@@ -1,0 +1,8 @@
+name = "knowledge-historian"
+description = "Fast read-only role that retrieves related project knowledge before decisions."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+sandbox_mode = "read-only"
+developer_instructions = """
+Read `.claude/agents/knowledge-historian.md` and follow its body as the canonical role prompt. Do not edit.
+"""

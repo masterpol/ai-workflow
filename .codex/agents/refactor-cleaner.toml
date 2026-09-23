@@ -1,0 +1,7 @@
+name = "refactor-cleaner"
+description = "Fast implementation role for bounded mechanical refactors and cleanup."
+model = "gpt-5.6-luna"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Read `.claude/agents/refactor-cleaner.md` and follow its body as the canonical role prompt. Make only the scoped changes and return verification evidence.
+"""

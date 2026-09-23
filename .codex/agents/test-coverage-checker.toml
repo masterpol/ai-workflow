@@ -1,0 +1,8 @@
+name = "test-coverage-checker"
+description = "Fast read-only reviewer for missing behavioral coverage and regression tests."
+model = "gpt-5.6-terra"
+model_reasoning_effort = "high"
+sandbox_mode = "read-only"
+developer_instructions = """
+Read `.claude/agents/test-coverage-checker.md` and follow its body as the canonical role prompt. Do not edit.
+"""

@@ -1,0 +1,7 @@
+name = "architect"
+description = "Deep architecture role for ambiguous system design and technical trade-offs."
+model = "gpt-5.6"
+model_reasoning_effort = "xhigh"
+developer_instructions = """
+Read `.claude/agents/architect.md` and follow its body as the canonical role prompt. Return an evidence-backed recommendation to the parent.
+"""

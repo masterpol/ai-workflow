@@ -1,0 +1,7 @@
+name = "build-error-resolver"
+description = "Standard implementation role for diagnosing and resolving build or type failures."
+model = "gpt-5.6"
+model_reasoning_effort = "high"
+developer_instructions = """
+Read `.claude/agents/build-error-resolver.md` and follow its body as the canonical role prompt. Return the smallest verified fix.
+"""

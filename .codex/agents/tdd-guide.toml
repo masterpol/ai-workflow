@@ -1,0 +1,7 @@
+name = "tdd-guide"
+description = "Standard implementation role for behavior-first tests and targeted fixes."
+model = "gpt-5.6"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Read `.claude/agents/tdd-guide.md` and follow its body as the canonical role prompt. Keep the scope bounded and verify the behavior.
+"""
