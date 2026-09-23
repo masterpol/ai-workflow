@@ -1,6 +1,0 @@
----
-description: Draft cold emails, warm intro blurbs, follow-ups, update emails, and investor communications for fundraising. Use when the user wants outreach to angels, VCs, strategic investors, or accelerators and needs concise, personalized, investor-facing messaging.
-model: openai/gpt-5.6-terra
----
-
-Load `.claude/skills/investor-outreach/SKILL.md` and follow it exactly. Use the `standard` capability profile from `ai-framework/integrations/harnesses.md`. $ARGUMENTS

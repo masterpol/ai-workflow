@@ -170,7 +170,7 @@ Status: READY FOR REVIEW
 ```
 /eval define feature-name
 ```
-Creates eval definition file at `.claude/evals/feature-name.md`
+Creates eval definition file at `.project/evals/feature-name.md`
 
 ### During Implementation
 ```

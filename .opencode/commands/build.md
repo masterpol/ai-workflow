@@ -1,5 +1,5 @@
 ---
-description: Execute planned scopes with evidence and hill tracking.
+description: Execute a planned pitch scope by scope. Hill-tracked progress, parallel dispatch where flagged in plan.md, evidence-required completion before marking done. Bug-fix and hotfix workflows enter here directly (skip /shape + /plan).
 model: openai/gpt-5.6-terra
 ---
 

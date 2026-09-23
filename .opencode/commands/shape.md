@@ -1,5 +1,5 @@
 ---
-description: Start the Shape phase for a feature request.
+description: Frame a problem before engineering. Set appetite, surface knowledge, breadboard the solution, name rabbit holes, write no-gos. Auto-fires /critique for big-batch + AI-prompt scopes before bet.
 model: openai/gpt-5.6-terra
 reasoningEffort: xhigh
 ---

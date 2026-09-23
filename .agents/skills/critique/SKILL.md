@@ -1,6 +1,6 @@
 ---
 name: critique
-description: Run the pre-bet red-team for a big-batch or AI-related pitch.
+description: Pre-bet red-team via parallel perspective subagents. Auto-fires for big-batch and AI-prompt pitches before bet decision. Surfaces missed knowledge, additional rabbit holes, appetite mismatches, cross-pitch conflicts, and eval blind spots. Findings advisory, not gating.
 ---
 
 # Critique

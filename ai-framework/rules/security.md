@@ -224,7 +224,7 @@ should generate this section once the stack is known.
 
 ## 8. Security Anti-Patterns (Auto-Flagged)
 
-The post-edit hook and `/security` review will flag these automatically:
+The post-edit hook and the `/audit` security-reviewer will flag these automatically:
 
 | Pattern | Risk | Fix |
 |---|---|---|
@@ -239,7 +239,7 @@ The post-edit hook and `/security` review will flag these automatically:
 
 ---
 
-## Security Checklist (Used in `/security` phase)
+## Security Checklist (used by `security-reviewer` in `/audit`)
 
 ### A. Authentication
 - [ ] Every write path calls a `requireAuth` (or equivalent) check

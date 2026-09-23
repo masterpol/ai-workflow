@@ -1,6 +1,6 @@
 ---
 name: ui-design
-description: Generate UI component structure and skeleton. Creates component hierarchy, wireframe, styling per your project's system, i18n stubs (if applicable), and ARIA labels. Run before /develop for UI-heavy features.
+description: Generate UI component structure and skeleton. Creates component hierarchy, wireframe, styling per your project's system, i18n stubs (if applicable), and ARIA labels. Run during /plan for UI-heavy scopes.
 ---
 
 # /ui-design — UI Generation
@@ -125,47 +125,17 @@ client component).
 2. `path/to/SubComponent.<ext>`
 
 ### Next Steps
-Proceed to `/develop` using these skeletons, or adjust the hierarchy first.
-```
-
-## Update Status
-
-**Update** `.project/status.md`:
-```markdown
-### Phase: UI Design
-- [x] Requirement understood
-- [x] Design rules loaded
-- [x] Component hierarchy designed
-- [x] Skeletons generated
-- [x] i18n keys listed
-- [x] Self-validated against rules
-- [ ] User approved
-
-### UI Components Planned
-[list]
-
-### i18n Keys Needed
-[count] new keys in EN/ES
-```
-
-## Session Logging
-
-```jsonl
-{"type":"phase-start","timestamp":"...","phase":"ui-design"}
-{"type":"component-designed","timestamp":"...","name":"...","layer":"feature|shared|ui","component_type":"server|client","est_lines":N}
-{"type":"self-validated","timestamp":"...","file":"...","issues_found":N,"fixed":N}
-{"type":"phase-end","timestamp":"...","phase":"ui-design","components":N,"i18n_keys":N}
+Attach these skeletons to the UI scope in `plan.md` and proceed, or adjust the hierarchy first.
 ```
 
 ## Confirmation Gate
 
 After presenting the design:
-1. ✓ **Approve** — proceed to `/develop`
+1. ✓ **Approve** — attach to the UI scope in `plan.md`
 2. ↻ **Revise** — adjust hierarchy or wireframe
 3. ✕ **Stop** — pause here
 
-**Do not proceed to /develop until approved.**
+**Do not start building the UI scope until approved.**
 
 ## What's Next
-After approval, proceed to `/develop` using these skeletons as the starting point.
-Run `/ui-review` after building to score the finished UI before the main `/review` phase.
+After approval, `/build` uses these skeletons as the starting point for the UI scope. The finished UI is scored by the `ux-reviewer` subagent during `/audit`.

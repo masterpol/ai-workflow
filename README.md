@@ -145,10 +145,24 @@ initial graph; `/ship` and `/cooldown` rebuild it when their approved knowledge 
 promotion, or archive work changes entries. Run it manually (`--check` for a dry-run report,
 non-zero exit on duplicate ids) after any other manual edit to a knowledge entry.
 
+## Version Log & Bundle Sync
+
+This repo tracks its own history in `VERSION` and `CHANGELOG.md` at the root. Run
+`node ai-framework/scripts/changelog.js --check` for the current version and latest entry, or
+see [How to improve this flow](#how-to-improve-this-flow) for when to add one — never hand-edit
+either file, always go through the `changelog` skill/script.
+
+A project that already unpacked this bundle can pull upstream improvements without re-running
+`/setup` (which only refreshes generated `.project/` content, not the bundle's own canonical
+files) — run `node ai-framework/scripts/bundle-sync.js --source <path-to-a-newer-checkout>` from
+that project's root for a dry-run drift report, then `--apply` after reviewing it. See
+`.claude/skills/bundle-sync/SKILL.md` for exactly what is compared, what is flagged for manual
+review, and the post-sync verification step.
+
 ## What you get
 
 ```
-ai-framework/      Portable core — rules/ workflow/ contexts/ templates/ integrations/ scripts/
+ai-framework/      Portable core — rules/ workflow/ templates/ integrations/ scripts/ hooks/
 .claude/           Claude Code role prompts, skills, and hooks (canonical — see below)
 .opencode/         OpenCode commands and native role adapters (thin mirrors)
 .codex/            Codex configuration and native role adapters (thin mirrors)
@@ -168,8 +182,8 @@ that same source — no vendor maintains its own copy of the logic:
 
 - **Skills** — canonical at `.claude/skills/<name>/SKILL.md`. Mirrored as
   `.opencode/commands/<name>.md` (OpenCode) and `.agents/skills/<name>/SKILL.md` (Codex), and at
-  install time as `.cursor/skills/<name>/` (Cursor). All **29** skills have all three mirrors —
-  not just the 7 pipeline phases.
+  install time as `.cursor/skills/<name>/` (Cursor). Every skill has all three mirrors —
+  not just the 7 pipeline phases (`workflow-doctor.js` enforces this, so no count is kept here).
 - **Agents** — canonical at `.claude/agents/<name>.md`. Mirrored as `.opencode/agents/<name>.md`
   and `.codex/agents/<name>.toml`, and at install time as `.cursor/agents/<name>.md`.
 - **A mirror is a pointer, never a fork.** Every mirror's entire content is "load the canonical
@@ -219,9 +233,10 @@ in every supported vendor, not just Claude Code (see [One source, every vendor](
 | Category | Skills |
 |---|---|
 | Core pipeline | `shape`, `critique`, `plan`, `build`, `audit`, `ship`, `cooldown` |
-| Navigate & maintain | `search`, `resume`, `switch`, `checkpoint`, `workflow-doctor`, `setup-validator`, `dependency-security`, `knowledge-health`, `validate`, `impact`, `fix` |
-| Engineering depth | `eval-harness`, `test-strategy`, `ui-design`, `verification-loop`, `iterative-retrieval`, `cost-aware-llm-pipeline`, `continuous-learning` |
-| Non-engineering | `investor-materials`, `investor-outreach`, `market-research`, `sync` |
+| Navigate & maintain | `search`, `resume`, `switch`, `checkpoint`, `workflow-doctor`, `setup-validator`, `dependency-security`, `knowledge-health`, `impact`, `fix` |
+| Bundle maintenance | `changelog` (this repo only — version-log an improvement), `bundle-sync` (target projects — pull structural updates from a newer source checkout) |
+| Engineering depth | `eval-harness`, `test-strategy`, `ui-design` |
+| Integrations | `sync` (Notion task sync) |
 
 ## How to improve this flow
 
@@ -234,7 +249,10 @@ canonical source changes.
 After any registered change below, run `node ai-framework/scripts/workflow-doctor.js`. It catches
 missing registered adapters, stale OpenCode model routes, core template/rule regressions, and
 knowledge graph inconsistencies; manually verify any artifact that has not been registered with
-it, including Codex model-profile choices.
+it, including Codex model-profile choices. Once the doctor passes, run `/changelog` (or
+`node ai-framework/scripts/changelog.js`, see `.claude/skills/changelog/SKILL.md`) to record the
+change in `VERSION`/`CHANGELOG.md` — that log is what `/bundle-sync` diffs against in projects
+that already unpacked this bundle.
 
 **Add or edit a coding rule**
 Edit `ai-framework/rules/*.md`. Keep it stack-agnostic — placeholders like

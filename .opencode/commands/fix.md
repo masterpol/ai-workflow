@@ -1,5 +1,5 @@
 ---
-description: Bug fix with shortened workflow. Searches knowledge for similar issues, skips Analyze and Design phases. Use for known bugs with clear reproduction steps.
+description: Entry point for the bug-fix workflow. Searches knowledge for similar issues, confirms reproduction and root cause, then runs the bug-fix variant of /build → /audit → /ship. Use for known bugs with clear reproduction steps.
 model: opencode/mimo-v2.5-free
 ---
 

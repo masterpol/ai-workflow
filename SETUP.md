@@ -22,7 +22,6 @@ ai-workflow-portable/
 ├── ai-framework/                ← PORTABLE core (stack-agnostic)
 │   ├── rules/                   ← 15 stack-agnostic coding/security/architecture rules
 │   ├── workflow/                ← pipeline overview + 6 phase specs
-│   ├── contexts/                ← dev / research / review context modes
 │   ├── hooks/                   ← hooks.json template + stuck-uphill-detector, pre-ship-verify
 │   ├── templates/project/       ← scaffold for the per-project .project/ dir
 │   └── integrations/            ← model profiles + harness guidance

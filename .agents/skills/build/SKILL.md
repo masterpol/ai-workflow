@@ -1,6 +1,6 @@
 ---
 name: build
-description: Execute a planned scope with hill tracking and current-session verification evidence.
+description: Execute a planned pitch scope by scope. Hill-tracked progress, parallel dispatch where flagged in plan.md, evidence-required completion before marking done. Bug-fix and hotfix workflows enter here directly (skip /shape + /plan).
 ---
 
 # Build

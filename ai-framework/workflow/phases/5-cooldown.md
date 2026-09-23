@@ -4,7 +4,6 @@
 
 The framework's only standalone learning surface. Every other phase weaves learning inline; `/cooldown` is the batched retrospective that promotes recurring patterns into rules, prunes stale knowledge, and triages the followups backlog.
 
-Replaces the old `/retro + /extract + /learn + /knowledge-health` quartet.
 
 ## Trigger
 

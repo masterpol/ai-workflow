@@ -1,6 +1,6 @@
 ---
 name: test-strategy
-description: Smart test planning and writing. Reasons through the right test types before writing. Enforces behavior tests over render-only tests. Use instead of /test when you want to avoid wasted test effort.
+description: Smart test planning and writing. Reasons through the right test types before writing. Enforces behavior tests over render-only tests. Use during /build when a scope needs new tests.
 ---
 
 # /test-strategy — Smart Testing
@@ -179,40 +179,18 @@ Coverage targets (fail if not met):
 [List or "None — no cross-page journeys in this feature"]
 ```
 
-## Update Status
+## Record
 
-```markdown
-### Phase: Test Strategy
-- [x] Strategy pass completed
-- [x] Test plan produced
-- [x] Plan approved by user
-- [ ] Tests written
-- [ ] `<test-command>` — all passing
-- [ ] Coverage targets met
-
-### Test Plan Summary
-[N] unit, [N] integration, [N] hook, [N] E2E tests planned
-```
-
-## Session Logging
-
-```jsonl
-{"type":"phase-start","timestamp":"...","phase":"test-strategy"}
-{"type":"strategy-pass","timestamp":"...","file":"...","behaviors_identified":N}
-{"type":"test-plan-approved","timestamp":"...","unit":N,"integration":N,"hook":N,"e2e":N}
-{"type":"test-written","timestamp":"...","file":"...","test_type":"unit|integration|hook|e2e","test_count":N}
-{"type":"test-run","timestamp":"...","passed":N,"failed":N,"coverage":{"utils":N,"hooks":N,"components":N,"handlers":N}}
-{"type":"phase-end","timestamp":"...","phase":"test-strategy","tests_written":N,"all_passing":true,"coverage_met":true}
-```
+Put the approved test plan under the scope's section in `plan.md` and add its test commands to that scope's exit criteria — `status.md` stays an index.
 
 ## Confirmation Gate
 
-1. ✓ **Approve** — all tests pass, coverage met, proceed to `/finish`
+1. ✓ **Approve** — all tests pass, coverage met, return to the scope in `/build`
 2. ↻ **Revise** — add more coverage or address failures
-3. ← **Back** — return to `/security` or `/review` if a bug was discovered
+3. ← **Back** — log the bug to `log.md` and fix it within the current `/build` scope
 4. ✕ **Stop** — pause
 
 **Do not proceed until all tests pass and all coverage targets are met.**
 
 ## What's Next
-After tests pass, proceed to `/finish`.
+After tests pass, run the scope's exit criteria and continue `/build`; coverage is re-checked by `test-coverage-checker` in `/audit`.

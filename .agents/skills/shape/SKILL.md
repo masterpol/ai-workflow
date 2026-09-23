@@ -1,6 +1,6 @@
 ---
 name: shape
-description: Shape a feature request into a bounded pitch. Use when starting a non-bug feature or product change.
+description: Frame a problem before engineering. Set appetite, surface knowledge, breadboard the solution, name rabbit holes, write no-gos. Auto-fires /critique for big-batch + AI-prompt scopes before bet.
 ---
 
 # Shape

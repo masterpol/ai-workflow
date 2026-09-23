@@ -1,6 +1,6 @@
 ---
 name: resume
-description: Resume a previous session. Reads status, loads context efficiently, and continues from where you left off.
+description: Resume work on a pitch. Reads the status index, loads only that pitch's context (~2K tokens), and offers to continue from its current phase and scope.
 ---
 
 # resume

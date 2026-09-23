@@ -8,81 +8,43 @@ Optimize token usage, maintain relevant context across sessions, and ensure the 
 
 ### Per-Phase Budgets
 
+Guidelines, not hard limits — tune them at `/cooldown` if a phase keeps overrunning.
+
 | Phase | Context Budget | Priority Loading |
 |-------|---------------|------------------|
-| Request | ~4K tokens | product.md, architecture.md, similar requirements |
-| Analyze | ~6K tokens | requirement doc, architecture.md, relevant ADRs |
-| Design | ~8K tokens | requirement + analysis, related design plans, rules |
-| Develop | ~10K tokens | design plan, target files, relevant rules |
-| Review | ~6K tokens | changed files, coding-standards.md |
-| Test | ~4K tokens | test targets, testing.md, coverage report |
-| Finish | ~3K tokens | status.md, checklist |
+| /shape | ~6K tokens | product.md, architecture.md, knowledge-gate matches from `graph.json` |
+| /critique | ~3K per perspective | pitch.md + only the slice each perspective needs |
+| /plan | ~8K tokens | pitch.md, impacted files list, filtered rules |
+| /build | ~10K per scope | plan.md scope section, target files, filtered rules + `.project/rules/` companion |
+| /audit | ~4K per subagent, ~6K synthesis | diff slice + the rules that subagent applies |
+| /ship | ~4K tokens | pitch.md, plan.md, hill.md, deviations.md, log.md |
+| /cooldown | ~6K tokens | `_followups.md`, graph.json tag index, recent `runs/` ship reports |
 
 ### Context Loading Priority
 
 **Always load (every phase):**
-1. `status.md` — current workflow state (~200 tokens)
-2. Active feature's requirement doc (~500-1000 tokens)
+1. `status.md` — the pitch index (~200 tokens)
+2. The active pitch's `checkpoint.md` (if present) and `hill.md`
 
 **Load when relevant:**
-3. Design plan (Design, Develop, Review phases)
-4. Applicable rules (filtered by file types being touched)
-5. Related knowledge nodes (searched, not bulk-loaded)
+3. `plan.md` — only the current scope's section during `/build`
+4. Applicable rules (filtered by file types being touched), plus the matching `.project/rules/` companion
+5. Related knowledge nodes (traversed via `knowledge/graph.json`, not bulk-loaded)
 
 **Never bulk-load:**
-- All ADRs (search instead)
-- All requirements (load only current)
+- All pitches (load only the active one)
+- All knowledge entries (traverse the graph instead)
 - All rules (filter by relevance)
 
 ## Context Pruning Strategies
 
 ### Phase Transitions
 
-When moving between phases, create a **transition summary** in `status.md`:
-
-```markdown
-## Phase Transition: Analyze → Design
-
-### Key Decisions from Analyze
-- Use discriminated union for step types (activity | feedback | branching)
-- Store hints as array in step schema, not a separate table
-- Estimated 3 new backend functions needed
-
-### Open Questions
-- Should branching rules live in the step record or a separate table?
-
-### Files to Touch
-- schema definition (schema change)
-- backend/sessions module (new functions)
-- components/features/sessions/ (UI updates)
-```
-
-This summary becomes the primary context for the next phase instead of re-reading all previous docs.
+Each phase's output artifact *is* its transition summary — `pitch.md` (shape), `plan.md` (plan), `hill.md` + `log.md` + `deviations.md` (build), the audit cycle report (audit), `SHIPPED.md` (ship). The next phase reads those instead of re-reading conversation history. Never write transition summaries into `status.md`; it is a ≤100-line index.
 
 ### Long Sessions
 
-For sessions exceeding 15-20 exchanges, create a **checkpoint**:
-
-```markdown
-## Session Checkpoint — 2026-02-28 14:30
-
-### Progress
-- [x] Schema updated with new fields
-- [x] upsertActivitySteps mutation working
-- [ ] UI components pending
-
-### Key Decisions Made
-- Using Zod discriminated union for step validation
-- HintsAccordion component for progressive disclosure
-
-### Current Blockers
-None
-
-### Next Immediate Step
-Create StepRenderer component with conditional rendering
-```
-
-Use `/checkpoint` to generate this automatically.
+For sessions exceeding 15-20 exchanges, run `/checkpoint`: it overwrites `pitches/{slug}/checkpoint.md` (< 300 tokens — done this session, decisions, blockers, next immediate step) and touches only the pitch's row in `status.md`.
 
 ### Large Documents
 
@@ -94,16 +56,16 @@ When a design plan or requirement exceeds 1500 tokens:
 
 Example requirement doc structure:
 ```markdown
-# Feature: Sessions UX Overhaul
+# Feature: Example Feature
 
 ## TL;DR (always load)
-Add step-level instructions, hints accordion, and branching rules to sessions.
-Schema changes in `sessions` and `sessionActivitySteps`. ~3 new mutations.
+One-paragraph summary of what changes and where.
+Key schema/data changes and the rough number of new endpoints or functions.
 
 ## Detailed Requirements (load when needed)
 [... full details ...]
 
-## Acceptance Criteria (load in Test phase)
+## Acceptance Criteria (load when writing exit criteria and tests)
 [... criteria ...]
 ```
 
@@ -111,7 +73,7 @@ Schema changes in `sessions` and `sessionActivitySteps`. ~3 new mutations.
 
 ### Before Each Skill Runs
 
-1. **Read `status.md`** — Understand current state
+1. **Read `status.md`** — find the active pitch; then its `checkpoint.md`/`hill.md`
 2. **Identify context needs** — What does this phase require?
 3. **Load minimal context** — Only what's needed for this phase
 4. **Search don't load** — For ADRs, past requirements, use search
@@ -122,8 +84,8 @@ Schema changes in `sessions` and `sessionActivitySteps`. ~3 new mutations.
 |------|--------|
 | Current feature requirement | Load directly |
 | Related past feature | Search by keyword, load if relevant |
-| Specific ADR | Search by topic, load if found |
-| All ADRs | NEVER — search instead |
+| Specific decision | Traverse `knowledge/graph.json` by tag, load if found |
+| All knowledge entries | NEVER — traverse the graph instead |
 | Applicable rules | Filter by file extensions being touched |
 
 ### Rule Filtering Logic
@@ -146,18 +108,14 @@ should reference whatever `/setup` produced there, not a fixed list of framework
 
 The framework maintains context across sessions via:
 
-1. **`status.md`** — Current workflow state (always read first)
-2. **`knowledge/`** — Extracted patterns and decisions (searchable)
-3. **`runs/`** — Session logs (for history search)
+1. **`status.md`** — the pitch index (always read first)
+2. **`pitches/{slug}/`** — the active pitch's artifacts and `checkpoint.md`
+3. **`knowledge/graph.json`** — extracted decisions, patterns, entities, issues (traversable)
+4. **`runs/`** — archived ship reports and `/cooldown` reports (history search)
 
 ### Resume Protocol
 
-When resuming a workflow:
-
-1. Read `status.md` to get current phase and links
-2. Read the transition summary (if present)
-3. Load only the phase-appropriate context
-4. Ask user to confirm understanding before proceeding
+`/resume {slug}` loads only that pitch's context (see `.claude/skills/resume/SKILL.md`) and asks the user to confirm before continuing.
 
 ### Multi-Session Large Features
 
@@ -206,7 +164,7 @@ If context is getting large:
 ### 3. Ignoring Previous Sessions
 ```
 ❌ Starting fresh, asking questions already answered
-✓ Read status.md, search runs/, check knowledge/
+✓ Read status.md and the pitch's checkpoint.md, traverse knowledge/graph.json
 ```
 
 ### 4. Inline History
@@ -219,18 +177,15 @@ If context is getting large:
 
 ### Phase Start
 Each phase skill should:
-1. Check token budget for the phase
-2. Load only required context
+1. Check the phase's token budget above
+2. Load only the required context
 3. Note what was loaded for the user
 
 ### Phase End
 Each phase skill should:
-1. Create transition summary if moving to next phase
-2. Update status.md with key decisions
-3. Suggest checkpoint if session is long
+1. Write its output artifact into `pitches/{slug}/` (that is the transition summary)
+2. Update only the pitch's row in `status.md`
+3. Suggest `/checkpoint` if the session is long
 
-### Finish Phase
-The `/finish` skill should:
-1. Extract key learnings to `knowledge/`
-2. Archive the session to `runs/`
-3. Clean up status.md for next task
+### Ship
+`/ship` extracts key learnings to `knowledge/`, archives the pitch's log and hill chart to `runs/`, and compacts `status.md` (see `ai-framework/workflow/phases/4-ship.md`).

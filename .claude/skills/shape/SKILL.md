@@ -1,6 +1,6 @@
 ---
 name: shape
-description: Frame a problem before engineering. Set appetite, surface knowledge, breadboard the solution, name rabbit holes, write no-gos. Replaces /request + the front of /analyze. Auto-fires /critique for big-batch + AI-prompt scopes before bet.
+description: Frame a problem before engineering. Set appetite, surface knowledge, breadboard the solution, name rabbit holes, write no-gos. Auto-fires /critique for big-batch + AI-prompt scopes before bet.
 ---
 
 # Shape

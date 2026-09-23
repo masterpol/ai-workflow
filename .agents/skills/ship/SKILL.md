@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Verify, reconcile, and close an audited pitch while extracting reusable knowledge.
+description: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.
 ---
 
 # Ship

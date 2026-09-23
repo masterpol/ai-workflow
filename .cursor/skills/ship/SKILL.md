@@ -1,6 +1,6 @@
 ---
 name: ship
-description: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction. Replaces /finish + /retro + /extract.
+description: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.
 ---
 
 # Ship
@@ -15,7 +15,7 @@ Phase 4 of the new pipeline. See `ai-framework/workflow/phases/4-ship.md` for fu
 
 ## Activities (in order)
 
-1. **Final /verify** — 6-phase gauntlet: `build:web` · `typecheck:web` · `lint` · `test --run` · `i18n:check` · git diff (no .env / no debug). If any fails, back to `/audit` cycle 2.
+1. **Final /verify** — 6-phase gauntlet using the real commands from `.project/context/stack.md`: `<build-command>` · `<typecheck-command>` · `<lint-command>` · `<test-command>` (non-watch) · `<i18n-check-command>` (i18n projects only) · git diff (no .env / no debug). Skip a step only when the project has no such command, and say so. If any fails, back to `/audit` cycle 2.
 2. **Reconciliation → SHIPPED.md** — pitch ↔ implementation: scope statuses, no-gos honored, rabbit holes resolved, followups generated.
 3. **Knowledge extraction** — `log.md` triage (promote non-trivial incidents to `knowledge/issues/`), `deviations.md` review (flag patterns for `/cooldown`), new reusable patterns → `knowledge/patterns/`. Give every new entry a real `id`, `tags`, and at least one `related` link or `[[wiki-link]]` to an existing entry — an entry with neither is invisible to graph traversal. Then run `node ai-framework/scripts/graphify.js` to rebuild `knowledge/graph.json` + `index.md` so the new entries are traversable immediately.
 4. **Status compaction** — pitch row → "Recent ships"; full log → `runs/{date}-{slug}.md`; status.md ≤100 lines.

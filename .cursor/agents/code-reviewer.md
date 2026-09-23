@@ -177,14 +177,14 @@ const usersWithPosts = await db.query(`
 
 ## Output structure
 
-For each finding, emit one table row:
+For each finding, emit one table row. The **failure scenario** column is required for `must-fix` and `should-fix`: the concrete input/state and the wrong outcome it produces. `/audit` downgrades a must-fix without one, so if you cannot name a scenario, the finding is at most `acknowledged`.
 
 ```
-| tier | file:line | issue | fix |
-|------|-----------|-------|-----|
-| must-fix | src/api/client.ts:42 | Hardcoded API key exposed in source | Move to `process.env.API_KEY` |
-| should-fix | components/List.tsx:18 | Array index used as React key on reorderable list | Use `item.id` as key |
-| acknowledged | utils/format.ts:7 | Magic number 86400 | Extract as `SECONDS_PER_DAY` constant — low priority |
+| tier | file:line | issue | failure scenario | fix |
+|------|-----------|-------|------------------|-----|
+| must-fix | src/api/client.ts:42 | Hardcoded API key exposed in source | Anyone with repo or bundle access reads and reuses the key | Move to `process.env.API_KEY` |
+| should-fix | components/List.tsx:18 | Array index used as React key on reorderable list | Dragging row 3 above row 1 keeps row 1's input state on the wrong item | Use `item.id` as key |
+| acknowledged | utils/format.ts:7 | Magic number 86400 | — | Extract as `SECONDS_PER_DAY` constant — low priority |
 ```
 
 **Tier mapping from checklist categories:**

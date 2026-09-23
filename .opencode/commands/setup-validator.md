@@ -1,5 +1,5 @@
 ---
-description: Verify that workflow setup generated complete project artifacts without changing files.
+description: Verify that workflow setup generated complete project context, entry files, knowledge graph, and harness mirrors.
 model: openai/gpt-5.6-luna
 ---
 

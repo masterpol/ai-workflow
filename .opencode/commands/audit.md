@@ -1,5 +1,5 @@
 ---
-description: Run the parallel audit and resolve must-fix findings.
+description: Parallel fan-out audit phase. Dispatches code-reviewer + security-reviewer + test-coverage + ux-reviewer + i18n-checker + eval-runner + cross-pitch-conflict-checker as parallel subagents, synthesizes findings, applies must-fix patches, loops ≤3 cycles.
 model: openai/gpt-5.6-terra
 ---
 

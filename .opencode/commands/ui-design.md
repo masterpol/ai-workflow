@@ -1,5 +1,5 @@
 ---
-description: Generate UI component structure and skeleton. Creates component hierarchy, wireframe, styling per your project's system, i18n stubs (if applicable), and ARIA labels. Run before /develop for UI-heavy features.
+description: Generate UI component structure and skeleton. Creates component hierarchy, wireframe, styling per your project's system, i18n stubs (if applicable), and ARIA labels. Run during /plan for UI-heavy scopes.
 model: openai/gpt-5.6-terra
 ---
 

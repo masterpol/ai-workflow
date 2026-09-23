@@ -1,6 +1,6 @@
 ---
 name: switch
-description: Switch between active tasks. Checkpoints current work and loads context for another task.
+description: Switch between pitches. Checkpoints the current pitch, then loads the target pitch's context via the /resume flow.
 ---
 
 # switch
