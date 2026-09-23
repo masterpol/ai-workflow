@@ -76,6 +76,7 @@ const skillProfileOverrides = {
 const skillModelOverrides = {
   "workflow-doctor": "openai/gpt-5.6-luna",
   "setup-validator": "openai/gpt-5.6-luna",
+  changelog: "openai/gpt-5.6-luna",
 };
 
 // Almost every skill mirror says "Load `.claude/skills/<name>/SKILL.md` and follow it exactly."
@@ -85,6 +86,8 @@ const skillModelOverrides = {
 const skillReferencePatternOverrides = {
   "workflow-doctor": /ai-framework\/scripts\/workflow-doctor\.js/,
   "setup-validator": /ai-framework\/scripts\/setup-validator\.js/,
+  changelog: /ai-framework\/scripts\/changelog\.js/,
+  "bundle-sync": /ai-framework\/scripts\/bundle-sync\.js/,
 };
 
 function absolute(relativePath) {

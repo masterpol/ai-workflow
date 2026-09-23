@@ -145,6 +145,20 @@ initial graph; `/ship` and `/cooldown` rebuild it when their approved knowledge 
 promotion, or archive work changes entries. Run it manually (`--check` for a dry-run report,
 non-zero exit on duplicate ids) after any other manual edit to a knowledge entry.
 
+## Version Log & Bundle Sync
+
+This repo tracks its own history in `VERSION` and `CHANGELOG.md` at the root. Run
+`node ai-framework/scripts/changelog.js --check` for the current version and latest entry, or
+see [How to improve this flow](#how-to-improve-this-flow) for when to add one — never hand-edit
+either file, always go through the `changelog` skill/script.
+
+A project that already unpacked this bundle can pull upstream improvements without re-running
+`/setup` (which only refreshes generated `.project/` content, not the bundle's own canonical
+files) — run `node ai-framework/scripts/bundle-sync.js --source <path-to-a-newer-checkout>` from
+that project's root for a dry-run drift report, then `--apply` after reviewing it. See
+`.claude/skills/bundle-sync/SKILL.md` for exactly what is compared, what is flagged for manual
+review, and the post-sync verification step.
+
 ## What you get
 
 ```
@@ -220,6 +234,7 @@ in every supported vendor, not just Claude Code (see [One source, every vendor](
 |---|---|
 | Core pipeline | `shape`, `critique`, `plan`, `build`, `audit`, `ship`, `cooldown` |
 | Navigate & maintain | `search`, `resume`, `switch`, `checkpoint`, `workflow-doctor`, `setup-validator`, `dependency-security`, `knowledge-health`, `validate`, `impact`, `fix` |
+| Bundle maintenance | `changelog` (this repo only — version-log an improvement), `bundle-sync` (target projects — pull structural updates from a newer source checkout) |
 | Engineering depth | `eval-harness`, `test-strategy`, `ui-design`, `verification-loop`, `iterative-retrieval`, `cost-aware-llm-pipeline`, `continuous-learning` |
 | Non-engineering | `investor-materials`, `investor-outreach`, `market-research`, `sync` |
 
@@ -234,7 +249,10 @@ canonical source changes.
 After any registered change below, run `node ai-framework/scripts/workflow-doctor.js`. It catches
 missing registered adapters, stale OpenCode model routes, core template/rule regressions, and
 knowledge graph inconsistencies; manually verify any artifact that has not been registered with
-it, including Codex model-profile choices.
+it, including Codex model-profile choices. Once the doctor passes, run `/changelog` (or
+`node ai-framework/scripts/changelog.js`, see `.claude/skills/changelog/SKILL.md`) to record the
+change in `VERSION`/`CHANGELOG.md` — that log is what `/bundle-sync` diffs against in projects
+that already unpacked this bundle.
 
 **Add or edit a coding rule**
 Edit `ai-framework/rules/*.md`. Keep it stack-agnostic — placeholders like
