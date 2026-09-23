@@ -43,7 +43,10 @@ async function checkContext() {
     const relativePath = `.project/context/${file}`;
     if (!(await requireFile(relativePath))) return;
     const content = await fs.readFile(absolute(relativePath), "utf8");
-    const incomplete = content.trim().length < 80 || /_Detecting\.\.\.|_Scanning project\.\.\.|<[^>]+>/.test(content);
+    // Placeholders inside code (e.g. a `<build-command>` mapping table, or `Array<string>`) are
+    // documentation, not unfilled template slots — only bare <...> outside code counts.
+    const prose = content.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
+    const incomplete = content.trim().length < 80 || /_Detecting\.\.\.|_Scanning project\.\.\.|<[^>]+>/.test(prose);
     record(incomplete ? "fail" : "pass", relativePath, incomplete ? "appears to be an unfilled setup draft" : "contains generated project context");
   }));
 }

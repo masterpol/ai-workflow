@@ -36,19 +36,32 @@ and any credential file are never read from the source or written to.
 ## Step 1 — Dry run
 
 ```
-node ai-framework/scripts/bundle-sync.js --source <path-to-ai-workflow-portable-checkout>
+node ai-framework/scripts/bundle-sync.js --source <path-to-ai-workflow-portable-checkout> [--base-ref <git-ref>]
 ```
 
-Read-only. Reports, grouped by status:
-- **new** — exists in source, missing locally (something added upstream since last sync).
-- **changed** — exists in both, content differs.
-- **removed** — exists locally, gone from source (never auto-deleted — surface it and let the
-  human decide whether it was an intentional local addition or something upstream dropped).
-- **flagged** — one of the mixed-content root/config files differs; always manual.
+Read-only. Every differing file is compared three ways — local copy, source, and **base** (the
+bundle version this project was last synced from) — so project customizations are never
+mistaken for stale files:
 
-If the source bundle has a `CHANGELOG.md`, skim entries newer than what this project last
-synced (see `.project/.bundle-sync.json` if present, or ask the human what version they
-installed) to explain *why* the flagged files changed, not just that they did.
+- **Base** comes from the hash manifest in `.project/.bundle-sync.json`, written by every
+  `--apply`. On a project's **first** sync there is no manifest yet: pass `--base-ref` with the
+  source-repo commit or tag that was originally unpacked (check the source's `CHANGELOG.md` /
+  `git log`, or ask the human). Without a base, differing files are reported as `unverified` and
+  are not overwritten.
+
+Statuses:
+- **new** — added upstream; applied.
+- **changed** — local copy equals base, upstream moved; applied. Case-only renames
+  (`skill.md` → `SKILL.md`) are handled here.
+- **local** — the project edited it and upstream did not; **kept**.
+- **conflict** — both edited; **kept**. Merge by hand: take the upstream file and re-apply the
+  project's edit, then keep its Cursor mirror identical to the canonical file.
+- **unverified** — no base known; kept unless `--overwrite-unverified`.
+- **removed** — gone upstream, tagged `unmodified` / `modified` / `unverified` versus base.
+- **flagged** — `AGENTS.md`, `CLAUDE.md`, `opencode.json`, `.codex/config.toml`: always manual.
+
+If the source bundle has a `CHANGELOG.md`, read the entries newer than the manifest's
+`sourceVersion` to explain *why* files changed, not just that they did.
 
 ## Step 2 — Gate
 
@@ -59,14 +72,18 @@ those need a human decision, not silent application.
 ## Step 3 — Apply (only after approval)
 
 ```
-node ai-framework/scripts/bundle-sync.js --source <path> --apply
+node ai-framework/scripts/bundle-sync.js --source <path> [--base-ref <ref>] --apply [--prune]
 ```
 
-Copies every `new` and `changed` file from source into the project, creating directories as
-needed. Never touches `removed` or `flagged` paths. Writes a sync marker to
-`.project/.bundle-sync.json` (source path, source `VERSION`, timestamp, files applied) when
-`.project/` exists, so the next `bundle-sync` run — or a human — can see when this project last
-pulled from source.
+Writes `new` and `changed` files; never touches `local`, `conflict`, or `flagged` paths.
+`--prune` deletes `removed` files only when they are `unmodified` versus base. Records the
+source hashes as the next sync's base in `.project/.bundle-sync.json`. Do this on a branch so the
+whole sync is one reviewable diff. On macOS, `git mv -f` any case-only renames afterwards — git
+there ignores filename case by default and would otherwise keep the old lowercase name.
+
+After applying, check that `.project/context/stack.md` maps the workflow placeholders
+(`<build-command>`, `<typecheck-command>`, `<lint-command>`, `<test-command>`,
+`<i18n-check-command>`) to the project's real commands — newer phase docs resolve them there.
 
 ## Step 4 — Verify
 
