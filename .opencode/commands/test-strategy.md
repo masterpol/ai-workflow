@@ -1,5 +1,5 @@
 ---
-description: Smart test planning and writing. Reasons through the right test types before writing. Enforces behavior tests over render-only tests. Use instead of /test when you want to avoid wasted test effort.
+description: Smart test planning and writing. Reasons through the right test types before writing. Enforces behavior tests over render-only tests. Use during /build when a scope needs new tests.
 model: opencode/mimo-v2.5-free
 ---
 

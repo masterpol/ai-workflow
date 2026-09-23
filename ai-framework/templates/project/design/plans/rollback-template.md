@@ -58,7 +58,7 @@ Initiate rollback if ANY of these occur within 30 minutes of deployment:
 ## Post-Rollback
 
 - [ ] Create incident report
-- [ ] Run `/retro` to extract lessons
+- [ ] Capture the lesson in the pitch's `log.md` so `/ship` or `/cooldown` extracts it
 - [ ] Update knowledge/issues/ with root cause
 - [ ] Schedule fix with proper testing
 

@@ -35,18 +35,18 @@ Problems encountered and their solutions. Prevents re-solving the same problems.
 
 ## When Knowledge is Created
 
-1. **After `/finish`** — The `/extract` skill runs automatically
-2. **After significant decisions** — Manually via `/extract`
+1. **At `/ship`** — knowledge extraction runs as part of closing a pitch
+2. **At `/cooldown`** — recurring issues are promoted to patterns, then rules
 3. **After solving a tricky bug** — Add to `issues/`
 4. **When establishing patterns** — Add to `patterns/`
 
 ## How Knowledge is Used
 
 1. **`/resume`** — Searches knowledge for relevant context
-2. **`/request`** — Checks for similar past features
-3. **`/design`** — References established patterns
-4. **`/impact`** — Surfaces relevant warnings before development
-5. **`/develop`** — Looks up known issues
+2. **`/shape`** — Knowledge gate (mandatory first step) checks for similar past work
+3. **`/plan`** — References established patterns and decisions
+4. **`/impact`** — Surfaces relevant warnings before scopes are finalized
+5. **`/build` / `/fix`** — Looks up known issues
 6. **`/search`** — Explicit knowledge search
 7. **`/knowledge-health`** — Audits graph for staleness, unused entries, promotion candidates
 
@@ -138,7 +138,7 @@ Use `[[entry-id]]` to cross-reference entries. This enables:
 
 ```
 Created (low confidence)
-  → Referenced in /design or /develop (medium confidence)
+  → Referenced in /plan or /build (medium confidence)
     → Validated across 3+ features (high confidence)
       → Issue recurs 2+ times → PROMOTED to rule in rules/
 

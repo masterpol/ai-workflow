@@ -19,7 +19,7 @@ Escalate one profile only when the returned work is demonstrably incomplete or u
 | Profile | Roles |
 |---|---|
 | `fast` | appetite-auditor, code-reviewer, cross-pitch-conflict-checker, cross-pitch-projector, eval-runner, i18n-checker, knowledge-historian, refactor-cleaner, test-coverage-checker |
-| `standard` | build-error-resolver, e2e-runner, eval-regression-projector, security-reviewer, skeptic, tdd-guide, ux-reviewer |
+| `standard` | build-error-resolver, eval-regression-projector, security-reviewer, skeptic, ux-reviewer |
 | `deep` | architect, planner |
 
 ## Claude Code

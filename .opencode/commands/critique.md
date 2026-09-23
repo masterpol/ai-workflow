@@ -1,5 +1,5 @@
 ---
-description: Run the pre-bet Critique phase.
+description: Pre-bet red-team via parallel perspective subagents. Auto-fires for big-batch and AI-prompt pitches before bet decision. Surfaces missed knowledge, additional rabbit holes, appetite mismatches, cross-pitch conflicts, and eval blind spots. Findings advisory, not gating.
 model: openai/gpt-5.6-terra
 ---
 

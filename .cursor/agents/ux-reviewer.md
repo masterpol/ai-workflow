@@ -2,7 +2,7 @@
 name: ux-reviewer
 description: UI/UX heuristic review subagent. Scores changed components against Nielsen's 10 heuristics + this project's simplicity patterns on a 0-3 rubric. Use during /audit when scope touches UI files.
 tools: ["Read", "Grep", "Glob"]
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

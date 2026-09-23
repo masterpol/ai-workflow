@@ -4,7 +4,7 @@
 
 Ensure user interfaces are **usable, simple, and follow this project's design patterns**. This rule enforces Nielsen's 10 Usability Heuristics + project-specific guidelines to prevent overly complex UIs that confuse users.
 
-**Run this review after development for any UI feature.** Use the `/ui-review` command or manual evaluation.
+**Run this review after development for any UI feature.** It runs automatically as the `ux-reviewer` subagent during `/audit`; use this file directly for a manual evaluation.
 
 ---
 

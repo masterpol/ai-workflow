@@ -14,34 +14,7 @@ Read the project's source files to understand what exists, generate the context 
 
 ## Update Status (Before Starting)
 
-At the start of this phase, **overwrite** `.project/status.md` with:
-
-```markdown
-# Workflow Status
-
-> This file is automatically updated by workflow commands. Use `/resume` to continue where you left off.
-
-## Current State
-
-- **Status**: active
-- **Phase**: setup
-- **Feature**: Project Setup
-- **Workflow**: —
-- **Last Updated**: [today's date]
-
-## Context
-
-### Mode
-_Detecting..._
-
-### Files to Generate
-_Scanning project..._
-
-### Next Step
-Scan project structure and generate context documents.
-```
-
-After setup completes, reset to idle.
+`.project/status.md` is the pitch index (format in `ai-framework/workflow/overview.md`). **Never overwrite an existing one** — on a re-run it holds active and parked pitches. If it does not exist yet, create it from `ai-framework/templates/project/status.md` during Step 5. Setup progress is reported in the conversation, not written into `status.md`.
 
 ## Step 0: Detect Existing Setup
 

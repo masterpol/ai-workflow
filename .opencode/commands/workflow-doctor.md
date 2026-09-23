@@ -1,5 +1,5 @@
 ---
-description: Diagnose the portable workflow and safely restore missing project template artifacts.
+description: Diagnose the installed AI workflow and safely restore missing project-template artifacts without overwriting project files.
 model: openai/gpt-5.6-luna
 ---
 

@@ -33,7 +33,17 @@ A scope **cannot** be marked `done` without evidence. Before `/hill {scope} done
 - If any command fails, the scope stays `downhill-X%` — failure logged to `log.md`
 - The framework refuses the `/hill done` transition without evidence
 
-This is what makes `next15-build-gate-required` and the lint-debt class of failures unrebreakable. Every UI scope's exit criteria includes `pnpm build:web` exit 0 — and the framework refuses scope-completion until that command actually ran.
+This is what makes "it compiled on my machine" and the lint-debt class of failures unrebreakable. Every UI scope's exit criteria includes `<build-command>` exit 0 (resolved from `.project/context/stack.md`) — and the framework refuses scope-completion until that command actually ran.
+
+## Three-strike rule (in-session thrash guard)
+
+The stuck-uphill detector below catches stalls *across* sessions; this catches them *within* one. If the same exit criterion fails **3 attempts in a row** on the same scope:
+
+1. Stop editing. Do not try a fourth variation of the same fix.
+2. Write a 3-line `log.md` entry: what was tried, the exact failing output, the current hypothesis.
+3. Escalate by cause — a build or type error goes to `build-error-resolver` (constrained to the failing output + touched files); anything else (unclear requirement, wrong plan assumption, missing dependency decision) goes to the human with the log entry and a proposed next step.
+
+Repeated near-identical attempts burn context and tend to widen the diff; a fresh, constrained pass or a human decision is cheaper.
 
 ## Inline UX 5-question check (UI scopes only)
 
@@ -87,7 +97,7 @@ Single implicit scope. Exit criteria:
 - Failing test now passes
 - Regression test added
 - Full test suite still green
-- `pnpm build:web` exit 0
+- `<build-command>` exit 0
 - `log.md` entry mandatory (the bug *is* the knowledge)
 
 Flows directly into `/audit` (skipped only for trivial typo / copy fix).

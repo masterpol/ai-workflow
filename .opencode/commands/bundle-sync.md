@@ -1,5 +1,5 @@
 ---
-description: Validate and sync structural changes from a newer ai-workflow-portable source bundle into this already-unpacked project.
+description: Validate structural drift between an already-unpacked project and a newer copy of the ai-workflow-portable source bundle, and apply approved updates.
 model: openai/gpt-5.6-terra
 ---
 

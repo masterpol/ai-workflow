@@ -1,29 +1,29 @@
 ---
 name: impact
-description: Impact analysis before development. Scans the codebase to identify files, tests, patterns, and downstream consumers affected by planned changes. Run between /design and /develop.
+description: Impact analysis before development. Scans the codebase to identify files, tests, patterns, and downstream consumers affected by planned changes. Run during /plan, before scopes are finalized.
 ---
 
 # /impact — Impact Analysis
 
 > **Recommended capability profile:** `fast` — repository/dependency-graph scan, mechanical blast-radius mapping. Select an available model using `ai-framework/integrations/harnesses.md`.
 
-> Run between `/design` and `/develop` to understand the blast radius of planned changes.
+> Run during `/plan`, before scopes are finalized, to understand the blast radius of the planned changes.
 
 You are in the **IMPACT ANALYSIS** phase.
 
 ## Your Goal
-Before writing code, systematically identify every file, test, consumer, and pattern that will be affected by the planned changes. This prevents surprises during `/review` and reduces rework.
+Before writing code, systematically identify every file, test, consumer, and pattern that will be affected by the planned changes. This prevents surprises during `/audit` and reduces rework.
 
 ## When to Run
-- **Recommended**: After `/design` is approved, before starting `/develop`
-- **Required**: When the design plan modifies 5+ existing files or touches shared code
+- **Recommended**: During `/plan` for big-batch pitches, before scope exit criteria are fixed
+- **Required**: When the plan modifies 5+ existing files or touches shared code
 - **Optional**: For small changes confined to a single feature folder
 
 ## Context Budget
 ~5K tokens:
-- Approved design plan (from `.project/design/plans/`)
+- The draft `plan.md` (from `.project/pitches/{slug}/`)
 - `ai-framework/rules/boundaries.md` (import matrix)
-- File list from design plan (the "Files to Create/Modify" table)
+- File list from the draft plan's scopes
 
 ## Steps
 
@@ -113,6 +113,10 @@ Search `knowledge/issues/` for entries tagged with the same areas:
 ## Output
 Impact analysis document appended to the design plan or presented inline.
 
+## Record
+
+Add the risk level and the downstream-consumer list to the draft `plan.md` (under the affected scopes), not to `status.md`.
+
 ## Confirmation Gate
 
 ```
@@ -124,33 +128,10 @@ Impact Analysis complete.
 - Risk level: [LOW/MEDIUM/HIGH]
 
 Options:
-1. Proceed to /develop
-2. Revise the design plan (impact revealed issues)
+1. Proceed — finalize the plan
+2. Revise the plan (impact revealed issues)
 3. Stop — need to discuss risk
 ```
 
-**Do not proceed to /develop until the user acknowledges the impact.**
+**Do not finalize the plan until the user acknowledges the impact.**
 
-## Update Status
-
-Append to `.project/status.md`:
-```markdown
-### Impact Analysis
-- [x] Design plan loaded
-- [x] Downstream consumers traced
-- [x] Boundary violations checked
-- [x] Tests identified
-- [x] Knowledge alerts surfaced
-- Risk level: [LOW/MEDIUM/HIGH]
-```
-
-## Session Logging
-
-```jsonl
-{"type":"phase-start","timestamp":"...","phase":"impact"}
-{"type":"impact-trace","timestamp":"...","modified_files":N,"new_files":M,"downstream_consumers":K}
-{"type":"boundary-check","timestamp":"...","violations":0,"checked":N}
-{"type":"test-check","timestamp":"...","existing":X,"to_create":Y}
-{"type":"knowledge-alerts","timestamp":"...","count":Z}
-{"type":"phase-end","timestamp":"...","phase":"impact","risk_level":"LOW|MEDIUM|HIGH"}
-```

@@ -128,7 +128,7 @@ Use this checklist before every production deploy:
 - [ ] `<lint-command>` — zero lint errors
 - [ ] `<test-command>` — all tests pass
 - [ ] `<build-command>` — build succeeds with no errors
-- [ ] Security review passed (`/security` phase complete)
+- [ ] Security review passed (`security-reviewer` clean in `/audit`)
 - [ ] All required env vars documented and set in target environment
 - [ ] Rollback plan defined for this change
 - [ ] Schema migration ready (if schema changed)

@@ -2,7 +2,7 @@
 
 ## Purpose
 
-Close the pitch cleanly: final verification, pitch ↔ implementation reconciliation, knowledge extraction, status compaction. Replaces today's `/finish`.
+Close the pitch cleanly: final verification, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.
 
 ## Trigger
 
@@ -13,14 +13,14 @@ Close the pitch cleanly: final verification, pitch ↔ implementation reconcilia
 
 ### 1. Final /verify (mandatory)
 
-Runs the 6-phase gauntlet one last time:
+Runs the 6-phase gauntlet one last time, using the real commands recorded in `.project/context/stack.md` (skip a line only when the project has no such command, and say so in the summary):
 
 ```
-✓ pnpm build:web exit 0
-✓ pnpm typecheck:web exit 0
-✓ pnpm lint exit 0
-✓ pnpm test --run exit 0
-✓ pnpm i18n:check exit 0
+✓ <build-command> exit 0
+✓ <typecheck-command> exit 0
+✓ <lint-command> exit 0
+✓ <test-command> exit 0 (non-watch mode)
+✓ <i18n-check-command> exit 0 (i18n projects only)
 ✓ git diff: no uncommitted .env / no debug code
 ```
 

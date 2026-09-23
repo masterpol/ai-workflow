@@ -66,16 +66,16 @@ cases:
 
 ## Adding a new judge rubric
 
-1. Add a prompt key to `apps/web/lib/ai/prompts/keys.ts` (e.g., `EVAL_JUDGE_X`).
-2. Add a definition to `apps/web/lib/ai/prompts/registry.ts` — surface `"eval_judge"`.
-3. Add the rubric Zod schema to `apps/web/evals/runner/judge.ts`.
+1. Add a prompt key to the project's prompt-key module under `<web-workspace>` (e.g., `EVAL_JUDGE_X`).
+2. Add a definition to the prompt registry — surface `"eval_judge"`.
+3. Add the rubric schema (using the project's schema validator) to the eval runner's judge module.
 4. Call `runJudge({ key, schema, ... })` from a test file.
 
 ## The baseline
 
 `.project/evals/baseline.json` pins:
 
-- The judge model (currently `claude-haiku-4-5-20251001`).
+- The exact judge model ID (a `fast`-profile model per `ai-framework/integrations/harnesses.md`; always pin the full ID, never an alias, so scores stay comparable).
 - The judge prompt versions.
 - Mean rubric scores per track.
 

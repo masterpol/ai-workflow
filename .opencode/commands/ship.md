@@ -1,5 +1,5 @@
 ---
-description: Reconcile and ship an audited pitch.
+description: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.
 model: opencode/mimo-v2.5-free
 ---
 

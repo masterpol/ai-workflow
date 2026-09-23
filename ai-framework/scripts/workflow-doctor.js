@@ -365,8 +365,22 @@ async function checkKnowledgeGraph() {
   }
 }
 
+// fs.access is case-insensitive on macOS/Windows, so a `skill.md` would pass there but be
+// invisible to harnesses on case-sensitive Linux. Compare the real directory entry instead.
+async function requireExactSkillFilename(directory) {
+  const entries = await fsp.readdir(absolute(directory)).catch(() => []);
+  const near = entries.find((entry) => entry.toLowerCase() === "skill.md");
+  if (near && near !== "SKILL.md") {
+    record("fail", `${directory}/${near}`, "must be named exactly SKILL.md (case-sensitive filesystems will not discover it)");
+  }
+}
+
 async function checkSkill(name) {
   const canonical = `.claude/skills/${name}/SKILL.md`;
+  await Promise.all([
+    requireExactSkillFilename(`.claude/skills/${name}`),
+    requireExactSkillFilename(`.agents/skills/${name}`),
+  ]);
   if (!(await requireFile(canonical))) return;
   const content = await fsp.readFile(absolute(canonical), "utf8");
   const referencePattern =

@@ -1,6 +1,6 @@
 ---
 name: dependency-security
-description: Audit dependencies for known vulnerabilities and security-relevant updates without changing project files.
+description: Audit project dependencies for known vulnerabilities and security-relevant updates without changing manifests or lockfiles.
 ---
 
 # Dependency Security

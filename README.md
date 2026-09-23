@@ -162,7 +162,7 @@ review, and the post-sync verification step.
 ## What you get
 
 ```
-ai-framework/      Portable core — rules/ workflow/ contexts/ templates/ integrations/ scripts/
+ai-framework/      Portable core — rules/ workflow/ templates/ integrations/ scripts/ hooks/
 .claude/           Claude Code role prompts, skills, and hooks (canonical — see below)
 .opencode/         OpenCode commands and native role adapters (thin mirrors)
 .codex/            Codex configuration and native role adapters (thin mirrors)
@@ -182,8 +182,8 @@ that same source — no vendor maintains its own copy of the logic:
 
 - **Skills** — canonical at `.claude/skills/<name>/SKILL.md`. Mirrored as
   `.opencode/commands/<name>.md` (OpenCode) and `.agents/skills/<name>/SKILL.md` (Codex), and at
-  install time as `.cursor/skills/<name>/` (Cursor). All **29** skills have all three mirrors —
-  not just the 7 pipeline phases.
+  install time as `.cursor/skills/<name>/` (Cursor). Every skill has all three mirrors —
+  not just the 7 pipeline phases (`workflow-doctor.js` enforces this, so no count is kept here).
 - **Agents** — canonical at `.claude/agents/<name>.md`. Mirrored as `.opencode/agents/<name>.md`
   and `.codex/agents/<name>.toml`, and at install time as `.cursor/agents/<name>.md`.
 - **A mirror is a pointer, never a fork.** Every mirror's entire content is "load the canonical
@@ -233,10 +233,10 @@ in every supported vendor, not just Claude Code (see [One source, every vendor](
 | Category | Skills |
 |---|---|
 | Core pipeline | `shape`, `critique`, `plan`, `build`, `audit`, `ship`, `cooldown` |
-| Navigate & maintain | `search`, `resume`, `switch`, `checkpoint`, `workflow-doctor`, `setup-validator`, `dependency-security`, `knowledge-health`, `validate`, `impact`, `fix` |
+| Navigate & maintain | `search`, `resume`, `switch`, `checkpoint`, `workflow-doctor`, `setup-validator`, `dependency-security`, `knowledge-health`, `impact`, `fix` |
 | Bundle maintenance | `changelog` (this repo only — version-log an improvement), `bundle-sync` (target projects — pull structural updates from a newer source checkout) |
-| Engineering depth | `eval-harness`, `test-strategy`, `ui-design`, `verification-loop`, `iterative-retrieval`, `cost-aware-llm-pipeline`, `continuous-learning` |
-| Non-engineering | `investor-materials`, `investor-outreach`, `market-research`, `sync` |
+| Engineering depth | `eval-harness`, `test-strategy`, `ui-design` |
+| Integrations | `sync` (Notion task sync) |
 
 ## How to improve this flow
 

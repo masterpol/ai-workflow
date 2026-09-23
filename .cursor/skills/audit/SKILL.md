@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Parallel fan-out audit phase. Dispatches code-reviewer + security-reviewer + test-coverage + ux-reviewer + i18n-checker + eval-runner + cross-pitch-conflict-checker as parallel subagents, synthesizes findings, applies must-fix patches, loops ≤3 cycles. Replaces /review + /security + /test + /ui-review + /scalable-review + /strict-review.
+description: Parallel fan-out audit phase. Dispatches code-reviewer + security-reviewer + test-coverage + ux-reviewer + i18n-checker + eval-runner + cross-pitch-conflict-checker as parallel subagents, synthesizes findings, applies must-fix patches, loops ≤3 cycles.
 ---
 
 # Audit
@@ -27,9 +27,15 @@ Phase 3 of the new pipeline. See `ai-framework/workflow/phases/3-audit.md` for f
 
 Each subagent gets a constrained context: only the slice of diff it needs, only the rules it applies (both the stack-agnostic `ai-framework/rules/` principle and the matching `.project/rules/*.md` companion — a security-reviewer pass on an auth change needs `boundaries.md` *and* `.project/rules/backend.md`'s actual auth-guard pattern, not just one), only matched knowledge entries.
 
+Require every subagent finding to carry severity, file:line, the rule/check violated, and a concrete failure scenario or failing command output.
+
+## Verify before triage
+
+Before any finding enters must-fix, re-read the cited code (or re-run the cited command) and confirm the failure scenario holds. Confirmed → keep tier. Plausible but unconfirmed → should-fix, marked "unverified". Refuted → drop it and list it in the cycle report as a false positive for `/cooldown` to tune. Never spend a cycle patching an unverified must-fix.
+
 ## Synthesis
 
-Main thread combines findings. Triage tiers:
+Main thread combines verified findings. Triage tiers:
 - **must-fix** — security high/critical, build-gate failures, eval regression > 0.3, missing exit criterion, cross-pitch pure overlap. Blocks /ship.
 - **should-fix** — fix this pass OR defer with reason logged to `deviations.md`.
 - **acknowledged** — noted, not actioned. Goes to `log.md` for /cooldown.

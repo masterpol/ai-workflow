@@ -1,5 +1,5 @@
 ---
-description: Record a version-log entry in this bundle's VERSION and CHANGELOG.md.
+description: Record a version-log entry in this bundle's VERSION and CHANGELOG.md whenever a structural improvement is added (new/changed skill, agent, rule, script, template, or hook).
 model: openai/gpt-5.6-luna
 ---
 

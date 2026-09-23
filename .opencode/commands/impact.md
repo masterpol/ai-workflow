@@ -1,5 +1,5 @@
 ---
-description: Impact analysis before development. Scans the codebase to identify files, tests, patterns, and downstream consumers affected by planned changes. Run between /design and /develop.
+description: Impact analysis before development. Scans the codebase to identify files, tests, patterns, and downstream consumers affected by planned changes. Run during /plan, before scopes are finalized.
 model: opencode/mimo-v2.5-free
 ---
 

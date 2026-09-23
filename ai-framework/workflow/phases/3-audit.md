@@ -17,15 +17,28 @@ Replace sequential review/security/test phases with a single **parallel fan-out*
 | `security-reviewer` | always | standard | Severity / vulnerability class / file:line / mitigation (per `security.md` + OWASP Top 10) |
 | `test-coverage-checker` | always | fast | Uncovered behavior / missing regressions / flaky tests (per `testing.md`) |
 | `ux-reviewer` | UI scopes | standard | 10-heuristic scores + simplification opportunities (per `ui-ux-review.md`); H8 ≥ 2 hard gate |
-| `i18n-checker` | i18n strings touched | fast | Missing keys / EN↔ES parity / `pnpm i18n:check` results |
+| `i18n-checker` | i18n strings touched | fast | Missing keys / parity across the project's configured locales / `<i18n-check-command>` results |
 | `eval-runner` | AI-prompt scopes | fast | Per-criterion score + delta vs baseline + pass/fail per gate |
 | `cross-pitch-conflict-checker` | ≥2 active pitches | fast | Pure overlap / adjacent overlap / disjoint vs other pitches' diffs |
 
 Dispatch applicable roles in parallel when native subagents are available; otherwise run them sequentially before synthesis. Each role gets only the slice of diff it needs + only the rules it applies (`ai-framework/rules/` for the principle, the matching `.project/rules/*.md` companion for this project's concrete convention — both, not either) + only matched knowledge entries. Constrained context = clean signal.
 
+## Finding contract (every subagent)
+
+Each finding a subagent returns must carry: **severity**, **file:line**, **the rule or check violated**, and a **concrete failure scenario** (inputs/state → wrong outcome) or the failing command output. A finding without a failure scenario or evidence cannot be triaged above should-fix.
+
+## Verify before triage (main thread)
+
+Fast-profile reviewers are cheap, and cheap reviewers produce false positives. Before a finding enters the **must-fix** tier, the main thread re-reads the cited code and confirms the failure scenario actually holds (or re-runs the cited command). Then:
+- **Confirmed** → keep its tier.
+- **Plausible but unconfirmed** → should-fix, with "unverified" noted.
+- **Refuted** (code doesn't do what the finding claims) → drop it and note it in the cycle report so the pattern can be tuned at `/cooldown`.
+
+Patching an unverified must-fix wastes a cycle and widens the diff; this step keeps the ≤3-cycle budget for real problems.
+
 ## Synthesis (single-threaded, main thread)
 
-After dispatch, main thread combines findings into a single report:
+After dispatch and verification, main thread combines findings into a single report:
 
 ```markdown
 # Audit cycle 1 — {pitch-slug}

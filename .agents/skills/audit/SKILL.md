@@ -1,6 +1,6 @@
 ---
 name: audit
-description: Audit built work with focused review, security, testing, UX, i18n, evaluation, and cross-pitch passes.
+description: Parallel fan-out audit phase. Dispatches code-reviewer + security-reviewer + test-coverage + ux-reviewer + i18n-checker + eval-runner + cross-pitch-conflict-checker as parallel subagents, synthesizes findings, applies must-fix patches, loops ≤3 cycles.
 ---
 
 # Audit

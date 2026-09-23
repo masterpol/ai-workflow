@@ -27,7 +27,13 @@ const crypto = require("node:crypto");
 const root = process.cwd();
 const apply = process.argv.includes("--apply");
 const json = process.argv.includes("--json");
-const color = !json && !process.argv.includes("--no-color") && !process.env.NO_COLOR;
+const color = !json && process.stdout.isTTY && !process.argv.includes("--no-color") && !process.env.NO_COLOR;
+
+// Piping into `head` closes stdout early; exit quietly instead of dumping an EPIPE stack.
+process.stdout.on("error", (error) => {
+  if (error.code === "EPIPE") process.exit(0);
+  throw error;
+});
 
 const colors = {
   new: "\u001b[36m",

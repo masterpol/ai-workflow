@@ -1,6 +1,6 @@
 ---
 name: checkpoint
-description: Save mid-session progress. Creates a snapshot of current work for easy resumption later.
+description: Save mid-session progress on the active pitch to its checkpoint.md so /resume can pick up exactly where you left off.
 ---
 
 # checkpoint

@@ -1,6 +1,6 @@
 ---
 name: cooldown
-description: Periodically promote lessons into rules and triage workflow follow-ups after shipping.
+description: Periodic learning surface. Promotes recurring issues → patterns → rules, triages the followups backlog into candidate pitches, reviews parked pitches, archives stale knowledge. Runs every 5 ships.
 ---
 
 # Cooldown

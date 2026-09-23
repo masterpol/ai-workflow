@@ -51,7 +51,7 @@ For each entry, check:
 ```
 
 ### 3. Check usage (pattern references)
-Search `status.md` and `runs/*.jsonl` for references to each knowledge entry:
+Search `pitches/*/` (pitch, plan, log, deviations, SHIPPED) and `runs/*.md` for references to each knowledge entry:
 
 ```markdown
 ## Usage Report
@@ -153,13 +153,3 @@ Actions:
 3. Skip — just wanted the report
 ```
 
-## Session Logging
-
-```jsonl
-{"type":"phase-start","timestamp":"...","phase":"knowledge-health"}
-{"type":"inventory","timestamp":"...","decisions":N,"patterns":N,"entities":N,"issues":N}
-{"type":"staleness-check","timestamp":"...","healthy":N,"stale":X,"broken_refs":Y}
-{"type":"usage-check","timestamp":"...","active":N,"unused":Y}
-{"type":"promotion-check","timestamp":"...","candidates":Z}
-{"type":"phase-end","timestamp":"...","phase":"knowledge-health","score":"good|needs_attention|critical"}
-```

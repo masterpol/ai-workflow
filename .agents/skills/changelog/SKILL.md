@@ -1,6 +1,6 @@
 ---
 name: changelog
-description: Record a version-log entry in this bundle's VERSION and CHANGELOG.md whenever a structural improvement is added.
+description: Record a version-log entry in this bundle's VERSION and CHANGELOG.md whenever a structural improvement is added (new/changed skill, agent, rule, script, template, or hook).
 ---
 
 # Changelog

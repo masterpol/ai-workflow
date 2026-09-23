@@ -165,8 +165,8 @@ Last synced: YYYY-MM-DD HH:MM
 ### Manual: `/sync`
 Run full bidirectional sync on demand.
 
-### After `/finish`
-The finish skill will suggest: "Run `/sync` to push completed work and new tasks to Notion?"
+### After `/ship`
+`/ship` can suggest: "Run `/sync` to push completed work and new tasks to Notion?"
 
 ### During `/resume`
 The resume skill will:

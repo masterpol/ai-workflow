@@ -1,5 +1,5 @@
 ---
-description: Turn a bet pitch into an executable plan.
+description: Turn a bet pitch into an executable spec. Decompose into independent scopes with machine-checkable exit criteria, identify parallel-dispatch opportunities, initialize hill chart.
 model: openai/gpt-5.6-terra
 ---
 

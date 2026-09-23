@@ -1,6 +1,6 @@
 ---
 name: plan
-description: Convert a bet pitch into independently verifiable implementation scopes.
+description: Turn a bet pitch into an executable spec. Decompose into independent scopes with machine-checkable exit criteria, identify parallel-dispatch opportunities, initialize hill chart.
 ---
 
 # Plan

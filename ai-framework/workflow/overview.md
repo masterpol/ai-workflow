@@ -36,15 +36,15 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 
 ### Bug fix
 ```
-/build → /audit → /ship
+/fix (triage) → /build → /audit → /ship
 ```
-Single implicit scope; mandatory `log.md` entry; full /audit fan-out still runs.
+`/fix` searches knowledge and confirms the root cause, then hands off. Single implicit scope; mandatory `log.md` entry; full /audit fan-out still runs.
 
 ### Hotfix
 ```
-/build → /ship
+/build → /audit (single pass) → /ship
 ```
-Audit deferred to follow-up; rollback plan required at /ship; explicit residual-risk acceptance.
+One audit cycle only; anything beyond it is deferred to a follow-up. Rollback plan required at /ship; explicit residual-risk acceptance at the audit gate.
 
 ## Adaptive confirmation gate
 
@@ -59,7 +59,7 @@ Audit deferred to follow-up; rollback plan required at /ship; explicit residual-
 
 ## Hill chart
 
-Per-pitch live tracking at `.project/pitches/{slug}/hill.md`. Positions:
+Per-pitch live tracking at `.project/pitches/{slug}/hill.md`. `/hill {scope} {position}` in the phase docs is shorthand for updating that scope's row in `hill.md` — it is not a separate command. Positions:
 
 ```
 uphill 0%  → uphill 25%  → uphill 75%  → over-the-hill  → downhill 25%  → downhill 75%  → done
@@ -77,6 +77,7 @@ Stuck-uphill detector: a scope at the same uphill position across 3 session upda
 │   ├── hill.md           ← live progress
 │   ├── log.md            ← in-build incident notes
 │   ├── deviations.md     ← plan ↔ reality drift
+│   ├── checkpoint.md     ← latest /checkpoint (overwritten, < 300 tokens)
 │   └── SHIPPED.md        ← /ship reconciliation
 ├── _followups.md         ← single-file backlog of deferred should-fixes
 ├── _parked/              ← passed pitches awaiting context shift
@@ -141,5 +142,3 @@ See `workflow/phases/`:
 - `3-audit.md`
 - `4-ship.md`
 - `5-cooldown.md`
-
-Legacy 9-phase docs preserved at `workflow/phases/_legacy/` for reference until ≥10 ships on the new pipeline.

@@ -2,7 +2,7 @@
 name: security-reviewer
 description: Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
-model: claude-sonnet-4-6
+model: claude-sonnet-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.
@@ -22,20 +22,17 @@ just a generic OWASP category.
 2. **Secrets Detection** — Find hardcoded API keys, passwords, tokens
 3. **Input Validation** — Ensure all user inputs are properly sanitized
 4. **Authentication/Authorization** — Verify proper access controls
-5. **Dependency Security** — Check for vulnerable npm packages
+5. **Dependency Security** — Check for vulnerable dependencies
 6. **Security Best Practices** — Enforce secure coding patterns
 
 ## Analysis Commands
 
-```bash
-pnpm audit --audit-level=high
-npx eslint . --plugin security
-```
+Use the audit command for the package manager recorded in `.project/context/stack.md` (e.g. `npm audit --audit-level=high`, `pnpm audit --audit-level=high`, `yarn npm audit`, `pip-audit`, `govulncheck ./...`) plus any security linter the project already has configured. Do not install new tools to run a review.
 
 ## Review Workflow
 
 ### 1. Initial Scan
-- Run `pnpm audit`, `eslint-plugin-security`, search for hardcoded secrets
+- Run the dependency audit and configured security linter, search for hardcoded secrets
 - Review high-risk areas: auth, API endpoints, DB queries, file uploads, payments, webhooks
 
 ### 2. OWASP Top 10 Check
@@ -47,7 +44,7 @@ npx eslint . --plugin security
 6. **Misconfiguration** — Default creds changed? Debug mode off in prod? Security headers set?
 7. **XSS** — Output escaped? CSP set? Framework auto-escaping?
 8. **Insecure Deserialization** — User input deserialized safely?
-9. **Known Vulnerabilities** — Dependencies up to date? pnpm audit clean?
+9. **Known Vulnerabilities** — Dependencies up to date? Dependency audit clean?
 10. **Insufficient Logging** — Security events logged? Alerts configured?
 
 ### 3. Code Pattern Review
@@ -85,14 +82,14 @@ Flag these patterns immediately:
 
 ## Output structure
 
-For each finding, emit one table row:
+For each finding, emit one table row. The **failure scenario** column is required for `must-fix` and `should-fix`: the concrete input/state an attacker or user supplies and the wrong outcome. `/audit` downgrades a must-fix without one.
 
 ```
-| tier | file:line | issue | fix |
-|------|-----------|-------|-----|
-| must-fix | src/api/route.ts:23 | No auth check on protected mutation | Add `ctx.auth` guard before data access |
-| should-fix | <backend-workspace>/sessions.ts:88 | No rate limiting on public endpoint | Add per-user rate limit counter |
-| acknowledged | lib/utils.ts:4 | MD5 used for non-security checksum | Acceptable for checksums; not a password hash |
+| tier | file:line | issue | failure scenario | fix |
+|------|-----------|-------|------------------|-----|
+| must-fix | src/api/route.ts:23 | No auth check on protected mutation | Unauthenticated POST with any `id` deletes another tenant's record | Add `ctx.auth` guard before data access |
+| should-fix | <backend-workspace>/sessions.ts:88 | No rate limiting on public endpoint | Scripted client issues 10k login attempts/min unthrottled | Add per-user rate limit counter |
+| acknowledged | lib/utils.ts:4 | MD5 used for non-security checksum | — | Acceptable for checksums; not a password hash |
 ```
 
 **Tier mapping:**
@@ -146,7 +143,7 @@ If you find a CRITICAL vulnerability:
 
 ## Reference
 
-For detailed vulnerability patterns, code examples, report templates, and PR review templates, see skill: `security-review`.
+For the full security principles and checklist, see `ai-framework/rules/security.md`. For a dedicated dependency vulnerability pass (read-only, no manifest or lockfile changes), follow `.claude/skills/dependency-security/SKILL.md`.
 
 ---
 
