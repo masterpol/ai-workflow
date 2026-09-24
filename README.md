@@ -33,7 +33,10 @@ Codex, and Cursor** — install once, open with whichever tool you have.
 - **Generated and canonical data stay separate.** `.project/` is a scaffold for both generated
   context/rule companions and canonical project records such as pitches, designs, and knowledge
   entries. Only generated outputs — project specifics, `.project/rules/*`, and
-  `knowledge/graph.json` + `index.md` — should be regenerated instead of hand-edited.
+   `knowledge/graph.json` + `index.md` — should be regenerated instead of hand-edited.
+- **Consumption is compact and local.** A post-agent collector keeps current and previous usage,
+  lifetime totals, and a small idempotency window in one JSON snapshot, plus regenerated Markdown
+  and HTML views. It never retains prompts, responses, or transcripts.
 
 ## Set up
 
@@ -75,6 +78,22 @@ harnesses follow the same doc manually):
    updated before a gate so an interrupted setup can be resumed.
 7. Verifies the install end-to-end (see below) and reports a punch list of what's wired vs. what
    you still need to decide.
+
+### Token Consumption
+
+After agent completion, the collector updates these Git-ignored local files:
+
+- `.project/metrics/token-consumption.json` is the only stored metric state. It holds current and
+  previous completion consumption, increase/decrease comparison inputs, lifetime aggregates, and a
+  bounded deduplication list.
+- `.project/metrics/token-consumption.md` and `.project/metrics/token-consumption.html` are
+  regenerated views for a quick report or browser dashboard.
+
+OpenCode reports per-message token fields and actual cost. Claude Code reports a completion for
+every subagent and can supplement foreground agents with final-request usage, which is labelled
+partial. Codex records all subagent completions but its hook payload supplies no token or cost
+fields, so those values are reported as unavailable rather than zero. Cursor has no verified
+completion-hook payload and is not wired automatically.
 
 **Re-running setup:** `/setup` (or re-reading `SETUP.md`) detects existing context docs and
 offers Refresh all / Merge / Selective / Cancel. Merge mode shows a diff and preserves manual

@@ -456,9 +456,9 @@ async function validate() {
   // against a real target project (found by testing this doctor against one).
   const inPortableBundleRepo = await exists(absolute("SETUP.md"));
 
-  const coreFiles = ["AGENTS.md", "CLAUDE.md", "README.md", "ai-framework/workflow/overview.md", "ai-framework/integrations/harnesses.md", "ai-framework/rules/model-routing.md", "ai-framework/hooks/hooks.json"];
+  const coreFiles = ["AGENTS.md", "CLAUDE.md", "README.md", "ai-framework/workflow/overview.md", "ai-framework/integrations/harnesses.md", "ai-framework/rules/model-routing.md", "ai-framework/hooks/hooks.json", ".claude/settings.json", ".codex/hooks.json", ".opencode/plugins/token-consumption.js"];
   if (inPortableBundleRepo) coreFiles.push("SETUP.md");
-  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js"];
+  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js"];
   // These scripts use CommonJS require(). A target project's own package.json may declare
   // "type": "module" (found by testing against a real Bun/ESM project) — without a scoped
   // override, plain `node` crashes with "require is not defined in ES module scope" the moment
@@ -500,6 +500,11 @@ async function validate() {
     ...agentFiles.map(checkAgent),
     parseJson(".opencode/opencode.json"),
     parseJson("ai-framework/hooks/hooks.json"),
+    parseJson(".claude/settings.json"),
+    parseJson(".codex/hooks.json"),
+    matches(".claude/settings.json", /token-consumption\.js/, "wires post-agent consumption collector"),
+    matches(".codex/hooks.json", /SubagentStop[\s\S]*token-consumption\.js/, "wires post-agent consumption collector"),
+    matches(".opencode/plugins/token-consumption.js", /recordEvent/, "wires post-agent consumption collector"),
     ...scripts.map(checkNode),
     checkOpenCodeResolution(),
   ]);

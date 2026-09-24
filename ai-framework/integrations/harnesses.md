@@ -60,6 +60,29 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 `.codex/config.toml` only enables a practical concurrency cap. It does not set a provider or a global model, so it does not override a user's Codex configuration.
 
+## Token Consumption Collector
+
+The bundle records completion metrics in a bounded local snapshot at
+`.project/metrics/token-consumption.json`, with regenerated
+`token-consumption.md` and `token-consumption.html` views. The directory is ignored by Git and
+contains only numeric usage, cost, identifiers, and model metadata: never prompts, responses, or
+transcripts.
+
+- **OpenCode:** `.opencode/plugins/token-consumption.js` automatically records completed assistant
+  messages. Its native event includes total message tokens and actual cost.
+- **Claude Code:** `.claude/settings.json` records every `SubagentStop`; its `Agent` PostToolUse
+  hook supplements foreground agents with final-request usage when Claude exposes it. That usage
+  is intentionally labeled `partial`, not a full agent-run total.
+- **Codex:** `.codex/hooks.json` records every `SubagentStop`. Codex completion hooks do not expose
+  token or cost fields, so those records truthfully show `unavailable` instead of zero.
+- **Cursor and other harnesses:** no portable completion payload is available. Run
+  `node ai-framework/hooks/scripts/token-consumption.js --vendor <vendor> --event agent-complete`
+  after an agent only when its caller can provide a supported numeric payload on stdin; otherwise
+  the collector records the completion as unavailable.
+
+The snapshot keeps only current and previous completions for comparison, lifetime aggregates, and
+at most 100 idempotency keys. It does not create per-run log files.
+
 ## Sub-agent Dispatch
 
 Any phase skill (`.claude/skills/*/SKILL.md`) or role prompt (`.claude/agents/*.md`) may spawn

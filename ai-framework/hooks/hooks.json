@@ -36,7 +36,29 @@
         "description": "Scan active pitches' hill charts; warn about scopes stuck at the same uphill position across 3+ sessions"
       }
     ],
+    "SubagentStop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.js\" --vendor claude --event subagent-complete --root \"$CLAUDE_PROJECT_DIR\""
+          }
+        ],
+        "description": "Record a bounded local consumption snapshot when any subagent finishes"
+      }
+    ],
     "PostToolUse": [
+      {
+        "matcher": "Agent",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.js\" --vendor claude --event agent-result --root \"$CLAUDE_PROJECT_DIR\""
+          }
+        ],
+        "description": "Supplement foreground agent completions with Claude's final-request usage when available"
+      },
       {
         "matcher": "Edit|Write",
         "hooks": [
