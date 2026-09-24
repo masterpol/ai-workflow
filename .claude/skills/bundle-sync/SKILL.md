@@ -8,8 +8,8 @@ description: Validate structural drift between an already-unpacked project and a
 > **Recommended capability profile:** `standard` — reviewing a structural diff and deciding what to apply requires judgment, not just mechanical diffing.
 
 Run this **inside a target project that already went through `/setup`** (not inside this
-source bundle itself), pointing `--source` at a checkout of `ai-workflow-portable` that is
-newer than what was unpacked here. It answers "what changed upstream since we installed/last
+source bundle itself). It fetches `https://github.com/masterpol/ai-workflow.git` at `main` into
+a temporary directory and answers "what changed upstream since we installed/last
 synced, and should we pull it in?" — a gap `/setup`'s re-run mode doesn't cover, since that
 mode only refreshes *generated* content (`.project/context/*`, `.project/rules/*`), not the
 bundle's own canonical files (skills, agents, rules, scripts, templates, hooks).
@@ -36,12 +36,16 @@ and any credential file are never read from the source or written to.
 ## Step 1 — Dry run
 
 ```
-node ai-framework/scripts/bundle-sync.js --source <path-to-ai-workflow-portable-checkout> [--base-ref <git-ref>]
+node ai-framework/scripts/bundle-sync.js [--base-ref <git-ref>]
 ```
 
 Read-only. Every differing file is compared three ways — local copy, source, and **base** (the
 bundle version this project was last synced from) — so project customizations are never
 mistaken for stale files:
+
+Use `--source <path-to-ai-workflow-portable-checkout>` only to compare an offline checkout or
+an unpublished branch. Use `--repo <https-url>` to compare a different public repository; the
+default is the public GitHub repository above.
 
 - **Base** comes from the hash manifest in `.project/.bundle-sync.json`, written by every
   `--apply`. On a project's **first** sync there is no manifest yet: pass `--base-ref` with the
@@ -72,7 +76,7 @@ those need a human decision, not silent application.
 ## Step 3 — Apply (only after approval)
 
 ```
-node ai-framework/scripts/bundle-sync.js --source <path> [--base-ref <ref>] --apply [--prune]
+node ai-framework/scripts/bundle-sync.js [--base-ref <ref>] --apply [--prune]
 ```
 
 Writes `new` and `changed` files; never touches `local`, `conflict`, or `flagged` paths.

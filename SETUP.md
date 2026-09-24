@@ -22,7 +22,7 @@ ai-workflow-portable/
 ├── ai-framework/                ← PORTABLE core (stack-agnostic)
 │   ├── rules/                   ← 15 stack-agnostic coding/security/architecture rules
 │   ├── workflow/                ← pipeline overview + 6 phase specs
-│   ├── hooks/                   ← hooks.json template + stuck-uphill-detector, pre-ship-verify
+│   ├── hooks/                   ← lifecycle hooks + verification and consumption scripts
 │   ├── templates/project/       ← scaffold for the per-project .project/ dir
 │   └── integrations/            ← model profiles + harness guidance
 ├── .claude/                     ← Claude Code role prompts, skills, and hooks
@@ -111,6 +111,8 @@ Nothing extra to convert — Claude Code auto-discovers `.claude/agents/` and `.
 OpenCode reads `AGENTS.md`, `.opencode/commands/`, and `.opencode/agents/` natively.
 
 - Keep `.opencode/opencode.json`; OpenCode discovers the native phase wrappers in `.agents/skills/`.
+- `.opencode/plugins/token-consumption.js` automatically records completed assistant message
+  usage and actual cost into the local metrics snapshot.
 - The included adapters intentionally do not pin a provider/model. Select available models by the
   `fast` / `standard` / `deep` profiles in `ai-framework/integrations/harnesses.md`.
 - Quit and restart OpenCode after changing its config, commands, agents, or skills.
@@ -125,6 +127,8 @@ Codex reads `AGENTS.md`, native skills in `.agents/skills/`, and native subagent
 - The included role adapters use Codex models by profile. If a workspace restricts a model, remove
   `model` and `model_reasoning_effort` from that adapter so it inherits the allowed parent model.
 - Ask Codex to spawn the named independent role agents, wait for results, then synthesize them.
+- Review and trust `.codex/hooks.json` through `/hooks`; its `SubagentStop` hook records every
+  completion, although Codex does not expose per-agent token or cost fields to that hook.
 
 ### 2d — Cursor
 Cursor reads `AGENTS.md` at the project root as its primary instruction file, and (since
@@ -265,11 +269,19 @@ with a one-line rationale each, before writing.
 
 ---
 
-## Step 6 — (Optional) Wire hooks — Claude Code only
+## Step 6 — Verify lifecycle hooks
 
-Three hooks ship with this bundle. `ai-framework/hooks/hooks.json` is a **wiring template**
-(not auto-loaded) — copy the entries you want into `.claude/settings.json` (create it if
-absent — do **not** touch `settings.local.json`):
+Claude Code's `.claude/settings.json` ships with the token-consumption hooks enabled. Merge it
+with an existing settings file; never overwrite `settings.local.json`. The collector writes only
+three regenerated, Git-ignored local files under `.project/metrics/`:
+
+- `token-consumption.json` — bounded machine-readable snapshot with current, previous, and
+  lifetime aggregates.
+- `token-consumption.md` — readable comparison and totals.
+- `token-consumption.html` — standalone visual dashboard.
+
+The remaining hooks are opt-in. `ai-framework/hooks/hooks.json` is a **wiring template** (not
+auto-loaded) — copy the entries you want into `.claude/settings.json`:
 
 - `.claude/hooks/post-edit-check.js` — deterministic PostToolUse gate, stack-agnostic on
   purpose (secrets, `console.log`, oversized files, TODO/FIXME, TS syntax if `typescript` is
@@ -281,7 +293,7 @@ absent — do **not** touch `settings.local.json`):
 - `ai-framework/hooks/scripts/pre-ship-verify.js` — **not** an event hook; it's a build-gate
   script the `/ship` phase runs. Leave it in place; the ship playbook invokes it.
 
-Minimal `.claude/settings.json` for the two event hooks:
+Minimal merge for the post-edit and hill-chart hooks:
 
 ```json
 {
@@ -297,8 +309,9 @@ Minimal `.claude/settings.json` for the two event hooks:
 ```
 
 The hooks have zero external dependencies (post-edit-check optionally uses the project's local
-`typescript` if present) and never block on parse errors. They are not provisioned for OpenCode,
-Codex, or Cursor; skip this step for those harnesses.
+`typescript` if present) and never block an agent on collector parse or write errors. OpenCode's
+plugin enables automatically after restart. Codex requires hook trust through `/hooks`. Cursor has
+no verified completion-hook payload, so it is intentionally not wired.
 
 ---
 

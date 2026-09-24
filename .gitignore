@@ -1,3 +1,4 @@
 .DS_Store
 .opencode/node_modules/
 .claude/settings.local.json
+.project/metrics/

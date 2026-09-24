@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /*
  * Validates and (on --apply) syncs structural changes from a newer copy of this source
- * bundle into an already-unpacked target project. Run this FROM THE TARGET PROJECT ROOT,
- * pointing --source at a checkout of ai-workflow-portable.
+ * bundle into an already-unpacked target project. Run this FROM THE TARGET PROJECT ROOT.
+ * By default it compares against the public GitHub main branch; --source accepts a local
+ * checkout when an offline or pre-release comparison is needed.
  *
  * Only the bundle's canonical directories are compared (rules, workflow, templates,
  * integrations, scripts, hooks, canonical agents/skills, and their OpenCode/Codex/Cursor
@@ -17,7 +18,8 @@
  *   conflict  both edited                         -> kept, reported for a manual merge
  *   unverified no base known                      -> kept unless --overwrite-unverified
  *
- * Dry run (default): node ai-framework/scripts/bundle-sync.js --source <path> [--base-ref <ref>] [--json]
+ * Dry run (default): node ai-framework/scripts/bundle-sync.js [--base-ref <ref>] [--json]
+ * Local source:       ... --source <path> [--base-ref <ref>]
  * Apply:              ... --apply [--prune] [--overwrite-unverified]
  *
  * --prune deletes files removed upstream only when they are unmodified versus base.
@@ -25,6 +27,7 @@
 
 const fsp = require("node:fs/promises");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
@@ -88,6 +91,8 @@ const FLAGGED_FILES = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".co
 
 const IGNORE_NAMES = new Set([".DS_Store"]);
 const MARKER = ".project/.bundle-sync.json";
+const PUBLIC_REPOSITORY = "https://github.com/masterpol/ai-workflow.git";
+const PUBLIC_BRANCH = "main";
 
 async function exists(target) {
   try {
@@ -233,24 +238,42 @@ async function sourceManifest(sourceRoot) {
   return files;
 }
 
-async function main() {
+function gitError(error) {
+  const detail = error.stderr?.toString().trim() || error.message;
+  return new Error(`could not fetch public bundle: ${detail}`);
+}
+
+async function resolveSource() {
   const source = arg("source");
-  if (!source) {
-    process.stderr.write("error: --source <path-to-ai-workflow-portable> is required\n");
-    process.exitCode = 1;
-    return;
+  if (source) {
+    const sourceRoot = path.resolve(source);
+    if (!(await exists(path.join(sourceRoot, "ai-framework/workflow/overview.md")))) {
+      throw new Error(`${sourceRoot} does not look like an ai-workflow-portable checkout`);
+    }
+    if (sourceRoot === path.resolve(root)) {
+      throw new Error("--source resolves to the current project root; omit --source to compare against public GitHub");
+    }
+    return { root: sourceRoot, label: sourceRoot, manifestSource: sourceRoot, cleanup: async () => {} };
   }
-  const sourceRoot = path.resolve(source);
-  if (!(await exists(path.join(sourceRoot, "ai-framework/workflow/overview.md")))) {
-    process.stderr.write(`error: ${sourceRoot} does not look like an ai-workflow-portable checkout\n`);
-    process.exitCode = 1;
-    return;
+
+  const repository = arg("repo") || PUBLIC_REPOSITORY;
+  const sourceRoot = await fsp.mkdtemp(path.join(os.tmpdir(), "ai-workflow-portable-"));
+  try {
+    // Keep the comparison isolated from the target's checkout and working tree.
+    execFileSync("git", ["clone", "--quiet", "--filter=blob:none", "--branch", PUBLIC_BRANCH, repository, sourceRoot], { stdio: ["ignore", "ignore", "pipe"] });
+  } catch (error) {
+    await fsp.rm(sourceRoot, { recursive: true, force: true });
+    throw gitError(error);
   }
-  if (sourceRoot === path.resolve(root)) {
-    process.stderr.write("error: --source resolves to the current project root; nothing to sync\n");
-    process.exitCode = 1;
-    return;
-  }
+  return {
+    root: sourceRoot,
+    label: `${repository}@${PUBLIC_BRANCH}`,
+    manifestSource: `${repository}@${PUBLIC_BRANCH}`,
+    cleanup: () => fsp.rm(sourceRoot, { recursive: true, force: true }),
+  };
+}
+
+async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource }) {
 
   let manifest = null;
   try {
@@ -304,7 +327,7 @@ async function main() {
     }
     const marker = {
       lastSyncedAt: new Date().toISOString(),
-      source: sourceRoot,
+      source: manifestSource,
       sourceVersion,
       applied,
       pruned,
@@ -317,7 +340,7 @@ async function main() {
   }
 
   const summary = {
-    source: sourceRoot,
+    source: sourceLabel,
     base: baseSource,
     ...Object.fromEntries(Object.entries(groups).map(([key, list]) => [key, list.length])),
     flaggedForReview: flagged.length,
@@ -332,7 +355,7 @@ async function main() {
     return;
   }
 
-  process.stdout.write(`Source: ${sourceRoot}\nBase: ${baseSource}\nMode: ${apply ? "apply" : "dry run (pass --apply to write)"}\n\n`);
+  process.stdout.write(`Source: ${sourceLabel}\nBase: ${baseSource}\nMode: ${apply ? "apply" : "dry run (pass --apply to write)"}\n\n`);
   const print = (label, status, list, describe = (entry) => entry.path) => {
     if (!list.length) return;
     process.stdout.write(`${paint(status, label)} (${list.length}):\n`);
@@ -353,6 +376,15 @@ async function main() {
     if (markerPath) process.stdout.write(`Recorded base manifest: ${markerPath}\n`);
   } else {
     process.stdout.write("Re-run with --apply (and --prune to delete unmodified removed files) after review.\n");
+  }
+}
+
+async function main() {
+  const source = await resolveSource();
+  try {
+    await runSync(source);
+  } finally {
+    await source.cleanup();
   }
 }
 
