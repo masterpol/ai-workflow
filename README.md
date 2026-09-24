@@ -173,8 +173,9 @@ either file, always go through the `changelog` skill/script.
 
 A project that already unpacked this bundle can pull upstream improvements without re-running
 `/setup` (which only refreshes generated `.project/` content, not the bundle's own canonical
-files) — run `node ai-framework/scripts/bundle-sync.js --source <path-to-a-newer-checkout>` from
-that project's root for a dry-run drift report, then `--apply` after reviewing it. See
+files) — run `node ai-framework/scripts/bundle-sync.js` from that project's root for a dry-run
+comparison against the public GitHub `main` branch, then `--apply` after reviewing it. Use
+`--source <path-to-a-newer-checkout>` only for offline or unpublished changes. See
 `.claude/skills/bundle-sync/SKILL.md` for exactly what is compared, what is flagged for manual
 review, and the post-sync verification step.
 
