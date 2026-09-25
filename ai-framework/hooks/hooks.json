@@ -60,6 +60,16 @@
         "description": "Supplement foreground agent completions with Claude's final-request usage when available"
       },
       {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.js\" --vendor claude --event skill-use --root \"$CLAUDE_PROJECT_DIR\""
+          }
+        ],
+        "description": "Count skill invocations by name only; the skill's arguments are never stored"
+      },
+      {
         "matcher": "Edit|Write",
         "hooks": [
           {

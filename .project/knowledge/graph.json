@@ -1,16 +1,981 @@
 {
-  "generated": "2026-09-21",
+  "generated": "2026-09-25",
   "stats": {
-    "total": 0,
-    "decisions": 0,
-    "patterns": 0,
+    "total": 22,
+    "decisions": 6,
+    "patterns": 9,
     "entities": 0,
-    "issues": 0,
-    "edges": 0,
+    "issues": 7,
+    "edges": 55,
     "brokenLinks": 0,
     "orphans": 0
   },
-  "nodes": [],
-  "edges": [],
-  "tagIndex": {}
+  "nodes": [
+    {
+      "id": "a-gate-must-not-trust-its-own-author",
+      "type": "pattern",
+      "title": "Pattern: A safety gate must not accept the claims of whoever it is gating — and must re-check at the destructive step",
+      "tags": [
+        "safety",
+        "deletion",
+        "validation",
+        "gates"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "pitch-compaction",
+      "related": [
+        "resolve-before-matching-a-protected-path-allowlist",
+        "bare-prefix-match-crosses-entities"
+      ],
+      "file": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md"
+    },
+    {
+      "id": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "type": "pattern",
+      "title": "Pattern: a read-only report over a project tree treats the tree as data, never as code",
+      "tags": [
+        "security",
+        "untrusted-input",
+        "reports",
+        "symlinks",
+        "redos"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "project-state-report",
+      "related": [
+        "subprocess-revalidation-against-on-disk-code",
+        "resolve-config-only-from-trusted-root",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "parse-untrusted-values-and-re-emit-them"
+      ],
+      "file": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md"
+    },
+    {
+      "id": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "type": "pattern",
+      "title": "Pattern: Allow-list untrusted labels at ingest, and again at the place they are rendered",
+      "tags": [
+        "security",
+        "untrusted-input",
+        "markdown",
+        "reports"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "metrics-report-dimensions",
+      "related": [
+        "resolve-config-only-from-trusted-root",
+        "a-gate-must-not-trust-its-own-author",
+        "async-agent-launch-hook-counted-as-completion"
+      ],
+      "file": ".project/knowledge/patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md"
+    },
+    {
+      "id": "async-agent-launch-hook-counted-as-completion",
+      "type": "issue",
+      "title": "Issue: A hook that fires at launch was counted as a completion, so async agents counted twice",
+      "tags": [
+        "hooks",
+        "claude-code",
+        "telemetry",
+        "double-counting"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "metrics-report-dimensions",
+      "related": [
+        "bare-prefix-match-crosses-entities",
+        "reversible-aggregates-store-their-routing"
+      ],
+      "file": ".project/knowledge/issues/async-agent-launch-hook-counted-as-completion.md"
+    },
+    {
+      "id": "bare-prefix-match-crosses-entities",
+      "type": "issue",
+      "title": "Issue: Matching entities by a bare `${id}-` prefix lets one entity resolve to another's",
+      "tags": [
+        "identifiers",
+        "matching",
+        "data-integrity"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "pitch-compaction",
+      "related": [
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/bare-prefix-match-crosses-entities.md"
+    },
+    {
+      "id": "caveman-mode-is-default-everywhere",
+      "type": "decision",
+      "title": "Decision: caveman brevity mode is the default for every skill, agent, and session",
+      "tags": [
+        "caveman",
+        "response-style",
+        "all-vendors",
+        "defaults"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "user-request",
+      "related": [
+        "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/decisions/caveman-mode-is-default-everywhere.md"
+    },
+    {
+      "id": "dual-hash-tracking-for-transformed-content",
+      "type": "pattern",
+      "title": "Pattern: Dual-hash tracking for content that gets transformed after fetch",
+      "tags": [
+        "ownership",
+        "formatting",
+        "hashing",
+        "transactions"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "subprocess-revalidation-against-on-disk-code",
+        "resolve-config-only-from-trusted-root"
+      ],
+      "file": ".project/knowledge/patterns/dual-hash-tracking-for-transformed-content.md"
+    },
+    {
+      "id": "hardening-a-shared-reader-made-its-writer-destructive",
+      "type": "issue",
+      "title": "Issue: making a shared reader treat a symlink as \"absent\" turned its writer into a data-destroyer",
+      "tags": [
+        "regression",
+        "symlinks",
+        "data-loss",
+        "shared-helpers",
+        "audit"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "project-state-report",
+      "related": [
+        "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/hardening-a-shared-reader-made-its-writer-destructive.md"
+    },
+    {
+      "id": "installed-skill-wrappers-ship-as-orphans",
+      "type": "issue",
+      "title": "Issue: a skill installed in the source checkout ships to every synced project as a broken orphan",
+      "tags": [
+        "bundle-sync",
+        "publishing",
+        "instance-data",
+        "migration"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "caveman-rollout",
+      "related": [
+        "caveman-mode-is-default-everywhere",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/installed-skill-wrappers-ship-as-orphans.md"
+    },
+    {
+      "id": "macos-tmpdir-realpath-alias-breaks-path-assertions",
+      "type": "issue",
+      "title": "Issue: macOS resolves `os.tmpdir()` through a `/private/var` alias, breaking exact-path assertions in tests",
+      "tags": [
+        "testing",
+        "macos",
+        "filesystem",
+        "node"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "low",
+      "resolved": "true",
+      "source": "portable-skill-installation",
+      "related": [],
+      "file": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md"
+    },
+    {
+      "id": "parse-untrusted-values-and-re-emit-them",
+      "type": "pattern",
+      "title": "Pattern: parse an untrusted value against a grammar and re-emit it from the parsed numbers",
+      "tags": [
+        "security",
+        "untrusted-input",
+        "css",
+        "reports",
+        "injection"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "project-state-report",
+      "related": [
+        "allow-list-untrusted-labels-at-ingest-and-at-render",
+        "resolve-config-only-from-trusted-root",
+        "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+      ],
+      "file": ".project/knowledge/patterns/parse-untrusted-values-and-re-emit-them.md"
+    },
+    {
+      "id": "pitch-compaction-gate-and-recovery-design",
+      "type": "decision",
+      "title": "Decision: how `/pitch-compress` decides a deletion is safe",
+      "tags": [
+        "pitch-compress",
+        "compaction",
+        "deletion",
+        "recovery",
+        "gates",
+        "design"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "pitch-compaction",
+      "related": [
+        "a-gate-must-not-trust-its-own-author",
+        "bare-prefix-match-crosses-entities",
+        "hardening-a-shared-reader-made-its-writer-destructive",
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+      ],
+      "file": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md"
+    },
+    {
+      "id": "project-state-report-design",
+      "type": "decision",
+      "title": "Decision: how `/state` builds its snapshot and themed HTML report",
+      "tags": [
+        "state-report",
+        "html",
+        "theme",
+        "snapshot",
+        "design"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "project-state-report",
+      "related": [
+        "parse-untrusted-values-and-re-emit-them",
+        "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+        "hardening-a-shared-reader-made-its-writer-destructive",
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+      ],
+      "file": ".project/knowledge/decisions/project-state-report-design.md"
+    },
+    {
+      "id": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+      "type": "issue",
+      "title": "Issue: A prose skill instruction referenced a CLI flag as if invocation arguments were already a clean single value, but they are free-form text",
+      "tags": [
+        "prose-skill",
+        "cli-integration",
+        "testing-gap"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "portable-skill-defaults",
+      "related": [
+        "resolve-before-matching-a-protected-path-allowlist"
+      ],
+      "file": ".project/knowledge/issues/prose-instructions-must-specify-how-to-extract-from-free-form-arguments.md"
+    },
+    {
+      "id": "resolve-before-matching-a-protected-path-allowlist",
+      "type": "pattern",
+      "title": "Pattern: Resolve the real path before matching it against a protected-directory list",
+      "tags": [
+        "security",
+        "filesystem",
+        "symlinks",
+        "case-sensitivity"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-defaults",
+      "related": [
+        "resolve-config-only-from-trusted-root",
+        "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+      ],
+      "file": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md"
+    },
+    {
+      "id": "resolve-config-only-from-trusted-root",
+      "type": "pattern",
+      "title": "Pattern: When invoking a tool over untrusted content, resolve its config only from a trusted root",
+      "tags": [
+        "security",
+        "subprocess",
+        "untrusted-content"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "dual-hash-tracking-for-transformed-content",
+        "resolve-before-matching-a-protected-path-allowlist"
+      ],
+      "file": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md"
+    },
+    {
+      "id": "reversible-aggregates-store-their-routing",
+      "type": "pattern",
+      "title": "Pattern: When aggregates can be undone, store where each record was counted, and never clamp",
+      "tags": [
+        "aggregation",
+        "reversal",
+        "schema-versioning",
+        "migration"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "metrics-report-dimensions",
+      "related": [
+        "subprocess-revalidation-against-on-disk-code",
+        "dual-hash-tracking-for-transformed-content",
+        "async-agent-launch-hook-counted-as-completion"
+      ],
+      "file": ".project/knowledge/patterns/reversible-aggregates-store-their-routing.md"
+    },
+    {
+      "id": "reviewer-reports-contradicted-by-measurement",
+      "type": "issue",
+      "title": "Issue: a subagent's audit report contained numbers and names the code and the test run contradicted",
+      "tags": [
+        "audit",
+        "subagents",
+        "verification",
+        "process"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "project-state-report",
+      "related": [
+        "async-agent-launch-hook-counted-as-completion",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md"
+    },
+    {
+      "id": "skill-defaults-attribution-guard-and-runtime-design",
+      "type": "decision",
+      "title": "Decision: how the default-skills machinery attributes, guards, and reports readiness",
+      "tags": [
+        "skills",
+        "defaults",
+        "caveman",
+        "compress-guard",
+        "token-metrics",
+        "design"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-defaults",
+      "related": [
+        "caveman-mode-is-default-everywhere",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+      ],
+      "file": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md"
+    },
+    {
+      "id": "subprocess-revalidation-against-on-disk-code",
+      "type": "pattern",
+      "title": "Pattern: Re-validate a just-synced contract as a subprocess, not an in-process require",
+      "tags": [
+        "sync",
+        "migration",
+        "schema-versioning",
+        "subprocess"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "dual-hash-tracking-for-transformed-content"
+      ],
+      "file": ".project/knowledge/patterns/subprocess-revalidation-against-on-disk-code.md"
+    },
+    {
+      "id": "token-metrics-dimensions-design",
+      "type": "decision",
+      "title": "Decision: how token metrics record and report vendor, model, agent, effort and skill",
+      "tags": [
+        "token-metrics",
+        "collector",
+        "report",
+        "schema",
+        "hooks",
+        "design"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "metrics-report-dimensions",
+      "related": [
+        "reversible-aggregates-store-their-routing",
+        "allow-list-untrusted-labels-at-ingest-and-at-render",
+        "async-agent-launch-hook-counted-as-completion",
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+      ],
+      "file": ".project/knowledge/decisions/token-metrics-dimensions-design.md"
+    },
+    {
+      "id": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+      "type": "decision",
+      "title": "Decision: workflow-tooling pitches share the same no-gos, and the installer's design answers stand",
+      "tags": [
+        "workflow",
+        "tooling",
+        "no-gos",
+        "installer",
+        "bundle-sync",
+        "architecture"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "resolve-config-only-from-trusted-root",
+        "subprocess-revalidation-against-on-disk-code",
+        "dual-hash-tracking-for-transformed-content",
+        "a-gate-must-not-trust-its-own-author",
+        "macos-tmpdir-realpath-alias-breaks-path-assertions"
+      ],
+      "file": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md"
+    }
+  ],
+  "edges": [
+    {
+      "from": "caveman-mode-is-default-everywhere",
+      "to": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    },
+    {
+      "from": "caveman-mode-is-default-everywhere",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "pitch-compaction-gate-and-recovery-design",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "pitch-compaction-gate-and-recovery-design",
+      "to": "bare-prefix-match-crosses-entities"
+    },
+    {
+      "from": "pitch-compaction-gate-and-recovery-design",
+      "to": "hardening-a-shared-reader-made-its-writer-destructive"
+    },
+    {
+      "from": "pitch-compaction-gate-and-recovery-design",
+      "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    },
+    {
+      "from": "project-state-report-design",
+      "to": "parse-untrusted-values-and-re-emit-them"
+    },
+    {
+      "from": "project-state-report-design",
+      "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    },
+    {
+      "from": "project-state-report-design",
+      "to": "hardening-a-shared-reader-made-its-writer-destructive"
+    },
+    {
+      "from": "project-state-report-design",
+      "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    },
+    {
+      "from": "skill-defaults-attribution-guard-and-runtime-design",
+      "to": "caveman-mode-is-default-everywhere"
+    },
+    {
+      "from": "skill-defaults-attribution-guard-and-runtime-design",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "skill-defaults-attribution-guard-and-runtime-design",
+      "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    },
+    {
+      "from": "token-metrics-dimensions-design",
+      "to": "reversible-aggregates-store-their-routing"
+    },
+    {
+      "from": "token-metrics-dimensions-design",
+      "to": "allow-list-untrusted-labels-at-ingest-and-at-render"
+    },
+    {
+      "from": "token-metrics-dimensions-design",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
+      "from": "token-metrics-dimensions-design",
+      "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    },
+    {
+      "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+      "to": "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    },
+    {
+      "from": "a-gate-must-not-trust-its-own-author",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "a-gate-must-not-trust-its-own-author",
+      "to": "bare-prefix-match-crosses-entities"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "parse-untrusted-values-and-re-emit-them"
+    },
+    {
+      "from": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
+      "from": "dual-hash-tracking-for-transformed-content",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "dual-hash-tracking-for-transformed-content",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "parse-untrusted-values-and-re-emit-them",
+      "to": "allow-list-untrusted-labels-at-ingest-and-at-render"
+    },
+    {
+      "from": "parse-untrusted-values-and-re-emit-them",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "parse-untrusted-values-and-re-emit-them",
+      "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    },
+    {
+      "from": "resolve-before-matching-a-protected-path-allowlist",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "resolve-before-matching-a-protected-path-allowlist",
+      "to": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    },
+    {
+      "from": "resolve-config-only-from-trusted-root",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "resolve-config-only-from-trusted-root",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "reversible-aggregates-store-their-routing",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "reversible-aggregates-store-their-routing",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "reversible-aggregates-store-their-routing",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
+      "from": "subprocess-revalidation-against-on-disk-code",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "async-agent-launch-hook-counted-as-completion",
+      "to": "bare-prefix-match-crosses-entities"
+    },
+    {
+      "from": "async-agent-launch-hook-counted-as-completion",
+      "to": "reversible-aggregates-store-their-routing"
+    },
+    {
+      "from": "bare-prefix-match-crosses-entities",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "hardening-a-shared-reader-made-its-writer-destructive",
+      "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    },
+    {
+      "from": "hardening-a-shared-reader-made-its-writer-destructive",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "hardening-a-shared-reader-made-its-writer-destructive",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "installed-skill-wrappers-ship-as-orphans",
+      "to": "caveman-mode-is-default-everywhere"
+    },
+    {
+      "from": "installed-skill-wrappers-ship-as-orphans",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "reviewer-reports-contradicted-by-measurement",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
+      "from": "reviewer-reports-contradicted-by-measurement",
+      "to": "a-gate-must-not-trust-its-own-author"
+    }
+  ],
+  "tagIndex": {
+    "caveman": [
+      "caveman-mode-is-default-everywhere",
+      "skill-defaults-attribution-guard-and-runtime-design"
+    ],
+    "response-style": [
+      "caveman-mode-is-default-everywhere"
+    ],
+    "all-vendors": [
+      "caveman-mode-is-default-everywhere"
+    ],
+    "defaults": [
+      "caveman-mode-is-default-everywhere",
+      "skill-defaults-attribution-guard-and-runtime-design"
+    ],
+    "pitch-compress": [
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "compaction": [
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "deletion": [
+      "a-gate-must-not-trust-its-own-author",
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "recovery": [
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "gates": [
+      "a-gate-must-not-trust-its-own-author",
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "design": [
+      "pitch-compaction-gate-and-recovery-design",
+      "project-state-report-design",
+      "skill-defaults-attribution-guard-and-runtime-design",
+      "token-metrics-dimensions-design"
+    ],
+    "state-report": [
+      "project-state-report-design"
+    ],
+    "html": [
+      "project-state-report-design"
+    ],
+    "theme": [
+      "project-state-report-design"
+    ],
+    "snapshot": [
+      "project-state-report-design"
+    ],
+    "skills": [
+      "skill-defaults-attribution-guard-and-runtime-design"
+    ],
+    "compress-guard": [
+      "skill-defaults-attribution-guard-and-runtime-design"
+    ],
+    "token-metrics": [
+      "skill-defaults-attribution-guard-and-runtime-design",
+      "token-metrics-dimensions-design"
+    ],
+    "collector": [
+      "token-metrics-dimensions-design"
+    ],
+    "report": [
+      "token-metrics-dimensions-design"
+    ],
+    "schema": [
+      "token-metrics-dimensions-design"
+    ],
+    "hooks": [
+      "async-agent-launch-hook-counted-as-completion",
+      "token-metrics-dimensions-design"
+    ],
+    "workflow": [
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "tooling": [
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "no-gos": [
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "installer": [
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "bundle-sync": [
+      "installed-skill-wrappers-ship-as-orphans",
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "architecture": [
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "safety": [
+      "a-gate-must-not-trust-its-own-author"
+    ],
+    "validation": [
+      "a-gate-must-not-trust-its-own-author"
+    ],
+    "security": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them",
+      "resolve-before-matching-a-protected-path-allowlist",
+      "resolve-config-only-from-trusted-root"
+    ],
+    "untrusted-input": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "reports": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "symlinks": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "hardening-a-shared-reader-made-its-writer-destructive",
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "redos": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    ],
+    "markdown": [
+      "allow-list-untrusted-labels-at-ingest-and-at-render"
+    ],
+    "ownership": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "formatting": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "hashing": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "transactions": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "css": [
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "injection": [
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "filesystem": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions",
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "case-sensitivity": [
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "subprocess": [
+      "resolve-config-only-from-trusted-root",
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "untrusted-content": [
+      "resolve-config-only-from-trusted-root"
+    ],
+    "aggregation": [
+      "reversible-aggregates-store-their-routing"
+    ],
+    "reversal": [
+      "reversible-aggregates-store-their-routing"
+    ],
+    "schema-versioning": [
+      "reversible-aggregates-store-their-routing",
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "migration": [
+      "installed-skill-wrappers-ship-as-orphans",
+      "reversible-aggregates-store-their-routing",
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "sync": [
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "claude-code": [
+      "async-agent-launch-hook-counted-as-completion"
+    ],
+    "telemetry": [
+      "async-agent-launch-hook-counted-as-completion"
+    ],
+    "double-counting": [
+      "async-agent-launch-hook-counted-as-completion"
+    ],
+    "identifiers": [
+      "bare-prefix-match-crosses-entities"
+    ],
+    "matching": [
+      "bare-prefix-match-crosses-entities"
+    ],
+    "data-integrity": [
+      "bare-prefix-match-crosses-entities"
+    ],
+    "regression": [
+      "hardening-a-shared-reader-made-its-writer-destructive"
+    ],
+    "data-loss": [
+      "hardening-a-shared-reader-made-its-writer-destructive"
+    ],
+    "shared-helpers": [
+      "hardening-a-shared-reader-made-its-writer-destructive"
+    ],
+    "audit": [
+      "hardening-a-shared-reader-made-its-writer-destructive",
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "publishing": [
+      "installed-skill-wrappers-ship-as-orphans"
+    ],
+    "instance-data": [
+      "installed-skill-wrappers-ship-as-orphans"
+    ],
+    "testing": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "macos": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "node": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "prose-skill": [
+      "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "cli-integration": [
+      "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "testing-gap": [
+      "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "subagents": [
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "verification": [
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "process": [
+      "reviewer-reports-contradicted-by-measurement"
+    ]
+  }
 }

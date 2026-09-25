@@ -51,7 +51,7 @@ doesn't auto-read either file, just ask it to *"read `SETUP.md` and set up the w
 **OpenCode model setup:** connect OpenAI and OpenCode Zen before starting a routed workflow —
 the bundled OpenCode routes deliberately avoid Anthropic for now, since some installations only
 have OpenAI/Zen connected and a route through an unconnected provider errors instead of falling
-back. The bundled routes use Zen's free `opencode/mimo-v2.5-free` model only for short,
+back. The bundled routes use Zen's free `opencode/space-bunny-free` model only for short,
 non-sensitive fast work, and OpenAI GPT-5.6 for standard and deep work (different reasoning
 effort per profile). Run `opencode debug config` to confirm that OpenCode resolves the
 configuration. For confidential work, replace the free fast-route adapters with the documented
@@ -87,7 +87,15 @@ After agent completion, the collector updates these Git-ignored local files:
   previous completion consumption, increase/decrease comparison inputs, lifetime aggregates, and a
   bounded deduplication list.
 - `.project/metrics/token-consumption.md` and `.project/metrics/token-consumption.html` are
-  regenerated views for a quick report or browser dashboard.
+  regenerated views for a quick report or browser dashboard. They open with a **Usage** summary
+  (most used vendor and model, and the basis it was ranked on), followed by tables by vendor,
+  model, agent, reasoning effort, and skill.
+
+The by-model, by-agent, by-effort, and by-skill tables start counting when the snapshot moves to
+schema v2 (the report prints the date) and are not back-filled. A harness that does not report a
+field shows `Unreported`; a completion with no nonzero cost shows `Unpriced`. Only skill names are
+recorded, never a skill's arguments. Completion counts are per assistant message for OpenCode and
+per subagent run for Claude Code and Codex, so they are not comparable across vendors.
 
 OpenCode reports per-message token fields and actual cost. Claude Code reports a completion for
 every subagent and can supplement foreground agents with final-request usage, which is labelled
@@ -122,9 +130,14 @@ the canonical file itself declares, and checks that both the OpenCode and Codex 
 load the canonical file (or, for a script-backed skill like `workflow-doctor` itself, the script
 it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
 scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
-Checks run concurrently and print color-coded progress as each completes. It does not validate
-Cursor mirrors (generated fresh at install time, not shipped in the bundle) or installed hook
-wiring in a target project's `.claude/settings.json`.
+It also requires the caveman-mode instruction in every canonical skill, agent, and (in this bundle)
+both entry files, validates `.project/skills/modes.json`, and reports the live state — active, inert
+(skill not installed), disabled, or under-covering the workflow — so "carries the instruction" is
+never mistaken for "is on".
+Checks run concurrently and print color-coded progress as each completes. Skills installed with
+`add-skill` are recognized from `.project/skills/registry.json` and checked for ownership, vendor
+coverage and activation instead of canonical mirror rules. It does not validate Cursor mirrors
+(the setup validator does) or installed hook wiring in a target project's `.claude/settings.json`.
 
 - `--fix` restores missing template files and the generated `_followups.md` backlog only when a
   non-symlink `.project/` directory already exists. Run it only after approving the repair; it
@@ -142,7 +155,7 @@ or the knowledge graph — nothing needs manual registration for the doctor to p
 After `/setup` completes in a target project, run
 `node ai-framework/scripts/setup-validator.js`. It is read-only and verifies the generated
 `.project` context and scaffold, filled project specifics, full `CLAUDE.md` mirror, knowledge
-graph, and Cursor mirrors, then runs the workflow doctor as a prerequisite. A missing `.project`
+graph, and a Cursor mirror for every canonical skill and agent, then runs the workflow doctor as a prerequisite. A missing `.project`
 in this portable bundle is expected; it becomes a setup failure only when run in a target project.
 Use `--json` for automation or `--no-color` for plain text. Repair failures by re-running `/setup`
 through its confirmation gates, rather than hand-editing generated artifacts.
@@ -193,9 +206,19 @@ SETUP.md           The AI-followable install guide (start here)
 ```
 
 `.cursor/{agents,skills}/` aren't shipped in the bundle — `SETUP.md` generates them at install
-time as mirrors of `.claude/agents/` and `.claude/skills/`, since Cursor uses the same format.
+time as mirrors of `.claude/agents/` and `.claude/skills/`, since Cursor uses the same format
+(`node ai-framework/scripts/skill-vendors.js cursor-mirrors --apply` creates missing ones).
+
+External skills (for example from skills.sh) are added with `/add-skill`, which installs one
+verified skill for every vendor in the project with an explicit scope and workflow phases. See
+`ai-framework/integrations/skills.md`.
 
 ## One source, every vendor
+
+> **Caveman mode** rides the same architecture: one instruction, carried by every canonical skill
+> and agent (and both entry files), resolved per invocation by `skill-defaults.js`. Vendor mirrors
+> point at the canonical files or are byte copies — see
+> [`ai-framework/integrations/skill-defaults.md`](ai-framework/integrations/skill-defaults.md).
 
 Every skill, agent, and command is written **once**, canonically, and every vendor consumes
 that same source — no vendor maintains its own copy of the logic:

@@ -1,7 +1,7 @@
 ---
 description: Fast scope-sizing role that checks work against the stated appetite.
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode/space-bunny-free
 permission:
   edit: deny
 ---

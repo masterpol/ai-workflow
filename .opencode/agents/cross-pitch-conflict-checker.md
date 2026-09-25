@@ -1,7 +1,7 @@
 ---
 description: Fast read-only reviewer for conflicts between active pitch diffs.
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode/space-bunny-free
 permission:
   edit: deny
 ---
