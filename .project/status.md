@@ -6,12 +6,17 @@
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
 | district-multisite-foundation | uphill 0% | shape | big-batch | 2026-09-21 |
+| portable-skill-defaults | uphill 0% | bet (queued) | epic (split) | 2026-09-24 |
+| pitch-compaction | uphill 0% | bet (queued) | epic (split) | 2026-09-24 |
+| project-state-report | uphill 0% | bet (queued) | epic (split) | 2026-09-24 |
 
 ## Parked pitches
 _none_
 
 ## Recent ships (last 5)
-_none yet_
+| Pitch | Shipped | Notes |
+|-------|---------|-------|
+| portable-skill-installation | 2026-09-25 | S1–S3, 63 tests, 0 must-fix at audit. See `pitches/portable-skill-installation/SHIPPED.md`. |
 
 ## Open rabbit holes across active pitches
 - Legacy source access, content and media totals, and school-site ownership.
@@ -19,6 +24,6 @@ _none yet_
 - Canonical paths and redirect treatment for current school domains.
 
 ## Followups backlog
-→ `.project/pitches/_followups.md` (0 items)
+→ `.project/pitches/_followups.md` (2 items)
 
-## /cooldown due in: 5 ships
+## /cooldown due in: 4 ships

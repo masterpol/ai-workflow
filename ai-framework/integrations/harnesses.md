@@ -60,6 +60,16 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 `.codex/config.toml` only enables a practical concurrency cap. It does not set a provider or a global model, so it does not override a user's Codex configuration.
 
+## Instance-managed Skills
+
+External skills are installed through the `add-skill` entry point in every vendor (Claude Code
+skill, Codex skill, OpenCode command, Cursor mirror). One installation writes a wrapper into each
+project vendor's descriptor path in `ai-framework/integrations/skill-vendors.json`, extended or
+overridden by `.project/skills/vendors.json`, and all wrappers load the same package under
+`.project/skills/packages/`. Some hosts also read other vendors' skill directories (OpenCode reads `.claude/skills/` and `.agents/skills/`);
+a wrapper per vendor keeps each host's own discovery path covered without relying on that.
+See `ai-framework/integrations/skills.md` for the contract.
+
 ## Token Consumption Collector
 
 The bundle records completion metrics in a bounded local snapshot at

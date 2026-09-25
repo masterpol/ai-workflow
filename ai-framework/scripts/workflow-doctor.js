@@ -9,6 +9,7 @@ const fs = require("node:fs");
 const fsp = require("node:fs/promises");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { externalSkillReport } = require("./skill-vendors");
 
 const root = process.cwd();
 const fix = process.argv.includes("--fix");
@@ -458,7 +459,7 @@ async function validate() {
 
   const coreFiles = ["AGENTS.md", "CLAUDE.md", "README.md", "ai-framework/workflow/overview.md", "ai-framework/integrations/harnesses.md", "ai-framework/rules/model-routing.md", "ai-framework/hooks/hooks.json", ".claude/settings.json", ".codex/hooks.json", ".opencode/plugins/token-consumption.js"];
   if (inPortableBundleRepo) coreFiles.push("SETUP.md");
-  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js"];
+  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js", "ai-framework/scripts/add-skill.js", "ai-framework/scripts/skill-registry.js", "ai-framework/scripts/skill-source.js", "ai-framework/scripts/skill-vendors.js"];
   // These scripts use CommonJS require(). A target project's own package.json may declare
   // "type": "module" (found by testing against a real Bun/ESM project) — without a scoped
   // override, plain `node` crashes with "require is not defined in ES module scope" the moment
@@ -489,6 +490,16 @@ async function validate() {
     ".claude/skills/audit/SKILL.md",
   ];
 
+  // Skills installed by add-skill own wrappers under .claude/skills but are upstream content: they
+  // are checked against registry ownership and vendor coverage, not canonical mirror/profile rules.
+  let external;
+  try {
+    external = externalSkillReport(root);
+  } catch (error) {
+    external = { managed: new Set(), results: [{ status: "fail", name: ".project/skills", detail: error.message }] };
+  }
+  for (const result of external.results) record(result.status, result.name, result.detail);
+
   await Promise.all([
     ...coreFiles.map(requireFile),
     ...(inPortableBundleRepo ? readmeChecks.map(([expression, detail]) => matches("README.md", expression, detail)) : []),
@@ -496,7 +507,7 @@ async function validate() {
     ...ruleFiles.map((rule) => requireFile(`ai-framework/rules/${rule}.md`)),
     ...cjsOverrides.map((file) => matches(file, /"type":\s*"commonjs"/, "declares commonjs for its directory")),
     ...rulesConsumers.map((file) => matches(file, /\.project\/rules/, "references the generated .project/rules companions")),
-    ...skillNames.map(checkSkill),
+    ...skillNames.filter((name) => !external.managed.has(name)).map(checkSkill),
     ...agentFiles.map(checkAgent),
     parseJson(".opencode/opencode.json"),
     parseJson("ai-framework/hooks/hooks.json"),

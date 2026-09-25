@@ -31,6 +31,7 @@ const os = require("node:os");
 const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
+const { ownedPaths } = require("./skill-sync");
 
 const root = process.cwd();
 const apply = process.argv.includes("--apply");
@@ -157,7 +158,7 @@ function classify(localDigest, sourceDigest, baseDigest) {
   return "conflict";
 }
 
-async function compareDir(relDir, sourceRoot, baseOf) {
+async function compareDir(relDir, sourceRoot, baseOf, excluded) {
   const sourceDir = path.join(sourceRoot, relDir);
   const targetDir = path.join(root, relDir);
   const sourceFiles = await walk(sourceDir);
@@ -168,6 +169,7 @@ async function compareDir(relDir, sourceRoot, baseOf) {
 
   for (const rel of sourceFiles) {
     const label = path.join(relDir, rel);
+    if (excluded.has(label.toLowerCase())) continue;
     const sourcePath = path.join(sourceDir, rel);
     const existing = targetByLower.get(rel.toLowerCase());
     if (existing === undefined) {
@@ -187,6 +189,10 @@ async function compareDir(relDir, sourceRoot, baseOf) {
   for (const rel of targetFiles) {
     if (sourceLower.has(rel.toLowerCase())) continue;
     const label = path.join(relDir, rel);
+    // Files owned by the local skill registry (add-skill) were never part of the canonical
+    // bundle: report them as neither new nor removed, so a registry-managed skill under
+    // .claude/skills/<name>/ never reads as "REMOVED in source" and is never a prune candidate.
+    if (excluded.has(label.toLowerCase())) continue;
     const targetPath = path.join(targetDir, rel);
     const baseDigest = baseOf(label);
     const localDigest = await fileHash(targetPath);
@@ -285,7 +291,8 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
   const baseOf = makeBaseLookup(sourceRoot, manifest, baseRef);
   const baseSource = manifest?.files ? `manifest (${MARKER})` : baseRef ? `git ref ${baseRef}` : "none";
 
-  const entries = (await Promise.all([...SYNCED_DIRS, ...RETIRED_DIRS].map((dir) => compareDir(dir, sourceRoot, baseOf)))).flat();
+  const excluded = ownedPaths(root);
+  const entries = (await Promise.all([...SYNCED_DIRS, ...RETIRED_DIRS].map((dir) => compareDir(dir, sourceRoot, baseOf, excluded)))).flat();
   const flagged = await compareFlagged(sourceRoot);
   const group = (status) => entries.filter((entry) => entry.status === status);
   const groups = {
@@ -339,6 +346,27 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
     markerPath = MARKER;
   }
 
+  // Runs against whatever skill-sync.js is now ON DISK (this project's, after any files this
+  // sync just applied), so a schema/adapter contract this same sync changed is checked with the
+  // new code immediately — not left to surface unexpectedly on the next add-skill invocation.
+  // Covered by the same approval as the rest of this sync; it is never a second apply gate.
+  let skillSync = null;
+  const skillSyncScript = path.join(root, "ai-framework/scripts/skill-sync.js");
+  if (fs.existsSync(skillSyncScript)) {
+    try {
+      const args = [skillSyncScript, "reconcile", "--json"];
+      if (apply) args.push("--apply");
+      const output = execFileSync(process.execPath, args, { cwd: root, stdio: ["ignore", "pipe", "pipe"] });
+      skillSync = JSON.parse(output.toString());
+    } catch (error) {
+      try {
+        skillSync = JSON.parse((error.stdout || Buffer.alloc(0)).toString());
+      } catch {
+        skillSync = { status: "error", error: (error.stderr?.toString() || error.message).trim(), skills: [] };
+      }
+    }
+  }
+
   const summary = {
     source: sourceLabel,
     base: baseSource,
@@ -348,10 +376,11 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
     appliedCount: applied.length,
     prunedCount: pruned.length,
     marker: markerPath,
+    skillSync: skillSync ? skillSync.status : "not-installed",
   };
 
   if (json) {
-    process.stdout.write(JSON.stringify({ summary, ...groups, flagged }, null, 2) + "\n");
+    process.stdout.write(JSON.stringify({ summary, ...groups, flagged, skillSync }, null, 2) + "\n");
     return;
   }
 
@@ -370,6 +399,15 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
   print("UNVERIFIED: differs, no base to tell who changed it (kept; pass --base-ref)", "unverified", groups.unverified, withRename);
   print("REMOVED in source", "removed", groups.removed, (entry) => `${entry.path}  [${entry.modified}]`);
   print("FLAGGED for manual review (project-specific sections; never auto-applied)", "flagged", flagged);
+
+  if (skillSync && skillSync.skills.length) {
+    const label = { current: "pass", clean: "pass", reconciled: "changed", "needs-reconciliation": "unverified", conflict: "conflict" };
+    process.stdout.write(`${paint(skillSync.status === "conflict" ? "conflict" : "changed", `SKILL REGISTRY (${skillSync.status})`)}:\n`);
+    for (const item of skillSync.skills) process.stdout.write(`  ${item.id}: ${item.status}${item.vendors ? ` [${item.vendors.join(", ")}]` : ""}${item.error ? ` — ${item.error}` : ""}\n`);
+    process.stdout.write("\n");
+  } else if (skillSync && ["incompatible", "coverage-unresolved", "pending-transaction"].includes(skillSync.status)) {
+    process.stdout.write(`${paint("conflict", `SKILL REGISTRY (${skillSync.status})`)}: ${skillSync.error || "resolve before installed skills can be trusted"}\n\n`);
+  }
 
   if (apply) {
     process.stdout.write(`Applied ${applied.length} file(s); pruned ${pruned.length}.\n`);

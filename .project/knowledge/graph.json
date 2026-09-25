@@ -1,16 +1,160 @@
 {
-  "generated": "2026-09-21",
+  "generated": "2026-09-25",
   "stats": {
-    "total": 0,
+    "total": 4,
     "decisions": 0,
-    "patterns": 0,
+    "patterns": 3,
     "entities": 0,
-    "issues": 0,
-    "edges": 0,
+    "issues": 1,
+    "edges": 4,
     "brokenLinks": 0,
     "orphans": 0
   },
-  "nodes": [],
-  "edges": [],
-  "tagIndex": {}
+  "nodes": [
+    {
+      "id": "dual-hash-tracking-for-transformed-content",
+      "type": "pattern",
+      "title": "Pattern: Dual-hash tracking for content that gets transformed after fetch",
+      "tags": [
+        "ownership",
+        "formatting",
+        "hashing",
+        "transactions"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "subprocess-revalidation-against-on-disk-code",
+        "resolve-config-only-from-trusted-root"
+      ],
+      "file": ".project/knowledge/patterns/dual-hash-tracking-for-transformed-content.md"
+    },
+    {
+      "id": "macos-tmpdir-realpath-alias-breaks-path-assertions",
+      "type": "issue",
+      "title": "Issue: macOS resolves `os.tmpdir()` through a `/private/var` alias, breaking exact-path assertions in tests",
+      "tags": [
+        "testing",
+        "macos",
+        "filesystem",
+        "node"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "low",
+      "resolved": "true",
+      "source": "portable-skill-installation",
+      "related": [],
+      "file": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md"
+    },
+    {
+      "id": "resolve-config-only-from-trusted-root",
+      "type": "pattern",
+      "title": "Pattern: When invoking a tool over untrusted content, resolve its config only from a trusted root",
+      "tags": [
+        "security",
+        "subprocess",
+        "untrusted-content"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "dual-hash-tracking-for-transformed-content"
+      ],
+      "file": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md"
+    },
+    {
+      "id": "subprocess-revalidation-against-on-disk-code",
+      "type": "pattern",
+      "title": "Pattern: Re-validate a just-synced contract as a subprocess, not an in-process require",
+      "tags": [
+        "sync",
+        "migration",
+        "schema-versioning",
+        "subprocess"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-installation",
+      "related": [
+        "dual-hash-tracking-for-transformed-content"
+      ],
+      "file": ".project/knowledge/patterns/subprocess-revalidation-against-on-disk-code.md"
+    }
+  ],
+  "edges": [
+    {
+      "from": "dual-hash-tracking-for-transformed-content",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "dual-hash-tracking-for-transformed-content",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "resolve-config-only-from-trusted-root",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "subprocess-revalidation-against-on-disk-code",
+      "to": "dual-hash-tracking-for-transformed-content"
+    }
+  ],
+  "tagIndex": {
+    "ownership": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "formatting": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "hashing": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "transactions": [
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "security": [
+      "resolve-config-only-from-trusted-root"
+    ],
+    "subprocess": [
+      "resolve-config-only-from-trusted-root",
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "untrusted-content": [
+      "resolve-config-only-from-trusted-root"
+    ],
+    "sync": [
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "migration": [
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "schema-versioning": [
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "testing": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "macos": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "filesystem": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "node": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ]
+  }
 }

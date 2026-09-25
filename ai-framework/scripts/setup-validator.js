@@ -4,6 +4,7 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { cursorMirrors } = require("./skill-vendors");
 
 const root = process.cwd();
 const json = process.argv.includes("--json");
@@ -102,8 +103,14 @@ async function checkScaffold() {
     record("info", ".project/rules", rules.length > 0 ? `${rules.length} stack-specific companion rule(s) generated` : "no stack-specific rules generated; valid when none apply");
   } catch { record("fail", ".project/rules", "missing"); }
 }
+// Every canonical skill and agent needs a Cursor copy; registry-managed skills carry their own
+// Cursor adapter and are validated by the doctor instead.
 async function checkCursorMirrors() {
-  await Promise.all([requireFile(".cursor/agents/code-reviewer.md"), requireFile(".cursor/skills/shape/SKILL.md")]);
+  let report;
+  try { report = cursorMirrors(root); } catch (error) { record("fail", ".cursor", error.message); return; }
+  for (const file of report.created) record("fail", file, "missing Cursor mirror; run node ai-framework/scripts/skill-vendors.js cursor-mirrors --apply");
+  for (const file of report.differs) record("warn", file, "differs from its canonical .claude file; refresh it unless the difference is a deliberate local customization");
+  if (!report.created.length) record("pass", ".cursor", `${report.current + report.differs.length} canonical skill/agent mirror file(s) present`);
 }
 async function checkWorkflowDoctor() {
   const result = await run(process.execPath, ["ai-framework/scripts/workflow-doctor.js", "--json"]);

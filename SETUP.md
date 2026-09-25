@@ -66,7 +66,9 @@ if a harness requires them.
 - `ai-workflow-portable/.opencode/{opencode.json,commands/,agents/}` → `<root>/.opencode/`
 - `ai-workflow-portable/.codex/` → `<root>/.codex/` and `ai-workflow-portable/.agents/` → `<root>/.agents/`
 - `.claude/agents/*.md` → `<root>/.cursor/agents/` and `.claude/skills/*/` → `<root>/.cursor/skills/`
-  *(Cursor uses the same agent and skill format; create these mirrors during setup.)*
+  *(Cursor uses the same agent and skill format; after copying the rest, run
+  `node ai-framework/scripts/skill-vendors.js cursor-mirrors` to preview and add `--apply` to
+  create the missing mirrors. It is safe to rerun and never overwrites an existing mirror.)*
 
 **Every one of these is the "first run" artifact for its vendor** — the file that vendor's tool
 auto-reads at session start, which is what lets it detect that `.project/` doesn't exist yet and
@@ -327,8 +329,9 @@ Confirm the install works end-to-end:
    `.claude/skills/`; OpenCode loads `/shape` from `.opencode/commands/` and can dispatch its
    `.opencode/agents/`; Codex exposes the `shape` skill from `.agents/skills/` and its
    `.codex/agents/`; Cursor discovers the mirrored `.cursor/skills/` and `.cursor/agents/`.
-   Verify directly in each harness that is available locally; otherwise report its files as
-   installed but untested.
+   Each also exposes `add-skill` for installing external skills (see
+   `ai-framework/integrations/skills.md`). Verify directly in each harness that is available
+   locally; otherwise report its files as installed but untested.
 3. **Knowledge graph is live:** run `node ai-framework/scripts/graphify.js --check`. It must
    exit clean (status `CLEAN` or `OK WITH WARNINGS`, not `NEEDS ATTENTION`) and confirm
    `.project/knowledge/graph.json` and `.project/knowledge/index.md` exist — this is what lets

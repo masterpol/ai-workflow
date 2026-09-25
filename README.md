@@ -122,9 +122,10 @@ the canonical file itself declares, and checks that both the OpenCode and Codex 
 load the canonical file (or, for a script-backed skill like `workflow-doctor` itself, the script
 it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
 scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
-Checks run concurrently and print color-coded progress as each completes. It does not validate
-Cursor mirrors (generated fresh at install time, not shipped in the bundle) or installed hook
-wiring in a target project's `.claude/settings.json`.
+Checks run concurrently and print color-coded progress as each completes. Skills installed with
+`add-skill` are recognized from `.project/skills/registry.json` and checked for ownership, vendor
+coverage and activation instead of canonical mirror rules. It does not validate Cursor mirrors
+(the setup validator does) or installed hook wiring in a target project's `.claude/settings.json`.
 
 - `--fix` restores missing template files and the generated `_followups.md` backlog only when a
   non-symlink `.project/` directory already exists. Run it only after approving the repair; it
@@ -142,7 +143,7 @@ or the knowledge graph — nothing needs manual registration for the doctor to p
 After `/setup` completes in a target project, run
 `node ai-framework/scripts/setup-validator.js`. It is read-only and verifies the generated
 `.project` context and scaffold, filled project specifics, full `CLAUDE.md` mirror, knowledge
-graph, and Cursor mirrors, then runs the workflow doctor as a prerequisite. A missing `.project`
+graph, and a Cursor mirror for every canonical skill and agent, then runs the workflow doctor as a prerequisite. A missing `.project`
 in this portable bundle is expected; it becomes a setup failure only when run in a target project.
 Use `--json` for automation or `--no-color` for plain text. Repair failures by re-running `/setup`
 through its confirmation gates, rather than hand-editing generated artifacts.
@@ -193,7 +194,12 @@ SETUP.md           The AI-followable install guide (start here)
 ```
 
 `.cursor/{agents,skills}/` aren't shipped in the bundle — `SETUP.md` generates them at install
-time as mirrors of `.claude/agents/` and `.claude/skills/`, since Cursor uses the same format.
+time as mirrors of `.claude/agents/` and `.claude/skills/`, since Cursor uses the same format
+(`node ai-framework/scripts/skill-vendors.js cursor-mirrors --apply` creates missing ones).
+
+External skills (for example from skills.sh) are added with `/add-skill`, which installs one
+verified skill for every vendor in the project with an explicit scope and workflow phases. See
+`ai-framework/integrations/skills.md`.
 
 ## One source, every vendor
 
