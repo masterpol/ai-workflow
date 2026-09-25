@@ -42,10 +42,24 @@ function loadModes(root) {
   return value;
 }
 
+// A phase invocation's arguments are free-form text (e.g. "caveman=lite fix the login bug"),
+// not a parsed flag set — a caller cannot reliably hand-extract just the mode token before
+// calling resolveMode without duplicating this logic per call site (found by literally trying
+// it: `--arg "caveman=lite do the build scope"` fails validation as-is, even though the intent
+// is unambiguous). Extracting it here, once, means every phase file's instruction can just pass
+// its raw argument text through unmodified. No `caveman=` mention at all is not an error — it
+// just means "no invocation override," falling through to instance/bundle defaults; a `caveman=`
+// mention with an unrecognized value IS an error — that is a real typo, not silence to swallow.
+function extractInvocationArg(argumentsText) {
+  const match = typeof argumentsText === "string" ? argumentsText.match(/\bcaveman=(\S+)/i) : null;
+  return match ? match[1].toLowerCase() : undefined;
+}
+
 // invocationArg is scoped to this one call (and whatever it dispatches) and is never persisted;
 // only an explicit modes.json edit (caveman.enabled/default/phases) persists across invocations.
-function resolveMode(root, { phase, invocationArg } = {}) {
+function resolveMode(root, { phase, invocationArg, argumentsText } = {}) {
   if (!PHASES.has(phase)) throw new Error(`Unknown phase: ${phase}`);
+  if (invocationArg === undefined) invocationArg = extractInvocationArg(argumentsText);
   if (invocationArg !== undefined) {
     if (invocationArg !== "off" && !MODES.has(invocationArg)) throw new Error(`Choose --arg explicitly from ${[...MODES, "off"].join(",")}`);
     return invocationArg;
@@ -105,10 +119,12 @@ function cli(argv) {
     else if (arg === "--root" && rest[index + 1]) options.root = rest[++index];
     else if (arg === "--phase" && rest[index + 1]) options.phase = rest[++index];
     else if (arg === "--arg" && rest[index + 1]) options.arg = rest[++index];
+    else if (arg === "--args-text" && rest[index + 1] !== undefined) options.argsText = rest[++index];
     else throw new Error(`Unknown option: ${arg}`);
   }
   if (action === "resolve-mode") {
-    const mode = resolveMode(options.root, { phase: options.phase, invocationArg: options.arg });
+    if (options.arg !== undefined && options.argsText !== undefined) throw new Error("Pass --arg (an exact mode) or --args-text (free-form invocation text), not both");
+    const mode = resolveMode(options.root, { phase: options.phase, invocationArg: options.arg, argumentsText: options.argsText });
     return options.json ? JSON.stringify({ phase: options.phase, mode }, null, 2) : mode;
   }
   if (action === "report") {
@@ -118,10 +134,10 @@ function cli(argv) {
     if (result.registryError) lines.push(`registry: ${result.registryError}`);
     return lines.join("\n");
   }
-  throw new Error("Usage: node ai-framework/scripts/skill-defaults.js <resolve-mode --phase P [--arg V] | report> [--root /absolute/project] [--json]");
+  throw new Error("Usage: node ai-framework/scripts/skill-defaults.js <resolve-mode --phase P [--arg exact-mode | --args-text free-form-invocation-text] | report> [--root /absolute/project] [--json]");
 }
 
-module.exports = { CATALOG, MODES, PHASES, resolveMode, report, loadModes };
+module.exports = { CATALOG, MODES, PHASES, resolveMode, report, loadModes, extractInvocationArg };
 
 if (require.main === module) {
   try {

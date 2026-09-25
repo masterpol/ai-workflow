@@ -5,7 +5,7 @@ const path = require("node:path");
 const { spawnSync } = require("node:child_process");
 const test = require("node:test");
 
-const { CATALOG, MODES, PHASES, resolveMode, report, loadModes } = require("./skill-defaults");
+const { CATALOG, MODES, PHASES, resolveMode, report, loadModes, extractInvocationArg } = require("./skill-defaults");
 
 const BUNDLE = path.resolve(__dirname, "../..");
 
@@ -25,6 +25,26 @@ test("the catalog's caveman mode list matches the hardcoded MODES set exactly", 
   assert.deepEqual(new Set(caveman.modes), MODES);
   assert.equal(caveman.defaultMode, "full");
   assert.ok(MODES.has(caveman.defaultMode));
+});
+
+test("a caveman=<mode> token embedded in real free-form invocation text is extracted correctly", () => {
+  assert.equal(extractInvocationArg("caveman=lite do the build scope"), "lite");
+  assert.equal(extractInvocationArg("fix the login bug, also caveman=ultra please"), "ultra");
+  assert.equal(extractInvocationArg("CAVEMAN=Off"), "off", "case-insensitive on both the key and the value");
+  assert.equal(extractInvocationArg("portable-skill-defaults D1 (plan approved)"), undefined, "no caveman= mention at all is not an error, just absent");
+  assert.equal(extractInvocationArg(""), undefined);
+  assert.equal(extractInvocationArg(undefined), undefined);
+  assert.equal(extractInvocationArg(42), undefined, "non-string input never throws");
+});
+
+test("resolveMode's --args-text path matches the exact scenario that broke the original --arg $ARGUMENT design", (t) => {
+  const root = fixture(t);
+  // Before the fix, passing the raw, unparsed invocation text directly as an exact mode value
+  // failed validation the moment it carried anything beyond the bare mode word.
+  assert.equal(resolveMode(root, { phase: "build", argumentsText: "caveman=lite do the build scope" }), "lite");
+  assert.equal(resolveMode(root, { phase: "build", argumentsText: "portable-skill-defaults D1 (plan approved)" }), "full", "falls through to bundle default when nothing mentions caveman");
+  assert.throws(() => resolveMode(root, { phase: "build", argumentsText: "caveman=turbo" }), /Choose --arg explicitly/, "a real typo after caveman= is still rejected loudly, not silently ignored");
+  assert.equal(resolveMode(root, { phase: "build", invocationArg: "ultra", argumentsText: "caveman=lite ignored because invocationArg wins" }), "ultra", "an explicit invocationArg always takes precedence over argumentsText extraction");
 });
 
 test("every mode plus off resolves, and an unknown mode is rejected", (t) => {
@@ -137,6 +157,20 @@ test("CLI resolve-mode and report work end to end, including --json", (t) => {
   const unknown = spawnSync(process.execPath, [script, "bogus"], { encoding: "utf8" });
   assert.equal(unknown.status, 1);
   assert.match(unknown.stderr, /Usage:/);
+});
+
+test("CLI --args-text resolves a real free-form phase invocation the way every canonical phase file actually calls it", (t) => {
+  const root = fixture(t);
+  const script = path.join(__dirname, "skill-defaults.js");
+  const embedded = spawnSync(process.execPath, [script, "resolve-mode", "--phase", "build", "--root", root, "--args-text", "caveman=lite do the build scope"], { encoding: "utf8" });
+  assert.equal(embedded.status, 0);
+  assert.equal(embedded.stdout.trim(), "lite");
+  const none = spawnSync(process.execPath, [script, "resolve-mode", "--phase", "build", "--root", root, "--args-text", "portable-skill-defaults D1 (plan approved)"], { encoding: "utf8" });
+  assert.equal(none.status, 0);
+  assert.equal(none.stdout.trim(), "full");
+  const both = spawnSync(process.execPath, [script, "resolve-mode", "--phase", "build", "--root", root, "--arg", "lite", "--args-text", "caveman=ultra"], { encoding: "utf8" });
+  assert.equal(both.status, 1);
+  assert.match(both.stderr, /not both/);
 });
 
 test("every canonical phase name from the pitch is accepted", () => {

@@ -1,12 +1,12 @@
 {
   "generated": "2026-09-25",
   "stats": {
-    "total": 5,
+    "total": 6,
     "decisions": 0,
     "patterns": 4,
     "entities": 0,
-    "issues": 1,
-    "edges": 6,
+    "issues": 2,
+    "edges": 8,
     "brokenLinks": 0,
     "orphans": 0
   },
@@ -53,6 +53,26 @@
       "file": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md"
     },
     {
+      "id": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+      "type": "issue",
+      "title": "Issue: A prose skill instruction referenced a CLI flag as if invocation arguments were already a clean single value, but they are free-form text",
+      "tags": [
+        "prose-skill",
+        "cli-integration",
+        "testing-gap"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "portable-skill-defaults",
+      "related": [
+        "resolve-before-matching-a-protected-path-allowlist"
+      ],
+      "file": ".project/knowledge/issues/prose-instructions-must-specify-how-to-extract-from-free-form-arguments.md"
+    },
+    {
       "id": "resolve-before-matching-a-protected-path-allowlist",
       "type": "pattern",
       "title": "Pattern: Resolve the real path before matching it against a protected-directory list",
@@ -69,7 +89,8 @@
       "resolved": null,
       "source": "portable-skill-defaults",
       "related": [
-        "resolve-config-only-from-trusted-root"
+        "resolve-config-only-from-trusted-root",
+        "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
       ],
       "file": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md"
     },
@@ -130,6 +151,10 @@
       "to": "resolve-config-only-from-trusted-root"
     },
     {
+      "from": "resolve-before-matching-a-protected-path-allowlist",
+      "to": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    },
+    {
       "from": "resolve-config-only-from-trusted-root",
       "to": "dual-hash-tracking-for-transformed-content"
     },
@@ -140,6 +165,10 @@
     {
       "from": "subprocess-revalidation-against-on-disk-code",
       "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
     }
   ],
   "tagIndex": {
@@ -193,6 +222,15 @@
     ],
     "node": [
       "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    ],
+    "prose-skill": [
+      "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "cli-integration": [
+      "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "testing-gap": [
+      "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
     ]
   }
 }

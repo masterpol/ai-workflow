@@ -26,16 +26,31 @@ own logic. Only the canonical phase files carry the resolution paragraph — eve
 already says "load the canonical file and follow it exactly," so no mirror needed editing.
 
 ```sh
-node ai-framework/scripts/skill-defaults.js resolve-mode --phase build [--arg lite] [--root P] [--json]
+node ai-framework/scripts/skill-defaults.js resolve-mode --phase build --args-text "$ARGUMENTS" [--root P] [--json]
+node ai-framework/scripts/skill-defaults.js resolve-mode --phase build --arg lite [--root P] [--json]
 node ai-framework/scripts/skill-defaults.js report [--root P] [--json]
 ```
 
-Precedence: an explicit `--arg` (an invocation-scoped `caveman=<mode>` argument on that phase
-command) beats a per-phase instance override, which beats an instance default, which beats the
-bundle default (`full`). An invocation-scoped choice applies **only to that call and whatever it
-dispatches** — it is never written to disk. Only editing `.project/skills/modes.json` directly
-persists a choice across invocations, matching the pitch's "disabling persists only when
-explicitly requested."
+A phase invocation's arguments are free-form text, not a parsed flag set (e.g. a user typing
+`/build caveman=lite fix the login bug`) — a caller cannot reliably hand-extract just the mode
+token before calling this without duplicating the extraction logic. `--args-text` takes that raw
+text as-is: it extracts a `caveman=<mode>` token if one appears anywhere in it (case-insensitive)
+and ignores everything else; no `caveman=` mention at all is not an error, it just falls through
+to the instance/bundle default. A `caveman=<value>` mention with an unrecognized value **is**
+rejected loudly — that is a real typo, never silently ignored. `--arg` (an exact mode string, no
+extraction) remains available for programmatic callers that already have just the mode value —
+the two options are mutually exclusive. Every canonical phase file uses `--args-text
+"$ARGUMENTS"`, verified against the literal invocation shape this would actually receive (see
+`skill-defaults.test.js`'s `extractInvocationArg` coverage) — this was found and fixed after the
+first version shipped with a bare `--arg $ARGUMENT`, which fails validation the moment real
+invocation text carries anything beyond the mode word alone.
+
+Precedence: an explicit invocation-scoped `caveman=<mode>` argument on that phase command beats
+a per-phase instance override, which beats an instance default, which beats the bundle default
+(`full`). An invocation-scoped choice applies **only to that call and whatever it dispatches** —
+it is never written to disk. Only editing `.project/skills/modes.json` directly persists a
+choice across invocations, matching the pitch's "disabling persists only when explicitly
+requested."
 
 Instance state — `.project/skills/modes.json` (project scope only; this file lives under
 `.project/`, which is outside every `bundle-sync.js` `SYNCED_DIRS` entry, so it is never touched

@@ -4,7 +4,7 @@ type: pattern
 created: 2026-09-25
 updated: 2026-09-25
 tags: [security, filesystem, symlinks, case-sensitivity]
-related: [resolve-config-only-from-trusted-root]
+related: [resolve-config-only-from-trusted-root, prose-instructions-must-specify-how-to-extract-from-free-form-arguments]
 source: portable-skill-defaults
 ---
 

@@ -14,11 +14,13 @@ _none yet_
 ## Entities (0 entries)
 _none yet_
 
-## Issues (1 entries)
+## Issues (2 entries)
 - [macos-tmpdir-realpath-alias-breaks-path-assertions](issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md) — Issue: macOS resolves `os.tmpdir()` through a `/private/var` alias, breaking exact-path assertions in tests
+- [prose-instructions-must-specify-how-to-extract-from-free-form-arguments](issues/prose-instructions-must-specify-how-to-extract-from-free-form-arguments.md) — Issue: A prose skill instruction referenced a CLI flag as if invocation arguments were already a clean single value, but they are free-form text
 
 ## Tag Index
 - **case-sensitivity** (1) — resolve-before-matching-a-protected-path-allowlist
+- **cli-integration** (1) — prose-instructions-must-specify-how-to-extract-from-free-form-arguments
 - **filesystem** (2) — macos-tmpdir-realpath-alias-breaks-path-assertions, resolve-before-matching-a-protected-path-allowlist
 - **formatting** (1) — dual-hash-tracking-for-transformed-content
 - **hashing** (1) — dual-hash-tracking-for-transformed-content
@@ -26,12 +28,14 @@ _none yet_
 - **migration** (1) — subprocess-revalidation-against-on-disk-code
 - **node** (1) — macos-tmpdir-realpath-alias-breaks-path-assertions
 - **ownership** (1) — dual-hash-tracking-for-transformed-content
+- **prose-skill** (1) — prose-instructions-must-specify-how-to-extract-from-free-form-arguments
 - **schema-versioning** (1) — subprocess-revalidation-against-on-disk-code
 - **security** (2) — resolve-before-matching-a-protected-path-allowlist, resolve-config-only-from-trusted-root
 - **subprocess** (2) — resolve-config-only-from-trusted-root, subprocess-revalidation-against-on-disk-code
 - **symlinks** (1) — resolve-before-matching-a-protected-path-allowlist
 - **sync** (1) — subprocess-revalidation-against-on-disk-code
 - **testing** (1) — macos-tmpdir-realpath-alias-breaks-path-assertions
+- **testing-gap** (1) — prose-instructions-must-specify-how-to-extract-from-free-form-arguments
 - **transactions** (1) — dual-hash-tracking-for-transformed-content
 - **untrusted-content** (1) — resolve-config-only-from-trusted-root
 
@@ -42,9 +46,11 @@ graph LR
   dual-hash-tracking-for-transformed-content --> subprocess-revalidation-against-on-disk-code
   dual-hash-tracking-for-transformed-content --> resolve-config-only-from-trusted-root
   resolve-before-matching-a-protected-path-allowlist --> resolve-config-only-from-trusted-root
+  resolve-before-matching-a-protected-path-allowlist --> prose-instructions-must-specify-how-to-extract-from-free-form-arguments
   resolve-config-only-from-trusted-root --> dual-hash-tracking-for-transformed-content
   resolve-config-only-from-trusted-root --> resolve-before-matching-a-protected-path-allowlist
   subprocess-revalidation-against-on-disk-code --> dual-hash-tracking-for-transformed-content
+  prose-instructions-must-specify-how-to-extract-from-free-form-arguments --> resolve-before-matching-a-protected-path-allowlist
 ```
 
 ## Traversal
