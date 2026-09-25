@@ -61,7 +61,7 @@ Harness mappings and role assignments: `ai-framework/integrations/harnesses.md`.
 
 | Profile | Claude Code | OpenCode | Codex |
 |---|---|---|---|
-| `fast` | Claude Haiku | `opencode/mimo-v2.5-free` | GPT-5.6 Luna or Terra |
+| `fast` | Claude Haiku | `opencode/space-bunny-free` | GPT-5.6 Luna or Terra |
 | `standard` | Claude Sonnet | `openai/gpt-5.6-terra`, high reasoning | GPT-5.6, medium/high reasoning |
 | `deep` | Claude Opus | `openai/gpt-5.6-terra`, xhigh reasoning | GPT-5.6, high/xhigh reasoning |
 
@@ -73,7 +73,7 @@ OpenCode's routes deliberately avoid Anthropic for now — some installations on
 OpenAI/OpenCode Zen connected, and a route through an unconnected provider errors rather than
 falling back. The free route is confined to bounded, mechanical fast roles and non-sensitive
 `/ship` reconciliation. Free endpoints can retain prompts or use them for service improvement,
-so replace `opencode/mimo-v2.5-free` with `openai/gpt-5.6-luna` in every fast adapter before
+so replace `opencode/space-bunny-free` with `openai/gpt-5.6-luna` in every fast adapter before
 using it with confidential source or data. There is no silent fallback: connect the required
 providers in OpenCode first, and let a missing configured model fail rather than downgrading a
 security or architecture task.

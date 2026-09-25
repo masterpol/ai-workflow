@@ -23,3 +23,16 @@
   being partially trusted. Real projects using quoted families or `var(--font-x)` get the fallback font.
   This is the most likely user-visible cost of the plan's strict grammar.
 - **VERSION/CHANGELOG still not touched** — bumped at commit time via the changelog script.
+
+## Audit cycle 1 (scope changes made while fixing)
+- **`ai-framework/scripts/pitch-compress.js` was modified**, outside the T1/T2 file lists: `readText` now
+  treats a symlink or non-regular file as absent and refuses files over 4 MB; `classify` and
+  `listPitchSlugs` no longer follow a symlinked `SHIPPED.md` or pitches directory. `/state` reuses
+  `inventory()`, so the untrusted-tree hardening had to live there. Behavior for ordinary files is
+  unchanged (pitch-compress and pitch-archive suites pass unmodified).
+- **`/state` runs the bundle's own `skill-sync.js`, not the target project's.** A project checkout that
+  is not itself a bundle install (no `.project/skills/registry.json` and no sync marker) now reports
+  partial-sync as `unavailable` instead of running anything.
+- **Contrast pairs unchanged.** UX suggested adding `--border` on `--bg` at 3:1; rejected because real
+  shadcn themes fail it and would all fall back. The attention outline uses `--fg` instead.
+- **Extra scope: ~40 tests** beyond the plan's exit criteria, all for audit findings.

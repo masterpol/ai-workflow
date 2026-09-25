@@ -17,8 +17,19 @@ const SLUG = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
 
 function full(root, relative) { return path.join(root, relative); }
 
+const MAX_TEXT_BYTES = 4 * 1024 * 1024;
+// Pitch records are read from a project tree that may not be trusted (/state reads them too): a
+// symlink, FIFO or directory standing in for a file is treated as absent instead of followed or
+// blocked on, and an absurdly large file is refused loudly rather than parsed.
 function readText(file) {
-  try { return fs.readFileSync(file, "utf8"); } catch (error) { if (error.code === "ENOENT") return null; throw error; }
+  let stat;
+  try { stat = fs.lstatSync(file); } catch (error) { if (error.code === "ENOENT") return null; throw error; }
+  if (stat.isSymbolicLink() || !stat.isFile()) return null;
+  if (stat.size > MAX_TEXT_BYTES) throw new Error(`${path.basename(file)} is larger than ${MAX_TEXT_BYTES / 1024 / 1024} MB`);
+  return fs.readFileSync(file, "utf8");
+}
+function isRegularFile(file) {
+  try { const stat = fs.lstatSync(file); return stat.isFile() && !stat.isSymbolicLink(); } catch { return false; }
 }
 
 function markdownHeadings(text, level) {
@@ -61,7 +72,9 @@ function doneWorkSlugs(root) {
 
 function listPitchSlugs(root) {
   const dir = full(root, PITCHES_DIR);
-  if (!fs.existsSync(dir)) return [];
+  let stat;
+  try { stat = fs.lstatSync(dir); } catch { return []; }
+  if (stat.isSymbolicLink() || !stat.isDirectory()) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory() && !EXCLUDED.has(entry.name)).map((entry) => entry.name).sort();
 }
 
@@ -78,8 +91,9 @@ function hillOpenCount(text) {
 
 function classify(root, slug) {
   const dir = pitchDir(root, slug);
-  if (fs.existsSync(path.join(dir, "SHIPPED.md"))) return { slug, eligible: true, reason: "shipped" };
-  const hill = readText(path.join(dir, "hill.md"));
+  if (isRegularFile(path.join(dir, "SHIPPED.md"))) return { slug, eligible: true, reason: "shipped" };
+  let hill;
+  try { hill = readText(path.join(dir, "hill.md")); } catch (error) { return { slug, eligible: false, reason: `hill.md cannot be read (${error.message})` }; }
   if (hill) {
     const openCount = hillOpenCount(hill);
     if (openCount > 0) return { slug, eligible: false, reason: `active: hill shows ${openCount} scope row(s) not done` };
@@ -220,6 +234,11 @@ function writeDoneWork(root, slug, summaryText, options = {}) {
   checkSlug(slug);
   if (typeof summaryText !== "string" || !summaryText.trim()) throw new Error("A nonempty summary is required");
   const file = full(root, DONE_WORK);
+  // readText treats a symlink or non-regular file as absent; writing "fresh" over one would follow the
+  // link and destroy its target, so refuse instead.
+  let occupied = null;
+  try { occupied = fs.lstatSync(file); } catch (error) { if (error.code !== "ENOENT") throw error; }
+  if (occupied && (occupied.isSymbolicLink() || !occupied.isFile())) throw new Error(`Refusing to write ${DONE_WORK}: it is a symlink or not a regular file`);
   const existingRaw = readText(file);
   const existing = existingRaw ?? "# Done Work\n";
   const lines = existing.split("\n");
@@ -240,7 +259,11 @@ function writeDoneWork(root, slug, summaryText, options = {}) {
   }
   updated = `${updated.replace(/\n{3,}/g, "\n\n").trimEnd()}\n`;
   const changed = existingRaw !== updated;
-  if (options.apply) fs.writeFileSync(file, updated);
+  if (options.apply) {
+    // Temp file + rename: a reader never sees a partial file, and rename replaces a path rather than following it.
+    const temporary = `${file}.tmp-${process.pid}-${Date.now()}`;
+    try { fs.writeFileSync(temporary, updated, { flag: "wx" }); fs.renameSync(temporary, file); } finally { fs.rmSync(temporary, { force: true }); }
+  }
   return { slug, changed, content: updated };
 }
 

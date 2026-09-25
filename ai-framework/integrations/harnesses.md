@@ -8,7 +8,7 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode/mimo-v2.5-free` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode/space-bunny-free` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
 | `standard` | Implementation, security, UX, test reasoning | Sonnet | `openai/gpt-5.6-terra` | `gpt-5.6` at medium or high effort |
 | `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `openai/gpt-5.6-terra` at xhigh effort | `gpt-5.6` at high or xhigh effort |
 
@@ -32,7 +32,7 @@ Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `mod
 
 The included OpenCode routes are explicit and, for now, deliberately avoid Anthropic entirely —
 some OpenCode installations only have OpenAI/OpenCode Zen connected, and a route through an
-unconnected provider errors instead of falling back: fast roles use `opencode/mimo-v2.5-free`
+unconnected provider errors instead of falling back: fast roles use `opencode/space-bunny-free`
 (the OpenCode Zen free tier); standard and deep roles use `openai/gpt-5.6-terra` (deep at
 `xhigh` reasoning via the global provider default in `.opencode/opencode.json`, standard at the
 `high` default, both explicit per-command where they need to differ from that default).

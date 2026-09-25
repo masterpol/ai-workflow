@@ -36,7 +36,7 @@ const COLOR_TOKENS = ["background", "foreground", "primary", "primaryForeground"
 const CSS_NAMES = { background: "background", foreground: "foreground", primary: "primary", primaryForeground: "primary-foreground", muted: "muted", mutedForeground: "muted-foreground", border: "border", radius: "radius", fontSans: "font-sans", fontMono: "font-mono" };
 
 // shadcn names (--background) and Tailwind v4 @theme aliases (--color-background) map to the same token.
-const TOKEN_BY_NAME = {};
+const TOKEN_BY_NAME = Object.create(null);
 for (const [token, cssName] of Object.entries(CSS_NAMES)) {
   TOKEN_BY_NAME[cssName] = token;
   if (COLOR_TOKENS.includes(token)) TOKEN_BY_NAME[`color-${cssName}`] = token;
@@ -162,11 +162,13 @@ function modeOf(chain) {
 function cssFiles(root) {
   const files = [];
   const skipped = [];
+  let visited = 0;
   const walk = (relative, depth) => {
-    if (depth > MAX_DEPTH) return;
+    if (depth > MAX_DEPTH || visited > 20000) return;
     let entries;
     try { entries = fs.readdirSync(path.join(root, relative), { withFileTypes: true }); } catch { return; }
     for (const entry of entries) {
+      if (++visited > 20000) return;
       if (entry.isSymbolicLink()) continue;
       const child = relative ? `${relative}/${entry.name}` : entry.name;
       if (entry.isDirectory()) { if (!SKIP_DIRS.has(entry.name)) walk(child, depth + 1); } else if (/\.css$/i.test(entry.name)) files.push(child);
@@ -290,7 +292,8 @@ function themeChanges(root, theme) {
   let recorded;
   try {
     const file = path.join(fs.realpathSync(root), THEME_FILE);
-    if (fs.lstatSync(file).isSymbolicLink()) return { recorded: false, changed: [] };
+    const stat = fs.lstatSync(file);
+    if (stat.isSymbolicLink() || !stat.isFile() || stat.size > 256 * 1024) return { recorded: false, changed: [] };
     recorded = JSON.parse(fs.readFileSync(file, "utf8"));
   } catch { return { recorded: false, changed: [] }; }
   const before = new Map((Array.isArray(recorded.sources) ? recorded.sources : []).map((item) => [String(item?.path), item?.sha256]));

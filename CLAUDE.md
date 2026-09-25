@@ -70,33 +70,33 @@ persisted to project files stay normal prose.
 
 ### Product
 
-La Salle Norandino is defining a single-domain, multi-site public platform for district, country,
-territory, and school contexts. The active shaped pitch is
-`.project/pitches/district-multisite-foundation/`.
+This repository is the `ai-workflow-portable` bundle itself: a portable, tool-agnostic development
+workflow (phases, subagents, rules, a knowledge graph, hooks and scripts) that is copied into other
+projects. It is not an application. Application projects built with it, including La Salle
+Norandino, live in their own repositories (`../lasallenorandi`) and are not tracked here.
 
-### Architecture Direction
+### Architecture
 
-- Tenant hierarchy: `district -> country -> territory (optional) -> school`.
-- Users and administrators must be restricted to their assigned organisation node and permitted
-  descendants; tenant checks are server-enforced.
-- Canonical path-based sites, configurable but controlled landing sections, scoped articles/blog,
-  media/documents, and migration with redirects are in scope.
-- Data provider, authentication, CMS/editor, hosting, infrastructure, and operations are
-  intentionally undecided pending discovery.
+- Canonical skill playbooks in `.claude/skills/*/SKILL.md` and role prompts in `.claude/agents/*.md`;
+  native adapters for the other vendors in `.agents/`, `.opencode/`, `.cursor/` and `.codex/`.
+- `ai-framework/` holds `workflow/` (phase docs), `rules/` (stack-agnostic rules), `hooks/` (wiring
+  template and hook scripts), `scripts/` (Node tools with tests), `integrations/` (harness and skill
+  docs) and `templates/project/` (the scaffold copied into projects).
+- `.project/` holds this checkout's own records: pitches, knowledge graph, runs and status.
+  `.project/metrics/` is Git-ignored local data.
 
-### Technology Direction
+### Technology
 
-- Proposed only: TypeScript, TanStack Start and justified TanStack packages, Tailwind, Vite, and
-  Ox tooling as needed.
-- No application dependencies, package manager, scripts, or infrastructure have been configured.
+- Node.js CommonJS scripts with no package manager, no dependencies and no build step. Tests run
+  with `node --test`.
+- Supported hosts: Claude Code, OpenCode, Codex and Cursor.
 
 ### Project Records
 
-- Public-site evidence: `.project/analysis/2026-09-21-current-site-validation.md`.
-- Requirements: `.project/requirements/features/multisite-platform.md`.
-- Scope and effort estimate: `.project/pitches/district-multisite-foundation/pitch.md`.
-- First discovery scope: organisation/source inventory, access governance, migration design, then a
-  technical proposition. Do not begin implementation until the pitch has a recorded bet decision.
+- Pitches: `.project/pitches/`; index: `.project/status.md`; backlog: `.project/pitches/_followups.md`.
+- Version history: `CHANGELOG.md` and `VERSION`, written by `ai-framework/scripts/changelog.js`.
+- Anything specific to an application built with this workflow belongs in that application's
+  repository, not here.
 
 ### Verification
 

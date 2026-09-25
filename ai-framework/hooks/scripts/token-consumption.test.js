@@ -537,3 +537,15 @@ test("agent model notes keep the newest entries even when agent ids are all digi
     assert.equal(notes.includes("agent:100"), false, "the oldest note was evicted");
   });
 });
+
+test("reversing costs in a different order than they were added does not trip on float residue", () => {
+  // 0.1 + 0.7 - 0.7 - 0.1 is -2.8e-17 in IEEE doubles: a real reversal must not read as an underflow.
+  const snapshot = blankSnapshot();
+  const first = normalizedEvent(message("f1", { costUsd: 0.1 }));
+  const second = normalizedEvent(message("f2", { costUsd: 0.7 }));
+  applyToSnapshot(snapshot, first, 1);
+  applyToSnapshot(snapshot, second, 1);
+  applyToSnapshot(snapshot, second, -1);
+  assert.doesNotThrow(() => applyToSnapshot(snapshot, first, -1));
+  assert.deepEqual(Object.keys(snapshot.dimensions.models), []);
+});

@@ -177,3 +177,20 @@ test("recordEvent writes a report with the usage headline and every table headin
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+test("an unsafe agent id is never shown as a label in either report", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-report-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "s", agent_id: "[click](https://evil.example/x)" } }, root);
+    for (const name of ["token-consumption.md", "token-consumption.html"]) {
+      const text = fs.readFileSync(path.join(root, ".project", "metrics", name), "utf8");
+      assert.doesNotMatch(text, /evil\.example/, `${name} does not render the id`);
+      assert.match(text, /\(other\)/);
+    }
+    recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "s2", agent_id: "a511f7310cb420ed5" } }, root);
+    assert.match(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.md"), "utf8"), /\| claude \| a511f7310cb420ed5 \|/, "a normal id is still shown");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});

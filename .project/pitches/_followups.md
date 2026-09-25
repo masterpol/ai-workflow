@@ -1,5 +1,22 @@
 # Followups
 
+## Candidate pitches (cooldown 2026-09-25, approved item by item)
+
+Not shaped yet; start any of them with `/shape <slug>`. The items stay below as the source text.
+
+| Candidate slug | Kind | Items bundled (headings below) |
+|---|---|---|
+| `independent-rereview-catch-up` | review only | Independent re-review of pitch-compaction; Independent security re-review of the metrics collector fixes; Deeper independent code review of /state |
+| `path-safety-hardening` | small build | TOCTOU ancestor-symlink race; commit-ledger writes through a symlinked .project/compaction |
+| `live-host-verification` | manual checklist per host | Verify the OpenCode effort and skill wiring; Confirm the new Claude Skill hook fires; Verify /state on Codex and Cursor |
+| `collector-robustness` | small build | Collector lock never reclaims a live or reused PID; Collector identity keys can collide |
+| `bundle-sync-marker-fix` | small build (standalone) | bundle-sync marker misclassifies un-applied unverified files as `local` |
+| `state-quoted-fonts` | small build (standalone) | Quoted font families fall back to the default font |
+
+**Promoted to do next, not a pitch:** run the first real `/pitch-compress` trial on a low-stakes pitch
+with the archive kept (item "First real-use trial of /pitch-compress"); fold the "Wire /state into
+/pitch-compress" decision into that trial.
+
 ## bundle-sync marker misclassifies un-applied unverified files as `local` on the next run
 
 Found 2026-09-25 during `portable-skill-installation` S3 manual verification (pre-existing,
@@ -46,6 +63,11 @@ archive kept) and record what the real content exposes that the fixtures did not
 The parent pitch wanted an automatic `/state` run after compaction; deliberately left out because
 the command does not exist yet.
 
+Update 2026-09-25, at the `project-state-report` ship: `/state` now exists. The `/pitch-compress`
+playbook names it as an explicit, human-chosen step after a removal (compacted pitches appear in the
+report from `done-work.md`). Still open: whether to call it automatically; decide after the first
+real compaction, and note that `/state` output is git-ignored, so an automatic run leaves no diff.
+
 ## Collector lock never reclaims a live or reused PID, and reclaim can remove a fresh lock
 
 Found 2026-09-24 in `metrics-report-dimensions` audit cycle 1 (security-reviewer, deferred
@@ -67,4 +89,57 @@ with `agent_id "X"` in one session collide. A second Codex `subagent-complete` w
 session and agent type but no agent id is dropped as a duplicate, so two real runs count once. Same
 family as `bare-prefix-match-crosses-entities`. Candidate fix: a JSON-encoded or length-prefixed
 identity, with a migration note because `recentEventKeys` and stored `identityKey`s use today's form.
+
+## Verify the OpenCode effort and skill wiring in a live session
+
+Raised 2026-09-25 at `metrics-report-dimensions` ship. The OpenCode plugin passes `variant` from
+`chat.message` as reasoning effort and counts `tool.execute.after` calls whose tool id is `skill`.
+Both were written against `@opencode-ai/plugin` 1.17.20 type definitions and tested with stubs only.
+Run one OpenCode session that uses a skill with a non-default variant and confirm the report shows
+that effort and that skill; if the tool id or field differs, fix the plugin. Until then the report
+shows `Unreported` for those fields on OpenCode, which is truthful.
+
+## Confirm the new Claude Skill hook fires in a fresh session
+
+Raised 2026-09-25 at the same ship. The `PostToolUse` `Skill` entry in `.claude/settings.json` was
+written from payload keys captured live, but the entry itself has not been observed running. Start a
+new Claude Code session, invoke any skill, and check that `skills.claude.<name>.uses` increments in
+`.project/metrics/token-consumption.json`.
+
+## Independent security re-review of the metrics collector fixes
+
+Raised 2026-09-25 at the same ship. The cycle 2 security re-review never returned (rate limit, then
+two stalls); the author ran the checks. Re-dispatch `security-reviewer` against
+`token-consumption.js`, `token-report.js` and `.opencode/plugins/token-consumption.js` and record the
+result as `audit-cycle-3.md`. Shipped without it by user decision.
+
+## Verify /state on Codex and Cursor in a running host
+
+Raised 2026-09-25 at the `project-state-report` ship. Claude Code (skill listed) and OpenCode
+(`opencode debug skill` returns `state`) were checked live. Codex has the `.agents/skills/state` pointer
+and Cursor a byte-identical mirror (43 current, 0 differ), but neither was run in a host. In each: invoke
+`/state`, confirm it runs `state-snapshot.js` then `state-render.js` and reports by fact status.
+
+## commit-ledger writes through a symlinked .project/compaction
+
+Raised 2026-09-25 by the cycle-3 security re-check. `pitch-compress.js commit-ledger` still uses
+`mkdirSync` + `writeFileSync` for `.project/compaction/ledgers/<slug>.json`, following a symlinked
+`compaction` or `ledgers` directory. Pre-existing and not reachable from `/state`; only through the
+human-approved compaction CLI. Give it the same lstat check and temp file + rename that
+`writeDoneWork` now has.
+
+## Deeper independent code review of /state, plus its HTML nits
+
+Raised 2026-09-25. The cycle-1 code review of `state-snapshot.js`/`state-theme.js`/`state-render.js`
+was shallow (three tool calls, one finding); security and UX were thorough. Re-dispatch `code-reviewer`
+with narrow slices. Bundle the UX nits that were not actioned: `lang="en"` is hard-coded although project
+text may be Spanish, timestamp not in `<time>`, nav tap-target size, repeated "—" cells read as noise,
+no `<meta name="color-scheme">`.
+
+## Quoted font families fall back to the default font
+
+Raised 2026-09-25. The strict theme grammar rejects any quote, so `'Inter', sans-serif` or
+`var(--font-inter)` in a project's CSS renders in the fallback font. If real projects hit this often,
+accept a quoted family only in the exact form `"[A-Za-z0-9 -]{1,40}"` and re-emit it from the validated
+name, and resolve one level of `var()` within the same file.
 

@@ -44,7 +44,7 @@ const colors = {
 // models (reasoning: true, 400k context, full none/low/medium/high/xhigh/max variants) — pick
 // whichever named variant you like, they're identical in capability, just don't use the bare id.
 const opencodeModels = {
-  fast: "opencode/mimo-v2.5-free",
+  fast: "opencode/space-bunny-free",
   standard: "openai/gpt-5.6-terra",
   deep: "openai/gpt-5.6-terra",
 };

@@ -417,3 +417,70 @@ test("the renderer and theme module load no network capability", () => {
     assert.ok(!/\bfetch\(|\beval\(|new Function/.test(source), file);
   }
 });
+
+test("audit fixes: one landmark per table, notes in their own column, readable keys, visible attention cue, summary and legend first", () => {
+  const root = project({
+    ".project/status.md": "# Status\n\n## Active pitches\n| Pitch | Hill |\n|---|---|\n| listed | x |\n",
+    ".project/pitches/listed/pitch.md": "# Pitch: listed\n\n**Appetite**: small-batch\n",
+    ".project/pitches/unlisted/pitch.md": "# Pitch: Unlisted title\n\n**Appetite**: small-batch\n",
+    "README.md": "# App\n\n**Bold** claim with `code` and a [link](http://evil.example/x).\n",
+  });
+  try {
+    run(SNAPSHOT_SCRIPT, root, "--apply", "--now", NOW);
+    const html = page(root, theme.discoverTheme(root), JSON.parse(fs.readFileSync(path.join(root, ".project/reports/state.json"), "utf8")));
+    assert.ok(!/role="region"/.test(html.replace(/<style>[\s\S]*<\/style>/, "")), "scroll wrappers are groups; only sections are landmarks");
+    assert.match(html, /<th scope="col">Notes<\/th>/);
+    assert.match(html, /<td>directory is not listed in \.project\/status\.md, the lifecycle authority<\/td>/);
+    assert.ok(!/listed<br><span class="sub">listed<\/span>/.test(html), "title equal to slug is not repeated");
+    assert.ok(/unlisted<br><span class="sub">Unlisted title<\/span>/.test(html));
+    assert.ok(!/<dt>[a-z]+[A-Z][A-Za-z]*<\/dt>/.test(html), "camelCase keys are humanized");
+    assert.match(html, /<p class="summary">\d+ observed/);
+    assert.ok(html.indexOf('id="legend"') < html.indexOf('id="workflow"'), "legend before the data");
+    assert.match(html, /td,th,a,code\{overflow-wrap:anywhere\}/);
+    assert.match(html, /\.status-stale[^{]*\{border:2px dashed var\(--fg\)\}/);
+    assert.match(html, /\.scroll tbody th\{position:sticky/);
+    assert.ok(!/\*\*|`|evil\.example/.test(html.replace(/<style>[\s\S]*<\/style>/, "")), "markdown and link targets do not leak into summaries");
+    assertOnlyKnownMarkup(html);
+  } finally { cleanup(root); }
+});
+
+test("theme scan is depth-bounded: a stylesheet 5 levels down is read, one 8 levels down is not", () => {
+  const shallow = project({ "a/b/c/d/e/theme.css": LIGHT_DARK_CSS });
+  const deep = project({ "a/b/c/d/e/f/g/h/theme.css": LIGHT_DARK_CSS });
+  try {
+    assert.equal(theme.discoverTheme(shallow).sources.length, 1);
+    assert.equal(theme.discoverTheme(deep).sources.length, 0);
+  } finally { cleanup(shallow, deep); }
+});
+
+test("terminal escapes from a hand-edited theme.json or a hostile CSS filename never reach the terminal raw", () => {
+  const root = project({ ".project/reports/theme.json": { sources: [{ path: "\u001b[2J\u001b]0;pwned\u0007FAKE", sha256: "x" }] } });
+  try {
+    run(SNAPSHOT_SCRIPT, root, "--apply");
+    const out = run(RENDER_SCRIPT, root).stdout;
+    assert.ok(!/[\u0000-\u0008\u000b-\u001f\u007f]/.test(out), JSON.stringify(out));
+    assert.match(out, /changed:/);
+  } finally { cleanup(root); }
+});
+
+test("an oversized recorded theme.json is ignored, and symlinked files in the CSS scan are never read", () => {
+  const root = project({ ".project/reports/theme.json": `{"sources":[],"pad":"${"x".repeat(300 * 1024)}"}` });
+  try { assert.deepEqual(theme.themeChanges(root, { sources: [{ path: "a.css", sha256: "y" }] }), { recorded: false, changed: [] }); } finally { cleanup(root); }
+});
+
+test("custom property names that are Object internals are not treated as tokens", () => {
+  const root = project({ "a.css": ":root{--constructor:zzz;--__proto__:zzz;--toString:zzz;--hasOwnProperty:zzz;}" });
+  try {
+    const found = theme.discoverTheme(root);
+    assert.equal(found.sources.length, 0);
+    assert.equal(found.mode, "fallback");
+  } finally { cleanup(root); }
+});
+
+test("secret-shaped names beyond .env are not linked", () => {
+  const root = project({ ".npmrc": "x", ".netrc": "x", "id_ed25519": "x", "keys/a.p12": "x", "docs/ok.md": "x" });
+  try {
+    for (const name of [".npmrc", ".netrc", "id_ed25519", "keys/a.p12"]) assert.equal(safeEvidencePath(root, name), false, name);
+    assert.equal(safeEvidencePath(root, "docs/ok.md"), true);
+  } finally { cleanup(root); }
+});

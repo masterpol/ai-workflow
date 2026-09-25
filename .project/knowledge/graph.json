@@ -1,12 +1,12 @@
 {
   "generated": "2026-09-25",
   "stats": {
-    "total": 10,
+    "total": 17,
     "decisions": 1,
-    "patterns": 5,
+    "patterns": 9,
     "entities": 0,
-    "issues": 4,
-    "edges": 15,
+    "issues": 7,
+    "edges": 35,
     "brokenLinks": 0,
     "orphans": 0
   },
@@ -32,6 +32,76 @@
         "bare-prefix-match-crosses-entities"
       ],
       "file": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md"
+    },
+    {
+      "id": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "type": "pattern",
+      "title": "Pattern: a read-only report over a project tree treats the tree as data, never as code",
+      "tags": [
+        "security",
+        "untrusted-input",
+        "reports",
+        "symlinks",
+        "redos"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "project-state-report",
+      "related": [
+        "subprocess-revalidation-against-on-disk-code",
+        "resolve-config-only-from-trusted-root",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "parse-untrusted-values-and-re-emit-them"
+      ],
+      "file": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md"
+    },
+    {
+      "id": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "type": "pattern",
+      "title": "Pattern: Allow-list untrusted labels at ingest, and again at the place they are rendered",
+      "tags": [
+        "security",
+        "untrusted-input",
+        "markdown",
+        "reports"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "metrics-report-dimensions",
+      "related": [
+        "resolve-config-only-from-trusted-root",
+        "a-gate-must-not-trust-its-own-author",
+        "async-agent-launch-hook-counted-as-completion"
+      ],
+      "file": ".project/knowledge/patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md"
+    },
+    {
+      "id": "async-agent-launch-hook-counted-as-completion",
+      "type": "issue",
+      "title": "Issue: A hook that fires at launch was counted as a completion, so async agents counted twice",
+      "tags": [
+        "hooks",
+        "claude-code",
+        "telemetry",
+        "double-counting"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "metrics-report-dimensions",
+      "related": [
+        "bare-prefix-match-crosses-entities",
+        "reversible-aggregates-store-their-routing"
+      ],
+      "file": ".project/knowledge/issues/async-agent-launch-hook-counted-as-completion.md"
     },
     {
       "id": "bare-prefix-match-crosses-entities",
@@ -98,6 +168,30 @@
       "file": ".project/knowledge/patterns/dual-hash-tracking-for-transformed-content.md"
     },
     {
+      "id": "hardening-a-shared-reader-made-its-writer-destructive",
+      "type": "issue",
+      "title": "Issue: making a shared reader treat a symlink as \"absent\" turned its writer into a data-destroyer",
+      "tags": [
+        "regression",
+        "symlinks",
+        "data-loss",
+        "shared-helpers",
+        "audit"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "project-state-report",
+      "related": [
+        "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/hardening-a-shared-reader-made-its-writer-destructive.md"
+    },
+    {
       "id": "installed-skill-wrappers-ship-as-orphans",
       "type": "issue",
       "title": "Issue: a skill installed in the source checkout ships to every synced project as a broken orphan",
@@ -137,6 +231,30 @@
       "source": "portable-skill-installation",
       "related": [],
       "file": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md"
+    },
+    {
+      "id": "parse-untrusted-values-and-re-emit-them",
+      "type": "pattern",
+      "title": "Pattern: parse an untrusted value against a grammar and re-emit it from the parsed numbers",
+      "tags": [
+        "security",
+        "untrusted-input",
+        "css",
+        "reports",
+        "injection"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "project-state-report",
+      "related": [
+        "allow-list-untrusted-labels-at-ingest-and-at-render",
+        "resolve-config-only-from-trusted-root",
+        "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+      ],
+      "file": ".project/knowledge/patterns/parse-untrusted-values-and-re-emit-them.md"
     },
     {
       "id": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
@@ -202,6 +320,51 @@
       "file": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md"
     },
     {
+      "id": "reversible-aggregates-store-their-routing",
+      "type": "pattern",
+      "title": "Pattern: When aggregates can be undone, store where each record was counted, and never clamp",
+      "tags": [
+        "aggregation",
+        "reversal",
+        "schema-versioning",
+        "migration"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "metrics-report-dimensions",
+      "related": [
+        "subprocess-revalidation-against-on-disk-code",
+        "dual-hash-tracking-for-transformed-content",
+        "async-agent-launch-hook-counted-as-completion"
+      ],
+      "file": ".project/knowledge/patterns/reversible-aggregates-store-their-routing.md"
+    },
+    {
+      "id": "reviewer-reports-contradicted-by-measurement",
+      "type": "issue",
+      "title": "Issue: a subagent's audit report contained numbers and names the code and the test run contradicted",
+      "tags": [
+        "audit",
+        "subagents",
+        "verification",
+        "process"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "project-state-report",
+      "related": [
+        "async-agent-launch-hook-counted-as-completion",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md"
+    },
+    {
       "id": "subprocess-revalidation-against-on-disk-code",
       "type": "pattern",
       "title": "Pattern: Re-validate a just-synced contract as a subprocess, not an in-process require",
@@ -241,12 +404,52 @@
       "to": "bare-prefix-match-crosses-entities"
     },
     {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "to": "parse-untrusted-values-and-re-emit-them"
+    },
+    {
+      "from": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
       "from": "dual-hash-tracking-for-transformed-content",
       "to": "subprocess-revalidation-against-on-disk-code"
     },
     {
       "from": "dual-hash-tracking-for-transformed-content",
       "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "parse-untrusted-values-and-re-emit-them",
+      "to": "allow-list-untrusted-labels-at-ingest-and-at-render"
+    },
+    {
+      "from": "parse-untrusted-values-and-re-emit-them",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
+      "from": "parse-untrusted-values-and-re-emit-them",
+      "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
     },
     {
       "from": "resolve-before-matching-a-protected-path-allowlist",
@@ -265,11 +468,43 @@
       "to": "resolve-before-matching-a-protected-path-allowlist"
     },
     {
+      "from": "reversible-aggregates-store-their-routing",
+      "to": "subprocess-revalidation-against-on-disk-code"
+    },
+    {
+      "from": "reversible-aggregates-store-their-routing",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "reversible-aggregates-store-their-routing",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
       "from": "subprocess-revalidation-against-on-disk-code",
       "to": "dual-hash-tracking-for-transformed-content"
     },
     {
+      "from": "async-agent-launch-hook-counted-as-completion",
+      "to": "bare-prefix-match-crosses-entities"
+    },
+    {
+      "from": "async-agent-launch-hook-counted-as-completion",
+      "to": "reversible-aggregates-store-their-routing"
+    },
+    {
       "from": "bare-prefix-match-crosses-entities",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "hardening-a-shared-reader-made-its-writer-destructive",
+      "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    },
+    {
+      "from": "hardening-a-shared-reader-made-its-writer-destructive",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "hardening-a-shared-reader-made-its-writer-destructive",
       "to": "a-gate-must-not-trust-its-own-author"
     },
     {
@@ -283,6 +518,14 @@
     {
       "from": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
       "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "reviewer-reports-contradicted-by-measurement",
+      "to": "async-agent-launch-hook-counted-as-completion"
+    },
+    {
+      "from": "reviewer-reports-contradicted-by-measurement",
+      "to": "a-gate-must-not-trust-its-own-author"
     }
   ],
   "tagIndex": {
@@ -310,6 +553,34 @@
     "gates": [
       "a-gate-must-not-trust-its-own-author"
     ],
+    "security": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them",
+      "resolve-before-matching-a-protected-path-allowlist",
+      "resolve-config-only-from-trusted-root"
+    ],
+    "untrusted-input": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "reports": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "symlinks": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "hardening-a-shared-reader-made-its-writer-destructive",
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "redos": [
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    ],
+    "markdown": [
+      "allow-list-untrusted-labels-at-ingest-and-at-render"
+    ],
     "ownership": [
       "dual-hash-tracking-for-transformed-content"
     ],
@@ -322,15 +593,14 @@
     "transactions": [
       "dual-hash-tracking-for-transformed-content"
     ],
-    "security": [
-      "resolve-before-matching-a-protected-path-allowlist",
-      "resolve-config-only-from-trusted-root"
+    "css": [
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "injection": [
+      "parse-untrusted-values-and-re-emit-them"
     ],
     "filesystem": [
       "macos-tmpdir-realpath-alias-breaks-path-assertions",
-      "resolve-before-matching-a-protected-path-allowlist"
-    ],
-    "symlinks": [
       "resolve-before-matching-a-protected-path-allowlist"
     ],
     "case-sensitivity": [
@@ -343,15 +613,35 @@
     "untrusted-content": [
       "resolve-config-only-from-trusted-root"
     ],
-    "sync": [
+    "aggregation": [
+      "reversible-aggregates-store-their-routing"
+    ],
+    "reversal": [
+      "reversible-aggregates-store-their-routing"
+    ],
+    "schema-versioning": [
+      "reversible-aggregates-store-their-routing",
       "subprocess-revalidation-against-on-disk-code"
     ],
     "migration": [
       "installed-skill-wrappers-ship-as-orphans",
+      "reversible-aggregates-store-their-routing",
       "subprocess-revalidation-against-on-disk-code"
     ],
-    "schema-versioning": [
+    "sync": [
       "subprocess-revalidation-against-on-disk-code"
+    ],
+    "hooks": [
+      "async-agent-launch-hook-counted-as-completion"
+    ],
+    "claude-code": [
+      "async-agent-launch-hook-counted-as-completion"
+    ],
+    "telemetry": [
+      "async-agent-launch-hook-counted-as-completion"
+    ],
+    "double-counting": [
+      "async-agent-launch-hook-counted-as-completion"
     ],
     "identifiers": [
       "bare-prefix-match-crosses-entities"
@@ -361,6 +651,19 @@
     ],
     "data-integrity": [
       "bare-prefix-match-crosses-entities"
+    ],
+    "regression": [
+      "hardening-a-shared-reader-made-its-writer-destructive"
+    ],
+    "data-loss": [
+      "hardening-a-shared-reader-made-its-writer-destructive"
+    ],
+    "shared-helpers": [
+      "hardening-a-shared-reader-made-its-writer-destructive"
+    ],
+    "audit": [
+      "hardening-a-shared-reader-made-its-writer-destructive",
+      "reviewer-reports-contradicted-by-measurement"
     ],
     "bundle-sync": [
       "installed-skill-wrappers-ship-as-orphans"
@@ -388,6 +691,15 @@
     ],
     "testing-gap": [
       "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "subagents": [
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "verification": [
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "process": [
+      "reviewer-reports-contradicted-by-measurement"
     ]
   }
 }

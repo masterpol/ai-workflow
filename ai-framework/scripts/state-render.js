@@ -10,7 +10,7 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const { readSource, writeAtomic, STATUSES } = require("./state-snapshot");
+const { printable, readSource, writeAtomic, facts, STATUSES } = require("./state-snapshot");
 const { discoverTheme, themeChanges, safeTheme, THEME_FILE } = require("./state-theme");
 
 const STATE_FILE = ".project/reports/state.json";
@@ -20,7 +20,7 @@ const MAX_DEPTH = 3;
 const CSP = "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
 
 const esc = (value) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-const SECRET_NAME = /(^|\/)(\.env[^/]*|credentials[^/]*|settings\.local\.json|id_rsa[^/]*|[^/]*\.pem|[^/]*\.key)$/i;
+const SECRET_NAME = /(^|\/)(\.env[^/]*|credentials[^/]*|settings\.local\.json|\.npmrc|\.netrc|\.pypirc|id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|pfx|keystore))$/i;
 
 // A link is only ever produced for a path that is safe by shape AND resolves to a real file
 // inside the project. Anything else renders as plain (escaped) text.
@@ -39,13 +39,15 @@ function safeEvidencePath(root, relative) {
 const evidence = (root, list) => (Array.isArray(list) ? list.slice(0, MAX_ITEMS) : []).map((item) => (safeEvidencePath(root, item)
   ? `<a href="../../${esc(item)}">${esc(item)}</a>` : `<code>${esc(item)}</code>`)).join("<br>") || `<span class="none">none</span>`;
 
+// Snapshot keys are camelCase identifiers; readers should see words.
+const humanKey = (key) => String(key).replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase();
 function value(node, depth = 0) {
   if (node === null || node === undefined || node === "") return `<span class="none">—</span>`;
   if (typeof node !== "object") return esc(node);
   if (depth >= MAX_DEPTH) return "…";
   if (Array.isArray(node)) return node.length ? `<ul>${node.slice(0, MAX_ITEMS).map((item) => `<li>${value(item, depth + 1)}</li>`).join("")}</ul>` : `<span class="none">none</span>`;
   const entries = Object.entries(node).slice(0, 30);
-  return entries.length ? `<dl>${entries.map(([key, item]) => `<dt>${esc(key)}</dt><dd>${value(item, depth + 1)}</dd>`).join("")}</dl>` : `<span class="none">—</span>`;
+  return entries.length ? `<dl>${entries.map(([key, item]) => `<dt>${esc(humanKey(key))}</dt><dd>${value(item, depth + 1)}</dd>`).join("")}</dl>` : `<span class="none">—</span>`;
 }
 const badge = (status) => {
   const known = STATUSES.has(status) ? status : "unknown";
@@ -59,7 +61,7 @@ function row(root, label, item) {
   return `<tr><th scope="row">${esc(label)}</th><td>${value(fact.value)}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}</td><td>${fact.note ? esc(fact.note) : `<span class="none">—</span>`}</td></tr>`;
 }
 function scroll(caption, inner) {
-  return `<div class="scroll" role="region" aria-label="${esc(caption)}" tabindex="0">${inner}</div>`;
+  return `<div class="scroll" role="group" aria-label="${esc(caption)}" tabindex="0">${inner}</div>`;
 }
 function table(caption, rows) {
   return scroll(caption, `<table><caption>${esc(caption)}</caption><thead><tr><th scope="col">Fact</th><th scope="col">Value</th><th scope="col">Status</th><th scope="col">Evidence</th><th scope="col">Notes</th></tr></thead><tbody>${rows.join("")}</tbody></table>`);
@@ -73,9 +75,12 @@ function projectRows(root, snapshot) {
   const rows = [];
   const project = snapshot.project || {};
   for (const [key, label] of [["description", "Product"], ["architecture", "Architecture"], ["technology", "Technology"]]) {
-    const facts = list(project[key]);
-    if (!facts.length) rows.push(row(root, label, MISSING));
-    for (const fact of facts) rows.push(row(root, `${label}: ${fact.value?.heading || "—"}`, { ...fact, value: fact.value?.summary ?? fact.value }));
+    const entries = list(project[key]);
+    if (!entries.length) rows.push(row(root, label, MISSING));
+    for (const fact of entries) {
+      const heading = fact.value?.heading;
+      rows.push(row(root, !heading || heading.toLowerCase() === label.toLowerCase() ? label : `${label}: ${heading}`, { ...fact, value: fact.value?.summary ?? fact.value }));
+    }
   }
   rows.push(row(root, "README", project.readme));
   return rows;
@@ -86,9 +91,10 @@ function pitchTable(root, snapshot) {
   const body = items.length ? items.slice(0, 100).map((fact) => {
     const v = fact.value && typeof fact.value === "object" ? fact.value : {};
     const hill = v.hill ? `${esc(v.hill.done)} of ${esc(v.hill.scopes)} scopes done` : `<span class="none">—</span>`;
-    return `<tr><th scope="row">${esc(v.slug)}${v.title ? `<br><span class="sub">${esc(v.title)}</span>` : ""}</th><td>${esc(v.phase)}</td><td>${v.appetite ? esc(v.appetite) : `<span class="none">—</span>`}</td><td>${hill}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}${fact.note ? `<br>${esc(fact.note)}` : ""}</td></tr>`;
-  }) : [`<tr><td colspan="6">No pitches found. ${badge("unavailable")}</td></tr>`];
-  return scroll("Pitches and their progress", `<table><caption>Pitches and their progress</caption><thead><tr><th scope="col">Pitch</th><th scope="col">Phase</th><th scope="col">Appetite</th><th scope="col">Hill</th><th scope="col">Status</th><th scope="col">Evidence</th></tr></thead><tbody>${body.join("")}</tbody></table>`);
+    const title = v.title && v.title !== v.slug ? `<br><span class="sub">${esc(v.title)}</span>` : "";
+    return `<tr><th scope="row">${esc(v.slug)}${title}</th><td>${esc(v.phase)}</td><td>${v.appetite ? esc(v.appetite) : `<span class="none">—</span>`}</td><td>${hill}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}</td><td>${fact.note ? esc(fact.note) : `<span class="none">—</span>`}</td></tr>`;
+  }) : [`<tr><td colspan="7">No pitches found. ${badge("unavailable")}</td></tr>`];
+  return scroll("Pitches and their progress", `<table><caption>Pitches and their progress</caption><thead><tr><th scope="col">Pitch</th><th scope="col">Phase</th><th scope="col">Appetite</th><th scope="col">Hill</th><th scope="col">Source status</th><th scope="col">Evidence</th><th scope="col">Notes</th></tr></thead><tbody>${body.join("")}</tbody></table>`);
 }
 
 function themeSection(theme) {
@@ -126,13 +132,15 @@ th,td{padding:.5rem .7rem;text-align:left;vertical-align:top;border-top:1px soli
 thead th{background:var(--muted);color:var(--fg)}
 tbody th{font-weight:600}
 .sub,.none{color:var(--muted-fg);font-weight:400}
-code{font-family:var(--mono);font-size:.85em;overflow-wrap:anywhere}
+td,th,a,code{overflow-wrap:anywhere}
+code{font-family:var(--mono);font-size:.85em}
 dl{margin:0}dt{font-weight:600}dd{margin:0 0 .3rem 1rem}ul{margin:0;padding-left:1.1rem}
 .legend{display:grid;grid-template-columns:max-content 1fr;gap:.4rem 1rem;align-items:center}.legend dd{margin:0}
 .status{display:inline-block;padding:0 .5rem;border:1px solid var(--border);border-radius:999px;background:var(--muted);color:var(--fg);font-size:.8rem;font-weight:600;white-space:nowrap}
-.status-unavailable,.status-stale,.status-unconfigured{border-style:dashed}
-@media (max-width:640px){header,main,nav{padding:.75rem}table{font-size:.85rem}.legend{grid-template-columns:1fr}}
-@media print{:root{--bg:#fff;--fg:#000;--primary:#000;--primary-fg:#fff;--muted:#eee;--muted-fg:#333;--border:#999}nav,.skip{display:none}.scroll{overflow:visible;border:0}tr{break-inside:avoid}a{color:#000;text-decoration:underline}}
+.status-unavailable,.status-stale,.status-unconfigured,.status-proposed,.status-unknown{border:2px dashed var(--fg)}
+.summary{font-weight:600}
+@media (max-width:640px){header,main,nav{padding:.75rem}table{font-size:.85rem}.legend{grid-template-columns:1fr}.scroll tbody th{position:sticky;left:0;background:var(--bg)}}
+@media print{h2{break-after:avoid}:root{--bg:#fff;--fg:#000;--primary:#000;--primary-fg:#fff;--muted:#eee;--muted-fg:#333;--border:#999}nav,.skip{display:none}.scroll{overflow:visible;border:0}tr{break-inside:avoid}a{color:#000;text-decoration:underline}}
 `;
 }
 
@@ -149,6 +157,9 @@ function renderHtml(snapshot, theme, options = {}) {
     ["metrics", "Token metrics", `${metricsNote ? `<p>${esc(metricsNote)}</p>` : ""}${table("Measured token usage", [row(root, "Token consumption", snapshot.metrics)])}`],
     ["database", "Database", table("Database and schema", [row(root, "Database", snapshot.database)])],
   ];
+  const counts = {};
+  for (const [, fact] of facts(snapshot)) counts[STATUSES.has(fact.status) ? fact.status : "unknown"] = (counts[STATUSES.has(fact.status) ? fact.status : "unknown"] || 0) + 1;
+  const summary = ["observed", "proposed", "stale", "unavailable", "unconfigured", "unknown"].filter((status) => counts[status]).map((status) => `${counts[status]} ${status}`).join(", ");
   const generated = typeof snapshot.generatedAt === "string" ? snapshot.generatedAt : "unknown time";
   return `<!doctype html>
 <html lang="en">
@@ -162,12 +173,12 @@ ${stylesheet(theme)}</style>
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
-<header><h1>State report — ${esc(name)}</h1><p>Generated ${esc(generated)}. ${esc(snapshot.authority || "")}</p></header>
-<nav aria-label="Sections"><ul>${[...sections, ["theme", "Styling"], ["legend", "Legend"]].map(([id, title]) => `<li><a href="#${id}">${esc(title)}</a></li>`).join("")}</ul></nav>
+<header><h1>State report — ${esc(name)}</h1><p>Generated ${esc(generated)}. ${esc(snapshot.authority || "")}</p><p class="summary">${esc(summary || "No facts")} — the legend below explains each status.</p></header>
+<nav aria-label="Page sections"><ul>${[["legend", "Legend"], ...sections, ["theme", "Styling"]].map(([id, title]) => `<li><a href="#${id}">${esc(title)}</a></li>`).join("")}</ul></nav>
 <main id="main">
+${section("legend", "Legend", legend())}
 ${sections.map(([id, title, body]) => section(id, title, body)).join("\n")}
 ${section("theme", "Styling", themeSection(theme))}
-${section("legend", "Legend", legend())}
 </main>
 </body>
 </html>
@@ -213,11 +224,11 @@ function cli(argv) {
   const result = render(options.root, options);
   if (options.json) return JSON.stringify(result, null, 2);
   const { html, theme } = result;
-  return `theme: ${theme.mode} (${theme.sources} source file(s), ${theme.fallbacks} fallback(s))${theme.changes.length ? `; changed: ${theme.changes.join(", ")}` : ""}\n${options.apply ? `${html.changed ? "wrote" : "unchanged"} ${html.path}` : `preview only (${html.bytes} bytes; pass --apply to write ${html.path})`}`;
+  return printable(`theme: ${theme.mode} (${theme.sources} source file(s), ${theme.fallbacks} fallback(s))${theme.changes.length ? `; changed: ${theme.changes.join(", ")}` : ""}`) + `\n${options.apply ? `${html.changed ? "wrote" : "unchanged"} ${html.path}` : `preview only (${html.bytes} bytes; pass --apply to write ${html.path})`}`;
 }
 
 module.exports = { renderHtml, render, esc, safeEvidencePath, stylesheet, CSP, STATE_FILE, HTML_FILE };
 
 if (require.main === module) {
-  try { process.stdout.write(`${cli(process.argv.slice(2))}\n`); } catch (error) { process.stderr.write(`state-render: ${error.message}\n`); process.exitCode = 1; }
+  try { process.stdout.write(`${cli(process.argv.slice(2))}\n`); } catch (error) { process.stderr.write(`${printable(`state-render: ${error.message}`)}\n`); process.exitCode = 1; }
 }

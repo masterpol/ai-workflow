@@ -37,12 +37,19 @@ function escapeHtml(value) {
 }
 
 // A name must not add a column, end a row, or inject markup into a Markdown table cell.
+// Opaque ids (agent id, session id) are only length-bounded when recorded, so any label shown
+// from one must pass the same identifier allow-list that names do; anything else shows as (other).
+const SAFE_LABEL = /^[\w.:/@+-]+$/;
+function safeLabel(value) {
+  return typeof value === "string" && SAFE_LABEL.test(value) ? value : "(other)";
+}
+
 function mdCell(value) {
   return String(value).replace(/\r?\n|\r/g, " ").replace(/\|/g, "\\|").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
 function recordLine(record) {
-  return `| ${mdCell(record.vendor)} | ${mdCell(record.agentType || record.agentId || "agent")} | ${mdCell(record.model || "Unknown")} | ${formatNumber(record.tokens.total)} | ${formatCost(record.costUsd)} | ${record.availability} | ${mdCell(record.mode || "Unavailable")} |`;
+  return `| ${mdCell(record.vendor)} | ${mdCell(safeLabel(record.agentType || record.agentId || "agent"))} | ${mdCell(record.model || "Unknown")} | ${formatNumber(record.tokens.total)} | ${formatCost(record.costUsd)} | ${record.availability} | ${mdCell(record.mode || "Unavailable")} |`;
 }
 
 // Snapshot maps are prototype-free at runtime but may be plain objects in a fixture, so they are
@@ -311,7 +318,7 @@ function html(snapshot) {
 <p>Updated ${escapeHtml(snapshot.updatedAt || "Never")}. Stores numeric usage and identifiers only. Actual cost appears only when a harness reports it.</p>
 <section><h2>Usage</h2>${usage}</section>
 <div class="cards"><div class="card"><div class="label">Current reported tokens</div><div class="value">${formatNumber(current?.tokens.total)}</div></div><div class="card"><div class="label">Change from previous</div><div class="value">${delta.value === null ? escapeHtml(delta.label) : formatNumber(delta.value)}</div></div><div class="card"><div class="label">Lifetime actual cost</div><div class="value">${formatCost(snapshot.lifetime.reportedCostUsd)}</div></div></div>
-<section><h2>Current Completion</h2><table><thead><tr><th>Vendor</th><th>Agent</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Scope</th><th>Caveman mode</th></tr></thead><tbody><tr><td>${escapeHtml(current?.vendor || "None")}</td><td>${escapeHtml(current?.agentType || current?.agentId || "-")}</td><td>${escapeHtml(current?.model || "-")}</td><td>${formatNumber(current?.tokens.total)}</td><td>${formatCost(current?.costUsd)}</td><td>${escapeHtml(current?.metricScope || "-")}</td><td>${escapeHtml(current?.mode || "Unavailable")}</td></tr></tbody></table></section>
+<section><h2>Current Completion</h2><table><thead><tr><th>Vendor</th><th>Agent</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Scope</th><th>Caveman mode</th></tr></thead><tbody><tr><td>${escapeHtml(current?.vendor || "None")}</td><td>${escapeHtml(current?.agentType || current?.agentId ? safeLabel(current.agentType || current.agentId) : "-")}</td><td>${escapeHtml(current?.model || "-")}</td><td>${formatNumber(current?.tokens.total)}</td><td>${formatCost(current?.costUsd)}</td><td>${escapeHtml(current?.metricScope || "-")}</td><td>${escapeHtml(current?.mode || "Unavailable")}</td></tr></tbody></table></section>
 <section><h2>Lifetime</h2><table><thead><tr><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Reported tokens</th><th>Actual cost</th></tr></thead><tbody><tr><td>${snapshot.lifetime.agentCompletions}</td><td>${snapshot.lifetime.reportedUsageCount}</td><td>${snapshot.lifetime.unavailableCount}</td><td>${formatNumber(snapshot.lifetime.tokens.total)}</td><td>${formatCost(snapshot.lifetime.reportedCostUsd)}</td></tr></tbody></table></section>
 <section><h2>By Vendor</h2><table><thead><tr><th>Vendor</th><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Actual cost</th></tr></thead><tbody>${vendorRows}</table></section>
 <p>${escapeHtml(sinceLine(snapshot))} ${escapeHtml(COST_NOTE)}</p>

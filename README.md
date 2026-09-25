@@ -51,7 +51,7 @@ doesn't auto-read either file, just ask it to *"read `SETUP.md` and set up the w
 **OpenCode model setup:** connect OpenAI and OpenCode Zen before starting a routed workflow —
 the bundled OpenCode routes deliberately avoid Anthropic for now, since some installations only
 have OpenAI/Zen connected and a route through an unconnected provider errors instead of falling
-back. The bundled routes use Zen's free `opencode/mimo-v2.5-free` model only for short,
+back. The bundled routes use Zen's free `opencode/space-bunny-free` model only for short,
 non-sensitive fast work, and OpenAI GPT-5.6 for standard and deep work (different reasoning
 effort per profile). Run `opencode debug config` to confirm that OpenCode resolves the
 configuration. For confidential work, replace the free fast-route adapters with the documented

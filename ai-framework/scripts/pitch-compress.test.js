@@ -343,3 +343,49 @@ test("inventory reports a directory with a non-slug name as preserved, without t
   assert.equal(result[1].eligible, false);
   assert.match(result[1].reason, /not a valid pitch slug/);
 });
+
+test("write-done-work refuses to write through a symlinked or non-regular done-work.md and never touches its target", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "foo");
+  write(root, "shared/done.md", "# Done Work\n\n## old — shipped 2026-01-01\n\nprecious old entry\n");
+  fs.symlinkSync("../shared/done.md", path.join(root, ".project/done-work.md"));
+  assert.throws(() => writeDoneWork(root, "foo", "summary", { apply: true }), /Refusing to write .*symlink/);
+  assert.equal(read(root, "shared/done.md"), "# Done Work\n\n## old — shipped 2026-01-01\n\nprecious old entry\n");
+  fs.rmSync(path.join(root, ".project/done-work.md"));
+  fs.mkdirSync(path.join(root, ".project/done-work.md"));
+  assert.throws(() => writeDoneWork(root, "foo", "summary", { apply: true }), /Refusing to write/);
+});
+
+test("write-done-work replaces atomically and leaves no temp file", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "foo");
+  writeDoneWork(root, "foo", "first", { apply: true });
+  writeDoneWork(root, "foo", "second", { apply: true });
+  assert.match(read(root, ".project/done-work.md"), /second/);
+  assert.deepEqual(fs.readdirSync(path.join(root, ".project")).filter((name) => name.includes(".tmp-")), []);
+});
+
+test("one unreadable or oversized hill.md only affects that pitch's inventory entry", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "good");
+  write(root, ".project/pitches/big/pitch.md", "# Pitch: Big\n");
+  write(root, ".project/pitches/big/hill.md", `| Scope | Position |\n|---|---|\n${"x".repeat(5 * 1024 * 1024)}`);
+  const entries = Object.fromEntries(inventory(root).map((entry) => [entry.slug, entry]));
+  assert.equal(entries.good.eligible, true);
+  assert.equal(entries.big.eligible, false);
+  assert.match(entries.big.reason, /hill\.md cannot be read .*larger than 4 MB/);
+});
+
+test("a symlinked SHIPPED.md, a symlinked pitches directory, and a FIFO hill.md never make a pitch eligible or hang inventory", (t) => {
+  const root = fixture(t);
+  write(root, "elsewhere/SHIPPED.md", "# Shipped\n");
+  write(root, ".project/pitches/a/pitch.md", "# Pitch: A\n");
+  fs.symlinkSync(path.join(root, "elsewhere/SHIPPED.md"), path.join(root, ".project/pitches/a/SHIPPED.md"));
+  assert.equal(inventory(root).find((entry) => entry.slug === "a").eligible, false);
+  write(root, ".project/pitches/b/pitch.md", "# Pitch: B\n");
+  assert.equal(spawnSync("mkfifo", [path.join(root, ".project/pitches/b/hill.md")]).status, 0);
+  assert.equal(inventory(root).find((entry) => entry.slug === "b").eligible, false);
+  fs.rmSync(path.join(root, ".project/pitches"), { recursive: true });
+  fs.symlinkSync(path.join(root, "elsewhere"), path.join(root, ".project/pitches"));
+  assert.deepEqual(inventory(root), []);
+});

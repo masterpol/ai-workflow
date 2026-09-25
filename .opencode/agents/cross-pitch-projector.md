@@ -1,7 +1,7 @@
 ---
 description: Fast read-only role that forecasts pitch file-set overlap before a bet.
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode/space-bunny-free
 permission:
   edit: deny
 ---

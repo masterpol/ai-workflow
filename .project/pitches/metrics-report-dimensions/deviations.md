@@ -25,3 +25,8 @@ The plan kept the existing "By Vendor" header verbatim (pinned by `skill-default
 ## D5 — Audit cycle 1 fixes and deferrals (2026-09-24)
 
 Added in cycle 1, beyond the plan: a name allow-list (names outside `[\w.:/@+-]` become `(other)`), id truncation to 128 characters, status allow-listing, cost and token bounds, realpath containment of `.project` and `.project/metrics`, a fixed JSON-parse error message, `agent:`-prefixed model-note keys, bounded plugin session maps, and a new test file `ai-framework/hooks/scripts/opencode-plugin.test.js` (registered in `workflow-doctor.js`). File count is now 11 code/doc files plus this pitch's records, still within the 15-file cap. Deferred to `_followups.md` with reasons: the lock-reclaim flaw and identity-key collisions, both in code this pitch does not modify. See `audit-cycle-1.md`.
+
+## D6 — Cycle 2 security re-check could not be completed by a reviewer agent (2026-09-25)
+
+Three dispatches produced no report (rate limit; two 600-second stalls). The main thread ran the same adversarial checks and a mutation pass itself and recorded them as author-run in `audit-cycle-2.md`. Those checks found and fixed one more gap (agent ids rendered as labels). The user should decide whether that is enough or whether to spend a third cycle on a fresh independent security pass.
+

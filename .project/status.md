@@ -5,8 +5,7 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| district-multisite-foundation | uphill 0% | shape | big-batch | 2026-09-21 |
-| project-state-report | T1-T2 done | build gate | epic (split) | 2026-09-25 |
+_none_
 
 ## Parked pitches
 _none_
@@ -14,6 +13,8 @@ _none_
 ## Recent ships (last 5)
 | Pitch | Shipped | Notes |
 |-------|---------|-------|
+| project-state-report | 2026-09-25 | T1–T2, 87 tests (270 whole surface); 4 must-fix over 3 audit cycles incl. one regression a fix introduced, all fixed. Codex/Cursor **unverified in a host**; scrub is best-effort. See `pitches/project-state-report/SHIPPED.md`. |
+| metrics-report-dimensions | 2026-09-25 | S0–S4, 76 tests (collector, renderer, plugin, skill-defaults), 2 must-fix and 5 should-fix security items at audit, all fixed. **Cycle 2 security re-check not independently completed** (3 dispatches failed; author-run, re-review queued). See `pitches/metrics-report-dimensions/SHIPPED.md`. |
 | pitch-compaction | 2026-09-25 | C1–C2, 40 tests (151 whole surface); 4 must-fix at audit, all fixed. **Only partly independent audit** — re-review queued. See `pitches/pitch-compaction/SHIPPED.md`. |
 | portable-skill-defaults | 2026-09-25 | D1–D3, 108 tests (whole skill surface), 3 must-fix at audit (2 security bypasses, 1 test gap), all fixed. See `pitches/portable-skill-defaults/SHIPPED.md`. |
 | portable-skill-installation | 2026-09-25 | S1–S3, 63 tests, 0 must-fix at audit. See `pitches/portable-skill-installation/SHIPPED.md`. |
@@ -24,6 +25,6 @@ _none_
 - Canonical paths and redirect treatment for current school domains.
 
 ## Followups backlog
-→ `.project/pitches/_followups.md` (5 items)
+→ `.project/pitches/_followups.md` (14 items)
 
-## /cooldown due in: 2 ships
+## /cooldown due in: 5 ships

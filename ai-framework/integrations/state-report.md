@@ -51,12 +51,25 @@ done-work.md, knowledge/graph.json, skills/{registry,modes}.json, .bundle-sync.j
 metrics/token-consumption.json, context/{product,architecture,stack}.md}`, `README.md`,
 `VERSION`, and a bounded scan for checked-in schema/migration files.
 
-Never reads `.env*`, `credentials.json`, `settings.local.json`, or session transcripts. Never opens
+Never reads `.env*`, `credentials.json`, `settings.local.json`, or session transcripts. The one
+child process it starts is this bundle's own `skill-sync.js reconcile` (read-only preview, 15 s
+timeout); it never runs a script that the analyzed project supplies. Never opens
 a database or network connection, so a database is reported `unconfigured` or, when schema files
 are checked in, `observed` as "schema files exist" with the note that live deployment state is
 not inferred. Symlinked sources and paths that resolve outside the project are refused. Every
-captured string is bounded (300 characters) and scrubbed of credential-shaped text; the count is
-in `redactions`.
+captured string is bounded (300 characters) and scrubbed of credential-shaped text — keyword
+assignments (`DB_PASSWORD=`, `client_secret :`, quoted `"password": "…"`), `Bearer`/`Basic`
+headers, JWTs, provider tokens (`AKIA…`, `sk_live_…`, `ghp_…`, `github_pat_…`, `AIza…`, `xox…`),
+credentials in URLs, and whole private-key blocks; the count is in `redactions`. The scrub is a
+best-effort second layer, not a guarantee: the primary controls are the fixed source allowlist and
+never reading secret-bearing files. Look-alike Unicode (a Cyrillic "о" in "passwоrd") and free-text
+phrasing ("the password is …") are not caught, so keep credentials out of the context files `/state`
+summarizes. Markdown sources
+are read only up to 64 KB and every parsing pattern is linear, so a hostile file cannot stall the
+report. Error text is never copied into the snapshot (only a code such as `EACCES`), directories
+such as `.project/runs`, `.project/pitches`, and the knowledge folders are refused when they are
+symlinks, and a FIFO or symlink standing in for `hill.md`/`SHIPPED.md`/`done-work.md` counts as
+absent. Text printed to the terminal has control characters replaced.
 
 ## Reading the token metrics
 
@@ -79,9 +92,12 @@ Every project-supplied string is HTML-escaped where it is written. An evidence p
 link only if it is project-relative, made of plain path characters, not secret-shaped (`.env*`,
 `credentials*`, `settings.local.json`, keys), not behind a symlink, and a real file inside the
 project; `javascript:`, `data:`, absolute, `../`, and external URLs render as plain text. The page
-has `lang`, header/nav/main landmarks, ordered headings, captioned tables with header scopes,
-keyboard-focusable scroll regions, a viewport meta, a narrow-screen layout, a print stylesheet,
-and `prefers-color-scheme` support. Missing metrics or database evidence render as a labeled
+has `lang`, header/nav/main landmarks (one region per section, not per table), ordered headings,
+captioned tables with header scopes, keyboard-focusable labelled scroll groups whose row headers
+stay pinned on narrow screens, a viewport meta, a print stylesheet, and `prefers-color-scheme`
+support. A status summary and the legend sit above the data; every non-`observed` status has a
+heavier dashed outline as well as its text, so the exceptions are visible without relying on color.
+Long paths and hashes wrap. Missing metrics or database evidence render as a labeled
 `unavailable`/`unconfigured` row, never blank or zero.
 
 ### Theme
