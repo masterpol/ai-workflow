@@ -8,6 +8,8 @@ description: Parallel fan-out audit phase. Dispatches code-reviewer + security-r
 > **Recommended capability profile:** `standard` — synthesis of subagent findings. Select an available model using `ai-framework/integrations/harnesses.md`.
 
 Phase 3 of the new pipeline. See `ai-framework/workflow/phases/3-audit.md` for full activities.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase audit [--arg $ARGUMENT]`. If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this phase's other instructions; pass the same resolved mode to any subagent this phase dispatches. If not installed, proceed normally — this is optional, never required.
+
 
 ## When to use
 

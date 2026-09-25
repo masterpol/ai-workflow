@@ -208,6 +208,16 @@ test("global scope is never read or written by a project sync", (t) => {
   assert.equal(read(target, ".ai-workflow/skills/registry.json"), "untouched sentinel");
 });
 
+test("instance caveman mode overrides in .project/skills/modes.json survive a sync unchanged", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  const modes = JSON.stringify({ schemaVersion: 1, caveman: { enabled: true, default: "lite", phases: { build: "ultra" } } });
+  write(target, ".project/skills/modes.json", modes);
+  write(source, "ai-framework/rules/example.md", "rule v2\n");
+  commit(source, "upstream edit, unrelated to instance mode state");
+  runJson(target, ["--source", source, "--base-ref", baseRef, "--apply", "--prune"]);
+  assert.equal(read(target, ".project/skills/modes.json"), modes, "protected exactly like .project/skills/registry.json — .project/ is outside every SYNCED_DIRS entry");
+});
+
 test("first sync without a known base reports differences as unverified, not silently applied", (t) => {
   const { source, target } = fixture(t);
   write(source, "ai-framework/rules/example.md", "rule v2\n");

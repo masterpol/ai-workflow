@@ -21,6 +21,36 @@ function textOrNull(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
 
+// Best-effort attribution only, for this project's own reporting: never reads, invokes, or
+// duplicates caveman-stats' own reporting (that skill's hook internals are unreviewed upstream
+// code this project deliberately does not couple to). Reads modes.json directly rather than
+// pulling in skill-defaults.js's full module (its skill-registry dependency is unrelated to a
+// hook's own invocation shape); the bundle default is read from the same catalog JSON
+// skill-defaults.js uses, so the fallback value is never duplicated by hand.
+function currentCavemanMode(root) {
+  try {
+    const full = path.join(root, ".project", "skills", "modes.json");
+    if (!fs.existsSync(full)) return null;
+    // Resolve the real path and confirm it stays under the real root — catches both the file
+    // itself being a symlink and an ancestor directory (e.g. .project/skills/) being one; an
+    // lstat of the leaf alone only catches the former. Best-effort: any escape or read failure
+    // here just falls through to the outer catch and returns null, never throws upward.
+    const relative = path.relative(fs.realpathSync(root), fs.realpathSync(full));
+    if (relative.startsWith("..") || path.isAbsolute(relative)) return null;
+    const value = JSON.parse(fs.readFileSync(full, "utf8"));
+    const caveman = value && typeof value === "object" && !Array.isArray(value) ? value.caveman : undefined;
+    if (!caveman || typeof caveman !== "object" || Array.isArray(caveman)) return null;
+    if (caveman.enabled === false) return "off";
+    const explicit = textOrNull(caveman.default);
+    if (explicit) return explicit;
+    const catalog = require("../../integrations/skill-defaults.json");
+    const entry = catalog.defaults?.find((item) => typeof item.id === "string" && item.id.endsWith("/caveman"));
+    return textOrNull(entry?.defaultMode);
+  } catch {
+    return null;
+  }
+}
+
 function tokensFrom(raw = {}) {
   const cache = raw.cache || {};
   const tokens = {
@@ -81,7 +111,7 @@ function applyRecord(totals, record, direction) {
   if (record.costUsd !== null) vendor.reportedCostUsd = Math.max(0, vendor.reportedCostUsd + record.costUsd * direction);
 }
 
-function normalizedEvent(input) {
+function normalizedEvent(input, root = process.cwd()) {
   const vendor = textOrNull(input.vendor) || "unknown";
   const raw = input.raw || input;
   const usage = raw.usage || raw.tool_response?.usage || raw.tool_response?.result?.usage || raw.tokens || {};
@@ -119,6 +149,7 @@ function normalizedEvent(input) {
     availability,
     tokens,
     costUsd: numberOrNull(input.costUsd ?? raw.cost ?? raw.cost_usd),
+    mode: currentCavemanMode(root),
   };
 }
 
@@ -289,7 +320,7 @@ function recordEvent(input, root = process.cwd()) {
   return withLock(directory, () => {
     const snapshotPath = path.join(directory, SNAPSHOT_NAME);
     const snapshot = readSnapshot(snapshotPath);
-    const record = normalizedEvent(input);
+    const record = normalizedEvent(input, root);
     if (record.id && snapshot.recentEventKeys.includes(record.id)) return { written: false, reason: "duplicate event", snapshot };
     const existing = [snapshot.current, snapshot.previous].find((candidate) => candidate?.identityKey === record.identityKey);
     const canUpgradeClaudeCompletion =

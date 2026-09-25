@@ -61,6 +61,117 @@ test("deduplicates replayed provider messages and supports a project root outsid
   }
 });
 
+test("a recorded event picks up the current caveman mode when modes.json resolves one", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    fs.mkdirSync(path.join(root, ".project", "skills"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".project", "skills", "modes.json"), JSON.stringify({ schemaVersion: 1, caveman: { default: "lite" } }));
+    recordEvent({ vendor: "opencode", event: "message.completed", raw: { session_id: "session-1", message_id: "one", tokens: { input: 1, output: 1 } } }, root);
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.current.mode, "lite");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a recorded event falls back to the bundle default mode when modes.json sets no explicit default", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    fs.mkdirSync(path.join(root, ".project", "skills"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".project", "skills", "modes.json"), JSON.stringify({ schemaVersion: 1, caveman: {} }));
+    recordEvent({ vendor: "opencode", event: "message.completed", raw: { session_id: "session-1", message_id: "one", tokens: { input: 1, output: 1 } } }, root);
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.current.mode, "full");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a recorded event reports mode 'off' when modes.json persistently disables caveman", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    fs.mkdirSync(path.join(root, ".project", "skills"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".project", "skills", "modes.json"), JSON.stringify({ schemaVersion: 1, caveman: { enabled: false } }));
+    recordEvent({ vendor: "opencode", event: "message.completed", raw: { session_id: "session-1", message_id: "one", tokens: { input: 1, output: 1 } } }, root);
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.current.mode, "off");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a recorded event has a null mode when modes.json does not exist", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    recordEvent({ vendor: "opencode", event: "message.completed", raw: { session_id: "session-1", message_id: "one", tokens: { input: 1, output: 1 } } }, root);
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.current.mode, null);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("a recorded event has a null mode when modes.json resolves outside the project root via a symlinked ancestor", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-outside-"));
+  try {
+    fs.writeFileSync(path.join(outside, "modes.json"), JSON.stringify({ schemaVersion: 1, caveman: { default: "ultra" } }));
+    fs.mkdirSync(path.join(root, ".project"));
+    fs.symlinkSync(outside, path.join(root, ".project", "skills"));
+    recordEvent({ vendor: "opencode", event: "message.completed", raw: { session_id: "session-1", message_id: "one", tokens: { input: 1, output: 1 } } }, root);
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.current.mode, null, "an escaping symlink must never leak an outside mode value into an attribution field");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+    fs.rmSync(outside, { recursive: true, force: true });
+  }
+});
+
+test("a recorded event has a null mode when modes.json exists but configures no caveman state", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    fs.mkdirSync(path.join(root, ".project", "skills"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".project", "skills", "modes.json"), JSON.stringify({ schemaVersion: 1 }));
+    recordEvent({ vendor: "opencode", event: "message.completed", raw: { session_id: "session-1", message_id: "one", tokens: { input: 1, output: 1 } } }, root);
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.current.mode, null);
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("the mode field never affects the recentEventKeys dedup logic", () => {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
+  fs.mkdirSync(path.join(root, ".project"));
+  try {
+    fs.mkdirSync(path.join(root, ".project", "skills"), { recursive: true });
+    fs.writeFileSync(path.join(root, ".project", "skills", "modes.json"), JSON.stringify({ schemaVersion: 1, caveman: { default: "lite" } }));
+    const event = { vendor: "opencode", idempotencyKey: "message-mode-1", raw: { tokens: { input: 8, output: 2 } } };
+    const first = recordEvent(event, root);
+    assert.equal(first.written, true);
+    assert.equal(first.record.mode, "lite");
+
+    // Changing the instance mode between the original event and its replay must not change
+    // whether the replay is recognized as a duplicate: the dedup key is the event id, not mode.
+    fs.writeFileSync(path.join(root, ".project", "skills", "modes.json"), JSON.stringify({ schemaVersion: 1, caveman: { default: "ultra" } }));
+    const duplicate = recordEvent(event, root);
+    assert.equal(duplicate.written, false);
+    assert.equal(duplicate.reason, "duplicate event");
+
+    const snapshot = JSON.parse(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.json"), "utf8"));
+    assert.equal(snapshot.lifetime.agentCompletions, 1);
+    assert.equal(snapshot.recentEventKeys.length, 1);
+    assert.equal(snapshot.current.mode, "lite", "the original recorded mode is untouched by the later, rejected replay");
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+});
+
 test("deduplicates retried subagent completion hooks beyond the rolling comparison", () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
   fs.mkdirSync(path.join(root, ".project"));

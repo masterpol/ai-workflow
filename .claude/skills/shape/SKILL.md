@@ -8,6 +8,8 @@ description: Frame a problem before engineering. Set appetite, surface knowledge
 > **Recommended capability profile:** `deep` — problem framing, breadboarding, decomposition. Select an available model using `ai-framework/integrations/harnesses.md`.
 
 Phase 0 of the new pipeline. See `ai-framework/workflow/phases/0-shape.md` for full activities.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase shape [--arg $ARGUMENT]`. If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this phase's other instructions; pass the same resolved mode to any subagent this phase dispatches. If not installed, proceed normally — this is optional, never required.
+
 
 ## When to use
 

@@ -8,6 +8,8 @@ description: Turn a bet pitch into an executable spec. Decompose into independen
 > **Recommended capability profile:** `deep` for big-batch, `standard` for small-batch. Select an available model using `ai-framework/integrations/harnesses.md`.
 
 Phase 1 of the new pipeline. See `ai-framework/workflow/phases/1-plan.md` for full activities.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase plan [--arg $ARGUMENT]`. If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this phase's other instructions; pass the same resolved mode to any subagent this phase dispatches. If not installed, proceed normally — this is optional, never required.
+
 
 ## When to use
 

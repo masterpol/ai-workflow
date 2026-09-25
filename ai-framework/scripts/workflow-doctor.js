@@ -299,6 +299,24 @@ async function checkProjectScaffold() {
   await requireFile(".project/pitches/_followups.md");
 }
 
+// Structural, not just "valid JSON": a malformed catalog would silently strip an entry from
+// skill-defaults.js's report()/resolveMode() rather than fail loudly (found while building the
+// caveman-modes scope — a plain parseJson() call would only catch broken syntax, not a broken
+// shape).
+async function checkSkillDefaults() {
+  const relativePath = "ai-framework/integrations/skill-defaults.json";
+  if (!(await requireFile(relativePath))) return;
+  try {
+    const catalog = JSON.parse(await fsp.readFile(absolute(relativePath), "utf8"));
+    const valid = catalog && catalog.schemaVersion === 1 && Array.isArray(catalog.defaults) && catalog.defaults.length > 0 &&
+      catalog.defaults.every((entry) => entry && typeof entry.id === "string" && /^[^/]+\/[^/]+\/[^/]+$/.test(entry.id) && typeof entry.path === "string" && typeof entry.purpose === "string" &&
+        (entry.runtime === null || entry.runtime === undefined || (Array.isArray(entry.runtime?.check) && entry.runtime.check.every((item) => typeof item === "string"))));
+    record(valid ? "pass" : "fail", relativePath, valid ? `${catalog.defaults.length} default skill(s) declared` : "malformed catalog: schemaVersion/defaults/id/path/purpose/runtime shape invalid");
+  } catch (error) {
+    record("fail", relativePath, `invalid JSON: ${error.message}`);
+  }
+}
+
 async function checkOpenCodeResolution() {
   if (process.versions.bun) {
     record("info", "OpenCode", "static adapter checks completed; run with Node to resolve live OpenCode config");
@@ -457,9 +475,11 @@ async function validate() {
   // against a real target project (found by testing this doctor against one).
   const inPortableBundleRepo = await exists(absolute("SETUP.md"));
 
-  const coreFiles = ["AGENTS.md", "CLAUDE.md", "README.md", "ai-framework/workflow/overview.md", "ai-framework/integrations/harnesses.md", "ai-framework/rules/model-routing.md", "ai-framework/hooks/hooks.json", ".claude/settings.json", ".codex/hooks.json", ".opencode/plugins/token-consumption.js"];
+  const coreFiles = ["AGENTS.md", "CLAUDE.md", "README.md", "ai-framework/workflow/overview.md", "ai-framework/integrations/harnesses.md", "ai-framework/rules/model-routing.md", "ai-framework/hooks/hooks.json", ".claude/settings.json", ".codex/hooks.json", ".opencode/plugins/token-consumption.js", "ai-framework/integrations/skill-defaults.md"];
   if (inPortableBundleRepo) coreFiles.push("SETUP.md");
-  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js", "ai-framework/scripts/add-skill.js", "ai-framework/scripts/skill-registry.js", "ai-framework/scripts/skill-source.js", "ai-framework/scripts/skill-vendors.js"];
+  // bundle-sync.js and skill-sync.js were missing from this list (found while adding
+  // skill-defaults.js here) — every other script this doctor knows about gets a syntax check.
+  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js", "ai-framework/scripts/add-skill.js", "ai-framework/scripts/skill-registry.js", "ai-framework/scripts/skill-source.js", "ai-framework/scripts/skill-vendors.js", "ai-framework/scripts/skill-sync.js", "ai-framework/scripts/bundle-sync.js", "ai-framework/scripts/skill-defaults.js", "ai-framework/scripts/skill-compress-guard.js", "ai-framework/scripts/browser-runtime.js"];
   // These scripts use CommonJS require(). A target project's own package.json may declare
   // "type": "module" (found by testing against a real Bun/ESM project) — without a scoped
   // override, plain `node` crashes with "require is not defined in ES module scope" the moment
@@ -518,6 +538,7 @@ async function validate() {
     matches(".opencode/plugins/token-consumption.js", /recordEvent/, "wires post-agent consumption collector"),
     ...scripts.map(checkNode),
     checkOpenCodeResolution(),
+    checkSkillDefaults(),
   ]);
   await checkProjectScaffold();
   await checkKnowledgeGraph();

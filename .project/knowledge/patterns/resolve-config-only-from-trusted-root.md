@@ -4,7 +4,7 @@ type: pattern
 created: 2026-09-25
 updated: 2026-09-25
 tags: [security, subprocess, untrusted-content]
-related: [dual-hash-tracking-for-transformed-content]
+related: [dual-hash-tracking-for-transformed-content, resolve-before-matching-a-protected-path-allowlist]
 source: portable-skill-installation
 ---
 

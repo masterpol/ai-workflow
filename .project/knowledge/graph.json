@@ -1,12 +1,12 @@
 {
   "generated": "2026-09-25",
   "stats": {
-    "total": 4,
+    "total": 5,
     "decisions": 0,
-    "patterns": 3,
+    "patterns": 4,
     "entities": 0,
     "issues": 1,
-    "edges": 4,
+    "edges": 6,
     "brokenLinks": 0,
     "orphans": 0
   },
@@ -53,6 +53,27 @@
       "file": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md"
     },
     {
+      "id": "resolve-before-matching-a-protected-path-allowlist",
+      "type": "pattern",
+      "title": "Pattern: Resolve the real path before matching it against a protected-directory list",
+      "tags": [
+        "security",
+        "filesystem",
+        "symlinks",
+        "case-sensitivity"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "portable-skill-defaults",
+      "related": [
+        "resolve-config-only-from-trusted-root"
+      ],
+      "file": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md"
+    },
+    {
       "id": "resolve-config-only-from-trusted-root",
       "type": "pattern",
       "title": "Pattern: When invoking a tool over untrusted content, resolve its config only from a trusted root",
@@ -68,7 +89,8 @@
       "resolved": null,
       "source": "portable-skill-installation",
       "related": [
-        "dual-hash-tracking-for-transformed-content"
+        "dual-hash-tracking-for-transformed-content",
+        "resolve-before-matching-a-protected-path-allowlist"
       ],
       "file": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md"
     },
@@ -104,8 +126,16 @@
       "to": "resolve-config-only-from-trusted-root"
     },
     {
+      "from": "resolve-before-matching-a-protected-path-allowlist",
+      "to": "resolve-config-only-from-trusted-root"
+    },
+    {
       "from": "resolve-config-only-from-trusted-root",
       "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "resolve-config-only-from-trusted-root",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
     },
     {
       "from": "subprocess-revalidation-against-on-disk-code",
@@ -126,7 +156,18 @@
       "dual-hash-tracking-for-transformed-content"
     ],
     "security": [
+      "resolve-before-matching-a-protected-path-allowlist",
       "resolve-config-only-from-trusted-root"
+    ],
+    "filesystem": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions",
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "symlinks": [
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "case-sensitivity": [
+      "resolve-before-matching-a-protected-path-allowlist"
     ],
     "subprocess": [
       "resolve-config-only-from-trusted-root",
@@ -148,9 +189,6 @@
       "macos-tmpdir-realpath-alias-breaks-path-assertions"
     ],
     "macos": [
-      "macos-tmpdir-realpath-alias-breaks-path-assertions"
-    ],
-    "filesystem": [
       "macos-tmpdir-realpath-alias-breaks-path-assertions"
     ],
     "node": [
