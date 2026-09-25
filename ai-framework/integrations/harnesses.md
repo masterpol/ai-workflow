@@ -101,10 +101,17 @@ contains only numeric usage, cost, identifiers, and model metadata: never prompt
 transcripts.
 
 - **OpenCode:** `.opencode/plugins/token-consumption.js` automatically records completed assistant
-  messages. Its native event includes total message tokens and actual cost.
+  messages. Its native event includes total message tokens and actual cost. The plugin also passes
+  the message's `variant` as reasoning effort and counts skill tool calls by name. Both were
+  written against OpenCode's type definitions (plugin 1.17.20) and are unverified in a live
+  session; if a field is absent the report shows `Unreported`.
 - **Claude Code:** `.claude/settings.json` records every `SubagentStop`; its `Agent` PostToolUse
   hook supplements foreground agents with final-request usage when Claude exposes it. That usage
-  is intentionally labeled `partial`, not a full agent-run total.
+  is intentionally labeled `partial`, not a full agent-run total. An async subagent's `Agent` event
+  fires at launch, so it only leaves a model note that the later `SubagentStop` picks up; it is
+  not counted as a completion. Effort comes from `effort.level`, agent type from `agent_type`,
+  and a `Skill` PostToolUse hook counts skill names (never `tool_input.args`). These fields were
+  captured from live payloads (key names only): see the pitch's `spike-payloads.md`.
 - **Codex:** `.codex/hooks.json` records every `SubagentStop`. Codex completion hooks do not expose
   token or cost fields, so those records truthfully show `unavailable` instead of zero.
 - **Cursor and other harnesses:** no portable completion payload is available. Run
@@ -113,7 +120,15 @@ transcripts.
   the collector records the completion as unavailable.
 
 The snapshot keeps only current and previous completions for comparison, lifetime aggregates, and
-at most 100 idempotency keys. It does not create per-run log files.
+at most 100 idempotency keys (plus 50 for skill events and 50 async-agent model notes). It does not
+create per-run log files.
+
+Schema v2 adds aggregates by vendor, model, agent, effort, and skill under `dimensions`, counted from
+`dimensions.since`. Each vendor keeps at most 25 distinct names per dimension; further names, and
+the reserved names `__proto__`, `constructor`, and `prototype`, fold into `(other)`, and names are
+cut at 80 characters. A v1 file migrates in place with its lifetime totals intact, but an older
+collector cannot read a v2 file and would start a blank snapshot, so update every checkout that
+shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.js`.
 
 ## Sub-agent Dispatch
 

@@ -234,14 +234,62 @@ async function removeEmptyParents(file) {
   }
 }
 
-async function sourceManifest(sourceRoot) {
+async function sourceManifest(sourceRoot, excluded = new Set()) {
   const files = {};
   for (const dir of SYNCED_DIRS) {
     for (const rel of await walk(path.join(sourceRoot, dir))) {
+      if (excluded.has(path.join(dir, rel).toLowerCase())) continue;
       files[path.join(dir, rel)] = await fileHash(path.join(sourceRoot, dir, rel));
     }
   }
   return files;
+}
+
+async function readIfExists(file) {
+  try {
+    return await fsp.readFile(file, "utf8");
+  } catch (error) {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  }
+}
+
+// What a sync cannot do for the receiving project by itself, computed from the source it is being
+// synced with. Each is an instance-owned choice or file bundle-sync deliberately never writes
+// (.project/, entry files, installed skills) — so they are named explicitly instead of left for
+// the next doctor run to surface as a failure.
+async function nextSteps(sourceRoot) {
+  const steps = [];
+  if (!(await exists(path.join(root, ".project")))) return steps;
+  const missing = [];
+  for (const rel of await walk(path.join(sourceRoot, "ai-framework/templates/project"))) {
+    if (!(await exists(path.join(root, ".project", rel)))) missing.push(rel);
+  }
+  if (missing.length) {
+    steps.push({ kind: "scaffold", message: `${missing.length} project scaffold file(s) new in this bundle version are missing from .project/ (${missing.slice(0, 5).join(", ")}${missing.length > 5 ? ", ..." : ""}): run node ai-framework/scripts/workflow-doctor.js --fix (restores missing files only, never overwrites)` });
+  }
+  const marker = /^## Response style \(caveman mode\)$/m;
+  const sourceEntry = await readIfExists(path.join(sourceRoot, "AGENTS.md"));
+  if (sourceEntry && marker.test(sourceEntry)) {
+    const lacking = [];
+    for (const file of ["AGENTS.md", "CLAUDE.md"]) {
+      const text = await readIfExists(path.join(root, file));
+      if (text !== null && !marker.test(text)) lacking.push(file);
+    }
+    if (lacking.length) steps.push({ kind: "entry-files", message: `${lacking.join(" and ")} lack the '## Response style (caveman mode)' section; entry files are never auto-applied, so copy it from the source AGENTS.md by hand or the main session agent of each vendor will not apply caveman mode` });
+  }
+  const catalogText = await readIfExists(path.join(sourceRoot, "ai-framework/integrations/skill-defaults.json"));
+  if (catalogText) {
+    let catalog = null;
+    try { catalog = JSON.parse(catalogText); } catch { /* an unreadable catalog just yields no hint */ }
+    let installed = {};
+    try { installed = JSON.parse((await readIfExists(path.join(root, ".project/skills/registry.json"))) || "{}").skills || {}; } catch { /* the skill-registry report surfaces an invalid registry */ }
+    for (const entry of catalog?.defaults || []) {
+      if (!Array.isArray(entry.recommendedPhases) || installed[entry.id]) continue;
+      steps.push({ kind: "default-skill", message: `recommended default skill ${entry.id} (${entry.purpose}) is not installed, so the instruction that references it in every skill and agent is inert: /add-skill ${entry.id} --path ${entry.path} --scope project --phases ${entry.recommendedPhases.join(",")}` });
+    }
+  }
+  return steps;
 }
 
 function gitError(error) {
@@ -291,7 +339,10 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
   const baseOf = makeBaseLookup(sourceRoot, manifest, baseRef);
   const baseSource = manifest?.files ? `manifest (${MARKER})` : baseRef ? `git ref ${baseRef}` : "none";
 
-  const excluded = ownedPaths(root);
+  // Skills installed into a project belong to that project, on BOTH sides: never overwrite or
+  // prune the target's own, and never ship the source checkout's own installs (their wrappers
+  // would land in every project as orphans whose package and registry stay behind).
+  const excluded = new Set([...ownedPaths(root), ...ownedPaths(sourceRoot)]);
   const entries = (await Promise.all([...SYNCED_DIRS, ...RETIRED_DIRS].map((dir) => compareDir(dir, sourceRoot, baseOf, excluded)))).flat();
   const flagged = await compareFlagged(sourceRoot);
   const group = (status) => entries.filter((entry) => entry.status === status);
@@ -340,7 +391,7 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
       pruned,
       keptLocal: groups.local.map((entry) => entry.path),
       conflicts: groups.conflict.map((entry) => entry.path),
-      files: await sourceManifest(sourceRoot),
+      files: await sourceManifest(sourceRoot, excluded),
     };
     await fsp.writeFile(path.join(root, MARKER), JSON.stringify(marker, null, 2) + "\n");
     markerPath = MARKER;
@@ -367,6 +418,8 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
     }
   }
 
+  const steps = await nextSteps(sourceRoot);
+
   const summary = {
     source: sourceLabel,
     base: baseSource,
@@ -377,10 +430,11 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
     prunedCount: pruned.length,
     marker: markerPath,
     skillSync: skillSync ? skillSync.status : "not-installed",
+    nextSteps: steps.length,
   };
 
   if (json) {
-    process.stdout.write(JSON.stringify({ summary, ...groups, flagged, skillSync }, null, 2) + "\n");
+    process.stdout.write(JSON.stringify({ summary, ...groups, flagged, skillSync, nextSteps: steps }, null, 2) + "\n");
     return;
   }
 
@@ -407,6 +461,12 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
     process.stdout.write("\n");
   } else if (skillSync && ["incompatible", "coverage-unresolved", "pending-transaction"].includes(skillSync.status)) {
     process.stdout.write(`${paint("conflict", `SKILL REGISTRY (${skillSync.status})`)}: ${skillSync.error || "resolve before installed skills can be trusted"}\n\n`);
+  }
+
+  if (steps.length) {
+    process.stdout.write(`${paint("flagged", `NEXT STEPS (${steps.length})`)} — what this sync cannot do for the project:\n`);
+    steps.forEach((step, index) => process.stdout.write(`  ${index + 1}. ${step.message}\n`));
+    process.stdout.write("\n");
   }
 
   if (apply) {

@@ -1,12 +1,12 @@
 {
   "generated": "2026-09-25",
   "stats": {
-    "total": 9,
+    "total": 10,
     "decisions": 1,
     "patterns": 5,
     "entities": 0,
-    "issues": 3,
-    "edges": 13,
+    "issues": 4,
+    "edges": 15,
     "brokenLinks": 0,
     "orphans": 0
   },
@@ -96,6 +96,28 @@
         "resolve-config-only-from-trusted-root"
       ],
       "file": ".project/knowledge/patterns/dual-hash-tracking-for-transformed-content.md"
+    },
+    {
+      "id": "installed-skill-wrappers-ship-as-orphans",
+      "type": "issue",
+      "title": "Issue: a skill installed in the source checkout ships to every synced project as a broken orphan",
+      "tags": [
+        "bundle-sync",
+        "publishing",
+        "instance-data",
+        "migration"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "caveman-rollout",
+      "related": [
+        "caveman-mode-is-default-everywhere",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/installed-skill-wrappers-ship-as-orphans.md"
     },
     {
       "id": "macos-tmpdir-realpath-alias-breaks-path-assertions",
@@ -251,6 +273,14 @@
       "to": "a-gate-must-not-trust-its-own-author"
     },
     {
+      "from": "installed-skill-wrappers-ship-as-orphans",
+      "to": "caveman-mode-is-default-everywhere"
+    },
+    {
+      "from": "installed-skill-wrappers-ship-as-orphans",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
       "from": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
       "to": "resolve-before-matching-a-protected-path-allowlist"
     }
@@ -317,6 +347,7 @@
       "subprocess-revalidation-against-on-disk-code"
     ],
     "migration": [
+      "installed-skill-wrappers-ship-as-orphans",
       "subprocess-revalidation-against-on-disk-code"
     ],
     "schema-versioning": [
@@ -330,6 +361,15 @@
     ],
     "data-integrity": [
       "bare-prefix-match-crosses-entities"
+    ],
+    "bundle-sync": [
+      "installed-skill-wrappers-ship-as-orphans"
+    ],
+    "publishing": [
+      "installed-skill-wrappers-ship-as-orphans"
+    ],
+    "instance-data": [
+      "installed-skill-wrappers-ship-as-orphans"
     ],
     "testing": [
       "macos-tmpdir-realpath-alias-breaks-path-assertions"

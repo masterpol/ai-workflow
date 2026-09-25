@@ -85,6 +85,27 @@ are never read or touched by a project sync.
 If the source bundle has a `CHANGELOG.md`, read the entries newer than the manifest's
 `sourceVersion` to explain *why* files changed, not just that they did.
 
+### Next steps (what a sync cannot do for the project)
+
+Every dry run and apply ends with a **NEXT STEPS** list, computed from the source being synced.
+These are instance-owned files or choices bundle-sync deliberately never writes, so they are
+named instead of left for the next doctor run to fail on:
+
+1. **Missing scaffold files** (a template added in this bundle version, e.g. `.project/done-work.md`):
+   `node ai-framework/scripts/workflow-doctor.js --fix` — restores missing files only.
+2. **Entry files** (`AGENTS.md`/`CLAUDE.md`) lacking the `## Response style (caveman mode)` section:
+   copy it from the source `AGENTS.md` by hand (these files are flagged, never auto-applied).
+3. **Recommended default skills not installed** (currently `caveman`): the instruction that
+   references it now exists in every skill and agent but is inert until it is installed —
+   run the printed `/add-skill ...` command. The choice to install stays with the human.
+
+A project synced from an **older** bundle version runs its own older `bundle-sync.js` for that
+first apply, which cannot print this list; re-run `bundle-sync.js` once afterwards (now the new
+script) to see it. Skills installed with `/add-skill` are instance data on **both** sides: a
+target's own installs are never overwritten or pruned, and a source checkout's own installs are
+never shipped (keep them untracked — this repo gitignores them — because an older script in a
+target has no such protection and would copy a tracked wrapper as an orphan).
+
 ## Step 2 — Gate
 
 Present the dry-run summary to the human per this project's confirmation-gate rule —

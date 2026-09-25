@@ -121,6 +121,16 @@ is installed (via the registry) and whether its CLI resolves on `PATH` — never
 (CLI absent — a host-capability fact that overrides everything else), `"not-installed"`,
 `"installed-disabled"`, or `"ready"`; a missing CLI is data, never a thrown failure.
 
+## Existing projects (upgrading from an older bundle version)
+
+`bundle-sync.js --apply` delivers the scripts, all skills and agents with the instruction, and
+the docs. It cannot deliver what is instance-owned, so it ends with a NEXT STEPS list: run
+`workflow-doctor.js --fix` for new scaffold files, copy the `## Response style (caveman mode)`
+section into `AGENTS.md`/`CLAUDE.md`, and install `caveman` with the printed `/add-skill` command.
+Until the last step the instruction is inert and the doctor says so. Verified by simulating a
+v2.3.0 project end to end: after the sync and those three steps the doctor reports 0 failures,
+0 warnings, and `active`.
+
 ## Verification
 
 ```sh

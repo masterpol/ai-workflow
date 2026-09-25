@@ -6,7 +6,7 @@
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
 | district-multisite-foundation | uphill 0% | shape | big-batch | 2026-09-21 |
-| project-state-report | uphill 0% | bet (queued) | epic (split) | 2026-09-24 |
+| project-state-report | T1-T2 done | build gate | epic (split) | 2026-09-25 |
 
 ## Parked pitches
 _none_

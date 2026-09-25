@@ -45,3 +45,26 @@ archive kept) and record what the real content exposes that the fixtures did not
 
 The parent pitch wanted an automatic `/state` run after compaction; deliberately left out because
 the command does not exist yet.
+
+## Collector lock never reclaims a live or reused PID, and reclaim can remove a fresh lock
+
+Found 2026-09-24 in `metrics-report-dimensions` audit cycle 1 (security-reviewer, deferred
+should-fix; pre-existing code in `token-consumption.js`, not part of that pitch's diff). A lock
+file whose recorded PID is alive (or reused after a crash, or owned by another user so
+`kill(pid, 0)` returns `EPERM`) is never reclaimed: every hook waits about 1 s and then gives up,
+so telemetry silently stops until someone deletes `.project/metrics/.token-consumption.lock`. Also,
+`reclaim()` renames the lock after reading a dead owner; if another process reclaimed and took the
+lock in between, the rename removes that process's fresh lock and two writers can overlap. Candidate
+fix: reclaim by age (mtime over ~30 s) regardless of PID, treat `EPERM` as "alive, check age", and
+re-read the lock content immediately before removing it.
+
+## Collector identity keys can collide across entities
+
+Found 2026-09-24 in `metrics-report-dimensions` audit cycle 1 (security-reviewer, deferred,
+pre-existing). `normalizedEvent` builds identity with `[...].filter(Boolean).join(":")`, so
+`session "a:b"` + `agent "c"` and `session "a"` + `agent "b:c"` share a key, and `agent_type "X"`
+with `agent_id "X"` in one session collide. A second Codex `subagent-complete` with the same
+session and agent type but no agent id is dropped as a duplicate, so two real runs count once. Same
+family as `bare-prefix-match-crosses-entities`. Candidate fix: a JSON-encoded or length-prefixed
+identity, with a migration note because `recentEventKeys` and stored `identityKey`s use today's form.
+

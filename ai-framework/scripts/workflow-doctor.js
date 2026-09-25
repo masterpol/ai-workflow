@@ -503,7 +503,7 @@ async function validate() {
   if (inPortableBundleRepo) coreFiles.push("SETUP.md");
   // bundle-sync.js and skill-sync.js were missing from this list (found while adding
   // skill-defaults.js here) — every other script this doctor knows about gets a syntax check.
-  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js", "ai-framework/scripts/add-skill.js", "ai-framework/scripts/skill-registry.js", "ai-framework/scripts/skill-source.js", "ai-framework/scripts/skill-vendors.js", "ai-framework/scripts/skill-sync.js", "ai-framework/scripts/bundle-sync.js", "ai-framework/scripts/skill-defaults.js", "ai-framework/scripts/skill-compress-guard.js", "ai-framework/scripts/browser-runtime.js"];
+  const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/hooks/scripts/token-report.js", "ai-framework/hooks/scripts/token-report.test.js", "ai-framework/hooks/scripts/opencode-plugin.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js", "ai-framework/scripts/add-skill.js", "ai-framework/scripts/skill-registry.js", "ai-framework/scripts/skill-source.js", "ai-framework/scripts/skill-vendors.js", "ai-framework/scripts/skill-sync.js", "ai-framework/scripts/bundle-sync.js", "ai-framework/scripts/skill-defaults.js", "ai-framework/scripts/skill-compress-guard.js", "ai-framework/scripts/browser-runtime.js", "ai-framework/scripts/pitch-compress.js", "ai-framework/scripts/pitch-archive.js", "ai-framework/scripts/state-snapshot.js", "ai-framework/scripts/state-theme.js", "ai-framework/scripts/state-render.js"];
   // These scripts use CommonJS require(). A target project's own package.json may declare
   // "type": "module" (found by testing against a real Bun/ESM project) — without a scoped
   // override, plain `node` crashes with "require is not defined in ES module scope" the moment
@@ -561,6 +561,7 @@ async function validate() {
     parseJson(".claude/settings.json"),
     parseJson(".codex/hooks.json"),
     matches(".claude/settings.json", /token-consumption\.js/, "wires post-agent consumption collector"),
+    matches(".claude/settings.json", /--event skill-use/, "wires skill-use counting"),
     matches(".codex/hooks.json", /SubagentStop[\s\S]*token-consumption\.js/, "wires post-agent consumption collector"),
     matches(".opencode/plugins/token-consumption.js", /recordEvent/, "wires post-agent consumption collector"),
     ...scripts.map(checkNode),

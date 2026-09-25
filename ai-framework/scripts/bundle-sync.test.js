@@ -218,6 +218,24 @@ test("instance caveman mode overrides in .project/skills/modes.json survive a sy
   assert.equal(read(target, ".project/skills/modes.json"), modes, "protected exactly like .project/skills/registry.json — .project/ is outside every SYNCED_DIRS entry");
 });
 
+test("report settings and generated reports in .project/reports survive every sync unchanged, and a new reports template is a named scaffold step", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  const settings = JSON.stringify({ schemaVersion: 1, themeMode: "fallback" });
+  write(target, ".project/reports/settings.json", settings);
+  write(target, ".project/reports/theme.json", "{\"schemaVersion\":1}\n");
+  write(target, ".project/reports/state.html", "<!doctype html>local\n");
+  write(source, "ai-framework/templates/project/reports/README.md", "# Reports\n");
+  write(source, "ai-framework/rules/example.md", "rule v2\n");
+  commit(source, "upstream adds the reports template");
+  for (let pass = 0; pass < 2; pass++) {
+    const result = runJson(target, ["--source", source, "--base-ref", baseRef, "--apply", "--prune"]);
+    if (pass === 0) assert.ok(result.nextSteps.some((step) => step.kind === "scaffold" && /reports\/README\.md/.test(step.message)), "the missing reports template is named, not silently written into .project/");
+    assert.equal(read(target, ".project/reports/settings.json"), settings, `pass ${pass + 1}: .project/ is outside every SYNCED_DIRS entry`);
+    assert.equal(read(target, ".project/reports/state.html"), "<!doctype html>local\n");
+    assert.ok(!exists(target, ".project/reports/README.md"), "sync never writes into .project/");
+  }
+});
+
 test("first sync without a known base reports differences as unverified, not silently applied", (t) => {
   const { source, target } = fixture(t);
   write(source, "ai-framework/rules/example.md", "rule v2\n");
@@ -228,4 +246,47 @@ test("first sync without a known base reports differences as unverified, not sil
   const applied = runJson(target, ["--source", source, "--apply"]);
   assert.equal(read(target, "ai-framework/rules/example.md"), "rule v1\n", "unverified is kept unless --overwrite-unverified");
   assert.equal(applied.summary.appliedCount, 0);
+});
+
+test("a skill installed in the SOURCE checkout is never shipped to a synced project", (t) => {
+  const { source, target, baseRef, directory } = fixture(t);
+  installSkill(source, skillRepo(directory, "srcinstalled"), { skill: "example/repository/srcinstalled" });
+  assert.equal(exists(source, ".claude/skills/srcinstalled/SKILL.md"), true, "sanity: the source really has an installed skill's wrapper");
+  const dry = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  assert.equal([...dry.new, ...dry.changed].some((entry) => /srcinstalled/.test(entry.path)), false, "installed wrappers are instance data on the source side too");
+  runJson(target, ["--source", source, "--base-ref", baseRef, "--apply"]);
+  assert.equal(exists(target, ".claude/skills/srcinstalled"), false, "an orphan wrapper (package and registry left behind) must never reach a project");
+  assert.equal(Object.keys(JSON.parse(read(target, ".project/.bundle-sync.json")).files).some((file) => /srcinstalled/.test(file)), false, "and never enters the recorded base either");
+});
+
+test("the sync names what it cannot do for the project — scaffold, entry files, recommended default skills — and goes quiet once done", (t) => {
+  const { source, target, baseRef, directory } = fixture(t);
+  write(source, "ai-framework/templates/project/done-work.md", "# Done Work\n");
+  write(source, "AGENTS.md", "# A\n\n## Response style (caveman mode)\n\nbe brief\n\n## Guardrails\n");
+  write(source, "ai-framework/integrations/skill-defaults.json", JSON.stringify({ schemaVersion: 1, defaults: [
+    { id: "acme/repo/c", path: "skills/c/SKILL.md", purpose: "brevity", recommendedPhases: ["build", "manual"] },
+    { id: "acme/repo/d", path: "skills/d/SKILL.md", purpose: "no recommendation" },
+  ] }));
+  write(target, "AGENTS.md", "# A\n");
+  write(target, "CLAUDE.md", "# C\n");
+
+  const before = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  assert.deepEqual(before.nextSteps.map((step) => step.kind), ["scaffold", "entry-files", "default-skill"]);
+  assert.match(before.nextSteps[0].message, /done-work\.md.*workflow-doctor\.js --fix/);
+  assert.match(before.nextSteps[1].message, /AGENTS\.md and CLAUDE\.md lack/);
+  assert.match(before.nextSteps[2].message, /acme\/repo\/c.*\/add-skill acme\/repo\/c --path skills\/c\/SKILL\.md --scope project --phases build,manual/);
+  assert.equal(before.nextSteps.some((step) => /acme\/repo\/d/.test(step.message)), false, "a default with no recommendedPhases is not nagged about");
+  assert.equal(before.summary.nextSteps, 3);
+  assert.match(run(target, ["--source", source, "--base-ref", baseRef]).stdout, /NEXT STEPS \(3\)/);
+
+  write(target, ".project/done-work.md", "# Done Work\n");
+  write(target, "AGENTS.md", "# A\n\n## Response style (caveman mode)\n\nbe brief\n");
+  write(target, "CLAUDE.md", "# C\n\n## Response style (caveman mode)\n\nbe brief\n");
+  installSkill(target, skillRepo(directory, "c"), { skill: "acme/repo/c" });
+  const after = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  assert.deepEqual(after.nextSteps, [], "every step done, so nothing is left to say");
+  assert.doesNotMatch(run(target, ["--source", source, "--base-ref", baseRef]).stdout, /NEXT STEPS/);
+
+  fs.rmSync(path.join(target, ".project"), { recursive: true, force: true });
+  assert.deepEqual(runJson(target, ["--source", source, "--base-ref", baseRef]).nextSteps, [], "no .project yet means setup has not run; these steps do not apply");
 });

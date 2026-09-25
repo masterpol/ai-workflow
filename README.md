@@ -87,7 +87,15 @@ After agent completion, the collector updates these Git-ignored local files:
   previous completion consumption, increase/decrease comparison inputs, lifetime aggregates, and a
   bounded deduplication list.
 - `.project/metrics/token-consumption.md` and `.project/metrics/token-consumption.html` are
-  regenerated views for a quick report or browser dashboard.
+  regenerated views for a quick report or browser dashboard. They open with a **Usage** summary
+  (most used vendor and model, and the basis it was ranked on), followed by tables by vendor,
+  model, agent, reasoning effort, and skill.
+
+The by-model, by-agent, by-effort, and by-skill tables start counting when the snapshot moves to
+schema v2 (the report prints the date) and are not back-filled. A harness that does not report a
+field shows `Unreported`; a completion with no nonzero cost shows `Unpriced`. Only skill names are
+recorded, never a skill's arguments. Completion counts are per assistant message for OpenCode and
+per subagent run for Claude Code and Codex, so they are not comparable across vendors.
 
 OpenCode reports per-message token fields and actual cost. Claude Code reports a completion for
 every subagent and can supplement foreground agents with final-request usage, which is labelled
