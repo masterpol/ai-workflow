@@ -45,6 +45,18 @@ Every gated phase ends with **Approve / Revise / Back / Stop**. Never auto-advan
 gate matrix in `ai-framework/workflow/overview.md` determines the gates for small batches, big
 batches, bug fixes, and hotfixes.
 
+## Response style (caveman mode)
+
+Default response style is brevity (`caveman`, default level `full`). If the `caveman` skill is
+installed and enabled (`.project/skills/registry.json`), load it at the level
+`node ai-framework/scripts/skill-defaults.js resolve-mode --phase agent --args-text "<the user's message>"`
+returns, unless that is `off`. A `caveman=<lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra|off>`
+token in a message overrides it for that message only; a persistent change is an explicit edit to
+`.project/skills/modes.json`. Skills, phase commands, and subagents apply the same resolution
+themselves (`ai-framework/integrations/skill-defaults.md`). The skill's own Auto-Clarity and
+Boundaries rules still apply: security warnings, irreversible-action confirmations, and text
+persisted to project files stay normal prose.
+
 ## Guardrails
 
 - Never read or copy secret-bearing files (`.env`, `.env.local`, `credentials.json`,

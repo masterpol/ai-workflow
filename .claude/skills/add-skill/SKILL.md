@@ -7,6 +7,8 @@ description: Install, update, enable, disable, or remove one external skill for 
 
 > **Recommended capability profile:** `standard` — reviewing third-party instructions and choosing activation needs judgment; the file work itself is scripted.
 
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+
 Brings one external skill (for example from skills.sh) into this project so that every vendor
 configured here — Claude Code, OpenCode, Codex, Cursor, and any registered local vendor — can
 discover it. `ai-framework/scripts/add-skill.js` does all file work: verification, ownership,
@@ -53,6 +55,14 @@ Never install every skill in a repository. One request installs exactly one skil
 node ai-framework/scripts/add-skill.js install <identity> --scope project --phases build,audit [--path P] [--ref C]
 node ai-framework/scripts/add-skill.js install <identity> --scope project --phases build,audit [--path P] [--ref C] --apply
 ```
+
+## Bundle default skills
+
+Before choosing phases for a skill in `ai-framework/integrations/skill-defaults.json` (e.g.
+`juliusbrussee/caveman/caveman`), use the catalog's `recommendedPhases` — the workflow
+instruction in every skill and agent assumes them, and `workflow-doctor.js` warns when an install
+leaves a recommended phase out (the wrapper tells agents not to activate outside its listed
+phases). The choice is still the human's; this only stops it being made blind.
 
 ## Lifecycle
 

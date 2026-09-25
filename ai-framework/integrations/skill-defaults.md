@@ -45,6 +45,37 @@ the two options are mutually exclusive. Every canonical phase file uses `--args-
 first version shipped with a bare `--arg $ARGUMENT`, which fails validation the moment real
 invocation text carries anything beyond the mode word alone.
 
+### Coverage: every skill and every agent
+
+The instruction is not limited to the seven phases. Every canonical skill (`.claude/skills/*`)
+and every canonical agent (`.claude/agents/*`) carries it, resolved through the same chain under
+one of nine scopes: the seven phase names, `utility` (every non-phase skill — `add-skill`,
+`checkpoint`, `search`, ...), and `agent` (every dispatched role). An instance can override
+`utility` or `agent` in `modes.json` like any phase. Agents also receive the mode from the phase
+that dispatched them (the phase files pass their resolved mode down); a read-only agent that
+cannot run commands simply follows the mode it was handed. OpenCode and Codex agent/skill
+mirrors point at the canonical file, so they inherit it; Cursor mirrors are byte copies and are
+re-synced with `skill-vendors.js cursor-mirrors`.
+
+Everything that describes or validates the workflow knows about it:
+- `workflow-doctor.js` reports a `Caveman mode` line with the live state — `active`, `inert` (not
+  installed), disabled, persistently off, or **under-covering** (the installed wrapper omits a
+  catalog-recommended phase, and it tells agents not to activate outside its listed phases) — and
+  fails on a malformed `.project/skills/modes.json`, which would otherwise make every skill's
+  command fail at runtime. It also requires the response-style section in `AGENTS.md`/`CLAUDE.md`
+  of this bundle (`setup-validator.js` only warns in a target project, whose own file may predate it).
+- `skill-defaults.js report` lists each default's installed phases and the gap against
+  `recommendedPhases` in the catalog.
+- The token-consumption Markdown and HTML reports show a `Caveman mode` column per record
+  (`Unavailable` when no mode is configured — never guessed).
+- Per-vendor coverage and verification status: `ai-framework/integrations/harnesses.md`.
+
+This is enforced, not just documented: `workflow-doctor.js` fails if any canonical skill or agent
+lacks the instruction (registry-installed upstream skills are exempt — they are not ours), and
+`skill-defaults.test.js` checks each file names a scope `resolve-mode` accepts, runs the exact
+command each one names, and confirms every mirror is current or a pointer. The instruction is
+inert until `caveman` is actually installed with `/add-skill`.
+
 Precedence: an explicit invocation-scoped `caveman=<mode>` argument on that phase command beats
 a per-phase instance override, which beats an instance default, which beats the bundle default
 (`full`). An invocation-scoped choice applies **only to that call and whatever it dispatches** —

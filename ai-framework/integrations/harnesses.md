@@ -60,6 +60,28 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 `.codex/config.toml` only enables a practical concurrency cap. It does not set a provider or a global model, so it does not override a user's Codex configuration.
 
+## Caveman Mode
+
+One instruction, carried by every canonical skill (`.claude/skills/*`), every canonical agent
+(`.claude/agents/*`), and both entry files, resolved per invocation by
+`ai-framework/scripts/skill-defaults.js` (scopes: the seven phases, `utility`, `agent`). Each
+vendor reaches it through the file it already loads:
+
+| Vendor | Skills | Agents | Main session |
+|---|---|---|---|
+| Claude Code | canonical `.claude/skills` | canonical `.claude/agents` | `CLAUDE.md` |
+| OpenCode | `.opencode/commands` load the canonical skill | `.opencode/agents` load the canonical role prompt | `AGENTS.md` |
+| Codex | `.agents/skills` load the canonical skill | `.codex/agents` load the canonical role prompt | `AGENTS.md` |
+| Cursor | `.cursor/skills` byte copies | `.cursor/agents` byte copies | `AGENTS.md` |
+
+Verification status, kept honest: file coverage and mirror parity are checked mechanically for
+all four vendors (`workflow-doctor.js`, `skill-defaults.test.js`). The `caveman=<mode>` token was
+exercised end to end only in **Claude Code**; OpenCode passes command text through `$ARGUMENTS`
+the same way, but Codex and Cursor invocation with an inline argument, and whether each host
+honors an installed skill's wrapper, are **unverified** — do not assume parity without running
+it there. A vendor that cannot dispatch nested agents applies the mode in its sequential role
+pass. Token reports label the mode per record and show `Unavailable` where none is configured.
+
 ## Instance-managed Skills
 
 External skills are installed through the `add-skill` entry point in every vendor (Claude Code

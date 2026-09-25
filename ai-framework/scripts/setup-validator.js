@@ -80,6 +80,14 @@ async function checkEntryFiles() {
     );
   }
 }
+// Warn, not fail: a target project's own pre-existing entry file may legitimately predate this.
+async function checkCavemanEntryFiles() {
+  for (const file of ["AGENTS.md", "CLAUDE.md"]) {
+    if (!(await exists(file))) continue;
+    const has = /^## Response style \(caveman mode\)$/m.test(await fs.readFile(absolute(file), "utf8"));
+    record(has ? "pass" : "warn", file, has ? "carries the caveman response-style section" : "no caveman response-style section: the main session agent will not apply caveman mode (copy the section from the bundle's AGENTS.md)");
+  }
+}
 async function checkKnowledgeGraph() {
   const files = [".project/knowledge/graph.json", ".project/knowledge/index.md"];
   if (!(await Promise.all(files.map(exists))).every(Boolean)) { await Promise.all(files.map(requireFile)); return; }
@@ -92,7 +100,7 @@ async function checkKnowledgeGraph() {
   } catch { record("fail", "Knowledge graph", "graphify did not return JSON"); }
 }
 async function checkScaffold() {
-  await Promise.all([".project/status.md", ".project/pitches/_followups.md", ".project/pitches/_archive/.gitkeep", ".project/pitches/_parked/.gitkeep"].map(requireFile));
+  await Promise.all([".project/status.md", ".project/pitches/_followups.md", ".project/pitches/_archive/.gitkeep", ".project/pitches/_parked/.gitkeep", ".project/done-work.md"].map(requireFile));
   if (await exists(".project/status.md")) {
     const content = await fs.readFile(absolute(".project/status.md"), "utf8");
     const lines = content.trimEnd() === "" ? 0 : content.trimEnd().split("\n").length;
@@ -122,7 +130,7 @@ async function checkWorkflowDoctor() {
 }
 async function validate() {
   if (!(await exists(".project"))) { record("fail", ".project", "missing; setup has not completed"); return; }
-  await Promise.all([checkWorkflowDoctor(), checkContext(), checkEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors()]);
+  await Promise.all([checkWorkflowDoctor(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors()]);
 }
 async function main() {
   if (!json) process.stdout.write(`${paint("heading", "Setup validator: checking generated setup artifacts concurrently...\n")}`);

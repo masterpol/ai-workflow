@@ -1,16 +1,80 @@
 {
   "generated": "2026-09-25",
   "stats": {
-    "total": 6,
-    "decisions": 0,
-    "patterns": 4,
+    "total": 9,
+    "decisions": 1,
+    "patterns": 5,
     "entities": 0,
-    "issues": 2,
-    "edges": 8,
+    "issues": 3,
+    "edges": 13,
     "brokenLinks": 0,
     "orphans": 0
   },
   "nodes": [
+    {
+      "id": "a-gate-must-not-trust-its-own-author",
+      "type": "pattern",
+      "title": "Pattern: A safety gate must not accept the claims of whoever it is gating — and must re-check at the destructive step",
+      "tags": [
+        "safety",
+        "deletion",
+        "validation",
+        "gates"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "pitch-compaction",
+      "related": [
+        "resolve-before-matching-a-protected-path-allowlist",
+        "bare-prefix-match-crosses-entities"
+      ],
+      "file": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md"
+    },
+    {
+      "id": "bare-prefix-match-crosses-entities",
+      "type": "issue",
+      "title": "Issue: Matching entities by a bare `${id}-` prefix lets one entity resolve to another's",
+      "tags": [
+        "identifiers",
+        "matching",
+        "data-integrity"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "pitch-compaction",
+      "related": [
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/issues/bare-prefix-match-crosses-entities.md"
+    },
+    {
+      "id": "caveman-mode-is-default-everywhere",
+      "type": "decision",
+      "title": "Decision: caveman brevity mode is the default for every skill, agent, and session",
+      "tags": [
+        "caveman",
+        "response-style",
+        "all-vendors",
+        "defaults"
+      ],
+      "created": "2026-09-25",
+      "updated": "2026-09-25",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "user-request",
+      "related": [
+        "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/decisions/caveman-mode-is-default-everywhere.md"
+    },
     {
       "id": "dual-hash-tracking-for-transformed-content",
       "type": "pattern",
@@ -139,6 +203,22 @@
   ],
   "edges": [
     {
+      "from": "caveman-mode-is-default-everywhere",
+      "to": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    },
+    {
+      "from": "caveman-mode-is-default-everywhere",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "a-gate-must-not-trust-its-own-author",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "a-gate-must-not-trust-its-own-author",
+      "to": "bare-prefix-match-crosses-entities"
+    },
+    {
       "from": "dual-hash-tracking-for-transformed-content",
       "to": "subprocess-revalidation-against-on-disk-code"
     },
@@ -167,11 +247,39 @@
       "to": "dual-hash-tracking-for-transformed-content"
     },
     {
+      "from": "bare-prefix-match-crosses-entities",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
       "from": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
       "to": "resolve-before-matching-a-protected-path-allowlist"
     }
   ],
   "tagIndex": {
+    "caveman": [
+      "caveman-mode-is-default-everywhere"
+    ],
+    "response-style": [
+      "caveman-mode-is-default-everywhere"
+    ],
+    "all-vendors": [
+      "caveman-mode-is-default-everywhere"
+    ],
+    "defaults": [
+      "caveman-mode-is-default-everywhere"
+    ],
+    "safety": [
+      "a-gate-must-not-trust-its-own-author"
+    ],
+    "deletion": [
+      "a-gate-must-not-trust-its-own-author"
+    ],
+    "validation": [
+      "a-gate-must-not-trust-its-own-author"
+    ],
+    "gates": [
+      "a-gate-must-not-trust-its-own-author"
+    ],
     "ownership": [
       "dual-hash-tracking-for-transformed-content"
     ],
@@ -213,6 +321,15 @@
     ],
     "schema-versioning": [
       "subprocess-revalidation-against-on-disk-code"
+    ],
+    "identifiers": [
+      "bare-prefix-match-crosses-entities"
+    ],
+    "matching": [
+      "bare-prefix-match-crosses-entities"
+    ],
+    "data-integrity": [
+      "bare-prefix-match-crosses-entities"
     ],
     "testing": [
       "macos-tmpdir-realpath-alias-breaks-path-assertions"

@@ -182,7 +182,7 @@ function change(current, previous) {
 }
 
 function recordLine(record) {
-  return `| ${record.vendor} | ${record.agentType || record.agentId || "agent"} | ${record.model || "Unknown"} | ${formatNumber(record.tokens.total)} | ${formatCost(record.costUsd)} | ${record.availability} |`;
+  return `| ${record.vendor} | ${record.agentType || record.agentId || "agent"} | ${record.model || "Unknown"} | ${formatNumber(record.tokens.total)} | ${formatCost(record.costUsd)} | ${record.availability} | ${record.mode || "Unavailable"} |`;
 }
 
 function markdown(snapshot) {
@@ -209,9 +209,9 @@ This is a bounded local snapshot. It stores numeric usage and identifiers only, 
 
 ## Current Completion
 
-| Vendor | Agent | Model | Reported tokens | Actual cost | Availability |
-|---|---|---|---:|---:|---|
-${current ? recordLine(current) : "| None | - | - | Unavailable | Unavailable | unavailable |"}
+| Vendor | Agent | Model | Reported tokens | Actual cost | Availability | Caveman mode |
+|---|---|---|---:|---:|---|---|
+${current ? recordLine(current) : "| None | - | - | Unavailable | Unavailable | unavailable | Unavailable |"}
 
 ## Lifetime Totals
 
@@ -262,7 +262,7 @@ function html(snapshot) {
 <p class="label">Local consumption snapshot</p><h1>Agent Token Consumption</h1>
 <p>Updated ${escapeHtml(snapshot.updatedAt || "Never")}. Stores numeric usage and identifiers only. Actual cost appears only when a harness reports it.</p>
 <div class="cards"><div class="card"><div class="label">Current reported tokens</div><div class="value">${formatNumber(current?.tokens.total)}</div></div><div class="card"><div class="label">Change from previous</div><div class="value">${delta.value === null ? escapeHtml(delta.label) : formatNumber(delta.value)}</div></div><div class="card"><div class="label">Lifetime actual cost</div><div class="value">${formatCost(snapshot.lifetime.reportedCostUsd)}</div></div></div>
-<section><h2>Current Completion</h2><table><thead><tr><th>Vendor</th><th>Agent</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Scope</th></tr></thead><tbody><tr><td>${escapeHtml(current?.vendor || "None")}</td><td>${escapeHtml(current?.agentType || current?.agentId || "-")}</td><td>${escapeHtml(current?.model || "-")}</td><td>${formatNumber(current?.tokens.total)}</td><td>${formatCost(current?.costUsd)}</td><td>${escapeHtml(current?.metricScope || "-")}</td></tr></tbody></table></section>
+<section><h2>Current Completion</h2><table><thead><tr><th>Vendor</th><th>Agent</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Scope</th><th>Caveman mode</th></tr></thead><tbody><tr><td>${escapeHtml(current?.vendor || "None")}</td><td>${escapeHtml(current?.agentType || current?.agentId || "-")}</td><td>${escapeHtml(current?.model || "-")}</td><td>${formatNumber(current?.tokens.total)}</td><td>${formatCost(current?.costUsd)}</td><td>${escapeHtml(current?.metricScope || "-")}</td><td>${escapeHtml(current?.mode || "Unavailable")}</td></tr></tbody></table></section>
 <section><h2>Lifetime</h2><table><thead><tr><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Reported tokens</th><th>Actual cost</th></tr></thead><tbody><tr><td>${snapshot.lifetime.agentCompletions}</td><td>${snapshot.lifetime.reportedUsageCount}</td><td>${snapshot.lifetime.unavailableCount}</td><td>${formatNumber(snapshot.lifetime.tokens.total)}</td><td>${formatCost(snapshot.lifetime.reportedCostUsd)}</td></tr></tbody></table></section>
 <section><h2>By Vendor</h2><table><thead><tr><th>Vendor</th><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Actual cost</th></tr></thead><tbody>${vendorRows}</table></section>
 </main></body></html>

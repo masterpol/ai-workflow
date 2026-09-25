@@ -27,3 +27,21 @@ on the same host, a materially stronger precondition than this tool's actual thr
 Deferred rather than fixed: `.project/pitches/portable-skill-installation/audit-cycle-1.md` has
 the full reasoning. Candidate fix if ever prioritized: verify device/inode of the opened file
 descriptor against a fresh `lstatSync` of the resolved path before trusting a write.
+
+## Independent re-review of pitch-compaction (security, test-coverage, cross-pitch)
+
+Raised 2026-09-25 at `pitch-compaction`'s ship. Its audit cycle had only one reviewer finish (the
+rest hit a provider rate limit); the security pass on this file-deleting tool was run by the code's
+own author. Re-dispatch `security-reviewer`, `test-coverage-checker` and
+`cross-pitch-conflict-checker` against `pitch-compress.js` / `pitch-archive.js` and record
+`audit-cycle-2.md`. Shipped without it by user decision.
+
+## First real-use trial of /pitch-compress
+
+The tool has only ever run against fixtures. Try it once on a low-stakes shipped pitch (with the
+archive kept) and record what the real content exposes that the fixtures did not.
+
+## Wire /state into /pitch-compress once project-state-report ships
+
+The parent pitch wanted an automatic `/state` run after compaction; deliberately left out because
+the command does not exist yet.

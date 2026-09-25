@@ -7,6 +7,8 @@ description: Validate structural drift between an already-unpacked project and a
 
 > **Recommended capability profile:** `standard` — reviewing a structural diff and deciding what to apply requires judgment, not just mechanical diffing.
 
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+
 Run this **inside a target project that already went through `/setup`** (not inside this
 source bundle itself). It fetches `https://github.com/masterpol/ai-workflow.git` at `main` into
 a temporary directory and answers "what changed upstream since we installed/last
@@ -29,7 +31,8 @@ ai-framework/{rules,workflow,contexts,templates,integrations,scripts,hooks}
 ```
 
 `AGENTS.md`, `CLAUDE.md`, `.opencode/opencode.json`, and `.codex/config.toml` are **flagged
-only, never auto-applied** — they mix canonical content with this project's own specifics or
+only, never auto-applied** (the `## Response style (caveman mode)` section in `AGENTS.md`/`CLAUDE.md`
+arrives this way — merge it by hand; `setup-validator.js` warns while it is missing) — they mix canonical content with this project's own specifics or
 locally connected providers. `.project/`, `.claude/settings.json`, `.claude/settings.local.json`,
 and any credential file are never read from the source or written to.
 

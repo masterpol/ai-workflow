@@ -8,7 +8,11 @@ const CATALOG = require("../integrations/skill-defaults.json");
 // Kept explicit rather than derived from the catalog so a malformed catalog entry can never
 // silently widen what resolveMode() accepts; a test cross-checks this set against the catalog.
 const MODES = new Set(["lite", "full", "ultra", "wenyan-lite", "wenyan-full", "wenyan-ultra"]);
-const PHASES = new Set(["shape", "critique", "plan", "build", "audit", "ship", "cooldown"]);
+// The seven workflow phases, plus two scopes so every non-phase skill ("utility": add-skill,
+// checkpoint, search, ...) and every dispatched agent ("agent") resolves through the same
+// precedence chain and can carry its own instance override — instead of only phase skills
+// participating and everything else silently ignoring the mode.
+const PHASES = new Set(["shape", "critique", "plan", "build", "audit", "ship", "cooldown", "utility", "agent"]);
 const MODES_FILE = ".project/skills/modes.json";
 
 function record(value) { return value !== null && typeof value === "object" && !Array.isArray(value); }
@@ -104,6 +108,11 @@ function report(root) {
       installed: Boolean(installed),
       enabled: installed ? installed.enabled : null,
       scope: installed ? installed.scope : null,
+      phases: installed ? installed.phases : null,
+      // Phases the catalog recommends that this install's wrapper does not list: the wrapper tells
+      // an agent not to activate the skill outside its listed phases, so a gap here means the
+      // instruction in those phases' skills would be told to skip it.
+      phaseGap: installed && entry.recommendedPhases ? entry.recommendedPhases.filter((phase) => !installed.phases.includes(phase)) : [],
       runtime: runtimeStatus(entry),
     };
   });
@@ -137,7 +146,7 @@ function cli(argv) {
   throw new Error("Usage: node ai-framework/scripts/skill-defaults.js <resolve-mode --phase P [--arg exact-mode | --args-text free-form-invocation-text] | report> [--root /absolute/project] [--json]");
 }
 
-module.exports = { CATALOG, MODES, PHASES, resolveMode, report, loadModes, extractInvocationArg };
+module.exports = { CATALOG, MODES, PHASES, MODES_FILE, resolveMode, report, loadModes, extractInvocationArg };
 
 if (require.main === module) {
   try {

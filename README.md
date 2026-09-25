@@ -122,6 +122,10 @@ the canonical file itself declares, and checks that both the OpenCode and Codex 
 load the canonical file (or, for a script-backed skill like `workflow-doctor` itself, the script
 it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
 scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
+It also requires the caveman-mode instruction in every canonical skill, agent, and (in this bundle)
+both entry files, validates `.project/skills/modes.json`, and reports the live state — active, inert
+(skill not installed), disabled, or under-covering the workflow — so "carries the instruction" is
+never mistaken for "is on".
 Checks run concurrently and print color-coded progress as each completes. Skills installed with
 `add-skill` are recognized from `.project/skills/registry.json` and checked for ownership, vendor
 coverage and activation instead of canonical mirror rules. It does not validate Cursor mirrors
@@ -202,6 +206,11 @@ verified skill for every vendor in the project with an explicit scope and workfl
 `ai-framework/integrations/skills.md`.
 
 ## One source, every vendor
+
+> **Caveman mode** rides the same architecture: one instruction, carried by every canonical skill
+> and agent (and both entry files), resolved per invocation by `skill-defaults.js`. Vendor mirrors
+> point at the canonical files or are byte copies — see
+> [`ai-framework/integrations/skill-defaults.md`](ai-framework/integrations/skill-defaults.md).
 
 Every skill, agent, and command is written **once**, canonically, and every vendor consumes
 that same source — no vendor maintains its own copy of the logic:

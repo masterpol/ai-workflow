@@ -186,7 +186,10 @@ test("workflow doctor and setup validator accept a registry-managed skill in a r
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");
   const skip = new Set([".git", "node_modules", "metrics", ".DS_Store"]);
-  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source) => !skip.has(path.basename(source)) && !source.includes(`${path.sep}.project${path.sep}skills`) });
+  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source) => !skip.has(path.basename(source)) });
+  // Keep .project/skills (registry + packages) together with the wrapper files it owns: excluding
+  // it would leave an installed skill's wrappers orphaned, which the doctor rightly rejects — a
+  // failure that only appears once a skill is actually installed in the repo running this test.
   run({ root, repo: sourceRepo(directory), skill: ID, scope: "project", phases: "manual", apply: true });
   const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1" };
   const doctor = spawnSync(process.execPath, ["ai-framework/scripts/workflow-doctor.js", "--json"], { cwd: root, encoding: "utf8", env });

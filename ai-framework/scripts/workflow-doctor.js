@@ -10,6 +10,7 @@ const fsp = require("node:fs/promises");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 const { externalSkillReport } = require("./skill-vendors");
+const skillDefaults = require("./skill-defaults");
 
 const root = process.cwd();
 const fix = process.argv.includes("--fix");
@@ -310,11 +311,30 @@ async function checkSkillDefaults() {
     const catalog = JSON.parse(await fsp.readFile(absolute(relativePath), "utf8"));
     const valid = catalog && catalog.schemaVersion === 1 && Array.isArray(catalog.defaults) && catalog.defaults.length > 0 &&
       catalog.defaults.every((entry) => entry && typeof entry.id === "string" && /^[^/]+\/[^/]+\/[^/]+$/.test(entry.id) && typeof entry.path === "string" && typeof entry.purpose === "string" &&
-        (entry.runtime === null || entry.runtime === undefined || (Array.isArray(entry.runtime?.check) && entry.runtime.check.every((item) => typeof item === "string"))));
+        (entry.runtime === null || entry.runtime === undefined || (Array.isArray(entry.runtime?.check) && entry.runtime.check.every((item) => typeof item === "string"))) &&
+        (entry.recommendedPhases === undefined || (Array.isArray(entry.recommendedPhases) && entry.recommendedPhases.every((item) => typeof item === "string"))));
     record(valid ? "pass" : "fail", relativePath, valid ? `${catalog.defaults.length} default skill(s) declared` : "malformed catalog: schemaVersion/defaults/id/path/purpose/runtime shape invalid");
   } catch (error) {
     record("fail", relativePath, `invalid JSON: ${error.message}`);
   }
+}
+
+// What the caveman instruction in every skill/agent/entry file will actually do right now. The
+// instruction itself is enforced file-by-file elsewhere; this reports the live state behind it so
+// "carries the instruction" is never mistaken for "is active" — and a malformed mode file, which
+// would make every one of those instructions' commands fail loudly, is caught here first.
+async function checkCavemanState() {
+  const name = "Caveman mode";
+  try { skillDefaults.loadModes(root); } catch (error) { record("fail", ".project/skills/modes.json", `invalid: ${error.message}`); return; }
+  const modes = fs.existsSync(absolute(skillDefaults.MODES_FILE)) ? skillDefaults.loadModes(root) : null;
+  const status = skillDefaults.report(root);
+  if (status.registryError) { record("warn", name, `skill registry unreadable, cannot tell whether caveman is installed: ${status.registryError}`); return; }
+  const caveman = status.defaults.find((entry) => entry.id.endsWith("/caveman"));
+  if (!caveman?.installed) { record("info", name, "instruction present in every skill/agent but caveman is not installed, so it is inert; install with /add-skill juliusbrussee/caveman/caveman"); return; }
+  if (!caveman.enabled) { record("warn", name, "caveman is installed but disabled in the registry; every skill/agent instruction will skip it"); return; }
+  if (caveman.phaseGap.length) { record("warn", name, `installed wrapper does not list recommended phase(s): ${caveman.phaseGap.join(", ")}; it tells agents not to activate outside its listed phases (re-run add-skill update --phases ...)`); return; }
+  if (modes?.caveman?.enabled === false) { record("info", name, "installed and covered, but persistently disabled in .project/skills/modes.json (enabled: false)"); return; }
+  record("pass", name, `active: installed, enabled, covers all recommended phases; default ${modes?.caveman?.default || skillDefaults.CATALOG.defaults.find((entry) => entry.id.endsWith("/caveman")).defaultMode}`);
 }
 
 async function checkOpenCodeResolution() {
@@ -401,6 +421,9 @@ async function checkSkill(name) {
     requireExactSkillFilename(`.agents/skills/${name}`),
   ]);
   if (!(await requireFile(canonical))) return;
+  // Every canonical skill (registry-managed external skills are filtered out before this runs)
+  // must carry the caveman-mode instruction, so a newly added skill can't silently opt out.
+  await matches(canonical, /\*\*Caveman mode:\*\*/, "carries the caveman mode instruction");
   const content = await fsp.readFile(absolute(canonical), "utf8");
   const referencePattern =
     skillReferencePatternOverrides[name] ?? new RegExp(`\\.claude/skills/${escapeRegExp(name)}/SKILL\\.md`);
@@ -437,6 +460,7 @@ async function checkAgent(name) {
   const content = await fsp.readFile(absolute(claude), "utf8");
 
   await matches(claude, /^model: .+$/m, "declares a Claude model");
+  await matches(claude, /\*\*Caveman mode:\*\*/, "carries the caveman mode instruction");
   await matches(claude, /Sub-agent dispatch:/, "documents nested sub-agent dispatch");
 
   const profile = extractAgentProfile(content);
@@ -523,6 +547,9 @@ async function validate() {
   await Promise.all([
     ...coreFiles.map(requireFile),
     ...(inPortableBundleRepo ? readmeChecks.map(([expression, detail]) => matches("README.md", expression, detail)) : []),
+    // The cross-vendor entry files are the template new installs copy: the main session agent of
+    // every vendor gets its caveman instruction from here, so the source bundle must carry it.
+    ...(inPortableBundleRepo ? ["AGENTS.md", "CLAUDE.md"].map((file) => matches(file, /^## Response style \(caveman mode\)$/m, "carries the caveman response-style section")) : []),
     ...phaseFiles.map((phase) => requireFile(`ai-framework/workflow/phases/${phase}.md`)),
     ...ruleFiles.map((rule) => requireFile(`ai-framework/rules/${rule}.md`)),
     ...cjsOverrides.map((file) => matches(file, /"type":\s*"commonjs"/, "declares commonjs for its directory")),
@@ -539,6 +566,7 @@ async function validate() {
     ...scripts.map(checkNode),
     checkOpenCodeResolution(),
     checkSkillDefaults(),
+    checkCavemanState(),
   ]);
   await checkProjectScaffold();
   await checkKnowledgeGraph();
