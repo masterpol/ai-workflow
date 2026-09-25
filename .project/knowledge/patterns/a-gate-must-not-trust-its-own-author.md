@@ -61,7 +61,7 @@ was the plan's own wording that was right and my "simplification" that was wrong
 
 - `ai-framework/scripts/pitch-compress.js` (`commitLedger`, `checkDestination`, `--accept-gap`)
 - `ai-framework/scripts/pitch-archive.js` (`requireCompleteLedger`, called from `remove()`)
-- Found in `.project/pitches/pitch-compaction/audit-cycle-1.md`.
+- Found in `.project/compaction/archives/pitch-compaction-2026-09-25T13-39-04-109Z/files/audit-cycle-1.md`.
 
 ## Related Patterns
 

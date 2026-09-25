@@ -5,7 +5,7 @@
  * never a database connection). .project/status.md and .project/runs/ remain the lifecycle
  * authorities. Every fact is { value, status, evidence, note? }; a section that cannot be built
  * is "unavailable" with a reason and never fails the others. See
- * ai-framework/integrations/state-report.md and .project/pitches/project-state-report/plan.md.
+ * ai-framework/integrations/state-report.md and .project/knowledge/decisions/project-state-report-design.md.
  */
 const fs = require("node:fs");
 const crypto = require("node:crypto");

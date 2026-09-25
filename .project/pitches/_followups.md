@@ -27,7 +27,7 @@ unchanged") on the next sync, even though upstream did change and the target nev
 silently hiding a real, still-pending upstream change. Likely fix: the marker's base for a given
 file should be the base it was ACTUALLY compared/kept against this run (old base if kept as
 `unverified`/`local`/`conflict`, new source hash only if applied), not a blanket re-snapshot of
-current source. See `.project/pitches/portable-skill-installation/log.md` (S3 observation) for
+current source. See `.project/compaction/archives/portable-skill-installation-2026-09-25T13-27-02-414Z/files/log.md` (S3 observation) for
 the exact repro.
 
 ## TOCTOU: ancestor-symlink race between resolveFile's check and the later write
@@ -41,7 +41,7 @@ redirecting an install/reconcile write outside the intended tree. Not reachable 
 upstream skill content alone (symlinks inside fetched content are already rejected before this
 point) — requires an independent local attacker already capable of racing filesystem operations
 on the same host, a materially stronger precondition than this tool's actual threat model.
-Deferred rather than fixed: `.project/pitches/portable-skill-installation/audit-cycle-1.md` has
+Deferred rather than fixed: `.project/compaction/archives/portable-skill-installation-2026-09-25T13-27-02-414Z/files/audit-cycle-1.md` has
 the full reasoning. Candidate fix if ever prioritized: verify device/inode of the opened file
 descriptor against a fresh `lstatSync` of the resolved path before trusting a write.
 
@@ -57,6 +57,21 @@ own author. Re-dispatch `security-reviewer`, `test-coverage-checker` and
 
 The tool has only ever run against fixtures. Try it once on a low-stakes shipped pitch (with the
 archive kept) and record what the real content exposes that the fixtures did not.
+
+**Done 2026-09-25 on `portable-skill-installation`** (19 required sections, all extracted, 0 gaps; archive
+verified; 12 files removed; ledger, archive, and `done-work.md` entry kept). What real content exposed that
+fixtures did not:
+- `remove` leaves the emptied pitch directory behind, and `inventory` and `/state` then read it as an
+  *active* pitch. Fixed in `inventory` (an empty directory whose slug is in `done-work.md` is "already
+  compacted"; tested). Open question: should `remove` also delete the empty directory?
+- The ledger's "destination exists" check is only mechanical. Extraction needed a real look at whether the
+  destination held the claim; nine of nineteen sections mapped to durable docs that already existed, and the
+  rest needed one new decision entry. Consider a `verify-destination` hint (a phrase that must appear in the
+  destination) so a mapping cannot point at a file that merely exists.
+- The summary is written before the archive exists, so the archive pointer needs a second `write-done-work`
+  run; a `--archive latest` option would remove that round trip.
+- Decision on `/state`: after compaction it now shows the pitch as "compacted" from `done-work.md`. Still a
+  separate, human-chosen step; calling it automatically would leave no diff (report output is git-ignored).
 
 ## Wire /state into /pitch-compress once project-state-report ships
 
@@ -142,4 +157,14 @@ Raised 2026-09-25. The strict theme grammar rejects any quote, so `'Inter', sans
 `var(--font-inter)` in a project's CSS renders in the fallback font. If real projects hit this often,
 accept a quoted family only in the exact form `"[A-Za-z0-9 -]{1,40}"` and re-emit it from the validated
 name, and resolve one level of `var()` within the same file.
+
+## /pitch-compress and /pitch-archive have no CHANGELOG entry of their own
+
+Raised 2026-09-25 while compacting `pitch-compaction`. The feature (skill, `pitch-compress.js`,
+`pitch-archive.js`, the `done-work.md` scaffold) shipped in commits without a `changelog.js` entry; only the
+2.8.0 entry mentions `pitch-compress`, and only for its hardening. A project syncing from an older bundle sees no
+changelog line for the new skill. `CHANGELOG.md` says past entries are not hand-edited, so the fix is a new
+entry (a patch bump) describing the skill as an addition that was previously unlogged.
+
+**Resolved 2026-09-25:** logged in the 2.8.1 entry (as a detail, not a retroactive 'Added' release).
 

@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "slug": "project-state-report",
+  "sourceRoot": ".project/pitches/project-state-report",
+  "archivedAt": "2026-09-25T13:39:04.585Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "4a22cf6cf0f61f13c49f458cb82b3e101a11009071b1580b1753327d89ea34b4",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "6c5f8212aecbb139b2f7a671b5f7c29ef5be54ecde7358b51cdab393f340a02f",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "99115b353856f6a97c07b9163888f083c11820dd56bea0a8dd7506b088db90e5",
+      "mode": 420
+    },
+    "audit-cycle-3.md": {
+      "hash": "ab99e23fde40751e854e6c28ffdc766fab1a1638e832546868dbba7424975765",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "3d5cbdf7e9a0e7a0b04cb08c326e8b5140cf53faaed24f6f3568f85430432b87",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "f19b189e9dd60bb4d20cf99acde1dcf89c0b1ba0cff67ae64e95591abbc0247b",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "9ddf03a81d4b29f6f1f4cc13939999a1d3d1197533ae30ce8d8e963cdd54176a",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "4326ae3358985416580bb1915ec8148aa0ded19b3c35e81bd917722f4f21a1c9",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "c4fd4108bec8ef96d7e6a04092b9ec8c619632bf3e135412d31bc74283c0d5b6",
+      "mode": 420
+    },
+    "state-html.md": {
+      "hash": "d6e9ac7f01fc475e5055f25cb348738a51172a23846932a8d5b353ce34546eab",
+      "mode": 420
+    },
+    "state-snapshot.md": {
+      "hash": "28e6ce011e0a9926284bd8d1e4c40d4be2e4103648a552239587ee54466fabb6",
+      "mode": 420
+    }
+  }
+}

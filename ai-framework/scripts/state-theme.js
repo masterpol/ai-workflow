@@ -8,7 +8,7 @@
  * cannot survive as text. Anything outside the grammar is rejected, not sanitized. Every
  * text/background pair is contrast-checked (WCAG AA 4.5:1) and falls back to the documented
  * shadcn-style theme, for that group only, with a recorded reason.
- * See ai-framework/integrations/state-report.md and .project/pitches/project-state-report/plan.md.
+ * See ai-framework/integrations/state-report.md and .project/knowledge/decisions/project-state-report-design.md.
  */
 const crypto = require("node:crypto");
 const fs = require("node:fs");

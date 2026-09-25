@@ -92,6 +92,19 @@ test("inventory reports an already-compacted pitch (directory gone, recorded in 
   assert.deepEqual(result, [{ slug: "gone-pitch", eligible: false, reason: "already compacted" }]);
 });
 
+test("an emptied pitch directory left behind by remove is compacted when done-work.md records it, and only then", (t) => {
+  const root = fixture(t);
+  write(root, ".project/done-work.md", "# Done Work\n\n## emptied — shipped 2026-09-01\n\nSummary.\n");
+  fs.mkdirSync(path.join(root, ".project/pitches/emptied"), { recursive: true });
+  fs.mkdirSync(path.join(root, ".project/pitches/never-recorded"), { recursive: true });
+  write(root, ".project/pitches/restored/pitch.md", "# Pitch: Restored\n");
+  write(root, ".project/done-work.md", `${read(root, ".project/done-work.md")}\n## restored — shipped 2026-09-02\n\nSummary.\n`);
+  const bySlug = Object.fromEntries(inventory(root).map((entry) => [entry.slug, entry]));
+  assert.equal(bySlug.emptied.reason, "already compacted");
+  assert.notEqual(bySlug["never-recorded"].reason, "already compacted", "an empty directory with no record is unknown, not compacted");
+  assert.notEqual(bySlug.restored.reason, "already compacted", "a pitch that was restored (files present again) is classified normally");
+});
+
 test("a hill chart where every scope reads done is not reported as active", (t) => {
   const root = fixture(t);
   write(root, ".project/pitches/finished-hill/pitch.md", "# Pitch\n");

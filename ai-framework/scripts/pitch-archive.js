@@ -3,7 +3,7 @@
  * Immutable recovery archive, transactional deletion, and restore for a pitch compacted by
  * pitch-compress.js. Deliberately reuses skill-registry.js's already-audited transact/recover
  * rather than a second implementation of "safely delete files with crash recovery" — see
- * .project/pitches/pitch-compaction/plan.md's "Reuse, not new plumbing".
+ * .project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md ("Reuse the audited transaction machinery").
  */
 const fs = require("node:fs");
 const path = require("node:path");

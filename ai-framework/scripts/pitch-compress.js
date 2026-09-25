@@ -104,11 +104,15 @@ function classify(root, slug) {
 function inventory(root) {
   const present = listPitchSlugs(root);
   const presentSet = new Set(present);
+  // `remove` deletes a pitch's files but leaves its (now empty) directory behind; with the slug recorded in
+  // done-work.md that is a compacted pitch, not an active one.
+  const compacted = doneWorkSlugs(root);
+  const isEmptyDirectory = (slug) => { try { return fs.readdirSync(pitchDir(root, slug)).length === 0; } catch { return false; } };
   // A directory whose name isn't a valid slug can never be compacted (every later step
   // validates the slug) — report it as preserved with the reason instead of letting one oddly
   // named directory throw and hide every other pitch from the inventory.
-  const results = present.map((slug) => (SLUG.test(slug) ? classify(root, slug) : { slug, eligible: false, reason: "directory name is not a valid pitch slug (lowercase letters, digits and hyphens); rename it to make it eligible" }));
-  for (const slug of doneWorkSlugs(root)) if (!presentSet.has(slug)) results.push({ slug, eligible: false, reason: "already compacted" });
+  const results = present.map((slug) => (SLUG.test(slug) ? (compacted.has(slug) && isEmptyDirectory(slug) ? { slug, eligible: false, reason: "already compacted" } : classify(root, slug)) : { slug, eligible: false, reason: "directory name is not a valid pitch slug (lowercase letters, digits and hyphens); rename it to make it eligible" }));
+  for (const slug of compacted) if (!presentSet.has(slug)) results.push({ slug, eligible: false, reason: "already compacted" });
   return results.sort((left, right) => left.slug.localeCompare(right.slug));
 }
 

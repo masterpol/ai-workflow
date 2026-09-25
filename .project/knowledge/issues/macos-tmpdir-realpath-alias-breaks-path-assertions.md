@@ -68,5 +68,5 @@ at the specific assertions that compare full path strings.
 ## Related
 
 - `ai-framework/scripts/add-skill.test.js` — original occurrence (S1 build incident,
-  `.project/pitches/portable-skill-installation/log.md`).
+  `.project/compaction/archives/portable-skill-installation-2026-09-25T13-27-02-414Z/files/log.md`).
 - `ai-framework/scripts/bundle-sync.test.js` — second, independent occurrence (S3 build).

@@ -71,7 +71,7 @@ strictly safe in both directions.
 - `ai-framework/scripts/skill-compress-guard.js` (`canCompress`/`resolveReal`) — found and fixed
   during `portable-skill-defaults`' audit cycle 1; both bypasses were independently reproduced
   with live PoC scripts before and after the fix (not accepted on a subagent's description
-  alone). See `.project/pitches/portable-skill-defaults/audit-cycle-1.md`.
+  alone). See `.project/compaction/archives/portable-skill-defaults-2026-09-25T13-39-03-844Z/files/audit-cycle-1.md`.
 - `ai-framework/scripts/skill-defaults.js` (`loadModes`) and
   `ai-framework/hooks/scripts/token-consumption.js` (`currentCavemanMode`) — a sibling issue
   (symlinked *ancestor directory*, not the checked leaf file, bypassing a "must not be a
