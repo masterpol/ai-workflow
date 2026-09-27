@@ -11,6 +11,98 @@ const { discoverVendors, adapters } = require("./skill-vendors");
 const { context, digest, json, snapshot, readRegistry, transact, recover, resolveFile } = require("./skill-registry");
 
 const ID = "example/repository/sample";
+
+test("rejects oversized and FIFO transaction locks without blocking", (t) => {
+  const { root, ctx } = fixture(t);
+  const lock = path.join(root, ctx.state, "lock.json");
+  write(root, `${ctx.state}/lock.json`, "x".repeat(4097));
+  assert.throws(() => transact(ctx, []), /small regular file/);
+  fs.unlinkSync(lock);
+  const result = spawnSync("mkfifo", [lock], { encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  const child = spawnSync(process.execPath, ["-e", "const {context,transact}=require(process.argv[2]);try{transact(context(process.argv[1],'project'),[])}catch(error){process.stderr.write(error.message);process.exit(2)}", root, path.join(__dirname, "skill-registry.js")], { encoding: "utf8", timeout: 3000 });
+  assert.equal(child.error, undefined, "FIFO reader must terminate before timeout");
+  assert.equal(child.status, 2, child.stderr);
+  assert.match(child.stderr, /small regular file/);
+});
+
+test("rejects ancestor replacement before creating a managed temporary file", (t) => {
+  const { root, home, ctx } = fixture(t);
+  write(root, "managed/item", "original");
+  write(home, "item", "outside");
+  const exists = fs.existsSync;
+  let swapped = false;
+  t.mock.method(fs, "existsSync", function(file) {
+    const result = exists.call(fs, file);
+    if (file === path.join(ctx.roots.target, "managed") && !swapped) {
+      swapped = true;
+      fs.renameSync(file, path.join(root, "saved-managed"));
+      fs.symlinkSync(home, file);
+    }
+    return result;
+  });
+  assert.throws(() => transact(ctx, [{ path: "managed/item", expected: digest(Buffer.from("original")), value: { data: Buffer.from("changed"), mode: 0o644 } }]), /Symlink/);
+  assert.equal(fs.readFileSync(path.join(home, "item"), "utf8"), "outside");
+  assert.deepEqual(fs.readdirSync(home), ["item"]);
+});
+
+test("rejects a swapped ancestor before deleting without removing outside data", (t) => {
+  const { root, home, ctx } = fixture(t);
+  write(root, "managed/item", "original");
+  write(home, "item", "outside");
+  const exists = fs.existsSync;
+  let swapped = false;
+  t.mock.method(fs, "existsSync", function(file) {
+    const result = exists.call(fs, file);
+    if (file === path.join(ctx.roots.target, "managed") && !swapped) {
+      swapped = true;
+      fs.renameSync(file, path.join(root, "saved-managed"));
+      fs.symlinkSync(home, file);
+    }
+    return result;
+  });
+  assert.throws(() => transact(ctx, [{ path: "managed/item", expected: digest(Buffer.from("original")), value: null }]), /Symlink/);
+  assert.equal(fs.readFileSync(path.join(home, "item"), "utf8"), "outside");
+});
+
+test("rejects a replaced regular directory ancestor before writing", (t) => {
+  const { root, ctx } = fixture(t);
+  write(root, "managed/item", "original");
+  const exists = fs.existsSync;
+  let swapped = false;
+  t.mock.method(fs, "existsSync", function(file) {
+    const result = exists.call(fs, file);
+    if (file === path.join(ctx.roots.target, "managed") && !swapped) {
+      swapped = true;
+      fs.renameSync(file, path.join(root, "saved-managed"));
+      fs.mkdirSync(file);
+      fs.writeFileSync(path.join(file, "item"), "replacement");
+    }
+    return result;
+  });
+  assert.throws(() => transact(ctx, [{ path: "managed/item", expected: digest(Buffer.from("original")), value: { data: Buffer.from("changed"), mode: 0o644 } }]), /ancestor changed/);
+  assert.equal(fs.readFileSync(path.join(root, "managed/item"), "utf8"), "replacement");
+});
+
+test("rejects a managed ancestor swapped before rename without modifying outside data", (t) => {
+  const { root, home, ctx } = fixture(t);
+  write(root, "managed/item", "original");
+  write(home, "item", "outside");
+  const originalWrite = fs.writeFileSync;
+  let swapped = false;
+  t.mock.method(fs, "writeFileSync", function(file, ...args) {
+    const result = originalWrite.call(fs, file, ...args);
+    if (typeof file === "number" && !swapped && fs.existsSync(path.join(root, "managed")) && fs.readdirSync(path.join(root, "managed")).some((name) => name.includes(".skill-"))) {
+      swapped = true;
+      fs.renameSync(path.join(root, "managed"), path.join(root, "saved-managed"));
+      fs.symlinkSync(home, path.join(root, "managed"));
+    }
+    return result;
+  });
+  assert.throws(() => transact(ctx, [{ path: "managed/item", expected: digest(Buffer.from("original")), value: { data: Buffer.from("changed"), mode: 0o644 } }]), /Symlink/);
+  assert.equal(fs.readFileSync(path.join(home, "item"), "utf8"), "outside");
+  assert.equal(fs.readFileSync(path.join(root, "saved-managed/item"), "utf8"), "original");
+});
 function write(root, name, value) {
   const file = path.join(root, name);
   fs.mkdirSync(path.dirname(file), { recursive: true });

@@ -331,7 +331,7 @@ test("doctor and setup-validator report the live caveman state truthfully across
   assert.equal(validator.results.find((item) => item.name === "AGENTS.md" && /caveman/.test(item.detail)).status, "warn", "in a target project this is a warning, not a failure");
 });
 
-test("the token report shows the caveman mode column, and labels it Unavailable rather than inventing one", () => {
+test("the token report shows the caveman mode column, and labels it Unavailable rather than inventing one", async () => {
   const { recordEvent } = require("../hooks/scripts/token-consumption");
   const withMode = fs.mkdtempSync(path.join(os.tmpdir(), "token-mode-"));
   const without = fs.mkdtempSync(path.join(os.tmpdir(), "token-nomode-"));
@@ -340,7 +340,7 @@ test("the token report shows the caveman mode column, and labels it Unavailable 
     fs.writeFileSync(path.join(withMode, ".project/skills/modes.json"), JSON.stringify({ schemaVersion: 1, caveman: { default: "ultra" } }));
     fs.mkdirSync(path.join(without, ".project"), { recursive: true });
     const event = { vendor: "opencode", event: "message.completed", raw: { session_id: "s", message_id: "m", tokens: { input: 1, output: 1 } } };
-    recordEvent(event, withMode); recordEvent(event, without);
+    await recordEvent(event, withMode); await recordEvent(event, without);
     const read = (root, file) => fs.readFileSync(path.join(root, ".project/metrics", file), "utf8");
     assert.match(read(withMode, "token-consumption.md"), /\| Availability \| Caveman mode \|/);
     assert.match(read(withMode, "token-consumption.md"), /\| ultra \|\n/);

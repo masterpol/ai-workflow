@@ -6,7 +6,9 @@
 
 const fs = require("node:fs");
 const path = require("node:path");
+const crypto = require("node:crypto");
 const { markdown, html } = require("./token-report.js");
+const { withLease } = require("./metrics-lock.js");
 
 const METRICS_DIRECTORY = path.join(".project", "metrics");
 const SNAPSHOT_NAME = "token-consumption.json";
@@ -20,6 +22,9 @@ const MAX_KEYS_PER_DIMENSION = 25;
 const MAX_ID_LENGTH = 128;
 const MAX_COST_USD = 1e6;
 const SAFE_NAME = /^[\w.:/@+-]+$/;
+const MODE = /^[a-z][a-z-]{0,23}$/;
+const MAX_STDIN_BYTES = 1024 * 1024;
+const MAX_SNAPSHOT_BYTES = 4 * 1024 * 1024;
 const UNREPORTED = "(unreported)";
 const OTHER = "(other)";
 // Names that would be unsafe or ambiguous as map keys are folded into OTHER, never stored.
@@ -32,6 +37,12 @@ function numberOrNull(value, max = 1e12) {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= max ? value : null;
 }
 
+// Token counts are whole numbers: a fractional count would leave float residue that makes a later
+// reversal throw an underflow and lose that event.
+function integerOrNull(value) {
+  return Number.isSafeInteger(value) && value >= 0 && value <= 1e12 ? value : null;
+}
+
 function textOrNull(value) {
   return typeof value === "string" && value.trim() ? value.trim() : null;
 }
@@ -39,6 +50,11 @@ function textOrNull(value) {
 // Names come from hook payloads, so they are bounded and limited to identifier characters
 // before they become keys or identities. Anything else (Markdown, HTML, control characters,
 // free text) is reported as (other) instead of being stored.
+// A model built from absent parts ("undefined/undefined") is not a model: it is reported as unreported.
+function knownModel(value) {
+  return value && /(^|\/)(undefined|null)(\/|$)/.test(value) ? null : value;
+}
+
 function boundedName(value) {
   const text = textOrNull(value);
   if (!text) return null;
@@ -77,7 +93,11 @@ function bucketKey(byName, name) {
 function currentCavemanMode(root) {
   try {
     const full = path.join(root, ".project", "skills", "modes.json");
-    if (!fs.existsSync(full)) return null;
+    // A FIFO would block this read (while the metrics lock is held) and a huge file would be read whole:
+    // only a small regular file is ever opened.
+    let stat;
+    try { stat = fs.lstatSync(full); } catch { return null; }
+    if (stat.isSymbolicLink() || !stat.isFile() || stat.size > 64 * 1024) return null;
     // Resolve the real path and confirm it stays under the real root — catches both the file
     // itself being a symlink and an ancestor directory (e.g. .project/skills/) being one; an
     // lstat of the leaf alone only catches the former. Best-effort: any escape or read failure
@@ -88,11 +108,13 @@ function currentCavemanMode(root) {
     const caveman = value && typeof value === "object" && !Array.isArray(value) ? value.caveman : undefined;
     if (!caveman || typeof caveman !== "object" || Array.isArray(caveman)) return null;
     if (caveman.enabled === false) return "off";
+    // A mode is one of a few short lowercase words; anything else in modes.json (a project file) is not stored.
+    const mode = (candidate) => (typeof candidate === "string" && MODE.test(candidate.trim()) ? candidate.trim() : null);
     const explicit = textOrNull(caveman.default);
-    if (explicit) return explicit;
+    if (explicit) return mode(explicit);
     const catalog = require("../../integrations/skill-defaults.json");
     const entry = catalog.defaults?.find((item) => typeof item.id === "string" && item.id.endsWith("/caveman"));
-    return textOrNull(entry?.defaultMode);
+    return mode(textOrNull(entry?.defaultMode));
   } catch {
     return null;
   }
@@ -101,11 +123,11 @@ function currentCavemanMode(root) {
 function tokensFrom(raw = {}) {
   const cache = raw.cache || {};
   const tokens = {
-    input: numberOrNull(raw.input ?? raw.input_tokens),
-    output: numberOrNull(raw.output ?? raw.output_tokens),
-    reasoning: numberOrNull(raw.reasoning ?? raw.reasoning_tokens),
-    cacheRead: numberOrNull(cache.read ?? raw.cache_read_input_tokens),
-    cacheWrite: numberOrNull(cache.write ?? raw.cache_creation_input_tokens),
+    input: integerOrNull(raw.input ?? raw.input_tokens),
+    output: integerOrNull(raw.output ?? raw.output_tokens),
+    reasoning: integerOrNull(raw.reasoning ?? raw.reasoning_tokens),
+    cacheRead: integerOrNull(cache.read ?? raw.cache_read_input_tokens),
+    cacheWrite: integerOrNull(cache.write ?? raw.cache_creation_input_tokens),
   };
   const reported = [tokens.input, tokens.output, tokens.reasoning].filter((value) => value !== null);
   return { ...tokens, total: reported.length > 0 ? reported.reduce((sum, value) => sum + value, 0) : null };
@@ -239,20 +261,20 @@ function normalizedEvent(input, root = process.cwd()) {
   const agentType = boundedName(input.agentType) || boundedName(raw.agent_type) || boundedName(raw.agentType) || boundedName(raw.tool_input?.subagent_type);
   const sessionId = boundedId(input.sessionId) || boundedId(raw.session_id) || boundedId(raw.sessionId);
   const turnId = boundedId(input.turnId) || boundedId(raw.turn_id) || boundedId(raw.turnId);
-  const model = boundedName(input.model) || boundedName(raw.model) || boundedName(raw.resolvedModel) || boundedName(raw.tool_response?.resolvedModel);
+  const model = knownModel(boundedName(input.model) || boundedName(raw.model) || boundedName(raw.resolvedModel) || boundedName(raw.tool_response?.resolvedModel));
   const effort = boundedName(input.effort) || boundedName(raw.effort?.level) || boundedName(raw.effort) || boundedName(raw.variant);
-  const event = textOrNull(input.event) || textOrNull(raw.hook_event_name) || "agent-complete";
+  const event = boundedName(input.event) || boundedName(raw.hook_event_name) || "agent-complete";
   const idempotencyKey =
     boundedId(input.idempotencyKey) ||
     boundedId(raw.message_id) ||
     boundedId(raw.messageId) ||
     boundedId(raw.tool_use_id) ||
-    boundedId(raw.toolUseId) ||
-    (event === "subagent-complete" && (agentId || agentType) ? [sessionId, agentId || agentType, event].filter(Boolean).join(":") : null);
-  const identity = idempotencyKey || (sessionId ? [sessionId, agentId || agentType, turnId].filter(Boolean).join(":") : agentId || [agentType, model, turnId].filter(Boolean).join(":"));
-  const identityKey = `${vendor}:${identity || `${agentType || "agent"}:${model || "unknown"}`}`;
+    boundedId(raw.toolUseId);
+  const completionKey = idempotencyKey ? ["event", idempotencyKey] : event === "subagent-complete" && agentId ? ["subagent", sessionId, agentId, event] : null;
+  const identity = idempotencyKey ? ["event", idempotencyKey] : event === "subagent-complete" && !agentId ? ["anonymous", crypto.randomUUID()] : sessionId ? ["session", sessionId, agentId, agentType, turnId] : agentId ? ["agent", agentId] : ["fallback", agentType, model, turnId];
+  const identityKey = JSON.stringify([vendor, ...identity]);
   return {
-    id: idempotencyKey ? `${vendor}:${idempotencyKey}` : null,
+    id: completionKey ? JSON.stringify([vendor, ...completionKey]) : null,
     identityKey,
     recordedAt: new Date().toISOString(),
     vendor,
@@ -288,67 +310,100 @@ function reviveMaps(snapshot) {
   return snapshot;
 }
 
+const isObject = (value) => value !== null && typeof value === "object" && !Array.isArray(value);
+const isCount = (value) => typeof value === "number" && Number.isFinite(value) && value >= 0;
+const TOKEN_KEYS = ["input", "output", "reasoning", "cacheRead", "cacheWrite", "total"];
+const isCountOrNull = (value) => value === null || isCount(value);
+const isStoredRecord = (record) => record === null
+  || (isObject(record) && typeof record.identityKey === "string" && typeof record.vendor === "string"
+    && isObject(record.tokens) && TOKEN_KEYS.every((key) => isCountOrNull(record.tokens[key]))
+    && (record.costUsd === undefined || isCountOrNull(record.costUsd))
+    && (record.dimensions == null || (isObject(record.dimensions) && ["models", "agents", "efforts"].every((name) => record.dimensions[name] === undefined || typeof record.dimensions[name] === "string"))));
+// Rows are read back, added to and reversed later; a row with a missing or negative counter would turn into NaN
+// (saved as null), the next read would reject the whole file, and every earlier total would be replaced by a blank one.
+const DIMENSION_ROW_FIELDS = ["completions", "reportedUsageCount", "unavailableCount", "tokens", "costUsd", "pricedCount"];
+const hasFields = (row, fields) => isObject(row) && fields.every((key) => isCount(row[key]));
+function validDimensions(dimensions) {
+  if (dimensions === undefined) return true;
+  if (!isObject(dimensions)) return false;
+  return ["models", "agents", "efforts", "skills"].every((name) => {
+    if (dimensions[name] === undefined) return true;
+    if (!isObject(dimensions[name])) return false;
+    const fields = name === "skills" ? ["uses"] : DIMENSION_ROW_FIELDS;
+    return Object.values(dimensions[name]).every((byName) => isObject(byName) && Object.values(byName).every((row) => hasFields(row, fields)));
+  });
+}
+// A stored record's routing is reversed by name later: a name with no matching row would throw on every event.
+function routingResolves(snapshot, record) {
+  if (!record?.dimensions?.applied) return true;
+  return ["models", "agents", "efforts"].every((name) => hasFields(snapshot.dimensions?.[name]?.[record.vendor]?.[record.dimensions[name]], DIMENSION_ROW_FIELDS));
+}
+// A well-formed JSON file with the wrong shape must not be accepted: the collector would throw on every
+// later event (and the reports would never regenerate) until someone deleted the file by hand.
+function usableShape(snapshot) {
+  if (!isObject(snapshot) || !isObject(snapshot.lifetime) || !Array.isArray(snapshot.recentEventKeys)) return false;
+  const lifetime = snapshot.lifetime;
+  if (!["agentCompletions", "reportedUsageCount", "unavailableCount"].every((key) => isCount(lifetime[key]))) return false;
+  if (!isObject(lifetime.tokens) || !TOKEN_KEYS.every((key) => isCount(lifetime.tokens[key]))) return false;
+  if (["reportedCostUsd", "reportedCostCount"].some((key) => lifetime[key] !== undefined && !isCount(lifetime[key]))) return false;
+  if (lifetime.vendors !== undefined && !isObject(lifetime.vendors)) return false;
+  if (Object.values(lifetime.vendors || {}).some((vendor) => !hasFields(vendor, ["completions", "reportedUsageCount", "unavailableCount", "reportedCostUsd"]) || (vendor.pricedCount !== undefined && !isCount(vendor.pricedCount)))) return false;
+  if (!validDimensions(snapshot.dimensions)) return false;
+  if (snapshot.agentModels !== undefined && (!isObject(snapshot.agentModels) || Object.values(snapshot.agentModels).some((note) => typeof note !== "string"))) return false;
+  return isStoredRecord(snapshot.current ?? null) && isStoredRecord(snapshot.previous ?? null)
+    && routingResolves(snapshot, snapshot.current) && routingResolves(snapshot, snapshot.previous);
+}
+
+// Returns { snapshot } or { skip: reason }. Absent, unparseable, or wrongly shaped means "start blank";
+// a snapshot that is not a plain file, is huge, or is from a NEWER schema is refused and never overwritten.
 function readSnapshot(snapshotPath) {
+  let stat;
+  try { stat = fs.lstatSync(snapshotPath); } catch (error) {
+    return error.code === "ENOENT" ? { snapshot: blankSnapshot() } : { skip: `snapshot cannot be inspected (${error.code || "error"})` };
+  }
+  if (stat.isSymbolicLink() || !stat.isFile()) return { skip: "snapshot is a symlink or not a regular file; not read or overwritten" };
+  if (stat.size > MAX_SNAPSHOT_BYTES) return { skip: "snapshot is larger than 4 MB; not read or overwritten" };
   try {
-    const snapshot = JSON.parse(fs.readFileSync(snapshotPath, "utf8"));
-    const usable = snapshot.lifetime && Array.isArray(snapshot.recentEventKeys);
+    const raw = fs.readFileSync(snapshotPath, "utf8");
+    const snapshot = JSON.parse(raw);
+    if (isObject(snapshot) && Number.isInteger(snapshot.schemaVersion) && snapshot.schemaVersion > 2) return { skip: `snapshot schemaVersion ${snapshot.schemaVersion} is newer than this collector understands; not overwritten` };
+    const usable = usableShape(snapshot);
+    // A parseable file that fails validation is replaced by a blank snapshot, but never silently lost: its text is kept aside.
+    if (!usable && isObject(snapshot)) return { snapshot: blankSnapshot(), rejectedText: raw };
     // v1 predates the dimension aggregates: keep its lifetime totals and start the dimensions now.
     // Its stored records carry no `dimensions.applied` flag, so reversing one never touches them.
-    if (usable && snapshot.schemaVersion === 1) return reviveMaps({ ...snapshot, schemaVersion: 2, dimensions: blankDimensions(new Date().toISOString()) });
-    if (usable && snapshot.schemaVersion === 2) return reviveMaps(snapshot);
+    try {
+      if (usable && snapshot.schemaVersion === 1) return { snapshot: reviveMaps({ ...snapshot, schemaVersion: 2, dimensions: blankDimensions(new Date().toISOString()) }) };
+      if (usable && snapshot.schemaVersion === 2) return { snapshot: reviveMaps(snapshot) };
+    } catch { return { snapshot: blankSnapshot(), rejectedText: raw }; } // validated, but still unrevivable: keep it aside too
   } catch {
     // A malformed local metrics file must not break an agent completion hook.
   }
-  return blankSnapshot();
+  return { snapshot: blankSnapshot() };
 }
 
 function writeAtomically(target, content) {
-  const temporary = `${target}.${process.pid}.${Date.now()}.tmp`;
-  fs.writeFileSync(temporary, content, { mode: 0o600 });
-  fs.renameSync(temporary, target);
+  // "wx" refuses an existing path (including a pre-planted symlink); the random suffix makes one unguessable.
+  const temporary = `${target}.${process.pid}.${crypto.randomBytes(6).toString("hex")}.tmp`;
+  try {
+    fs.writeFileSync(temporary, content, { mode: 0o600, flag: "wx" });
+    fs.renameSync(temporary, target);
+  } finally { fs.rmSync(temporary, { force: true }); }
 }
 
-function withLock(directory, action) {
-  const lock = path.join(directory, ".token-consumption.lock");
-  const reclaim = () => {
-    const staleLock = `${lock}.${process.pid}.${Date.now()}.stale`;
-    try {
-      fs.renameSync(lock, staleLock);
-      fs.rmSync(staleLock, { force: true });
-    } catch {}
-  };
-  for (let attempt = 0; attempt < 40; attempt += 1) {
-    try {
-      const descriptor = fs.openSync(lock, "wx", 0o600);
-      try {
-        fs.writeSync(descriptor, String(process.pid));
-        return action();
-      } finally {
-        fs.closeSync(descriptor);
-        fs.rmSync(lock, { force: true });
-      }
-    } catch (error) {
-      if (error.code !== "EEXIST") throw error;
-      try {
-        const owner = Number(fs.readFileSync(lock, "utf8"));
-        if (Number.isInteger(owner) && owner > 0) {
-          process.kill(owner, 0);
-        } else if (Date.now() - fs.statSync(lock).mtimeMs > 1000) {
-          reclaim();
-        }
-      } catch (lockError) {
-        if (lockError.code === "ESRCH") reclaim();
-      }
-      Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, 25);
-    }
-  }
-  throw new Error("timed out waiting for token-consumption metrics lock");
+// The pathname lock that earlier collectors used. Its presence means an old writer may still be running
+// (or crashed and left it): the new protocol cannot exclude that writer, so the event is skipped until an
+// operator has stopped every old collector and removed the file. It is never reclaimed automatically.
+const LEGACY_LOCK_NAME = ".token-consumption.lock";
+
+function legacyLockPresent(directory) {
+  try { fs.lstatSync(path.join(directory, LEGACY_LOCK_NAME)); return true; } catch (error) { return error.code !== "ENOENT"; }
 }
 
 // An async Claude subagent fires PostToolUse(Agent) at launch, not completion, so that event is
 // not a completion: it only leaves a model note for the SubagentStop that follows, which has none.
 function rememberAgentModel(snapshot, record) {
-  if (record.agentId && record.model) snapshot.agentModels[`agent:${record.agentId}`] = record.model;
+  if (record.agentId && record.model) snapshot.agentModels[`agent:${record.vendor}:${record.agentId}`] = record.model;
   const ids = Object.keys(snapshot.agentModels);
   while (ids.length > AGENT_MODEL_NOTES_LIMIT) delete snapshot.agentModels[ids.shift()];
 }
@@ -362,9 +417,10 @@ function recordCompletion(snapshot, input, root) {
     snapshot.updatedAt = record.recordedAt;
     return { written: true, record, launch: true };
   }
-  const noteKey = `agent:${record.agentId}`;
+  const noteKey = `agent:${record.vendor}:${record.agentId}`;
   if (!record.model && record.event === "subagent-complete" && record.agentId && snapshot.agentModels[noteKey]) {
-    record.model = snapshot.agentModels[noteKey];
+    // The note came from a file that can be edited: it goes through the same allow-list as a payload name.
+    record.model = knownModel(boundedName(snapshot.agentModels[noteKey]));
     delete snapshot.agentModels[noteKey];
   }
   const existing = [snapshot.current, snapshot.previous].find((candidate) => candidate?.identityKey === record.identityKey);
@@ -394,6 +450,10 @@ function recordCompletion(snapshot, input, root) {
   return { written: true, record };
 }
 
+function isLink(target) {
+  try { return fs.lstatSync(target).isSymbolicLink(); } catch { return false; }
+}
+
 function staysUnderRoot(root, target) {
   try {
     const relative = path.relative(fs.realpathSync(root), fs.realpathSync(target));
@@ -403,34 +463,54 @@ function staysUnderRoot(root, target) {
   }
 }
 
-function recordEvent(input, root = process.cwd()) {
+// Asynchronous: the metrics lease is a kernel-held socket (metrics-lock.js). Callers must await it.
+// options.lock is passed to the lease (tests use a longer or shorter waitMs).
+async function recordEvent(input, root = process.cwd(), options = {}) {
   const project = path.join(root, ".project");
   if (!fs.existsSync(project)) return { written: false, reason: ".project is not initialized" };
   const directory = path.join(root, METRICS_DIRECTORY);
   // A cloned repo can commit .project or .project/metrics as a symlink. Resolve both before
   // anything is created or written, and refuse to leave the project root.
   if (!staysUnderRoot(root, project)) return { written: false, reason: ".project resolves outside the project root" };
+  // An existing path (a symlink, possibly dangling) is judged before mkdir can follow it anywhere.
+  if (fs.existsSync(directory) || isLink(directory)) { if (!staysUnderRoot(root, directory)) return { written: false, reason: "metrics directory resolves outside the project root" }; }
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   if (!staysUnderRoot(root, directory)) return { written: false, reason: "metrics directory resolves outside the project root" };
-  return withLock(directory, () => {
+  // The lease is held across the read, the snapshot write and both report writes, and released in withLease's finally.
+  const held = await withLease(directory, () => {
+    if (legacyLockPresent(directory)) {
+      return { written: false, reason: `legacy lock ${METRICS_DIRECTORY}/${LEGACY_LOCK_NAME} is present; stop old collectors, then remove it (see README, Token Consumption)` };
+    }
     const snapshotPath = path.join(directory, SNAPSHOT_NAME);
-    const snapshot = readSnapshot(snapshotPath);
+    const loaded = readSnapshot(snapshotPath);
+    if (loaded.skip) return { written: false, reason: loaded.skip };
+    const snapshot = loaded.snapshot;
+    if (loaded.rejectedText !== undefined) writeAtomically(`${snapshotPath}.rejected`, loaded.rejectedText);
     const outcome = textOrNull(input.event) === "skill-use" ? recordSkillUse(snapshot, input) : recordCompletion(snapshot, input, root);
     if (!outcome.written) return { ...outcome, snapshot };
     snapshot.updatedAt ||= new Date().toISOString();
     snapshot.dimensions.since ||= snapshot.updatedAt;
     writeAtomically(snapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`);
-    writeAtomically(path.join(directory, MARKDOWN_NAME), markdown(snapshot));
-    writeAtomically(path.join(directory, HTML_NAME), html(snapshot));
+    // The snapshot is the record; a report that cannot be rendered must not stop the next event from being recorded.
+    try {
+      writeAtomically(path.join(directory, MARKDOWN_NAME), markdown(snapshot));
+      writeAtomically(path.join(directory, HTML_NAME), html(snapshot));
+    } catch { return { ...outcome, snapshot, warning: "reports could not be rendered" }; }
     return { ...outcome, snapshot };
-  });
+  }, options.lock);
+  return held.skipped ? { written: false, reason: held.skipped } : held.value;
 }
 
 function readStdin() {
   return new Promise((resolve, reject) => {
     let data = "";
+    let bytes = 0;
     process.stdin.setEncoding("utf8");
-    process.stdin.on("data", (chunk) => { data += chunk; });
+    process.stdin.on("data", (chunk) => {
+      bytes += Buffer.byteLength(chunk);
+      if (bytes > MAX_STDIN_BYTES) { process.stdin.destroy(); reject(new Error("stdin is larger than 1 MB")); return; }
+      data += chunk;
+    });
     process.stdin.on("end", () => resolve(data));
     process.stdin.on("error", reject);
   });
@@ -449,14 +529,17 @@ async function main() {
       throw new Error("stdin is not valid JSON");
     }
   }
-  const result = recordEvent({ vendor: argumentsByName.get("--vendor"), event: argumentsByName.get("--event"), raw }, argumentsByName.get("--root") || process.cwd());
+  const result = await recordEvent({ vendor: argumentsByName.get("--vendor"), event: argumentsByName.get("--event"), raw }, argumentsByName.get("--root") || process.cwd());
   if (!result.written) process.stderr.write(`[token-consumption] skipped: ${result.reason}\n`);
 }
 
 if (require.main === module) {
   main().catch((error) => {
     // Telemetry is observational and must never block the agent that just completed.
-    process.stderr.write(`[token-consumption] ${error.message}\n`);
+    // File-system errors quote absolute paths; report only their code.
+    // Messages can carry a name read back from the snapshot: printable ASCII only, and bounded.
+    const message = error.syscall && error.code ? `file system error (${error.code})` : String(error.message).replace(/[^\x20-\x7e]/g, "?").slice(0, 160);
+    process.stderr.write(`[token-consumption] ${message}\n`);
   });
 }
 

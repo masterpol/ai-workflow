@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "slug": "native-safety-feasibility",
+  "sourceRoot": ".project/pitches/native-safety-feasibility",
+  "archivedAt": "2026-09-27T01:27:20.475Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "a510286755603c71b36584799a2fb039af60f522ebbcbaa873054d8d22bb7b04",
+      "mode": 420
+    },
+    "audit-code-cycle-1.md": {
+      "hash": "ed24f13bb045db0f8e85cee3ccf73eaa54dcacdc69542679fcb87a1a6a9aa586",
+      "mode": 420
+    },
+    "audit-code-cycle-2.md": {
+      "hash": "f1172d9c13237a423cf5a49938b48c169bef0ffaafc2b307023f39e7c45ad156",
+      "mode": 420
+    },
+    "audit-cross-cycle-1.md": {
+      "hash": "f4daeb344c763520272e96c48768db16eb3b99e804cb4602b9df53e39a2d7de0",
+      "mode": 420
+    },
+    "audit-prompts.md": {
+      "hash": "903e5466e86e296bfcdf02ad57500274467b1843bbb52dea9c35eaf2a0cc0ed0",
+      "mode": 420
+    },
+    "audit-security-cycle-1.md": {
+      "hash": "9854151ec2cbdd34dd7b695858375a47ccd2242a937e3ee2d014947c7c0eee78",
+      "mode": 420
+    },
+    "audit-test-cycle-1.md": {
+      "hash": "a4f0654a9321f7526515bad6cae4e307be97942848bb5066beafbe34f793eaf0",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "a8f21f1a2a919642d4c60f5d0add6e1169aa78b474f9525c0a9bccccbf71bad5",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "999edbd1ab034bdb6c6c9e6d9c5ed9a4235355212078c6bac6918ccca2cee42d",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "ed30d3f10b94c6b234762c102c298474d65e7b10569ccfb3c72d25870812e790",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "9d151649e9cac1b4cb9726e679c9f1c6e61737325a9ebf6170c87054733370c6",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "c40a0539ee89b07dc3dcd56f176c830d717304105ca039ff141bb229cacbfa6e",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "58a9eca14734968e2d67a5f9d66525dd2b64951de5b297d3160a8476d06a95df",
+      "mode": 420
+    },
+    "ship-readiness.md": {
+      "hash": "293bf09ceb4be639c5c9c1e685b4fb4b967477d2c04ab4349906dd3403b599ee",
+      "mode": 420
+    }
+  }
+}

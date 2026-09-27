@@ -160,6 +160,22 @@ test("commit-ledger accepts a complete mapping, computes coverage, and is idempo
   assert.equal(record.sections.length, required.length);
 });
 
+test("rejects ledger writes through symlinked compaction folders", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "linked");
+  write(root, "notes/dest.md", "extracted");
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "ledger-outside-"));
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  const mapping = { sections: buildLedger(root, "linked").required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })) };
+  for (const folder of [".project/compaction", ".project/compaction/ledgers"]) {
+    fs.mkdirSync(path.dirname(path.join(root, folder)), { recursive: true });
+    fs.symlinkSync(outside, path.join(root, folder));
+    assert.throws(() => commitLedger(root, "linked", mapping, { apply: true }), /Symlink/);
+    assert.deepEqual(fs.readdirSync(outside), []);
+    fs.unlinkSync(path.join(root, folder));
+  }
+});
+
 test("commit-ledger rejects a mapping missing a required section", (t) => {
   const root = fixture(t);
   seedShippedPitch(root, "missing-one");
@@ -362,7 +378,7 @@ test("write-done-work refuses to write through a symlinked or non-regular done-w
   seedShippedPitch(root, "foo");
   write(root, "shared/done.md", "# Done Work\n\n## old — shipped 2026-01-01\n\nprecious old entry\n");
   fs.symlinkSync("../shared/done.md", path.join(root, ".project/done-work.md"));
-  assert.throws(() => writeDoneWork(root, "foo", "summary", { apply: true }), /Refusing to write .*symlink/);
+  assert.throws(() => writeDoneWork(root, "foo", "summary", { apply: true }), /Symlink forbidden in path|Refusing to write .*symlink/);
   assert.equal(read(root, "shared/done.md"), "# Done Work\n\n## old — shipped 2026-01-01\n\nprecious old entry\n");
   fs.rmSync(path.join(root, ".project/done-work.md"));
   fs.mkdirSync(path.join(root, ".project/done-work.md"));
@@ -401,4 +417,238 @@ test("a symlinked SHIPPED.md, a symlinked pitches directory, and a FIFO hill.md 
   fs.rmSync(path.join(root, ".project/pitches"), { recursive: true });
   fs.symlinkSync(path.join(root, "elsewhere"), path.join(root, ".project/pitches"));
   assert.deepEqual(inventory(root), []);
+});
+
+// ---- Independent re-review (S1): findings verified against the real code ----
+
+test("duplicate and colliding headings get distinct ledger keys, and content under a later duplicate is required", (t) => {
+  const root = fixture(t);
+  write(root, ".project/pitches/dup/SHIPPED.md", "## Same\nx\n\n## Same\ny\n\n## A B\nz\n\n## A-B\nw\n");
+  write(root, ".project/pitches/dup/log.md", "## Update\n\n## Update\nreal content in the second one\n");
+  assert.deepEqual(requiredSections(root, "dup"), ["SHIPPED.md#same", "SHIPPED.md#same-2", "SHIPPED.md#a-b", "SHIPPED.md#a-b-2", "log.md#update-2"]);
+});
+
+test("headings in other scripts keep readable, distinct keys; ASCII keys are unchanged", (t) => {
+  const root = fixture(t);
+  write(root, ".project/pitches/es/SHIPPED.md", "## Decisión clave\nx\n\n## ¿Qué?\ny\n\n## 决定\nz\n\n## 结果\nw\n\n## S1 — 2026-09-24\nv\n");
+  assert.deepEqual(requiredSections(root, "es"), ["SHIPPED.md#decisión-clave", "SHIPPED.md#qué", "SHIPPED.md#决定", "SHIPPED.md#结果", "SHIPPED.md#s1-2026-09-24"]);
+  assert.equal(slugifyHeading("Scope reconciliation"), "scope-reconciliation");
+});
+
+test("No-gos and Rabbit holes are found under the names the template really uses, and keep their canonical keys", (t) => {
+  for (const [nogos, holes] of [["No-gos", "Rabbit holes"], ["No-Gos", "Rabbit Holes"], ["No-gos (this pitch)", "Rabbit holes (resolved)"], ["No gos", "Rabbit-holes"]]) {
+    const root = fixture(t);
+    write(root, ".project/pitches/loose/SHIPPED.md", "## S\nx\n");
+    write(root, ".project/pitches/loose/pitch.md", `# P\n\n## ${holes}\n\n- one\n\n## ${nogos}\n\n- two\n`);
+    assert.deepEqual(requiredSections(root, "loose"), ["SHIPPED.md#s", "pitch.md#no-gos", "pitch.md#rabbit-holes"], `${nogos} / ${holes}`);
+  }
+});
+
+test("a # line inside a fenced code block is not a heading", (t) => {
+  const root = fixture(t);
+  write(root, ".project/pitches/fence/SHIPPED.md", "## Real\n\n```sh\n## not a heading\n# comment\n```\n\nafter the fence\n");
+  write(root, ".project/pitches/fence/log.md", "## Entry\n\n```\n## fake\n```\ntext\n");
+  assert.deepEqual(requiredSections(root, "fence"), ["SHIPPED.md#real", "log.md#entry"]);
+});
+
+test("the graph check runs the bundle's graphify.js, never one the project supplies", (t) => {
+  const root = fixture(t);
+  const witness = path.join(fs.mkdtempSync(path.join(os.tmpdir(), "witness-")), "RAN");
+  t.after(() => fs.rmSync(path.dirname(witness), { recursive: true, force: true }));
+  write(root, "ai-framework/scripts/graphify.js", `require("fs").writeFileSync(${JSON.stringify(witness)}, "ran"); console.log(JSON.stringify({ status: "clean", problems: [] }));`);
+  seedShippedPitch(root, "witness-pitch");
+  write(root, "notes/dest.md", "d");
+  const sections = buildLedger(root, "witness-pitch").required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md" }));
+  commitLedger(root, "witness-pitch", { sections }, {});
+  assert.ok(!fs.existsSync(witness), "the project's own graphify.js was executed");
+});
+
+test("writeDoneWork rejects a summary containing heading lines and leaves other pitches' sections byte-for-byte alone", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "first");
+  seedShippedPitch(root, "second");
+  assert.throws(() => writeDoneWork(root, "first", "line\n\n## ghost — shipped 2026-01-01\nforged", { apply: true }), /heading lines/);
+  assert.throws(() => writeDoneWork(root, "first", "# top\nx", { apply: true }), /heading lines/);
+  writeDoneWork(root, "first", "code:\n\n\n\nafter three blank lines", { apply: true });
+  writeDoneWork(root, "second", "second summary", { apply: true });
+  const before = read(root, ".project/done-work.md");
+  writeDoneWork(root, "second", "second summary changed", { apply: true });
+  const after = read(root, ".project/done-work.md");
+  assert.match(after, /code:\n\n\n\nafter three blank lines/, "the other pitch's blank lines survive a rerun");
+  assert.equal(after.replace("second summary changed", "second summary"), before, "only the rerun pitch's own section changed");
+  assert.deepEqual(inventory(root).map((entry) => entry.slug).sort(), ["first", "second"]);
+});
+
+test("a compacted pitch whose directory keeps nested empty directories is still compacted, but one with a file is not", (t) => {
+  const root = fixture(t);
+  write(root, ".project/done-work.md", "# Done\n\n## nested — shipped 2026-01-01\n\nS\n\n## has-file — shipped 2026-01-02\n\nS\n");
+  fs.mkdirSync(path.join(root, ".project/pitches/nested/sub/deeper"), { recursive: true });
+  write(root, ".project/pitches/has-file/sub/keep.md", "still here\n");
+  const bySlug = Object.fromEntries(inventory(root).map((entry) => [entry.slug, entry.reason]));
+  assert.equal(bySlug.nested, "already compacted");
+  assert.notEqual(bySlug["has-file"], "already compacted");
+});
+
+test("CLI: an option without a value and a malformed ledger file give fixed messages that do not echo input", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "cli-fixed");
+  const missing = spawnSync(process.execPath, [path.join(__dirname, "pitch-compress.js"), "commit-ledger", "cli-fixed", "--root", root, "--file"], { encoding: "utf8" });
+  assert.match(missing.stderr, /--file requires a value/);
+  write(root, "mapping.json", "{ secret-looking-content");
+  const bad = spawnSync(process.execPath, [path.join(__dirname, "pitch-compress.js"), "commit-ledger", "cli-fixed", "--root", root, "--file", path.join(root, "mapping.json")], { encoding: "utf8" });
+  assert.match(bad.stderr, /the ledger file is not valid JSON/);
+  assert.ok(!bad.stderr.includes("secret-looking-content"));
+});
+
+// ---- Independent re-review of the S1 fixes ----
+
+test("a numeric suffix never collides with another heading's own slug", (t) => {
+  const root = fixture(t);
+  write(root, ".project/pitches/coll/SHIPPED.md", "## A B\nx\n\n## A B\ny\n\n## A B 2\nSECRET\n\n## A B 2\nagain\n");
+  const keys = requiredSections(root, "coll");
+  assert.equal(new Set(keys).size, keys.length, `duplicate keys: ${keys.join(", ")}`);
+  assert.equal(keys.length, 4);
+});
+
+test("a later No-gos heading with content is required even when an earlier matching heading is empty", (t) => {
+  const root = fixture(t);
+  write(root, ".project/pitches/second/SHIPPED.md", "## S\nx\n");
+  write(root, ".project/pitches/second/pitch.md", "# P\n\n## No-gos\n\n## No-gos (second)\nSECOND\n");
+  assert.deepEqual(requiredSections(root, "second"), ["SHIPPED.md#s", "pitch.md#no-gos"]);
+});
+
+test("fenced code follows CommonMark: a backtick in the info string, a shorter closing fence, and a different fence character do not hide or expose headings wrongly", (t) => {
+  const cases = [
+    ["intro\n``` a`b\n## Hidden decision\ntext\n", ["log.md#hidden-decision"]],
+    ["```\n## inside\n```\n\n## Outside\ntext\n", ["log.md#outside"]],
+    ["````\n```\n## still inside the long fence\n````\n\n## After\ntext\n", ["log.md#after"]],
+    ["~~~\n```\n## inside tilde fence\n~~~\n\n## After\ntext\n", ["log.md#after"]],
+  ];
+  for (const [text, expected] of cases) {
+    const root = fixture(t);
+    write(root, ".project/pitches/fenced/SHIPPED.md", "## S\nx\n");
+    write(root, ".project/pitches/fenced/log.md", text);
+    assert.deepEqual(requiredSections(root, "fenced").slice(1), expected, JSON.stringify(text));
+  }
+});
+
+test("a very long heading line cannot make heading parsing slow", (t) => {
+  const root = fixture(t);
+  write(root, ".project/pitches/long/SHIPPED.md", "## S\nx\n");
+  write(root, ".project/pitches/long/log.md", `## a${" ".repeat(200000)}\u0000\n## Real\ntext\n`);
+  const started = Date.now();
+  requiredSections(root, "long");
+  assert.ok(Date.now() - started < 500, `took ${Date.now() - started} ms`);
+});
+
+test("a ledger destination inside .project/compaction (the ledger or an archived copy) is refused", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "selfref");
+  write(root, ".project/compaction/ledgers/other.json", "{\"a\":1}");
+  const sections = buildLedger(root, "selfref").required.map((source) => ({ source, status: "extracted", destination: ".project/compaction/ledgers/other.json" }));
+  assert.throws(() => commitLedger(root, "selfref", { sections }, {}), /inside \.project\/compaction/);
+});
+
+test("writeDoneWork refuses a symlinked .project ancestor and writes nothing outside the project", (t) => {
+  const root = fixture(t);
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "outside-"));
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  fs.rmSync(path.join(root, ".project"), { recursive: true, force: true });
+  fs.symlinkSync(outside, path.join(root, ".project"));
+  assert.throws(() => writeDoneWork(root, "p", "summary", { apply: true }), /Symlink forbidden in path/);
+  assert.deepEqual(fs.readdirSync(outside), []);
+});
+
+test("read errors carry an error code, never an absolute path or the child process's raw output", (t) => {
+  if (process.getuid && process.getuid() === 0) return;
+  const root = fixture(t);
+  seedShippedPitch(root, "unreadable");
+  const dir = path.join(root, ".project/pitches/unreadable");
+  fs.chmodSync(dir, 0);
+  let message = "";
+  try { requiredSections(root, "unreadable"); } catch (error) { message = error.message; } finally { fs.chmodSync(dir, 0o755); }
+  assert.match(message, /Cannot read SHIPPED\.md \(EACCES\)/);
+  assert.ok(!message.includes(root));
+});
+
+test("a failing graph check reports graphify's own problem list, not raw stderr or paths", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "graphfail");
+  write(root, ".project/knowledge/patterns/broken.md", "---\nid: broken\ntype: pattern\n---\n\nDuplicate id on purpose.\n");
+  write(root, ".project/knowledge/patterns/broken-dupe.md", "---\nid: broken\ntype: pattern\n---\n\nDuplicate id on purpose.\n");
+  const sections = buildLedger(root, "graphfail").required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" }));
+  let message = "";
+  try { commitLedger(root, "graphfail", { sections }, {}); } catch (error) { message = error.message; }
+  assert.match(message, /^Knowledge graph invalid: /);
+  assert.ok(!message.includes(root), "no absolute path from the child process");
+});
+
+test("an unlistable pitch directory reports an error code and no absolute path", (t) => {
+  if (process.getuid && process.getuid() === 0) return;
+  const root = fixture(t);
+  seedShippedPitch(root, "unlistable");
+  const dir = path.join(root, ".project/pitches/unlistable");
+  fs.chmodSync(dir, 0o111);
+  let message = "";
+  try { requiredSections(root, "unlistable"); } catch (error) { message = error.message; } finally { fs.chmodSync(dir, 0o755); }
+  assert.match(message, /Cannot list the pitch directory \(EACCES\)/);
+  assert.ok(!message.includes(root));
+});
+
+// ---- Audit cycle 3 of the S1 re-review ----
+
+test("a fence closer padded to thousands of characters, or a CRLF closer, still closes the fence; indented ATX headings count", (t) => {
+  const cases = [
+    [`## First\nreal\n\`\`\`sh\nnpm test\n${"`".repeat(5000)}\n## After long closer\ncontent\n`, "log.md#after-long-closer"],
+    ["## First\r\nreal\r\n```sh\r\n## Inside a CRLF fence\r\n```\r\n## After crlf closer\r\ncontent\r\n", "log.md#after-crlf-closer"],
+    ["## First\nreal\n\n   ## Indented heading\ncontent\n", "log.md#indented-heading"],
+  ];
+  for (const [text, key] of cases) {
+    const root = fixture(t);
+    write(root, ".project/pitches/fence2/SHIPPED.md", "## S\nx\n");
+    write(root, ".project/pitches/fence2/log.md", text);
+    assert.ok(requiredSections(root, "fence2").includes(key), `${key} missing from ${JSON.stringify(requiredSections(root, "fence2"))}`);
+    assert.ok(!requiredSections(root, "fence2").includes("log.md#inside-a-crlf-fence"), "a heading inside a CRLF fence is code, not a section");
+  }
+});
+
+test("requiredSections, inventory and readers refuse a symlinked .project or pitch directory instead of reading outside the project", (t) => {
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "outside-"));
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  write(outside, "pitches/p/SHIPPED.md", "## secret heading from outside\nx\n");
+  const viaProject = fixture(t);
+  fs.rmSync(path.join(viaProject, ".project"), { recursive: true, force: true });
+  fs.symlinkSync(outside, path.join(viaProject, ".project"));
+  assert.throws(() => requiredSections(viaProject, "p"), /Symlink forbidden in path/);
+  assert.deepEqual(inventory(viaProject), []);
+  const viaPitch = fixture(t);
+  fs.mkdirSync(path.join(viaPitch, ".project/pitches"), { recursive: true });
+  fs.symlinkSync(path.join(outside, "pitches/p"), path.join(viaPitch, ".project/pitches/p"));
+  assert.throws(() => requiredSections(viaPitch, "p"), /Symlink forbidden in path/);
+  assert.ok(!inventory(viaPitch).some((entry) => entry.eligible), "a symlinked pitch directory is never eligible");
+});
+
+test("ledger commits refuse pending compaction and legacy installer journals without changing either", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "pending-ledger");
+  write(root, "notes/dest.md", "extracted");
+  const mapping = { sections: buildLedger(root, "pending-ledger").required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })) };
+  const ledger = ".project/compaction/ledgers/pending-ledger.json";
+  commitLedger(root, "pending-ledger", mapping, { apply: true });
+  const original = read(root, ledger);
+  for (const [journal, message] of [
+    [".project/compaction/transaction.json", /Interrupted transaction: run recover/],
+    [".project/skills/transaction.json", /Pending legacy or skill transaction/],
+  ]) {
+    write(root, journal, "pending evidence\n");
+    assert.throws(() => commitLedger(root, "pending-ledger", mapping, { apply: true }), message);
+    assert.equal(read(root, ledger), original);
+    assert.equal(read(root, journal), "pending evidence\n");
+    assert.equal(exists(root, ".project/compaction/lock.json"), false);
+    fs.unlinkSync(path.join(root, journal));
+  }
+  write(root, ".project/skills/registry.json", "unrelated installer data\n");
+  commitLedger(root, "pending-ledger", mapping, { apply: true });
+  assert.equal(read(root, ".project/skills/registry.json"), "unrelated installer data\n");
+  assert.equal(exists(root, ".project/skills/lock.json"), false);
 });

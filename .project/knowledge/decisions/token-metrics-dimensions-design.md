@@ -2,9 +2,9 @@
 id: token-metrics-dimensions-design
 type: decision
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-09-27
 tags: [token-metrics, collector, report, schema, hooks, design]
-related: [reversible-aggregates-store-their-routing, allow-list-untrusted-labels-at-ingest-and-at-render, async-agent-launch-hook-counted-as-completion, workflow-tooling-pitches-share-standing-no-gos-and-design-answers]
+related: [reversible-aggregates-store-their-routing, allow-list-untrusted-labels-at-ingest-and-at-render, async-agent-launch-hook-counted-as-completion, workflow-tooling-pitches-share-standing-no-gos-and-design-answers, false-cross-pitch-attribution-in-a-shared-uncommitted-file]
 source: metrics-report-dimensions
 ---
 
@@ -54,12 +54,27 @@ caveman-mode attribution and never-block-the-agent behavior unchanged; `.project
   `agent:`-prefixed note keys, bounded plugin session maps, and `opencode-plugin.test.js`.
 - D6: the cycle-2 security re-check was never completed by a reviewer agent (rate limit, then two stalls); the
   author ran the checks and one more gap was found and fixed (agent ids shown as labels). Shipped on that basis.
+- D7 (`independent-rereview-catch-up`, S2, 2026-09-26): the deferred independent security re-review ran. 12 more
+  fixes: a guarded snapshot reader (symlink/FIFO/non-regular refused without blocking, own skip outcome), an
+  unrecognised-`schemaVersion` snapshot no longer silently overwritten, `mode` bounded and allow-listed
+  (was an unbounded Markdown-link vector), `hook_event_name` allow-listed and stdin capped at 1 MB by bytes
+  (the decision's "bounded snapshot" claim was false: a 3 MB event name gave a 3 MB snapshot), full snapshot-shape
+  validation before any later event can throw mid-write, the renderer's allow-list widened from the agent label
+  alone to every string/number/date field (vendor, model, mode, scope, dates were reaching Markdown/HTML raw),
+  token counts made whole numbers (float residue could underflow a reversal and lose the event), model notes
+  vendor-scoped (`agent:<vendor>:<id>`, a Claude note could otherwise be read by another vendor's completion),
+  the modes.json read guarded the same way the snapshot read is, and a rejected snapshot is now kept aside as
+  `token-consumption.json.rejected` instead of silently discarded. Not fixed: the plugin's own hardening
+  (null-event throws, unbounded map values, `undefined/undefined` model strings — guarded in the collector
+  instead, per the per-slice fix cap) and the `since`/`metricScope` collector-renderer test gap (the review
+  bench's canary attempts on both were refused because they broke no test). See `review-metrics.md`.
 
 ## Consequences
 
 - **Pros**: a report that cannot imply a winner it cannot measure, and a bounded, hostile-input-safe snapshot.
 - **Cons**: history before migration has no dimensions; Claude/Codex show no tokens or cost.
-- **Implications**: an independent security re-review of the collector remains a followup.
+- **Implications**: the independent security re-review this entry once listed as a followup is done (D7); the
+  plugin's own hardening and the `since`/`metricScope` test gap are now the open followups instead.
 
 ## References
 

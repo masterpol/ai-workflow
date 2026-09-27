@@ -85,14 +85,32 @@ function mkdirParents(ctx, file, root, created) {
 
 function writeAtomic(ctx, relative, value, root, created) {
   const full = resolveFile(ctx, relative, root);
+  const ancestors = [];
+  for (let current = path.dirname(full); current.startsWith(ctx.roots[root]); current = path.dirname(current)) {
+    try { const stat = fs.lstatSync(current); ancestors.push({ path: current, dev: stat.dev, ino: stat.ino }); } catch (error) { if (error.code !== "ENOENT") throw error; }
+    if (current === ctx.roots[root]) break;
+  }
+  const check = () => {
+    resolveFile(ctx, relative, root);
+    for (const ancestor of ancestors) {
+      const stat = fs.lstatSync(ancestor.path);
+      if (stat.dev !== ancestor.dev || stat.ino !== ancestor.ino) throw new Error(`Destination ancestor changed: ${relative}`);
+    }
+  };
   mkdirParents(ctx, full, root, created);
+  check();
   if (value === null) { fs.rmSync(full, { force: true }); return; }
   const temporary = `${full}.skill-${crypto.randomUUID()}`;
   try {
     const handle = fs.openSync(temporary, "wx", value.mode);
     try { fs.fchmodSync(handle, value.mode); fs.writeFileSync(handle, Buffer.from(value.data, "base64")); fs.fsyncSync(handle); } finally { fs.closeSync(handle); }
+    check();
     fs.renameSync(temporary, full);
-  } finally { fs.rmSync(temporary, { force: true }); }
+  } finally {
+    // Re-check cleanup too: never follow a swapped ancestor to remove an outside file.
+    check();
+    fs.rmSync(temporary, { force: true });
+  }
 }
 
 function cleanup(ctx, created) {
@@ -107,7 +125,18 @@ function acquire(ctx, recovering, created) {
   const lock = resolveFile(ctx, `${ctx.state}/lock.json`);
   mkdirParents(ctx, lock, "target", created);
   if (fs.existsSync(lock)) {
-    const owner = JSON.parse(fs.readFileSync(lock, "utf8"));
+    // Opening a FIFO must not block a ledger or registry caller; bound both type and bytes
+    // on the descriptor so a leaf swap cannot bypass a pathname-only size/type check.
+    const descriptor = fs.openSync(lock, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW | fs.constants.O_NONBLOCK);
+    let owner;
+    try {
+      const stat = fs.fstatSync(descriptor);
+      if (!stat.isFile() || stat.size > 4096) throw new Error("Invalid lock: expected a small regular file");
+      const bytes = Buffer.alloc(4097);
+      const count = fs.readSync(descriptor, bytes, 0, bytes.length, 0);
+      if (count > 4096) throw new Error("Invalid lock: expected a small regular file");
+      owner = JSON.parse(bytes.subarray(0, count).toString("utf8"));
+    } finally { fs.closeSync(descriptor); }
     let alive = true;
     if (!Number.isSafeInteger(owner.pid) || owner.pid <= 0) throw new Error("Invalid lock; inspect it before recovery");
     try { process.kill(owner.pid, 0); } catch (error) { if (error.code === "ESRCH") alive = false; }
@@ -180,7 +209,9 @@ function transact(ctx, operations, options = {}) {
       }
       fs.unlinkSync(resolveFile(ctx, journalPath));
     } catch (error) {
-      recoverJournal(ctx);
+      try { recoverJournal(ctx); } catch (recoveryError) {
+        throw new AggregateError([error, recoveryError], `${error.message}; rollback refused: ${recoveryError.message}`);
+      }
       throw error;
     }
   } finally { if (release) release(); cleanup(ctx, created); }

@@ -1,16 +1,40 @@
 {
-  "generated": "2026-09-25",
+  "generated": "2026-09-27",
   "stats": {
-    "total": 22,
-    "decisions": 6,
-    "patterns": 9,
+    "total": 26,
+    "decisions": 8,
+    "patterns": 10,
     "entities": 0,
-    "issues": 7,
-    "edges": 55,
+    "issues": 8,
+    "edges": 72,
     "brokenLinks": 0,
     "orphans": 0
   },
   "nodes": [
+    {
+      "id": "a-gate-must-not-audit-its-own-instrument",
+      "type": "pattern",
+      "title": "Pattern: the tool that verifies independence must itself be independently verified",
+      "tags": [
+        "security",
+        "review-tooling",
+        "self-audit",
+        "workflow-tooling"
+      ],
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "independent-rereview-catch-up",
+      "related": [
+        "a-gate-must-not-trust-its-own-author",
+        "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "reviewer-reports-contradicted-by-measurement"
+      ],
+      "file": ".project/knowledge/patterns/a-gate-must-not-audit-its-own-instrument.md"
+    },
     {
       "id": "a-gate-must-not-trust-its-own-author",
       "type": "pattern",
@@ -22,14 +46,15 @@
         "gates"
       ],
       "created": "2026-09-25",
-      "updated": "2026-09-25",
+      "updated": "2026-09-27",
       "confidence": null,
       "severity": null,
       "resolved": null,
       "source": "pitch-compaction",
       "related": [
         "resolve-before-matching-a-protected-path-allowlist",
-        "bare-prefix-match-crosses-entities"
+        "bare-prefix-match-crosses-entities",
+        "a-gate-must-not-audit-its-own-instrument"
       ],
       "file": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md"
     },
@@ -168,6 +193,54 @@
       "file": ".project/knowledge/patterns/dual-hash-tracking-for-transformed-content.md"
     },
     {
+      "id": "effective-sync-bases-and-bounded-font-discovery",
+      "type": "decision",
+      "title": "Decision: Effective sync bases and bounded font discovery",
+      "tags": [
+        "bundle-sync",
+        "merge-base",
+        "state-report",
+        "css",
+        "fonts",
+        "design"
+      ],
+      "created": "2026-09-26",
+      "updated": "2026-09-26",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "bundle-sync-marker-fix, state-quoted-fonts",
+      "related": [
+        "dual-hash-tracking-for-transformed-content",
+        "parse-untrusted-values-and-re-emit-them",
+        "project-state-report-design",
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+      ],
+      "file": ".project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md"
+    },
+    {
+      "id": "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
+      "type": "issue",
+      "title": "Issue: a cross-pitch-conflict-checker cannot separate authorship in a file two uncommitted pitches share",
+      "tags": [
+        "cross-pitch",
+        "verification",
+        "false-positive",
+        "workflow-tooling"
+      ],
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "independent-rereview-catch-up",
+      "related": [
+        "reviewer-reports-contradicted-by-measurement",
+        "a-gate-must-not-audit-its-own-instrument"
+      ],
+      "file": ".project/knowledge/issues/false-cross-pitch-attribution-in-a-shared-uncommitted-file.md"
+    },
+    {
       "id": "hardening-a-shared-reader-made-its-writer-destructive",
       "type": "issue",
       "title": "Issue: making a shared reader treat a symlink as \"absent\" turned its writer into a data-destroyer",
@@ -190,6 +263,31 @@
         "a-gate-must-not-trust-its-own-author"
       ],
       "file": ".project/knowledge/issues/hardening-a-shared-reader-made-its-writer-destructive.md"
+    },
+    {
+      "id": "inode-anchoring-and-stable-inode-locks",
+      "type": "decision",
+      "title": "Decision: Inode anchoring and stable-inode locks",
+      "tags": [
+        "path-safety",
+        "filesystem",
+        "locking",
+        "collector",
+        "feasibility",
+        "platform"
+      ],
+      "created": "2026-09-26",
+      "updated": "2026-09-26",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "native-safety-feasibility",
+      "related": [
+        "a-gate-must-not-trust-its-own-author",
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+        "hardening-a-shared-reader-made-its-writer-destructive"
+      ],
+      "file": ".project/knowledge/decisions/inode-anchoring-and-stable-inode-locks.md"
     },
     {
       "id": "installed-skill-wrappers-ship-as-orphans",
@@ -294,7 +392,7 @@
         "design"
       ],
       "created": "2026-09-25",
-      "updated": "2026-09-25",
+      "updated": "2026-09-27",
       "confidence": null,
       "severity": null,
       "resolved": null,
@@ -303,7 +401,9 @@
         "parse-untrusted-values-and-re-emit-them",
         "a-report-over-an-untrusted-tree-runs-only-bundle-code",
         "hardening-a-shared-reader-made-its-writer-destructive",
-        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+        "resolve-before-matching-a-protected-path-allowlist",
+        "a-gate-must-not-audit-its-own-instrument"
       ],
       "file": ".project/knowledge/decisions/project-state-report-design.md"
     },
@@ -474,7 +574,7 @@
         "design"
       ],
       "created": "2026-09-25",
-      "updated": "2026-09-25",
+      "updated": "2026-09-27",
       "confidence": null,
       "severity": null,
       "resolved": null,
@@ -483,7 +583,8 @@
         "reversible-aggregates-store-their-routing",
         "allow-list-untrusted-labels-at-ingest-and-at-render",
         "async-agent-launch-hook-counted-as-completion",
-        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+        "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
+        "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
       ],
       "file": ".project/knowledge/decisions/token-metrics-dimensions-design.md"
     },
@@ -525,6 +626,34 @@
       "to": "a-gate-must-not-trust-its-own-author"
     },
     {
+      "from": "effective-sync-bases-and-bounded-font-discovery",
+      "to": "dual-hash-tracking-for-transformed-content"
+    },
+    {
+      "from": "effective-sync-bases-and-bounded-font-discovery",
+      "to": "parse-untrusted-values-and-re-emit-them"
+    },
+    {
+      "from": "effective-sync-bases-and-bounded-font-discovery",
+      "to": "project-state-report-design"
+    },
+    {
+      "from": "effective-sync-bases-and-bounded-font-discovery",
+      "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    },
+    {
+      "from": "inode-anchoring-and-stable-inode-locks",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "inode-anchoring-and-stable-inode-locks",
+      "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    },
+    {
+      "from": "inode-anchoring-and-stable-inode-locks",
+      "to": "hardening-a-shared-reader-made-its-writer-destructive"
+    },
+    {
       "from": "pitch-compaction-gate-and-recovery-design",
       "to": "a-gate-must-not-trust-its-own-author"
     },
@@ -557,6 +686,14 @@
       "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
     },
     {
+      "from": "project-state-report-design",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "project-state-report-design",
+      "to": "a-gate-must-not-audit-its-own-instrument"
+    },
+    {
       "from": "skill-defaults-attribution-guard-and-runtime-design",
       "to": "caveman-mode-is-default-everywhere"
     },
@@ -585,6 +722,10 @@
       "to": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
     },
     {
+      "from": "token-metrics-dimensions-design",
+      "to": "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
+    },
+    {
       "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
       "to": "resolve-config-only-from-trusted-root"
     },
@@ -605,12 +746,32 @@
       "to": "macos-tmpdir-realpath-alias-breaks-path-assertions"
     },
     {
+      "from": "a-gate-must-not-audit-its-own-instrument",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "a-gate-must-not-audit-its-own-instrument",
+      "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+    },
+    {
+      "from": "a-gate-must-not-audit-its-own-instrument",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "a-gate-must-not-audit-its-own-instrument",
+      "to": "reviewer-reports-contradicted-by-measurement"
+    },
+    {
       "from": "a-gate-must-not-trust-its-own-author",
       "to": "resolve-before-matching-a-protected-path-allowlist"
     },
     {
       "from": "a-gate-must-not-trust-its-own-author",
       "to": "bare-prefix-match-crosses-entities"
+    },
+    {
+      "from": "a-gate-must-not-trust-its-own-author",
+      "to": "a-gate-must-not-audit-its-own-instrument"
     },
     {
       "from": "a-report-over-an-untrusted-tree-runs-only-bundle-code",
@@ -705,6 +866,14 @@
       "to": "a-gate-must-not-trust-its-own-author"
     },
     {
+      "from": "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
+      "to": "reviewer-reports-contradicted-by-measurement"
+    },
+    {
+      "from": "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
+      "to": "a-gate-must-not-audit-its-own-instrument"
+    },
+    {
       "from": "hardening-a-shared-reader-made-its-writer-destructive",
       "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
     },
@@ -752,6 +921,53 @@
       "caveman-mode-is-default-everywhere",
       "skill-defaults-attribution-guard-and-runtime-design"
     ],
+    "bundle-sync": [
+      "effective-sync-bases-and-bounded-font-discovery",
+      "installed-skill-wrappers-ship-as-orphans",
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "merge-base": [
+      "effective-sync-bases-and-bounded-font-discovery"
+    ],
+    "state-report": [
+      "effective-sync-bases-and-bounded-font-discovery",
+      "project-state-report-design"
+    ],
+    "css": [
+      "effective-sync-bases-and-bounded-font-discovery",
+      "parse-untrusted-values-and-re-emit-them"
+    ],
+    "fonts": [
+      "effective-sync-bases-and-bounded-font-discovery"
+    ],
+    "design": [
+      "effective-sync-bases-and-bounded-font-discovery",
+      "pitch-compaction-gate-and-recovery-design",
+      "project-state-report-design",
+      "skill-defaults-attribution-guard-and-runtime-design",
+      "token-metrics-dimensions-design"
+    ],
+    "path-safety": [
+      "inode-anchoring-and-stable-inode-locks"
+    ],
+    "filesystem": [
+      "inode-anchoring-and-stable-inode-locks",
+      "macos-tmpdir-realpath-alias-breaks-path-assertions",
+      "resolve-before-matching-a-protected-path-allowlist"
+    ],
+    "locking": [
+      "inode-anchoring-and-stable-inode-locks"
+    ],
+    "collector": [
+      "inode-anchoring-and-stable-inode-locks",
+      "token-metrics-dimensions-design"
+    ],
+    "feasibility": [
+      "inode-anchoring-and-stable-inode-locks"
+    ],
+    "platform": [
+      "inode-anchoring-and-stable-inode-locks"
+    ],
     "pitch-compress": [
       "pitch-compaction-gate-and-recovery-design"
     ],
@@ -768,15 +984,6 @@
     "gates": [
       "a-gate-must-not-trust-its-own-author",
       "pitch-compaction-gate-and-recovery-design"
-    ],
-    "design": [
-      "pitch-compaction-gate-and-recovery-design",
-      "project-state-report-design",
-      "skill-defaults-attribution-guard-and-runtime-design",
-      "token-metrics-dimensions-design"
-    ],
-    "state-report": [
-      "project-state-report-design"
     ],
     "html": [
       "project-state-report-design"
@@ -795,9 +1002,6 @@
     ],
     "token-metrics": [
       "skill-defaults-attribution-guard-and-runtime-design",
-      "token-metrics-dimensions-design"
-    ],
-    "collector": [
       "token-metrics-dimensions-design"
     ],
     "report": [
@@ -822,25 +1026,32 @@
     "installer": [
       "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
     ],
-    "bundle-sync": [
-      "installed-skill-wrappers-ship-as-orphans",
-      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
-    ],
     "architecture": [
       "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "security": [
+      "a-gate-must-not-audit-its-own-instrument",
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "parse-untrusted-values-and-re-emit-them",
+      "resolve-before-matching-a-protected-path-allowlist",
+      "resolve-config-only-from-trusted-root"
+    ],
+    "review-tooling": [
+      "a-gate-must-not-audit-its-own-instrument"
+    ],
+    "self-audit": [
+      "a-gate-must-not-audit-its-own-instrument"
+    ],
+    "workflow-tooling": [
+      "a-gate-must-not-audit-its-own-instrument",
+      "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
     ],
     "safety": [
       "a-gate-must-not-trust-its-own-author"
     ],
     "validation": [
       "a-gate-must-not-trust-its-own-author"
-    ],
-    "security": [
-      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
-      "allow-list-untrusted-labels-at-ingest-and-at-render",
-      "parse-untrusted-values-and-re-emit-them",
-      "resolve-before-matching-a-protected-path-allowlist",
-      "resolve-config-only-from-trusted-root"
     ],
     "untrusted-input": [
       "a-report-over-an-untrusted-tree-runs-only-bundle-code",
@@ -875,15 +1086,8 @@
     "transactions": [
       "dual-hash-tracking-for-transformed-content"
     ],
-    "css": [
-      "parse-untrusted-values-and-re-emit-them"
-    ],
     "injection": [
       "parse-untrusted-values-and-re-emit-them"
-    ],
-    "filesystem": [
-      "macos-tmpdir-realpath-alias-breaks-path-assertions",
-      "resolve-before-matching-a-protected-path-allowlist"
     ],
     "case-sensitivity": [
       "resolve-before-matching-a-protected-path-allowlist"
@@ -931,6 +1135,16 @@
     "data-integrity": [
       "bare-prefix-match-crosses-entities"
     ],
+    "cross-pitch": [
+      "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
+    ],
+    "verification": [
+      "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "false-positive": [
+      "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
+    ],
     "regression": [
       "hardening-a-shared-reader-made-its-writer-destructive"
     ],
@@ -969,9 +1183,6 @@
       "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
     ],
     "subagents": [
-      "reviewer-reports-contradicted-by-measurement"
-    ],
-    "verification": [
       "reviewer-reports-contradicted-by-measurement"
     ],
     "process": [

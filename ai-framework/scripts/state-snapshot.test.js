@@ -221,6 +221,57 @@ test("pitches: active, shipped, unlisted, and compacted are told apart", () => {
   } finally { cleanup(root); }
 });
 
+test("a done-work.md or status.md over the 64 KB read limit is reported stale, not silently wrong", () => {
+  const padding = "<!-- padding -->\n".repeat(4000);
+  assert.ok(Buffer.byteLength(padding) > 64 * 1024, "fixture must actually exceed the cap");
+  const doneWork = `${padding}\n## real-pitch — shipped 2026-09-01\nSummary\n`;
+  const root1 = project({ ".project/done-work.md": doneWork });
+  try {
+    const snapshot = snap(root1);
+    assert.equal(snapshot.doneWork.status, "stale");
+    assert.match(snapshot.doneWork.note, /64 KB/);
+    assert.equal(snapshot.doneWork.value.compacted, 0, "the real heading sits past the truncation point and must not be silently missed as if it never existed");
+    assert.deepEqual(checkSnapshot(root1, snapshot), []);
+  } finally { cleanup(root1); }
+
+  const rows = "| noise | uphill 0% | plan | small-batch | 2026-09-01 |\n".repeat(1500);
+  const statusMd = `# Status\n\n## Active pitches\n| Pitch | Hill | Phase | Appetite | Last touched |\n|-------|------|-------|----------|--------------|\n${rows}| real-pitch | uphill 0% | plan | small-batch | 2026-09-20 |\n\n## Parked pitches\n_none_\n\n## Recent ships (last 5)\n| Pitch | Shipped | Notes |\n|-------|---------|-------|\n_none_\n`;
+  assert.ok(Buffer.byteLength(statusMd) > 64 * 1024, "fixture must actually exceed the cap");
+  const root2 = project({ ".project/status.md": statusMd, ".project/pitches/real-pitch/pitch.md": PITCH("Real") });
+  try {
+    const snapshot = snap(root2);
+    assert.equal(snapshot.pitches.statusMd.status, "stale");
+    assert.match(snapshot.pitches.statusMd.note, /64 KB/);
+    const item = snapshot.pitches.items.find((entry) => entry.value.slug === "real-pitch");
+    assert.match(item.note, /could not be confirmed/, "must not claim the pitch is unlisted when status.md itself was truncated");
+    assert.equal(item.status, "stale", "an unconfirmed-listed claim must not be badged \"observed\"");
+  } finally { cleanup(root2); }
+
+  // A compacted (no pitch directory) entry has the same uncertainty: a missing shipped date or a
+  // missing "listed" match could be a real negative, or just past the truncation cutoff.
+  const root3 = project({
+    ".project/status.md": statusMd,
+    ".project/done-work.md": `# Done work\n\n${"<!-- padding -->\n".repeat(4000)}\n## real-pitch — shipped 2026-09-01\nSummary\n`,
+  });
+  try {
+    const snapshot = snap(root3);
+    const item = snapshot.pitches.items.find((entry) => entry.value.slug === "real-pitch");
+    assert.equal(item.value.phase, "compacted");
+    assert.equal(item.status, "stale");
+    assert.match(item.note, /64 KB/);
+  } finally { cleanup(root3); }
+});
+
+test("a nonexistent --root fails with a fixed reason, never the raw absolute path (buildSnapshot, writeSnapshot, CLI)", () => {
+  const bogus = path.join(os.tmpdir(), `state-snapshot-missing-${Date.now()}`);
+  assert.throws(() => buildSnapshot(bogus, { now: NOW }), /--root does not exist or is not resolvable/);
+  assert.throws(() => writeSnapshot(bogus, {}), /--root does not exist or is not resolvable/);
+  const result = spawnSync(process.execPath, [SCRIPT, "--root", bogus], { encoding: "utf8" });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /--root does not exist or is not resolvable/);
+  assert.ok(!result.stderr.includes(bogus), "the raw --root path must not reach stderr");
+});
+
 test("knowledge graph: counts by type and flags a graph older than its entries", () => {
   const root = project({ ".project/knowledge/graph.json": { nodes: [{ type: "pattern" }, { type: "pattern" }, { type: "issue" }] } });
   try {

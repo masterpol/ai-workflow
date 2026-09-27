@@ -2,9 +2,9 @@
 id: project-state-report-design
 type: decision
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-09-27
 tags: [state-report, html, theme, snapshot, design]
-related: [parse-untrusted-values-and-re-emit-them, a-report-over-an-untrusted-tree-runs-only-bundle-code, hardening-a-shared-reader-made-its-writer-destructive, workflow-tooling-pitches-share-standing-no-gos-and-design-answers]
+related: [parse-untrusted-values-and-re-emit-them, a-report-over-an-untrusted-tree-runs-only-bundle-code, hardening-a-shared-reader-made-its-writer-destructive, workflow-tooling-pitches-share-standing-no-gos-and-design-answers, resolve-before-matching-a-protected-path-allowlist, a-gate-must-not-audit-its-own-instrument]
 source: project-state-report
 ---
 
@@ -43,6 +43,38 @@ source: project-state-report
 - **Cons**: the scrub is best-effort; themes with quoted fonts or `var()` fall back.
 - **Implications**: `/pitch-compress` does not call `/state`; compacted pitches appear from `done-work.md`.
 
+## Independent re-review (`independent-rereview-catch-up`, S3, 2026-09-27)
+
+The code review at this pitch's own build-time audit was shallow (three tool calls, one finding). A later,
+dedicated independent re-review (5 dispatches, 2 cycles) found what it missed:
+
+- **`readMarkdown`'s 64 KB cap silently misreported, not just omitted.** A `done-work.md`/`status.md` past
+  the cap kept reporting `status:"observed"` on facts that were actually undercounted or wrong (a shipped
+  pitch invisible, an actually-listed pitch claimed "not listed"). Fixed: truncation is now flagged and the
+  affected facts downgrade to `"stale"` with a note — but only where the specific claim (not just the file)
+  is actually uncertain, so a confirmed positive found within the truncated portion stays `"observed"`.
+- **`readSettings`/`themeChanges` had the ancestor-symlink bug this project's own pattern doc already named**
+  ([[resolve-before-matching-a-protected-path-allowlist]]): they checked only the leaf file's symlink-ness,
+  not whether an ancestor directory (`.project` itself) was a symlink — exactly the ordering `readSource`/
+  `collect` in the same file already get right. Fixed with a shared `insideProject()` realpath-and-contain
+  check.
+- **A hostile or hand-edited `state.json` (the documented untrusted-input boundary) crashed the whole render**
+  instead of degrading one section: `projectRows`/`pitchTable`/the skills mapping indexed a raw array element
+  without the file's own `isFact` shape guard. Fixed by filtering at `list()`, the one place all three
+  consume an array.
+- Two should-fix items: `safeTheme`'s font branch could overwrite a fallback font with literal `undefined`
+  when the key was absent (latent — no production call site triggered it); leaf strings/notes had no length
+  bound before `esc()` (one huge value could produce a multi-MB page).
+- The five HTML nits this decision's own build never actioned (`lang="en"` hard-coded, no `<time>`, tap-target
+  size, `.none` dash noise, no `color-scheme` meta) were triaged: 4 followup, 1 rejected (the stylesheet
+  already sets `color-scheme` on `:root`, so the meta tag would be redundant for this single self-contained
+  page).
+
+See `review-state.md` and `.project/pitches/independent-rereview-catch-up/audit-cycle-1.md` (which also found
+and fixed the same "raw error, absolute path" and ancestor-symlink bug classes in the *review tool itself*,
+`review-bench.js` — see [[a-gate-must-not-audit-its-own-instrument]]).
+
 ## References
 
-`ai-framework/integrations/state-report.md`; [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].
+`ai-framework/integrations/state-report.md`; [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]];
+[[a-gate-must-not-audit-its-own-instrument]].

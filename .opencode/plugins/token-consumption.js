@@ -23,7 +23,8 @@ export default async ({ directory }) => ({
     const skill = typeof input.args?.name === "string" ? input.args.name : null;
     if (!skill) return;
     try {
-      collector.recordEvent({ vendor: "opencode", event: "skill-use", skill, idempotencyKey: input.callID }, directory);
+      // Awaited so a rejection lands in this catch instead of becoming an unhandled rejection in OpenCode.
+      await collector.recordEvent({ vendor: "opencode", event: "skill-use", skill, idempotencyKey: input.callID }, directory);
     } catch {
       // Consumption reporting is observational and cannot affect a tool call.
     }
@@ -33,7 +34,7 @@ export default async ({ directory }) => ({
       if (event.type !== "message.updated") return;
       const message = event.properties?.info;
       if (message?.role !== "assistant" || !message.time?.completed) return;
-      collector.recordEvent({
+      await collector.recordEvent({
         vendor: "opencode",
         event: "message.completed",
         agentType: agentsBySession.get(message.sessionID) || message.mode || "primary",

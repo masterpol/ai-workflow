@@ -107,6 +107,9 @@ test("changed and conflict are classified correctly against a known base, and on
   assert.equal(read(target, "ai-framework/rules/example.md"), "rule v2\n");
   assert.equal(read(target, "ai-framework/rules/fought-over.md"), "target version\n", "conflict is kept, never overwritten");
   assert.equal(read(target, "ai-framework/rules/mine.md"), "local addition, never existed upstream\n", "local-only file untouched");
+  const again = runJson(target, ["--source", source]);
+  assert.equal(again.summary.conflict, 1, "unapplied conflict retains the null prior base");
+  assert.equal(again.summary.changed, 0);
 });
 
 test("prune removes only unmodified-vs-base files removed upstream, keeping a locally edited one", (t) => {
@@ -132,6 +135,24 @@ test("prune removes only unmodified-vs-base files removed upstream, keeping a lo
   assert.equal(exists(target, "ai-framework/rules/gone-clean.md"), false);
   assert.equal(exists(target, "ai-framework/rules/gone-edited.md"), true, "modified-vs-base file is never pruned");
   assert.equal(applied.summary.prunedCount, 1);
+  const again = runJson(target, ["--source", source]);
+  assert.equal(again.removed.find((entry) => /gone-edited/.test(entry.path)).modified, "modified");
+  assert.equal(again.removed.some((entry) => /gone-clean/.test(entry.path)), false);
+});
+
+test("preserves local bases and retains unpruned upstream removals", (t) => {
+  const { source, target } = fixture(t);
+  write(source, "ai-framework/rules/gone.md", "old\n");
+  write(target, "ai-framework/rules/gone.md", "old\n");
+  const base = commit(source, "add removal fixture");
+  write(target, "ai-framework/rules/example.md", "my edit\n");
+  fs.unlinkSync(path.join(source, "ai-framework/rules/gone.md"));
+  runJson(target, ["--source", source, "--base-ref", base, "--apply"]);
+  const again = runJson(target, ["--source", source]);
+  assert.equal(again.summary.local, 1);
+  assert.equal(again.removed.find((entry) => /gone.md/.test(entry.path)).modified, "unmodified");
+  const pruned = runJson(target, ["--source", source, "--apply", "--prune"]);
+  assert.equal(pruned.summary.prunedCount, 1);
 });
 
 test("two target projects with different installed skills keep those differences after apply and prune", (t) => {
@@ -233,6 +254,18 @@ test("report settings and generated reports in .project/reports survive every sy
     assert.equal(read(target, ".project/reports/settings.json"), settings, `pass ${pass + 1}: .project/ is outside every SYNCED_DIRS entry`);
     assert.equal(read(target, ".project/reports/state.html"), "<!doctype html>local\n");
     assert.ok(!exists(target, ".project/reports/README.md"), "sync never writes into .project/");
+  }
+});
+
+test("keeps unverified files pending across repeated marker writes", (t) => {
+  const { source, target } = fixture(t);
+  write(source, "ai-framework/rules/example.md", "upstream v2\n");
+  for (let runNumber = 0; runNumber < 2; runNumber++) {
+    const result = runJson(target, ["--source", source, "--apply"]);
+    assert.equal(result.summary.unverified, 1);
+    const marker = JSON.parse(read(target, ".project/.bundle-sync.json"));
+    assert.equal(Object.hasOwn(marker.files, "ai-framework/rules/example.md"), false);
+    assert.equal(read(target, "ai-framework/rules/example.md"), "rule v1\n");
   }
 });
 

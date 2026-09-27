@@ -13,6 +13,37 @@ const SNAPSHOT_SCRIPT = path.join(__dirname, "state-snapshot.js");
 const RENDER_SCRIPT = path.join(__dirname, "state-render.js");
 const NOW = "2026-09-25T12:00:00.000Z";
 
+test("parses quoted fonts canonically and rejects hostile or indirect family tokens", () => {
+  assert.equal(theme.parseFontFamily("'Open Sans', monospace", "sans-serif").css, '"Open Sans", monospace');
+  assert.equal(theme.parseFontFamily('"123 Font"', "sans-serif").css, '"123 Font", sans-serif');
+  for (const value of ['"evil; color:red"', '"evil</style>"', '"a\\22b"', 'var(--font)', '"a,b"', "'unclosed", 'url(x)', '"   "', 'x'.repeat(201)]) assert.ok(theme.parseFontFamily(value, "sans-serif").reason, value);
+  const custom = { light: { ...theme.FALLBACK.light, fontSans: '"Open Sans", sans-serif' }, dark: theme.FALLBACK.dark };
+  assert.equal(theme.safeTheme(custom).light.fontSans, '"Open Sans", sans-serif');
+  custom.light.fontSans = '"evil</style>"';
+  assert.equal(theme.safeTheme(custom).light.fontSans, theme.FALLBACK.light.fontSans);
+});
+
+test("resolves one same-file variable with final source order and mode precedence", () => {
+  const root = project({ "global.css": ':root{--face:"First";--font-sans:Arial;--font-sans:var(--face);--face:"Open Sans"}.dark{--face:"Dark Face";--font-sans:var(--face)}' });
+  try {
+    const result = theme.discoverTheme(root);
+    assert.equal(result.light.fontSans, '"Open Sans", sans-serif');
+    assert.equal(result.dark.fontSans, '"Dark Face", sans-serif');
+    assert.match(page(root), /"Open Sans", sans-serif/);
+  } finally { cleanup(root); }
+});
+
+test("rejects nested cycles and cross-file font variables", () => {
+  for (const css of [':root{--face:var(--font-sans);--font-sans:var(--face)}', ':root{--face:var(--other);--other:Arial;--font-sans:var(--face)}', ':root{--font-sans:var(--elsewhere)}', ':root{--font-sans:var(--missing, Arial)}']) {
+    const root = project({ "a.css": css, "b.css": ':root{--elsewhere:"Another File"}' });
+    try {
+      const result = theme.discoverTheme(root);
+      assert.equal(result.light.fontSans, theme.FALLBACK.light.fontSans);
+      assert.ok(result.rejected.some((item) => item.token === "fontSans"));
+    } finally { cleanup(root); }
+  }
+});
+
 function project(files = {}) {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-html-")));
   fs.mkdirSync(path.join(root, ".project"), { recursive: true });
@@ -170,6 +201,22 @@ test("invalid settings.json is ignored with a note, never trusted", () => {
   }
 });
 
+test("an ancestor-directory symlink on .project cannot smuggle settings.json or theme.json from outside the project", () => {
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-html-outside-")));
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-html-")));
+  try {
+    fs.mkdirSync(path.join(outside, "reports"), { recursive: true });
+    fs.writeFileSync(path.join(outside, "reports/settings.json"), JSON.stringify({ schemaVersion: 1, themeMode: "fallback" }));
+    fs.writeFileSync(path.join(outside, "reports/theme.json"), JSON.stringify({ sources: [{ path: "evil.css", sha256: "x" }] }));
+    fs.symlinkSync(outside, path.join(root, ".project"));
+    const settings = theme.readSettings(root);
+    assert.equal(settings.themeMode, "auto", "settings.json read through an ancestor symlink must be ignored, not trusted");
+    assert.match(settings.note, /outside the project/);
+    const changes = theme.themeChanges(root, { sources: [] });
+    assert.equal(changes.recorded, false, "theme.json read through an ancestor symlink must be ignored, not trusted");
+  } finally { cleanup(root, outside); }
+});
+
 test("every documented fallback pair is at least 4.5:1 in light and dark", () => {
   for (const mode of ["light", "dark"]) for (const pair of theme.PAIRS) assert.ok(theme.ratioOf(theme.FALLBACK[mode], pair) >= 4.5, `${mode} ${pair.join("/")}`);
   assert.equal(theme.contrastRatio([0, 0, 0], [255, 255, 255]).toFixed(1), "21.0");
@@ -201,6 +248,16 @@ test("hostile values handed straight to the renderer are re-validated and fall b
     // The low-contrast dark pair (#000 on #010101) is not used either.
     assert.ok(html.includes(`--fg:${theme.FALLBACK.dark.foreground}`));
   } finally { cleanup(root); }
+});
+
+test("safeTheme keeps the fallback font when fontSans/fontMono is absent, not undefined", () => {
+  const partial = { light: { background: "#ffffff", foreground: "#000000" }, dark: { background: "#000000", foreground: "#ffffff" } };
+  const safe = theme.safeTheme(partial);
+  for (const mode of ["light", "dark"]) for (const key of ["fontSans", "fontMono"]) {
+    assert.equal(typeof safe[mode][key], "string", `${mode}.${key} must stay a string, never undefined`);
+    assert.equal(safe[mode][key], theme.FALLBACK[mode][key]);
+  }
+  assert.ok(!stylesheet(safe).includes("undefined"), "a stylesheet must never emit the literal text \"undefined\"");
 });
 
 test("low-contrast text pair falls back for that group only, with a recorded reason", () => {
@@ -338,6 +395,33 @@ test("a snapshot with sections removed still renders, labeling the gaps", () => 
   } finally { cleanup(root); }
 });
 
+test("a null or non-fact element in project/pitches/skills arrays is dropped, not a crash", () => {
+  const root = project();
+  try {
+    const snapshot = snapshotOf(root);
+    snapshot.project.description = [null, "bare-string", { status: "observed" }, { value: { heading: "H", summary: "ok" }, status: "observed", evidence: [] }];
+    snapshot.pitches.items = [null, { value: { slug: "ok" }, status: "observed", evidence: [] }];
+    snapshot.skills = { installed: [null, { value: { id: "skill-a" }, status: "observed", evidence: [] }], caveman: { value: null, status: "unconfigured", evidence: [] } };
+    let html;
+    assert.doesNotThrow(() => { html = renderHtml(snapshot, theme.discoverTheme(root), { root }); });
+    assert.ok(html.includes("skill-a"));
+    assert.ok(html.includes(">ok<") || html.includes("ok</th"));
+    assertOnlyKnownMarkup(html);
+  } finally { cleanup(root); }
+});
+
+test("a single oversized leaf string or note is bounded before it reaches the page", () => {
+  const root = project();
+  try {
+    const huge = "&".repeat(900 * 1024);
+    const snapshot = snapshotOf(root);
+    snapshot.metrics = { value: huge, status: "observed", evidence: [], note: huge };
+    const html = renderHtml(snapshot, theme.discoverTheme(root), { root });
+    assert.ok(html.length < 100 * 1024, `page grew to ${html.length} bytes from one leaf string/note`);
+    assertOnlyKnownMarkup(html);
+  } finally { cleanup(root); }
+});
+
 test("rendering is deterministic and --apply is idempotent", () => {
   const root = project({ "a.css": LIGHT_DARK_CSS });
   try {
@@ -386,6 +470,17 @@ test("a symlinked state.json, html destination, or reports directory is refused"
     assert.ok(!fs.existsSync(path.join(outside, "victim.html")));
     assert.throws(() => render(linkedOutput, { apply: true }), /Symlink destination forbidden/);
   } finally { cleanup(outside, linkedInput, linkedOutput); }
+});
+
+test("a nonexistent --root fails with a fixed reason, never the raw absolute path", () => {
+  const bogus = path.join(os.tmpdir(), `state-html-missing-${Date.now()}`);
+  try {
+    const result = run(RENDER_SCRIPT, bogus);
+    assert.notEqual(result.status, 0);
+    assert.match(result.stderr, /root does not exist or is not resolvable/);
+    assert.ok(!result.stderr.includes(bogus), "the raw --root path must not reach stderr");
+    assert.throws(() => theme.discoverTheme(bogus), /root does not exist or is not resolvable/);
+  } finally { /* bogus was never created */ }
 });
 
 test("end to end on a real-shaped project: snapshot then render produce a page that passes every structural check", () => {

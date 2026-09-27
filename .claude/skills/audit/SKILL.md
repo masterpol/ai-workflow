@@ -35,6 +35,12 @@ Require every subagent finding to carry severity, file:line, the rule/check viol
 
 Before any finding enters must-fix, re-read the cited code (or re-run the cited command) and confirm the failure scenario holds. Confirmed → keep tier. Plausible but unconfirmed → should-fix, marked "unverified". Refuted → drop it and list it in the cycle report as a false positive for `/cooldown` to tune. Never spend a cycle patching an unverified must-fix.
 
+## Reviewer contract
+
+Every dispatch follows the **Reviewer contract** in `ai-framework/workflow/phases/3-audit.md` (explicit model per dispatch, hard limits, scratch copy plus a repo guard,
+`independent: yes | no | not-completed` on the `Dispatched:` line, and the prompt template). A reviewer that returns nothing twice is recorded
+`not-completed`, never replaced by an author-run check presented as a review.
+
 ## Synthesis
 
 Main thread combines verified findings. Triage tiers:

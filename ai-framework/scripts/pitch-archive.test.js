@@ -384,3 +384,226 @@ test("remove refuses a malformed, wrong-slug, empty, non-JSON, or invalid-status
   write(root, ledgerFile, JSON.stringify({ ...good, sections: [{ source: "a", status: "maybe" }] }));
   assert.throws(() => remove(root, "ledger-shape", { apply: true }), /neither extracted nor gaps/);
 });
+
+// ---- Independent re-review (S1): findings verified against the real code ----
+
+function placeLedger(root, slug, sections, extra = {}) {
+  write(root, `.project/compaction/ledgers/${slug}.json`, JSON.stringify({ schemaVersion: 1, slug, sections, ...extra }));
+}
+
+test("remove recomputes what the pitch requires: a hand-placed ledger with nonsense entries, a missing section, or an unknown one cannot open the gate", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "gate-a");
+  write(root, ".project/pitches/gate-a/audit-cycle-1.md", "a second required section, so a partial ledger is not empty\n");
+  write(root, "notes/dest.md", "extracted");
+  archive(root, "gate-a", { apply: true });
+  placeLedger(root, "gate-a", [{ source: "anything-at-all", status: "extracted", destination: "notes/dest.md" }]);
+  assert.throws(() => remove(root, "gate-a", { apply: true }), /does not match this pitch's required sections \(missing: .*SHIPPED\.md#summary.*unknown: anything-at-all/);
+  const required = buildLedger(root, "gate-a").required;
+  placeLedger(root, "gate-a", required.slice(1).map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })));
+  assert.throws(() => remove(root, "gate-a", { apply: true }), /missing: /);
+  placeLedger(root, "gate-a", [...required, required[0]].map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })));
+  assert.throws(() => remove(root, "gate-a", { apply: true }), /duplicated: /);
+  assert.ok(exists(root, ".project/pitches/gate-a/SHIPPED.md"), "nothing was deleted");
+});
+
+test("a ledger committed before a section was added to the pitch is stale and cannot open the gate", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "gate-b");
+  commitFixtureLedger(root, "gate-b");
+  write(root, ".project/pitches/gate-b/audit-cycle-2.md", "a required file that no ledger covers\n");
+  archive(root, "gate-b", { apply: true });
+  assert.throws(() => remove(root, "gate-b", { apply: true }), /missing: audit-cycle-2\.md/);
+});
+
+test("remove re-checks every extracted destination at removal time, not only when the ledger was committed", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "gate-c");
+  commitFixtureLedger(root, "gate-c");
+  archive(root, "gate-c", { apply: true });
+  fs.rmSync(path.join(root, "notes/dest.md"));
+  assert.throws(() => remove(root, "gate-c", { apply: true }), /destination for .* is missing, empty, outside the project, or inside this pitch/);
+  write(root, "notes/dest.md", "back");
+  assert.equal(remove(root, "gate-c", { apply: true }).applied, true);
+});
+
+test("archive refuses a symlinked ancestor and a FIFO in the pitch, and never copies outside content into the archive", (t) => {
+  const root = fixture(t);
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "outside-"));
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  write(outside, "foo/SHIPPED.md", "OUTSIDE-CONTENT\n");
+  fs.mkdirSync(path.join(root, ".project"), { recursive: true });
+  fs.symlinkSync(outside, path.join(root, ".project/pitches"));
+  assert.throws(() => archive(root, "foo", { apply: true }), /Symlink forbidden in path/);
+  assert.ok(!exists(root, ".project/compaction"), "no archive was written");
+  fs.rmSync(path.join(root, ".project/pitches"));
+  const dir = seedShippedPitch(root, "with-pipe");
+  assert.equal(spawnSync("mkfifo", [path.join(root, dir, "pipe")]).status, 0);
+  const run = spawnSync(process.execPath, [path.join(__dirname, "pitch-archive.js"), "archive", "with-pipe", "--root", root, "--apply"], { encoding: "utf8", timeout: 8000 });
+  assert.equal(run.error, undefined, "must return, not hang on the pipe");
+  assert.equal(run.status, 1);
+  assert.match(run.stderr, /Refusing non-regular file/);
+});
+
+test("restore never writes through a symlink: not at the destination, not on the way, not at the target file", (t) => {
+  const root = fixture(t);
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "outside-"));
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  write(outside, "victim.txt", "ORIGINAL\n");
+  const dir = seedShippedPitch(root, "restore-safe");
+  archive(root, "restore-safe", { apply: true });
+  // (1) a symlinked leaf under --force
+  fs.rmSync(path.join(root, dir, "SHIPPED.md"));
+  fs.symlinkSync(path.join(outside, "victim.txt"), path.join(root, dir, "SHIPPED.md"));
+  assert.throws(() => restore(root, "restore-safe", { apply: true, force: true }), /symlink or special file/);
+  assert.equal(fs.readFileSync(path.join(outside, "victim.txt"), "utf8"), "ORIGINAL\n");
+  // (2) the pitch directory itself is a symlink to an outside directory
+  fs.rmSync(path.join(root, dir), { recursive: true });
+  fs.symlinkSync(outside, path.join(root, dir));
+  assert.throws(() => restore(root, "restore-safe", { apply: true }), /Symlink forbidden in path/);
+  // (3) an explicit --to that is a symlink
+  const target = path.join(os.tmpdir(), `restore-link-${process.pid}`);
+  fs.symlinkSync(outside, target);
+  t.after(() => fs.rmSync(target, { force: true }));
+  assert.throws(() => restore(root, "restore-safe", { apply: true, to: target }), /destination is a symlink or not a directory/);
+  assert.deepEqual(fs.readdirSync(outside), ["victim.txt"], "nothing was written into the outside directory");
+});
+
+test("restore --force reports the files it did not replace, leaves no temp file, and keeps the archive's modes", (t) => {
+  const root = fixture(t);
+  const dir = seedShippedPitch(root, "restore-extras");
+  archive(root, "restore-extras", { apply: true });
+  write(root, `${dir}/extra.md`, "not in the archive\n");
+  fs.writeFileSync(path.join(root, dir, "pitch.md"), "changed\n");
+  const result = restore(root, "restore-extras", { apply: true, force: true });
+  assert.deepEqual(result.extraFiles, ["extra.md"]);
+  assert.equal(read(root, `${dir}/pitch.md`), "# Pitch\n");
+  assert.deepEqual(fs.readdirSync(path.join(root, dir)).filter((name) => name.includes(".tmp-")), []);
+});
+
+test("verify reports a corrupt or malformed manifest and an unlisted extra file as issues, never as a thrown error or quoted content", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "verify-hard");
+  const { archiveDir } = archive(root, "verify-hard", { apply: true });
+  const base = `.project/compaction/archives/${archiveDir}`;
+  write(root, `${base}/files/smuggled.md`, "added after archiving\n");
+  assert.match(verify(root, "verify-hard").issues.join(), /unlisted file in the archive: smuggled\.md/);
+  fs.rmSync(path.join(root, `${base}/files/smuggled.md`));
+  const good = read(root, `${base}/manifest.json`);
+  fs.writeFileSync(path.join(root, `${base}/manifest.json`), "{ secret-looking-content");
+  const bad = verify(root, "verify-hard");
+  assert.equal(bad.valid, false);
+  assert.match(bad.issues.join(), /Archive manifest is not valid JSON/);
+  assert.ok(!bad.issues.join().includes("secret-looking-content"));
+  fs.writeFileSync(path.join(root, `${base}/manifest.json`), JSON.stringify({ slug: "verify-hard" }));
+  assert.match(verify(root, "verify-hard").issues.join(), /Archive manifest is malformed/);
+  fs.writeFileSync(path.join(root, `${base}/manifest.json`), good);
+  assert.equal(verify(root, "verify-hard").valid, true);
+});
+
+test("CLI error output carries no control characters", (t) => {
+  const root = fixture(t);
+  const run = spawnSync(process.execPath, [path.join(__dirname, "pitch-archive.js"), "archive", "bad\u001b[2Jslug", "--root", root], { encoding: "utf8" });
+  assert.equal(run.status, 1);
+  assert.ok(!/[\u0000-\u0008\u000b-\u001f\u007f]/.test(run.stderr), JSON.stringify(run.stderr));
+});
+
+// ---- Audit cycle 3 of the S1 re-review ----
+
+test("verify reports files named like inherited object properties, and CLI file-system errors carry a code, not a path", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "proto");
+  const { archiveDir } = archive(root, "proto", { apply: true });
+  write(root, `.project/compaction/archives/${archiveDir}/files/constructor`, "planted");
+  write(root, `.project/compaction/archives/${archiveDir}/files/toString`, "planted");
+  const issues = verify(root, "proto").issues.join();
+  assert.match(issues, /unlisted file in the archive: constructor/);
+  assert.match(issues, /unlisted file in the archive: toString/);
+  if (process.getuid && process.getuid() === 0) return;
+  const other = fixture(t);
+  const dir = seedShippedPitch(other, "perm");
+  write(other, `${dir}/sub/a.md`, "a");
+  fs.chmodSync(path.join(other, dir, "sub"), 0);
+  try {
+    const run = spawnSync(process.execPath, [path.join(__dirname, "pitch-archive.js"), "archive", "perm", "--root", other], { encoding: "utf8" });
+    assert.match(run.stderr, /Cannot list sub \(EACCES\)/);
+    assert.ok(!run.stderr.includes(other), "no absolute path");
+  } finally { fs.chmodSync(path.join(other, dir, "sub"), 0o755); }
+});
+
+test("restore reports its default destination relative to the project, not as an absolute path", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "rel");
+  archive(root, "rel", { apply: true });
+  fs.rmSync(path.join(root, ".project/pitches/rel"), { recursive: true });
+  const result = restore(root, "rel", { apply: true });
+  assert.equal(result.destination, ".project/pitches/rel");
+});
+
+test("recovers a killed real ledger commit through the compaction CLI with exact original bytes", (t) => {
+  for (const existing of [false, true]) {
+    const root = fixture(t);
+    const slug = "killed-ledger";
+    seedShippedPitch(root, slug);
+    write(root, "notes/dest.md", "extracted");
+    const mapping = { sections: buildLedger(root, slug).required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md", reason: "new mapping" })) };
+    const ledger = `.project/compaction/ledgers/${slug}.json`;
+    if (existing) commitFixtureLedger(root, slug);
+    const before = existing ? read(root, ledger) : null;
+    const killed = spawnSync(process.execPath, ["-e", `
+      const registry = require(${JSON.stringify(path.join(__dirname, "skill-registry.js"))});
+      const transact = registry.transact;
+      registry.transact = (ctx, operations) => transact(ctx, operations, { afterWrite: () => process.kill(process.pid, "SIGKILL") });
+      require(${JSON.stringify(path.join(__dirname, "pitch-compress.js"))}).commitLedger(${JSON.stringify(root)}, ${JSON.stringify(slug)}, ${JSON.stringify(mapping)}, { apply: true });
+    `], { encoding: "utf8", timeout: 10000 });
+    assert.equal(killed.signal, "SIGKILL", killed.stderr);
+    assert.notEqual(read(root, ledger), before, "kill occurs after the actual ledger write");
+    const journal = JSON.parse(read(root, ".project/compaction/transaction.json"));
+    assert.deepEqual(journal.roots, { target: fs.realpathSync(root) });
+    assert.equal(exists(root, ".project/skills/transaction.json"), false);
+    assert.throws(() => commitLedger(root, slug, mapping, { apply: true }), /Interrupted transaction/);
+    assert.throws(() => archive(root, slug, { apply: true }), /Interrupted transaction/);
+    const recovered = spawnSync(process.execPath, [path.join(__dirname, "pitch-archive.js"), "recover", "--root", root, "--apply"], { encoding: "utf8", timeout: 10000 });
+    assert.equal(recovered.status, 0, recovered.stderr);
+    assert.equal(JSON.parse(recovered.stdout).recovered, true);
+    if (existing) assert.equal(read(root, ledger), before);
+    else assert.equal(exists(root, ledger), false);
+    assert.equal(exists(root, ".project/compaction/transaction.json"), false);
+    assert.equal(exists(root, ".project/compaction/lock.json"), false);
+    commitLedger(root, slug, mapping, { apply: true });
+    assert.equal(JSON.parse(read(root, ledger)).sections[0].reason, "new mapping");
+    assert.equal(verify(root, slug).valid, false, "recovery creates no archive or deletion authority");
+  }
+});
+
+test("preserves a legacy ledger journal until recovery with its original installer context", (t) => {
+  const root = fixture(t);
+  const slug = "legacy-ledger";
+  seedShippedPitch(root, slug);
+  commitFixtureLedger(root, slug);
+  const ledger = `.project/compaction/ledgers/${slug}.json`;
+  const before = read(root, ledger);
+  const killed = spawnSync(process.execPath, ["-e", `
+    const r = require(${JSON.stringify(path.join(__dirname, "skill-registry.js"))});
+    const ctx = r.context(${JSON.stringify(root)}, "project");
+    const before = r.snapshot(ctx, ${JSON.stringify(ledger)});
+    r.transact(ctx, [{ path: ${JSON.stringify(ledger)}, expected: before.hash, value: { data: Buffer.from("legacy partial write"), mode: 0o644 } }], { afterWrite: () => process.kill(process.pid, "SIGKILL") });
+  `], { encoding: "utf8", timeout: 10000 });
+  assert.equal(killed.signal, "SIGKILL", killed.stderr);
+  const journal = read(root, ".project/skills/transaction.json");
+  const mapping = { sections: buildLedger(root, slug).required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })) };
+  assert.throws(() => commitLedger(root, slug, mapping, { apply: true }), /Pending legacy or skill transaction/);
+  assert.throws(() => archive(root, slug, { apply: true }), /Pending legacy or skill transaction/);
+  const wrongRecovery = spawnSync(process.execPath, [path.join(__dirname, "pitch-archive.js"), "recover", "--root", root, "--apply"], { encoding: "utf8", timeout: 10000 });
+  assert.equal(wrongRecovery.status, 0, wrongRecovery.stderr);
+  assert.equal(JSON.parse(wrongRecovery.stdout).recovered, false);
+  assert.equal(read(root, ".project/skills/transaction.json"), journal);
+  assert.equal(read(root, ledger), "legacy partial write");
+  const recovered = spawnSync(process.execPath, [path.join(__dirname, "add-skill.js"), "recover", "--scope", "project", "--root", root, "--apply"], { encoding: "utf8", timeout: 10000 });
+  assert.equal(recovered.status, 0, recovered.stderr);
+  assert.equal(JSON.parse(recovered.stdout).recovered, true);
+  assert.equal(read(root, ledger), before);
+  assert.equal(exists(root, ".project/skills/transaction.json"), false);
+  assert.equal(exists(root, ".project/skills/lock.json"), false);
+  assert.equal(archive(root, slug, { apply: true }).applied, true);
+});

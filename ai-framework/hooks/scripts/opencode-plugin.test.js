@@ -81,3 +81,27 @@ test("session lookups stay bounded", async () => {
     assert.equal(dimensions.agents.opencode.a0, undefined, "the oldest session was pruned");
   });
 });
+
+test("the plugin awaits the collector and stays best-effort when it skips or rejects", async (t) => {
+  await withPlugin(async (hooks, snapshot, root) => {
+    const metrics = path.join(root, ".project", "metrics");
+    fs.mkdirSync(metrics, { recursive: true });
+    const legacy = path.join(metrics, ".token-consumption.lock");
+    fs.writeFileSync(legacy, "12345");
+    await hooks.event(completed("m-legacy", "s1"));
+    await hooks["tool.execute.after"]({ tool: "skill", sessionID: "s1", callID: "c-legacy", args: { name: "plan" } });
+    assert.equal(fs.existsSync(path.join(metrics, "token-consumption.json")), false, "a legacy lock skips the event");
+    fs.rmSync(legacy);
+
+    if (!(process.getuid && process.getuid() === 0)) {
+      await hooks.event(completed("m-first", "s1"));
+      fs.chmodSync(metrics, 0o500); // the collector's write now rejects inside its lease
+      try {
+        await hooks.event(completed("m-denied", "s1"));
+        await hooks["tool.execute.after"]({ tool: "skill", sessionID: "s1", callID: "c-denied", args: { name: "plan" } });
+      } finally { fs.chmodSync(metrics, 0o700); }
+    }
+    await hooks.event(completed("m-after", "s1"));
+    assert.equal(snapshot().current.id, JSON.stringify(["opencode", "event", "m-after"]), "the awaited call has finished writing when the hook returns");
+  });
+});

@@ -14,8 +14,38 @@ const COMPACTION_DIR = ".project/compaction";
 const LEDGERS_DIR = `${COMPACTION_DIR}/ledgers`;
 const DONE_WORK = ".project/done-work.md";
 const SLUG = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
+const printable = (text) => String(text).replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f]/g, "?");
+// JSON.parse errors quote their input; a fixed message does not.
+function parseJson(text, label) { try { return JSON.parse(text); } catch { throw new Error(`${label} is not valid JSON`); } }
 
 function full(root, relative) { return path.join(root, relative); }
+
+// All compaction mutations and recovery must agree on journal location and roots.
+// Kept here because pitch-archive already imports the ledger contract from this module.
+function compactionContext(root) {
+  return { roots: { target: fs.realpathSync(root) }, state: COMPACTION_DIR };
+}
+
+function requireNoPendingCompaction(root) {
+  const { snapshot } = require("./skill-registry");
+  const ctx = compactionContext(root);
+  if (snapshot(ctx, `${COMPACTION_DIR}/transaction.json`)) throw new Error("Interrupted transaction: run recover with pitch-archive.js before continuing");
+  // Older ledger commits shared the installer journal. Never strand or overwrite it
+  // by starting a new transaction in the new namespace; recover it with its old roots.
+  if (snapshot(ctx, ".project/skills/transaction.json")) throw new Error("Pending legacy or skill transaction: run add-skill.js recover --scope project before continuing");
+}
+
+// Every path component under `base` must be a real directory or file: a symlinked ancestor (for example
+// .project -> elsewhere) would send reads and writes outside the project. security.md section 9.
+function assertPlainPath(base, relative, allowMissing = false) {
+  let current = base;
+  for (const part of relative.split("/")) {
+    current = path.join(current, part);
+    let stat;
+    try { stat = fs.lstatSync(current); } catch (error) { if (error.code === "ENOENT" && allowMissing) return; throw new Error(`Cannot read: ${relative}`); }
+    if (stat.isSymbolicLink()) throw new Error(`Symlink forbidden in path: ${relative}`);
+  }
+}
 
 const MAX_TEXT_BYTES = 4 * 1024 * 1024;
 // Pitch records are read from a project tree that may not be trusted (/state reads them too): a
@@ -23,7 +53,7 @@ const MAX_TEXT_BYTES = 4 * 1024 * 1024;
 // blocked on, and an absurdly large file is refused loudly rather than parsed.
 function readText(file) {
   let stat;
-  try { stat = fs.lstatSync(file); } catch (error) { if (error.code === "ENOENT") return null; throw error; }
+  try { stat = fs.lstatSync(file); } catch (error) { if (error.code === "ENOENT") return null; throw new Error(`Cannot read ${path.basename(file)} (${error.code || "error"})`); }
   if (stat.isSymbolicLink() || !stat.isFile()) return null;
   if (stat.size > MAX_TEXT_BYTES) throw new Error(`${path.basename(file)} is larger than ${MAX_TEXT_BYTES / 1024 / 1024} MB`);
   return fs.readFileSync(file, "utf8");
@@ -32,28 +62,77 @@ function isRegularFile(file) {
   try { const stat = fs.lstatSync(file); return stat.isFile() && !stat.isSymbolicLink(); } catch { return false; }
 }
 
+// Every heading with its line index, skipping "#" lines inside fenced code blocks (a shell "# comment"
+// is not a heading).
+function headingLines(lines) {
+  const found = [];
+  let fence = null;
+  lines.forEach((rawLine, index) => {
+    const line = rawLine.endsWith("\r") ? rawLine.slice(0, -1) : rawLine; // CRLF files: "." never matches "\r"
+    if (fence) {
+      // CommonMark: a closing fence uses the same character, at least as many of it, and nothing else on the line.
+      // Checked before the length cap below: a closer padded to thousands of characters is still a closer.
+      const closing = line.match(/^ {0,3}(`+|~+)[ \t]*$/);
+      if (closing && closing[1][0] === fence.char && closing[1].length >= fence.length) fence = null;
+      return;
+    }
+    const opening = line.match(/^ {0,3}(`{3,}|~{3,})(.*)$/);
+    // A backtick fence whose info string contains a backtick is not a fence.
+    if (opening && !(opening[1][0] === "`" && opening[2].includes("`"))) { fence = { char: opening[1][0], length: opening[1].length }; return; }
+    if (line.length > 4000) return; // no heading is that long; keeps the pattern below linear
+    const match = line.trimEnd().match(/^ {0,3}(#{1,6})[ \t]+(\S.*)$/);
+    if (match) found.push({ index, level: match[1].length, title: match[2].trim() });
+  });
+  return found;
+}
+// The lines under headings[position], up to the next heading of the same or shallower level.
+function bodyUnder(lines, headings, position) {
+  const next = headings.slice(position + 1).find((heading) => heading.level <= headings[position].level);
+  return lines.slice(headings[position].index + 1, next ? next.index : lines.length).join("\n");
+}
+
 function markdownHeadings(text, level) {
-  const marker = "#".repeat(level);
-  return [...text.matchAll(new RegExp(`^${marker} (.+)$`, "gm"))].map((match) => match[1].trim());
+  return headingLines(text.split("\n")).filter((heading) => heading.level === level).map((heading) => heading.title);
 }
 
-// GitHub-style heading slug: lowercase, strip punctuation, spaces become dashes.
+// GitHub-style heading slug: lowercase, strip punctuation, spaces become dashes. Letters and digits of any
+// script are kept, so a Spanish or Chinese heading keeps a readable, distinct key.
 function slugifyHeading(heading) {
-  return heading.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, "").replace(/\s+/g, "-");
+  return heading.normalize("NFC").toLowerCase().trim().replace(/[^\p{L}\p{N}\s-]/gu, "").replace(/\s+/g, "-");
 }
 
-// Content directly under one heading, up to the next heading of the same or shallower level.
+// Two headings that slugify the same (duplicates, or "A B" and "A-B") must not merge: the first keeps the plain
+// key, later ones get -2, -3. Keys are computed over ALL headings so they stay stable when an earlier one is empty.
+function sectionKeys(prefix, titles) {
+  const used = new Set();
+  const seen = new Map();
+  return titles.map((title) => {
+    const slug = slugifyHeading(title) || "section";
+    let count = seen.get(slug) || 0;
+    let key;
+    // A "-2" suffix can equal another heading's own slug ("A B", "A B", "A B 2"): keep counting until the key is unused.
+    do { count += 1; key = `${prefix}#${count === 1 ? slug : `${slug}-${count}`}`; } while (used.has(key));
+    seen.set(slug, count);
+    used.add(key);
+    return key;
+  });
+}
+
+// Content directly under the first heading whose text is exactly `heading`.
 function extractSection(text, heading) {
   const lines = text.split("\n");
-  const startIndex = lines.findIndex((line) => { const match = line.match(/^(#{1,6})\s+(.+)$/); return match && match[2].trim() === heading; });
-  if (startIndex === -1) return null;
-  const level = lines[startIndex].match(/^(#{1,6})/)[1].length;
-  let end = lines.length;
-  for (let index = startIndex + 1; index < lines.length; index++) {
-    const match = lines[index].match(/^(#{1,6})\s/);
-    if (match && match[1].length <= level) { end = index; break; }
-  }
-  return lines.slice(startIndex + 1, end).join("\n");
+  const headings = headingLines(lines);
+  const position = headings.findIndex((entry) => entry.title === heading);
+  return position === -1 ? null : bodyUnder(lines, headings, position);
+}
+
+// The pitch template names these sections loosely ("No-gos", "No-gos (this pitch)", "Rabbit holes"): match the
+// canonical name at the start of the heading, ignoring case, spaces, hyphens and punctuation.
+function loosely(text) { return text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, ""); }
+function looseSectionHasContent(text, canonical) {
+  const lines = text.split("\n");
+  const headings = headingLines(lines);
+  return headings.some((entry, position) => loosely(entry.title).startsWith(loosely(canonical)) && bodyUnder(lines, headings, position).trim());
 }
 
 function checkSlug(slug) {
@@ -61,7 +140,12 @@ function checkSlug(slug) {
   return slug;
 }
 
-function pitchDir(root, slug) { return full(root, `${PITCHES_DIR}/${checkSlug(slug)}`); }
+function pitchDir(root, slug) {
+  // Every read path resolves the pitch through here: a symlinked .project or pitch directory would read (and echo the
+  // headings of) files outside the project.
+  assertPlainPath(root, `${PITCHES_DIR}/${checkSlug(slug)}`, true);
+  return full(root, `${PITCHES_DIR}/${slug}`);
+}
 
 function doneWorkSlugs(root) {
   const text = readText(full(root, DONE_WORK));
@@ -73,7 +157,7 @@ function doneWorkSlugs(root) {
 function listPitchSlugs(root) {
   const dir = full(root, PITCHES_DIR);
   let stat;
-  try { stat = fs.lstatSync(dir); } catch { return []; }
+  try { assertPlainPath(root, PITCHES_DIR, true); stat = fs.lstatSync(dir); } catch { return []; }
   if (stat.isSymbolicLink() || !stat.isDirectory()) return [];
   return fs.readdirSync(dir, { withFileTypes: true }).filter((entry) => entry.isDirectory() && !EXCLUDED.has(entry.name)).map((entry) => entry.name).sort();
 }
@@ -90,7 +174,8 @@ function hillOpenCount(text) {
 }
 
 function classify(root, slug) {
-  const dir = pitchDir(root, slug);
+  let dir;
+  try { dir = pitchDir(root, slug); } catch { return { slug, eligible: false, reason: "pitch directory is a symlink or cannot be read" }; }
   if (isRegularFile(path.join(dir, "SHIPPED.md"))) return { slug, eligible: true, reason: "shipped" };
   let hill;
   try { hill = readText(path.join(dir, "hill.md")); } catch (error) { return { slug, eligible: false, reason: `hill.md cannot be read (${error.message})` }; }
@@ -101,13 +186,22 @@ function classify(root, slug) {
   return { slug, eligible: false, reason: "no SHIPPED.md" };
 }
 
+// remove() deletes files but not directories, so a compacted pitch may leave nested empty directories:
+// "empty" means no file (or symlink) at any depth.
+function hasNoFiles(dir, depth = 0) {
+  if (depth > 20) return false;
+  let entries;
+  try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return false; }
+  return entries.every((entry) => entry.isDirectory() && hasNoFiles(path.join(dir, entry.name), depth + 1));
+}
+
 function inventory(root) {
   const present = listPitchSlugs(root);
   const presentSet = new Set(present);
   // `remove` deletes a pitch's files but leaves its (now empty) directory behind; with the slug recorded in
   // done-work.md that is a compacted pitch, not an active one.
   const compacted = doneWorkSlugs(root);
-  const isEmptyDirectory = (slug) => { try { return fs.readdirSync(pitchDir(root, slug)).length === 0; } catch { return false; } };
+  const isEmptyDirectory = (slug) => hasNoFiles(pitchDir(root, slug));
   // A directory whose name isn't a valid slug can never be compacted (every later step
   // validates the slug) — report it as preserved with the reason instead of letting one oddly
   // named directory throw and hide every other pitch from the inventory.
@@ -120,27 +214,31 @@ function requiredSections(root, slug) {
   const dir = pitchDir(root, slug);
   const shipped = readText(path.join(dir, "SHIPPED.md"));
   if (shipped === null) throw new Error(`Not eligible: ${slug} has no SHIPPED.md`);
-  const required = markdownHeadings(shipped, 2).map((heading) => `SHIPPED.md#${slugifyHeading(heading)}`);
+  const shippedLines = shipped.split("\n");
+  const shippedTitles = headingLines(shippedLines).filter((heading) => heading.level === 2).map((heading) => heading.title);
+  const required = sectionKeys("SHIPPED.md", shippedTitles);
 
   const pitch = readText(path.join(dir, "pitch.md"));
   if (pitch) {
-    for (const heading of ["No-gos", "Rabbit holes"]) {
-      const section = extractSection(pitch, heading);
-      if (section && section.trim()) required.push(`pitch.md#${slugifyHeading(heading)}`);
+    for (const canonical of ["No-gos", "Rabbit holes"]) {
+      if (looseSectionHasContent(pitch, canonical)) required.push(`pitch.md#${slugifyHeading(canonical)}`);
     }
   }
 
-  for (const entry of fs.readdirSync(dir)) {
+  let entries;
+  try { entries = fs.readdirSync(dir).sort(); } catch (error) { throw new Error(`Cannot list the pitch directory (${error.code || "error"})`); }
+  for (const entry of entries) {
     if (/^audit-cycle-.+\.md$/.test(entry)) required.push(entry);
   }
 
   for (const file of ["deviations.md", "log.md"]) {
     const text = readText(path.join(dir, file));
     if (!text) continue;
-    for (const heading of markdownHeadings(text, 2)) {
-      const section = extractSection(text, heading);
-      if (section && section.trim()) required.push(`${file}#${slugifyHeading(heading)}`);
-    }
+    const lines = text.split("\n");
+    const headings = headingLines(lines);
+    const second = headings.map((heading, position) => ({ heading, position })).filter((entry) => entry.heading.level === 2);
+    const keys = sectionKeys(file, second.map((entry) => entry.heading.title));
+    second.forEach((entry, index) => { if (bodyUnder(lines, headings, entry.position).trim()) required.push(keys[index]); });
   }
   return required;
 }
@@ -149,13 +247,16 @@ function buildLedger(root, slug) {
   return { slug, required: requiredSections(root, slug) };
 }
 
+// Runs this bundle's own graphify.js (next to this script), never one the project supplies; it reads the project
+// through cwd. ai-framework/rules/security.md section 9: execute only bundle code.
 function checkGraph(root) {
-  const script = full(root, "ai-framework/scripts/graphify.js");
+  const script = path.join(__dirname, "graphify.js");
   const result = spawnSync(process.execPath, [script, "--check", "--json"], { cwd: root, encoding: "utf8" });
   if (result.status !== 0) {
-    let detail = (result.stderr || result.stdout || "").trim();
-    try { detail = JSON.parse(result.stdout).problems?.map((problem) => problem.message).join("; ") || detail; } catch { /* keep raw detail */ }
-    throw new Error(`Knowledge graph invalid: ${detail || "graphify --check failed"}`);
+    // graphify's own problem list is bundle output; anything else (stderr, a stack trace with paths) is not echoed.
+    let detail = "graphify --check failed";
+    try { detail = JSON.parse(result.stdout).problems?.map((problem) => problem.message).join("; ") || detail; } catch { /* keep the generic message */ }
+    throw new Error(`Knowledge graph invalid: ${detail}`);
   }
 }
 
@@ -167,10 +268,16 @@ function checkGraph(root) {
 function checkDestination(root, slug, destinationPath, original) {
   const target = full(root, destinationPath);
   if (!fs.existsSync(target)) throw new Error(`Destination does not exist: ${original}`);
-  const real = fs.realpathSync(target);
+  let real;
+  try { real = fs.realpathSync(target); } catch (error) { throw new Error(`Destination cannot be inspected (${error.code || "error"}): ${original}`); }
   const outside = (base) => { const relative = path.relative(fs.realpathSync(base), real); return relative.startsWith("..") || path.isAbsolute(relative); };
   if (outside(root)) throw new Error(`Destination resolves outside the project: ${original}`);
   if (!outside(pitchDir(root, slug))) throw new Error(`Destination is inside the pitch being compacted and would be deleted with it: ${original}`);
+  // The ledger and the archive live here: pointing at them would "prove" extraction with the very files remove keeps.
+  if (fs.existsSync(path.join(root, COMPACTION_DIR))) {
+    const fromCompaction = path.relative(fs.realpathSync(path.join(root, COMPACTION_DIR)), real);
+    if (!(fromCompaction.startsWith("..") || path.isAbsolute(fromCompaction))) throw new Error(`Destination is inside ${COMPACTION_DIR}, which is not a place content is extracted to: ${original}`);
+  }
   const stat = fs.statSync(real);
   if (!stat.isFile() || stat.size === 0) throw new Error(`Destination must be a nonempty file: ${original}`);
 }
@@ -217,8 +324,12 @@ function commitLedger(root, slug, mapping, options = {}) {
   const acceptedGaps = gaps.map((gap) => ({ source: gap.source, reason: gap.reason, acceptedReason: accepted[gap.source] }));
   const record = { schemaVersion: 1, slug, sections: mapping.sections, coverage, gaps, acceptedGaps, committedAt: new Date().toISOString() };
   if (options.apply) {
-    fs.mkdirSync(full(root, LEDGERS_DIR), { recursive: true });
-    fs.writeFileSync(full(root, `${LEDGERS_DIR}/${slug}.json`), `${JSON.stringify(record, null, 2)}\n`);
+    const { transact, snapshot } = require("./skill-registry");
+    requireNoPendingCompaction(root);
+    const ctx = compactionContext(root);
+    const relative = `${LEDGERS_DIR}/${slug}.json`;
+    const before = snapshot(ctx, relative);
+    transact(ctx, [{ path: relative, expected: before?.hash || null, value: { data: Buffer.from(`${JSON.stringify(record, null, 2)}\n`), mode: 0o644 } }]);
   }
   return { slug, coverage, gaps, acceptedGaps, applied: Boolean(options.apply) };
 }
@@ -237,7 +348,11 @@ function readShippedDate(root, slug) {
 function writeDoneWork(root, slug, summaryText, options = {}) {
   checkSlug(slug);
   if (typeof summaryText !== "string" || !summaryText.trim()) throw new Error("A nonempty summary is required");
+  // A "# " or "## " line would split this pitch's section: the next rerun would end it there and orphan the tail,
+  // and readers would take the line for another pitch's entry.
+  if (/^#{1,2}\s/m.test(summaryText)) throw new Error("A summary cannot contain '#' or '##' heading lines");
   const file = full(root, DONE_WORK);
+  assertPlainPath(root, DONE_WORK, true);
   // readText treats a symlink or non-regular file as absent; writing "fresh" over one would follow the
   // link and destroy its target, so refuse instead.
   let occupied = null;
@@ -261,7 +376,8 @@ function writeDoneWork(root, slug, summaryText, options = {}) {
     const after = lines.slice(endIndex).join("\n").trim();
     updated = after ? `${before}\n\n${section}\n\n${after}` : `${before}\n\n${section}`;
   }
-  updated = `${updated.replace(/\n{3,}/g, "\n\n").trimEnd()}\n`;
+  // Only the file's outer edge is normalized: other pitches' sections keep their own blank lines exactly.
+  updated = `${updated.trimEnd()}\n`;
   const changed = existingRaw !== updated;
   if (options.apply) {
     // Temp file + rename: a reader never sees a partial file, and rename replaces a path rather than following it.
@@ -276,6 +392,7 @@ function cli(argv) {
   const positional = [];
   for (let index = 0; index < argv.length; index++) {
     const arg = argv[index];
+    if (["--root", "--file", "--summary", "--accept-gap"].includes(arg) && argv[index + 1] === undefined) throw new Error(`${arg} requires a value`);
     if (arg === "--json") options.json = true;
     else if (arg === "--apply") options.apply = true;
     else if (arg === "--root" && argv[index + 1] !== undefined) options.root = argv[++index];
@@ -304,7 +421,7 @@ function cli(argv) {
   }
   if (action === "commit-ledger") {
     if (!options.file) throw new Error("commit-ledger requires --file <ledger.json>");
-    const mapping = JSON.parse(fs.readFileSync(options.file, "utf8"));
+    const mapping = parseJson(fs.readFileSync(options.file, "utf8"), "the ledger file");
     const result = commitLedger(root, slugArg, mapping, { apply: options.apply, acceptGaps: options.acceptGaps });
     return options.json ? JSON.stringify(result, null, 2) : `${result.slug}: coverage ${(result.coverage * 100).toFixed(0)}%, ${result.gaps.length} gap(s), applied=${result.applied}`;
   }
@@ -317,11 +434,11 @@ function cli(argv) {
   throw new Error("Usage: node ai-framework/scripts/pitch-compress.js <inventory | ledger SLUG | commit-ledger SLUG --file F [--accept-gap SECTION=REASON]... | write-done-work SLUG --summary F> [--apply] [--root /absolute/project] [--json]");
 }
 
-module.exports = { inventory, classify, buildLedger, requiredSections, commitLedger, writeDoneWork, slugifyHeading, extractSection };
+module.exports = { inventory, classify, buildLedger, requiredSections, commitLedger, writeDoneWork, slugifyHeading, extractSection, checkDestination, assertPlainPath, compactionContext, requireNoPendingCompaction };
 
 if (require.main === module) {
   try {
     const result = cli(process.argv.slice(2));
     process.stdout.write(`${result}\n`);
-  } catch (error) { process.stderr.write(`pitch-compress: ${error.message}\n`); process.exitCode = 1; }
+  } catch (error) { process.stderr.write(`${printable(`pitch-compress: ${error.syscall && error.code ? `file system error (${error.code})` : error.message}`)}\n`); process.exitCode = 1; }
 }

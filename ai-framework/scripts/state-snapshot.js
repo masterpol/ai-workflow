@@ -89,12 +89,22 @@ function readSource(root, relative) {
   return { text: fs.readFileSync(full, "utf8"), mtimeMs: stat.mtimeMs };
 }
 // Markdown goes through regexes and section splitting; only its first MARKDOWN_LIMIT bytes matter here.
+// A file over that cap is silently incomplete, not absent — callers that scan for every row/heading
+// (not just one section) must check `truncated` and downgrade the fact instead of reporting "observed".
 function readMarkdown(root, relative) {
   const source = readSource(root, relative);
-  return source.text === undefined ? source : { ...source, text: source.text.slice(0, MARKDOWN_LIMIT) };
+  if (source.text === undefined) return source;
+  const truncated = source.text.length > MARKDOWN_LIMIT;
+  return { ...source, text: source.text.slice(0, MARKDOWN_LIMIT), truncated };
 }
+const TRUNCATED_NOTE = (relative) => `${relative} exceeds the 64 KB read limit; entries past that point are not counted`;
 // Never surface raw error text: it can carry absolute paths or fragments of a file's content.
 const failure = (error) => (error && typeof error.code === "string" ? error.code : "unexpected error");
+// A raw ENOENT/EACCES message embeds the absolute path; keep only a fixed reason (same rule as
+// state-render.js's render() and state-theme.js's discoverTheme()).
+function resolveRoot(root) {
+  try { return fs.realpathSync(root); } catch { throw new Error("--root does not exist or is not resolvable"); }
+}
 function readJson(root, relative) {
   const source = readSource(root, relative);
   if (source.missing || source.error) return source;
@@ -225,7 +235,13 @@ function pitchesSection(root, scrub) {
   const items = inventory(root).slice(0, 100).map((entry) => {
     const rel = `.project/pitches/${entry.slug}`;
     const base = { slug: scrub(entry.slug), inStatusMd: listed.has(entry.slug) };
-    if (entry.reason === "already compacted") return fact({ ...base, phase: "compacted", shipped: compacted.get(entry.slug) || null }, "observed", [".project/done-work.md"], "full history was compacted; summary lives in done-work.md");
+    if (entry.reason === "already compacted") {
+      const shippedDate = compacted.get(entry.slug) || null;
+      // A negative (no shipped date found / not listed) is only uncertain if the source that would
+      // have shown it was truncated; a positive found within the truncated portion is still solid.
+      const unsure = [doneWork.truncated && !shippedDate ? TRUNCATED_NOTE(".project/done-work.md") : null, status.truncated && !base.inStatusMd ? TRUNCATED_NOTE(".project/status.md") : null].filter(Boolean);
+      return fact({ ...base, phase: "compacted", shipped: shippedDate }, unsure.length ? "stale" : "observed", [".project/done-work.md"], unsure.length ? unsure.join("; ") : "full history was compacted; summary lives in done-work.md");
+    }
     const pitch = readMarkdown(root, `${rel}/pitch.md`);
     const title = pitch.text?.match(/^#\s+(?:Pitch:\s*)?(.+)$/m)?.[1];
     const appetite = pitch.text?.match(/\*\*Appetite\*\*:[ \t]*([^•\n]+)/)?.[1]?.trim();
@@ -235,9 +251,17 @@ function pitchesSection(root, scrub) {
     const details = { ...base, title: title ? scrub(title) : null, appetite: appetite ? scrub(appetite) : null, hill: { scopes: rows.length, done: rows.filter((row) => /^done$/i.test(row.position)).length } };
     const evidence = [`${rel}/pitch.md`, hill.text ? `${rel}/hill.md` : null, shipped.text ? `${rel}/SHIPPED.md` : null].filter((item, index) => item && (index > 0 || pitch.text));
     if (entry.eligible) return fact({ ...details, phase: "shipped", shipped: shipped.text?.match(/\*\*Shipped:\*\*[ \t]*(\d{4}-\d{2}-\d{2})/)?.[1] || null }, "observed", evidence);
-    return fact({ ...details, phase: "active", reason: scrub(entry.reason) }, "observed", evidence.length ? evidence : [rel], base.inStatusMd ? undefined : "directory is not listed in .project/status.md, the lifecycle authority");
+    // Same rule as above: "not listed" is only uncertain, not a confirmed fact, if status.md was truncated.
+    const unsureListed = status.truncated && !base.inStatusMd;
+    const notListedNote = unsureListed
+      ? `${TRUNCATED_NOTE(".project/status.md")}; whether this pitch is listed could not be confirmed`
+      : "directory is not listed in .project/status.md, the lifecycle authority";
+    return fact({ ...details, phase: "active", reason: scrub(entry.reason) }, unsureListed ? "stale" : "observed", evidence.length ? evidence : [rel], base.inStatusMd ? undefined : notListedNote);
   });
-  return { statusMd: status.text ? fact({ listed: listed.size }, "observed", [".project/status.md"]) : unavailable(problem(status), []), items };
+  const statusMd = status.text
+    ? fact({ listed: listed.size }, status.truncated ? "stale" : "observed", [".project/status.md"], status.truncated ? TRUNCATED_NOTE(".project/status.md") : undefined)
+    : unavailable(problem(status), []);
+  return { statusMd, items };
 }
 
 function knowledgeSection(root) {
@@ -319,7 +343,8 @@ function doneWorkSection(root) {
   const source = readMarkdown(root, ".project/done-work.md");
   if (source.missing || source.error) return unavailable(problem(source), []);
   const entries = [...source.text.matchAll(/^## ([a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?) — shipped (\d{4}-\d{2}-\d{2})(?![^\s])/gm)].map((match) => ({ slug: match[1], shipped: match[2] }));
-  return fact({ compacted: entries.length, entries: entries.slice(0, 100) }, "observed", [".project/done-work.md"]);
+  const status = source.truncated ? "stale" : "observed";
+  return fact({ compacted: entries.length, entries: entries.slice(0, 100) }, status, [".project/done-work.md"], source.truncated ? TRUNCATED_NOTE(".project/done-work.md") : undefined);
 }
 
 // Each section is built independently so one broken source only marks its own section.
@@ -328,7 +353,7 @@ function section(build, label) {
 }
 
 function buildSnapshot(root, options = {}) {
-  root = fs.realpathSync(root);
+  root = resolveRoot(root);
   const now = options.now ? new Date(options.now) : new Date();
   if (Number.isNaN(now.getTime())) throw new Error("Invalid --now timestamp");
   const { scrub, counter } = makeScrubber();
@@ -381,7 +406,7 @@ function writeAtomic(root, relative, text) {
 }
 
 function writeSnapshot(root, snapshot) {
-  root = fs.realpathSync(root);
+  root = resolveRoot(root);
   const text = `${JSON.stringify(snapshot, null, 2)}\n`;
   // generatedAt alone differing is not a change: rerunning on an unchanged project is a no-op.
   const withoutClock = (json) => { try { const { generatedAt, ...rest } = JSON.parse(json); return JSON.stringify(rest); } catch { return null; } };
@@ -401,7 +426,7 @@ function cli(argv) {
     else if (arg === "--now" && argv[index + 1] !== undefined) options.now = argv[++index];
     else throw new Error(`Unknown option: ${arg}`);
   }
-  const root = fs.realpathSync(options.root);
+  const root = resolveRoot(options.root);
   const snapshot = buildSnapshot(root, { now: options.now });
   const write = options.apply ? writeSnapshot(root, snapshot) : null;
   if (options.json) return JSON.stringify(write ? { ...snapshot, written: write } : snapshot, null, 2);

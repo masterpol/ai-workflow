@@ -183,7 +183,7 @@ async function compareDir(relDir, sourceRoot, baseOf, excluded) {
     const status = classify(localDigest, sourceDigest, baseDigest);
     const caseRename = existing !== rel ? existingLabel : undefined;
     if (status === "same" && !caseRename) continue;
-    results.push({ status: status === "same" ? "changed" : status, path: label, caseRename, sourcePath, targetPath, finalPath: path.join(targetDir, rel) });
+    results.push({ status: status === "same" ? "changed" : status, path: label, baseDigest, caseRename, sourcePath, targetPath, finalPath: path.join(targetDir, rel) });
   }
 
   for (const rel of targetFiles) {
@@ -197,7 +197,7 @@ async function compareDir(relDir, sourceRoot, baseOf, excluded) {
     const baseDigest = baseOf(label);
     const localDigest = await fileHash(targetPath);
     const modified = baseDigest === undefined ? "unverified" : localDigest === baseDigest ? "unmodified" : "modified";
-    results.push({ status: "removed", path: label, targetPath, modified });
+    results.push({ status: "removed", path: label, baseDigest, targetPath, modified });
   }
   return results;
 }
@@ -383,6 +383,13 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
     } catch {
       // Source predates VERSION.
     }
+    const files = await sourceManifest(sourceRoot, excluded);
+    // Only verified equality or an applied update advances a file's merge base.
+    for (const entry of entries) {
+      if (applied.includes(entry.path) || pruned.includes(entry.path)) continue;
+      if (entry.baseDigest === undefined) delete files[entry.path];
+      else files[entry.path] = entry.baseDigest;
+    }
     const marker = {
       lastSyncedAt: new Date().toISOString(),
       source: manifestSource,
@@ -391,7 +398,7 @@ async function runSync({ root: sourceRoot, label: sourceLabel, manifestSource })
       pruned,
       keptLocal: groups.local.map((entry) => entry.path),
       conflicts: groups.conflict.map((entry) => entry.path),
-      files: await sourceManifest(sourceRoot, excluded),
+      files,
     };
     await fsp.writeFile(path.join(root, MARKER), JSON.stringify(marker, null, 2) + "\n");
     markerPath = MARKER;

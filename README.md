@@ -103,6 +103,29 @@ partial. Codex records all subagent completions but its hook payload supplies no
 fields, so those values are reported as unavailable rather than zero. Cursor has no verified
 completion-hook payload and is not wired automatically.
 
+**One writer at a time.** Each writer (the hook CLI and the OpenCode plugin) holds a loopback
+socket on `127.0.0.1` for the whole read, write and report step. The port is derived from the
+metrics directory's real path, in the range 20000–29999. The kernel holds that socket while the
+writer runs, including while it is paused, and frees it when the writer exits or dies. A waiting
+writer gives up after about one second and skips that event: telemetry is best-effort and never
+blocks the agent. The same skip happens if another program already uses the derived port, or if a
+sandbox refuses loopback sockets. The collector never falls back to a different port or to a lock
+file. This has been verified on macOS only; Linux and Windows are not yet verified. Writers in
+separate network namespaces that share one directory are not kept apart.
+
+**Upgrading from a collector that used a lock file.** Earlier collectors used
+`.project/metrics/.token-consumption.lock`. The new collector cannot keep an old one from writing,
+so it skips every event while that file exists. It never removes the file itself. To migrate:
+
+1. Stop every old writer: finish running agent sessions and restart OpenCode, whose plugin keeps
+   the old code loaded in memory.
+2. Delete `.project/metrics/.token-consumption.lock` if it exists. Do not delete anything else:
+   `token-consumption.json` and its reports stay as they are, and totals carry over unchanged.
+
+Event ids now use a structured form. An event recorded under the old colon-joined id can
+therefore be counted a second time if a harness replays it after the upgrade. This happens at
+most once per such event.
+
 **Re-running setup:** `/setup` (or re-reading `SETUP.md`) detects existing context docs and
 offers Refresh all / Merge / Selective / Cancel. Merge mode shows a diff and preserves manual
 edits where possible; Refresh all overwrites selected generated documents only after your
@@ -381,3 +404,33 @@ belongs in the generated `.project/`, not the template.
 
 See `SETUP.md` for the full step-by-step and `ai-framework/workflow/overview.md` for the
 pipeline mechanics.
+
+### Managed-write safety and interrupted compaction
+
+Skill installation and pitch compaction require trusted project directories and ancestors:
+cooperating users must not rename or replace them while a managed transaction runs. The tools
+reject static symlinks and observed ancestor replacements and use atomic file replacement.
+These checks do **not** guarantee continuous containment against a hostile local process that
+can swap an ancestor after the final check. Directory-relative native operations alone would
+not solve relocation of an already-open directory either. Keep that stronger threat model out
+of the portable runtime's guarantees.
+
+Ledger commits, archives and removals share `.project/compaction/transaction.json` and its
+transaction roots. After an interruption, recover with:
+
+```sh
+node ai-framework/scripts/pitch-archive.js recover --root /absolute/project --apply
+```
+
+Older ledger commits used the installer journal at `.project/skills/transaction.json`.
+A pending legacy or installer journal blocks new compaction mutations; it is never silently
+moved, discarded or recovered with the wrong roots. After ensuring the original writer has
+stopped, recover that journal with:
+
+```sh
+node ai-framework/scripts/add-skill.js recover --scope project --root /absolute/project --apply
+```
+
+Recovery rolls back the interrupted transaction and refuses conflicting file edits. Inspect
+and resolve any reported conflict rather than deleting its journal or lock. Existing archive
+verification, coverage requirements and human approval before pitch deletion still apply.

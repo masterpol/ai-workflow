@@ -17,6 +17,11 @@ const STATE_FILE = ".project/reports/state.json";
 const HTML_FILE = ".project/reports/state.html";
 const MAX_ITEMS = 50;
 const MAX_DEPTH = 3;
+// MAX_ITEMS/MAX_DEPTH bound structure, but a single leaf string is unbounded on its own: state.json
+// is the untrusted-input path (see the design decision), so cap it here too, independent of the
+// source file's total size.
+const MAX_TEXT = 500;
+const boundedText = (text) => (text.length > MAX_TEXT ? `${text.slice(0, MAX_TEXT)}…` : text);
 const CSP = "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'";
 
 const esc = (value) => String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
@@ -43,7 +48,7 @@ const evidence = (root, list) => (Array.isArray(list) ? list.slice(0, MAX_ITEMS)
 const humanKey = (key) => String(key).replace(/([a-z0-9])([A-Z])/g, "$1 $2").toLowerCase();
 function value(node, depth = 0) {
   if (node === null || node === undefined || node === "") return `<span class="none">—</span>`;
-  if (typeof node !== "object") return esc(node);
+  if (typeof node !== "object") return esc(typeof node === "string" ? boundedText(node) : node);
   if (depth >= MAX_DEPTH) return "…";
   if (Array.isArray(node)) return node.length ? `<ul>${node.slice(0, MAX_ITEMS).map((item) => `<li>${value(item, depth + 1)}</li>`).join("")}</ul>` : `<span class="none">none</span>`;
   const entries = Object.entries(node).slice(0, 30);
@@ -58,7 +63,7 @@ const MISSING = { value: null, status: "unavailable", evidence: [], note: "this 
 
 function row(root, label, item) {
   const fact = isFact(item) ? item : MISSING;
-  return `<tr><th scope="row">${esc(label)}</th><td>${value(fact.value)}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}</td><td>${fact.note ? esc(fact.note) : `<span class="none">—</span>`}</td></tr>`;
+  return `<tr><th scope="row">${esc(label)}</th><td>${value(fact.value)}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}</td><td>${fact.note ? esc(boundedText(String(fact.note))) : `<span class="none">—</span>`}</td></tr>`;
 }
 function scroll(caption, inner) {
   return `<div class="scroll" role="group" aria-label="${esc(caption)}" tabindex="0">${inner}</div>`;
@@ -69,7 +74,10 @@ function table(caption, rows) {
 function section(id, title, body) {
   return `<section aria-labelledby="${id}"><h2 id="${id}">${esc(title)}</h2>${body}</section>`;
 }
-const list = (node) => (Array.isArray(node) ? node : isFact(node) ? [node] : []);
+// A non-fact element (null, a bare string, a hand-edited record missing status/evidence) must not
+// crash the whole render — projectRows/pitchTable/the skills mapping all trust every element here
+// is fact-shaped, so filter before they ever see it, the same way row() falls back to MISSING.
+const list = (node) => (Array.isArray(node) ? node.filter(isFact) : isFact(node) ? [node] : []);
 
 function projectRows(root, snapshot) {
   const rows = [];
@@ -92,7 +100,7 @@ function pitchTable(root, snapshot) {
     const v = fact.value && typeof fact.value === "object" ? fact.value : {};
     const hill = v.hill ? `${esc(v.hill.done)} of ${esc(v.hill.scopes)} scopes done` : `<span class="none">—</span>`;
     const title = v.title && v.title !== v.slug ? `<br><span class="sub">${esc(v.title)}</span>` : "";
-    return `<tr><th scope="row">${esc(v.slug)}${title}</th><td>${esc(v.phase)}</td><td>${v.appetite ? esc(v.appetite) : `<span class="none">—</span>`}</td><td>${hill}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}</td><td>${fact.note ? esc(fact.note) : `<span class="none">—</span>`}</td></tr>`;
+    return `<tr><th scope="row">${esc(v.slug)}${title}</th><td>${esc(v.phase)}</td><td>${v.appetite ? esc(v.appetite) : `<span class="none">—</span>`}</td><td>${hill}</td><td>${badge(fact.status)}</td><td>${evidence(root, fact.evidence)}</td><td>${fact.note ? esc(boundedText(String(fact.note))) : `<span class="none">—</span>`}</td></tr>`;
   }) : [`<tr><td colspan="7">No pitches found. ${badge("unavailable")}</td></tr>`];
   return scroll("Pitches and their progress", `<table><caption>Pitches and their progress</caption><thead><tr><th scope="col">Pitch</th><th scope="col">Phase</th><th scope="col">Appetite</th><th scope="col">Hill</th><th scope="col">Source status</th><th scope="col">Evidence</th><th scope="col">Notes</th></tr></thead><tbody>${body.join("")}</tbody></table>`);
 }
@@ -196,7 +204,8 @@ function loadSnapshot(root) {
 }
 
 function render(root, options = {}) {
-  root = fs.realpathSync(root);
+  // A raw ENOENT/EACCES message embeds the absolute path; keep only a fixed reason.
+  try { root = fs.realpathSync(root); } catch { throw new Error("--root does not exist or is not resolvable"); }
   const snapshot = loadSnapshot(root);
   const theme = discoverTheme(root);
   const changes = themeChanges(root, theme);

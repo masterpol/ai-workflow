@@ -88,7 +88,7 @@ test("rows sort by tokens, then completions, then name, inside each vendor", () 
 test("the since line reports the counting date, or says nothing was counted yet", () => {
   assert.match(markdown(snapshotWith({ since: "2026-09-24T10:00:00.000Z" })), /Dimensions counted since 2026-09-24T10:00:00\.000Z\. Completions recorded before that are not back-filled\./);
   assert.match(markdown(snapshotWith({ since: null })), /Not yet counted\. Completions recorded before that are not back-filled\./);
-  assert.match(html(snapshotWith({ since: "<b>" })), /Dimensions counted since &lt;b&gt;\./);
+  assert.match(html(snapshotWith({ since: "<b>" })), /Not yet counted\./, "a value that is not a date is not shown");
 });
 
 test("skills table lists vendor, skill and uses", () => {
@@ -110,16 +110,18 @@ test("every dynamic string is escaped in HTML", () => {
   }));
   assert.equal(output.includes("<script>"), false);
   assert.equal(output.includes("<img"), false);
-  assert.match(output, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  // Hostile names are re-checked against the identifier allow-list at render and never shown, escaped or not.
+  assert.equal(output.includes("alert(1)"), false);
+  assert.match(output, /Other \(overflow\)|\(other\)/);
 });
 
 test("a name cannot break out of a Markdown table row", () => {
   const output = markdown(snapshotWith({ models: { claude: { "a | b\n| injected | row |": row() } } }));
-  const line = output.split("\n").find((entry) => entry.startsWith("| claude") && entry.includes("injected"));
-  assert.ok(line, "the name stays on one line");
-  const cells = line.split(/(?<!\\)\|/).slice(1, -1);
-  assert.equal(cells.length, 7, "an escaped pipe adds no column");
+  assert.equal(output.includes("injected"), false, "the hostile name is replaced, not echoed");
   assert.equal(output.split("\n").some((entry) => entry.startsWith("| injected")), false);
+  const line = output.split("\n").find((entry) => entry.startsWith("| claude") && entry.includes("Other (overflow)"));
+  assert.ok(line, "the row stays on one line under the overflow label");
+  assert.equal(line.split(/(?<!\\)\|/).slice(1, -1).length, 7, "no column is added");
   assert.equal(markdown(snapshotWith({ models: { claude: { "<b>x</b>": row() } } })).includes("<b>"), false);
 });
 
@@ -159,12 +161,12 @@ test("a vendor named __proto__ is data, not a prototype", () => {
   assert.equal(({}).completions, undefined);
 });
 
-test("recordEvent writes a report with the usage headline and every table heading", () => {
+test("recordEvent writes a report with the usage headline and every table heading", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-report-"));
   fs.mkdirSync(path.join(root, ".project"));
   try {
-    recordEvent({ vendor: "opencode", event: "message.completed", agentType: "reviewer", model: "openai/gpt", effort: "high", costUsd: 0.01, raw: { session_id: "s", message_id: "one", tokens: { input: 10, output: 20 } } }, root);
-    recordEvent({ vendor: "claude", event: "skill-use", raw: { tool_use_id: "t1", tool_input: { skill: "build" } } }, root);
+    await recordEvent({ vendor: "opencode", event: "message.completed", agentType: "reviewer", model: "openai/gpt", effort: "high", costUsd: 0.01, raw: { session_id: "s", message_id: "one", tokens: { input: 10, output: 20 } } }, root);
+    await recordEvent({ vendor: "claude", event: "skill-use", raw: { tool_use_id: "t1", tool_input: { skill: "build" } } }, root);
     const metrics = path.join(root, ".project", "metrics");
     const md = fs.readFileSync(path.join(metrics, "token-consumption.md"), "utf8");
     assert.match(md, /Most used vendor: opencode \(30 reported tokens, 1 assistant messages\)/);
@@ -178,19 +180,74 @@ test("recordEvent writes a report with the usage headline and every table headin
   }
 });
 
-test("an unsafe agent id is never shown as a label in either report", () => {
+test("an unsafe agent id is never shown as a label in either report", async () => {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-report-"));
   fs.mkdirSync(path.join(root, ".project"));
   try {
-    recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "s", agent_id: "[click](https://evil.example/x)" } }, root);
+    await recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "s", agent_id: "[click](https://evil.example/x)" } }, root);
     for (const name of ["token-consumption.md", "token-consumption.html"]) {
       const text = fs.readFileSync(path.join(root, ".project", "metrics", name), "utf8");
       assert.doesNotMatch(text, /evil\.example/, `${name} does not render the id`);
       assert.match(text, /\(other\)/);
     }
-    recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "s2", agent_id: "a511f7310cb420ed5" } }, root);
+    await recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "s2", agent_id: "a511f7310cb420ed5" } }, root);
     assert.match(fs.readFileSync(path.join(root, ".project", "metrics", "token-consumption.md"), "utf8"), /\| claude \| a511f7310cb420ed5 \|/, "a normal id is still shown");
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
   }
+});
+
+// ---- Independent re-review (S2): the renderer must be safe and total for any snapshot ----
+
+test("a hand-edited snapshot with hostile strings and wrong types renders without markup, links, injected headings, or a throw", () => {
+  const snapshot = blankSnapshot();
+  snapshot.updatedAt = "2026-01-01\n# injected heading";
+  snapshot.lifetime.agentCompletions = "<img src=x onerror=alert(1)>";
+  snapshot.lifetime.reportedCostUsd = "1";
+  snapshot.lifetime.tokens = null;
+  snapshot.lifetime.vendors = map({ "[click](https://evil.example/v)": { completions: "<b>", reportedUsageCount: 1, unavailableCount: 0, reportedCostUsd: "x" }, zzz: null });
+  snapshot.current = { vendor: "[v](javascript:alert(1))", agentType: "![i](http://e/x.png)", model: "m‮​\u0007", tokens: null, costUsd: "5", availability: "<script>", metricScope: "a|b\nc", mode: "[m](https://evil.example/mode)" };
+  snapshot.previous = 5;
+  snapshot.dimensions = { since: "<b>", models: { "[x](https://evil.example)": { "[m](javascript:1)": { completions: "3", tokens: NaN } } }, agents: null, efforts: { claude: { "a b": {} } }, skills: { claude: { s: { uses: Infinity } } } };
+  let md;
+  let page;
+  assert.doesNotThrow(() => { md = markdown(snapshot); page = html(snapshot); });
+  for (const output of [md, page]) {
+    assert.doesNotMatch(output, /evil\.example|javascript:|onerror|<img|<script|‮|​|\u0007/);
+  }
+  assert.equal(/^# injected heading/m.test(md), false);
+  assert.doesNotMatch(md, /\]\(/, "no Markdown link syntax survives");
+});
+
+test("a snapshot that is not an object at all still renders the empty report", () => {
+  for (const value of [null, undefined, 5, "text", [], { lifetime: 7, dimensions: "x", current: [] }]) {
+    assert.doesNotThrow(() => { markdown(value); html(value); }, JSON.stringify(value));
+    assert.match(markdown(value), /Agent Token Consumption/);
+  }
+});
+
+test("an identifier-shaped name still renders exactly as it did before the render-time allow-list", () => {
+  const output = markdown(snapshotWith({ models: { opencode: { "openai/gpt-5.6-terra": row({ completions: 2, reportedUsageCount: 2, unavailableCount: 0, tokens: 30 }), "(unreported)": row({ completions: 1 }) } } }));
+  assert.match(output, /\| opencode \| assistant messages \| openai\/gpt-5\.6-terra \| 2 \| 2 \| 30 \|/);
+  assert.match(output, /\| opencode \| assistant messages \| Unreported \|/);
+});
+
+// ---- Audit cycle 2 of the S2 re-review ----
+
+test("a bare URL, a www host or an address in a name is not turned into a Markdown link", () => {
+  const output = markdown(snapshotWith({ models: { claude: { "www.evil-example.com/reset": row(), "https://evil.example/login": row(), "a@b.example": row() } } }));
+  assert.doesNotMatch(output, /https:\/\/evil\.example|www\.evil-example|a@b\.example/);
+  assert.match(output, /https&#58;\/\/evil\.example\/login/);
+  assert.match(output, /www&#46;evil-example\.com\/reset/);
+});
+
+test("the By Vendor table in the HTML report is closed", () => {
+  const output = html(snapshotWith({ vendors: { claude: { completions: 1, reportedUsageCount: 0, unavailableCount: 1, reportedCostUsd: 0, pricedCount: 0 } } }));
+  assert.equal((output.match(/<tbody>/g) || []).length, (output.match(/<\/tbody>/g) || []).length);
+});
+
+test("www after an underscore or other word character is still neutralized", () => {
+  const output = markdown(snapshotWith({ models: { claude: { "_www.evil.example": row() } } }));
+  assert.doesNotMatch(output, /_www\.evil/);
+  assert.match(output, /_www&#46;evil\.example/);
 });

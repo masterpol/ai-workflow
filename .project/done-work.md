@@ -126,3 +126,39 @@ Design: [[project-state-report-design]]. Lessons: [[parse-untrusted-values-and-r
 from it (`security.md` section 9, `testing.md` Guards and Fixes).
 
 Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/project-state-report-2026-09-25T13-39-04-583Z/`; restore with `node ai-framework/scripts/pitch-archive.js restore project-state-report --apply`. Ship-time log: `.project/runs/2026-09-25-project-state-report.md`. Coverage ledger: `.project/compaction/ledgers/project-state-report.json` (20 of 20 sections extracted, 0 gaps).
+
+## bundle-sync-marker-fix — shipped 2026-09-26
+
+S1 shipped per-entry effective sync bases. Verified equality and applied files advance to the source digest; unapplied local/conflict/retained-removal entries preserve their base, unverified entries without a base stay absent, and pruned entries disappear. Repeated-run tests keep pending upstream changes visible.
+
+Knowledge: [[effective-sync-bases-and-bounded-font-discovery]]. Closure evidence and constraints: `.project/records/pitch-compression/bundle-sync-marker-fix.md`. Ship-time log: `.project/runs/2026-09-26-bundle-sync-marker-fix.md`. No Git commit or external publication occurred. Production safety pitches remain incomplete.
+
+Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/bundle-sync-marker-fix-2026-09-27T01-27-20-241Z/`. Restore: `node ai-framework/scripts/pitch-archive.js restore bundle-sync-marker-fix --apply`. Coverage ledger: `.project/compaction/ledgers/bundle-sync-marker-fix.json` (100% extracted, zero gaps).
+
+## native-safety-feasibility — shipped 2026-09-27
+
+S1 shipped four scratch deliverables (386 lines), coordinated filesystem/process experiments and recommendations. Directory-relative operations withstand pathname symlink swaps but follow captured directories moved outside root. Advisory locks require stable inodes, cooperation and holder-lifetime supervision; Linux remains unverified and Windows unsupported. No production dependency or integration shipped.
+
+Knowledge: [[inode-anchoring-and-stable-inode-locks]]. Closure evidence and constraints: `.project/records/pitch-compression/native-safety-feasibility.md`. Ship-time log: `.project/runs/2026-09-26-native-safety-feasibility.md`. No Git commit or external publication occurred. Production safety pitches remain incomplete.
+
+Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/native-safety-feasibility-2026-09-27T01-27-20-473Z/`. Restore: `node ai-framework/scripts/pitch-archive.js restore native-safety-feasibility --apply`. Coverage ledger: `.project/compaction/ledgers/native-safety-feasibility.json` (100% extracted, zero gaps).
+
+## state-quoted-fonts — shipped 2026-09-26
+
+S1 shipped bounded quoted font-family parsing and one same-file custom-property hop. Output is canonicalized and revalidated by safeTheme; source-order and light/dark precedence are preserved. Nested/cyclic/unresolved/cross-file references, fallbacks and hostile tokens remain rejected.
+
+Knowledge: [[effective-sync-bases-and-bounded-font-discovery]]. Closure evidence and constraints: `.project/records/pitch-compression/state-quoted-fonts.md`. Ship-time log: `.project/runs/2026-09-26-state-quoted-fonts.md`. No Git commit or external publication occurred. Production safety pitches remain incomplete.
+
+Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/state-quoted-fonts-2026-09-27T01-27-20-753Z/`. Restore: `node ai-framework/scripts/pitch-archive.js restore state-quoted-fonts --apply`. Coverage ledger: `.project/compaction/ledgers/state-quoted-fonts.json` (100% extracted, zero gaps).
+
+## independent-rereview-catch-up — shipped 2026-09-27
+
+Shipped S0–S4: review bench and audit reviewer contract, plus independent re-review and fixes for compaction, metrics and state reporting. Final budget 19 files after two approved raises. Ship-time full suite: 390 tests, 389 passed, one Linux-only skip, zero failures.
+
+The outer audit found and fixed four security defects in the review bench itself; earlier guard evidence was weaker than claimed. Independence means fresh context within the same model family. S3 omitted guard snapshots and one dispatch lacked a canary/contract docs; final S1/S2/S3 patches did not receive another independent review. Source claims of must-fix-only work conflict with documented lower-tier fixes. Open limits and followups remain explicit in the compact record.
+
+Knowledge: [[a-gate-must-not-audit-its-own-instrument]], [[false-cross-pitch-attribution-in-a-shared-uncommitted-file]], [[token-metrics-dimensions-design]], [[project-state-report-design]].
+
+Closure evidence: `.project/records/pitch-compression/independent-rereview-catch-up.md`. Ship-time log: `.project/runs/2026-09-27-independent-rereview-catch-up.md`. Coverage: 25/25 required sections extracted, zero gaps.
+
+Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/independent-rereview-catch-up-2026-09-27T18-09-29-288Z/`. Restore: `node ai-framework/scripts/pitch-archive.js restore independent-rereview-catch-up --apply`. Coverage ledger: `.project/compaction/ledgers/independent-rereview-catch-up.json`.

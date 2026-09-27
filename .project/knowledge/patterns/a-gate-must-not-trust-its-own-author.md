@@ -2,9 +2,9 @@
 id: a-gate-must-not-trust-its-own-author
 type: pattern
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-09-27
 tags: [safety, deletion, validation, gates]
-related: [resolve-before-matching-a-protected-path-allowlist, bare-prefix-match-crosses-entities]
+related: [resolve-before-matching-a-protected-path-allowlist, bare-prefix-match-crosses-entities, a-gate-must-not-audit-its-own-instrument]
 source: pitch-compaction
 ---
 

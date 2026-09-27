@@ -84,10 +84,15 @@ function parseLength(raw) {
 const GENERIC_FAMILIES = new Set(["serif", "sans-serif", "monospace", "system-ui", "ui-monospace", "ui-sans-serif", "ui-serif", "cursive", "fantasy"]);
 function parseFontFamily(raw, generic) {
   const value = String(raw).trim();
-  // Quotes are rejected on purpose (reject, don't sanitize): unquoted multi-word names are valid CSS.
-  if (!/^[A-Za-z0-9 ,_-]{1,200}$/.test(value)) return { reason: "value is outside the accepted font-family grammar" };
-  const families = value.split(",").map((family) => family.trim());
-  if (families.some((family) => !family || /^(?:url|expression|import|javascript|var|calc)$/i.test(family))) return { reason: "value is outside the accepted font-family grammar" };
+  if (!value.length || value.length > 200) return { reason: "value is outside the accepted font-family grammar" };
+  const families = [];
+  for (const token of value.split(",")) {
+    const family = token.trim();
+    const quoted = family.match(/^(?:"([A-Za-z0-9 _-]+)"|'([A-Za-z0-9 _-]+)')$/);
+    const name = (quoted ? quoted[1] || quoted[2] : family).trim().replace(/\s+/g, " ");
+    if (!/^[A-Za-z0-9 _-]+$/.test(name) || /^(?:url|expression|import|javascript|var|calc)$/i.test(name)) return { reason: "value is outside the accepted font-family grammar" };
+    families.push(quoted ? `"${name}"` : name);
+  }
   if (!GENERIC_FAMILIES.has(families[families.length - 1].toLowerCase())) families.push(generic);
   return { css: families.join(", ") };
 }
@@ -110,8 +115,8 @@ function safeTheme(theme) {
     for (const token of COLOR_TOKENS) if (typeof source[token] === "string" && /^#[0-9a-f]{6}$/i.test(source[token])) clean[mode][token] = source[token].toLowerCase();
     if (typeof source.radius === "string" && parseLength(source.radius).css === source.radius) clean[mode].radius = source.radius;
     for (const [key, generic] of [["fontSans", "sans-serif"], ["fontMono", "monospace"]]) {
-      const parsed = typeof source[key] === "string" ? parseFontFamily(source[key], generic) : {};
-      if (parsed.css === source[key]) clean[mode][key] = source[key];
+      if (typeof source[key] !== "string") continue; // absent/wrong-typed: keep the fallback, never assign undefined
+      if (parseFontFamily(source[key], generic).css === source[key]) clean[mode][key] = source[key];
     }
     if (PAIRS.some((pair) => ratioOf(clean[mode], pair) < MIN_CONTRAST)) clean[mode] = { ...FALLBACK[mode] };
   }
@@ -180,14 +185,26 @@ function cssFiles(root) {
   return { files: files.slice(0, MAX_FILES), skipped };
 }
 
+// A leaf-only symlink check is not enough: an ancestor directory (".project" itself, say) can be a
+// symlink, and the OS follows it transparently before the leaf is ever inspected. Resolve the whole
+// path and check containment, the same way readSource/collect do, before trusting "not a symlink".
+function insideProject(root, file) {
+  let real;
+  try { real = fs.realpathSync(file); } catch { return null; }
+  const within = path.relative(root, real);
+  return within.startsWith("..") || path.isAbsolute(within) ? null : real;
+}
+
 function readSettings(root) {
   const result = { themeMode: "auto", note: null };
   const file = path.join(root, SETTINGS_FILE);
   let stat;
   try { stat = fs.lstatSync(file); } catch { return result; }
   if (stat.isSymbolicLink() || !stat.isFile() || stat.size > 4096) return { ...result, note: "settings.json ignored (not a small regular file)" };
+  const real = insideProject(root, file);
+  if (!real) return { ...result, note: "settings.json ignored (resolves outside the project)" };
   try {
-    const parsed = JSON.parse(fs.readFileSync(file, "utf8"));
+    const parsed = JSON.parse(fs.readFileSync(real, "utf8"));
     if (parsed?.schemaVersion === 1 && ["auto", "fallback"].includes(parsed.themeMode)) return { themeMode: parsed.themeMode, note: null };
   } catch { /* fall through */ }
   return { ...result, note: "settings.json ignored (expected {schemaVersion:1, themeMode:'auto'|'fallback'})" };
@@ -210,13 +227,27 @@ function collect(root) {
     if (real.startsWith("..") || path.isAbsolute(real)) continue;
     const text = fs.readFileSync(full, "utf8");
     let recognised = false;
-    for (const { chain, name, value } of declarations(text)) {
+    const entries = declarations(text);
+    const variables = { light: new Map(), dark: new Map() };
+    for (const entry of entries) {
+      const mode = modeOf(entry.chain);
+      if (mode) variables[mode].set(entry.name, entry.value);
+    }
+    for (const { chain, name, value } of entries) {
       const mode = modeOf(chain);
       const token = TOKEN_BY_NAME[name];
       if (!mode || !token) continue;
       recognised = true;
       if (found[mode][token]?.css) continue; // earlier (shallower, then alphabetical) definition wins
-      const parsed = COLOR_TOKENS.includes(token) ? parseColor(value) : token === "radius" ? parseLength(value) : parseFontFamily(value, token === "fontMono" ? "monospace" : "sans-serif");
+      // Font declarations use the last value in this file/mode. Variables are one-hop,
+      // same-file lookups; dark values may inherit the root/light definition.
+      if (token === "fontSans" || token === "fontMono") {
+        if (variables[mode].get(name) !== value) continue;
+      }
+      let fontValue = value;
+      const reference = value.match(/^var\(\s*--([A-Za-z0-9_-]+)\s*\)$/);
+      if (reference) fontValue = variables[mode].get(reference[1]) ?? (mode === "dark" ? variables.light.get(reference[1]) : undefined) ?? value;
+      const parsed = COLOR_TOKENS.includes(token) ? parseColor(value) : token === "radius" ? parseLength(value) : parseFontFamily(fontValue, token === "fontMono" ? "monospace" : "sans-serif");
       if (parsed.css) found[mode][token] = { ...parsed, source: relative };
       else if (!found[mode][token]) { found[mode][token] = { reason: parsed.reason }; reject({ token, mode, file: relative, reason: parsed.reason }); }
     }
@@ -257,7 +288,8 @@ function assemble(mode, found, fallbacks) {
 }
 
 function discoverTheme(root, options = {}) {
-  root = fs.realpathSync(root);
+  // A raw ENOENT/EACCES message embeds the absolute path; keep only a fixed reason.
+  try { root = fs.realpathSync(root); } catch { throw new Error("root does not exist or is not resolvable"); }
   const settings = options.settings || readSettings(root);
   const fallbacks = [];
   const forced = settings.themeMode === "fallback";
@@ -291,10 +323,13 @@ function discoverTheme(root, options = {}) {
 function themeChanges(root, theme) {
   let recorded;
   try {
-    const file = path.join(fs.realpathSync(root), THEME_FILE);
+    const projectRoot = fs.realpathSync(root);
+    const file = path.join(projectRoot, THEME_FILE);
     const stat = fs.lstatSync(file);
     if (stat.isSymbolicLink() || !stat.isFile() || stat.size > 256 * 1024) return { recorded: false, changed: [] };
-    recorded = JSON.parse(fs.readFileSync(file, "utf8"));
+    const real = insideProject(projectRoot, file);
+    if (!real) return { recorded: false, changed: [] };
+    recorded = JSON.parse(fs.readFileSync(real, "utf8"));
   } catch { return { recorded: false, changed: [] }; }
   const before = new Map((Array.isArray(recorded.sources) ? recorded.sources : []).map((item) => [String(item?.path), item?.sha256]));
   const now = new Map(theme.sources.map((item) => [item.path, item.sha256]));

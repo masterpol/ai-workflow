@@ -107,10 +107,15 @@ skipping `node_modules`, `.git`, `.project`, build output, and symlinks): shadcn
 properties (`--background`, `--foreground`, `--primary`, `--primary-foreground`, `--muted`,
 `--muted-foreground`, `--border`, `--radius`, `--font-sans`, `--font-mono`, in `:root` and
 `.dark`) and Tailwind v4 `@theme` `--color-*` aliases. A value is **parsed, not copied**: only hex,
-`rgb()`, `hsl()` (including shadcn's bare `240 10% 4%` form), lengths, and unquoted font-family
+`rgb()`, `hsl()` (including shadcn's bare `240 10% 4%` form), lengths, and bounded quoted or unquoted font-family
 lists are accepted, and colors are re-emitted as `#rrggbb`. Anything else — `url(`, `;`, braces,
-quotes, `<`, `expression`, `!important`, `var()` indirection, `oklch()` and other color spaces
+`<`, `expression`, `!important`, unresolved `var()` indirection, `oklch()` and other color spaces
 whose contrast cannot be checked — is rejected and recorded in `theme.json` under `rejected`.
+Font names accept ASCII letters, numbers, spaces, underscores and hyphens (at most 200 input
+characters). Quoted names are re-emitted with double quotes. A font may reference one custom
+property in the same stylesheet with `var(--name)`: the last declaration for that mode wins,
+and dark mode can inherit a light/root value. Nested references, cycles, fallbacks in `var()`,
+and references to another file are rejected. Stylesheet discovery precedence remains unchanged.
 
 Contrast is checked for every text/background pair the page uses (4.5:1, WCAG AA). A group that
 fails, is incomplete, or uses an unverifiable value falls back to the documented shadcn-style

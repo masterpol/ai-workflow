@@ -1,0 +1,64 @@
+{
+  "sections": [
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-1-shippedmdreconciliation",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#verification-and-audit",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-2-shippedmdverification-and-audit",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-and-documentation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-3-shippedmdno-gos-and-documentation",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-remaining-work",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-4-shippedmdknowledge-and-remaining-work",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#delivery",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-5-shippedmddelivery",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-6-pitchmdno-gos",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-7-pitchmdrabbit-holes",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "log.md#2026-09-26-s1-complete",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-8-logmd2026-09-26-s1-complete",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "log.md#2026-09-26-audit-complete-ready-for-ship-gate",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-9-logmd2026-09-26-audit-complete-ready-for-ship-gate",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "log.md#2026-09-26-shipped",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/native-safety-feasibility.md#section-10-logmd2026-09-26-shipped",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    }
+  ]
+}

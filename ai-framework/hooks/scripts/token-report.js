@@ -39,13 +39,15 @@ function escapeHtml(value) {
 // A name must not add a column, end a row, or inject markup into a Markdown table cell.
 // Opaque ids (agent id, session id) are only length-bounded when recorded, so any label shown
 // from one must pass the same identifier allow-list that names do; anything else shows as (other).
-const SAFE_LABEL = /^[\w.:/@+-]+$/;
+const SAFE_LABEL = /^[\w.:/@+-]{1,128}$/;
 function safeLabel(value) {
   return typeof value === "string" && SAFE_LABEL.test(value) ? value : "(other)";
 }
 
+// GitHub-flavored Markdown turns a bare "https://..." or "www...." into a link even inside a table cell, and an
+// "a@b.c" into a mail link; the characters that trigger it are written as entities, which read the same.
 function mdCell(value) {
-  return String(value).replace(/\r?\n|\r/g, " ").replace(/\|/g, "\\|").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  return String(value).replace(/\r?\n|\r/g, " ").replace(/\|/g, "\\|").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/:\/\//g, "&#58;//").replace(/www\./gi, "www&#46;").replace(/@/g, "&#64;");
 }
 
 function recordLine(record) {
@@ -225,7 +227,75 @@ function markdownTable({ headers, textColumns, rows }) {
   return [`| ${headers.join(" | ")} |`, `|${alignment.join("|")}|`, ...body.map((row) => `| ${row.map(mdCell).join(" | ")} |`)].join("\n");
 }
 
-function markdown(snapshot) {
+// The renderer never trusts the file it is given. The collector sanitizes on the way in, but the snapshot is a
+// plain file anyone can edit, so every string is re-checked against the identifier allow-list here (again, at
+// the place it is written), every number is forced finite, and every date must look like one. What comes out of
+// this function is safe to interpolate into Markdown and HTML, and cannot make the renderer throw.
+const DATE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/;
+const MODE = /^[a-z][a-z-]{0,23}$/;
+const AVAILABILITY = new Set(["reported", "partial", "unavailable"]);
+const plain = (value) => (value !== null && typeof value === "object" && !Array.isArray(value) ? value : {});
+const label = (value, fallback = OTHER) => (value === UNREPORTED || value === OTHER ? value : typeof value === "string" && SAFE_LABEL.test(value) ? value : fallback);
+const numberOrNull = (value) => (typeof value === "number" && Number.isFinite(value) ? value : null);
+const date = (value) => (typeof value === "string" && DATE.test(value) ? value : null);
+
+function cleanRecord(record) {
+  if (!record || typeof record !== "object") return null;
+  return {
+    vendor: label(record.vendor, "unknown"),
+    agentType: record.agentType ? label(record.agentType) : null,
+    agentId: record.agentId ? label(record.agentId) : null,
+    model: record.model ? label(record.model) : null,
+    tokens: { total: numberOrNull(plain(record.tokens).total) },
+    costUsd: numberOrNull(record.costUsd),
+    availability: AVAILABILITY.has(record.availability) ? record.availability : "unavailable",
+    metricScope: record.metricScope ? label(record.metricScope) : null,
+    mode: typeof record.mode === "string" && MODE.test(record.mode) ? record.mode : null,
+  };
+}
+
+const ROW_FIELDS = ["completions", "reportedUsageCount", "unavailableCount", "tokens", "costUsd", "pricedCount", "uses"];
+function cleanDimension(byVendor) {
+  const cleaned = Object.create(null);
+  for (const [vendor, byName] of entries(byVendor)) {
+    const target = (cleaned[label(vendor, "unknown")] ||= Object.create(null));
+    for (const [name, row] of entries(byName)) {
+      // Two hostile names can fold into the same label; their rows are added, never dropped.
+      const merged = (target[label(name)] ||= Object.fromEntries(ROW_FIELDS.map((field) => [field, 0])));
+      for (const field of ROW_FIELDS) merged[field] += count(plain(row)[field]);
+    }
+  }
+  return cleaned;
+}
+
+function cleanSnapshot(snapshot) {
+  const source = plain(snapshot);
+  const lifetime = plain(source.lifetime);
+  const tokens = plain(lifetime.tokens);
+  const vendors = Object.create(null);
+  for (const [vendor, values] of entries(lifetime.vendors)) {
+    const target = (vendors[label(vendor, "unknown")] ||= { completions: 0, reportedUsageCount: 0, unavailableCount: 0, reportedCostUsd: 0, pricedCount: 0 });
+    for (const field of Object.keys(target)) target[field] += count(plain(values)[field]);
+  }
+  const dimensions = plain(source.dimensions);
+  return {
+    updatedAt: date(source.updatedAt),
+    current: cleanRecord(source.current),
+    previous: cleanRecord(source.previous),
+    lifetime: {
+      agentCompletions: count(lifetime.agentCompletions),
+      reportedUsageCount: count(lifetime.reportedUsageCount),
+      unavailableCount: count(lifetime.unavailableCount),
+      reportedCostUsd: count(lifetime.reportedCostUsd),
+      tokens: Object.fromEntries(["input", "output", "reasoning", "cacheRead", "cacheWrite", "total"].map((key) => [key, count(tokens[key])])),
+      vendors,
+    },
+    dimensions: { since: date(dimensions.since), models: cleanDimension(dimensions.models), agents: cleanDimension(dimensions.agents), efforts: cleanDimension(dimensions.efforts), skills: cleanDimension(dimensions.skills) },
+  };
+}
+
+function markdown(input) {
+  const snapshot = cleanSnapshot(input);
   const delta = change(snapshot.current, snapshot.previous);
   const current = snapshot.current;
   const previous = snapshot.previous;
@@ -287,7 +357,8 @@ function htmlTable({ headers, textColumns, rows }) {
   return `<table><thead><tr>${head}</tr></thead><tbody>${cells}</tbody></table>`;
 }
 
-function html(snapshot) {
+function html(input) {
+  const snapshot = cleanSnapshot(input);
   const delta = change(snapshot.current, snapshot.previous);
   const current = snapshot.current;
   const vendorRows = entries(snapshot.lifetime.vendors)
@@ -320,7 +391,7 @@ function html(snapshot) {
 <div class="cards"><div class="card"><div class="label">Current reported tokens</div><div class="value">${formatNumber(current?.tokens.total)}</div></div><div class="card"><div class="label">Change from previous</div><div class="value">${delta.value === null ? escapeHtml(delta.label) : formatNumber(delta.value)}</div></div><div class="card"><div class="label">Lifetime actual cost</div><div class="value">${formatCost(snapshot.lifetime.reportedCostUsd)}</div></div></div>
 <section><h2>Current Completion</h2><table><thead><tr><th>Vendor</th><th>Agent</th><th>Model</th><th>Tokens</th><th>Cost</th><th>Scope</th><th>Caveman mode</th></tr></thead><tbody><tr><td>${escapeHtml(current?.vendor || "None")}</td><td>${escapeHtml(current?.agentType || current?.agentId ? safeLabel(current.agentType || current.agentId) : "-")}</td><td>${escapeHtml(current?.model || "-")}</td><td>${formatNumber(current?.tokens.total)}</td><td>${formatCost(current?.costUsd)}</td><td>${escapeHtml(current?.metricScope || "-")}</td><td>${escapeHtml(current?.mode || "Unavailable")}</td></tr></tbody></table></section>
 <section><h2>Lifetime</h2><table><thead><tr><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Reported tokens</th><th>Actual cost</th></tr></thead><tbody><tr><td>${snapshot.lifetime.agentCompletions}</td><td>${snapshot.lifetime.reportedUsageCount}</td><td>${snapshot.lifetime.unavailableCount}</td><td>${formatNumber(snapshot.lifetime.tokens.total)}</td><td>${formatCost(snapshot.lifetime.reportedCostUsd)}</td></tr></tbody></table></section>
-<section><h2>By Vendor</h2><table><thead><tr><th>Vendor</th><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Actual cost</th></tr></thead><tbody>${vendorRows}</table></section>
+<section><h2>By Vendor</h2><table><thead><tr><th>Vendor</th><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Actual cost</th></tr></thead><tbody>${vendorRows}</tbody></table></section>
 <p>${escapeHtml(sinceLine(snapshot))} ${escapeHtml(COST_NOTE)}</p>
 ${dimensionSections}
 </main></body></html>

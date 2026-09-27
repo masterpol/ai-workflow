@@ -1,0 +1,62 @@
+[
+  {
+    "slug": "bundle-sync-marker-fix",
+    "coverage": 1,
+    "gaps": [],
+    "archive": ".project/compaction/archives/bundle-sync-marker-fix-2026-09-27T01-27-20-241Z/",
+    "verified": true,
+    "applied": false,
+    "files": [
+      ".project/pitches/bundle-sync-marker-fix/SHIPPED.md",
+      ".project/pitches/bundle-sync-marker-fix/audit-cycle-1.md",
+      ".project/pitches/bundle-sync-marker-fix/deviations.md",
+      ".project/pitches/bundle-sync-marker-fix/hill.md",
+      ".project/pitches/bundle-sync-marker-fix/log.md",
+      ".project/pitches/bundle-sync-marker-fix/pitch.md",
+      ".project/pitches/bundle-sync-marker-fix/plan.md",
+      ".project/pitches/bundle-sync-marker-fix/ship-readiness.md"
+    ]
+  },
+  {
+    "slug": "native-safety-feasibility",
+    "coverage": 1,
+    "gaps": [],
+    "archive": ".project/compaction/archives/native-safety-feasibility-2026-09-27T01-27-20-473Z/",
+    "verified": true,
+    "applied": false,
+    "files": [
+      ".project/pitches/native-safety-feasibility/SHIPPED.md",
+      ".project/pitches/native-safety-feasibility/audit-code-cycle-1.md",
+      ".project/pitches/native-safety-feasibility/audit-code-cycle-2.md",
+      ".project/pitches/native-safety-feasibility/audit-cross-cycle-1.md",
+      ".project/pitches/native-safety-feasibility/audit-prompts.md",
+      ".project/pitches/native-safety-feasibility/audit-security-cycle-1.md",
+      ".project/pitches/native-safety-feasibility/audit-test-cycle-1.md",
+      ".project/pitches/native-safety-feasibility/audit.md",
+      ".project/pitches/native-safety-feasibility/deviations.md",
+      ".project/pitches/native-safety-feasibility/hill.md",
+      ".project/pitches/native-safety-feasibility/log.md",
+      ".project/pitches/native-safety-feasibility/pitch.md",
+      ".project/pitches/native-safety-feasibility/plan.md",
+      ".project/pitches/native-safety-feasibility/ship-readiness.md"
+    ]
+  },
+  {
+    "slug": "state-quoted-fonts",
+    "coverage": 1,
+    "gaps": [],
+    "archive": ".project/compaction/archives/state-quoted-fonts-2026-09-27T01-27-20-753Z/",
+    "verified": true,
+    "applied": false,
+    "files": [
+      ".project/pitches/state-quoted-fonts/SHIPPED.md",
+      ".project/pitches/state-quoted-fonts/audit-cycle-1.md",
+      ".project/pitches/state-quoted-fonts/deviations.md",
+      ".project/pitches/state-quoted-fonts/hill.md",
+      ".project/pitches/state-quoted-fonts/log.md",
+      ".project/pitches/state-quoted-fonts/pitch.md",
+      ".project/pitches/state-quoted-fonts/plan.md",
+      ".project/pitches/state-quoted-fonts/ship-readiness.md"
+    ]
+  }
+]
