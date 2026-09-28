@@ -108,8 +108,9 @@ socket on `127.0.0.1` for the whole read, write and report step. The port is der
 metrics directory's real path, in the range 20000–29999. The kernel holds that socket while the
 writer runs, including while it is paused, and frees it when the writer exits or dies. A waiting
 writer gives up after about one second and skips that event: telemetry is best-effort and never
-blocks the agent. The same skip happens if another program already uses the derived port, or if a
-sandbox refuses loopback sockets. The collector never falls back to a different port or to a lock
+blocks the agent. The same skip happens if another program already listens on `127.0.0.1` at the
+derived port, or if a sandbox refuses loopback sockets. A program listening on all interfaces at that
+port does not block the collector on macOS; it is not a metrics writer, so it cannot corrupt the snapshot. The collector never falls back to a different port or to a lock
 file. This has been verified on macOS only; Linux and Windows are not yet verified. Writers in
 separate network namespaces that share one directory are not kept apart.
 
@@ -416,7 +417,11 @@ not solve relocation of an already-open directory either. Keep that stronger thr
 of the portable runtime's guarantees.
 
 Ledger commits, archives and removals share `.project/compaction/transaction.json` and its
-transaction roots. After an interruption, recover with:
+transaction roots. Before upgrading or running this version, stop every process using older
+compaction scripts, including long-lived sessions that imported them, and recover any pending
+legacy transaction using the installer recovery command below. Do not run old and new
+compaction writers concurrently: they use different locks, and absence of a legacy journal
+does not prove an old writer cannot resume. After an interruption, recover with:
 
 ```sh
 node ai-framework/scripts/pitch-archive.js recover --root /absolute/project --apply

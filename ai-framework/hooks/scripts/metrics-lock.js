@@ -49,6 +49,10 @@ function listenOnce(endpoint, timeoutMs) {
     let settled = false;
     const settle = (value) => { if (!settled) { settled = true; clearTimeout(timer); resolve(value); } };
     server.on("error", (error) => {
+      // After a successful listen, an error is an accept failure (EMFILE and the like). The listening socket
+      // is still open and still the lease: closing it here would hand the lease to another writer while this
+      // one is mid-write. Only the lease's release() closes a granted server.
+      if (settled) return;
       server.close(() => {});
       settle(error && error.code === "EADDRINUSE" ? { busy: true } : { error: (error && error.code) || "error" });
     });

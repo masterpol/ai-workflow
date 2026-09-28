@@ -13,3 +13,20 @@ Reclamation compares device/inode and contents immediately before rename; releas
 New identities and completion keys are tagged JSON tuples. Agent ID and agent type occupy separate positions. Type-only subagent completions receive an opaque unique identity, because a type cannot identify one completion. Explicit completion IDs remain replay-deduplicated.
 
 Legacy v1/v2 snapshots and stored totals remain readable. Legacy colon-form dedup keys are preserved but are not mapped to ambiguous new tuples: replay of a previously stored old key can count once after migration. Existing model-note and skill-use keys keep their prior grammar.
+
+## D3 — Completion plan built without a separate pre-bet critique — 2026-09-27
+
+The completion plan said a pre-bet critique was required before finalizing. The user approved the plan
+directly and asked for the implementation; no critique dispatch ran. The outer `/audit` is the first
+independent look at this design.
+
+## D4 — S1's reclaim contract and its tests retired — 2026-09-27
+
+The five pathname-lock tests (live/EPERM owner retained, Linux reused-PID reclaim, replacement lock during
+reclaim, dead-PID reclaim, orphan-age reclaim) tested a mechanism the approved plan replaces. They were
+removed with it, not weakened. Structured identity (D2) and its tests are unchanged.
+
+## D5 — Cross-project endpoint collisions are real, not theoretical — 2026-09-27
+
+Two unrelated projects share a port with probability ~1/10,000 per pair; while one holds, the other skips.
+The contract accepts this, but it made one full parallel test run flaky (1 in 7 observed). Followup opened.

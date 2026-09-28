@@ -823,6 +823,8 @@ test("a real-shaped snapshot from this collector validates and keeps its totals 
 // ---- collector-robustness C3: every writer holds the kernel lease (metrics-lock.js) ----
 
 const { endpointFor } = require("./metrics-lock.js");
+// A lease or test server left open by a failed assertion must fail this file, not hang it (see metrics-lock.test.js).
+require("node:test").after(() => { setTimeout(() => process.exit(), 2000).unref(); });
 const net = require("node:net");
 const { spawn } = require("node:child_process");
 
@@ -899,11 +901,12 @@ test("another program on the metrics endpoint makes recordEvent skip within its 
   fs.mkdirSync(metrics, { recursive: true });
   const squatter = net.createServer();
   await new Promise((resolve) => squatter.listen({ host: "127.0.0.1", port: endpointFor(metrics).port, exclusive: true }, resolve));
+  t.after(() => new Promise((resolve) => squatter.close(() => resolve())));
   const skipped = await recordEvent(event(), root, { lock: { waitMs: 150 } });
   assert.equal(skipped.written, false);
   assert.match(skipped.reason, /held by another writer/);
   assert.equal(fs.existsSync(snapshotFile(root)), false);
-  await new Promise((resolve) => squatter.close(resolve));
+  await new Promise((resolve) => squatter.close(() => resolve()));
   assert.equal((await recordEvent(event(), root)).written, true);
 });
 

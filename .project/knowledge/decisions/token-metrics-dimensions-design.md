@@ -4,7 +4,7 @@ type: decision
 created: 2026-09-25
 updated: 2026-09-27
 tags: [token-metrics, collector, report, schema, hooks, design]
-related: [reversible-aggregates-store-their-routing, allow-list-untrusted-labels-at-ingest-and-at-render, async-agent-launch-hook-counted-as-completion, workflow-tooling-pitches-share-standing-no-gos-and-design-answers, false-cross-pitch-attribution-in-a-shared-uncommitted-file]
+related: [reversible-aggregates-store-their-routing, allow-list-untrusted-labels-at-ingest-and-at-render, async-agent-launch-hook-counted-as-completion, workflow-tooling-pitches-share-standing-no-gos-and-design-answers, false-cross-pitch-attribution-in-a-shared-uncommitted-file, collector-metrics-lease-design]
 source: metrics-report-dimensions
 ---
 
@@ -79,3 +79,5 @@ caveman-mode attribution and never-block-the-agent behavior unchanged; `.project
 ## References
 
 `README.md` metrics section; [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].
+
+Writers serialize through a kernel-held loopback lease, not a lock file: [[collector-metrics-lease-design]].

@@ -546,6 +546,8 @@ test("recovers a killed real ledger commit through the compaction CLI with exact
     const slug = "killed-ledger";
     seedShippedPitch(root, slug);
     write(root, "notes/dest.md", "extracted");
+    const sourceFiles = Object.fromEntries(fs.readdirSync(path.join(root, `.project/pitches/${slug}`)).map((file) => [file, read(root, `.project/pitches/${slug}/${file}`)]));
+    const extracted = read(root, "notes/dest.md");
     const mapping = { sections: buildLedger(root, slug).required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md", reason: "new mapping" })) };
     const ledger = `.project/compaction/ledgers/${slug}.json`;
     if (existing) commitFixtureLedger(root, slug);
@@ -570,6 +572,8 @@ test("recovers a killed real ledger commit through the compaction CLI with exact
     else assert.equal(exists(root, ledger), false);
     assert.equal(exists(root, ".project/compaction/transaction.json"), false);
     assert.equal(exists(root, ".project/compaction/lock.json"), false);
+    for (const [file, content] of Object.entries(sourceFiles)) assert.equal(read(root, `.project/pitches/${slug}/${file}`), content, "ledger recovery must not alter the source pitch");
+    assert.equal(read(root, "notes/dest.md"), extracted, "ledger recovery must not alter extracted content");
     commitLedger(root, slug, mapping, { apply: true });
     assert.equal(JSON.parse(read(root, ledger)).sections[0].reason, "new mapping");
     assert.equal(verify(root, slug).valid, false, "recovery creates no archive or deletion authority");

@@ -77,28 +77,6 @@ playbook names it as an explicit, human-chosen step after a removal (compacted p
 report from `done-work.md`). Still open: whether to call it automatically; decide after the first
 real compaction, and note that `/state` output is git-ignored, so an automatic run leaves no diff.
 
-## Collector lock never reclaims a live or reused PID, and reclaim can remove a fresh lock
-
-Found 2026-09-24 in `metrics-report-dimensions` audit cycle 1 (security-reviewer, deferred
-should-fix; pre-existing code in `token-consumption.js`, not part of that pitch's diff). A lock
-file whose recorded PID is alive (or reused after a crash, or owned by another user so
-`kill(pid, 0)` returns `EPERM`) is never reclaimed: every hook waits about 1 s and then gives up,
-so telemetry silently stops until someone deletes `.project/metrics/.token-consumption.lock`. Also,
-`reclaim()` renames the lock after reading a dead owner; if another process reclaimed and took the
-lock in between, the rename removes that process's fresh lock and two writers can overlap. Candidate
-fix: reclaim by age (mtime over ~30 s) regardless of PID, treat `EPERM` as "alive, check age", and
-re-read the lock content immediately before removing it.
-
-## Collector identity keys can collide across entities
-
-Found 2026-09-24 in `metrics-report-dimensions` audit cycle 1 (security-reviewer, deferred,
-pre-existing). `normalizedEvent` builds identity with `[...].filter(Boolean).join(":")`, so
-`session "a:b"` + `agent "c"` and `session "a"` + `agent "b:c"` share a key, and `agent_type "X"`
-with `agent_id "X"` in one session collide. A second Codex `subagent-complete` with the same
-session and agent type but no agent id is dropped as a duplicate, so two real runs count once. Same
-family as `bare-prefix-match-crosses-entities`. Candidate fix: a JSON-encoded or length-prefixed
-identity, with a migration note because `recentEventKeys` and stored `identityKey`s use today's form.
-
 ## Verify the OpenCode effort and skill wiring in a live session
 
 Raised 2026-09-25 at `metrics-report-dimensions` ship. The OpenCode plugin passes `variant` from
@@ -187,14 +165,6 @@ clamped with `Math.max(0, ...)` while `patterns/reversible-aggregates-store-thei
 clamping or document lifetime totals as the exception. The overflow bucket "Other (overflow)" also shows names rejected by the
 allow-list, not only overflow; relabel it "Other (overflow or invalid)".
 
-## Reconcile the collector edits made by the S2 re-review with `collector-robustness`
-
-Raised 2026-09-26. `independent-rereview-catch-up` S2 edited `token-consumption.js` and `token-report.js` (and their tests) in
-regions outside the lock and identity code, while `collector-robustness` still has uncommitted edits to the lock and identity
-code of the same file. Both sets are in the working tree. Whoever commits second should run both test suites together
-(`token-consumption.test.js`, `token-report.test.js`, `opencode-plugin.test.js`) and check that vendor-scoped model notes
-(`agent:<vendor>:<id>`) and the JSON identity keys still line up.
-
 ## /state report: four small UX/i18n nits from the original audit, never actioned
 
 Raised 2026-09-27 by the S3 independent re-review of `independent-rereview-catch-up` (`review-state.md`'s
@@ -236,3 +206,32 @@ touching the real project beyond being told the scratch path in its prompt. Wort
 given this is internal developer tooling, not exposed to untrusted end users, is convention (a disciplined
 orchestrator) an acceptable boundary here, or should a future pitch add real process isolation?
 
+## Metrics lease: verify on Linux and Windows, and reduce cross-project port collisions
+
+Raised 2026-09-27 by `collector-robustness` C2/C3. The kernel-held loopback lease (`metrics-lock.js`) is
+verified on macOS only; Windows socket exclusivity semantics differ and Linux needs a real run. Unrelated
+projects share a derived port with probability ~1/10,000 per pair and skip each other's events while one
+holds; one full parallel test run failed this way (likely, not confirmed). Options: a wider port span, or a
+per-directory port chosen once and recorded, with the trust questions that brings. Also untested: the guard
+that closes a server whose `listen` completes after its attempt timed out (needs timing fault injection).
+
+## Path-safety completion disposition — 2026-09-27
+
+**Shipped 2026-09-27:** user approved path-safety-hardening. The approved trusted-directory
+contract intentionally leaves hostile ancestor replacement after the final pathname check
+outside the guarantee. The original stronger TOCTOU requirement remains unresolved rather
+than being represented as fixed.
+
+Ledger symlink refusal is verified, and the ledger/archive transaction-context mismatch is
+fixed using one compaction namespace and tested real interruption recovery. Old installer
+journals retain their recovery route; migration requires stopping old compaction writers.
+Ledger symlink refusal and the transaction-context mismatch are closed by this ship.
+
+## Review bench tree guard must exclude secret filenames
+
+Found during path-safety completion audit on 2026-09-27: review-bench.js has a SECRET_NAME
+matcher in its copy/reader path, but walkTree's skip predicate omits it before hashing files.
+The audit used a private copy with that matcher added to the skip predicate; no secret files
+were read by the guard in this run. Future bench hardening should apply the same exclusion to
+tree walking and verify that secret-shaped files are never opened. No shared bench source was
+changed as part of path safety.

@@ -1,12 +1,12 @@
 {
-  "generated": "2026-09-27",
+  "generated": "2026-09-28",
   "stats": {
-    "total": 26,
-    "decisions": 8,
+    "total": 28,
+    "decisions": 10,
     "patterns": 10,
     "entities": 0,
     "issues": 8,
-    "edges": 72,
+    "edges": 80,
     "brokenLinks": 0,
     "orphans": 0
   },
@@ -169,6 +169,57 @@
         "a-gate-must-not-trust-its-own-author"
       ],
       "file": ".project/knowledge/decisions/caveman-mode-is-default-everywhere.md"
+    },
+    {
+      "id": "collector-metrics-lease-design",
+      "type": "decision",
+      "title": "Decision: the metrics collector holds a kernel-owned loopback lease, not a lock file",
+      "tags": [
+        "collector",
+        "locking",
+        "token-metrics",
+        "concurrency",
+        "migration",
+        "platform"
+      ],
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "collector-robustness",
+      "related": [
+        "inode-anchoring-and-stable-inode-locks",
+        "token-metrics-dimensions-design",
+        "reversible-aggregates-store-their-routing",
+        "a-gate-must-not-trust-its-own-author"
+      ],
+      "file": ".project/knowledge/decisions/collector-metrics-lease-design.md"
+    },
+    {
+      "id": "compaction-recovery-shares-context-and-trusted-directories",
+      "type": "decision",
+      "title": "Decision: shared compaction recovery context and trusted directories",
+      "tags": [
+        "compaction",
+        "recovery",
+        "transactions",
+        "path-safety",
+        "threat-model",
+        "migration"
+      ],
+      "created": "2026-09-27",
+      "updated": "2026-09-27",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "path-safety-hardening",
+      "related": [
+        "pitch-compaction-gate-and-recovery-design",
+        "inode-anchoring-and-stable-inode-locks",
+        "hardening-a-shared-reader-made-its-writer-destructive"
+      ],
+      "file": ".project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md"
     },
     {
       "id": "dual-hash-tracking-for-transformed-content",
@@ -584,7 +635,8 @@
         "allow-list-untrusted-labels-at-ingest-and-at-render",
         "async-agent-launch-hook-counted-as-completion",
         "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
-        "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
+        "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
+        "collector-metrics-lease-design"
       ],
       "file": ".project/knowledge/decisions/token-metrics-dimensions-design.md"
     },
@@ -624,6 +676,34 @@
     {
       "from": "caveman-mode-is-default-everywhere",
       "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "collector-metrics-lease-design",
+      "to": "inode-anchoring-and-stable-inode-locks"
+    },
+    {
+      "from": "collector-metrics-lease-design",
+      "to": "token-metrics-dimensions-design"
+    },
+    {
+      "from": "collector-metrics-lease-design",
+      "to": "reversible-aggregates-store-their-routing"
+    },
+    {
+      "from": "collector-metrics-lease-design",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "compaction-recovery-shares-context-and-trusted-directories",
+      "to": "pitch-compaction-gate-and-recovery-design"
+    },
+    {
+      "from": "compaction-recovery-shares-context-and-trusted-directories",
+      "to": "inode-anchoring-and-stable-inode-locks"
+    },
+    {
+      "from": "compaction-recovery-shares-context-and-trusted-directories",
+      "to": "hardening-a-shared-reader-made-its-writer-destructive"
     },
     {
       "from": "effective-sync-bases-and-bounded-font-discovery",
@@ -724,6 +804,10 @@
     {
       "from": "token-metrics-dimensions-design",
       "to": "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
+    },
+    {
+      "from": "token-metrics-dimensions-design",
+      "to": "collector-metrics-lease-design"
     },
     {
       "from": "workflow-tooling-pitches-share-standing-no-gos-and-design-answers",
@@ -921,6 +1005,53 @@
       "caveman-mode-is-default-everywhere",
       "skill-defaults-attribution-guard-and-runtime-design"
     ],
+    "collector": [
+      "collector-metrics-lease-design",
+      "inode-anchoring-and-stable-inode-locks",
+      "token-metrics-dimensions-design"
+    ],
+    "locking": [
+      "collector-metrics-lease-design",
+      "inode-anchoring-and-stable-inode-locks"
+    ],
+    "token-metrics": [
+      "collector-metrics-lease-design",
+      "skill-defaults-attribution-guard-and-runtime-design",
+      "token-metrics-dimensions-design"
+    ],
+    "concurrency": [
+      "collector-metrics-lease-design"
+    ],
+    "migration": [
+      "collector-metrics-lease-design",
+      "compaction-recovery-shares-context-and-trusted-directories",
+      "installed-skill-wrappers-ship-as-orphans",
+      "reversible-aggregates-store-their-routing",
+      "subprocess-revalidation-against-on-disk-code"
+    ],
+    "platform": [
+      "collector-metrics-lease-design",
+      "inode-anchoring-and-stable-inode-locks"
+    ],
+    "compaction": [
+      "compaction-recovery-shares-context-and-trusted-directories",
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "recovery": [
+      "compaction-recovery-shares-context-and-trusted-directories",
+      "pitch-compaction-gate-and-recovery-design"
+    ],
+    "transactions": [
+      "compaction-recovery-shares-context-and-trusted-directories",
+      "dual-hash-tracking-for-transformed-content"
+    ],
+    "path-safety": [
+      "compaction-recovery-shares-context-and-trusted-directories",
+      "inode-anchoring-and-stable-inode-locks"
+    ],
+    "threat-model": [
+      "compaction-recovery-shares-context-and-trusted-directories"
+    ],
     "bundle-sync": [
       "effective-sync-bases-and-bounded-font-discovery",
       "installed-skill-wrappers-ship-as-orphans",
@@ -947,38 +1078,19 @@
       "skill-defaults-attribution-guard-and-runtime-design",
       "token-metrics-dimensions-design"
     ],
-    "path-safety": [
-      "inode-anchoring-and-stable-inode-locks"
-    ],
     "filesystem": [
       "inode-anchoring-and-stable-inode-locks",
       "macos-tmpdir-realpath-alias-breaks-path-assertions",
       "resolve-before-matching-a-protected-path-allowlist"
     ],
-    "locking": [
-      "inode-anchoring-and-stable-inode-locks"
-    ],
-    "collector": [
-      "inode-anchoring-and-stable-inode-locks",
-      "token-metrics-dimensions-design"
-    ],
     "feasibility": [
-      "inode-anchoring-and-stable-inode-locks"
-    ],
-    "platform": [
       "inode-anchoring-and-stable-inode-locks"
     ],
     "pitch-compress": [
       "pitch-compaction-gate-and-recovery-design"
     ],
-    "compaction": [
-      "pitch-compaction-gate-and-recovery-design"
-    ],
     "deletion": [
       "a-gate-must-not-trust-its-own-author",
-      "pitch-compaction-gate-and-recovery-design"
-    ],
-    "recovery": [
       "pitch-compaction-gate-and-recovery-design"
     ],
     "gates": [
@@ -999,10 +1111,6 @@
     ],
     "compress-guard": [
       "skill-defaults-attribution-guard-and-runtime-design"
-    ],
-    "token-metrics": [
-      "skill-defaults-attribution-guard-and-runtime-design",
-      "token-metrics-dimensions-design"
     ],
     "report": [
       "token-metrics-dimensions-design"
@@ -1083,9 +1191,6 @@
     "hashing": [
       "dual-hash-tracking-for-transformed-content"
     ],
-    "transactions": [
-      "dual-hash-tracking-for-transformed-content"
-    ],
     "injection": [
       "parse-untrusted-values-and-re-emit-them"
     ],
@@ -1106,11 +1211,6 @@
       "reversible-aggregates-store-their-routing"
     ],
     "schema-versioning": [
-      "reversible-aggregates-store-their-routing",
-      "subprocess-revalidation-against-on-disk-code"
-    ],
-    "migration": [
-      "installed-skill-wrappers-ship-as-orphans",
       "reversible-aggregates-store-their-routing",
       "subprocess-revalidation-against-on-disk-code"
     ],
