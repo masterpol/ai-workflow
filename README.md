@@ -51,7 +51,7 @@ doesn't auto-read either file, just ask it to *"read `SETUP.md` and set up the w
 **OpenCode model setup:** connect OpenAI and OpenCode Zen before starting a routed workflow —
 the bundled OpenCode routes deliberately avoid Anthropic for now, since some installations only
 have OpenAI/Zen connected and a route through an unconnected provider errors instead of falling
-back. The bundled routes use Zen's free `opencode/mimo-v2.5-free` model only for short,
+back. The bundled routes use Zen's free `opencode/space-bunny-free` model only for short,
 non-sensitive fast work, and OpenAI GPT-5.6 for standard and deep work (different reasoning
 effort per profile). Run `opencode debug config` to confirm that OpenCode resolves the
 configuration. For confidential work, replace the free fast-route adapters with the documented
@@ -87,13 +87,45 @@ After agent completion, the collector updates these Git-ignored local files:
   previous completion consumption, increase/decrease comparison inputs, lifetime aggregates, and a
   bounded deduplication list.
 - `.project/metrics/token-consumption.md` and `.project/metrics/token-consumption.html` are
-  regenerated views for a quick report or browser dashboard.
+  regenerated views for a quick report or browser dashboard. They open with a **Usage** summary
+  (most used vendor and model, and the basis it was ranked on), followed by tables by vendor,
+  model, agent, reasoning effort, and skill.
+
+The by-model, by-agent, by-effort, and by-skill tables start counting when the snapshot moves to
+schema v2 (the report prints the date) and are not back-filled. A harness that does not report a
+field shows `Unreported`; a completion with no nonzero cost shows `Unpriced`. Only skill names are
+recorded, never a skill's arguments. Completion counts are per assistant message for OpenCode and
+per subagent run for Claude Code and Codex, so they are not comparable across vendors.
 
 OpenCode reports per-message token fields and actual cost. Claude Code reports a completion for
 every subagent and can supplement foreground agents with final-request usage, which is labelled
 partial. Codex records all subagent completions but its hook payload supplies no token or cost
 fields, so those values are reported as unavailable rather than zero. Cursor has no verified
 completion-hook payload and is not wired automatically.
+
+**One writer at a time.** Each writer (the hook CLI and the OpenCode plugin) holds a loopback
+socket on `127.0.0.1` for the whole read, write and report step. The port is derived from the
+metrics directory's real path, in the range 20000–29999. The kernel holds that socket while the
+writer runs, including while it is paused, and frees it when the writer exits or dies. A waiting
+writer gives up after about one second and skips that event: telemetry is best-effort and never
+blocks the agent. The same skip happens if another program already listens on `127.0.0.1` at the
+derived port, or if a sandbox refuses loopback sockets. A program listening on all interfaces at that
+port does not block the collector on macOS; it is not a metrics writer, so it cannot corrupt the snapshot. The collector never falls back to a different port or to a lock
+file. This has been verified on macOS only; Linux and Windows are not yet verified. Writers in
+separate network namespaces that share one directory are not kept apart.
+
+**Upgrading from a collector that used a lock file.** Earlier collectors used
+`.project/metrics/.token-consumption.lock`. The new collector cannot keep an old one from writing,
+so it skips every event while that file exists. It never removes the file itself. To migrate:
+
+1. Stop every old writer: finish running agent sessions and restart OpenCode, whose plugin keeps
+   the old code loaded in memory.
+2. Delete `.project/metrics/.token-consumption.lock` if it exists. Do not delete anything else:
+   `token-consumption.json` and its reports stay as they are, and totals carry over unchanged.
+
+Event ids now use a structured form. An event recorded under the old colon-joined id can
+therefore be counted a second time if a harness replays it after the upgrade. This happens at
+most once per such event.
 
 **Re-running setup:** `/setup` (or re-reading `SETUP.md`) detects existing context docs and
 offers Refresh all / Merge / Selective / Cancel. Merge mode shows a diff and preserves manual
@@ -122,9 +154,14 @@ the canonical file itself declares, and checks that both the OpenCode and Codex 
 load the canonical file (or, for a script-backed skill like `workflow-doctor` itself, the script
 it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
 scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
-Checks run concurrently and print color-coded progress as each completes. It does not validate
-Cursor mirrors (generated fresh at install time, not shipped in the bundle) or installed hook
-wiring in a target project's `.claude/settings.json`.
+It also requires the caveman-mode instruction in every canonical skill, agent, and (in this bundle)
+both entry files, validates `.project/skills/modes.json`, and reports the live state — active, inert
+(skill not installed), disabled, or under-covering the workflow — so "carries the instruction" is
+never mistaken for "is on".
+Checks run concurrently and print color-coded progress as each completes. Skills installed with
+`add-skill` are recognized from `.project/skills/registry.json` and checked for ownership, vendor
+coverage and activation instead of canonical mirror rules. It does not validate Cursor mirrors
+(the setup validator does) or installed hook wiring in a target project's `.claude/settings.json`.
 
 - `--fix` restores missing template files and the generated `_followups.md` backlog only when a
   non-symlink `.project/` directory already exists. Run it only after approving the repair; it
@@ -142,7 +179,7 @@ or the knowledge graph — nothing needs manual registration for the doctor to p
 After `/setup` completes in a target project, run
 `node ai-framework/scripts/setup-validator.js`. It is read-only and verifies the generated
 `.project` context and scaffold, filled project specifics, full `CLAUDE.md` mirror, knowledge
-graph, and Cursor mirrors, then runs the workflow doctor as a prerequisite. A missing `.project`
+graph, and a Cursor mirror for every canonical skill and agent, then runs the workflow doctor as a prerequisite. A missing `.project`
 in this portable bundle is expected; it becomes a setup failure only when run in a target project.
 Use `--json` for automation or `--no-color` for plain text. Repair failures by re-running `/setup`
 through its confirmation gates, rather than hand-editing generated artifacts.
@@ -193,9 +230,19 @@ SETUP.md           The AI-followable install guide (start here)
 ```
 
 `.cursor/{agents,skills}/` aren't shipped in the bundle — `SETUP.md` generates them at install
-time as mirrors of `.claude/agents/` and `.claude/skills/`, since Cursor uses the same format.
+time as mirrors of `.claude/agents/` and `.claude/skills/`, since Cursor uses the same format
+(`node ai-framework/scripts/skill-vendors.js cursor-mirrors --apply` creates missing ones).
+
+External skills (for example from skills.sh) are added with `/add-skill`, which installs one
+verified skill for every vendor in the project with an explicit scope and workflow phases. See
+`ai-framework/integrations/skills.md`.
 
 ## One source, every vendor
+
+> **Caveman mode** rides the same architecture: one instruction, carried by every canonical skill
+> and agent (and both entry files), resolved per invocation by `skill-defaults.js`. Vendor mirrors
+> point at the canonical files or are byte copies — see
+> [`ai-framework/integrations/skill-defaults.md`](ai-framework/integrations/skill-defaults.md).
 
 Every skill, agent, and command is written **once**, canonically, and every vendor consumes
 that same source — no vendor maintains its own copy of the logic:
@@ -358,3 +405,37 @@ belongs in the generated `.project/`, not the template.
 
 See `SETUP.md` for the full step-by-step and `ai-framework/workflow/overview.md` for the
 pipeline mechanics.
+
+### Managed-write safety and interrupted compaction
+
+Skill installation and pitch compaction require trusted project directories and ancestors:
+cooperating users must not rename or replace them while a managed transaction runs. The tools
+reject static symlinks and observed ancestor replacements and use atomic file replacement.
+These checks do **not** guarantee continuous containment against a hostile local process that
+can swap an ancestor after the final check. Directory-relative native operations alone would
+not solve relocation of an already-open directory either. Keep that stronger threat model out
+of the portable runtime's guarantees.
+
+Ledger commits, archives and removals share `.project/compaction/transaction.json` and its
+transaction roots. Before upgrading or running this version, stop every process using older
+compaction scripts, including long-lived sessions that imported them, and recover any pending
+legacy transaction using the installer recovery command below. Do not run old and new
+compaction writers concurrently: they use different locks, and absence of a legacy journal
+does not prove an old writer cannot resume. After an interruption, recover with:
+
+```sh
+node ai-framework/scripts/pitch-archive.js recover --root /absolute/project --apply
+```
+
+Older ledger commits used the installer journal at `.project/skills/transaction.json`.
+A pending legacy or installer journal blocks new compaction mutations; it is never silently
+moved, discarded or recovered with the wrong roots. After ensuring the original writer has
+stopped, recover that journal with:
+
+```sh
+node ai-framework/scripts/add-skill.js recover --scope project --root /absolute/project --apply
+```
+
+Recovery rolls back the interrupted transaction and refuses conflicting file edits. Inspect
+and resolve any reported conflict rather than deleting its journal or lock. Existing archive
+verification, coverage requirements and human approval before pitch deletion still apply.

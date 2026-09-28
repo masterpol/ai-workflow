@@ -7,6 +7,8 @@ description: Resume work on a pitch. Reads the status index, loads only that pit
 
 > **Recommended capability profile:** `fast` — templated status reload, no new judgment. Select an available model using `ai-framework/integrations/harnesses.md`.
 
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+
 Usage: `/resume` or `/resume {slug}`.
 
 ## Steps

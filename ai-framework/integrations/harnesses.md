@@ -8,7 +8,7 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode/mimo-v2.5-free` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode/space-bunny-free` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
 | `standard` | Implementation, security, UX, test reasoning | Sonnet | `openai/gpt-5.6-terra` | `gpt-5.6` at medium or high effort |
 | `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `openai/gpt-5.6-terra` at xhigh effort | `gpt-5.6` at high or xhigh effort |
 
@@ -32,7 +32,7 @@ Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `mod
 
 The included OpenCode routes are explicit and, for now, deliberately avoid Anthropic entirely —
 some OpenCode installations only have OpenAI/OpenCode Zen connected, and a route through an
-unconnected provider errors instead of falling back: fast roles use `opencode/mimo-v2.5-free`
+unconnected provider errors instead of falling back: fast roles use `opencode/space-bunny-free`
 (the OpenCode Zen free tier); standard and deep roles use `openai/gpt-5.6-terra` (deep at
 `xhigh` reasoning via the global provider default in `.opencode/opencode.json`, standard at the
 `high` default, both explicit per-command where they need to differ from that default).
@@ -60,6 +60,38 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 `.codex/config.toml` only enables a practical concurrency cap. It does not set a provider or a global model, so it does not override a user's Codex configuration.
 
+## Caveman Mode
+
+One instruction, carried by every canonical skill (`.claude/skills/*`), every canonical agent
+(`.claude/agents/*`), and both entry files, resolved per invocation by
+`ai-framework/scripts/skill-defaults.js` (scopes: the seven phases, `utility`, `agent`). Each
+vendor reaches it through the file it already loads:
+
+| Vendor | Skills | Agents | Main session |
+|---|---|---|---|
+| Claude Code | canonical `.claude/skills` | canonical `.claude/agents` | `CLAUDE.md` |
+| OpenCode | `.opencode/commands` load the canonical skill | `.opencode/agents` load the canonical role prompt | `AGENTS.md` |
+| Codex | `.agents/skills` load the canonical skill | `.codex/agents` load the canonical role prompt | `AGENTS.md` |
+| Cursor | `.cursor/skills` byte copies | `.cursor/agents` byte copies | `AGENTS.md` |
+
+Verification status, kept honest: file coverage and mirror parity are checked mechanically for
+all four vendors (`workflow-doctor.js`, `skill-defaults.test.js`). The `caveman=<mode>` token was
+exercised end to end only in **Claude Code**; OpenCode passes command text through `$ARGUMENTS`
+the same way, but Codex and Cursor invocation with an inline argument, and whether each host
+honors an installed skill's wrapper, are **unverified** — do not assume parity without running
+it there. A vendor that cannot dispatch nested agents applies the mode in its sequential role
+pass. Token reports label the mode per record and show `Unavailable` where none is configured.
+
+## Instance-managed Skills
+
+External skills are installed through the `add-skill` entry point in every vendor (Claude Code
+skill, Codex skill, OpenCode command, Cursor mirror). One installation writes a wrapper into each
+project vendor's descriptor path in `ai-framework/integrations/skill-vendors.json`, extended or
+overridden by `.project/skills/vendors.json`, and all wrappers load the same package under
+`.project/skills/packages/`. Some hosts also read other vendors' skill directories (OpenCode reads `.claude/skills/` and `.agents/skills/`);
+a wrapper per vendor keeps each host's own discovery path covered without relying on that.
+See `ai-framework/integrations/skills.md` for the contract.
+
 ## Token Consumption Collector
 
 The bundle records completion metrics in a bounded local snapshot at
@@ -69,10 +101,17 @@ contains only numeric usage, cost, identifiers, and model metadata: never prompt
 transcripts.
 
 - **OpenCode:** `.opencode/plugins/token-consumption.js` automatically records completed assistant
-  messages. Its native event includes total message tokens and actual cost.
+  messages. Its native event includes total message tokens and actual cost. The plugin also passes
+  the message's `variant` as reasoning effort and counts skill tool calls by name. Both were
+  written against OpenCode's type definitions (plugin 1.17.20) and are unverified in a live
+  session; if a field is absent the report shows `Unreported`.
 - **Claude Code:** `.claude/settings.json` records every `SubagentStop`; its `Agent` PostToolUse
   hook supplements foreground agents with final-request usage when Claude exposes it. That usage
-  is intentionally labeled `partial`, not a full agent-run total.
+  is intentionally labeled `partial`, not a full agent-run total. An async subagent's `Agent` event
+  fires at launch, so it only leaves a model note that the later `SubagentStop` picks up; it is
+  not counted as a completion. Effort comes from `effort.level`, agent type from `agent_type`,
+  and a `Skill` PostToolUse hook counts skill names (never `tool_input.args`). These fields were
+  captured from live payloads (key names only): see the pitch's `spike-payloads.md`.
 - **Codex:** `.codex/hooks.json` records every `SubagentStop`. Codex completion hooks do not expose
   token or cost fields, so those records truthfully show `unavailable` instead of zero.
 - **Cursor and other harnesses:** no portable completion payload is available. Run
@@ -81,7 +120,15 @@ transcripts.
   the collector records the completion as unavailable.
 
 The snapshot keeps only current and previous completions for comparison, lifetime aggregates, and
-at most 100 idempotency keys. It does not create per-run log files.
+at most 100 idempotency keys (plus 50 for skill events and 50 async-agent model notes). It does not
+create per-run log files.
+
+Schema v2 adds aggregates by vendor, model, agent, effort, and skill under `dimensions`, counted from
+`dimensions.since`. Each vendor keeps at most 25 distinct names per dimension; further names, and
+the reserved names `__proto__`, `constructor`, and `prototype`, fold into `(other)`, and names are
+cut at 80 characters. A v1 file migrates in place with its lifetime totals intact, but an older
+collector cannot read a v2 file and would start a blank snapshot, so update every checkout that
+shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.js`.
 
 ## Sub-agent Dispatch
 

@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "slug": "metrics-report-dimensions",
+  "sections": [
+    {
+      "source": "SHIPPED.md#what-changed-for-the-user",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#deviations-deviationsmd",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated-pitchesfollowupsmd",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#notes-for-cooldown",
+      "status": "extracted",
+      "destination": "ai-framework/rules/testing.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d1-claude-async-agents-are-double-counted-and-split-across-model-rows-found-in-s0-2026-09-24",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d2-s4-built-inline-not-dispatched-2026-09-24",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d3-collector-coverage-criterion-needed-extra-tests-after-s2-2026-09-24",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d4-s2-added-a-by-vendor-unit-table-2026-09-24",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d5-audit-cycle-1-fixes-and-deferrals-2026-09-24",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d6-cycle-2-security-re-check-could-not-be-completed-by-a-reviewer-agent-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/token-metrics-dimensions-design.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-09-25T13:39:04.307Z"
+}

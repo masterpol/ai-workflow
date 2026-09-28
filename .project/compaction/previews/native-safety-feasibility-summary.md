@@ -1,0 +1,5 @@
+S1 shipped four scratch deliverables (386 lines), coordinated filesystem/process experiments and recommendations. Directory-relative operations withstand pathname symlink swaps but follow captured directories moved outside root. Advisory locks require stable inodes, cooperation and holder-lifetime supervision; Linux remains unverified and Windows unsupported. No production dependency or integration shipped.
+
+Knowledge: [[inode-anchoring-and-stable-inode-locks]]. Closure evidence and constraints: `.project/records/pitch-compression/native-safety-feasibility.md`. Ship-time log: `.project/runs/2026-09-26-native-safety-feasibility.md`. No Git commit or external publication occurred. Production safety pitches remain incomplete.
+
+Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/native-safety-feasibility-2026-09-27T01-27-20-473Z/`. Restore: `node ai-framework/scripts/pitch-archive.js restore native-safety-feasibility --apply`. Coverage ledger: `.project/compaction/ledgers/native-safety-feasibility.json` (100% extracted, zero gaps).

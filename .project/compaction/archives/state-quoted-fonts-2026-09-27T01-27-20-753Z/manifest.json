@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-quoted-fonts",
+  "sourceRoot": ".project/pitches/state-quoted-fonts",
+  "archivedAt": "2026-09-27T01:27:20.754Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "62e6ad25be1ece20e7b0707f60685da2b5a35d2f4db55507995118c28eaf44bc",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "742802911c82664cf761be8fde0f52748b58873bd59245a2109cfeeece6c5f16",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "321f5c8b3dc9ebb967e5cbb1ba755151b58777b2b5355630606401bf46d1e90e",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "68683e4a9bec601545121c56941750be2873254181a8ff13371b8af8e04ba0d8",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "ee01654415b9bd62bc0f459bbd27d69089f13b3d740f24ec69a2b4acb8b2ed70",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "06e3a25c3b901f0470e4b0d1d6a56028c2bd0d6fe4144e40f57a47ed3493a6cc",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "187786f5dc62339b0b735bd8847b790fc7ef5e0b187d39e49827f8be931e4c54",
+      "mode": 420
+    },
+    "ship-readiness.md": {
+      "hash": "7a94afb6aa58bf45e81d43a0fa796d08a1fa181f889c9b6c6cc0fb3699e6a50b",
+      "mode": 420
+    }
+  }
+}

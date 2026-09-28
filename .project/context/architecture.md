@@ -1,60 +1,29 @@
 # Architecture Context
 
-## Proposed Shape, Not a Final Decision
+## Overview
 
-One application serves multiple public site contexts from one canonical domain. The route identifies the public context, and the organisational hierarchy determines which content and configuration may be shown or edited.
+The bundle is a set of Markdown playbooks and role prompts, JSON configuration, and small Node.js scripts. There is no server, database or build step. Each supported vendor reads its own entry file and adapter directory, and all adapters point at one canonical set of playbooks.
 
-Example public paths:
+## Layout
 
-```text
-/
-/{country}
-/{country}/{territory}
-/{country}/{territory}/{school}
-/{country}/articles/{article-slug}
-```
+- `AGENTS.md` and `CLAUDE.md` are the entry files (OpenCode, Codex and Cursor read `AGENTS.md`; Claude Code reads `CLAUDE.md`).
+- `.claude/skills/*/SKILL.md` and `.claude/agents/*.md` are the canonical phase and utility playbooks and role prompts.
+- `.agents/`, `.opencode/`, `.cursor/` and `.codex/` hold the per-vendor adapters, plugins, commands and hook wiring.
+- `ai-framework/workflow/` documents the phases and gate matrix.
+- `ai-framework/rules/` holds the stack-agnostic rules.
+- `ai-framework/hooks/` holds the hook wiring template and hook scripts, including the token-consumption collector and report renderer.
+- `ai-framework/scripts/` holds the Node tools (setup validator, workflow doctor, graph builder, skill installer, bundle-sync, state report, and others), each with tests.
+- `ai-framework/integrations/` documents harness routing, model profiles and skill handling.
+- `ai-framework/templates/project/` is the scaffold copied into a project during setup.
 
-The final URL and legacy-domain strategy requires approval after the organisation inventory is complete.
+## Project Records
 
-## Tenant Model
+`.project/` holds this checkout's own state: `pitches/` (one folder per pitch, with its plan, hill chart, evidence and audit records), `knowledge/` (decisions, patterns, issues, and a generated graph and index), `runs/` (archived ship logs), `skills/` (installed skill registry and packages), `rules/`, `context/` and `status.md`. `.project/metrics/` and generated reports are Git-ignored.
 
-```text
-District
-  Country
-    Territory (optional and country-defined)
-      School
-```
+## Data Flow
 
-- Every organisation node has a stable identifier, slug, status, contact data, and configurable public presentation.
-- Content belongs to one organisation node and may be visible only in that node, inherited by descendants, or promoted according to an approved publishing rule.
-- Landing configuration inherits from district to country to territory to school. A child can override only allowed fields and approved page sections.
-- Users have memberships and roles scoped to one or more organisation nodes. Permissions apply to the assigned node and, where intended, its descendants.
+A pitch moves through the phase playbooks, each reading only the records it needs. Hooks and plugins write bounded local metrics. `graphify.js` rebuilds the knowledge graph after entries change. `bundle-sync` compares an unpacked project with a newer bundle copy and applies approved updates.
 
-## Access-Control Direction
+## Integrations
 
-| Role | Intended scope |
-|---|---|
-| Platform administrator | Entire district, tenancy, global settings, accounts, and support |
-| District editor/publisher | District content and approved shared assets |
-| Country administrator | Assigned country and descendants; local users and configuration |
-| Territory administrator | Assigned territory and descendant schools |
-| School administrator | Assigned school users, landing configuration, and publication workflow |
-| Author/editor | Assigned content scope; cannot manage users or protected settings |
-| Reviewer/publisher | Assigned content scope; approves publication if a workflow is required |
-
-Exact role names, permissions, approval workflow, and delegation rules remain discovery decisions.
-
-## Content Direction
-
-- Structured pages and landing blocks, rather than unrestricted page-builder code.
-- Article/blog records with author, owner organisation, audience/scope, publication state, lead media, categories, and revisions.
-- Central media and document records with ownership, metadata, usage references, and lifecycle controls.
-- Redirect records for legacy Joomla URLs and approved school-domain mappings.
-
-## Undecided Components
-
-- Database and data-access approach.
-- Authentication provider, identity federation, invitation flow, and password policy.
-- Hosting, CDN, file storage, backup, monitoring, CI/CD, and environments.
-- Search, analytics, email, forms, anti-spam, and translation approach.
-- CMS/editor implementation and the migration extraction method.
+Claude Code, OpenCode, Codex and Cursor as hosts. External skills are fetched from pinned Git sources by the installer and are never auto-installed.

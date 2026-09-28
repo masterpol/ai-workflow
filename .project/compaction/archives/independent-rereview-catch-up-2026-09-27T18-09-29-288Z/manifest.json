@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "slug": "independent-rereview-catch-up",
+  "sourceRoot": ".project/pitches/independent-rereview-catch-up",
+  "archivedAt": "2026-09-27T18:09:29.290Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "94d2d4117bdadbd71d04f8de92cb639f3193fe32f2de34d5be1ab119ae2eef7f",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "9b774938bcbbcdbfb3ed83d6c6b16999ecd8f38c9f6e4649cf5995d9a78e5331",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "417172d59e251c0034743e0ff4b33cab4be981dd71f664dea475ef9be1707bde",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "8e318814bec9dfaf24f284adf4aa34f84f962b985e8f26e0128bceca24e5d421",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "589095519f04be0342641c93937c150f8d6696616c51122d6635ae207fbdab7d",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "73a94e58bccaed8760399f54b2eed8baadc20723924fc8870f1083cc0efe4fdc",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "f8f9f3239c35d0efbe18700c58eccfad21c87b0ed9c3e8126d7d4e57fd5ca59a",
+      "mode": 420
+    },
+    "prompts/s1-s1a.txt": {
+      "hash": "21c0e906c7df0bcecd04e1310c5997f0a8c05bb95b87614dc1aa461a71df0cdf",
+      "mode": 420
+    },
+    "prompts/s1-s1b.txt": {
+      "hash": "afb36ce1f50b356255615f4ff6f41447a589e8144b28bbed5e3c12ad81de329f",
+      "mode": 420
+    },
+    "prompts/s1-s1c.txt": {
+      "hash": "23ab891f2c4f8181bf900a1a84c6936a69cd1fd0db6a5f3fcdd2e2e00790fefc",
+      "mode": 420
+    },
+    "prompts/s1-s1d.txt": {
+      "hash": "481888fc76a74ca397410cfaab3d6191fd0a896d17727437877e1bd686b22eec",
+      "mode": 420
+    },
+    "prompts/s1-s1e.txt": {
+      "hash": "bc4510b32f79dc475eeff4c1586cac27f2c790ec32896c8c6f019ea49851e8b2",
+      "mode": 420
+    },
+    "prompts/s2-s2a.txt": {
+      "hash": "6ee52f85d3c4ab2eed9bb17b04ee40bc5a80555d1a7a22cc4c30b2eda38b7315",
+      "mode": 420
+    },
+    "prompts/s2-s2b.txt": {
+      "hash": "e2bb684dc509a6a601754b17c7092c29dde1959e4b1d81a0d9b55d02ab9055c3",
+      "mode": 420
+    },
+    "prompts/s2-s2c.txt": {
+      "hash": "a3c5f9a3019adcb3b2f124b9429a60f18af5bd637ac4a6df595c3e6eb92ebd76",
+      "mode": 420
+    },
+    "prompts/s2-s2d.txt": {
+      "hash": "e44e44540ae1a3f9ff30bab21acc439d27b7d53947f91d02e96cd195e3538164",
+      "mode": 420
+    },
+    "prompts/s2-s2e.txt": {
+      "hash": "053b0aa3afe238c1ed2fcc68a86fc79c355f9723c09fd5996f5b46c7b7cde2b3",
+      "mode": 420
+    },
+    "prompts/s3-cross.txt": {
+      "hash": "145945896ee3f605f5fe01d71b266314e09eb16efb68def7290f307ba9cc1c61",
+      "mode": 420
+    },
+    "prompts/s3-fix.txt": {
+      "hash": "e0da2d8d629fb6d1e5b4cb6a7cfcdfacf88e1d0e40c27d702429e2e13ac99410",
+      "mode": 420
+    },
+    "prompts/s3-s3a.txt": {
+      "hash": "a385c55dd85138f662905ebffb94cc87ad4c47a60179a8c3f49f0e72f56a787a",
+      "mode": 420
+    },
+    "prompts/s3-s3b.txt": {
+      "hash": "c7da64c7be139c425902ddde9205fafb47e30f2af0d4ee2181f5d37a08dd727f",
+      "mode": 420
+    },
+    "prompts/s3-s3c.txt": {
+      "hash": "1bdf47c0abc5061cc4bf3a513e73f311dde6c964c39c66b8e0492b36e253151e",
+      "mode": 420
+    },
+    "review-compaction.md": {
+      "hash": "b73e42252761c57e52186db94b4443d087257a600f8c2c58a257b6ee84ab0c31",
+      "mode": 420
+    },
+    "review-metrics.md": {
+      "hash": "34465184fb772422c5387100e224c73e9b91b86ba0878db7dd5aec64f53574d1",
+      "mode": 420
+    },
+    "review-state.md": {
+      "hash": "3e7620e4f87d8ef519581f0d9a807410f7868552dd4c01f23d3681540ef4be23",
+      "mode": 420
+    }
+  }
+}

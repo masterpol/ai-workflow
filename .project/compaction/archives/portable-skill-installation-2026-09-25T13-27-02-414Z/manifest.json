@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "portable-skill-installation",
+  "sourceRoot": ".project/pitches/portable-skill-installation",
+  "archivedAt": "2026-09-25T13:27:02.416Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "256ebd44fa4107ca4529c4d7f608238febb683da5b77e7bf766648f4c6bb01d0",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "3b8cc14822b2f1e6055d3621e796ab2d3a3096d867119c44894663df118c28cf",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "be2b8b0f2856568d62f81ececd92caa7163487825bfc20b19d94cbbf4e22cb3f",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "a5ba5d7be3172f0365448fdfff1a31243375af4112b4b593d1a2c4d7b6619e80",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "dadbbb76e805b16c09c26a0f723b5eb5e012f356c5a6993c9e978407c027808e",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "60dfc986dbf32cfdf74771fe7d3074b27bb536a9aab8bc10f739d18ba1a23c3e",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "1f6c31a17e39882821e0cb6976e536f31b16ed418cbcde2b46058973181071a4",
+      "mode": 420
+    },
+    "registry-installer.md": {
+      "hash": "0698e0eff55c6419399cc2f5159de0ebc6d36ddd76706dfcb2c22c9dac5ae451",
+      "mode": 420
+    },
+    "s1-evidence.md": {
+      "hash": "0b3945633bbea5d5c1d422d45ee0bb47f143f9481482808f9171cc8cdcc2d284",
+      "mode": 420
+    },
+    "s2-evidence.md": {
+      "hash": "cebaea8ee27c9f49217b19c7ad50887dc4ad0bd0fb60cb5f93fb470ca61b0fa2",
+      "mode": 420
+    },
+    "s3-evidence.md": {
+      "hash": "4c9034b0c32d86cb712f036ad0454384e1d10aad8242dee0b85e8a450303ba39",
+      "mode": 420
+    },
+    "skill-portability.md": {
+      "hash": "e36d08a1141def4438122730b96cfffc308ce69550cc4a4fd78ecdd403a5aaef",
+      "mode": 420
+    }
+  }
+}

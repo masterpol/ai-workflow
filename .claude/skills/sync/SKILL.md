@@ -7,6 +7,8 @@ description: Bidirectional sync between local workflow tasks and a Notion databa
 
 > **Recommended capability profile:** `fast` — mechanical field mapping and API calls, no judgment beyond conflict reporting. Select an available model using `ai-framework/integrations/harnesses.md`.
 
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+
 > Bidirectional sync between local workflow tasks and a Notion database.
 
 You are running the **SYNC** skill. This connects the local AI development workflow to a Notion task board.

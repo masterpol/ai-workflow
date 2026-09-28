@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "slug": "pitch-compaction",
+  "sourceRoot": ".project/pitches/pitch-compaction",
+  "archivedAt": "2026-09-25T13:39:04.112Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "9466c45168ceb73159bc4e212dfebc2e5290833e2a07847f2c618e658fe65fae",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "d7b5dd1cd91ed4f9edb536b5c6333fbabc637ea47f99128ff49c6e5ee824870f",
+      "mode": 420
+    },
+    "c1-evidence.md": {
+      "hash": "11a90d7d8e804a1cb0ce045cf145121ac2cd6995ff8e08ad34e91abd354ef730",
+      "mode": 420
+    },
+    "c2-evidence.md": {
+      "hash": "96675a58076cb8b674b59b7e6a1d3e620fd5eb7af45e23097c8d0606571f47b6",
+      "mode": 420
+    },
+    "compaction-index.md": {
+      "hash": "b62451a57558f0149df2a2a7ef4310b122ddcf95dede45c19df8410a2158ad90",
+      "mode": 420
+    },
+    "compaction-removal.md": {
+      "hash": "2e1d33b9c42fec72f96e0fc4c98ad6604b8cb981700b8bb0f5b10fff50f635f1",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "9754acdcb6f31b2f2bcc2db1d5612e74ea25481b496cfdebb77737dbd254c0de",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "fdea016fce676353293d855d0c7512a0d444d4abd893b2d5f8b070bab333d155",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "89babac54253820847e41354e0f13ecc744e43ad1fabff373c7c0a2856cadff3",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "a9a5f7eeef28618c526226c90bec900b1ddde7161e578a4a17f689d50031d13c",
+      "mode": 420
+    }
+  }
+}

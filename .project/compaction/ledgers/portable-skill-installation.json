@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "slug": "portable-skill-installation",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit-findings-final-disposition",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/index.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#what-downstream-pitches-can-now-build-on",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#version",
+      "status": "extracted",
+      "destination": "CHANGELOG.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md",
+      "reason": "TOCTOU deferral is in _followups.md; the formatter --config finding is this pattern (with a regression test); the YAML fix lives in add-skill.test.js"
+    },
+    {
+      "source": "deviations.md#s1-2026-09-24",
+      "status": "extracted",
+      "destination": "ai-framework/integrations/skills.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s2-2026-09-24",
+      "status": "extracted",
+      "destination": "ai-framework/integrations/skills.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s3-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/subprocess-revalidation-against-on-disk-code.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-initial-tests-2026-09-24",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-live-upstream-probe-2026-09-24",
+      "status": "extracted",
+      "destination": ".claude/skills/add-skill/SKILL.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s3-observation-2026-09-25-not-fixed-out-of-scope",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#audit-cycle-1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-09-25T13:27:02.379Z"
+}

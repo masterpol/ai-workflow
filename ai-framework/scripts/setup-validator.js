@@ -4,6 +4,7 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const { cursorMirrors } = require("./skill-vendors");
 
 const root = process.cwd();
 const json = process.argv.includes("--json");
@@ -79,6 +80,14 @@ async function checkEntryFiles() {
     );
   }
 }
+// Warn, not fail: a target project's own pre-existing entry file may legitimately predate this.
+async function checkCavemanEntryFiles() {
+  for (const file of ["AGENTS.md", "CLAUDE.md"]) {
+    if (!(await exists(file))) continue;
+    const has = /^## Response style \(caveman mode\)$/m.test(await fs.readFile(absolute(file), "utf8"));
+    record(has ? "pass" : "warn", file, has ? "carries the caveman response-style section" : "no caveman response-style section: the main session agent will not apply caveman mode (copy the section from the bundle's AGENTS.md)");
+  }
+}
 async function checkKnowledgeGraph() {
   const files = [".project/knowledge/graph.json", ".project/knowledge/index.md"];
   if (!(await Promise.all(files.map(exists))).every(Boolean)) { await Promise.all(files.map(requireFile)); return; }
@@ -91,7 +100,7 @@ async function checkKnowledgeGraph() {
   } catch { record("fail", "Knowledge graph", "graphify did not return JSON"); }
 }
 async function checkScaffold() {
-  await Promise.all([".project/status.md", ".project/pitches/_followups.md", ".project/pitches/_archive/.gitkeep", ".project/pitches/_parked/.gitkeep"].map(requireFile));
+  await Promise.all([".project/status.md", ".project/pitches/_followups.md", ".project/pitches/_archive/.gitkeep", ".project/pitches/_parked/.gitkeep", ".project/done-work.md"].map(requireFile));
   if (await exists(".project/status.md")) {
     const content = await fs.readFile(absolute(".project/status.md"), "utf8");
     const lines = content.trimEnd() === "" ? 0 : content.trimEnd().split("\n").length;
@@ -102,8 +111,14 @@ async function checkScaffold() {
     record("info", ".project/rules", rules.length > 0 ? `${rules.length} stack-specific companion rule(s) generated` : "no stack-specific rules generated; valid when none apply");
   } catch { record("fail", ".project/rules", "missing"); }
 }
+// Every canonical skill and agent needs a Cursor copy; registry-managed skills carry their own
+// Cursor adapter and are validated by the doctor instead.
 async function checkCursorMirrors() {
-  await Promise.all([requireFile(".cursor/agents/code-reviewer.md"), requireFile(".cursor/skills/shape/SKILL.md")]);
+  let report;
+  try { report = cursorMirrors(root); } catch (error) { record("fail", ".cursor", error.message); return; }
+  for (const file of report.created) record("fail", file, "missing Cursor mirror; run node ai-framework/scripts/skill-vendors.js cursor-mirrors --apply");
+  for (const file of report.differs) record("warn", file, "differs from its canonical .claude file; refresh it unless the difference is a deliberate local customization");
+  if (!report.created.length) record("pass", ".cursor", `${report.current + report.differs.length} canonical skill/agent mirror file(s) present`);
 }
 async function checkWorkflowDoctor() {
   const result = await run(process.execPath, ["ai-framework/scripts/workflow-doctor.js", "--json"]);
@@ -115,7 +130,7 @@ async function checkWorkflowDoctor() {
 }
 async function validate() {
   if (!(await exists(".project"))) { record("fail", ".project", "missing; setup has not completed"); return; }
-  await Promise.all([checkWorkflowDoctor(), checkContext(), checkEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors()]);
+  await Promise.all([checkWorkflowDoctor(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors()]);
 }
 async function main() {
   if (!json) process.stdout.write(`${paint("heading", "Setup validator: checking generated setup artifacts concurrently...\n")}`);

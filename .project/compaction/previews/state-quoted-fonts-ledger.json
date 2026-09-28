@@ -1,0 +1,70 @@
+{
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-1-shippedmdscope-reconciliation",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-2-shippedmdverification",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-3-shippedmdaudit",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-4-shippedmdno-gos-honored",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-and-deviations",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-5-shippedmdrabbit-holes-and-deviations",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-followups",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-6-shippedmdknowledge-and-followups",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "SHIPPED.md#delivery",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-7-shippedmddelivery",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-8-pitchmdno-gos",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-9-pitchmdrabbit-holes",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-10-audit-cycle-1md",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    },
+    {
+      "source": "log.md#s1-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-11-logmds1-2026-09-26",
+      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+    }
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "metrics-report-dimensions",
+  "sourceRoot": ".project/pitches/metrics-report-dimensions",
+  "archivedAt": "2026-09-25T13:39:04.342Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "2fc8c413ef5a26f26db92456267b72d8ef4a1b6b8dd3ba6434f79deb7ab9d9ac",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "ed785123bf3ce475e99e1e52a648c97df437754e6d7fe3ddf4fdca8eb5be6870",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "cd6b9dce10abf5423c9a20c63d9afc16fb478a47971bb433607f8cc0de67857e",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "51e3e897ef8eac9288b61ab98c2227c36d696606c6b8fd063acc91c99945100a",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "bb2615ea423fa140391f19b9ea3609cddfc7fb7c36b68d14b52f93b85d868df2",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "3ce318e324666fd700ae87afc2aa9a7ccb0ebfa83906e9bae90917c8405a9fc0",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "99e51107c528873074d8601d9e8e4aa7afaf2ee2a43d9dd622a0cd7cc0ab3338",
+      "mode": 420
+    },
+    "s1-evidence.md": {
+      "hash": "db619f62793a8b18f875de2aef4a7d50b15626381b8b1e84b0fdac8ede53c30b",
+      "mode": 420
+    },
+    "s2-evidence.md": {
+      "hash": "fe1bdc54a86dedd05c747621b85338cd15eb40a9c0eca22478737c77b1dc01ae",
+      "mode": 420
+    },
+    "s2-s4-evidence.md": {
+      "hash": "63395cae38c602baa0717fc1bb493d4971ce0b296a025a6c20645c7292503f96",
+      "mode": 420
+    },
+    "s3-evidence.md": {
+      "hash": "8208b98ed271ecebd207709bb093c66bc779cc5e8897fdb7dbf91fb65c7e8622",
+      "mode": 420
+    },
+    "spike-payloads.md": {
+      "hash": "0d1f47e2e7bd7a8ce62f2f7a99aae9165c24fe685582519bf7e1187334a352c7",
+      "mode": 420
+    }
+  }
+}

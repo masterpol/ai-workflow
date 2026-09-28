@@ -1,7 +1,7 @@
 ---
 description: Fast read-only role that retrieves related project knowledge before decisions.
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode/space-bunny-free
 permission:
   edit: deny
 ---

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "slug": "portable-skill-defaults",
+  "sourceRoot": ".project/pitches/portable-skill-defaults",
+  "archivedAt": "2026-09-25T13:39:03.848Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "17b1521e3cf0aa2cd5c68888992ad0ca1ceb2388b33e1b1460e03afc08a977ee",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "5443d101152da6a960ca5d1dc85dde74fec207e9ef6c919067d026a7feabf292",
+      "mode": 420
+    },
+    "browser-runtime.md": {
+      "hash": "8f07dac17544ee27246fde9a343d3a400e96ef9b063195bd9453bfbf984fd6cd",
+      "mode": 420
+    },
+    "caveman-metrics-compression.md": {
+      "hash": "c1caa24a4ede36aee469d849998d47bd14b162d5128f0e6d0869e59e755aacc7",
+      "mode": 420
+    },
+    "caveman-modes.md": {
+      "hash": "fb909063b01a6891f524b8ba77bc534d97dd8b3e50077e1abd8a4339c3ae3a86",
+      "mode": 420
+    },
+    "d1-evidence.md": {
+      "hash": "9c7ca7cc66607730a211fc8faa4973610d09e794e968625790631bf15668e9f1",
+      "mode": 420
+    },
+    "d2-evidence.md": {
+      "hash": "053cf44d3a7153c734d52cd3e98e59181bd3f470ac1e138f86ac80c1501bc682",
+      "mode": 420
+    },
+    "d3-evidence.md": {
+      "hash": "da042dd361053db2412fb973413fb22cb437ca4ee524e5e31609ee5fa9dfdf76",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "d8af54a50944e77617a3282bc65baed4345e20d4b6f7260c3cc94a6e33543447",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "94066463d339eb7cff6da13ed5b6275ed3dbca77a7da37c8ac21487969daf8f4",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "46147dff6d4bd7c79ecee53aef8da94650eca86c4b081d15c2e3aea936b45536",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "ab4133981f0a55f09a3bf522d8c7dd75debe8d44daafa65161d860abf556a38c",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "062576f9f007f9c83a1ee5a13827c64150dc3496cecd112069f3e539bfb0b534",
+      "mode": 420
+    }
+  }
+}

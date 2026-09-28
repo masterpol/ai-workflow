@@ -7,6 +7,8 @@ description: Scan project and generate context docs (product, architecture, stac
 
 > **Recommended capability profile:** `standard` — project-scan inference and stack-detection judgment. Select an available model using `ai-framework/integrations/harnesses.md`.
 
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+
 You are running the **SETUP** phase. This command scans the current project and generates (or updates) the framework's project-specific documents.
 
 ## Your Goal
@@ -42,6 +44,7 @@ Existing context documents detected:
 - [✓/✗] .project/context/stack.md
 - [✓/✗] AGENTS.md project specifics
 - [✓/✗] CLAUDE.md full mirror (⚠️ still the bootstrap stub — needs regenerating, if applicable)
+- [✓/✗] `## Response style (caveman mode)` section in both `AGENTS.md` and `CLAUDE.md` (copy verbatim from the bundle's `AGENTS.md`; the main session agent of every vendor gets caveman mode from it — `setup-validator.js` warns when missing)
 
 How would you like to proceed?
 1. 🔄 Refresh all — re-scan and overwrite everything

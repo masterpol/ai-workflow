@@ -1,7 +1,7 @@
 ---
 description: Fast read-only reviewer for missing behavioral coverage and regression tests.
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode/space-bunny-free
 permission:
   edit: deny
 ---

@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "vendors": [
+    { "id": "claude-code", "detect": [".claude", "CLAUDE.md"], "project": ".claude/skills", "global": ".claude/skills" },
+    { "id": "opencode", "detect": [".opencode"], "project": ".opencode/skills", "global": ".config/opencode/skills" },
+    { "id": "codex", "detect": [".codex", ".agents/skills"], "project": ".agents/skills", "global": ".codex/skills" },
+    { "id": "cursor", "detect": [".cursor"], "project": ".cursor/skills", "global": ".cursor/skills" }
+  ]
+}

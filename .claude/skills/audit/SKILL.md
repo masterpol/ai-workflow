@@ -8,6 +8,8 @@ description: Parallel fan-out audit phase. Dispatches code-reviewer + security-r
 > **Recommended capability profile:** `standard` — synthesis of subagent findings. Select an available model using `ai-framework/integrations/harnesses.md`.
 
 Phase 3 of the new pipeline. See `ai-framework/workflow/phases/3-audit.md` for full activities.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase audit --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this phase's other instructions; pass the same resolved mode to any subagent this phase dispatches. If not installed, proceed normally — this is optional, never required.
+
 
 ## When to use
 
@@ -32,6 +34,12 @@ Require every subagent finding to carry severity, file:line, the rule/check viol
 ## Verify before triage
 
 Before any finding enters must-fix, re-read the cited code (or re-run the cited command) and confirm the failure scenario holds. Confirmed → keep tier. Plausible but unconfirmed → should-fix, marked "unverified". Refuted → drop it and list it in the cycle report as a false positive for `/cooldown` to tune. Never spend a cycle patching an unverified must-fix.
+
+## Reviewer contract
+
+Every dispatch follows the **Reviewer contract** in `ai-framework/workflow/phases/3-audit.md` (explicit model per dispatch, hard limits, scratch copy plus a repo guard,
+`independent: yes | no | not-completed` on the `Dispatched:` line, and the prompt template). A reviewer that returns nothing twice is recorded
+`not-completed`, never replaced by an author-run check presented as a review.
 
 ## Synthesis
 

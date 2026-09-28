@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "slug": "bundle-sync-marker-fix",
+  "sourceRoot": ".project/pitches/bundle-sync-marker-fix",
+  "archivedAt": "2026-09-27T01:27:20.242Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "211c240e16ffd1f1ee44c28fc3317845e1a4aa13bbbf9974063afc999725335d",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "b2c1b04e073dd9974a70b313986c95279d27a483e96adf8c5d42acf687f6ec94",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "524f2abdc7a4a387c0984c83b3b2d83abb3bfd072108437e54fb2dea61dd0ccd",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "47147dc166fe55133fafc04bc2795de44659f1e9ae22213b10db6c31c8cf16ff",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "f8585e0303fade86e08ee9c7ee68602253fbe425b7b53c63abdc8aad13197737",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "cc36b5d757913a0ff05225b04fb4fb3f45c22c4818e543202cbe1e2d1a206513",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "095c5d4e09f37e9d80bf1063b5c4df7496793a8502c219c3fe668ed8b977dcc3",
+      "mode": 420
+    },
+    "ship-readiness.md": {
+      "hash": "7e9fe9402a8ec995d84041c2013e93a5c399148b33c7a62661657ab09dae75be",
+      "mode": 420
+    }
+  }
+}

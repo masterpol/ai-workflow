@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "defaults": [
+    {
+      "id": "juliusbrussee/caveman/caveman",
+      "path": "skills/caveman/SKILL.md",
+      "purpose": "brevity mode",
+      "modes": ["lite", "full", "ultra", "wenyan-lite", "wenyan-full", "wenyan-ultra"],
+      "defaultMode": "full",
+      "recommendedPhases": ["shape", "critique", "plan", "build", "audit", "ship", "cooldown", "manual"],
+      "runtime": null
+    },
+    {
+      "id": "juliusbrussee/caveman/caveman-stats",
+      "path": "skills/caveman-stats/SKILL.md",
+      "purpose": "token/mode attribution reporting",
+      "runtime": null
+    },
+    {
+      "id": "juliusbrussee/caveman/caveman-compress",
+      "path": "skills/caveman-compress/SKILL.md",
+      "purpose": "explicit memory-file compression",
+      "runtime": { "check": ["python3", "--version"] }
+    },
+    {
+      "id": "vercel-labs/agent-browser/agent-browser",
+      "path": "skills/agent-browser/SKILL.md",
+      "purpose": "browser automation CLI",
+      "runtime": { "check": ["agent-browser", "--version"] }
+    }
+  ]
+}

@@ -63,8 +63,23 @@ describe("<UnitName>", () => {
 - Components: 70%+
 - Business-logic handlers: 80%+
 
+## Guards and Fixes: Prove the Test Can Fail
+
+Promoted at the 2026-09-25 cooldown: mutation checks found real test gaps in four pitches, and one
+cycle-1 fix introduced a data-loss regression that only a re-review of the fix caught.
+
+- ✅ For every security guard or bound, remove or loosen it once and confirm a test fails. Record
+  survivors: a survivor is either a missing test or a redundant layer, and the record says which.
+- ✅ Re-verify a reviewer's claim with one command before it enters triage (a name, a line, a
+  percentage). A short "clean" review is an unreviewed area, not a pass.
+- ✅ After a fix, re-review the fix. Trace a change to a shared helper through every caller.
+- ✅ Give long-running review agents hard limits (command time, tool-call budget); a stalled agent
+  leaves no partial findings.
+
 ## Testing Checklist for New Features
 
+- [ ] Each guard or bound has a test that fails when it is removed
+- [ ] Fixes to shared helpers were traced through all callers
 - [ ] Unit tests for utility functions
 - [ ] Validation schema tests
 - [ ] Component render tests (all prop variations, conditional rendering)

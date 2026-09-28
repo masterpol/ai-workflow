@@ -5,13 +5,19 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| district-multisite-foundation | uphill 0% | shape | big-batch | 2026-09-21 |
+_none_
 
 ## Parked pitches
 _none_
 
 ## Recent ships (last 5)
-_none yet_
+| Pitch | Shipped | Notes |
+|-------|---------|-------|
+| collector-robustness | 2026-09-27 | Kernel-held loopback lease replaces the age/PID lock file; async `recordEvent` awaited by CLI and plugin; legacy lock skips until removed. 117 tests (404 repo suite); audit: 1 must-fix fixed. **macOS only.** See `runs/2026-09-27-collector-robustness.md`. |
+| path-safety-hardening | 2026-09-27 | Approved trusted-directory contract; shared ledger/archive recovery; 231 tests passed, audited, version 2.8.6. See runs/2026-09-27-path-safety-hardening.md. |
+| independent-rereview-catch-up | 2026-09-27 | S0–S4, 268 tests (390 whole repo suite), 31 fixes across 3 re-reviewed subjects + the review tool itself. Outer /audit found 4 must-fix in `review-bench.js` (never independently reviewed until then), all fixed; 1 cross-pitch false positive refuted. Two user-approved cap raises (15→16→19). See `runs/2026-09-27-independent-rereview-catch-up.md`. |
+| native-safety-feasibility | 2026-09-26 | S1 done; four scratch files / 386 lines; audit passed; measured containment/lock limits; production parents remain incomplete. |
+| state-quoted-fonts | 2026-09-26 | S1 done; bounded quoted fonts and one same-file variable hop; audit passed. |
 
 ## Open rabbit holes across active pitches
 - Legacy source access, content and media totals, and school-site ownership.
@@ -19,6 +25,6 @@ _none yet_
 - Canonical paths and redirect treatment for current school domains.
 
 ## Followups backlog
-→ `.project/pitches/_followups.md` (0 items)
+→ `.project/pitches/_followups.md` (21 items; 3 closed 2026-09-27 by `collector-robustness`)
 
-## /cooldown due in: 5 ships
+## /cooldown due now

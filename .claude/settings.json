@@ -9,6 +9,15 @@
             "command": "node \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.js\" --vendor claude --event agent-result --root \"$CLAUDE_PROJECT_DIR\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.js\" --vendor claude --event skill-use --root \"$CLAUDE_PROJECT_DIR\""
+          }
+        ]
       }
     ],
     "SubagentStop": [

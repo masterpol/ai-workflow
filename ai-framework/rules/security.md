@@ -239,6 +239,39 @@ The post-edit hook and the `/audit` security-reviewer will flag these automatica
 
 ---
 
+## 9. Scripts That Read or Write a Project Tree
+
+Applies to workflow scripts, hooks and reports that scan a project they did not author (doctor,
+`/state`, sync, compaction, collectors). Promoted at the 2026-09-25 cooldown: a path or
+untrusted-input must-fix was found at the audit of all five pitches shipped that day. Background:
+`.project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md`.
+
+### ✅ Read through one guarded reader
+Refuse symlinks, non-regular files (a FIFO blocks forever), paths whose realpath leaves the
+project, and files over a size bound. Apply the same check to directory listings.
+
+### ✅ Bound input before every regex, and again after any transformation that can grow it
+Unicode NFKC expands text up to about 18×. Prefer linear patterns and cap the source.
+
+### ✅ Execute only bundle code
+Resolve helper scripts from the running script's directory, never from the analyzed project.
+
+### ✅ Parse and re-emit untrusted values; allow-list labels at ingest and again at render
+Never copy project text into CSS, SQL, a shell command or markup
+(`patterns/parse-untrusted-values-and-re-emit-them.md`,
+`patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md`).
+
+### ✅ Never copy error text into output; write atomically
+Keep the error code, not the message (absolute paths, file fragments). Write with a temp file
+opened `wx` plus rename, through a resolver that refuses symlinked destinations.
+
+### 🚫 Never let a helper's "absent" result stand for "refused"
+If a reader starts refusing symlinks or non-regular files, list every caller that writes on
+"absent" and give the refusal its own outcome
+(`issues/hardening-a-shared-reader-made-its-writer-destructive.md`).
+
+---
+
 ## Security Checklist (used by `security-reviewer` in `/audit`)
 
 ### A. Authentication
@@ -269,3 +302,10 @@ The post-edit hook and the `/audit` security-reviewer will flag these automatica
 ### F. Multi-Tenancy (if applicable)
 - [ ] All queries scoped by organization/tenant ID
 - [ ] Organization/tenant ID derived from auth, never from client args
+
+### G. Scripts over a project tree (workflow tooling)
+- [ ] Reader refuses symlinks, FIFOs/non-regular files, out-of-project realpaths and oversize files; directory listings checked too
+- [ ] Regexes are linear and input is capped before matching and after any expanding transformation
+- [ ] No script supplied by the analyzed project is executed
+- [ ] No raw error text or absolute path reaches output
+- [ ] Writers refuse non-regular or symlinked targets and replace atomically

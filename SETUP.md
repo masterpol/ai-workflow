@@ -66,7 +66,9 @@ if a harness requires them.
 - `ai-workflow-portable/.opencode/{opencode.json,commands/,agents/}` → `<root>/.opencode/`
 - `ai-workflow-portable/.codex/` → `<root>/.codex/` and `ai-workflow-portable/.agents/` → `<root>/.agents/`
 - `.claude/agents/*.md` → `<root>/.cursor/agents/` and `.claude/skills/*/` → `<root>/.cursor/skills/`
-  *(Cursor uses the same agent and skill format; create these mirrors during setup.)*
+  *(Cursor uses the same agent and skill format; after copying the rest, run
+  `node ai-framework/scripts/skill-vendors.js cursor-mirrors` to preview and add `--apply` to
+  create the missing mirrors. It is safe to rerun and never overwrites an existing mirror.)*
 
 **Every one of these is the "first run" artifact for its vendor** — the file that vendor's tool
 auto-reads at session start, which is what lets it detect that `.project/` doesn't exist yet and
@@ -207,6 +209,8 @@ project specifics, the full `CLAUDE.md` mirror (required — see below), and
     - All harnesses → `AGENTS.md` (extend the one placed in Step 1 with project specifics)
     - `CLAUDE.md` → **required**, not optional, whichever tool runs setup. Replace the Step-1
       bootstrap with a full, self-contained mirror of `AGENTS.md`'s content (pipeline table,
+      the `## Response style (caveman mode)` section — copy it verbatim from the bundle's `AGENTS.md`
+      into both files, and into an appended `## AI Workflow` section if `CLAUDE.md` pre-existed —
       subagent index, rules index, confirmation-gate rule, this project's specifics) — not just a
       pointer. Claude Code auto-loads this file every session, so it is the workflow's primary
       chance to "use itself well": everything a session needs for phase 1 of any task should be
@@ -327,14 +331,20 @@ Confirm the install works end-to-end:
    `.claude/skills/`; OpenCode loads `/shape` from `.opencode/commands/` and can dispatch its
    `.opencode/agents/`; Codex exposes the `shape` skill from `.agents/skills/` and its
    `.codex/agents/`; Cursor discovers the mirrored `.cursor/skills/` and `.cursor/agents/`.
-   Verify directly in each harness that is available locally; otherwise report its files as
-   installed but untested.
-3. **Knowledge graph is live:** run `node ai-framework/scripts/graphify.js --check`. It must
+   Each also exposes `add-skill` for installing external skills (see
+   `ai-framework/integrations/skills.md`). Verify directly in each harness that is available
+   locally; otherwise report its files as installed but untested.
+3. **Caveman mode is wired:** `node ai-framework/scripts/workflow-doctor.js` reports a
+   `Caveman mode` line — `active` once the `caveman` skill is installed with `/add-skill
+   juliusbrussee/caveman/caveman` (recommended phases: all seven plus `manual`), `inert` before
+   that. `setup-validator.js` warns if `AGENTS.md`/`CLAUDE.md` lack the response-style section.
+   Every canonical skill and agent must carry the instruction; the doctor fails if one does not.
+4. **Knowledge graph is live:** run `node ai-framework/scripts/graphify.js --check`. It must
    exit clean (status `CLEAN` or `OK WITH WARNINGS`, not `NEEDS ATTENTION`) and confirm
    `.project/knowledge/graph.json` and `.project/knowledge/index.md` exist — this is what lets
    `/shape`'s knowledge gate, `/search`, `/knowledge-health`, and `/cooldown` traverse prior
    knowledge instead of re-reading every file under `.project/knowledge/`.
-4. **Dry run:** using the active harness, ask the human for a tiny first task and run `/shape` (or read the shape
+5. **Dry run:** using the active harness, ask the human for a tiny first task and run `/shape` (or read the shape
    playbook) to confirm the pipeline flows: shape → plan → build → audit → ship.
 
 Report a short punch list of what's wired vs. what the human still needs to decide (e.g. a

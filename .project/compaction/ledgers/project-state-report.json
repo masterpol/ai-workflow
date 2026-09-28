@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "slug": "project-state-report",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#deviations-that-changed-the-plan-see-deviationsmd",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit-findings-final-disposition",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/index.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#version",
+      "status": "extracted",
+      "destination": "CHANGELOG.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/hardening-a-shared-reader-made-its-writer-destructive.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-3.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#t1",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#t2",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-scope-changes-made-while-fixing",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-09-25-t1-built",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-09-25-t2-built",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-09-25-audit-3-cycles",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-09-25T13:39:04.551Z"
+}

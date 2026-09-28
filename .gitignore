@@ -2,3 +2,18 @@
 .opencode/node_modules/
 .claude/settings.local.json
 .project/metrics/
+# /state output; the README scaffold stays tracked so a fresh clone passes the doctor scaffold check.
+.project/reports/*
+!.project/reports/README.md
+
+# Skills installed into THIS checkout with /add-skill (instance data, like .project/metrics/).
+# The bundle is published from this repo, and bundle-sync copies .claude/skills, .agents/skills and
+# .cursor/skills to every project — a tracked installed wrapper would land in each of them as an
+# orphan whose package and registry stay behind. Installed skills stay local to the checkout.
+.project/skills/registry.json
+.project/skills/packages/
+.project/skills/global.json
+.claude/skills/caveman/
+.agents/skills/caveman/
+.cursor/skills/caveman/
+.opencode/skills/

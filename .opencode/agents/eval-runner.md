@@ -1,7 +1,7 @@
 ---
 description: Fast evaluation role that runs defined checks and reports scored evidence.
 mode: subagent
-model: opencode/mimo-v2.5-free
+model: opencode/space-bunny-free
 permission:
   edit: deny
 ---

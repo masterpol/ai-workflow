@@ -36,6 +36,50 @@ Fast-profile reviewers are cheap, and cheap reviewers produce false positives. B
 
 Patching an unverified must-fix wastes a cycle and widens the diff; this step keeps the ≤3-cycle budget for real problems.
 
+## Reviewer contract (every dispatch)
+
+Written after five reviewer dispatches in one day failed to return, one returned a report the measurements contradicted, and
+a shallow code review was mistaken for a clean one. It applies to the "Verify before triage" step above and to
+`ai-framework/rules/testing.md` (Guards and Fixes); it does not replace either.
+
+1. **The model is explicit.** Several agent files pin a role to a `fast` (Haiku) model in their frontmatter. The orchestrator sets `model`
+   for each dispatch, at `standard` or higher for any role that must judge (security, and code review of a security-relevant tool), and the
+   audit record names the model used.
+2. **Committed code has no diff.** When re-reviewing code that is already committed, the target is named whole files and line ranges. The
+   reviewers' diff-only and "skip unchanged code" defaults are switched off in the prompt.
+3. **Read-only by construction.** Give a reviewer a scratch copy, never the repo, and let it run proofs of concept only there. Reviewers that
+   hold Write or Edit tools are bound by the prompt and by a before/after check of the repo
+   (`node ai-framework/scripts/review-bench.js guard snapshot|check`), and the record states `read-only: verified by <method>`.
+4. **Hard limits in the prompt.** Each command at most about 20 seconds, a tool-call budget, and a required final report; anything unfinished is
+   reported as unverified. A stalled reviewer leaves no partial findings, so do not wait on one.
+5. **One dispatch at a time when limits bite.** Retry once with a fresh agent on a narrower scope. A role that returns nothing twice is recorded
+   `independent: not-completed`. It is never replaced by an author-run check presented as a review; author-run checks are listed as
+   `author-run`.
+6. **What `independent: yes` means.** A fresh agent (not resumed, not shown earlier findings), the same model family as the author. It is not
+   proof of independence from the author's blind spots. `yes` also requires that a defect planted in the scratch copy (a canary) was caught;
+   `no` covers a missed canary and author-run checks. A clean report ("No security findings.") counts only with the canary caught and the
+   checklist walked item by item.
+7. **Cross-file interactions.** At least one pass over the interfaces between reviewed files and the callers of any shared helper, or the record
+   says `cross-file interactions: not reviewed`.
+8. **The record is checkable.** `node ai-framework/scripts/review-bench.js record-check <record>` fails a record that claims independence without
+   a caught canary, or that lacks the read-only method, the prompt hash, the model, the cross-file line, or a findings table with a `verified`
+   column.
+
+### Review prompt template
+
+Fill the braces; keep the hard-limit and scope lines. Store the exact text used and record its SHA-256 in the review record.
+
+```text
+Model: {model override}. Caveman mode: {resolved mode}.
+READ-ONLY. Work only in the scratch copy at {scratch path}; never touch any other path. Do not read .env*, credentials.json or settings.local.json.
+Limits: each shell command under ~20 seconds; at most {N} tool calls; send the final report even if unfinished and mark unfinished items unverified.
+Target: whole-file review of committed code. Review {files with line ranges}. Ignore the diff-only and unchanged-code filters.
+Contract: {decision entry or spec the code must satisfy}.
+Checklist: {rule file and checklist letter}. Walk it item by item and return a result per item.
+Known defects (do not report): {list, each with the followup that owns it}.
+Return findings as: severity / file:line / rule violated / failure scenario with the command you ran and its output. Say what you tried that did not work.
+```
+
 ## Synthesis (single-threaded, main thread)
 
 After dispatch and verification, main thread combines findings into a single report:
@@ -43,7 +87,8 @@ After dispatch and verification, main thread combines findings into a single rep
 ```markdown
 # Audit cycle 1 — {pitch-slug}
 
-Dispatched: code (3) | security (1) | test (2) | ux (PASS) | eval (PASS) | i18n (0) | cross-pitch (0)
+Dispatched: code (3, independent: yes) | security (1, independent: not-completed) | test (2, independent: yes) | ux (PASS) | eval (PASS) | i18n (0) | cross-pitch (0)
+Independence: security reviewer returned nothing twice (rate limit); checks run by the author are listed below as author-run, not as a review.
 
 ## Must-fix (blocks /ship)
 | ID | Source | File | Issue | Cycle |
