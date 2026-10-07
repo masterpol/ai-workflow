@@ -1,7 +1,7 @@
 ---
 description: Fast read-only reviewer for correctness, regressions, and maintainability risks.
 mode: subagent
-model: opencode/space-bunny-free
+model: opencode-go/space-bunny
 permission:
   edit: deny
 ---

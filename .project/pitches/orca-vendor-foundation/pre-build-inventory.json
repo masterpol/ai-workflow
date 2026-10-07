@@ -1,0 +1,201 @@
+{
+  "captured": "2026-10-07",
+  "files": [
+    {
+      "file": ".opencode/agents/appetite-auditor.md",
+      "sha256": "96ed9d4af4d2c7c762b4f5f4488f1e57db3d3798ae2f9b80ac16878af34f44b0"
+    },
+    {
+      "file": ".opencode/agents/architect.md",
+      "sha256": "448dc0e04e76d3e30065322e17f93c3196c8141cc4599a5616adcabca12b065d"
+    },
+    {
+      "file": ".opencode/agents/build-error-resolver.md",
+      "sha256": "3c4bf7b9b2b2b4cde6aca86250ed2555a08e59ca2ec13b901baf219f4af1dea9"
+    },
+    {
+      "file": ".opencode/agents/code-reviewer.md",
+      "sha256": "9911df3f850e1a627d667adf6415c71253348c19e17a5cbe3c4f21c4087499db"
+    },
+    {
+      "file": ".opencode/agents/cross-pitch-conflict-checker.md",
+      "sha256": "944bc34c61f57f6378fa9f126de36a0605cee54f9d6137ffe6f78948368d0ff9"
+    },
+    {
+      "file": ".opencode/agents/cross-pitch-projector.md",
+      "sha256": "248696e8c00f2afa5fb82c60b6b1f9d8dcbb7b8fad64a929457e2e9b7654298d"
+    },
+    {
+      "file": ".opencode/agents/eval-regression-projector.md",
+      "sha256": "6a05af0ff60fc3abcd6e1c230a939e18545b729e5a3bd5bfb8254d9f806728f4"
+    },
+    {
+      "file": ".opencode/agents/eval-runner.md",
+      "sha256": "31ce0d5d5c73e5f60e8c8ff6c3cb4f629102000d4b5f94e4a4a5084596d4f57e"
+    },
+    {
+      "file": ".opencode/agents/i18n-checker.md",
+      "sha256": "a5976369b01a8e01e28027536f8b6c756d35f0e0e719fab5eee2731c44f89dc8"
+    },
+    {
+      "file": ".opencode/agents/knowledge-historian.md",
+      "sha256": "e53f8060658bf52136f59c986b23c61add1c39c5eae714c81cf47f396519c6a0"
+    },
+    {
+      "file": ".opencode/agents/planner.md",
+      "sha256": "0566e4eff3dc906f5952b90883a5ad727bb1f7f79ffd0ca6defa11b234cfa928"
+    },
+    {
+      "file": ".opencode/agents/refactor-cleaner.md",
+      "sha256": "1b749d7e66a5fc0028f5e7b896412230c51135435e1e955b5228122bff02a134"
+    },
+    {
+      "file": ".opencode/agents/security-reviewer.md",
+      "sha256": "df8da747d2e84db26c5d2d68740c696c5c151c62e220f864ed8faab7606fec8f"
+    },
+    {
+      "file": ".opencode/agents/skeptic.md",
+      "sha256": "bd8114fc3a698beabfaabbca4101d8ac857841b6545d3de286fb56113d21c44e"
+    },
+    {
+      "file": ".opencode/agents/test-coverage-checker.md",
+      "sha256": "056e9acd3adf1e132b20e0695a9f1ab0e21b755f08c9fb88f0c6f4060843239f"
+    },
+    {
+      "file": ".opencode/agents/ux-reviewer.md",
+      "sha256": "e1746aebefb0fdaf9e018dab630c3b02fab47abf9f98991e786080588b361c99"
+    },
+    {
+      "file": ".opencode/commands/add-skill.md",
+      "sha256": "a24a853b7cfd2648bc3c6c7e5faceb503367a41125546706dc2e5c1a58eaefa0"
+    },
+    {
+      "file": ".opencode/commands/audit.md",
+      "sha256": "3e1d85c40b6ea6c9affc8abdc69b5a881824144d30f76899f62aabbafd6c9632"
+    },
+    {
+      "file": ".opencode/commands/build.md",
+      "sha256": "161f807562f1303fd47e46a9fd1e78d477cb0195e53d750fbb6c729b2fc7b9ed"
+    },
+    {
+      "file": ".opencode/commands/bundle-sync.md",
+      "sha256": "e34b14ddf267a0ca76b4d78b3a92a3f1c7248dab37c0a5176162095be6e53158"
+    },
+    {
+      "file": ".opencode/commands/changelog.md",
+      "sha256": "e19c62ffd5096e989bcc4e9f7bcce23b26937e0fc3ea417ad3f2cab562ce13b7"
+    },
+    {
+      "file": ".opencode/commands/checkpoint.md",
+      "sha256": "fd526e47acd94df24148859607197d2da010b3bb444e101473e853229e22f728"
+    },
+    {
+      "file": ".opencode/commands/cooldown.md",
+      "sha256": "e03ff5f42597a08f31d57c2f7394404b6e90b91ea0d6f73d649af3c8b45e3e97"
+    },
+    {
+      "file": ".opencode/commands/critique.md",
+      "sha256": "b49ad5e6d69541594a3368923f0031ffe9a148862ee34cc75ea18da013d36cc4"
+    },
+    {
+      "file": ".opencode/commands/dependency-security.md",
+      "sha256": "6222354d4bc3a9d52b0e0f4e036c6c2e7712ec609b2b6bed19a3fa9fb358c7ff"
+    },
+    {
+      "file": ".opencode/commands/eval-harness.md",
+      "sha256": "f5af146facb0ffb883a2747abcd315e59c13280e81a7e7c2cf5680f9a01211fc"
+    },
+    {
+      "file": ".opencode/commands/fix.md",
+      "sha256": "ee52366270062b34e359484937079c3a34826cf81f8fc132a84dbe76e14464b6"
+    },
+    {
+      "file": ".opencode/commands/impact.md",
+      "sha256": "7b7cd6654a8a6d1b6807b2badbfe29da6f79b61d3cf70653b95c74885813a924"
+    },
+    {
+      "file": ".opencode/commands/knowledge-health.md",
+      "sha256": "47bf002b60af30a0792015c940b7fd469a5d182f6919788174762072ce009c15"
+    },
+    {
+      "file": ".opencode/commands/pitch-compress.md",
+      "sha256": "840e1c204edf6d9b480f627742a7cf28bbe3eb587239dee529396f943d36bfaa"
+    },
+    {
+      "file": ".opencode/commands/plan.md",
+      "sha256": "f5663a94fe039dc833ea7ccf34cf219e18e5b3bd30cd5bf7735e132c31f789f2"
+    },
+    {
+      "file": ".opencode/commands/resume.md",
+      "sha256": "72158946831b0cf028de449de2a956715cbba8943c154f995800d5eb3b68acba"
+    },
+    {
+      "file": ".opencode/commands/search.md",
+      "sha256": "14418729d20533bf5fce89b03d75784e68611cfd0bb8863f043fabb5dd07f0bc"
+    },
+    {
+      "file": ".opencode/commands/setup-validator.md",
+      "sha256": "c750e62cb1b5f3d5fa3a8507689ab0c9e74cf7a56aa430278540bbe0c72f563c"
+    },
+    {
+      "file": ".opencode/commands/setup.md",
+      "sha256": "1f0112b7797923d620a08020802fa6e702b79a34051a393abcfd674de2d56b72"
+    },
+    {
+      "file": ".opencode/commands/shape.md",
+      "sha256": "87ce32f7f27907809b925584094902e146520cca56debe132f2a8b75e2c31108"
+    },
+    {
+      "file": ".opencode/commands/ship.md",
+      "sha256": "782eb47a2fd7ab1038aa63f0541319a36ef37a5ec5198c0f4b66e04669489aa9"
+    },
+    {
+      "file": ".opencode/commands/state.md",
+      "sha256": "8cd42d6a0033fd42042bcfd470df942968007c92a25e3fb5e6fe644c9bebfee0"
+    },
+    {
+      "file": ".opencode/commands/switch.md",
+      "sha256": "55c57574a7130bed4ddcfa293b50e0be8ddac4de32c271fe7503ea4c872fa64a"
+    },
+    {
+      "file": ".opencode/commands/sync.md",
+      "sha256": "0d808ba11c104d594dab28b2874219fa7196579bfd352419aea8a54d239bee62"
+    },
+    {
+      "file": ".opencode/commands/test-strategy.md",
+      "sha256": "5fdf9562863efc264e861f77d8772c74afb01bbd7131a8334c9084c38be80ee6"
+    },
+    {
+      "file": ".opencode/commands/ui-design.md",
+      "sha256": "9f903532327b2af84c6e45f66ad4df50bca414c16d6c2ba6fef18161cda73e6a"
+    },
+    {
+      "file": ".opencode/commands/workflow-doctor.md",
+      "sha256": "2b09d6ef9501ad1ca11851dd2787dbd0a1f26af33b08200f02f656cc54f1b6b3"
+    },
+    {
+      "file": ".opencode/opencode.json",
+      "sha256": "688d629450e968bec3fbc27b5fc0344e09f1024127076cc52492eb5537b6ee68"
+    },
+    {
+      "file": ".opencode/plugins/token-consumption.js",
+      "sha256": "af31a13a6ca45e9e1598d01f85e8eaeb84b5d2c5e69e5b9539f9e5a741325049"
+    },
+    {
+      "file": ".project/status.md",
+      "sha256": "9625c63b971f85944b8fb3dbff7286ff964854e9f00f01ed868566d0f81746f2"
+    },
+    {
+      "file": "ai-framework/hooks/scripts/opencode-plugin.test.js",
+      "sha256": "41f816ced10d60dc53e738992f071fb17a3c9384d673d60d7c9dbaf8af4e3ea2"
+    },
+    {
+      "file": "ai-framework/integrations/harnesses.md",
+      "sha256": "d24f770b9257067ed0f0ef7670784bcdd319d2791a99a413d0da4663e505531f"
+    },
+    {
+      "file": "ai-framework/scripts/workflow-doctor.js",
+      "sha256": "673a6c2a9a46b600744844134b3feaa72f6704e8e42f14460947d3f669dbb390"
+    }
+  ]
+}

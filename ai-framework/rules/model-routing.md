@@ -61,22 +61,16 @@ Harness mappings and role assignments: `ai-framework/integrations/harnesses.md`.
 
 | Profile | Claude Code | OpenCode | Codex |
 |---|---|---|---|
-| `fast` | Claude Haiku | `opencode/space-bunny-free` | GPT-5.6 Luna or Terra |
-| `standard` | Claude Sonnet | `openai/gpt-5.6-terra`, high reasoning | GPT-5.6, medium/high reasoning |
-| `deep` | Claude Opus | `openai/gpt-5.6-terra`, xhigh reasoning | GPT-5.6, high/xhigh reasoning |
+| `fast` | Claude Haiku | `opencode-go/space-bunny` | GPT-5.6 Luna or Terra |
+| `standard` | Claude Sonnet | `opencode-go/minimax-m3` | GPT-5.6, medium/high reasoning |
+| `deep` | Claude Opus | `opencode-go/kimi-k2.7-code` | GPT-5.6, high/xhigh reasoning |
 
-Never route OpenCode to bare `openai/gpt-5.6` — it's a stub catalog entry with no real reasoning
-support (`reasoning: false`, `context: 0`), unlike its named siblings `gpt-5.6-luna`/`-sol`/`-terra`.
-Verify with `opencode models <provider> --verbose` if in doubt; the catalog changes over time.
+Verify OpenCode ids with `opencode models | grep opencode-go`; the catalog changes over time.
 
-OpenCode's routes deliberately avoid Anthropic for now — some installations only have
-OpenAI/OpenCode Zen connected, and a route through an unconnected provider errors rather than
-falling back. The free route is confined to bounded, mechanical fast roles and non-sensitive
-`/ship` reconciliation. Free endpoints can retain prompts or use them for service improvement,
-so replace `opencode/space-bunny-free` with `openai/gpt-5.6-luna` in every fast adapter before
-using it with confidential source or data. There is no silent fallback: connect the required
-providers in OpenCode first, and let a missing configured model fail rather than downgrading a
-security or architecture task.
+OpenCode's routes all use OpenCode Go, so one provider connection covers them. Use the standard
+route instead of the fast one for confidential source or data. There is no silent fallback:
+connect the required provider in OpenCode first, and let a missing configured model fail rather
+than downgrading a security or architecture task.
 
 ---
 

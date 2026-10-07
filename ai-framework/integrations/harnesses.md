@@ -8,9 +8,9 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode/space-bunny-free` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
-| `standard` | Implementation, security, UX, test reasoning | Sonnet | `openai/gpt-5.6-terra` | `gpt-5.6` at medium or high effort |
-| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `openai/gpt-5.6-terra` at xhigh effort | `gpt-5.6` at high or xhigh effort |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/space-bunny` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
+| `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-5.6` at medium or high effort |
+| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-5.6` at high or xhigh effort |
 
 Escalate one profile only when the returned work is demonstrably incomplete or unreliable. A harness that cannot select per-agent models should use its current model and preserve the same role separation.
 
@@ -30,28 +30,17 @@ Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `mod
 
 `.opencode/opencode.json` loads `AGENTS.md`. OpenCode discovers the phase wrappers in `.agents/skills/`; `.opencode/commands/` provides native phase commands, and `.opencode/agents/` provides native subagent definitions. Commands and adapters load the canonical playbooks and role prompts from `.claude/`.
 
-The included OpenCode routes are explicit and, for now, deliberately avoid Anthropic entirely —
-some OpenCode installations only have OpenAI/OpenCode Zen connected, and a route through an
-unconnected provider errors instead of falling back: fast roles use `opencode/space-bunny-free`
-(the OpenCode Zen free tier); standard and deep roles use `openai/gpt-5.6-terra` (deep at
-`xhigh` reasoning via the global provider default in `.opencode/opencode.json`, standard at the
-`high` default, both explicit per-command where they need to differ from that default).
-**Never route to bare `openai/gpt-5.6`** — confirmed via `opencode models openai --verbose`,
-that id is a stub catalog entry (`reasoning: false`, `context: 0`, empty `variants`) despite
-accepting a `reasoningEffort` option, which breaks at runtime. Its named siblings —
-`gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` — are the real, fully-specified models
-(`reasoning: true`, 400k context, full `none`/`low`/`medium`/`high`/`xhigh`/`max` variants) and
-are otherwise identical; this bundle standardizes on `terra` for standard/deep and `luna` for
-the paid-fast route below, but any of the three works. Before assuming a model id from this doc
-still resolves, check `opencode models <provider> --verbose` against your own installation —
-the catalog changes over time. `workflow-doctor` and `setup-validator` are the exception among
-fast roles: they use the paid `openai/gpt-5.6-luna` because diagnostics can expose broad project
-context, not the free route. Connect OpenAI (and OpenCode Zen for the free tier) before running
-the workflow. The free route is only for short, mechanical, non-sensitive work: OpenCode's
-free-model privacy terms may permit prompt retention or training. Change every affected fast
-adapter to `openai/gpt-5.6-luna` when source or task context is confidential. If Anthropic
-becomes available in your OpenCode installation and you'd
-rather route standard/deep work there, that's a local choice to make deliberately — it isn't the
+The included OpenCode routes are explicit and all run on OpenCode Go, so a single provider
+connection covers them (a route through an unconnected provider errors instead of falling back):
+fast roles use `opencode-go/space-bunny`, standard roles use `opencode-go/minimax-m3`, and deep
+roles (shape, architecture, planning, and the default `build` agent) use
+`opencode-go/kimi-k2.7-code`. `workflow-doctor` and `setup-validator` run on the standard route
+because diagnostics can expose broad project context. Before assuming a model id from this doc
+still resolves, check `opencode models | grep opencode-go` against your own installation — the
+catalog changes over time. Connect OpenCode Go before running the workflow. The fast route is for
+short, mechanical work; change the affected fast adapters to the standard route when source or
+task context is confidential. If another provider is available in your OpenCode installation and
+you would rather route work there, that is a local choice to make deliberately — it isn't the
 bundle's default. Do not commit credentials or provider setup to this bundle.
 
 ## Codex

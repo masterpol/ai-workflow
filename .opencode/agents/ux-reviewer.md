@@ -1,7 +1,7 @@
 ---
 description: Standard read-only UX reviewer for heuristic and task-flow risks.
 mode: subagent
-model: openai/gpt-5.6-terra
+model: opencode-go/minimax-m3
 permission:
   edit: deny
 ---

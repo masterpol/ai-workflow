@@ -48,14 +48,11 @@ file this bundle ships (`CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Co
 each one detects `.project/` is missing and self-triggers `SETUP.md` on its own. If your tool
 doesn't auto-read either file, just ask it to *"read `SETUP.md` and set up the workflow."*
 
-**OpenCode model setup:** connect OpenAI and OpenCode Zen before starting a routed workflow —
-the bundled OpenCode routes deliberately avoid Anthropic for now, since some installations only
-have OpenAI/Zen connected and a route through an unconnected provider errors instead of falling
-back. The bundled routes use Zen's free `opencode/space-bunny-free` model only for short,
-non-sensitive fast work, and OpenAI GPT-5.6 for standard and deep work (different reasoning
-effort per profile). Run `opencode debug config` to confirm that OpenCode resolves the
-configuration. For confidential work, replace the free fast-route adapters with the documented
-paid OpenAI route in `ai-framework/integrations/harnesses.md`.
+**OpenCode model setup:** connect OpenCode Go before starting a routed workflow — every bundled
+OpenCode route uses it: `opencode-go/space-bunny` for short fast work, `opencode-go/minimax-m3`
+for standard work and `opencode-go/kimi-k2.7-code` for deep work. Run `opencode debug config` to
+confirm that OpenCode resolves the configuration. For confidential work, switch the fast-route
+adapters to the standard route (see `ai-framework/integrations/harnesses.md`).
 
 What setup actually does (`SETUP.md`, driven by the `/setup` skill in Claude Code — other
 harnesses follow the same doc manually):

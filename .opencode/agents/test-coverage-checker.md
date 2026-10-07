@@ -1,7 +1,7 @@
 ---
 description: Fast read-only reviewer for missing behavioral coverage and regression tests.
 mode: subagent
-model: opencode/space-bunny-free
+model: opencode-go/space-bunny
 permission:
   edit: deny
 ---

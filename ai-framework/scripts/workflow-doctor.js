@@ -33,20 +33,16 @@ const colors = {
 // doctor honest as agents/skills are added — a new one is checked automatically, not only
 // once someone remembers to register it here.
 
-// No Anthropic route in the OpenCode adapters for now — some installations only have
-// OpenAI/OpenCode Zen connected, and an Anthropic route there errors instead of falling back.
-// Prefer the more capable option over the free one once a task earns `standard` or above.
-//
-// Use a *named* 5.6-tier model (luna/sol/terra), never bare "openai/gpt-5.6" — confirmed via
-// `opencode models openai --verbose`: the bare id is a stub catalog entry
-// (reasoning: false, context: 0, empty variants) despite accepting a reasoningEffort option,
-// which is exactly what broke a real /plan run. The named siblings are the real, fully-specified
-// models (reasoning: true, 400k context, full none/low/medium/high/xhigh/max variants) — pick
-// whichever named variant you like, they're identical in capability, just don't use the bare id.
+// Every OpenCode route uses the OpenCode Go provider (opencode-go/*) — no OpenAI models, no
+// Zen free tier. A route through an unconnected provider errors instead of falling back, so
+// connect OpenCode Go before running the workflow. `big-pickle` is deliberately unused: it only
+// exists as `opencode/big-pickle` on OpenCode Zen, and every bundled route stays on OpenCode Go.
+// Verify ids against your own installation with `opencode models | grep opencode-go` — the catalog
+// changes over time.
 const opencodeModels = {
-  fast: "opencode/space-bunny-free",
-  standard: "openai/gpt-5.6-terra",
-  deep: "openai/gpt-5.6-terra",
+  fast: "opencode-go/space-bunny",
+  standard: "opencode-go/minimax-m3",
+  deep: "opencode-go/kimi-k2.7-code",
 };
 
 // .claude/agents/*.md declare a concrete Claude model, not an abstract profile name — this
@@ -72,13 +68,13 @@ const skillProfileOverrides = {
 };
 
 // Most OpenCode command models derive directly from their canonical capability profile. The
-// doctor and setup-validator read broad project configuration, so they use a paid OpenAI route
-// instead of the free route reserved for non-sensitive mechanical tasks (no Anthropic route for
-// now — see the opencodeModels comment above).
+// doctor and setup-validator read broad project configuration, so they use the stronger
+// standard route; changelog is fully templated, so it uses the cheapest route (see the
+// opencodeModels comment above).
 const skillModelOverrides = {
-  "workflow-doctor": "openai/gpt-5.6-luna",
-  "setup-validator": "openai/gpt-5.6-luna",
-  changelog: "openai/gpt-5.6-luna",
+  "workflow-doctor": "opencode-go/minimax-m3",
+  "setup-validator": "opencode-go/minimax-m3",
+  changelog: "opencode-go/muse-spark-1.3-contributor",
 };
 
 // Almost every skill mirror says "Load `.claude/skills/<name>/SKILL.md` and follow it exactly."
@@ -447,11 +443,6 @@ async function checkSkill(name) {
   await requireFile(command);
   await matches(command, new RegExp(`^model: ${escapeRegExp(expectedModel)}$`, "m"), `expected OpenCode model (${profile} profile)`);
   await matches(command, referencePattern, "loads canonical skill");
-  if (profile === "deep") {
-    // The opencode.json provider default is a moderate effort shared by every gpt-5.6 use, so a
-    // deep-profile command must declare its own xhigh override — it can't just inherit the model.
-    await matches(command, /^reasoningEffort: xhigh$/m, "uses xhigh reasoning");
-  }
 }
 
 async function checkAgent(name) {
@@ -479,7 +470,8 @@ async function checkAgent(name) {
   await matches(opencode, new RegExp(`\\.claude/agents/${escapeRegExp(name)}\\.md`), "loads canonical role prompt");
   await matches(codex, /^model = ".+"$/m, "declares a Codex model");
   if (profile === "deep") {
-    await matches(opencode, /^reasoningEffort: xhigh$/m, "uses xhigh reasoning");
+    // The OpenCode deep route (opencode-go/kimi-k2.7-code) declares no effort override;
+    // Codex still needs its explicit effort.
     await matches(codex, /^model_reasoning_effort = "xhigh"$/m, "uses xhigh reasoning");
   }
 }

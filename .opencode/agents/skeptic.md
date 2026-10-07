@@ -1,7 +1,7 @@
 ---
 description: Standard read-only red-team role for missed risks, assumptions, and rabbit holes.
 mode: subagent
-model: openai/gpt-5.6-terra
+model: opencode-go/minimax-m3
 permission:
   edit: deny
 ---

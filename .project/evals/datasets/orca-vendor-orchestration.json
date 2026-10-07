@@ -1,0 +1,178 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Shaping acceptance fixtures for policy and worker briefs; not an executed benchmark or existing harness schema.",
+  "cases": [
+    {
+      "id": "codex-coordinates-alternate-vendors",
+      "input": {
+        "harness": "codex",
+        "orcaSessionVerified": true,
+        "capabilitiesVerified": true,
+        "workers": [
+          "claude",
+          "opencode"
+        ],
+        "scopes": [
+          "change parser in isolated checkout A",
+          "change formatter in isolated checkout B"
+        ]
+      },
+      "expected": {
+        "coordinator": "codex",
+        "workerVendors": [
+          "claude",
+          "opencode"
+        ],
+        "isolatedWriters": true,
+        "briefRequires": [
+          "target",
+          "change",
+          "constraints",
+          "ownership",
+          "observableAcceptance"
+        ],
+        "peerCommunication": "run-scoped inbox",
+        "completion": "coordinator validates integrated tree; existing gates remain"
+      }
+    },
+    {
+      "id": "preflight-fallback",
+      "input": {
+        "harness": "claude",
+        "orcaSessionVerified": false
+      },
+      "expected": {
+        "route": "normal workflow",
+        "orcaLaunches": 0,
+        "gatesPreserved": true,
+        "diagnosticRequired": true
+      }
+    },
+    {
+      "id": "uncertain-worker-does-not-duplicate-editing",
+      "input": {
+        "harness": "opencode",
+        "dispatchStarted": true,
+        "workerLiveness": "unverifiable",
+        "timeout": true
+      },
+      "expected": {
+        "replacementWriter": false,
+        "automaticStop": false,
+        "preserveResources": true,
+        "route": "inspect ownership and checkpoint; no fallback editing until settled"
+      }
+    },
+    {
+      "id": "worker-preamble-prevents-recursive-coordination",
+      "input": {
+        "harness": "claude",
+        "activeDispatchPreamble": true,
+        "policyMode": "auto"
+      },
+      "expected": {
+        "role": "dispatched worker",
+        "newCoordinatorRun": false,
+        "nestedLaunches": 0
+      }
+    },
+    {
+      "id": "unreported-cost-is-not-savings",
+      "input": {
+        "baselineSeconds": 120,
+        "delegatedSecondsIncludingReconciliation": 100,
+        "reportedCostComplete": false
+      },
+      "expected": {
+        "costImprovement": "unproven",
+        "qualityImprovement": "requires acceptance and rework comparison"
+      }
+    },
+    {
+      "id": "completion-receipts-are-not-proof",
+      "variants": [
+        "launch accepted",
+        "terminal idle",
+        "stale dispatch report",
+        "duplicate completion",
+        "passing check claim contradicted by execution"
+      ],
+      "expected": {
+        "rejectPrematureCompletion": true,
+        "verifyCurrentDispatch": true,
+        "independentChecksRequired": true
+      }
+    },
+    {
+      "id": "prepared-input-and-integrated-evidence",
+      "variants": [
+        "unrelated dirty coordinator changes",
+        "stale worker baseline",
+        "overlapping worker changes",
+        "evidence stored in retired worktree"
+      ],
+      "expected": {
+        "preserveUnrelatedEdits": true,
+        "rejectStaleInputs": true,
+        "resolveOverlapExplicitly": true,
+        "checksBindIntegratedTree": true,
+        "retainEvidenceOutsideCleanup": true
+      }
+    },
+    {
+      "id": "all-coordinator-and-policy-permutations",
+      "variants": [
+        "claude success",
+        "codex success",
+        "opencode success",
+        "missing policy",
+        "disabled policy",
+        "malformed policy",
+        "invalid role route",
+        "unavailable worker",
+        "missing individual capability",
+        "dependent scopes",
+        "single atomic scope"
+      ],
+      "expected": {
+        "coordinatorMatchesInvokingHarness": true,
+        "boundedConcurrency": true,
+        "noForcedRedundantWork": true,
+        "preflightFailureLaunchCount": 0,
+        "gatesPreserved": true
+      }
+    },
+    {
+      "id": "stateful-recovery-and-peer-messages",
+      "variants": [
+        "partial launch",
+        "restart",
+        "settled attempt retry",
+        "retry exhaustion",
+        "mail replay",
+        "peer question pending",
+        "recovery record refused",
+        "recovery record corrupt"
+      ],
+      "expected": {
+        "noDuplicateWriters": true,
+        "retryOnlyAfterProvenSettlement": true,
+        "boundedRetries": true,
+        "runScopedPeerDelivery": true,
+        "processBeforeAck": true,
+        "refusalNeverMeansAbsent": true
+      }
+    },
+    {
+      "id": "static-fixtures-do-not-prove-runtime",
+      "input": {
+        "fixturesPassed": true,
+        "installedRuntimeSmokeCompleted": false
+      },
+      "expected": {
+        "liveCompatibility": "unverified",
+        "dispatchBetReady": false
+      }
+    }
+  ]
+}

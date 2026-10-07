@@ -5,7 +5,8 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-_none_
+| orca-vendor-orchestration | — | foundation bet; dispatch awaiting prerequisites | decomposed: foundation + dispatch | 2026-10-07 |
+| orca-vendor-foundation | S1/S2 done; S3 uphill 0% | build; S2 gate pending | big-batch | 2026-10-07 |
 
 ## Parked pitches
 _none_

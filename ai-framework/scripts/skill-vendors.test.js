@@ -52,7 +52,7 @@ test("every bundled vendor entry point exposes add-skill from one canonical play
     assert.equal(text.match(/^description: (.+)$/m)[1], description, mirror);
     assert.match(text, /Load `\.claude\/skills\/add-skill\/SKILL\.md` and follow it exactly/);
   }
-  assert.match(read(BUNDLE, ".opencode/commands/add-skill.md"), /^model: openai\/gpt-5\.6-terra$/m);
+  assert.match(read(BUNDLE, ".opencode/commands/add-skill.md"), /^model: opencode-go\/minimax-m3$/m);
   assert.match(read(BUNDLE, ".agents/skills/add-skill/SKILL.md"), /^name: add-skill$/m);
   for (const command of canonical.match(/node ai-framework\/scripts\/[a-z-]+\.js/g)) assert.ok(fs.existsSync(path.join(BUNDLE, command.split(" ")[1])), command);
 });
