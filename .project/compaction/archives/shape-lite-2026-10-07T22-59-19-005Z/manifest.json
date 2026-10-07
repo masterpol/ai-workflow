@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "shape-lite",
+  "sourceRoot": ".project/pitches/shape-lite",
+  "archivedAt": "2026-10-07T22:59:19.006Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "96f5ac474e5d90b04370ae2fd6d5de5178103c4072778bd2cc110bf218ea78d6",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "2d2682d33bce15b43c2b9377c83bbfb58e433fd0a99b75f74135fafd54c7b6d8",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "430a5455ec5ad8fab611e0afe2730c589d5324f7c0930eaed2877407a9c4a21f",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "39b6d7217d37cbf7892b5d72dec717592ea03bd0622a9c985bbfb1273b631535",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "5e9e81b3e27b462def61e99312fadd7d5c9b0e40a96fe1eacb62d058f9865a40",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "751648253fcc588c2ac822e3317bb30a9d1968fb90ca1b3b1a7db8298aa3b318",
+      "mode": 420
+    }
+  }
+}

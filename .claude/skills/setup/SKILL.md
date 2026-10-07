@@ -43,7 +43,7 @@ Existing context documents detected:
 - [✓/✗] .project/context/architecture.md
 - [✓/✗] .project/context/stack.md
 - [✓/✗] AGENTS.md project specifics
-- [✓/✗] CLAUDE.md full mirror (⚠️ still the bootstrap stub — needs regenerating, if applicable)
+- [✓/✗] CLAUDE.md full mirror, or a valid `@AGENTS.md` import that is already present — preserve it (⚠️ still the bootstrap stub — needs regenerating, if applicable)
 - [✓/✗] `## Response style (caveman mode)` section in both `AGENTS.md` and `CLAUDE.md` (copy verbatim from the bundle's `AGENTS.md`; the main session agent of every vendor gets caveman mode from it — `setup-validator.js` warns when missing)
 
 How would you like to proceed?

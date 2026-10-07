@@ -5,6 +5,7 @@ const fs = require("node:fs/promises");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 const { cursorMirrors } = require("./skill-vendors");
+const { resolveClaudeEntry, effectiveEntryText } = require("./entry-import");
 
 const root = process.cwd();
 const json = process.argv.includes("--json");
@@ -58,8 +59,14 @@ async function checkEntryFiles() {
     record(complete ? "pass" : "fail", "AGENTS.md", complete ? "project specifics are filled" : "project specifics are still a setup placeholder");
   }
   if (await requireFile("CLAUDE.md")) {
-    const content = await fs.readFile(absolute("CLAUDE.md"), "utf8");
-    const isBootstrapStub = /Bootstrap file shipped/.test(content);
+    const own = await fs.readFile(absolute("CLAUDE.md"), "utf8");
+    // A third valid shape: CLAUDE.md loads AGENTS.md through Claude Code's native `@AGENTS.md`
+    // import. Validate the effective text (CLAUDE.md + its local, regular-file target); a
+    // malformed, foreign, symlinked or missing target fails rather than passing on the pointer.
+    const entry = await resolveClaudeEntry(root, own);
+    if (entry.kind === "invalid") { record("fail", "CLAUDE.md", entry.detail); return; }
+    const content = entry.content;
+    const isBootstrapStub = /Bootstrap file shipped/.test(own);
     // SETUP.md has two valid completion shapes for CLAUDE.md, not one: a full mirror (no
     // pre-existing CLAUDE.md, so setup replaces the bootstrap wholesale — "## Project
     // specifics" heading present) OR an append-only merge (a real, pre-existing CLAUDE.md
@@ -73,7 +80,9 @@ async function checkEntryFiles() {
       complete ? "pass" : "fail",
       "CLAUDE.md",
       complete
-        ? isFullMirror
+        ? entry.kind === "import"
+          ? "loads the complete AGENTS.md through @AGENTS.md"
+          : isFullMirror
           ? "full project mirror is present"
           : "pre-existing CLAUDE.md preserved with an appended AI Workflow section"
         : "bootstrap file was not replaced or merged by setup"
@@ -84,7 +93,7 @@ async function checkEntryFiles() {
 async function checkCavemanEntryFiles() {
   for (const file of ["AGENTS.md", "CLAUDE.md"]) {
     if (!(await exists(file))) continue;
-    const has = /^## Response style \(caveman mode\)$/m.test(await fs.readFile(absolute(file), "utf8"));
+    const has = /^## Response style \(caveman mode\)$/m.test((await effectiveEntryText(root, file)).content);
     record(has ? "pass" : "warn", file, has ? "carries the caveman response-style section" : "no caveman response-style section: the main session agent will not apply caveman mode (copy the section from the bundle's AGENTS.md)");
   }
 }

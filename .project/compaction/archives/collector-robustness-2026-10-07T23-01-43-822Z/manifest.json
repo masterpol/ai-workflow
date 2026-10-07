@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "slug": "collector-robustness",
+  "sourceRoot": ".project/pitches/collector-robustness",
+  "archivedAt": "2026-10-07T23:01:43.825Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "0f94a93bcaeb5bfd090c1041b4c1b6e58b332effa6b8c485cc5d8684545e3338",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "348ca3c4ab4063fbd51d86d670cf6177288a2208bb6c758cb911ce39611bf835",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "007ea31be158b32756d5c9198d307b57e163f0f4e35d13b1fcab1344628bf94c",
+      "mode": 420
+    },
+    "completion-plan-2026-09-27.md": {
+      "hash": "bfe32a53aa1a7646acca39466016e359eabed69a893dc390a325c5ad54b02415",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "7a9572dd03bda5e2706ad52295248282ebfb63c6282414a02f4416fa45e80013",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "f4a92cc54044566146968947b10a4f2c2ce05dbf5c6b1c7519375b7efd4ec1f5",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "291317ebb9e6b0feb4dd3bb2a4a91926e70b452ee2d535175de11461de18f285",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "ad161afe6ec0892b4fd695c6303ea7cb8077a88bb70314c1436ac0848d7280d5",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "ef884507861872def7429c226f8a159f3932c5de122f7d945320c99aaeffc685",
+      "mode": 420
+    },
+    "prompts/audit-code.txt": {
+      "hash": "883558a9a32cb96f5bbba8699277d34204ed0bae3c89226f6be7fae874b51054",
+      "mode": 420
+    },
+    "prompts/audit-cov.txt": {
+      "hash": "0ca354c7864e9ac472186652480b912b9eb5bdf1c3508272b0534b678f437501",
+      "mode": 420
+    },
+    "prompts/audit-fix.txt": {
+      "hash": "4a0a334c8227b8f36eda2d8d6c4eff23bf46310ba7801e52db9f3d81c04a6e64",
+      "mode": 420
+    },
+    "prompts/audit-sec.txt": {
+      "hash": "723aa48ccb9790b0b31e04e054c67bea005b605f20082d407a89e23da026836b",
+      "mode": 420
+    },
+    "prompts/audit-xpitch.txt": {
+      "hash": "870334b472b9fd7aaaac641c2c1d731c8939150afcb1dd336c203b156ba51671",
+      "mode": 420
+    },
+    "reshape.md": {
+      "hash": "b6e1988a7103001d1db81804cc64813637acf424388eb5fb05430fd349183820",
+      "mode": 420
+    }
+  }
+}

@@ -235,3 +235,11 @@ The audit used a private copy with that matcher added to the skip predicate; no 
 were read by the guard in this run. Future bench hardening should apply the same exclusion to
 tree walking and verify that secret-shaped files are never opened. No shared bench source was
 changed as part of path safety.
+
+## shape-lite followups — 2026-10-07
+
+- `skill-defaults.test.js` "live caveman state truthfully" fails at HEAD when caveman is not installed in the source checkout; make it fixture-only or skip when absent.
+- `outsideCode`: multi-line code spans, a backtick in a fence info string, and a symlinked `CLAUDE.md` are unhandled; confirm Claude Code's exact behaviour first.
+- `/shape-lite` step 1: one active pitch plus an unrelated task is ambiguous; add a rule.
+- Run `/shape-lite` end to end on a throwaway task per host (OpenCode, Codex, Cursor); only Claude Code wiring is checked statically.
+- Cycle-2 reviewer lacked `setup-validator.js`/`bundle-sync.js` callers in scratch; a caller-inclusive re-review of the entry-import wiring is open.

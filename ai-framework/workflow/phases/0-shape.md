@@ -79,6 +79,10 @@ Output: a "Critique findings" section appended to `pitch.md` with severity / typ
 
 If user acknowledges critique findings instead of addressing them, log the reason in the pitch's "Bet decision" section.
 
+## Lite variant
+
+For a small task or a user rejection mid-flow, `/shape-lite` (`.claude/skills/shape-lite/SKILL.md`) replaces this phase's ceremony: graph-only knowledge gate (≤3 reads), a 4-line frame, mechanical escalation triggers back to this phase, and one Approve / Revise / Back / Stop gate. Inline mode patches the active pitch and logs one `## Revisions` row; standalone mode writes a ≤150-token card. This phase's behaviour, template and gates are unchanged.
+
 ## Output
 
 - `.project/pitches/{slug}/pitch.md` (≤500 tokens for small-batch, ≤900 for big-batch, ≤1500 for epic-with-decomposition)

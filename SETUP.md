@@ -215,6 +215,10 @@ project specifics, the full `CLAUDE.md` mirror (required — see below), and
       pointer. Claude Code auto-loads this file every session, so it is the workflow's primary
       chance to "use itself well": everything a session needs for phase 1 of any task should be
       readable from this one file without a hop to `AGENTS.md`.
+      **Equally valid:** a `CLAUDE.md` whose only workflow content is Claude Code's native
+      `@AGENTS.md` import line (sibling file, regular file, not a symlink). `setup-validator.js`
+      accepts it only when the imported `AGENTS.md` is complete; keep the import when it is
+      already present, and do not expand it into a mirror.
    Both files point at `ai-framework/workflow/overview.md`, `ai-framework/rules/`, and
    `.project/`, and restate the confirmation-gate rule.
 
