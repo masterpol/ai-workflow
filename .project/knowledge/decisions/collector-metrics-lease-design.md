@@ -47,5 +47,5 @@ holds the lease across the snapshot read, the snapshot write and both report wri
 
 ## References
 
-`README.md` (Token Consumption); `.project/pitches/collector-robustness/` (completion plan, `audit-cycle-2.md`);
+`README.md` (Token Consumption); `.project/done-work.md` (compacted pitch; full record restorable from `.project/compaction/archives/`);
 [[token-metrics-dimensions-design]].

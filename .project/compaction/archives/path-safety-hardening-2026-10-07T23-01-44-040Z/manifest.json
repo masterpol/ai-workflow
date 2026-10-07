@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "slug": "path-safety-hardening",
+  "sourceRoot": ".project/pitches/path-safety-hardening",
+  "archivedAt": "2026-10-07T23:01:44.042Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "c1b286031f391bfead0f571470eb0ac0272f86a3ee65e12c42b7b806f6950a27",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "c8aa05bbaa90b3783818b1460b13d9f023b40215eb13877f8301d122d1714c7d",
+      "mode": 420
+    },
+    "completion-audit-code-prompt.txt": {
+      "hash": "1fe572c84f87eb6d045608790c6e5e50e68fce5872d0aab0850a4d1d23747b92",
+      "mode": 420
+    },
+    "completion-audit-code.md": {
+      "hash": "6844ef1be681a2325d05f4a95dc0ccdc85c3e9d090c660a346d073f4197c114b",
+      "mode": 420
+    },
+    "completion-audit-cross-prompt.txt": {
+      "hash": "7696ebb32addbbf1c374df6c108595a9c78e99b50ea52c3f7a0d5620001b500f",
+      "mode": 420
+    },
+    "completion-audit-cross.md": {
+      "hash": "8ed5b649bc72fb5aa6d09a7efd3a2349680bc5f73a102b566868d724d4260663",
+      "mode": 420
+    },
+    "completion-audit-security-prompt.txt": {
+      "hash": "d63788551ad3c0bcbab5640691bba3596e3c6e0aac8feae9a8b75dd0e9360619",
+      "mode": 420
+    },
+    "completion-audit-security.md": {
+      "hash": "ec83baa134f8fba469d083a2f8f4fa35b82aab508eadc69a6c18a75a85ef6711",
+      "mode": 420
+    },
+    "completion-audit-summary-2026-09-27.md": {
+      "hash": "6aa01ec5b522c3881799be559192677b2b6fa42f53090a8095bb2f30622b7cd2",
+      "mode": 420
+    },
+    "completion-audit-test-cycle2-prompt.txt": {
+      "hash": "a0a5cb9241dd5071702d154a80215ecbbc65a1a962a805968f38abde1790af89",
+      "mode": 420
+    },
+    "completion-audit-test-cycle2.md": {
+      "hash": "0fe820eb97d84097fc3cb60f2b46fd92041e2c5135c02ac2562d3f0ee0cb7954",
+      "mode": 420
+    },
+    "completion-audit-test-prompt.txt": {
+      "hash": "0d6bf2ce8fc1d2b29f6bbe105a88cf07a884c3342d498da5d99b775a7005d34e",
+      "mode": 420
+    },
+    "completion-audit-test.md": {
+      "hash": "bd4f7d73cf360356b59bb8d84b1e1faaa254544ee32e8beca377185cd72a5660",
+      "mode": 420
+    },
+    "completion-log-2026-09-27.md": {
+      "hash": "526573d7f687c56b2bdaf561b6042390af9fbf47140c8eb9186194af0349918a",
+      "mode": 420
+    },
+    "completion-plan-2026-09-27.md": {
+      "hash": "14c3dd819428ddb599afe67d031b00297e8e2f5f7a22da2e1aedf4a94ed71f96",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "4d5fc5b8945f7636e14101f9fc1075d4dd274ae017cc4c47e29d2edb60ef4da7",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "b17d75943172d52d4c218060b4495c9d9627a1aa56d87f6b0a431aa56c42d74d",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "4c21d89f0492956f124ec5efd7c8d415626eeddaf2d565ee1e3208d2e18e2113",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "576be2503a043ba0019afb85e71dd955a7a6f35499e24af87a367f43b129f959",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "0b7928b7a7b583303f72e4b7b31a7a89d08d3347de00583088ed5a2d0d2402ab",
+      "mode": 420
+    },
+    "reshape.md": {
+      "hash": "5777d68350faf7c4ba51135e46862e7f7c02dbfef81777a49e0c4bcb0d52cb29",
+      "mode": 420
+    },
+    "ship-readiness-2026-09-27.md": {
+      "hash": "dfc04e0f79310755fd1d3f4640b6f5ed024ca88fd4e6e442c65b5d7ef74e70e0",
+      "mode": 420
+    }
+  }
+}

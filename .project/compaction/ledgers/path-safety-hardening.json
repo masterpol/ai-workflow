@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "slug": "path-safety-hardening",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit-and-confidence",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-and-remaining-limitations",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-followups",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#delivery",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d1-portable-filesystem-limitation-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#reproducible-in-memory-mutation-method",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-07T23:01:39.567Z"
+}

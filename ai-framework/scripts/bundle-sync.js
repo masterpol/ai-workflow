@@ -32,6 +32,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const { execFileSync } = require("node:child_process");
 const { ownedPaths } = require("./skill-sync");
+const { resolveClaudeEntry } = require("./entry-import");
 
 const root = process.cwd();
 const apply = process.argv.includes("--apply");
@@ -273,7 +274,14 @@ async function nextSteps(sourceRoot) {
   if (sourceEntry && marker.test(sourceEntry)) {
     const lacking = [];
     for (const file of ["AGENTS.md", "CLAUDE.md"]) {
-      const text = await readIfExists(path.join(root, file));
+      let text = await readIfExists(path.join(root, file));
+      // CLAUDE.md that imports AGENTS.md via @AGENTS.md carries the section through its target.
+      if (text !== null && file === "CLAUDE.md") {
+        const entry = await resolveClaudeEntry(root, text);
+        // An unusable import is reported as a problem of its own, not as a missing section.
+        if (entry.kind === "invalid") { steps.push({ kind: "entry-files", message: `CLAUDE.md has an unusable AGENTS.md import (${entry.detail}); run node ai-framework/scripts/setup-validator.js` }); continue; }
+        text = entry.content;
+      }
       if (text !== null && !marker.test(text)) lacking.push(file);
     }
     if (lacking.length) steps.push({ kind: "entry-files", message: `${lacking.join(" and ")} lack the '## Response style (caveman mode)' section; entry files are never auto-applied, so copy it from the source AGENTS.md by hand or the main session agent of each vendor will not apply caveman mode` });

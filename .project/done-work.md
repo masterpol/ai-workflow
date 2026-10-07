@@ -162,3 +162,82 @@ Knowledge: [[a-gate-must-not-audit-its-own-instrument]], [[false-cross-pitch-att
 Closure evidence: `.project/records/pitch-compression/independent-rereview-catch-up.md`. Ship-time log: `.project/runs/2026-09-27-independent-rereview-catch-up.md`. Coverage: 25/25 required sections extracted, zero gaps.
 
 Recovery archive (byte-for-byte, checksummed): `.project/compaction/archives/independent-rereview-catch-up-2026-09-27T18-09-29-288Z/`. Restore: `node ai-framework/scripts/pitch-archive.js restore independent-rereview-catch-up --apply`. Coverage ledger: `.project/compaction/ledgers/independent-rereview-catch-up.json`.
+
+## shape-lite — shipped 2026-10-07
+
+`/shape-lite` shipped as bundle 2.9.0/2.9.1: a compressed variant of `/shape` for small tasks and user rejections, one skill
+on four vendors (canonical `.claude`, byte-copy `.cursor`, `.agents` stub, `.opencode` command). It runs standalone (a card of
+≤150 tokens) or inline (patches the one active pitch and logs a `## Revisions` row), with a graph-only knowledge gate, a
+mechanical escalation test back to full `/shape` (>2 files or >100 LOC, prompt/LLM call sites, security-rules paths, overlap with
+another active pitch) and one Approve / Revise / Back / Stop gate. A user-requested added scope made `setup-validator.js`
+accept a `CLAUDE.md` that loads `AGENTS.md` through `@AGENTS.md` (`entry-import.js`, wired into `bundle-sync`, SETUP.md and the
+setup skill).
+
+No-gos held: full `/shape` behaviour, template and gates are unchanged; lite runs no critique fan-out and adds no agents; it
+never auto-advances past its gate or edits a pitch the user did not name; standing workflow-tooling no-gos respected. Rabbit
+holes resolved: escalation drift (hard triggers evaluated first, with evidence), recording a rejection without bloating the pitch
+(one Revisions row; a knowledge entry only if reusable), the AI-prompt golden-eval gate (lite refuses and escalates). Pushed to
+plan and closed there: doctor/test skill counts (the doctor discovers skills dynamically, no code change). Pushed to no-go:
+a cross-pitch conflict check inside lite (file-set overlap is an escalation trigger instead).
+
+Audit ran two cycles with independent reviewers and caught canaries: a quadratic fence regex (a 1 MB `CLAUDE.md` blocked tooling
+for about 187 s) and a directive judged on a code-stripped line, both fixed; stale escalation ordering in the skill also fixed.
+Knowledge: [[shape-lite-is-a-gated-escalating-variant-of-shape]] and [[backtracking-regex-over-untrusted-text-is-quadratic]].
+Open followups are in `.project/pitches/_followups.md` ("shape-lite followups").
+
+## collector-robustness — shipped 2026-09-27
+
+Collector robustness shipped 2026-09-27 as a small-batch S1 (structured event identity) plus a user-approved big-batch completion
+plan (C2 kernel lease, C3 all writers and migration; 9 files). Identity: tagged JSON tuples, type-only completions distinct,
+replay dedup kept. The S1 age/PID pathname lock was proved unsafe (a paused owner resumes) and was superseded by
+`metrics-lock.js`, a loopback lease on a port derived from the directory's real path; `recordEvent` is async and holds it
+across read, snapshot and both report writes; the CLI and both OpenCode callbacks await; a legacy lock file makes events skip and
+is never reclaimed. 117 tests in the required suites, 404/404 full suite (three runs), doctor and setup-validator READY.
+
+Confidence limits: macOS only; unrelated projects can share a port (about 1 in 10,000 per pair) and skip while one holds it; the
+guard for a `listen` that completes after its attempt timed out survives mutation (needs timing fault injection); old writers are
+not excluded until the quiescent migration step is done; the completion plan had no separate pre-bet critique (the user approved
+it directly), so audit was the first independent look; C2/C3 were committed mid-build by someone other than that session.
+
+No-gos held: no new telemetry dimensions or vendors, no unbounded waits (about 1 s monotonic deadline), historical snapshots
+unchanged beyond read compatibility, Node built-ins only. Rabbit holes resolved: legacy colon keys stay readable and may replay
+once; the lock-age boundary disappeared with the age rule; every writer uses one protocol with no synchronous path left.
+
+Deviations: unsafe age reclaim (S1 lock incomplete), identity semantics, no separate critique, S1's five reclaim tests retired
+with the mechanism they tested, cross-project port collisions seen in practice (one flaky full run in seven). The 2026-09-26
+audit (cycle 1) reviewed the retired S1 lock; cycle 2 used five fresh sonnet reviewers, every canary caught. F1 (a late accept
+error closed a granted lease and admitted a second writer) was fixed with a guard-proving test; a vacuous timing bound and a
+README overstatement were fixed; cross-pitch was clean; 0 must-fix open. Build evidence: 59 tests at S1; at C2/C3 ten lock tests
+(SIGSTOP holder keeps the lease, SIGKILL frees it), a six-process exact-totals test (31 completions, 62 tokens), nine in-memory
+mutants killed with one recorded survivor. Hanging mutant runs led to test cleanup fixes and a post-suite exit watchdog.
+
+Lessons live in [[collector-metrics-lease-design]], [[inode-anchoring-and-stable-inode-locks]] and
+[[token-metrics-dimensions-design]]. Followups are in `.project/pitches/_followups.md` (Linux/Windows verification and port
+collisions; OpenCode plugin null-event hardening; the `since`/`metricScope` test gap).
+
+## path-safety-hardening — shipped 2026-09-27
+
+Path safety hardening shipped 2026-09-27 (bundle 2.8.6) under a user-approved contract: trusted project directories and
+ancestors, with continuous containment against hostile ancestor replacement outside the guarantee. S1 and P2 are done. Ledger
+commits now share their transaction roots and compaction journal namespace with archive, removal and recovery; new writes refuse
+pending compaction or legacy installer journals, and old journals keep their original recovery route (migration needs old
+compaction writers stopped). Static-symlink and observed-ancestor-swap guards stay intact; ledger symlink refusal and the
+transaction-context mismatch are fixed.
+
+Verification: 231 tests across nine suites, real SIGKILL fixtures (prior ledger bytes or prior absence, cleanup, legacy
+recovery), four author-run guard mutants caught, relevant line coverage reported in the ship record. Audit: code, security, test
+and cross-pitch reviewers each completed after one fresh narrower retry following provider usage-limit failures; all four caught
+verified canaries; migration-documentation and preservation-assertion findings fixed and rechecked in cycle 2; no must-fix open.
+
+Remaining limits, kept in [[compaction-recovery-shares-context-and-trusted-directories]]: hostile concurrent directory relocation
+is not solved, and an unsafe cleanup may keep a temporary file in a moved original directory rather than follow a refused path.
+No-gos held: no new dependency, ledger schema, retention policy, deletion approval, skill fetching or vendor-mirror change;
+historical pitch and spike evidence intact. Rabbit holes: co-resident write access is required for the race but closing it
+still matters; a refused path is an error, never absent; deterministic race simulation was pushed to plan; platform descriptor
+APIs and a general filesystem transaction framework were pushed to no-go. Deviation D1: dependency-free Node cannot make
+pathname operations atomic, ledger commits reuse registry transactions and so also take the registry lock under `.project/skills`.
+
+Knowledge: [[prove-a-guard-test-with-an-in-memory-mutant]] (the mutation method from the build log),
+[[reusing-a-transaction-exposes-its-lock-reader-to-new-callers]] (the FIFO/oversized-lock finding from audit cycle 1),
+[[macos-tmpdir-realpath-alias-breaks-path-assertions]]. One new followup: exclude secret filenames in the review bench tree
+guard. Delivery: version 2.8.6; closure only, no commit, merge or publication; cooldown became due.

@@ -34,6 +34,7 @@ a persistent knowledge graph, and cost-aware model routing.
 | Phase | Playbook | Purpose |
 |-------|----------|---------|
 | shape | `.claude/skills/shape/SKILL.md` | Frame problem, set appetite, name rabbit holes, no-gos |
+| shape-lite | `.claude/skills/shape-lite/SKILL.md` | Compressed framing for small tasks or user rejections; standalone or patches an active pitch |
 | critique | `.claude/skills/critique/SKILL.md` | Pre-bet red-team (big-batch + AI scopes) |
 | plan | `.claude/skills/plan/SKILL.md` | Decompose into independent scopes with checkable exits |
 | build | `.claude/skills/build/SKILL.md` | Execute scopes, hill-tracked, verify before done |

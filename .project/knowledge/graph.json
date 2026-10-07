@@ -1,12 +1,12 @@
 {
-  "generated": "2026-09-28",
+  "generated": "2026-10-07",
   "stats": {
-    "total": 28,
-    "decisions": 10,
-    "patterns": 10,
+    "total": 32,
+    "decisions": 11,
+    "patterns": 11,
     "entities": 0,
-    "issues": 8,
-    "edges": 80,
+    "issues": 10,
+    "edges": 92,
     "brokenLinks": 0,
     "orphans": 0
   },
@@ -127,6 +127,29 @@
         "reversible-aggregates-store-their-routing"
       ],
       "file": ".project/knowledge/issues/async-agent-launch-hook-counted-as-completion.md"
+    },
+    {
+      "id": "backtracking-regex-over-untrusted-text-is-quadratic",
+      "type": "issue",
+      "title": "Issue: a lazy fence-stripping regex over CLAUDE.md was quadratic",
+      "tags": [
+        "regex",
+        "redos",
+        "untrusted-input",
+        "entry-files",
+        "setup-validator"
+      ],
+      "created": "2026-10-07",
+      "updated": "2026-10-07",
+      "confidence": null,
+      "severity": "high",
+      "resolved": "true",
+      "source": "shape-lite",
+      "related": [
+        "parse-untrusted-values-and-re-emit-them",
+        "a-gate-must-not-audit-its-own-instrument"
+      ],
+      "file": ".project/knowledge/issues/backtracking-regex-over-untrusted-text-is-quadratic.md"
     },
     {
       "id": "bare-prefix-match-crosses-entities",
@@ -479,6 +502,30 @@
       "file": ".project/knowledge/issues/prose-instructions-must-specify-how-to-extract-from-free-form-arguments.md"
     },
     {
+      "id": "prove-a-guard-test-with-an-in-memory-mutant",
+      "type": "pattern",
+      "title": "Pattern: prove a guard test guards by running it against an in-memory mutant",
+      "tags": [
+        "testing",
+        "mutation",
+        "verification",
+        "audit",
+        "path-safety"
+      ],
+      "created": "2026-10-07",
+      "updated": "2026-10-07",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "path-safety-hardening",
+      "related": [
+        "a-gate-must-not-audit-its-own-instrument",
+        "a-gate-must-not-trust-its-own-author",
+        "macos-tmpdir-realpath-alias-breaks-path-assertions"
+      ],
+      "file": ".project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md"
+    },
+    {
       "id": "resolve-before-matching-a-protected-path-allowlist",
       "type": "pattern",
       "title": "Pattern: Resolve the real path before matching it against a protected-directory list",
@@ -520,6 +567,31 @@
         "resolve-before-matching-a-protected-path-allowlist"
       ],
       "file": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md"
+    },
+    {
+      "id": "reusing-a-transaction-exposes-its-lock-reader-to-new-callers",
+      "type": "issue",
+      "title": "Issue: reusing skill-registry transactions for ledger commits exposed their lock read to FIFOs and huge files",
+      "tags": [
+        "path-safety",
+        "transactions",
+        "locks",
+        "fifo",
+        "shared-helpers",
+        "audit"
+      ],
+      "created": "2026-10-07",
+      "updated": "2026-10-07",
+      "confidence": null,
+      "severity": "medium",
+      "resolved": "true",
+      "source": "path-safety-hardening",
+      "related": [
+        "hardening-a-shared-reader-made-its-writer-destructive",
+        "compaction-recovery-shares-context-and-trusted-directories",
+        "resolve-before-matching-a-protected-path-allowlist"
+      ],
+      "file": ".project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md"
     },
     {
       "id": "reversible-aggregates-store-their-routing",
@@ -565,6 +637,33 @@
         "a-gate-must-not-trust-its-own-author"
       ],
       "file": ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md"
+    },
+    {
+      "id": "shape-lite-is-a-gated-escalating-variant-of-shape",
+      "type": "decision",
+      "title": "Decision: `/shape-lite` is a compressed variant of `/shape` that escalates mechanically",
+      "tags": [
+        "shape-lite",
+        "shape",
+        "gates",
+        "escalation",
+        "small-batch",
+        "workflow",
+        "cross-vendor"
+      ],
+      "created": "2026-10-07",
+      "updated": "2026-10-07",
+      "confidence": null,
+      "severity": null,
+      "resolved": null,
+      "source": "shape-lite",
+      "related": [
+        "a-gate-must-not-trust-its-own-author",
+        "a-gate-must-not-audit-its-own-instrument",
+        "caveman-mode-is-default-everywhere",
+        "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+      ],
+      "file": ".project/knowledge/decisions/shape-lite-is-a-gated-escalating-variant-of-shape.md"
     },
     {
       "id": "skill-defaults-attribution-guard-and-runtime-design",
@@ -774,6 +873,22 @@
       "to": "a-gate-must-not-audit-its-own-instrument"
     },
     {
+      "from": "shape-lite-is-a-gated-escalating-variant-of-shape",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "shape-lite-is-a-gated-escalating-variant-of-shape",
+      "to": "a-gate-must-not-audit-its-own-instrument"
+    },
+    {
+      "from": "shape-lite-is-a-gated-escalating-variant-of-shape",
+      "to": "caveman-mode-is-default-everywhere"
+    },
+    {
+      "from": "shape-lite-is-a-gated-escalating-variant-of-shape",
+      "to": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    },
+    {
       "from": "skill-defaults-attribution-guard-and-runtime-design",
       "to": "caveman-mode-is-default-everywhere"
     },
@@ -906,6 +1021,18 @@
       "to": "a-report-over-an-untrusted-tree-runs-only-bundle-code"
     },
     {
+      "from": "prove-a-guard-test-with-an-in-memory-mutant",
+      "to": "a-gate-must-not-audit-its-own-instrument"
+    },
+    {
+      "from": "prove-a-guard-test-with-an-in-memory-mutant",
+      "to": "a-gate-must-not-trust-its-own-author"
+    },
+    {
+      "from": "prove-a-guard-test-with-an-in-memory-mutant",
+      "to": "macos-tmpdir-realpath-alias-breaks-path-assertions"
+    },
+    {
       "from": "resolve-before-matching-a-protected-path-allowlist",
       "to": "resolve-config-only-from-trusted-root"
     },
@@ -946,6 +1073,14 @@
       "to": "reversible-aggregates-store-their-routing"
     },
     {
+      "from": "backtracking-regex-over-untrusted-text-is-quadratic",
+      "to": "parse-untrusted-values-and-re-emit-them"
+    },
+    {
+      "from": "backtracking-regex-over-untrusted-text-is-quadratic",
+      "to": "a-gate-must-not-audit-its-own-instrument"
+    },
+    {
       "from": "bare-prefix-match-crosses-entities",
       "to": "a-gate-must-not-trust-its-own-author"
     },
@@ -979,6 +1114,18 @@
     },
     {
       "from": "prose-instructions-must-specify-how-to-extract-from-free-form-arguments",
+      "to": "resolve-before-matching-a-protected-path-allowlist"
+    },
+    {
+      "from": "reusing-a-transaction-exposes-its-lock-reader-to-new-callers",
+      "to": "hardening-a-shared-reader-made-its-writer-destructive"
+    },
+    {
+      "from": "reusing-a-transaction-exposes-its-lock-reader-to-new-callers",
+      "to": "compaction-recovery-shares-context-and-trusted-directories"
+    },
+    {
+      "from": "reusing-a-transaction-exposes-its-lock-reader-to-new-callers",
       "to": "resolve-before-matching-a-protected-path-allowlist"
     },
     {
@@ -1043,11 +1190,14 @@
     ],
     "transactions": [
       "compaction-recovery-shares-context-and-trusted-directories",
-      "dual-hash-tracking-for-transformed-content"
+      "dual-hash-tracking-for-transformed-content",
+      "reusing-a-transaction-exposes-its-lock-reader-to-new-callers"
     ],
     "path-safety": [
       "compaction-recovery-shares-context-and-trusted-directories",
-      "inode-anchoring-and-stable-inode-locks"
+      "inode-anchoring-and-stable-inode-locks",
+      "prove-a-guard-test-with-an-in-memory-mutant",
+      "reusing-a-transaction-exposes-its-lock-reader-to-new-callers"
     ],
     "threat-model": [
       "compaction-recovery-shares-context-and-trusted-directories"
@@ -1095,7 +1245,8 @@
     ],
     "gates": [
       "a-gate-must-not-trust-its-own-author",
-      "pitch-compaction-gate-and-recovery-design"
+      "pitch-compaction-gate-and-recovery-design",
+      "shape-lite-is-a-gated-escalating-variant-of-shape"
     ],
     "html": [
       "project-state-report-design"
@@ -1105,6 +1256,25 @@
     ],
     "snapshot": [
       "project-state-report-design"
+    ],
+    "shape-lite": [
+      "shape-lite-is-a-gated-escalating-variant-of-shape"
+    ],
+    "shape": [
+      "shape-lite-is-a-gated-escalating-variant-of-shape"
+    ],
+    "escalation": [
+      "shape-lite-is-a-gated-escalating-variant-of-shape"
+    ],
+    "small-batch": [
+      "shape-lite-is-a-gated-escalating-variant-of-shape"
+    ],
+    "workflow": [
+      "shape-lite-is-a-gated-escalating-variant-of-shape",
+      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
+    ],
+    "cross-vendor": [
+      "shape-lite-is-a-gated-escalating-variant-of-shape"
     ],
     "skills": [
       "skill-defaults-attribution-guard-and-runtime-design"
@@ -1121,9 +1291,6 @@
     "hooks": [
       "async-agent-launch-hook-counted-as-completion",
       "token-metrics-dimensions-design"
-    ],
-    "workflow": [
-      "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
     ],
     "tooling": [
       "workflow-tooling-pitches-share-standing-no-gos-and-design-answers"
@@ -1164,6 +1331,7 @@
     "untrusted-input": [
       "a-report-over-an-untrusted-tree-runs-only-bundle-code",
       "allow-list-untrusted-labels-at-ingest-and-at-render",
+      "backtracking-regex-over-untrusted-text-is-quadratic",
       "parse-untrusted-values-and-re-emit-them"
     ],
     "reports": [
@@ -1177,7 +1345,8 @@
       "resolve-before-matching-a-protected-path-allowlist"
     ],
     "redos": [
-      "a-report-over-an-untrusted-tree-runs-only-bundle-code"
+      "a-report-over-an-untrusted-tree-runs-only-bundle-code",
+      "backtracking-regex-over-untrusted-text-is-quadratic"
     ],
     "markdown": [
       "allow-list-untrusted-labels-at-ingest-and-at-render"
@@ -1193,6 +1362,24 @@
     ],
     "injection": [
       "parse-untrusted-values-and-re-emit-them"
+    ],
+    "testing": [
+      "macos-tmpdir-realpath-alias-breaks-path-assertions",
+      "prove-a-guard-test-with-an-in-memory-mutant"
+    ],
+    "mutation": [
+      "prove-a-guard-test-with-an-in-memory-mutant"
+    ],
+    "verification": [
+      "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
+      "prove-a-guard-test-with-an-in-memory-mutant",
+      "reviewer-reports-contradicted-by-measurement"
+    ],
+    "audit": [
+      "hardening-a-shared-reader-made-its-writer-destructive",
+      "prove-a-guard-test-with-an-in-memory-mutant",
+      "reusing-a-transaction-exposes-its-lock-reader-to-new-callers",
+      "reviewer-reports-contradicted-by-measurement"
     ],
     "case-sensitivity": [
       "resolve-before-matching-a-protected-path-allowlist"
@@ -1226,6 +1413,15 @@
     "double-counting": [
       "async-agent-launch-hook-counted-as-completion"
     ],
+    "regex": [
+      "backtracking-regex-over-untrusted-text-is-quadratic"
+    ],
+    "entry-files": [
+      "backtracking-regex-over-untrusted-text-is-quadratic"
+    ],
+    "setup-validator": [
+      "backtracking-regex-over-untrusted-text-is-quadratic"
+    ],
     "identifiers": [
       "bare-prefix-match-crosses-entities"
     ],
@@ -1238,10 +1434,6 @@
     "cross-pitch": [
       "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
     ],
-    "verification": [
-      "false-cross-pitch-attribution-in-a-shared-uncommitted-file",
-      "reviewer-reports-contradicted-by-measurement"
-    ],
     "false-positive": [
       "false-cross-pitch-attribution-in-a-shared-uncommitted-file"
     ],
@@ -1252,20 +1444,14 @@
       "hardening-a-shared-reader-made-its-writer-destructive"
     ],
     "shared-helpers": [
-      "hardening-a-shared-reader-made-its-writer-destructive"
-    ],
-    "audit": [
       "hardening-a-shared-reader-made-its-writer-destructive",
-      "reviewer-reports-contradicted-by-measurement"
+      "reusing-a-transaction-exposes-its-lock-reader-to-new-callers"
     ],
     "publishing": [
       "installed-skill-wrappers-ship-as-orphans"
     ],
     "instance-data": [
       "installed-skill-wrappers-ship-as-orphans"
-    ],
-    "testing": [
-      "macos-tmpdir-realpath-alias-breaks-path-assertions"
     ],
     "macos": [
       "macos-tmpdir-realpath-alias-breaks-path-assertions"
@@ -1281,6 +1467,12 @@
     ],
     "testing-gap": [
       "prose-instructions-must-specify-how-to-extract-from-free-form-arguments"
+    ],
+    "locks": [
+      "reusing-a-transaction-exposes-its-lock-reader-to-new-callers"
+    ],
+    "fifo": [
+      "reusing-a-transaction-exposes-its-lock-reader-to-new-callers"
     ],
     "subagents": [
       "reviewer-reports-contradicted-by-measurement"

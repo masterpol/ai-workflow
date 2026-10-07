@@ -34,6 +34,13 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 ```
 `/critique` skipped; per-scope confirmation skipped.
 
+### Lite shape (small task or user rejection)
+```
+/shape-lite → /build            (standalone: 0 active pitches)
+/shape-lite → pitch's next phase (inline: patches the active pitch)
+```
+Compressed framing: graph-only knowledge gate, 4-line frame, one gate (Approve / Revise / Back / Stop). Inline mode keeps the target pitch's appetite and gate row from the table below; it never downgrades them. Escalates to full `/shape` on >2 files / >100 LOC, AI-prompt or LLM scopes, security-rules paths, or overlap with another active pitch. Full `/shape` is unchanged.
+
 ### Bug fix
 ```
 /fix (triage) → /build → /audit → /ship

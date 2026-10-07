@@ -1,0 +1,5 @@
+# Deviations: shape-lite
+
+- 2026-10-07 S1: caveman line uses `--phase utility`, not `shape` (plan said shape). `skill-defaults.test.js` requires every non-phase skill to resolve as `utility`; shape-lite is a utility variant, not a phase. Fixed in canonical and Cursor mirror.
+- 2026-10-07 S4 (added, user request mid-build): `CLAUDE.md` that loads `AGENTS.md` via `@AGENTS.md` was rejected by `setup-validator.js` ("bootstrap file was not replaced"). Added `entry-import.js` (+ test), wired into setup-validator and bundle-sync, documented in SETUP.md and the setup skill. Released as 2.9.1. Vendors: only Claude Code uses CLAUDE.md; OpenCode, Codex and Cursor read AGENTS.md directly, so no per-vendor change. No Cloud Build config exists in this repo (it belongs to the application repository).
+- Pre-existing, not caused here: `skill-defaults.test.js` "live caveman state truthfully" fails at HEAD (caveman skill not installed in this checkout). "payload-controlled names" test is flaky under full-suite load, passes alone.
