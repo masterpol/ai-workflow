@@ -2,6 +2,8 @@
 .opencode/node_modules/
 .claude/settings.local.json
 .project/metrics/
+# Optional per-project vendor orchestration policy; portable example stays tracked.
+.project/orchestration.json
 # /state output; the README scaffold stays tracked so a fresh clone passes the doctor scaffold check.
 .project/reports/*
 !.project/reports/README.md

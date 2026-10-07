@@ -20,7 +20,7 @@ function selectExecutable(env, platform) {
     const command = env.ORCA_CLI_COMMAND;
     // Paths may contain spaces, but an override is never interpreted as command text.
     if (typeof command !== "string" || command.length > 4096 || /[\0\r\n]/.test(command)) return null;
-    if (!path.isAbsolute(command) && !/^[a-zA-Z0-9._-]+$/.test(command)) return null;
+    if (!path.isAbsolute(command) && !/^(?!\.+$)[a-zA-Z0-9._-]+$/.test(command)) return null;
     return command;
   }
   if (env.ORCA_DEV_REPO_ROOT) return "orca-dev";
@@ -28,10 +28,12 @@ function selectExecutable(env, platform) {
   return ["darwin", "linux", "win32"].includes(platform) ? "orca" : null;
 }
 
+// Absolute PATH entries only, so an empty or relative entry cannot resolve to a file inside the inspected repo.
+const absolutePathEntries = (env) => (env.PATH || "").split(path.delimiter).filter((directory) => path.isAbsolute(directory)).slice(0, 64);
+
 function executablePresent(command, env, platform) {
   const extensions = platform === "win32" ? ["", ".exe"] : [""];
-  const directories = path.isAbsolute(command) ? [""] : (env.PATH || "").split(path.delimiter)
-    .filter((directory) => path.isAbsolute(directory)).slice(0, 64);
+  const directories = path.isAbsolute(command) ? [""] : absolutePathEntries(env);
   for (const directory of directories) for (const extension of extensions) {
     const file = directory ? path.join(directory, `${command}${extension}`) : `${command}${extension}`;
     try {
@@ -106,7 +108,7 @@ function report(root, vendor, options = {}) {
   result.candidate = true;
   if (!options.probe) return { ...result, reason: "runtime-not-probed" };
   const now = options.now || (() => performance.now());
-  const context = { root: fs.realpathSync(root), env, run: options.run || spawnSync, now, started: now() };
+  const context = { root: fs.realpathSync(root), env: { ...env, PATH: absolutePathEntries(env).join(path.delimiter) }, run: options.run || spawnSync, now, started: now() };
   const runtime = inspectRuntime(command, context);
   return { ...result, reason: runtime.reason, runtime: runtime.session ? "reachable" : "unverified",
     session: runtime.session || "unverified", capabilities: runtime.capabilities || "unverified",

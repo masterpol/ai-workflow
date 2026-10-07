@@ -11,6 +11,7 @@ const path = require("node:path");
 const { spawn } = require("node:child_process");
 const { externalSkillReport } = require("./skill-vendors");
 const skillDefaults = require("./skill-defaults");
+const orcaPolicy = require("./orca-policy");
 
 const root = process.cwd();
 const fix = process.argv.includes("--fix");
@@ -333,6 +334,22 @@ async function checkCavemanState() {
   record("pass", name, `active: installed, enabled, covers all recommended phases; default ${modes?.caveman?.default || skillDefaults.CATALOG.defaults.find((entry) => entry.id.endsWith("/caveman")).defaultMode}`);
 }
 
+function checkOrcaPolicy() {
+  // Optional local policy is inspected without importing preflight or touching executables.
+  const result = orcaPolicy.readPolicy(root);
+  const details = {
+    missing: "optional policy absent; normal workflow; no Orca checks",
+    disabled: "policy disabled; normal workflow; no Orca checks",
+    valid: "policy opted in; runtime unverified; normal workflow; dispatch disabled",
+    malformed: "malformed policy; normal workflow; correct JSON and routing schema",
+    "unsupported-schema": "unsupported policy schema; normal workflow; expected schemaVersion 1",
+    refused: "policy path or read refused; normal workflow; use a regular local file under .project",
+  };
+  const status = result.status === "valid" ? "pass"
+    : ["missing", "disabled"].includes(result.status) ? "info" : "fail";
+  record(status, "Orca policy", details[result.status]);
+}
+
 async function checkOpenCodeResolution() {
   if (process.versions.bun) {
     record("info", "OpenCode", "static adapter checks completed; run with Node to resolve live OpenCode config");
@@ -496,6 +513,7 @@ async function validate() {
   // bundle-sync.js and skill-sync.js were missing from this list (found while adding
   // skill-defaults.js here) — every other script this doctor knows about gets a syntax check.
   const scripts = [".claude/hooks/post-edit-check.js", "ai-framework/hooks/scripts/pre-ship-verify.js", "ai-framework/hooks/scripts/stuck-uphill-detector.js", "ai-framework/hooks/scripts/token-consumption.js", "ai-framework/hooks/scripts/token-consumption.test.js", "ai-framework/hooks/scripts/token-report.js", "ai-framework/hooks/scripts/token-report.test.js", "ai-framework/hooks/scripts/opencode-plugin.test.js", "ai-framework/scripts/graphify.js", "ai-framework/scripts/workflow-doctor.js", "ai-framework/scripts/setup-validator.js", "ai-framework/scripts/entry-import.js", "ai-framework/scripts/entry-import.test.js", "ai-framework/scripts/add-skill.js", "ai-framework/scripts/skill-registry.js", "ai-framework/scripts/skill-source.js", "ai-framework/scripts/skill-vendors.js", "ai-framework/scripts/skill-sync.js", "ai-framework/scripts/bundle-sync.js", "ai-framework/scripts/skill-defaults.js", "ai-framework/scripts/skill-compress-guard.js", "ai-framework/scripts/browser-runtime.js", "ai-framework/scripts/pitch-compress.js", "ai-framework/scripts/pitch-archive.js", "ai-framework/scripts/state-snapshot.js", "ai-framework/scripts/state-theme.js", "ai-framework/scripts/state-render.js", "ai-framework/scripts/review-bench.js"];
+  scripts.push("ai-framework/scripts/orca-policy.js", "ai-framework/scripts/orca-preflight.js");
   // These scripts use CommonJS require(). A target project's own package.json may declare
   // "type": "module" (found by testing against a real Bun/ESM project) — without a scoped
   // override, plain `node` crashes with "require is not defined in ES module scope" the moment
@@ -560,6 +578,7 @@ async function validate() {
     checkOpenCodeResolution(),
     checkSkillDefaults(),
     checkCavemanState(),
+    checkOrcaPolicy(),
   ]);
   await checkProjectScaffold();
   await checkKnowledgeGraph();

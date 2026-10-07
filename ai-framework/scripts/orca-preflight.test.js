@@ -45,6 +45,7 @@ test("skips all Orca checks when false or missing, including explicit probe requ
   const root = fixture(t, false);
   const options = { probe: true, present: () => { throw Error("availability must not run"); }, run: () => { throw Error("probe must not run"); },
     get env() { throw Error("environment must not be inspected"); }, get platform() { throw Error("platform must not be inspected"); } };
+  assertNormal(report(root, "codex", options));
   assert.equal(report(root, "codex", options).reason, "policy-disabled");
   const file = path.join(root, ".project/orchestration.json");
   const policy = JSON.parse(fs.readFileSync(file, "utf8"));
@@ -55,15 +56,34 @@ test("skips all Orca checks when false or missing, including explicit probe requ
   assertNormal(report(root, "codex", options));
 });
 
+test("probe child gets only absolute PATH entries and dot-only override names are refused", (t) => {
+  const root = fixture(t);
+  const file = path.join(root, ".project/orchestration.json");
+  const value = JSON.parse(fs.readFileSync(file, "utf8"));
+  value["use-orca-orchestration"] = true;
+  fs.writeFileSync(file, JSON.stringify(value));
+  const harness = probe();
+  harness.options.env.PATH = ["", ".", "rel", "/usr/bin"].join(path.delimiter);
+  report(root, "codex", harness.options);
+  assert.ok(harness.calls.length > 0);
+  for (const call of harness.calls) assert.equal(call.options.env.PATH, "/usr/bin");
+  for (const name of ["..", "."]) {
+    const result = report(root, "codex", { env: { ORCA_CLI_COMMAND: name, PATH: "/usr/bin" }, platform: "darwin", present: () => true });
+    assert.equal(result.reason, "executable-selection-unsupported");
+  }
+});
+
 test("skips all checks for malformed/refused policy and unconfigured or empty routes", (t) => {
   const root = fixture(t);
   const options = { get env() { throw Error("must not inspect environment"); } };
   const file = path.join(root, ".project/orchestration.json");
   fs.writeFileSync(file, "not json");
   assert.equal(report(root, "codex", options).reason, "policy-malformed");
+  assertNormal(report(root, "codex", options));
   fs.unlinkSync(file);
   fs.mkdirSync(file);
   assert.equal(report(root, "codex", options).reason, "policy-refused");
+  assertNormal(report(root, "codex", options));
   fs.rmdirSync(file);
   for (const coordinators of [{}, { codex: { workers: [], roles: {} } }]) {
     const value = JSON.parse(fs.readFileSync(EXAMPLE, "utf8"));
@@ -71,6 +91,7 @@ test("skips all checks for malformed/refused policy and unconfigured or empty ro
     value.coordinators = coordinators;
     fs.writeFileSync(file, JSON.stringify(value));
     assert.equal(report(root, "codex", options).eligible, false);
+    assertNormal(report(root, "codex", options));
   }
 });
 
@@ -281,4 +302,72 @@ test("keeps public CLI default/probe/worker diagnostics read-only and normal", (
     assert.equal(result.status, 1);
     assert.equal(result.stderr, "orca-preflight: invalid invocation or internal failure\n");
   }
+});
+
+test("doctor validates optional local policy without probing or repairing it", { skip: process.platform === "win32" }, (t) => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-doctor-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  const bundle = path.resolve(__dirname, "../..");
+  const skip = new Set(["node_modules", "caveman", "settings.local.json", "credentials.json", ".aws"]);
+  const filter = (source) => !skip.has(path.basename(source)) && !path.basename(source).startsWith(".env");
+  for (const item of [".claude", ".agents", ".codex", ".cursor", ".opencode", "ai-framework",
+    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md"]) {
+    fs.cpSync(path.join(bundle, item), path.join(root, item), { recursive: true, filter });
+  }
+  // No project-local registry/packages or their external wrappers belong to this bundle fixture.
+  fs.rmSync(path.join(root, ".opencode/skills"), { recursive: true, force: true });
+  const bin = path.join(root, "fixture-bin");
+  fs.mkdirSync(bin);
+  const marker = path.join(root, "orca-was-executed");
+  const launcher = path.join(bin, "orca");
+  const sentinel = `#!${process.execPath}\nrequire('node:fs').writeFileSync(${JSON.stringify(marker)}, 'executed');\n`;
+  for (const vendor of ["orca", "orca-dev", "orca-ide", "claude", "codex"]) {
+    fs.writeFileSync(path.join(bin, vendor), sentinel, { mode: 0o755 });
+  }
+  const env = { ...process.env, PATH: bin, ORCA_CLI_COMMAND: launcher, NO_COLOR: "1" };
+  const run = (...args) => spawnSync(process.execPath, ["ai-framework/scripts/workflow-doctor.js", "--json", ...args],
+    { cwd: root, encoding: "utf8", env, timeout: 10000, maxBuffer: 1024 * 1024 });
+  const assertDoctor = (status, expected, args = []) => {
+    const result = run(...args);
+    const report = JSON.parse(result.stdout);
+    assert.equal(result.status, expected, result.stderr || JSON.stringify(report.results.filter((item) => item.status === "fail")));
+    assert.equal(report.results.find((item) => item.name === "Orca policy").status, status);
+    assert.equal(report.failures, expected);
+    assert.equal(fs.existsSync(marker), false, "doctor must never execute Orca or alternate vendors");
+    assert.ok(!result.stdout.includes("SECRET_MARKER"));
+    return report;
+  };
+  assertDoctor("info", 0, ["--fix"]);
+  assert.equal(fs.existsSync(path.join(root, ".project")), false);
+  fs.mkdirSync(path.join(root, ".project"));
+  // Only install the normal scaffold; optional orchestration is not a template requirement.
+  fs.cpSync(path.join(root, "ai-framework/templates/project"), path.join(root, ".project"), { recursive: true });
+  fs.writeFileSync(path.join(root, ".project/pitches/_followups.md"), "# Follow-ups\n");
+  const file = path.join(root, ".project/orchestration.json");
+  assertDoctor("info", 0, ["--fix"]);
+  assert.equal(fs.existsSync(file), false, "doctor must not create optional policy in an installed project");
+  const value = JSON.parse(fs.readFileSync(EXAMPLE, "utf8"));
+  fs.writeFileSync(file, JSON.stringify(value));
+  assertDoctor("info", 0);
+  value["use-orca-orchestration"] = true;
+  fs.writeFileSync(file, JSON.stringify(value));
+  const valid = assertDoctor("pass", 0);
+  assert.match(valid.results.find((item) => item.name === "Orca policy").detail, /runtime unverified; normal workflow; dispatch disabled/);
+  for (const text of ["SECRET_MARKER", JSON.stringify({ ...value, schemaVersion: 2 }),
+    JSON.stringify({ ...value, "use-orca-orchestration": "true" })]) {
+    fs.writeFileSync(file, text);
+    assertDoctor("fail", 1, ["--fix"]);
+    assert.equal(fs.readFileSync(file, "utf8"), text, "doctor must not rewrite invalid policy");
+  }
+  fs.unlinkSync(file);
+  fs.mkdirSync(file);
+  assertDoctor("fail", 1, ["--fix"]);
+  assert.equal(fs.statSync(file).isDirectory(), true);
+  fs.rmdirSync(file);
+  const target = path.join(root, "outside-policy.json");
+  fs.writeFileSync(target, "SECRET_MARKER");
+  fs.symlinkSync(target, file);
+  assertDoctor("fail", 1, ["--fix"]);
+  assert.equal(fs.lstatSync(file).isSymbolicLink(), true);
+  assert.equal(fs.readFileSync(target, "utf8"), "SECRET_MARKER");
 });
