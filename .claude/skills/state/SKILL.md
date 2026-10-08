@@ -36,11 +36,18 @@ output). Rerunning with no change reports `unchanged`.
 
 ```sh
 node ai-framework/scripts/state-render.mts            # preview: theme used, whether the page would change
-node ai-framework/scripts/state-render.mts --apply    # write .project/reports/state.html and theme.json
+node ai-framework/scripts/state-render.mts --apply    # write the report pages and theme.json
 ```
 
-Renders the `state.json` from Step 2 (run that first) into one self-contained page: no scripts, no
-external loads, all project text escaped, links only to real project files. The theme is
+Renders the `state.json` from Step 2 (run that first) into a linked set of self-contained pages in
+`.project/reports/`: `index.html` (overview), `structure.html` (folder diagram for the detected
+project type, with the recorded decisions that touch each folder), `skills.html` (base skills from
+the bundle versus project skills from the registry), `metrics.html`, `knowledge.html` (links to
+`graphify-out/graph.html`) and `pitches.html`, plus the original single page `state.html`. No
+scripts, no external loads, all project text escaped, links only to real project files. The set is
+written through a staging directory that doubles as a lock: if a crash left
+`.project/reports/.state-stage` behind, the run refuses and says so; remove it by hand after
+checking no other render is running. The theme is
 rediscovered from the project's own CSS custom properties on every run; report any `changed:`
 line and any fallback the output names (a low-contrast pair, an `oklch()` value, a rejected
 value) — those are the project's stylesheet problems, not the report's. `themeMode: "fallback"`
@@ -53,6 +60,9 @@ Summarize from the snapshot, in this order: workflow (installed version, sync at
 (what it is), pitches (active / shipped / compacted), knowledge and skills, token metrics,
 database. Hold to these rules — they are the point of the command:
 
+- **Project type is a name-based guess.** `structure.projectType` comes from which folders and
+  manifest file names exist, never their contents. Say `mixed` lists every detected type and
+  `unknown` means nothing matched; do not rename or refine it.
 - **Status decides wording.** `observed` is stated as fact. `proposed` is "proposed, not decided".
   `unconfigured` is "not set up". `stale` says why. `unavailable` gives the note's reason — never
   fill the gap with a guess.

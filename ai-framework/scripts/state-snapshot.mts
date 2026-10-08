@@ -12,6 +12,7 @@ import { createNodeDeps } from "./runtime/node.mts";
 import * as skillDefaults from "./skill-defaults.mts";
 import * as registryModule from "./skill-registry.mts";
 import { inventory } from "./pitch-compress.mts";
+import { createStateStructure } from "./state-structure.mts";
 
 import type { RegistryContext, RootName } from "./skill-registry.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
@@ -22,9 +23,13 @@ let nodeDeps: RuntimeDeps | undefined;
 function defaultDeps(): RuntimeDeps { return (nodeDeps ??= createNodeDeps()); }
 export interface StateFact { value: unknown; status: string; evidence: string[]; note?: string }
 export interface SnapshotOptions { now?: string; reconcileTimeoutMs?: number; root?: string; json?: boolean; apply?: boolean }
+export class StateError extends Error {}
+export const DEPTH_PLACEHOLDER = "[depth limit]";
+
 /** Bind source reads, trusted bundle subprocesses and atomic writes to this runtime. */
 function bindStateSnapshot(deps: RuntimeDeps) {
 const { fs, path } = deps;
+const structureApi = createStateStructure(deps);
 // Text printed to a terminal never carries control characters from project-controlled strings.
 const printable = (text: unknown): string => String(text).replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f]/g, "?");
 const STATUSES = new Set(["observed", "proposed", "stale", "unavailable", "unconfigured"]);
@@ -88,16 +93,18 @@ function makeScrubber() {
 // One place every source is read: refuses symlinks and anything that resolves outside the
 // project (the class of bypass fixed in portable-skill-defaults), and bounds size.
 function readSource(root: string, relative: string, maxBytes = MAX_FILE_BYTES) {
-  const full = path.join(root, relative);
-  let stat;
-  try { stat = fs.lstatSync(full); } catch (error) { if (error.code === "ENOENT") return { missing: true }; throw error; }
-  if (stat.isSymbolicLink()) return { error: "symlink refused" };
-  const real = fs.realpathSync(full);
-  const within = path.relative(root, real);
-  if (within.startsWith("..") || path.isAbsolute(within)) return { error: "resolves outside the project" };
-  if (!stat.isFile()) return { error: "not a file" };
-  if (stat.size > maxBytes) return { error: "too large to read" };
-  return { text: fs.readFileSync(full), mtimeMs: stat.mtimeMs };
+  try {
+    const full = path.join(root, relative);
+    let stat;
+    try { stat = fs.lstatSync(full); } catch (error) { if (error.code === "ENOENT") return { missing: true }; throw error; }
+    if (stat.isSymbolicLink()) return { error: "symlink refused" };
+    const real = fs.realpathSync(full);
+    const within = path.relative(root, real);
+    if (within.startsWith("..") || path.isAbsolute(within)) return { error: "resolves outside the project" };
+    if (!stat.isFile()) return { error: "not a file" };
+    if (stat.size > maxBytes) return { error: "too large to read" };
+    return { text: fs.readFileSync(full), mtimeMs: stat.mtimeMs };
+  } catch (error) { return { error: failure(error) }; }
 }
 // Markdown goes through regexes and section splitting; only its first MARKDOWN_LIMIT bytes matter here.
 // A file over that cap is silently incomplete, not absent — callers that scan for every row/heading
@@ -110,11 +117,11 @@ function readMarkdown(root: string, relative: string) {
 }
 const TRUNCATED_NOTE = (relative: string): string => `${relative} exceeds the 64 KB read limit; entries past that point are not counted`;
 // Never surface raw error text: it can carry absolute paths or fragments of a file's content.
-const failure = (error: unknown): string => (error && typeof error === "object" && "code" in error && typeof error.code === "string" ? error.code : "unexpected error");
+const failure = (error: unknown): string => (error && typeof error === "object" && "code" in error && typeof error.code === "string" && /^[A-Z0-9_]{1,20}$/.test(error.code) ? error.code : "unexpected error");
 // A raw ENOENT/EACCES message embeds the absolute path; keep only a fixed reason (same rule as
 // state-render.mts's render() and state-theme.mts's discoverTheme()).
 function resolveRoot(root: string) {
-  try { return fs.realpathSync(root); } catch { throw new Error("--root does not exist or is not resolvable"); }
+  try { return fs.realpathSync(root); } catch { throw new StateError("--root does not exist or is not resolvable"); }
 }
 function readJson(root: string, relative: string, maxBytes = MAX_FILE_BYTES) {
   const source = readSource(root, relative, maxBytes);
@@ -304,10 +311,14 @@ function knowledgeSection(root: string) {
 }
 
 function skillsSection(root: string, scrub: (text: unknown) => string) {
+  // Base (the bundle's own skill directory) and project (registry) are independent: either can fail alone.
+  let base;
+  try { base = structureApi.baseSkills(root, scrub); } catch (error) { base = unavailable(`.claude/skills could not be listed (${failure(error)})`, []); }
   let registry;
-  try { ({ registry } = readRegistry(context(root, "project", undefined, deps), deps)); } catch { return { installed: unavailable("skill registry is unreadable or not a supported schema", [".project/skills/registry.json"]), caveman: unavailable("skill registry unreadable") }; }
+  try { ({ registry } = readRegistry(context(root, "project", undefined, deps), deps)); } catch { return { installed: unavailable("skill registry is unreadable or not a supported schema", [".project/skills/registry.json"]), caveman: unavailable("skill registry unreadable"), base, project: unavailable("skill registry is unreadable or not a supported schema", [".project/skills/registry.json"]) }; }
   const entries = Object.values(registry.skills).map((entry) => fact({ id: scrub(entry.id), enabled: entry.enabled, phases: entry.phases.map(scrub), scope: entry.scope, runtime: entry.runtime?.status || "unverified" }, "observed", [".project/skills/registry.json"]));
   const installed = entries.length ? entries : [fact([], "unconfigured", [], "no skills installed")];
+  const project = entries.length ? entries : fact(null, "unconfigured", [], "no project skills are registered");
   const report = skillDefaults.report(root, deps, {
     context: (project, scope, location) => context(project, scope, location, deps),
     snapshot: (ctx, relative, location) => registrySnapshot(ctx as RegistryContext, relative, location as RootName | undefined, deps),
@@ -321,7 +332,7 @@ function skillsSection(root: string, scrub: (text: unknown) => string) {
   if (!modesProblem) for (const phase of skillDefaults.PHASES) resolved[phase] = skillDefaults.resolveMode(root, { phase }, deps);
   const cavemanFact = modesProblem ? unavailable(`modes.json ${modesProblem}`, [".project/skills/modes.json"])
     : fact({ installed: Boolean(caveman?.installed), enabled: caveman?.enabled ?? null, phaseGap: caveman?.phaseGap || [], persistentlyOff: modes?.caveman?.enabled === false, resolved }, caveman?.installed ? "observed" : "unconfigured", caveman?.installed ? [".project/skills/registry.json"] : [], caveman?.installed ? undefined : "caveman is not installed, so the instruction in every skill and agent is inert");
-  return { installed, caveman: cavemanFact };
+  return { installed, caveman: cavemanFact, base, project };
 }
 
 function count(value: unknown): number | null { return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null; }
@@ -371,7 +382,7 @@ function section<T>(build: () => T, label: string) {
 function buildSnapshot(root: string, options: SnapshotOptions = {}) {
   root = resolveRoot(root);
   const now = options.now ? new Date(options.now) : new Date(deps.clock.now());
-  if (Number.isNaN(now.getTime())) throw new Error("Invalid --now timestamp");
+  if (Number.isNaN(now.getTime())) throw new StateError("Invalid --now timestamp");
   const { scrub, counter } = makeScrubber();
   const snapshot = {
     schemaVersion: 1,
@@ -383,6 +394,7 @@ function buildSnapshot(root: string, options: SnapshotOptions = {}) {
     pitches: section(() => pitchesSection(root, scrub), "pitches"),
     doneWork: section(() => doneWorkSection(root), "done-work"),
     knowledge: section(() => knowledgeSection(root), "knowledge"),
+    structure: section(() => structureApi.scanStructure(root, { scrub, readMarkdown }), "structure"),
     skills: section(() => skillsSection(root, scrub), "skills"),
     metrics: section(() => metricsSection(root, now, scrub), "metrics"),
     runs: section(() => runsSection(root, scrub), "runs"),
@@ -392,11 +404,12 @@ function buildSnapshot(root: string, options: SnapshotOptions = {}) {
 }
 
 // Every leaf fact, wherever it sits — used by validation and by the renderer.
-function* facts(node: unknown, trail = ""): Generator<[string, StateFact]> {
-  if (Array.isArray(node)) { for (const [index, item] of node.entries()) yield* facts(item, `${trail}[${index}]`); return; }
+function* facts(node: unknown, trail = "", depth = 0): Generator<[string, StateFact]> {
+  if (depth > 32) { yield [trail, { value: DEPTH_PLACEHOLDER, status: "unavailable", evidence: [], note: "nesting exceeds depth limit" }]; return; }
+  if (Array.isArray(node)) { for (const [index, item] of node.entries()) yield* facts(item, `${trail}[${index}]`, depth + 1); return; }
   if (!node || typeof node !== "object") return;
   if ("status" in node && typeof node.status === "string" && "evidence" in node && Array.isArray(node.evidence)) { yield [trail, node as StateFact]; return; }
-  for (const [key, value] of Object.entries(node)) yield* facts(value, trail ? `${trail}.${key}` : key);
+  for (const [key, value] of Object.entries(node)) yield* facts(value, trail ? `${trail}.${key}` : key, depth + 1);
 }
 
 function checkSnapshot(root: string, snapshot: unknown) {
@@ -413,12 +426,17 @@ function checkSnapshot(root: string, snapshot: unknown) {
 // Temp file in the destination directory + rename: a reader never sees a partial report, and a
 // leftover temp file from an earlier crash never blocks a rerun (each run uses its own name).
 function writeAtomic(root: string, relative: string, text: string) {
-  const destination = resolveFile({ roots: { target: root } }, relative, "target", deps);
-  fs.mkdirSync(path.dirname(destination), { recursive: true });
-  // "wx" refuses an existing path (including a pre-planted symlink); the random suffix makes one unguessable.
-  const temporary = `${destination}.tmp-${deps.proc.pid}-${Array.from(deps.crypto.randomBytes(6), (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
-  try { fs.writeFileSync(temporary, text, { mode: 0o644, flag: "wx" }); fs.renameSync(temporary, destination); } finally { fs.rmSync(temporary, { force: true }); }
-  return relative;
+  try {
+    const destination = resolveFile({ roots: { target: root } }, relative, "target", deps);
+    fs.mkdirSync(path.dirname(destination), { recursive: true });
+    // "wx" refuses an existing path (including a pre-planted symlink); the random suffix makes one unguessable.
+    const temporary = `${destination}.tmp-${deps.proc.pid}-${Array.from(deps.crypto.randomBytes(6), (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
+    try { fs.writeFileSync(temporary, text, { mode: 0o644, flag: "wx" }); fs.renameSync(temporary, destination); } finally { fs.rmSync(temporary, { force: true }); }
+    return relative;
+  } catch (error) {
+    if (error instanceof Error && error.message.startsWith("Symlink destination forbidden")) throw new StateError("Symlink destination forbidden");
+    throw new StateError(`atomic write failed: ${failure(error)}`);
+  }
 }
 
 function writeSnapshot(root: string, snapshot: unknown) {
@@ -440,7 +458,7 @@ function cli(argv: string[]) {
     else if (arg === "--apply") options.apply = true;
     else if (arg === "--root" && argv[index + 1] !== undefined) options.root = argv[++index];
     else if (arg === "--now" && argv[index + 1] !== undefined) options.now = argv[++index];
-    else throw new Error(`Unknown option: ${arg}`);
+    else throw new StateError("Unknown option");
   }
   const root = resolveRoot(options.root);
   const snapshot = buildSnapshot(root, { now: options.now });
@@ -470,7 +488,7 @@ export function facts(node: unknown, trail = "", deps: RuntimeDeps = defaultDeps
 export function main(argv: string[], deps: RuntimeDeps): number {
   const api = createStateSnapshot(deps);
   try { deps.io.stdout.write(`${api.cli(argv)}\n`); return 0; }
-  catch (error) { deps.io.stderr.write(`${api.printable(`state-snapshot: ${error instanceof Error ? error.message : String(error)}`)}\n`); return 1; }
+  catch (error) { deps.io.stderr.write(`${api.printable(`state-snapshot: ${error instanceof StateError ? error.message : "internal error"}`)}\n`); return 1; }
 }
 
 runDirect(import.meta.url, main);

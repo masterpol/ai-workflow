@@ -220,12 +220,12 @@ function cssFiles(root: string, deps: RuntimeDeps): { files: string[]; skipped: 
 // A leaf-only symlink check is not enough: an ancestor directory (".project" itself, say) can be a
 // symlink, and the OS follows it transparently before the leaf is ever inspected. Resolve the whole
 // path and check containment, the same way readSource/collect do, before trusting "not a symlink".
-function insideProject(root: string, file: string, deps: RuntimeDeps): string | null {
+export function insideProject(root: string, file: string, deps: RuntimeDeps): string | null {
   const { fs, path } = deps;
   let real;
   try { real = fs.realpathSync(file); } catch { return null; }
   const within = path.relative(root, real);
-  return within.startsWith("..") || path.isAbsolute(within) ? null : real;
+  return within === ".." || within.startsWith("../") || within.startsWith("..\\") || path.isAbsolute(within) ? null : real;
 }
 
 export function readSettings(root: string, deps: RuntimeDeps = defaultDeps()): Settings {

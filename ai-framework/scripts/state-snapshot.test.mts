@@ -9,6 +9,8 @@ import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
 import { createBunDeps } from "./runtime/bun.mts";
+import { scanStructure } from "./state-structure.mts";
+import * as theme from "./state-theme.mts";
 import { createStateSnapshot, main, buildSnapshot, checkSnapshot, writeSnapshot, facts, REPORT_FILE, printable } from "./state-snapshot.mts";
 
 const SCRIPT = path.join(import.meta.dirname, "state-snapshot.mts");
@@ -670,7 +672,7 @@ test("injected clock and output drive main; independent factories retain their f
     assert.equal(b.buildSnapshot(root).generatedAt, "2026-10-01T00:00:00.000Z");
     assert.equal(a.buildSnapshot(root).generatedAt, NOW);
     assert.equal(main(["--bogus"], first), 1);
-    assert.match(errors[0], /Unknown option: --bogus/);
+    assert.match(errors[0], /Unknown option/);
   } finally { cleanup(root); }
 });
 
@@ -690,5 +692,440 @@ test("injected reconcile runs only the reporting bundle script with bounded time
     assert.ok(calls[0].args.includes(path.join(import.meta.dirname, "skill-sync.mts")));
     assert.equal(calls[0].args.at(-1), root);
     assert.equal(calls[0].timeout, 123);
+  } finally { cleanup(root); }
+});
+
+// ---- structure + base/project skills (state-structure.mts) ----
+const dirs = (root: string, ...names: string[]) => names.forEach((name) => fs.mkdirSync(path.join(root, name), { recursive: true }));
+const touch = (root: string, name: string, text = "x") => { fs.mkdirSync(path.dirname(path.join(root, name)), { recursive: true }); fs.writeFileSync(path.join(root, name), text); };
+const treePaths = (snapshot) => snapshot.structure.tree.map((item) => item.value.path);
+const typeOf = (root: string) => snap(root).structure.projectType;
+
+test("project type is detected from names present, per template", () => {
+  const cases: Array<[string, (root: string) => void, string, string[]]> = [
+    ["workflow-bundle", (r) => dirs(r, "ai-framework/scripts"), "workflow-bundle", ["workflow-bundle"]],
+    ["web", (r) => { touch(r, "package.json", "{}"); dirs(r, "components"); }, "web", ["web"]],
+    ["backend", (r) => dirs(r, "api", "migrations"), "backend", ["backend"]],
+    ["mobile", (r) => dirs(r, "ios", "android"), "mobile", ["mobile"]],
+    ["ai-prompts", (r) => dirs(r, "lib/ai/prompts"), "ai-prompts", ["ai-prompts"]],
+    ["mixed", (r) => { dirs(r, "api", "ios"); touch(r, "package.json", "{}"); dirs(r, "app"); }, "mixed", ["web", "backend", "mobile"]],
+    ["unknown", (r) => dirs(r, "misc"), "unknown", []],
+  ];
+  for (const [label, setup, expected, detected] of cases) {
+    const root = project();
+    try {
+      setup(root);
+      const structure = snap(root).structure;
+      assert.equal(structure.projectType.value, expected, label);
+      assert.deepEqual(structure.detectedTypes.value, detected, label);
+      assert.equal(structure.projectType.status, expected === "unknown" ? "unconfigured" : "observed", label);
+      if (expected === "mixed") assert.match(structure.projectType.note, /web, backend, mobile/);
+      assert.deepEqual(checkSnapshot(root, snap(root)), [], label);
+    } finally { cleanup(root); }
+  }
+});
+
+test("a package.json alone is not a web project, and every folder gets a role from the type template", () => {
+  const root = project();
+  try {
+    touch(root, "package.json", "{}");
+    assert.equal(typeOf(root).value, "unknown");
+    dirs(root, "ios", "docs", "weird");
+    const roles = Object.fromEntries(snap(root).structure.tree.map((item) => [item.value.path, item.value.role]));
+    assert.equal(roles.ios, "iOS app project");
+    assert.equal(roles.docs, "documentation");
+    assert.equal(roles.weird, "unclassified");
+    assert.ok(snap(root).structure.tree.every((item) => item.value.kind === "dir" && item.value.role && item.status === "observed"));
+  } finally { cleanup(root); }
+});
+
+test("the scan stops at depth 3 and at 500 entries, shallow folders first, and says so", () => {
+  const root = project();
+  try {
+    dirs(root, "a/b/c/d/e");
+    let structure = snap(root).structure;
+    assert.deepEqual(structure.tree.map((item) => item.value.path).filter((item) => item.startsWith("a")), ["a", "a/b", "a/b/c"]);
+    assert.equal(Math.max(...structure.tree.map((item) => item.value.depth)), 3);
+    assert.equal(structure.limits.status, "observed");
+    for (let index = 0; index < 600; index++) fs.mkdirSync(path.join(root, `bulk-${String(index).padStart(3, "0")}`));
+    structure = snap(root).structure;
+    assert.equal(structure.tree.length, 500);
+    assert.equal(structure.limits.status, "stale");
+    assert.equal(structure.limits.value.truncated, true);
+    assert.ok(structure.tree.some((item) => item.value.path === "a"), "depth-1 folders win over the cap");
+  } finally { cleanup(root); }
+});
+
+test("dependency, VCS and build-output directories are skipped", () => {
+  const root = project();
+  try {
+    dirs(root, "node_modules/pkg", ".git/hooks", "dist/x", "build/x", ".next/cache", "src/node_modules/y", "src/keep");
+    const paths = treePaths(snap(root));
+    assert.deepEqual(paths.filter((item) => /node_modules|\.git|dist|build|\.next/.test(item)), []);
+    assert.ok(paths.includes("src") && paths.includes("src/keep"));
+  } finally { cleanup(root); }
+});
+
+test("symlinked directories are refused, including through an ancestor symlink", () => {
+  const root = project();
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-structure-outside-")));
+  try {
+    dirs(outside, "leaked/inner", "knowledge/decisions");
+    touch(outside, "knowledge/decisions/evil.md", "---\nid: evil\n---\n# Decision: evil\nsee `real/thing.ts`\n");
+    dirs(root, "real");
+    fs.symlinkSync(path.join(outside, "leaked"), path.join(root, "link-out"));
+    fs.symlinkSync(path.join(root, "real"), path.join(root, "link-in"));
+    fs.rmSync(path.join(root, ".project"), { recursive: true });
+    fs.symlinkSync(outside, path.join(root, ".project"));
+    const snapshot = snap(root);
+    const paths = treePaths(snapshot);
+    assert.ok(paths.includes("real"));
+    assert.deepEqual(paths.filter((item) => /link-|leaked|\.project|knowledge/.test(item)), []);
+    assert.equal(JSON.stringify(snapshot).includes("evil"), false, "a decision behind a symlinked .project is not read");
+    assert.equal(JSON.stringify(snapshot).includes(outside), false);
+  } finally { cleanup(root, outside); }
+});
+
+test("a symlinked .claude/skills ancestor yields no base skills", () => {
+  const root = project();
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-structure-skills-")));
+  try {
+    dirs(outside, "stolen");
+    fs.mkdirSync(path.join(root, ".claude"));
+    fs.symlinkSync(outside, path.join(root, ".claude/skills"));
+    const base = snap(root).skills.base;
+    assert.equal(Array.isArray(base), false);
+    assert.equal(base.status, "unconfigured");
+    assert.equal(JSON.stringify(snap(root).skills).includes("stolen"), false);
+  } finally { cleanup(root, outside); }
+});
+
+test("secret-shaped and credential-shaped folder names are omitted", () => {
+  const root = project();
+  try {
+    dirs(root, ".env.d", ".env", "credentials", "credentials-prod", "secrets", "my-secret-store", "keys.pem", "deploy.key", "ok-folder", "AKIAABCDEFGHIJKLMNOP");
+    touch(root, "settings.local.json", "{}");
+    const paths = treePaths(snap(root));
+    assert.deepEqual(paths.filter((item) => /env|credential|secret|\.pem|\.key|AKIA/i.test(item)), []);
+    assert.ok(paths.includes("ok-folder"));
+  } finally { cleanup(root); }
+});
+
+test("the tree scan reads no file contents; only decision records are opened", () => {
+  const root = project();
+  try {
+    dirs(root, "src/lib", "api");
+    touch(root, "src/lib/code.ts", "TOP-SECRET-CONTENT-MARKER");
+    touch(root, "package.json", "TOP-SECRET-CONTENT-MARKER");
+    touch(root, ".project/knowledge/decisions/d1.md", "---\nid: d1\ntags: [api]\n---\n# Decision: use the api\n`src/lib/code.ts` holds it\n");
+    const base = createNodeDeps();
+    const reads: string[] = [];
+    const spied = { ...base, fs: { ...base.fs, readFileSync: (file: string) => { reads.push(file); return base.fs.readFileSync(file); }, readBytesSync: (file: string) => { reads.push(file); return base.fs.readBytesSync(file); } } };
+    const snapshot = buildSnapshot(root, { now: NOW }, spied);
+    const structureReads = reads.filter((file) => !file.includes(`${path.sep}.project${path.sep}`) && !file.endsWith(`${path.sep}VERSION`) && !file.endsWith("README.md"));
+    assert.deepEqual(structureReads, []);
+    assert.equal(JSON.stringify(snapshot).includes("TOP-SECRET-CONTENT-MARKER"), false);
+    assert.ok(reads.some((file) => file.endsWith("d1.md")));
+  } finally { cleanup(root); }
+});
+
+test("decisions map to folders by evidence paths and tags, from both decision directories", () => {
+  const root = project();
+  try {
+    dirs(root, "src/lib", "api", "ai-framework/scripts");
+    touch(root, ".project/knowledge/decisions/d1.md", "---\nid: d1\ntags: [api, other]\n---\n# Decision: how the lib works\nSee `src/lib/code.ts` and https://example.com/src/nope/x.\n");
+    touch(root, ".project/design/decisions/d2.md", "# Layout choice\nUses ai-framework/scripts/tool.mts only.\n");
+    touch(root, ".project/knowledge/decisions/README.md", "# index\nsrc/lib\n");
+    const decisions = snap(root).structure.decisions;
+    const rows = decisions.map((item) => `${item.value.id}|${item.value.path}|${item.value.title}`).sort();
+    assert.deepEqual(rows, ["d1|api|how the lib works", "d1|src/lib|how the lib works", "d2|ai-framework/scripts|Layout choice"]);
+    assert.ok(decisions.every((item) => item.status === "observed" && item.evidence.length === 1));
+  } finally { cleanup(root); }
+});
+
+test("decision text is scrubbed and bounded", () => {
+  const root = project();
+  try {
+    dirs(root, "src");
+    touch(root, ".project/knowledge/decisions/d.md", `# Decision: token=ghp_${"a".repeat(30)} ${"long ".repeat(200)}\nsrc/x\n`);
+    const [item] = snap(root).structure.decisions;
+    assert.doesNotMatch(item.value.title, /ghp_/);
+    assert.ok(item.value.title.length <= 300);
+  } finally { cleanup(root); }
+});
+
+test("skills.base lists the bundle directory and skills.project lists the registry, both keyed by id", () => {
+  const hash = "a".repeat(64);
+  const adapter = ".claude/skills/x/SKILL.md";
+  const registry = { schemaVersion: 1, skills: { "acme/tool/x": { id: "acme/tool/x", name: "x", scope: "project", enabled: true, phases: ["build"], packagePath: ".project/skills/packages/acme/tool/x", source: {}, adapters: { claude: adapter }, owned: { [adapter]: { hash, sourceHash: hash, mode: 0o644 } } } } };
+  const root = project({ ".project/skills/registry.json": registry });
+  try {
+    dirs(root, ".claude/skills/shape", ".claude/skills/build");
+    touch(root, ".claude/skills/not-a-dir.md");
+    const skills = snap(root).skills;
+    assert.deepEqual(skills.base.map((item) => item.value.id), ["build", "shape"]);
+    assert.ok(skills.base.every((item) => item.value.scope === "base" && item.evidence[0].startsWith(".claude/skills/")));
+    assert.deepEqual(skills.project.map((item) => item.value.id), ["acme/tool/x"]);
+    assert.equal(skills.project[0].value.scope, "project");
+    assert.deepEqual(skills.project[0].value.phases, ["build"]);
+    assert.equal(skills.installed.length, 1);
+    assert.ok(!skills.base.some((item) => item.value.id === "acme/tool/x"));
+  } finally { cleanup(root); }
+});
+
+test("a failing section does not fail the others: unreadable registry keeps base skills and structure", () => {
+  const root = project({ ".project/skills/registry.json": "{ not json" });
+  try {
+    dirs(root, ".claude/skills/shape", "ios");
+    const snapshot = snap(root);
+    assert.equal(snapshot.skills.installed.status, "unavailable");
+    assert.equal(snapshot.skills.project.status, "unavailable");
+    assert.deepEqual(snapshot.skills.base.map((item) => item.value.id), ["shape"]);
+    assert.equal(snapshot.structure.projectType.value, "mobile");
+    const base = createNodeDeps();
+    const broken = { ...base, fs: { ...base.fs, readdirEntriesSync: (dir: string) => { if (dir.endsWith(`${path.sep}.claude${path.sep}skills`)) throw Object.assign(new Error("boom"), { code: "EIO" }); return base.fs.readdirEntriesSync(dir); } } };
+    const partial = buildSnapshot(root, { now: NOW }, broken);
+    assert.equal(partial.skills.base.status, "unavailable");
+    assert.equal(partial.structure.projectType.value, "mobile");
+    assert.equal(partial.metrics.status, "unavailable");
+  } finally { cleanup(root); }
+});
+
+test("an I/O failure while scanning structure degrades to unknown and leaves other sections intact", () => {
+  const root = project({ ".project/.bundle-sync.json": { sourceVersion: "9.8.7" } });
+  try {
+    dirs(root, "ios");
+    const base = createNodeDeps();
+    const broken = { ...base, fs: { ...base.fs, lstatSync: (file: string) => { if (file.endsWith(`${path.sep}ios`)) throw Object.assign(new Error("x"), { code: "EIO" }); return base.fs.lstatSync(file); } } };
+    const snapshot = buildSnapshot(root, { now: NOW }, broken);
+    assert.equal(snapshot.structure.projectType.value, "unknown");
+    assert.equal(snapshot.workflow.installedVersion.status, "observed");
+    assert.equal(snapshot.workflow.installedVersion.value, "9.8.7");
+    assert.equal(snapshot.schemaVersion, 1);
+  } finally { cleanup(root); }
+});
+
+// ---- audit cycle 1: scan guards, caps, fallbacks ----
+const lying = (name: string, flags: { dir?: boolean; link?: boolean } = {}) => ({ name, isDirectory: () => flags.dir ?? true, isSymbolicLink: () => flags.link ?? false, isFile: () => false });
+const withEntries = (extra: (dir: string, real: any[]) => any[]) => { const base = createNodeDeps(); return { ...base, fs: { ...base.fs, readdirEntriesSync: (dir: string) => extra(dir, base.fs.readdirEntriesSync(dir)) } }; };
+
+test("scan guards: a Dirent that claims a symlinked directory is a directory is still refused (realDir lstat)", () => {
+  const root = project();
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-guard-outside-")));
+  try {
+    dirs(root, "real"); dirs(outside, "leaked/inner");
+    fs.symlinkSync(path.join(outside, "leaked"), path.join(root, "evil-link"));
+    const deps = withEntries((dir, real) => (dir === root ? real.filter((e) => e.name !== "evil-link").concat([lying("evil-link", { dir: true, link: false })]) : real));
+    const paths = treePaths(buildSnapshot(root, { now: NOW }, deps));
+    assert.ok(paths.includes("real"));
+    assert.deepEqual(paths.filter((item) => /evil-link|leaked/.test(item)), []);
+  } finally { cleanup(root, outside); }
+});
+
+test("scan guards: a Dirent that reports a symlink is skipped even over a real directory (Dirent symlink check)", () => {
+  const root = project();
+  try {
+    dirs(root, "real", "pretend-link/child");
+    const deps = withEntries((dir, real) => (dir === root ? real.map((e) => (e.name === "pretend-link" ? lying("pretend-link", { dir: true, link: true }) : e)) : real));
+    const paths = treePaths(buildSnapshot(root, { now: NOW }, deps));
+    assert.ok(paths.includes("real"));
+    assert.deepEqual(paths.filter((item) => item.startsWith("pretend-link")), []);
+  } finally { cleanup(root); }
+});
+
+test("scan guards: a directory swapped for a symlink between listing and the real-path check is refused", () => {
+  const root = project();
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-guard-swap-")));
+  try {
+    dirs(root, "swap/inner", "stable"); dirs(outside, "payload/inner");
+    const deps = withEntries((dir, real) => { if (dir === root) { fs.rmSync(path.join(root, "swap"), { recursive: true }); fs.symlinkSync(path.join(outside, "payload"), path.join(root, "swap")); } return real; });
+    const paths = treePaths(buildSnapshot(root, { now: NOW }, deps));
+    assert.ok(paths.includes("stable"));
+    assert.deepEqual(paths.filter((item) => item.startsWith("swap")), []);
+  } finally { cleanup(root, outside); }
+});
+
+test("scan guards: a nested directory swapped for a symlink after its parent was listed is refused", () => {
+  const root = project();
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-guard-nest-")));
+  try {
+    dirs(root, "top/sub"); dirs(outside, "payload");
+    const deps = withEntries((dir, real) => { if (dir === path.join(root, "top")) { fs.rmSync(path.join(root, "top/sub"), { recursive: true }); fs.symlinkSync(path.join(outside, "payload"), path.join(root, "top/sub")); } return real; });
+    const paths = treePaths(buildSnapshot(root, { now: NOW }, deps));
+    assert.ok(paths.includes("top"));
+    assert.ok(!paths.includes("top/sub"));
+  } finally { cleanup(root, outside); }
+});
+
+test("detect() ignores a symlinked ai-framework, ios and .claude/skills", () => {
+  const root = project();
+  const outside = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "state-detect-outside-")));
+  try {
+    dirs(outside, "fw/scripts", "phone", "skills/stolen");
+    fs.symlinkSync(path.join(outside, "fw"), path.join(root, "ai-framework"));
+    fs.symlinkSync(path.join(outside, "phone"), path.join(root, "ios"));
+    fs.mkdirSync(path.join(root, ".claude"));
+    fs.symlinkSync(path.join(outside, "skills"), path.join(root, ".claude/skills"));
+    const snapshot = snap(root);
+    assert.equal(snapshot.structure.projectType.value, "unknown");
+    assert.deepEqual(snapshot.structure.detectedTypes.value, []);
+    assert.equal(snapshot.skills.base.status, "unconfigured");
+    assert.deepEqual(treePaths(snapshot).filter((item) => /ai-framework|ios|skills|phone|stolen/.test(item)), []);
+  } finally { cleanup(root, outside); }
+});
+
+test("a directory whose name starts with two dots (..foo) is scanned; only a real parent escape is refused", () => {
+  const root = project();
+  try {
+    dirs(root, "..foo/inner", "...bar");
+    const paths = treePaths(snap(root));
+    assert.ok(paths.includes("..foo") && paths.includes("..foo/inner") && paths.includes("...bar"), paths.join(","));
+    const { insideProject } = theme;
+    const deps = createNodeDeps();
+    assert.equal(insideProject(root, path.join(root, "..foo"), deps), path.join(root, "..foo"));
+    assert.equal(insideProject(root, path.dirname(root), deps), null);
+    assert.equal(insideProject(root, os.tmpdir(), deps), null);
+  } finally { cleanup(root); }
+});
+
+test("MAX_VISITED: more than 5000 directory entries stops the scan and marks the limits stale", () => {
+  const root = project();
+  try {
+    dirs(root, "aaa-first", "zzz-last");
+    for (let index = 0; index < 5100; index++) fs.writeFileSync(path.join(root, `f${String(index).padStart(5, "0")}.txt`), "");
+    const structure = snap(root).structure;
+    const paths = structure.tree.map((item) => item.value.path);
+    assert.ok(paths.includes("aaa-first"));
+    assert.ok(!paths.includes("zzz-last"), "entries sorted after the 5000th visit are not listed");
+    assert.ok(structure.tree.length < 500, "the visit cap, not the entry cap, stopped the scan");
+    assert.equal(structure.limits.status, "stale");
+    assert.equal(structure.limits.value.truncated, true);
+    assert.match(structure.limits.note, /5000-visit/);
+  } finally { cleanup(root); }
+});
+
+test("decision caps: 100 decision files per directory, 3 folders per decision, and one unreadable decision preserves the others", () => {
+  const root = project();
+  try {
+    dirs(root, "src", "lib", "docs", "app", "api");
+    for (let index = 0; index < 105; index++) touch(root, `.project/knowledge/decisions/d${String(index).padStart(3, "0")}.md`, `# Decision: n${index}\nsrc/x\n`);
+    touch(root, ".project/design/decisions/many.md", "# Decision: many\nsrc/a lib/b docs/c app/d api/e\n");
+    const decisions = snap(root).structure.decisions;
+    const ids = decisions.map((item) => item.value.id);
+    assert.ok(ids.includes("d099") && !ids.includes("d100") && !ids.includes("d104"), "only the first 100 files of a directory are read");
+    assert.equal(decisions.filter((item) => item.value.id === "many").length, 3, "three folders at most per decision");
+    const base = createNodeDeps();
+    const deps = { ...base, fs: { ...base.fs } };
+    const read = deps.fs.readFileSync;
+    let failed = false;
+    deps.fs.readFileSync = (file) => {
+      if (file.endsWith("d000.md")) { failed = true; throw Object.assign(new Error("private absolute path"), { code: "EACCES" }); }
+      return read(file);
+    };
+    const result = buildSnapshot(root, { now: NOW }, deps);
+    assert.ok(failed, "the production source reader encountered the broken file");
+    assert.ok(Array.isArray(result.structure.decisions));
+    assert.ok(!result.structure.decisions.some((item) => item.value.id === "d000"));
+    assert.ok(result.structure.decisions.some((item) => item.value.id === "d001"));
+    assert.ok(result.structure.decisions.some((item) => item.value.id === "many"));
+    assert.ok(result.structure.tree.length > 0, "the folder tree survives");
+  } finally { cleanup(root); }
+});
+
+test("scan guards: a lying Dirent over an in-project symlink is refused by the lstat check alone", () => {
+  const root = project();
+  try {
+    dirs(root, "real/inner");
+    fs.symlinkSync(path.join(root, "real"), path.join(root, "inside-link"));
+    const deps = withEntries((dir, real) => (dir === root ? real.filter((e) => e.name !== "inside-link").concat([lying("inside-link", { dir: true, link: false })]) : real));
+    const paths = treePaths(buildSnapshot(root, { now: NOW }, deps));
+    assert.ok(paths.includes("real") && paths.includes("real/inner"));
+    assert.deepEqual(paths.filter((item) => item.startsWith("inside-link")), []);
+  } finally { cleanup(root); }
+});
+
+test("base skills: a Dirent reporting a symlink, or a lying Dirent over a symlink, is not listed", () => {
+  const root = project();
+  try {
+    dirs(root, ".claude/skills/shape", ".claude/skills/pretend", "elsewhere");
+    fs.symlinkSync(path.join(root, "elsewhere"), path.join(root, ".claude/skills/sneaky"));
+    const skillsDir = path.join(root, ".claude/skills");
+    const deps = withEntries((dir, real) => (dir === skillsDir ? real.filter((e) => e.name !== "sneaky" && e.name !== "pretend").concat([lying("sneaky", { dir: true, link: false }), lying("pretend", { dir: true, link: true })]) : real));
+    const ids = buildSnapshot(root, { now: NOW }, deps).skills.base.map((item) => item.value.id);
+    assert.deepEqual(ids, ["shape"]);
+  } finally { cleanup(root); }
+});
+
+test("facts bounds a 20000-level state.json traversal with a fixed placeholder", () => {
+  const deep = JSON.parse('{"child":'.repeat(20000) + '"leaf"' + '}'.repeat(20000));
+  const result = [...facts(deep)];
+  assert.equal(result.length, 1);
+  assert.equal(result[0][1].value, "[depth limit]");
+  assert.equal(result[0][1].status, "unavailable");
+});
+
+test("shared secret policy filters decision sources, tree folders and base skills before reads", () => {
+  const root = project();
+  try {
+    dirs(root, "src", ".env.d", "credentials", "secret.md", "store.jks", ".claude/skills/secret.md", ".claude/skills/store.jks", ".claude/skills/credentials", ".claude/skills/shape");
+    touch(root, ".project/knowledge/decisions/good.md", "# Good\nsrc/x\n");
+    touch(root, ".project/knowledge/decisions/secret.md", "must never read");
+    touch(root, ".project/knowledge/decisions/credentials.md", "must never read");
+    const base = createNodeDeps();
+    const deps = { ...base, fs: { ...base.fs }, proc: { ...base.proc } };
+    const read = deps.fs.readFileSync;
+    deps.fs.readFileSync = (file) => { assert.ok(!/\/(?:secret|credentials)\.md$/.test(file), file); return read(file); };
+    const snapshot = buildSnapshot(root, { now: NOW }, deps);
+    assert.deepEqual(snapshot.skills.base.map((item) => item.value.id), ["shape"]);
+    assert.deepEqual(snapshot.structure.decisions.map((item) => item.value.id), ["good"]);
+    assert.ok(!treePaths(snapshot).some((name) => /secret|credentials|\.env|\.jks/.test(name)));
+  } finally { cleanup(root); }
+});
+
+test("base skills are capped at the first 200 safe directory names", () => {
+  const root = project();
+  try {
+    for (let i = 0; i < 205; i++) dirs(root, `.claude/skills/s${String(i).padStart(3, "0")}`);
+    const ids = snap(root).skills.base.map((item) => item.value.id);
+    assert.equal(ids.length, 200);
+    assert.equal(ids[0], "s000");
+    assert.equal(ids.at(-1), "s199");
+  } finally { cleanup(root); }
+});
+
+test("frontend configuration and backend manifest detection works without package.json or app directories", () => {
+  for (const [name, expected] of [["vite.config.ts", "web"], ["next.config.mjs", "web"], ["go.mod", "backend"], ["manage.py", "backend"]]) {
+    const root = project({ [name]: "contents are irrelevant" });
+    try { assert.equal(typeOf(root).value, expected); assert.deepEqual(typeOf(root).evidence, [name]); } finally { cleanup(root); }
+  }
+});
+
+test("snapshot --json prints valid JSON and writes only when requested", () => {
+  const root = project();
+  try {
+    const runJson = (...args) => spawnSync(process.execPath, [...RUNTIME_FLAGS, SCRIPT, "--root", root, "--now", NOW, "--json", ...args], { encoding: "utf8" });
+    const preview = runJson();
+    assert.equal(preview.status, 0, preview.stderr);
+    assert.equal(JSON.parse(preview.stdout).schemaVersion, 1);
+    assert.ok(!fs.existsSync(path.join(root, REPORT_FILE)));
+    const applied = runJson("--apply");
+    assert.equal(applied.status, 0, applied.stderr);
+    assert.deepEqual(JSON.parse(applied.stdout).written, { path: REPORT_FILE, changed: true });
+  } finally { cleanup(root); }
+});
+
+test("snapshot CLI suppresses unexpected internal errors and atomic writes expose only fixed text", () => {
+  const root = project();
+  try {
+    const base = createNodeDeps();
+    const deps = { ...base, fs: { ...base.fs }, proc: { ...base.proc } };
+    let stderr = "";
+    deps.io.stderr.write = (text) => { stderr += text; };
+    deps.proc.cwd = () => { throw new Error(`${root}/sensitive`); };
+    assert.equal(main([], deps), 1);
+    assert.equal(stderr, "state-snapshot: internal error\n");
+    const writes = { ...base, fs: { ...base.fs } };
+    writes.fs.writeFileSync = () => { throw Object.assign(new Error(`${root}/sensitive`), { code: "EACCES" }); };
+    assert.throws(() => createStateSnapshot(writes).writeAtomic(root, ".project/reports/output.json", "{}"), /^Error: atomic write failed: EACCES$/);
   } finally { cleanup(root); }
 });

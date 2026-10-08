@@ -4,7 +4,7 @@ type: decision
 created: 2026-09-25
 updated: 2026-09-27
 tags: [state-report, html, theme, snapshot, design]
-related: [parse-untrusted-values-and-re-emit-them, a-report-over-an-untrusted-tree-runs-only-bundle-code, hardening-a-shared-reader-made-its-writer-destructive, workflow-tooling-pitches-share-standing-no-gos-and-design-answers, resolve-before-matching-a-protected-path-allowlist, a-gate-must-not-audit-its-own-instrument]
+related: [a-report-never-overwrites-a-file-it-did-not-write, parse-untrusted-values-and-re-emit-them, a-report-over-an-untrusted-tree-runs-only-bundle-code, hardening-a-shared-reader-made-its-writer-destructive, workflow-tooling-pitches-share-standing-no-gos-and-design-answers, resolve-before-matching-a-protected-path-allowlist, a-gate-must-not-audit-its-own-instrument]
 source: project-state-report
 ---
 
@@ -73,6 +73,16 @@ dedicated independent re-review (5 dispatches, 2 cycles) found what it missed:
 See `review-state.md` and `.project/pitches/independent-rereview-catch-up/audit-cycle-1.md` (which also found
 and fixed the same "raw error, absolute path" and ancestor-symlink bug classes in the *review tool itself*,
 `review-bench.js` — see [[a-gate-must-not-audit-its-own-instrument]]).
+
+## Multipage report (`state-multipage-report`, 2026-10-08)
+
+`/state` now renders `index`, `structure`, `skills`, `metrics`, `knowledge` and `pitches` pages plus the original `state.html`,
+from additive snapshot sections (`structure`, `skills.base`, `skills.project`; `schemaVersion` stays 1). Decisions:
+the folder scan lists names only (depth <= 3, <= 500 entries) and reuses `insideProject`; project type comes from names
+present, never file contents; pages are written as a set through a pinned staging directory that is also the lock; a
+generated page is only replaced when it carries the generator marker (see [[a-report-never-overwrites-a-file-it-did-not-write]]);
+graph and metrics pages are linked only when they exist. Audit: 3 cycles, 2 of them through Orca workers; see
+[[status-dispatch-ready-false-is-not-launch-authority]] and [[orca-workers-differ-from-the-coordinator-environment]].
 
 ## References
 

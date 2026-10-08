@@ -229,7 +229,7 @@ test("the direct TypeScript command loads the same API for non-migrated callers 
   const root = realProject(t);
   put(root, "src/app.css", SHADCN);
   const shim = createRequire(import.meta.url)("./state-theme.mts") as typeof import("./state-theme.mts");
-  assert.deepEqual(Object.keys(shim).sort(), ["FALLBACK", "MIN_CONTRAST", "PAIRS", "SETTINGS_FILE", "THEME_FILE", "contrastRatio", "declarations", "discoverTheme", "parseColor", "parseFontFamily", "parseLength", "ratioOf", "readSettings", "rgbOf", "safeTheme", "themeChanges"]);
+  assert.deepEqual(Object.keys(shim).sort(), ["FALLBACK", "MIN_CONTRAST", "PAIRS", "SETTINGS_FILE", "THEME_FILE", "contrastRatio", "declarations", "discoverTheme", "insideProject", "parseColor", "parseFontFamily", "parseLength", "ratioOf", "readSettings", "rgbOf", "safeTheme", "themeChanges"]);
   const theme = shim.discoverTheme(root);
   assert.equal(theme.mode, "partial");
   assert.equal(theme.light.background, "#ffffff");
