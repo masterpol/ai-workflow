@@ -35,7 +35,8 @@ run. Launching `bun <entry>.mts` also works; set `AI_WORKFLOW_RUNNER=bun` to sel
 
 `.env` is read only from the project root that contains `ai-framework/`, never from an unrelated
 working directory. A `.env` symlink leaving that root is ignored. Only the runner setting is
-used. With Bun selected but missing from `PATH`, the command prints one error line and exits 1.
+used here (the Orca switch `AI_WORKFLOW_ORCA_MULTI_AGENT` is read separately, by the Orca launch gate, with the same
+rules). With Bun selected but missing from `PATH`, the command prints one error line and exits 1.
 
 ## Writing a script
 

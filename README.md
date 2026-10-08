@@ -60,6 +60,8 @@ AI_WORKFLOW_RUNNER=bun
 ```
 
 Process environment variables override `.env`. Bun must be installed and available on `PATH`.
+Orca multi-agent dispatch is off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true` (see
+[Orca vendors](ai-framework/integrations/orca-vendors.md)); any other value keeps the normal workflow.
 Run scripts directly as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later, or
 `bun ai-framework/scripts/<name>.mts`. Node 22.12–22.17 requires
 `--experimental-strip-types --disable-warning=ExperimentalWarning` before the script path;

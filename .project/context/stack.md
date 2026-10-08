@@ -21,4 +21,4 @@ There is no build, typecheck, lint or i18n command in this repository. Phases th
 
 ## Environment
 
-No environment variables are required. Secret files such as `.claude/settings.local.json` are never read or copied. Metrics, generated reports and installed skill packages are local instance data. The runtime reads only `AI_WORKFLOW_RUNNER` from the project-root `.env`, without exposing other values.
+No environment variables are required. Secret files such as `.claude/settings.local.json` are never read or copied. Metrics, generated reports and installed skill packages are local instance data. The runtime reads only `AI_WORKFLOW_RUNNER` from the project-root `.env`, without exposing other values; the Orca launch gate separately reads only `AI_WORKFLOW_ORCA_MULTI_AGENT` (exactly `true` enables Orca multi-agent dispatch, anything else keeps the normal workflow).

@@ -27,6 +27,15 @@ Phase 2 of the new pipeline. See `ai-framework/workflow/phases/2-build.md` for f
 6. **Log deviations** — any plan ↔ reality drift goes to `deviations.md` immediately.
 7. **Log incidents** — build errors, unexpected findings → `log.md`.
 
+## Optional Orca dispatch (off by default)
+
+Only when `AI_WORKFLOW_ORCA_MULTI_AGENT=true` (environment or project `.env`), `.project/orchestration.json` opts in, and a scope in `plan.md` is marked for an alternate vendor. Every other case uses the normal workflow above, with no side effects.
+
+- Library: `ai-framework/scripts/orca-dispatch.mts` (`dispatchScope`, `dispatchWithRetries`, `collectReport`, `classifyLiveness`, `markUnknownLiveness`). Pass the `coordinator` (the vendor running this task) and the alternate `vendor`; placement is typed fields only, never free text, built on the launch gate (`orca-launch-gate.mts`) and the ownership ledger (`orca-ledger.mts`). Contract and limits: `ai-framework/integrations/orca-vendors.md`.
+- The coordinator stays the current agent. Workers never launch workers or ship; every brief carries `--worker-context`.
+- A launch is never repeated for an owned attempt. Unknown liveness is inspected and preserved; a blocked launch (trust prompt, port, funds, residual resources) is reported to the user and never auto-answered; only a receipt that proves nothing was left behind is retried, within the policy cap.
+- Completion counts only from the attempt's own `worker_done`. Re-measure the changed files and run the scope's exit criterion yourself; never accept a worker's numbers. The library enforces the policy's `maxConcurrentWorkers`; the caller calls `markUnknownLiveness` if the runtime version changes after launch. Reconciliation of worker changes is a separate capability (`orca-vendor-reconcile`).
+
 ## Adaptive gate
 
 | Appetite | Per-scope gate | Build-start gate |

@@ -70,9 +70,50 @@ function bunChild(bun: BunApi): ChildDeps {
       return out;
     },
     async run(command, args, options = {}): Promise<RunResult> {
-      const proc = bun.spawn(argvFor(command, args, options), spawnOptions(options));
-      const [stdout, stderr, status] = await Promise.all([readAll(proc.stdout), readAll(proc.stderr), proc.exited]);
-      return { status: proc.signalCode ? null : status, signal: proc.signalCode, stdout, stderr };
+      // Timeout and byte cap are enforced here (not by Bun.spawn) so both adapters report the same errorCode and a
+      // grandchild holding a pipe open cannot outlast the deadline.
+      const { timeout: _timeout, maxBuffer: _maxBuffer, ...spawnBase } = spawnOptions(options);
+      const proc = bun.spawn(argvFor(command, args, options), spawnBase);
+      const limit = options.maxBufferBytes ?? 64 * 1024 * 1024;
+      const signal = options.killSignal ?? "SIGKILL";
+      let errorCode: "ETIMEDOUT" | "ENOBUFS" | undefined;
+      let bytes = 0;
+      let wake: () => void = () => {};
+      const stopped = new Promise<void>((resolve) => { wake = resolve; });
+      let grace: ReturnType<typeof setTimeout> | null = null;
+      const kill = (code: "ETIMEDOUT" | "ENOBUFS"): void => {
+        if (errorCode) return;
+        errorCode = code;
+        proc.kill(signal);
+        grace = setTimeout(wake, 200);
+      };
+      const timer = options.timeoutMs === undefined ? null : setTimeout(() => kill("ETIMEDOUT"), options.timeoutMs);
+      const read = async (stream: ReadableStream<Uint8Array> | undefined): Promise<string> => {
+        if (!stream) return "";
+        const chunks: Uint8Array[] = [];
+        const reader = stream.getReader();
+        try {
+          for (;;) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            if (errorCode === "ENOBUFS") continue;
+            bytes += value.length;
+            if (bytes > limit) { kill("ENOBUFS"); continue; }
+            chunks.push(value);
+          }
+        } catch { /* a killed child can reset its pipe */ }
+        return decode(Buffer.concat(chunks));
+      };
+      const outputs = Promise.all([read(proc.stdout), read(proc.stderr), proc.exited]);
+      outputs.catch(() => {});
+      let settled: { value: [string, string, number] } | null;
+      try { settled = await Promise.race([outputs.then((value) => ({ value })), stopped.then(() => null)]); }
+      finally { if (timer) clearTimeout(timer); if (grace) clearTimeout(grace); }
+      if (settled === null) return { status: null, signal, stdout: "", stderr: "", ...(errorCode ? { errorCode } : {}) };
+      const [stdout, stderr, status] = settled.value;
+      const out: RunResult = { status: proc.signalCode ? null : status, signal: proc.signalCode, stdout, stderr };
+      if (errorCode) out.errorCode = errorCode;
+      return out;
     },
   };
 }

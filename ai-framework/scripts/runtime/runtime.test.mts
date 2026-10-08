@@ -98,6 +98,23 @@ for (const [name, make] of adapters) {
     const result = await deps.child.run(deps.proc.execPath, ["-e", "setTimeout(()=>{},60000)"], { timeoutMs: 200 });
     assert.equal(result.status, null);
     assert.equal(result.signal, "SIGKILL");
+    assert.equal(result.errorCode, "ETIMEDOUT");
+  });
+
+  test(`${name} adapter: output over maxBufferBytes stops the child and reports ENOBUFS`, async () => {
+    const deps = make();
+    const result = await deps.child.run(deps.proc.execPath, ["-e", "process.stdout.write('x'.repeat(2e6)); setTimeout(()=>{},60000)"], { maxBufferBytes: 1000, timeoutMs: 20000 });
+    assert.equal(result.errorCode, "ENOBUFS");
+    assert.ok(result.stdout.length <= 1000 + 70000);
+  });
+
+  test(`${name} adapter: a grandchild holding the pipe open does not outlast the timeout`, async () => {
+    const deps = make();
+    const script = "require('child_process').spawn('sleep',['6'],{stdio:['ignore','inherit','inherit'],detached:true}).unref(); setTimeout(()=>{},60000)";
+    const started = Date.now();
+    const result = await deps.child.run(deps.proc.execPath, ["-e", script], { timeoutMs: 300 });
+    assert.equal(result.errorCode, "ETIMEDOUT");
+    assert.ok(Date.now() - started < 3000, `waited ${Date.now() - started} ms`);
   });
 
   test(`${name} adapter: clock is monotonic and io writes through`, () => {

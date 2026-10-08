@@ -46,13 +46,40 @@ export const nodeChild: ChildDeps = {
     return new Promise<RunResult>((resolve, reject) => {
       const stdio = stdioFor(options);
       const child = spawn(command, args, { cwd: options.cwd, env: toEnv(options.env), shell: options.shell, stdio });
+      const limit = options.maxBufferBytes ?? 64 * 1024 * 1024;
       let stdout = "";
       let stderr = "";
-      const timer = options.timeoutMs === undefined ? null : setTimeout(() => child.kill((options.killSignal as NodeJS.Signals | undefined) ?? "SIGKILL"), options.timeoutMs);
-      child.stdout?.setEncoding("utf8").on("data", (chunk: string) => { stdout += chunk; });
-      child.stderr?.setEncoding("utf8").on("data", (chunk: string) => { stderr += chunk; });
-      child.on("error", (error) => { if (timer) clearTimeout(timer); reject(error); });
-      child.on("close", (status, signal) => { if (timer) clearTimeout(timer); resolve({ status, signal, stdout, stderr }); });
+      let bytes = 0;
+      let errorCode: "ETIMEDOUT" | "ENOBUFS" | undefined;
+      let settled = false;
+      let grace: ReturnType<typeof setTimeout> | null = null;
+      const kill = (code: "ETIMEDOUT" | "ENOBUFS"): void => {
+        if (errorCode) return;
+        errorCode = code;
+        child.kill((options.killSignal as NodeJS.Signals | undefined) ?? "SIGKILL");
+        // A grandchild can keep the pipes open after the child dies: stop waiting for them shortly after the kill.
+        grace = setTimeout(() => finish(null, (options.killSignal as string | undefined) ?? "SIGKILL"), 200);
+      };
+      const timer = options.timeoutMs === undefined ? null : setTimeout(() => kill("ETIMEDOUT"), options.timeoutMs);
+      const finish = (status: number | null, signal: string | null): void => {
+        if (settled) return;
+        settled = true;
+        if (timer) clearTimeout(timer);
+        if (grace) clearTimeout(grace);
+        const result: RunResult = { status, signal, stdout, stderr };
+        if (errorCode) result.errorCode = errorCode;
+        resolve(result);
+      };
+      const collect = (current: string, chunk: string): string => {
+        if (errorCode === "ENOBUFS") return current;
+        bytes += Buffer.byteLength(chunk);
+        if (bytes > limit) { kill("ENOBUFS"); return current; }
+        return current + chunk;
+      };
+      child.stdout?.setEncoding("utf8").on("data", (chunk: string) => { stdout = collect(stdout, chunk); });
+      child.stderr?.setEncoding("utf8").on("data", (chunk: string) => { stderr = collect(stderr, chunk); });
+      child.on("error", (error) => { if (timer) clearTimeout(timer); if (grace) clearTimeout(grace); if (!settled) { settled = true; reject(error); } });
+      child.on("close", (status, signal) => finish(status, signal));
       child.stdin?.on("error", () => {});
       child.stdin?.end(options.input ?? "");
     });

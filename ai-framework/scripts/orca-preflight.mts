@@ -1,6 +1,7 @@
 import { runDirect } from "./runtime/cli.mts";
 import { report as policyReport } from "./orca-policy.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaMultiAgentEnabled } from "./runtime/select.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 export const MAX_OUTPUT_BYTES = 256 * 1024;
@@ -153,6 +154,8 @@ export function report(root: string, vendor: string, options: ReportOptions = {}
   if (!Object.values(result.vendors as Record<string, string>).includes("present")) return { ...result, reason: "no-available-workers" };
   result.candidate = true;
   if (!options.probe) return { ...result, reason: "runtime-not-probed" };
+  // Orca is only contacted when the multi-agent switch is on.
+  if (!orcaMultiAgentEnabled(root, deps, env)) return { ...result, reason: "orca-multi-agent-disabled" };
   const now = options.now || (() => deps.clock.perfNowMs());
   const context: Context = { root: deps.fs.realpathSync(root), env: { ...env, PATH: absolutePathEntries(env, deps).join(deps.path.delimiter) },
     run: options.run || defaultRun(deps), now, started: now() };

@@ -39,7 +39,7 @@ function receipts(): Values {
 }
 function probe(values: Values = receipts()) {
   const calls: Array<{ command: string; args: string[]; options: RunOptions }> = [];
-  const options: ReportOptions & { env: Record<string, string | undefined> } = { probe: true, env: { ORCA_AGENT_SESSION_ID: "fixture-session" }, platform: "darwin",
+  const options: ReportOptions & { env: Record<string, string | undefined> } = { probe: true, env: { ORCA_AGENT_SESSION_ID: "fixture-session", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, platform: "darwin",
     present: () => true, run: (command: string, args: string[], options: RunOptions) => {
       calls.push({ command, args, options });
       return { status: 0, signal: null, stdout: JSON.stringify(values[calls.length - 1]), stderr: "" };
@@ -239,7 +239,7 @@ test("refuses unsupported guides and unproven runtime/caller receipts", (t: Test
     assertNormal(result);
   }
   const options = probe().options;
-  options.env = {};
+  options.env = { AI_WORKFLOW_ORCA_MULTI_AGENT: "true" };
   assert.equal(report(root, "codex", options).reason, "caller-unverified");
 });
 
@@ -336,7 +336,7 @@ test("doctor validates optional local policy without probing or repairing it", {
   for (const vendor of ["orca", "orca-dev", "orca-ide", "claude", "codex"]) {
     fs.writeFileSync(path.join(bin, vendor), sentinel, { mode: 0o755 });
   }
-  const env = { ...process.env, PATH: bin, ORCA_CLI_COMMAND: launcher, NO_COLOR: "1", AI_WORKFLOW_RUNNER: "node" };
+  const env = { ...process.env, PATH: bin, ORCA_CLI_COMMAND: launcher, NO_COLOR: "1", AI_WORKFLOW_RUNNER: "node", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" };
   const run = (...args: string[]) => spawnSync(process.execPath, [...RUNTIME_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--json", ...args],
     { cwd: root, encoding: "utf8", env, timeout: 10000, maxBuffer: 1024 * 1024 });
   const assertDoctor = (status: string, expected: number, args: string[] = []) => {
@@ -391,7 +391,7 @@ const withFs = (overrides: Partial<FsDeps>): RuntimeDeps => ({ ...nodeDeps, fs: 
 interface Harness { deps: RuntimeDeps; out: string[]; err: string[]; spawned: Array<{ command: string; args: string[]; timeoutMs?: number }> }
 /** Real policy files, but executables, child processes, environment and clock are all injected. */
 function harness(root: string, run: (call: number) => { status: number | null; signal: string | null; stdout: string; stderr: string },
-  env: Record<string, string | undefined> = { ORCA_AGENT_SESSION_ID: "fixture-session", PATH: "/fixture/bin" }, clock: () => number = () => 0): Harness {
+  env: Record<string, string | undefined> = { ORCA_AGENT_SESSION_ID: "fixture-session", PATH: "/fixture/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, clock: () => number = () => 0): Harness {
   const h: Harness = { deps: nodeDeps, out: [], err: [], spawned: [] };
   h.deps = {
     ...withFs({
@@ -481,4 +481,19 @@ test("executablePresent uses the injected filesystem and requires the execute bi
   seen.length = 0;
   assert.equal(executablePresent("orca", { PATH: "/a" }, "win32", deps), true);
   assert.deepEqual(seen, [["/a/orca", nodeDeps.fs.constants.F_OK]]);
+});
+
+test("without the multi-agent switch --probe never contacts Orca", (t: TestContext) => {
+  const root = fixture(t, false);
+  const file = path.join(root, ".project/orchestration.json");
+  const value = JSON.parse(fs.readFileSync(file, "utf8")) as Obj;
+  value["use-orca-orchestration"] = true;
+  fs.writeFileSync(file, JSON.stringify(value));
+  for (const flag of [undefined, "false", "yes"]) {
+    const harness = probe();
+    harness.options.env = { ORCA_AGENT_SESSION_ID: "fixture-session", AI_WORKFLOW_ORCA_MULTI_AGENT: flag };
+    const result = report(root, "codex", harness.options);
+    assert.equal(result.reason, "orca-multi-agent-disabled", String(flag));
+    assert.equal(harness.calls.length, 0, String(flag));
+  }
 });

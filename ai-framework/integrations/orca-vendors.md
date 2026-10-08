@@ -5,10 +5,20 @@ the bundle does not create it during setup or doctor repair. Start from
 [orca-vendors.example.json](orca-vendors.example.json), which sets
 `"use-orca-orchestration": false`. Keep this instance file out of version control.
 
-This release provides policy validation and read-only preflight diagnostics. Every result
-uses the normal workflow and reports `dispatchReady: false`. Worker dispatch, peer messaging,
-recovery, and reconciliation belong to the separately gated dispatch capability. Quality,
-latency, and cost improvements require measurements; splitting work does not guarantee them.
+The policy and preflight commands below are read-only diagnostics: every result uses the normal workflow
+and reports `dispatchReady: false`. Launching is a separate opt-in library, described under
+[Dispatch core](#dispatch-core-opt-in-library-only); peer messaging and reconciliation of worker changes are
+not part of it. Quality, latency, and cost improvements require measurements; splitting work does not guarantee them.
+
+## Switch: `AI_WORKFLOW_ORCA_MULTI_AGENT`
+
+Orca is used only when `AI_WORKFLOW_ORCA_MULTI_AGENT` is exactly `true` (case-insensitive, surrounding spaces ignored).
+Unset, empty, `false`, `1`, `yes` or anything else keeps the normal workflow. Set it in the process environment or the
+project-root `.env` (the environment wins; `.env` is read from the trusted root only and a symlink leaving the root is
+ignored). With the switch off the launch gate returns `orca-multi-agent-disabled` first, before reading the policy,
+probing Orca or spawning anything; `dispatchScope` and `dispatchWithRetries` return the normal workflow without a claim;
+`orca-preflight --probe` does not contact Orca. The static policy and presence diagnostics still work. The switch is
+necessary but not sufficient: dispatch also needs an opted-in policy and a supported Orca runtime.
 
 ## Policy contract
 
@@ -71,7 +81,7 @@ Other versions remain unverified until their contract is reviewed.
 
 `--worker-context` prevents coordinator selection and all probes when the caller is an
 existing worker. This is an explicit caller guard; session presence alone does not identify
-the coordinator. Foundation does not launch workers or inject worker context.
+the coordinator. The preflight and policy commands never launch workers; the dispatch core adds the flag to every brief.
 
 ## Workflow doctor
 
@@ -86,3 +96,38 @@ The orchestration interfaces are described by the
 [maintained coordinator guide](https://github.com/stablyai/orca/blob/main/skill-guides/orchestration.md).
 The installed-source contract and live-verification limits are recorded in the foundation
 pitch's S2 evidence. Future dispatch work must obtain live proof before relying on this policy.
+
+## Dispatch core (opt-in, library only)
+
+`orca-dispatch.mts` sends one scope to one alternate vendor through `orca orchestration worker-start`.
+It is a library for the build phase, not a command, and stays inert unless the policy opts in.
+
+- **Roles**: the `coordinator` is the vendor running the task and selects the policy entry; the worker (`vendor`) must be
+  one of that coordinator's configured workers. A coordinator is never launched as its own worker.
+- **Launch gate** (`orca-launch-gate.mts`): re-reads the policy and re-probes the runtime immediately before every
+  launch; allowed only for an eligible policy and the exact supported Orca version. It spawns exactly the executable the
+  probe selected (`ORCA_CLI_COMMAND`, `orca-dev` or `orca`); a different `launcher` is refused. An external coordinator
+  has no `caller.orcaSessionId`, so the gate does not require it. A worker (the `--worker-context` flag, or a worker env
+  marker, which is unverified) is always denied. The child environment is an allowlist with absolute PATH entries only.
+  Briefs start with a plain-text line, carry the flag on its own line, and are bounded (4 KiB per field, 16 KiB total).
+- **Placement**: only the typed fields `worktree`, `repo`, `name`, `baseBranch`, `setup`, `model` and `effort` become
+  flags, each value matching a strict grammar. Free-text flags are refused.
+- **Ownership ledger** (`orca-ledger.mts`): one record per attempt under `.project/metrics/orca-ledger/`. Reads report
+  `missing`, `refused` or `corrupt` separately and a writer never treats the last two as missing; symlinks, FIFOs and
+  oversize files are refused. Completion requires the worker's own report id, and a dispatch id is set once.
+- **Dispatch**: a claim precedes the spawn and the deadline is checked before it; a replayed or crashed attempt is
+  inspected, never relaunched; one live attempt per task. A failure at `agent_readiness` or with residual resources is
+  returned to the user. A timeout, output overflow, signal exit, unreadable receipt or missing dispatch id means unknown
+  liveness. Only a readable receipt with no failed stage and an explicitly empty `residualResources` list is retryable, capped by the smaller
+  of the caller's value, the policy's `maxRetriesPerTask` and 5, each retry with a new attempt id.
+  The policy's `maxConcurrentWorkers` caps the attempts that are claimed, launched or of unknown liveness; a further
+  dispatch returns the normal workflow.
+- **Mail**: only a `worker_done` whose dispatch id matches the ledger completes an attempt; ids, payloads and file lists
+  are parsed against a grammar (file lists may not name `.git` or `.project`), text is stripped of control and bidi
+  characters, and a report that contradicts the recorded outcome is refused. A settled attempt accepts only a replay of its own completion report.
+- **Runtime**: the Node and Bun adapters set `errorCode` `ETIMEDOUT` or `ENOBUFS` for async `run`, and a deadline is not
+  extended by a grandchild process that keeps a pipe open.
+
+Observed live (Orca 1.4.222, `runtime-contract.md` in the dispatch pitch): Claude launch, completion, settlement and
+isolation. Not observed: Codex and OpenCode completion, and peer messaging. Those remain live-smoke criteria.
+

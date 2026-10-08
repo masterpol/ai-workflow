@@ -3,6 +3,19 @@ import { createNodeDeps } from "./node.mts";
 import type { RunnerName, RuntimeDeps } from "./types.mts";
 
 export const RUNNER_VAR = "AI_WORKFLOW_RUNNER";
+export const ORCA_MULTI_AGENT_VAR = "AI_WORKFLOW_ORCA_MULTI_AGENT";
+
+/**
+ * Orca multi-agent work is used only when this is exactly `true` (case-insensitive). Unset, `false`, empty or any other
+ * value keeps the normal workflow. A process environment value wins over the project `.env`, which is read from the
+ * trusted `root` for this one key only.
+ */
+export function orcaMultiAgentEnabled(root: string, deps: RuntimeDeps, env: Record<string, string | undefined> = deps.proc.env): boolean {
+  try {
+    const merged = loadDotenv(deps.fs, deps.path, root, { [ORCA_MULTI_AGENT_VAR]: env[ORCA_MULTI_AGENT_VAR] });
+    return merged[ORCA_MULTI_AGENT_VAR]?.trim().toLowerCase() === "true";
+  } catch { return false; }
+}
 
 /** Unset or empty selects Node. `bun` selects Bun. Anything else is a configuration error. */
 export function resolveRunner(env: Record<string, string | undefined>): RunnerName {
