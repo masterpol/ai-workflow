@@ -59,6 +59,7 @@ export interface FsDeps {
   statSync(file: string): StatLike;
   lstatSync(file: string): StatLike;
   fstatSync(fd: number): StatLike;
+  symlinkSync(target: string, link: string): void;
   rmSync(file: string, options?: { recursive?: boolean; force?: boolean }): void;
   rmdirSync(dir: string): void;
   renameSync(from: string, to: string): void;

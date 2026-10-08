@@ -4,10 +4,34 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadDotenv } from "./env.mts";
 import { createNodeDeps } from "./node.mts";
 import { resolveRunner } from "./select.mts";
-import type { RuntimeDeps } from "./types.mts";
+import type { RunResult, RuntimeDeps, SpawnOptions } from "./types.mts";
 
 /** Child commands support Node 22.12–22.17 with type stripping disabled by default. */
 export const NODE_FLAGS = ["--experimental-strip-types", "--disable-warning=ExperimentalWarning"];
+
+/** Child runner choice follows the effective spawn environment, not the parent executable. */
+export function workflowInvocation(deps: RuntimeDeps, args: string[], options: SpawnOptions = {}): { command: string; args: string[]; options: SpawnOptions } {
+  const env = options.env ?? deps.proc.env;
+  const declared = env.AI_WORKFLOW_RUNNER ?? deps.proc.env.AI_WORKFLOW_RUNNER;
+  const runner = declared === undefined ? deps.runtime : resolveRunner({ AI_WORKFLOW_RUNNER: declared });
+  const current = deps.proc.versions ? (deps.proc.versions.bun ? "bun" : "node") : deps.runtime;
+  const command = runner === current ? deps.proc.execPath : runner;
+  const rest = [...args];
+  while (NODE_FLAGS.includes(rest[0])) rest.shift();
+  if (runner === "bun" && rest[0] === "--test") rest[0] = "test";
+  return { command, args: runner === "node" ? [...NODE_FLAGS, ...rest] : rest,
+    options: { ...options, env: { ...env, AI_WORKFLOW_RUNNER: runner } } };
+}
+
+export function runWorkflowSync(deps: RuntimeDeps, args: string[], options: SpawnOptions = {}): RunResult {
+  const invocation = workflowInvocation(deps, args, options);
+  return deps.child.runSync(invocation.command, invocation.args, invocation.options);
+}
+
+export function runWorkflow(deps: RuntimeDeps, args: string[], options: SpawnOptions = {}): Promise<RunResult> {
+  const invocation = workflowInvocation(deps, args, options);
+  return deps.child.run(invocation.command, invocation.args, invocation.options);
+}
 
 export function inferRoot(script: string): string {
   const directory = path.dirname(script);

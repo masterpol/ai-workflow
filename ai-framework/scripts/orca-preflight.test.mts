@@ -337,7 +337,9 @@ test("doctor validates optional local policy without probing or repairing it", {
     fs.writeFileSync(path.join(bin, vendor), sentinel, { mode: 0o755 });
   }
   const env = { ...process.env, PATH: bin, ORCA_CLI_COMMAND: launcher, NO_COLOR: "1", AI_WORKFLOW_RUNNER: "node", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" };
-  const run = (...args: string[]) => spawnSync(process.execPath, [...RUNTIME_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--json", ...args],
+  // This fixture deliberately validates the Node runner with a restricted PATH.
+  const nodeExecutable = spawnSync("node", ["-p", "process.execPath"], { encoding: "utf8" }).stdout.trim();
+  const run = (...args: string[]) => spawnSync(nodeExecutable, [...NODE_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--json", ...args],
     { cwd: root, encoding: "utf8", env, timeout: 10000, maxBuffer: 1024 * 1024 });
   const assertDoctor = (status: string, expected: number, args: string[] = []) => {
     const result = run(...args);

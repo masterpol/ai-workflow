@@ -1,3 +1,4 @@
+import { runWorkflowSync } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 /*
  * Builds .project/reports/state.json: a derived, non-authoritative snapshot of the project's
@@ -190,7 +191,7 @@ function workflowSection(root: string, now: Date, scrub: (text: unknown) => stri
   // execute a script that project supplies. reconcile without --apply is a read-only preview.
   const script = path.join(import.meta.dirname, "skill-sync.mts");
   if (fs.existsSync(path.join(root, ".project/skills/registry.json")) || marker.value) {
-    const run = deps.child.runSync(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", script, "reconcile", "--json", "--root", root], { timeoutMs: options.reconcileTimeoutMs || 15000 });
+    const run = runWorkflowSync(deps, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", script, "reconcile", "--json", "--root", root], { timeoutMs: options.reconcileTimeoutMs || 15000 });
     try { registryStatus = JSON.parse(run.stdout).status; } catch { registryStatus = "unavailable"; }
   }
   const attention = conflicts.length > 0 || ["conflict", "incompatible", "coverage-unresolved", "pending-transaction", "needs-reconciliation"].includes(registryStatus);

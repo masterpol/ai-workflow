@@ -215,8 +215,8 @@ test("workflow doctor and setup validator accept a registry-managed skill in a r
   // it would leave an installed skill's wrappers orphaned, which the doctor rightly rejects — a
   // failure that only appears once a skill is actually installed in the repo running this test.
   run({ root, repo: sourceRepo(directory), skill: ID, scope: "project", phases: "manual", apply: true });
-  // Pin the runner: a developer's project .env may select bun, which this PATH does not contain.
-  const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: "node" };
+  // Pin this fixture to its actual host; the restricted PATH contains only that executable.
+  const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
   const doctor = spawnSync(process.execPath, [...RUNTIME_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--json"], { cwd: root, encoding: "utf8", env });
   const report = JSON.parse(doctor.stdout) as Report;
   assert.deepEqual(report.results.filter((item) => item.status === "fail"), []);

@@ -33,7 +33,9 @@ export function resolveRunner(env: Record<string, string | undefined>): RunnerNa
 export async function selectRuntime(root: string, env: Record<string, string | undefined> = process.env): Promise<RuntimeDeps> {
   const boot = createNodeDeps(env);
   const merged = loadDotenv(boot.fs, boot.path, root, { [RUNNER_VAR]: env[RUNNER_VAR] });
-  if (resolveRunner(merged) === "node") return createNodeDeps(env);
+  const runner = resolveRunner(merged);
+  const selectedEnv = { ...env, [RUNNER_VAR]: runner };
+  if (runner === "node") return createNodeDeps(selectedEnv);
   const { createBunDeps } = await import("./bun.mts");
-  return createBunDeps(env);
+  return createBunDeps(selectedEnv);
 }

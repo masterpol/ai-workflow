@@ -1,17 +1,15 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { chmodSync, existsSync, mkdirSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, posix } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import { extractWikiLinks, graphifyCommand, legacyCovered, main, overlayKnowledge, parseFrontmatter, buildGraph } from "./graphify.mts";
+import { createTestDeps, runScript, tempFixture } from "./runtime/test-helpers.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 const ROOT = "/proj";
 const KNOW = `${ROOT}/.project/knowledge`;
 const shim = fileURLToPath(new URL("./graphify.mts", import.meta.url));
+const deps = createTestDeps();
 
 interface Fake {
   deps: RuntimeDeps;
@@ -47,7 +45,7 @@ function fake(files: Record<string, string>, dirs: string[] = [], env: Record<st
   const err: string[] = [];
   const writes: string[] = [];
   const isDir = (p: string): boolean => dirSet.has(p) || [...map.keys()].some((k) => k.startsWith(`${p}/`));
-  const deps: RuntimeDeps = {
+  const fakeDeps: RuntimeDeps = {
     runtime: "node",
     fs: {
       readFileSync(file) {
@@ -74,7 +72,7 @@ function fake(files: Record<string, string>, dirs: string[] = [], env: Record<st
       exists: unsupported("exists"),
       readdir: unsupported("readdir"),
     },
-    path: posix,
+    path: deps.path,
     child: { runSync: (command, args) => { calls.push({ command, args }); return script(command, args); }, run: unsupported("run") },
     crypto: { sha256Hex: unsupported("sha256Hex") },
     os: { tmpdir: () => "/tmpfake", platform: () => "linux" },
@@ -82,7 +80,7 @@ function fake(files: Record<string, string>, dirs: string[] = [], env: Record<st
     io: { stdout: { write: (t) => { out.push(t); } }, stderr: { write: (t) => { err.push(t); } } },
     proc: { argv: [], env, execPath: "node", cwd: () => ROOT },
   };
-  return { deps, files: map, out, err, writes, calls };
+  return { deps: fakeDeps, files: map, out, err, writes, calls };
 }
 
 const entry = (id: string, extra = "", body = ""): string =>
@@ -252,33 +250,32 @@ test("non-md files and directories named *.md are skipped", () => {
 });
 
 test("integration: the direct TypeScript command builds the overlay with a stub graphify", () => {
-  const dir = realpathSync(mkdtempSync(join(tmpdir(), "graphify-test-")));
+  const dir = tempFixture(deps, {
+    ".project/knowledge/patterns/one.md": entry("one", "related: [two]\n"),
+    ".project/knowledge/patterns/two.md": entry("two"),
+    "stub-graphify": { content: `#!/bin/sh\nmkdir -p graphify-out && echo '{"nodes":[],"links":[],"graph":{}}' > graphify-out/graph.json\n`, mode: 0o755 },
+  });
   try {
-    const know = join(dir, ".project", "knowledge", "patterns");
-    mkdirSync(know, { recursive: true });
-    writeFileSync(join(know, "one.md"), entry("one", "related: [two]\n"));
-    writeFileSync(join(know, "two.md"), entry("two"));
-    const stub = join(dir, "stub-graphify");
-    writeFileSync(stub, `#!/bin/sh\nmkdir -p graphify-out && echo '{"nodes":[],"links":[],"graph":{}}' > graphify-out/graph.json\n`);
-    chmodSync(stub, 0o755);
-    const run = (...args: string[]) => spawnSync("node", [shim, ...args], { cwd: dir, encoding: "utf8", env: { ...process.env, GRAPHIFY_BIN: stub } });
+    const know = deps.path.join(dir, ".project", "knowledge", "patterns");
+    const stub = deps.path.join(dir, "stub-graphify");
+    const run = (...args: string[]) => runScript(deps, shim, args, { cwd: dir, encoding: "utf8", env: { ...process.env, GRAPHIFY_BIN: stub } });
 
     const check = run("--check", "--json");
     assert.equal(check.status, 0, check.stderr);
     assert.equal(JSON.parse(check.stdout).stats.total, 2);
-    assert.equal(existsSync(join(dir, "graphify-out")), false);
+    assert.equal(deps.fs.existsSync(deps.path.join(dir, "graphify-out")), false);
 
     const write = run();
     assert.equal(write.status, 0, write.stderr);
-    const graph = JSON.parse(readFileSync(join(dir, "graphify-out", "graph.json"), "utf8"));
+    const graph = JSON.parse(deps.fs.readFileSync(deps.path.join(dir, "graphify-out", "graph.json"), "utf8"));
     assert.equal(graph.links.filter((l: { relation: string }) => l.relation === "related").length, 1);
-    assert.match(readFileSync(join(dir, ".project", "knowledge", "index.md"), "utf8"), /one --> two/);
+    assert.match(deps.fs.readFileSync(deps.path.join(dir, ".project", "knowledge", "index.md"), "utf8"), /one --> two/);
 
-    writeFileSync(join(know, "dup.md"), entry("one"));
+    deps.fs.writeFileSync(deps.path.join(know, "dup.md"), entry("one"));
     const stale = run("--check");
     assert.equal(stale.status, 1);
     assert.match(stale.stdout, /Graph status: NEEDS ATTENTION \(1 error\(s\)\)/);
   } finally {
-    rmSync(dir, { recursive: true, force: true });
+    deps.fs.rmSync(dir, { recursive: true, force: true });
   }
 });

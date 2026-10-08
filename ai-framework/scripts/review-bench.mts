@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { runWorkflowSync } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 /*
  * Review bench for independent re-reviews (see .project/pitches/independent-rereview-catch-up/plan.md).
@@ -120,9 +121,11 @@ function git(root: string, args: string[], deps: RuntimeDeps): string {
 const parseJson = (text: string, label: string): unknown => { try { return JSON.parse(text); } catch { return fail(`${label} is not valid JSON`); } };
 const sha = (data: string | Uint8Array, deps: RuntimeDeps): string => deps.crypto.sha256Hex(data);
 
-function runNode(command: unknown, cwd: string, deps: RuntimeDeps): number | null {
-  if (!Array.isArray(command) || command[0] !== "node" || command.some((part) => typeof part !== "string")) fail("test command must be a JSON array starting with \"node\"");
-  try { return deps.child.runSync("node", (command as string[]).slice(1), { cwd, timeoutMs: TEST_TIMEOUT_MS }).status; } catch { return null; }
+function runSelectedTest(command: unknown, cwd: string, deps: RuntimeDeps): number | null {
+  if (!Array.isArray(command) || !["node", "bun"].includes(command[0]) || command.some((part) => typeof part !== "string")) fail("test command must be a JSON array starting with \"node\" or \"bun\"");
+  const args = (command as string[]).slice(1);
+  if (command[0] === "bun" && args[0] === "test") args[0] = "--test";
+  try { return runWorkflowSync(deps, args, { cwd, timeoutMs: TEST_TIMEOUT_MS }).status; } catch { return null; }
 }
 
 export function prepare(root: string, options: Options, deps: RuntimeDeps = defaultDeps()): PrepareResult {
@@ -146,7 +149,7 @@ export function prepare(root: string, options: Options, deps: RuntimeDeps = defa
     fs.writeFileSync(target, data);
     copied.push({ path: relative, sha256: sha(data, deps) });
   }
-  if (runNode(command, out, deps) !== 0) fail("baseline tests must pass in the scratch copy before a canary is planted");
+  if (runSelectedTest(command, out, deps) !== 0) fail("baseline tests must pass in the scratch copy before a canary is planted");
 
   const target = path.join(out, canary.file);
   const text = fs.readFileSync(target);
@@ -154,7 +157,7 @@ export function prepare(root: string, options: Options, deps: RuntimeDeps = defa
   if (first === -1 || text.indexOf(canary.find, first + 1) !== -1) fail("canary find text must match exactly once");
   const line = text.slice(0, first).split("\n").length;
   fs.writeFileSync(target, text.slice(0, first) + canary.replace + text.slice(first + canary.find.length));
-  if (runNode(command, out, deps) === 0) fail("a canary that breaks no scratch test is refused");
+  if (runSelectedTest(command, out, deps) === 0) fail("a canary that breaks no scratch test is refused");
 
   // The manifest sits beside the scratch tree, not in it, and is never put in a reviewer prompt.
   const manifest = `${out}.manifest.json`;

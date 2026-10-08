@@ -258,3 +258,41 @@ changed as part of path safety.
 - orca-vendor-dispatch (2026-10-08): kill the whole process group on timeout in `runtime/node.mts` and `bun.mts` (orphans keep pipes open until they exit); move the coordinator/worker membership check into the launch gate (callers of `launchWorker` bypass it today); add a test that changes a ledger slot between read and rename (a deleted compare-before-rename survived); prune settled ledger records and isolate one corrupt record so it does not block every task; Bun grace path drops partial output (Node keeps it); a missing launcher (ENOENT) is labelled unknown-liveness; replace the guessed `WORKER_ENV_MARKERS` once a real worker env is observed; observe Codex/OpenCode completion and peer messaging live (S0 gap); `orca-vendor-reconcile` pitch is next.
 
 - orca-vendor-reconcile (2026-10-08): wire reconcile into /audit and /ship and write the executable grader (`orca-vendor-reconcile-integration`); unit-level proof of the cleanup filter-driver guard and the apply `--ignore-submodules` flag (end-to-end tests are shadowed by other layers); `apply.whitespace`/`core.autocrlf`/`eol`/`ident` can change written bytes (consider `-c` overrides and refusing non-unspecified attributes); admission keeps its own 120 s budget instead of the caller deadline; ignored-path check does not read the user's global excludes; prune settled ledger/evidence/snapshot directories; race of two reconcile processes and a person touching a worktree between decide and perform are untested; third-cycle fixes need an independent re-review; observe real Orca `worker-release` output against the settlement parser.
+
+## Workflow usage metrics followups — 2026-10-08
+
+- `workflow-usage-capture`: shape explicit workflow lifecycle instrumentation and verified Claude/Codex/OpenCode/Cursor adapters; distinguish primary/subagent work and replace automatic token hooks with useful events. Preserve existing historical files; require live capture proof or explicit unverified status. Core 2.16.0 is the dependency, not evidence of automatic capture.
+- `workflow-usage-adoption`: after capture contracts stabilize, shape `/state`, setup/doctor, bundle-sync and project-local rollout. Application projects need their own repository scope; no automatic fleet discovery/upload. Optional comparisons take explicit roots and report incomplete evidence honestly.
+- `metrics-core-maintainability`: reconcile approved cohesive state/report modules with generic size/manual-schema conventions in a bounded mechanical refactor; preserve all behavioral contracts and hostile-state checks, and avoid introducing a validation dependency without a deliberate scope decision (audit D4).
+
+## Test runtime helpers followups — 2026-10-08
+
+- Commit-order blocker (must clear before any clean checkout works): `runtime/test-helpers.mts` and `runtime/test-helpers.test.mts` are untracked while `orca-apply.test.mts` in `HEAD` already imports them (the S4 refactor landed in `fb38efd` under `orca-vendor-reconcile`). Commit `runtime/{test-helpers.mts,test-helpers.test.mts,types.mts,node.mts}` as one unit. Do not rewrite `fb38efd`. Tell `workflow-usage-metrics` to record the dependency in its `deviations.md` and correct `plan.md:98` ("no test-helper/API changes required" is no longer true).
+- `runScript`'s `NODE_FLAGS` branch never executes on Node >= 22.18 or Bun (`process.features.typescript === "strip"`), so Node 22.12-22.17 support is unproven. Extract a pure `nodeFlagsFor(runtime, script, features)` and unit-test both branches; or add a CI matrix entry on Node 22.14.
+- `memoryFs` has untested surface no pilot currently needs: `readdirEntriesSync` (16 lines), `readBytesSync`, the `Uint8Array` content branch, and empty-`files`. Add tests when the first pilot needs them, and re-check `existsSync` on a dangling link (still `true`, real `fs` says `false`) plus `readdirSync` error code (`ENOENT` vs Node's `ENOTDIR`).
+- `CapturedDeps` extends the deps object with `out`/`err` before handing it to production code. Harmless today, but any `{...deps}` into a logged or serialized structure leaks test state. Consider returning `{ deps, out, err }` instead.
+- `FsDeps.symlinkSync` is a required member with no typecheck in this repo. Hand-written `fs` object literals in ~14 test files will fail silently at runtime if one is missed. Add a parity guard in `runtime/invariants.test.mts` asserting every `FsDeps` key exists on both the node and bun adapters, or make the member optional.
+- `runtime/runtime.test.mts` "extended fs surface behaves like node:fs" uses a raw `node:fs` `symlinkSync`, so it never proves the adapter method. Add a read-back case through `deps.fs.symlinkSync` for both adapters.
+- `runtime.test.mts:337` ("the project .env picks the runner but none of its other variables reach `proc.env`") asserts `deepEqual(deps.proc.env, { PATH: "/usr/bin" })`, but `selectRuntime` now injects the resolved runner into `proc.env` (`select.mts:37`). Reproduced at HEAD with the helper pitch's adapter changes stashed. Fix in `fix-workflow-runner-env`: assert the runner key is present and the *other* `.env` keys (`OPENAI_API_KEY`, `NODE_OPTIONS`) are absent, rather than deep-equalling the whole object.
+- `workflowInvocation` selects the bare runner name (`"node"` / `"bun"`) whenever the requested runner differs from the current one, so the child must find that name on `PATH`. An `options.env` without `PATH` makes it fail with ENOENT. Resolve a real executable path, or document that callers must preserve `PATH` when overriding `options.env`.
+- `fix-workflow-runner-env`: `review-bench.mts` requires a node-prefixed test command, and three portable inline hooks start `node -e` without the shared dispatcher. Neither goes through `runWorkflowSync`.
+- Muted candidate set: 34 test files still import `node:fs`/`node:os`/`node:path`/`node:child_process` directly. Only migrate a file that is already being edited; bulk migration has no appetite.
+
+## Runner env followups — 2026-10-08
+
+- `hooks.json` has no test asserting the command wiring of the three `workflow-notice.mts` entries; a typo would go uncaught.
+- Hooks still bootstrap with a literal `node`; a Bun-only host cannot start any hook. Document as a prerequisite or add a bootstrap-free path.
+- `workflow-notice.mts` exits 1 above 64 KiB instead of passing input through. Decide whether fail-open pass-through is preferable.
+- `setup-validator.mts` and `workflow-doctor.mts` pick parse-check args from `deps.runtime`, not the effective runner; no disagreeing input found, `selectRuntime` keeps them aligned.
+- An explicit child `AI_WORKFLOW_RUNNER=""` selects Node even when the process env says Bun.
+- Node parity was not re-run at ship time and Node 22.12-22.17 flag handling is still unproven.
+
+## orca-vendor-reconcile-integration — 2026-10-08
+
+- Run the live smoke for Codex, OpenCode and peer messaging when funds allow; record pass / fail / not-run per target.
+- `reconcile` with no `--check` passes an empty list to the library; decide whether the library should refuse an integration with no independent checks.
+- Trace whether the CLI's verbatim outcome can carry launch stdout/stderr; cap or drop it if so.
+- Grader copies up to 200 chars of error text into its report; emit an error code only.
+- Test-coverage-checker was not dispatched at audit; the next audit should include it.
+- Bun full suite intermittently fails 1-4 tests when run right after the Node suite (runs: 1, 0, 4, 0 failures). Names were not captured; rerun with output saved to identify the flaky tests.
+- `skill-defaults.test.mts` "doctor and setup-validator report the live caveman state truthfully" fails on a clean `git archive` export (also at HEAD): it needs the gitignored local caveman install (`.project/skills/registry.json`, `.claude/skills/caveman/`). Make it install a fixture skill or skip when absent. A clean export also skips 3 more tests than the working tree.

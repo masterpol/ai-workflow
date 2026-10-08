@@ -2,9 +2,14 @@
 
 ← [Back to README](../../README.md)
 
-After agent completion, the collector updates these Git-ignored local files:
+For useful project workflow activity, use the [workflow usage collector](../integrations/workflow-metrics.md).
+It records sessions, agents, skills, phases, pitches, gates and audits without token or cost fields.
+Its automatic capture is not yet configured; the existing hooks described below still use the
+legacy collector. Existing historical files remain untouched and are not imported into usage metrics.
 
-- `.project/metrics/token-consumption.json` is the only stored metric state. It holds current and
+After agent completion, the legacy collector updates these Git-ignored local files:
+
+- `.project/metrics/token-consumption.json` is the legacy collector's stored metric state. It holds current and
   previous completion consumption, increase/decrease comparison inputs, lifetime aggregates, and a
   bounded deduplication list.
 - `.project/metrics/token-consumption.md` and `.project/metrics/token-consumption.html` are

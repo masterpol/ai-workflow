@@ -1,0 +1,26 @@
+{
+  "scratch": "/var/folders/77/m2rbzn2n14q3jc82w4lzjj800000gn/T/runner-audit-gjj33obt",
+  "model": "gpt-6.1-sol",
+  "roles": {
+    "code": {
+      "prompt": "/Users/bryanrestrepo/Documents/ai-workflow-portable/.project/pitches/fix-workflow-runner-env/audit-1-code-prompt.txt",
+      "sha256": "86f4e9271390449303cd2ab01b678296627520fdfd8c5cb40396dfd8e42162ad",
+      "role": "code-reviewer"
+    },
+    "security": {
+      "prompt": "/Users/bryanrestrepo/Documents/ai-workflow-portable/.project/pitches/fix-workflow-runner-env/audit-1-security-prompt.txt",
+      "sha256": "43489bdaddeb19962627dd17f1e8d45d5780dd7f698ff4006b87f42cffb58020",
+      "role": "security-reviewer"
+    },
+    "coverage": {
+      "prompt": "/Users/bryanrestrepo/Documents/ai-workflow-portable/.project/pitches/fix-workflow-runner-env/audit-1-coverage-prompt.txt",
+      "sha256": "d1d054603b0f7e0aa35cc5849b2e18c2bd27c6c2f96cfd752ab06ef1cbdbe4f3",
+      "role": "test-coverage-checker"
+    },
+    "conflicts": {
+      "prompt": "/Users/bryanrestrepo/Documents/ai-workflow-portable/.project/pitches/fix-workflow-runner-env/audit-1-conflicts-prompt.txt",
+      "sha256": "359f598a5f339e38c83d73a1c0e8eaf01edcd6a6bf3d7f44aa53cf3a52687446",
+      "role": "cross-pitch-conflict-checker"
+    }
+  }
+}

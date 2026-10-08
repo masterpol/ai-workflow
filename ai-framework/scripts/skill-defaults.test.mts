@@ -200,8 +200,8 @@ test("workflow-doctor exits 0 on a real bundle copy, and fails loudly on a malfo
   // Keep .project/skills (registry + packages) together with the wrapper files it owns: excluding
   // it would leave an installed skill's wrappers orphaned, which the doctor rightly rejects — a
   // failure that only appears once a skill is actually installed in the repo running this test.
-  // Pin the runner: a developer's project .env may select bun, which this PATH does not contain.
-  const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: "node" };
+  // Pin this fixture to its actual host; the restricted PATH contains only that executable.
+  const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
   const doctorScript = path.join(root, "ai-framework/scripts/workflow-doctor.mts");
 
   const clean = spawnSync(process.execPath, [...RUNTIME_FLAGS, doctorScript, "--json"], { cwd: root, encoding: "utf8", env });
@@ -296,8 +296,8 @@ test("doctor and setup-validator report the live caveman state truthfully across
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");
   fs.cpSync(BUNDLE, root, { recursive: true, filter: (source: string) => !new Set([".git", "node_modules", "metrics", ".DS_Store", ".env"]).has(path.basename(source)) });
-  // Pin the runner: a developer's project .env may select bun, which this PATH does not contain.
-  const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: "node" };
+  // Pin this fixture to its actual host; the restricted PATH contains only that executable.
+  const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
   const node = (script: string, ...args: string[]) => spawnSync(process.execPath, [...RUNTIME_FLAGS, path.join(root, "ai-framework/scripts", script), ...args], { cwd: root, encoding: "utf8", env });
   const doctor = (): Checks => parseChecks(node("workflow-doctor.mts", "--json").stdout);
   const state = (): Check | undefined => doctor().results.find((item: Check) => item.name === "Caveman mode");

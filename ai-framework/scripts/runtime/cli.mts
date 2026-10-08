@@ -3,24 +3,26 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { selectRuntime } from "./select.mts";
 import type { ScriptMain } from "./types.mts";
 import { createNodeDeps } from "./node.mts";
-import { inferRoot, isDirect, runnerEnvironment } from "./entry.mts";
+import { inferRoot, isDirect, runnerEnvironment, workflowInvocation } from "./entry.mts";
 import { resolveRunner } from "./select.mts";
 
 /** Select the runner before constructing Bun dependencies in a direct command. */
 export async function execute(script: string, argv: string[], main: ScriptMain, env: Record<string, string | undefined> = process.env): Promise<number> {
   const boot = createNodeDeps(env);
   const merged = runnerEnvironment(script, env, boot);
-  if (resolveRunner(merged) === "bun" && !process.versions.bun) {
+  const runner = resolveRunner(merged);
+  if (runner !== (process.versions.bun ? "bun" : "node")) {
     try {
-      const result = boot.child.runSync("bun", [script, ...argv], { stdio: "inherit", env: merged });
+      const invocation = workflowInvocation(boot, [script, ...argv], { stdio: "inherit", env: merged });
+      const result = boot.child.runSync(invocation.command, invocation.args, invocation.options);
       if (result.signal) boot.proc.kill(boot.proc.pid, result.signal);
       return result.status ?? 1;
     } catch (error) {
-      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") throw new Error('AI_WORKFLOW_RUNNER=bun but "bun" was not found on PATH');
+      if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") throw new Error(`AI_WORKFLOW_RUNNER=${runner} but "${runner}" was not found on PATH`);
       throw error;
     }
   }
-  const deps = await selectRuntime(inferRoot(script), env);
+  const deps = await selectRuntime(inferRoot(script), merged);
   deps.proc.argv = argv;
   return await main(argv, deps);
 }

@@ -29,14 +29,19 @@ Set `AI_WORKFLOW_RUNNER` in the environment or the project's `.env` (the environ
 | `bun` | Bun, using `Bun.file`, `Bun.write`, `Bun.spawn` and `Bun.CryptoHasher` where Bun has its own API |
 | anything else | one error line, exit 1 |
 
-A direct entry launched through Node with `AI_WORKFLOW_RUNNER=bun` starts Bun with the same
-TypeScript file and arguments. Node must support TypeScript loading before that selection can
-run. Launching `bun <entry>.mts` also works; set `AI_WORKFLOW_RUNNER=bun` to select its Bun adapter.
+A direct entry starts the selected executable with the same TypeScript file and arguments,
+including Node → Bun and Bun → Node. Node must support TypeScript loading before selection can
+run when it is the initial launcher. The resolved runner is forwarded to workflow children.
+Use `runWorkflow` or `runWorkflowSync` from `runtime/entry.mts` for child workflow commands;
+they apply Node's compatibility flags only to Node and honor an explicit child runner override.
+An explicit child environment replaces the inherited environment; include `PATH` when selecting
+another executable by name. A sanitized environment without a runner keeps the parent's selection.
 
 `.env` is read only from the project root that contains `ai-framework/`, never from an unrelated
 working directory. A `.env` symlink leaving that root is ignored. Only the runner setting is
 used here (the Orca switch `AI_WORKFLOW_ORCA_MULTI_AGENT` is read separately, by the Orca launch gate, with the same
-rules). With Bun selected but missing from `PATH`, the command prints one error line and exits 1.
+rules). A selected executable missing from `PATH` fails with an error; it never falls back to
+another runtime. Portable reminder hooks and review-bench test commands use the same selection.
 
 ## Writing a script
 
@@ -49,6 +54,10 @@ rules). With Bun selected but missing from `PATH`, the command prints one error 
   when the file was invoked directly; a library import has no CLI side effects.
 - Keep tests beside their source as `<name>.test.mts` using `node:test`; use in-memory dependencies
   when testing behavior without a real project tree.
+- Tests build those dependencies with `runtime/test-helpers.mts` instead of importing `node:fs`,
+  `node:os`, `node:path` or `node:child_process` directly: `createTestDeps()`, `tempFixture()`,
+  `runScript()`, `memoryFs()` and `captureIo()`. `node:test` and `node:assert` stay as they are —
+  Bun supports both under `bun test`.
 - The OpenCode plugin is `.opencode/plugins/token-consumption.ts`: its host discovers `.ts`
   files, while shared libraries remain `.mts`.
 

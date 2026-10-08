@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { runWorkflowSync } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { migrateInstanceEntries } from "./runtime/migrate.mts";
 /*
@@ -403,7 +404,7 @@ function makeSync(argv: string[], deps: RuntimeDeps) {
     try {
       const args = ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", skillSyncScript, "reconcile", "--json"];
       if (apply) args.push("--apply");
-      const result = deps.child.runSync(deps.proc.execPath, args, { cwd: root, maxBufferBytes: EXEC_MAX_BUFFER });
+      const result = runWorkflowSync(deps, args, { cwd: root, maxBufferBytes: EXEC_MAX_BUFFER });
       if (result.status !== 0 || result.errorCode) throw commandFailure(deps.proc.execPath, args, result.stdout, result.stderr);
       return JSON.parse(result.stdout) as SkillSyncReport;
     } catch (error) {

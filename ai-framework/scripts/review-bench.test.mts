@@ -347,12 +347,13 @@ test("error output carries no control characters from a hostile argument", (t: T
   assert.ok(!/[\u0000-\u0008\u000b-\u001f\u007f]/.test(result.stderr), JSON.stringify(result.stderr));
 });
 
-test("the bench executes nothing but node, on files it copied, and opens no network", () => {
+test("the bench executes selected workflow tests and git, and opens no network", () => {
   const source = fs.readFileSync(SOURCE, "utf8");
   assert.ok(!/require\(["'](?:node:)?(?:https?|net|tls|dgram|dns)["']\)/.test(source));
   assert.ok(!/\bfetch\(|\beval\(|new Function|shell:\s*true/.test(source));
   assert.ok(!/from "node:/.test(source.replace(/^import type .*$/gm, "")), "no runtime node:* import");
-  assert.deepEqual([...source.matchAll(/runSync\("([^"]+)"/g)].map((m) => m[1]).sort(), ["git", "node"]);
+  assert.deepEqual([...source.matchAll(/runSync\("([^"]+)"/g)].map((m) => m[1]).sort(), ["git"]);
+  assert.match(source, /runWorkflowSync\(deps, args,/);
 });
 
 // ---- main() with an in-memory fake RuntimeDeps ------------------------------------------------------

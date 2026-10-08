@@ -339,7 +339,7 @@ test("selectRuntime: the project .env picks the runner but none of its other var
   try {
     writeFileSync(join(root, ".env"), `OPENAI_API_KEY=sk-not-real\nNODE_OPTIONS=--require=/nonexistent\n${RUNNER_VAR}=node\n`);
     const deps = await selectRuntime(root, { PATH: "/usr/bin" });
-    assert.deepEqual(deps.proc.env, { PATH: "/usr/bin" });
+    assert.deepEqual(deps.proc.env, { PATH: "/usr/bin", [RUNNER_VAR]: "node" });
     const seen = deps.child.runSync(deps.proc.execPath, ["-e", "process.stdout.write(String(process.env.OPENAI_API_KEY)+String(process.env.NODE_OPTIONS))"], { env: deps.proc.env });
     assert.equal(seen.stdout, "undefinedundefined");
   } finally { rmSync(root, { recursive: true, force: true }); }
@@ -372,6 +372,7 @@ function commandFixture(t: TestContext): { root: string; script: string } {
   writeFileSync(script, `import { runDirect } from "./runtime/cli.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 export function main(argv: string[], deps: RuntimeDeps): number {
+  if (argv[0] === "host") { deps.io.stdout.write(process.versions.bun ? "bun" : "node"); return 0; }
   if (argv[0] === "signal") { deps.proc.kill(deps.proc.pid, "SIGTERM"); return 0; }
   deps.io.stdout.write(JSON.stringify({ argv, procArgv: deps.proc.argv, runtime: deps.runtime,
     key: deps.proc.env.OPENAI_API_KEY ?? null, options: deps.proc.env.NODE_OPTIONS ?? null }));
@@ -387,6 +388,24 @@ function direct(script: string, args: string[] = [], env: Record<string, string 
     env: { ...process.env, [RUNNER_VAR]: "node", OPENAI_API_KEY: undefined, NODE_OPTIONS: undefined, ...env },
   });
 }
+
+test("direct entries execute on the selected host in both directions", { skip: !bunAvailable }, (t) => {
+  const { script } = commandFixture(t);
+  for (const [bootstrap, selected] of [[nodeExecutable, "bun"], ["bun", "node"]]) {
+    const result = direct(script, ["host"], { [RUNNER_VAR]: selected }, bootstrap);
+    assert.equal(result.status, 0, result.stderr);
+    assert.equal(result.stdout, selected);
+  }
+});
+
+test("Bun bootstrap fails once when selected Node is missing, without falling back", { skip: !bunAvailable }, (t) => {
+  const { root, script } = commandFixture(t);
+  const bunExecutable = spawnSync("bun", ["-e", "process.stdout.write(process.execPath)"], { encoding: "utf8" }).stdout;
+  const result = direct(script, ["host"], { PATH: root, [RUNNER_VAR]: "node" }, bunExecutable);
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, "");
+  assert.equal(result.stderr.trim(), 'AI_WORKFLOW_RUNNER=node but "node" was not found on PATH');
+});
 
 test("direct TypeScript command preserves arguments and exit status without launcher output", (t) => {
   const { script } = commandFixture(t);

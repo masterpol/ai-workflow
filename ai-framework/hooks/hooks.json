@@ -8,7 +8,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(process.platform!=='win32'&&/(pnpm( run)? dev\\b|npm run dev\\b|yarn dev\\b|bun run dev\\b)/.test(cmd)){console.error('[Hook] BLOCKED: Dev server must run in tmux for log access');console.error('[Hook] Use: tmux new-session -d -s dev \\\"pnpm dev\\\"');console.error('[Hook] Then: tmux attach -t dev');process.exit(2)}}catch{}console.log(d)})\""
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-notice.mts\" dev-server"
           }
         ],
         "description": "Block dev servers outside tmux - ensures you can access logs"
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/git push/.test(cmd)){console.error('[Hook] Review changes before push...');console.error('[Hook] Continuing with push (remove this hook to add interactive review)')}}catch{}console.log(d)})\""
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-notice.mts\" push"
           }
         ],
         "description": "Reminder before git push to review changes"
@@ -84,7 +84,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{try{const i=JSON.parse(d);const cmd=i.tool_input?.command||'';if(/gh pr create/.test(cmd)){const out=i.tool_output?.output||'';const m=out.match(/https:\\/\\/github.com\\/[^/]+\\/[^/]+\\/pull\\/\\d+/);if(m){console.error('[Hook] PR created: '+m[0]);const repo=m[0].replace(/https:\\/\\/github.com\\/([^/]+\\/[^/]+)\\/pull\\/\\d+/,'$1');const pr=m[0].replace(/.+\\/pull\\/(\\d+)/,'$1');console.error('[Hook] To review: gh pr review '+pr+' --repo '+repo)}}}catch{}console.log(d)})\""
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-notice.mts\" pull-request"
           }
         ],
         "description": "Log PR URL and provide review command after PR creation"

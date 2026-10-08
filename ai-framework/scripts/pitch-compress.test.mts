@@ -664,7 +664,7 @@ test("injected graph subprocess is bundle-owned and reports only the validated p
   const root = fixture(t);
   seedShippedPitch(root, "runtime-graph");
   write(root, "notes/dest.md", "extracted");
-  const deps = createNodeDeps();
+  const deps = createNodeDeps({ AI_WORKFLOW_RUNNER: "node" });
   const calls = [];
   deps.child = { ...deps.child, runSync: (command, args, options) => {
     calls.push({ command, args, options });
@@ -673,7 +673,7 @@ test("injected graph subprocess is bundle-owned and reports only the validated p
   const tools = createPitchCompress(deps);
   const mapping = { sections: tools.requiredSections(root, "runtime-graph").map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })) };
   assert.equal(tools.commitLedger(root, "runtime-graph", mapping).coverage, 1);
-  assert.deepEqual(calls, [{ command: deps.proc.execPath, args: ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", path.join(__dirname, "graphify.mts"), "--check", "--json"], options: { cwd: root } }]);
+  assert.deepEqual(calls, [{ command: process.versions.bun ? "node" : deps.proc.execPath, args: ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", path.join(__dirname, "graphify.mts"), "--check", "--json"], options: { cwd: root, env: { AI_WORKFLOW_RUNNER: "node" } } }]);
   deps.child.runSync = () => ({ status: 1, signal: null, stdout: '{"problems":[{"message":"stale graph"}]}', stderr: "private child output" });
   assert.throws(() => tools.commitLedger(root, "runtime-graph", mapping), { message: "Knowledge graph invalid: stale graph" });
 });

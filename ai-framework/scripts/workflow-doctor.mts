@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { runWorkflow } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 /*
  * Verifies that the portable workflow is complete after installation. Checks
@@ -14,6 +15,7 @@ import * as docsLinks from "./docs-links.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 const TS_PARSE_SCRIPT = 'const m=require("module"),fs=require("fs");if(typeof m.stripTypeScriptTypes!=="function")process.exit(3);m.stripTypeScriptTypes(fs.readFileSync(process.argv[1],"utf8"));';
+const BUN_PARSE_SCRIPT = 'new Bun.Transpiler({loader:process.argv[2]}).transformSync(require("fs").readFileSync(process.argv[1],"utf8"));';
 
 /** Runs with isolated invocation state and injected host operations. */
 export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
@@ -169,7 +171,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
 
   async function runProcess(command: string, args: string[], options: { timeout?: number } = {}): Promise<{ code?: number | null; stdout: string; stderr: string; error?: Error & { code?: string } }> {
     try {
-      const result = await deps.child.run(command, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" });
+      const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }) : deps.child.run(command, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }));
       return { code: result.status, stdout: result.stdout, stderr: result.stderr };
     } catch (error) {
       return { error: error instanceof Error ? error : new Error(String(error)), stdout: "", stderr: "" };
@@ -218,15 +220,13 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
 
   async function checkNode(relativePath: string): Promise<void> {
     if (!(await requireFile(relativePath))) return;
-    if (deps.proc.versions.bun) {
-      record("info", relativePath, "Node syntax check skipped under Bun; run with Node for parser validation");
-      return;
-    }
     const typed = /\.(mts|ts)$/.test(relativePath);
     // A plain .ts file in a directory without "type": "module" is read as CommonJS by --check, so parse by stripping types instead.
-    const result = await runProcess(deps.proc.execPath, typed ? ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "-e", TS_PARSE_SCRIPT, absolute(relativePath)] : ["--check", absolute(relativePath)]);
+    const args = deps.runtime === "bun" ? ["-e", BUN_PARSE_SCRIPT, absolute(relativePath), typed ? "ts" : "js"] : typed ? ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "-e", TS_PARSE_SCRIPT, absolute(relativePath)] : ["--check", absolute(relativePath)];
+    const result = await runProcess(deps.proc.execPath, args);
     if (typed && result.code === 3) { record("info", relativePath, "TypeScript parse skipped: this Node has no module.stripTypeScriptTypes"); return; }
-    record(result.code === 0 ? "pass" : "fail", relativePath, result.code === 0 ? "valid Node.js syntax" : result.stderr.trim() || "invalid Node.js syntax");
+    const label = deps.runtime === "bun" ? "Bun" : "Node.js";
+    record(result.code === 0 ? "pass" : "fail", relativePath, result.code === 0 ? `valid ${label} syntax` : result.stderr.trim() || `invalid ${label} syntax`);
   }
 
   async function statOrNull(target) {

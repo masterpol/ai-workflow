@@ -1,3 +1,4 @@
+import { runWorkflowSync } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import * as registryModule from "./skill-registry.mts";
@@ -312,7 +313,7 @@ export function createPitchCompress(deps: RuntimeDeps, transactionApi: RegistryA
   // through cwd. ai-framework/rules/security.md section 9: execute only bundle code.
   function checkGraph(root: string): void {
     const script = path.join(import.meta.dirname, "graphify.mts");
-    const result = deps.child.runSync(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", script, "--check", "--json"], { cwd: root });
+    const result = runWorkflowSync(deps, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", script, "--check", "--json"], { cwd: root });
     if (result.status !== 0) {
       // graphify's own problem list is bundle output; anything else (stderr, a stack trace with paths) is not echoed.
       let detail = "graphify --check failed";

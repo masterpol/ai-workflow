@@ -134,8 +134,7 @@ isolation. Not observed: Codex and OpenCode completion, and peer messaging. Thos
 ## Reconcile core (opt-in, library only)
 
 `orca-reconcile.mts` brings completed workers' changes onto the coordinator checkout. It is a library, off unless
-`AI_WORKFLOW_ORCA_MULTI_AGENT=true`, and wires into no phase yet (the audit/ship wiring and the executable grader belong
-to the separate `orca-vendor-reconcile-integration` pitch). Everything before the apply is side-effect free.
+`AI_WORKFLOW_ORCA_MULTI_AGENT=true`; the phases reach it through the CLI below. Everything before the apply is side-effect free.
 
 - **Order**: switch, ledger state (only an attempt completed by its own `worker_done`; a corrupt or refused slot stops
   everything), hardened diff admission, claims versus the measured diff, check-definition guard, baseline check run,
@@ -171,3 +170,39 @@ to the separate `orca-vendor-reconcile-integration` pitch). Everything before th
 - **Limits**: a path could be swapped for a symlink between the check and `git apply` (which itself refuses to write
   through one); snapshot directories are not pruned; a worker that leaves edits uncommitted keeps its tree.
 
+## CLI, grader and live-smoke status
+
+**CLI.** `node ai-framework/scripts/orca-run.mts <status|dispatch|collect|reconcile> --root <dir> [--input <file>] [--check <name>]...`
+parses arguments, validates input, makes one library call and prints one JSON object. Every switch, launch, path and apply
+guard stays in the libraries. `--input` is a regular file of at most 64 KiB inside `--root` (no symlinks). `status` is
+read-only (`--probe` opts into an Orca call). `--check` selects from a fixed catalog by name only: `workflow-doctor`,
+`setup-validator`, `graph-check`, `node-tests`; command text cannot be supplied.
+
+| Exit | Meaning |
+|---|---|
+| 0 | launched, resumed, accepted or integrated |
+| 3 | normal workflow or refused with no side effects (switch off, ineligible, a guard refused) |
+| 2 | usage error |
+| 1 | internal error |
+
+**Phase wiring.** `/build` (dispatch, collect), `/audit` and `/ship` (reconcile) carry one removable opt-in block each,
+off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true`. Worker text is data and never chooses commands, paths, vendors or approvals;
+the Approve / Revise / Back / Stop gates stay human.
+
+**Grader.** `node ai-framework/scripts/orca-eval-grader.mts --root .` runs `.project/evals/datasets/orca-vendor-orchestration.json`
+and reports each case as `executes` (run through the real libraries with fakes or temporary git repos), `parses-only`, or
+`live-only` (always not-run). The summary keeps the three counts separate and never merges them. `static-fixtures-do-not-prove-runtime`
+stays `liveCompatibility: "unverified"`; a smoke record cannot turn it into a pass.
+
+**Live smoke status.** Nothing counts `not-run` as a pass.
+
+| Target | Status |
+|---|---|
+| Claude (coordinator and worker) | observed |
+| Codex | not-run (no funds) |
+| OpenCode | not-run (no funds) |
+| Peer messaging | not-run |
+
+Manual smoke checklist: set the switch in a scratch project; run `status --probe`; dispatch one scope to an alternate vendor
+with a spend cap you set in advance; `collect` after `worker_done`; `reconcile` with `--check workflow-doctor`; save the JSON
+outputs under `.project/metrics/orca-smoke/` (local, Git-ignored) and record pass, fail or not-run per target in the pitch.

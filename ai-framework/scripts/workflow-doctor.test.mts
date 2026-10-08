@@ -69,11 +69,27 @@ test("doctor reports invalid TypeScript from the real Node parser", async (t) =>
   const capture = injected(root);
   const base = createNodeDeps();
   capture.deps.child.run = async (command, args, options) => {
-    if (args.at(-1)?.endsWith("bundle-sync.mts")) return base.child.run("node", args, options);
+    if (args.at(-1)?.endsWith("bundle-sync.mts")) return base.child.run("node", args, { ...options, env: { PATH: process.env.PATH } });
     return { status: 0, signal: null, stdout: "", stderr: "" };
   };
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "fail" && /SyntaxError|Unexpected token|invalid Node.js syntax/.test(item.detail)), JSON.stringify(checks(capture.output).filter((item) => item.name.endsWith("bundle-sync.mts"))));
+});
+
+test("doctor checks TypeScript syntax with Bun instead of skipping it", { skip: !process.versions.bun }, async (t) => {
+  const root = fixture(t);
+  write(root, "ai-framework/scripts/bundle-sync.mts", "export const invalid: number = ;\n");
+  const capture = injected(root);
+  capture.deps.runtime = "bun";
+  capture.deps.proc.versions = { bun: process.versions.bun! };
+  capture.deps.proc.env = { PATH: process.env.PATH, AI_WORKFLOW_RUNNER: "bun" };
+  const base = createNodeDeps();
+  capture.deps.child.run = async (command, args, options) => {
+    if (args.includes(path.join(root, "ai-framework/scripts/bundle-sync.mts"))) return base.child.run(command, args, options);
+    return { status: 0, signal: null, stdout: "", stderr: "" };
+  };
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "fail" && /Unexpected|Expected|error/i.test(item.detail)));
 });
 
 test("fix restores missing scaffold files while retaining existing instance data", async (t) => {
