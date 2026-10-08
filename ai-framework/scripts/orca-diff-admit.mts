@@ -67,7 +67,7 @@ export const REASONS = Object.freeze([
   "git-timeout", "git-output-limit", "git-failed",
   "symlink", "symlink-ancestor", "gitlink", "non-regular", "unmerged",
   "path-invalid", "path-control", "path-absolute", "path-backslash", "path-dotdot", "path-dash", "path-too-long", "path-git-dir",
-  "case-collision", "mode-special", "mode-invalid", "too-large", "patch-not-utf8", "admit-error",
+  "case-collision", "mode-special", "mode-invalid", "too-large", "patch-not-utf8", "admit-error", "path-local-data",
 ] as const);
 export type RejectReason = (typeof REASONS)[number];
 
@@ -110,6 +110,8 @@ export function validatePath(path: unknown): RejectReason | undefined {
   if (path.startsWith("/") || /^[A-Za-z]:/.test(path)) return "path-absolute";
   if (path.includes("\\")) return "path-backslash";
   if (path.startsWith("-")) return "path-dash";
+  // Local data (ledger, snapshots, evidence) is never something a worker may land in the coordinator.
+  if (/^\.project\/metrics(\/|$)/i.test(path)) return "path-local-data";
   for (const part of path.split("/")) {
     if (part === "" || part === ".") return "path-invalid";
     if (part === "..") return "path-dotdot";

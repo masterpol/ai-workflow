@@ -384,14 +384,20 @@ test("removal passes only the plain remove subcommand and no forcing or pruning 
   }
 });
 
-test("git itself refuses to remove a tree that turned dirty after the decision", async (t: TestContext) => {
+test("performCleanup re-checks a decision: a tree that turned dirty (ignored files included) or lost its evidence is not removed", async (t: TestContext) => {
   const { f } = proven(t);
   const decision = await decide(f);
   assert.equal(decision.action, "remove");
   write(path.join(f.wt, "late-work.txt"), "user came back");
-  const result = await performCleanup(decision, deps);
-  assert.equal(result.status, "failed");
+  const dirty = await performCleanup(decision, deps);
+  assert.deepEqual([dirty.status, dirty.reason], ["refused", "worktree-dirty"]);
   assert.ok(fs.existsSync(path.join(f.wt, "late-work.txt")));
+  fs.rmSync(path.join(f.wt, "late-work.txt"));
+  const forged = { ...decision, manifestSha256: "0".repeat(64) };
+  const mismatch = await performCleanup(forged, deps);
+  assert.equal(mismatch.status, "refused");
+  assert.match(mismatch.reason, /^evidence-/);
+  assert.ok(fs.existsSync(f.wt));
 });
 
 test("cleanup resumes after a crash between steps", async (t: TestContext) => {
@@ -399,7 +405,7 @@ test("cleanup resumes after a crash between steps", async (t: TestContext) => {
     // Crash before removal ran (injected failure), then a second call finishes.
     const { f } = proven(t);
     const decision = await decide(f);
-    const crashing = spyDeps(async (args) => { if (args.includes("remove")) throw new Error("crash"); return { status: 0, signal: null, stdout: "", stderr: "" }; });
+    const crashing = spyDeps(async (args) => { if (args.includes("remove")) throw new Error("crash"); return { status: args.includes("config") ? 1 : 0, signal: null, stdout: "", stderr: "" }; });
     assert.equal((await performCleanup(decision, crashing.deps)).status, "failed");
     assert.ok(fs.existsSync(f.wt));
     assert.deepEqual(await performCleanup(decision, deps), { status: "ok", reason: "removed" });

@@ -71,8 +71,8 @@ export function validRelativePath(value: unknown): value is string {
   if (parts.some((part) => part === "" || part === "." || part === "..")) return false;
   if (parts.some((part) => part.toLowerCase() === ".git")) return false;
   const lower = parts.map((part) => part.toLowerCase());
-  const store = SNAPSHOT_DIR_PARTS;
-  if (lower.length >= store.length && store.every((part, index) => lower[index] === part)) return false;
+  // The whole local-data directory is off limits: workers must not land snapshots, evidence or ledger records.
+  if (lower.length >= 2 && lower[0] === ".project" && lower[1] === "metrics") return false;
   return true;
 }
 
@@ -84,6 +84,8 @@ export function pathsOverlap(a: string, b: string): boolean {
 }
 
 const hasStatMode = (stat: StatLike): number => stat.mode & 0o7777;
+
+const PATCH_SPECIAL_MODE = /^(?:new file mode|new mode|old mode|deleted file mode) (?:120000|160000)$|^index [0-9a-f.]+ (?:120000|160000)$|^(?:Subproject commit)/m;
 
 interface Ctx { root: string; deps: RuntimeDeps; deadlineMs: number; now: () => number }
 type GitOk = { ok: true; stdout: string };
@@ -100,7 +102,7 @@ function gitEnv(deps: RuntimeDeps): Record<string, string> {
   return env;
 }
 
-async function git(ctx: Ctx, args: readonly string[], input?: string): Promise<GitOk | Fail> {
+async function git(ctx: Ctx, args: readonly string[], input?: string, okStatuses: readonly number[] = [0]): Promise<GitOk | Fail> {
   const remaining = ctx.deadlineMs - ctx.now();
   if (!(remaining >= 1)) return fail("time-budget");
   try {
@@ -108,7 +110,7 @@ async function git(ctx: Ctx, args: readonly string[], input?: string): Promise<G
       timeoutMs: Math.floor(remaining), maxBufferBytes: GIT_OUTPUT_BYTES, killSignal: "SIGKILL", stdio: "pipe" });
     if (result.errorCode === "ETIMEDOUT") return fail("git-timeout");
     if (result.errorCode === "ENOBUFS") return fail("git-output-limit");
-    if (result.status !== 0 || result.signal) return fail("git-failed");
+    if (result.status === null || !okStatuses.includes(result.status) || result.signal) return fail("git-failed");
     return { ok: true, stdout: result.stdout };
   } catch { return fail("git-failed"); }
 }
@@ -356,6 +358,74 @@ export function rollback(options: RollbackOptions): RollbackResult {
   return { status: "restored", restored };
 }
 
+/** Paths whose bytes on disk differ from the baseline blob, or that the index hides from `git status`. */
+async function hiddenEdits(ctx: Ctx, baseline: string, touched: readonly string[]): Promise<{ ok: true; path?: string } | Fail> {
+  const flags = await git(ctx, ["ls-files", "-v", "-z", "--", ...touched]);
+  if (!flags.ok) return flags;
+  for (const record of flags.stdout.split("\0").filter(Boolean)) {
+    if (/^[a-zS]$/.test(record[0] ?? "")) return { ok: true, path: record.slice(2) };
+  }
+  const tree = await git(ctx, ["ls-tree", "-z", "-r", baseline, "--", ...touched]);
+  if (!tree.ok) return tree;
+  const blobs = new Map<string, string>();
+  const modes = new Map<string, string>();
+  for (const record of tree.stdout.split("\0").filter(Boolean)) {
+    const tab = record.indexOf("\t");
+    const parts = record.slice(0, tab).split(" ");
+    if (tab > 0 && parts[2]) { blobs.set(record.slice(tab + 1), parts[2]); modes.set(record.slice(tab + 1), parts[0]); }
+  }
+  const present: string[] = [];
+  for (const rel of touched) {
+    const walked = walkPath(ctx.root, rel, ctx.deps);
+    if ("refused" in walked) return fail(walked.refused, { path: rel });
+    if (walked.stat === null) { if (blobs.has(rel)) return { ok: true, path: rel }; continue; }
+    // The executable bit is part of the user's edit too (and `core.fileMode` comes from the shared config).
+    const baselineMode = modes.get(rel);
+    if (baselineMode !== undefined && ((walked.stat.mode & 0o111) !== 0) !== (baselineMode === "100755")) return { ok: true, path: rel };
+    present.push(rel);
+  }
+  if (present.length === 0) return { ok: true };
+  const hashed = await git(ctx, ["hash-object", "--no-filters", "--stdin-paths"], `${present.join("\n")}\n`);
+  if (!hashed.ok) return hashed;
+  const shas = hashed.stdout.split("\n").filter(Boolean);
+  if (shas.length !== present.length) return fail("hash-mismatch");
+  for (let i = 0; i < present.length; i++) {
+    if (blobs.get(present[i]) !== shas[i]) return { ok: true, path: present[i] };
+  }
+  return { ok: true };
+}
+
+/** True when the patch's change is already in the working tree (it reverse-applies cleanly). Never writes. */
+export async function isApplied(options: { root: string; patch: string; entries: readonly AdmittedEntry[]; deps: RuntimeDeps; deadlineMs?: number; now?: () => number }): Promise<boolean> {
+  const { deps } = options;
+  try {
+    const root = deps.fs.realpathSync(options.root);
+    const now = options.now ?? (() => deps.clock.perfNowMs());
+    const ctx: Ctx = { root, deps, now, deadlineMs: options.deadlineMs ?? now() + DEFAULT_BUDGET_MS };
+    // `git apply` converts the working-tree file through any configured clean filter, which would run worker-chosen
+    // commands: with a filter attribute on any of the paths, report "not applied" and let the apply step refuse.
+    const paths = [...new Set(options.entries.flatMap((entry) => (entry.from ? [entry.path, entry.from] : [entry.path])))];
+    if (paths.length === 0 || !paths.every(validRelativePath)) return false;
+    // A reverse `git apply --check` ignores permission bits, so the working tree is also compared with every entry:
+    // a file must exist (with the entry's executable bit) or be absent, exactly as the change leaves it.
+    for (const entry of options.entries) {
+      const gone = entry.kind === "delete";
+      const walked = walkPath(root, entry.path, deps);
+      if ("refused" in walked) return false;
+      if (gone) { if (walked.stat !== null) return false; continue; }
+      if (walked.stat === null || !walked.stat.isFile() || ((walked.stat.mode & 0o111) !== 0) !== (entry.mode === "100755")) return false;
+      if (entry.kind === "rename" && entry.from) { const source = walkPath(root, entry.from, deps); if ("refused" in source || source.stat !== null) return false; }
+    }
+    const configured = await git(ctx, ["config", "--get-regexp", "^filter\\."], undefined, [0, 1]);
+    if (!configured.ok || configured.stdout.trim() !== "") return false;
+    const attrs = await git(ctx, ["check-attr", "-z", "filter", "--", ...paths]);
+    if (!attrs.ok) return false;
+    const fields = attrs.stdout.split("\0");
+    for (let i = 0; i + 2 < fields.length; i += 3) if (fields[i + 2] !== "unspecified") return false;
+    return (await git(ctx, ["apply", "--check", "--reverse", "--binary", "-"], options.patch)).ok;
+  } catch { return false; }
+}
+
 export async function applyAdmitted(options: ApplyOptions): Promise<ApplyResult> {
   const { deps } = options;
   const refuse = (f: Fail): ApplyResult => ({ status: "refused", reason: f.reason, ...(f.path !== undefined ? { path: f.path } : {}), ...(f.worker !== undefined ? { worker: f.worker } : {}) });
@@ -402,15 +472,33 @@ export async function applyAdmitted(options: ApplyOptions): Promise<ApplyResult>
       if (walked.stat !== null && !walked.stat.isFile()) return refuse(fail("non-regular-file", { path: rel }));
     }
 
-    const status = await git(ctx, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--no-renames"]);
+    // `git status` scans the whole tree, not only the touched paths, and a worker sharing the git directory can set a
+    // filter for a file it never touches. So any configured filter driver stops the apply before status runs.
+    const drivers = await git(ctx, ["config", "--get-regexp", "^filter\\."], undefined, [0, 1]);
+    if (!drivers.ok) return refuse(drivers);
+    if (drivers.stdout.trim() !== "") return refuse(fail("filter-driver"));
+    // Clean/smudge filters would run worker-chosen commands, including during `git status`, so this check comes first.
+    const attrs = await git(ctx, ["check-attr", "-z", "filter", "--", ...touched]);
+    if (!attrs.ok) return refuse(attrs);
+    const fields = attrs.stdout.split("\0");
+    for (let i = 0; i + 2 < fields.length; i += 3) {
+      if (fields[i + 2] !== "unspecified") return refuse(fail("filter-driver", { path: fields[i] }));
+    }
+    const status = await git(ctx, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--no-renames", "--ignore-submodules=all"]);
     if (!status.ok) return refuse(status);
     const dirty = parseStatus(status.stdout);
     for (const rel of touched) {
       const hit = dirty.find((d) => pathsOverlap(rel, d));
       if (hit !== undefined) return refuse(fail("dirty-overlap", { path: rel }));
     }
+    // `git status` can be told to ignore a file (assume-unchanged, skip-worktree) through the index, which a worker
+    // sharing the repository can set. So also compare the bytes on disk with the baseline blob for every touched path.
+    const hidden = await hiddenEdits(ctx, options.baseline, touched);
+    if (!hidden.ok) return refuse(hidden);
+    if (hidden.path !== undefined) return refuse(fail("dirty-overlap", { path: hidden.path }));
 
     for (const worker of workers) {
+      if (PATCH_SPECIAL_MODE.test(worker.patch)) return refuse(fail("patch-mode", { worker: worker.attemptKey }));
       const check = await git(ctx, ["apply", "--check", "--binary", "-"], worker.patch);
       if (!check.ok) return refuse({ ...check, reason: check.reason === "git-failed" ? "apply-check-failed" : check.reason, worker: worker.attemptKey });
     }

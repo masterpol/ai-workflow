@@ -131,3 +131,43 @@ It is a library for the build phase, not a command, and stays inert unless the p
 Observed live (Orca 1.4.222, `runtime-contract.md` in the dispatch pitch): Claude launch, completion, settlement and
 isolation. Not observed: Codex and OpenCode completion, and peer messaging. Those remain live-smoke criteria.
 
+## Reconcile core (opt-in, library only)
+
+`orca-reconcile.mts` brings completed workers' changes onto the coordinator checkout. It is a library, off unless
+`AI_WORKFLOW_ORCA_MULTI_AGENT=true`, and wires into no phase yet (the audit/ship wiring and the executable grader belong
+to the separate `orca-vendor-reconcile-integration` pitch). Everything before the apply is side-effect free.
+
+- **Order**: switch, ledger state (only an attempt completed by its own `worker_done`; a corrupt or refused slot stops
+  everything), hardened diff admission, claims versus the measured diff, check-definition guard, baseline check run,
+  snapshot and apply of all workers, post-apply checks, hash-verified evidence, ledger `settled`, then cleanup.
+- **Diff admission** (`orca-diff-admit.mts`): reads the worker tree through git with hooks, attributes, filters,
+  textconv, fsmonitor and global config disabled. The changed set comes from `git diff --raw` plus untracked files, never
+  from worker mail. It rejects symlinks, submodule entries, bad or aliased paths, case collisions, special modes,
+  oversize diffs, a baseline that is not an ancestor, an unmerged index, and anything under `.project/metrics/` (local
+  data); binary files round-trip. The no-filter guarantee holds for admission only: later steps are guarded separately (below).
+- **Apply** (`orca-apply.mts`): refuses when HEAD moved or an admitted path overlaps the user's uncommitted work
+  (no merge, no conflict markers). Overlap is judged from `git status` and also from the bytes on disk against the
+  baseline blob and the index flags (assume-unchanged, skip-worktree), because a worker sharing the repository can make
+  `git status` blind to an edit; the executable bit counts as part of an edit. It refuses when any `filter.*` driver is
+  configured in the repository (clean/smudge drivers run worker-chosen commands during `git status` and `git apply`,
+  and `git status` scans the whole tree, so a driver on an untouched file still runs; this also blocks Git LFS
+  repositories), when a patch declares a symlink or submodule mode, and when a path lies under `.project/metrics/`. It runs `git apply --check` for every worker before any write; snapshots only the touched
+  paths; refuses symlinked ancestors; a later failure rolls back only those paths. It never uses stash, reset, checkout of
+  the tree, clean, restore or force.
+- **Checks**: only commands from a catalog the trusted caller passes in, with the worker env allowlist and a deadline.
+  They run on the baseline first; a check that passed there and fails after the apply is worker-caused and rolls the change
+  back (`rollbackOnFailure: false` keeps it and reports `failedChecks`). A diff that touches check definitions (package
+  and lock files, config, `node_modules/`, test directories, `ai-framework/scripts/`, hooks, adapters, evals), a path the
+  coordinator ignores, or a different file set than the worker claimed needs `humanConfirmed`. Checks run worker-authored
+  code with your home directory readable; without a sandbox that cannot be prevented, so review diffs first.
+- **Evidence and cleanup** (`orca-evidence.mts`): patch, manifest with file hashes and check output are copied under
+  `.project/metrics/orca-evidence/` and verified. A worker tree is removed (plain `git worktree remove`, never force or
+  prune) only with positive proof: verified evidence, a parsed release receipt with `state: "released"` (not `retained` or
+  `user_takeover`), a clean tree registered under an allowed workspace root, and no commits the evidence does not cover.
+  Evidence verification also checks each file's executable bit. Otherwise the attempt ends `integrated-uncleaned` with the leftover paths. A repository with any configured `filter.*`
+  driver, or a nested repository (gitlink) in the worker tree, keeps that tree (cleanup would run `git status` against it,
+  and `performCleanup` re-verifies the evidence and re-checks that the tree is clean, ignored files included, immediately before `git worktree remove`), and git runs with absolute PATH entries only. A rerun re-admits the worker's diff, detects that it is already in the tree (contents and executable
+  bit), runs the checks (a resumed attempt is settled only if every check passes, even in a batch with new workers), and reuses evidence only if it was written for exactly that patch and those entries; a settled attempt whose worker tree is gone is trusted only on verifying evidence.
+- **Limits**: a path could be swapped for a symlink between the check and `git apply` (which itself refuses to write
+  through one); snapshot directories are not pruned; a worker that leaves edits uncommitted keeps its tree.
+

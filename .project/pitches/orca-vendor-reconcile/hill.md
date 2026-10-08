@@ -6,11 +6,11 @@
 
 | Scope | Position | Last moved | Notes |
 |-------|----------|------------|-------|
-| R1 | uphill 0% | 2026-10-08 | diff admission, deep subagent |
-| R2 | uphill 0% | 2026-10-08 | snapshot/apply/rollback, standard subagent |
-| R3 | uphill 0% | 2026-10-08 | Wave B: evidence and cleanup |
-| R4 | uphill 0% | 2026-10-08 | Wave B: orchestration and checks |
-| R5 | uphill 0% | 2026-10-08 | release |
+| R1 | done | 2026-10-08 | built (opus subagent, session cut off; orchestrator verified): 31 tests Node+Bun, 5 guard mutants red |
+| R2 | done | 2026-10-08 | built (sonnet subagent): 20 tests Node+Bun, 7 mutants red; incident D2 |
+| R3 | done | 2026-10-08 | built (sonnet subagent): 19 tests Node+Bun, 8 mutants red |
+| R4 | done | 2026-10-08 | built (main thread): 14 tests Node+Bun, 12 guard mutants red |
+| R5 | done | 2026-10-08 | docs and changelog 2.15.0 |
 
 ## Hill positions reference
 

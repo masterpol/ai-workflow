@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
+import { createTestDeps, tempFixture } from "./runtime/test-helpers.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
@@ -16,22 +13,24 @@ type Worker = import("./orca-apply.mts").AdmittedWorker;
 type Entry = import("./orca-apply.mts").AdmittedEntry;
 
 const HERE = import.meta.dirname;
-const deps = createNodeDeps();
+const deps = createTestDeps();
 const GIT_ENV = { ...process.env, GIT_CONFIG_GLOBAL: "/dev/null", GIT_CONFIG_NOSYSTEM: "1", GIT_AUTHOR_NAME: "t", GIT_AUTHOR_EMAIL: "t@t", GIT_COMMITTER_NAME: "t", GIT_COMMITTER_EMAIL: "t@t" };
 
 function sh(cwd: string, args: string[]): string {
-  return execFileSync("git", ["-c", "core.autocrlf=false", ...args], { cwd, env: GIT_ENV, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  const result = deps.child.runSync("git", ["-c", "core.autocrlf=false", ...args], { cwd, env: GIT_ENV, encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  if (result.status !== 0) throw new Error(`git ${args.join(" ")} failed: ${result.stderr}`);
+  return result.stdout;
 }
 function tmp(t: TestContext, real = true): string {
-  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "orca-apply-"));
-  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
-  return real ? fs.realpathSync(dir) : dir;
+  const dir = tempFixture(deps, {});
+  t.after(() => deps.fs.rmSync(dir, { recursive: true, force: true }));
+  return real ? deps.fs.realpathSync(dir) : dir;
 }
 function put(root: string, rel: string, data: string | Buffer, mode = 0o644): void {
-  const file = path.join(root, rel);
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, data);
-  fs.chmodSync(file, mode);
+  const file = deps.path.join(root, rel);
+  deps.fs.mkdirSync(deps.path.dirname(file), { recursive: true });
+  deps.fs.writeFileSync(file, data);
+  deps.fs.chmodSync(file, mode);
 }
 const BASE: Record<string, string> = { "a.txt": "alpha\nline2\n", "b.txt": "bravo\nline2\n", "c.txt": "charlie\n", "src/d.txt": "delta\n" };
 function makeRepo(t: TestContext, extra: (root: string) => void = () => {}, real = true): { root: string; head: string } {
@@ -54,23 +53,23 @@ function patchFrom(t: TestContext, repo: string, mutate: (clone: string) => void
 }
 const entry = (p: string, kind: Entry["kind"] = "modify", extra: Partial<Entry> = {}): Entry => ({ path: p, kind, mode: "100644", binary: false, size: 0, ...extra });
 const worker = (attemptKey: string, patch: string, entries: Entry[]): Worker => ({ attemptKey, entries, patch });
-const read = (root: string, rel: string): string => fs.readFileSync(path.join(root, rel), "utf8");
-const modeOf = (root: string, rel: string): number => fs.lstatSync(path.join(root, rel)).mode & 0o777;
+const read = (root: string, rel: string): string => deps.fs.readFileSync(deps.path.join(root, rel), "utf8");
+const modeOf = (root: string, rel: string): number => deps.fs.lstatSync(deps.path.join(root, rel)).mode & 0o777;
 const call = (root: string, head: string, workers: Worker[], d: RuntimeDeps = deps, extra: Record<string, unknown> = {}) =>
   applyAdmitted({ root, baseline: head, admitted: workers, workerOrder: workers.map((w) => w.attemptKey), deps: d, ...extra });
-const storeExists = (root: string): boolean => fs.existsSync(path.join(root, ".project/metrics/orca-snapshots"));
+const storeExists = (root: string): boolean => deps.fs.existsSync(deps.path.join(root, ".project/metrics/orca-snapshots"));
 
 /** Walks a tree (excluding .git and the snapshot store) into a path -> "mode:content" map. */
 function tree(root: string): Record<string, string> {
   const out: Record<string, string> = {};
   const walk = (dir: string, rel: string): void => {
-    for (const name of fs.readdirSync(dir).sort()) {
+    for (const name of deps.fs.readdirSync(dir).sort()) {
       if (rel === "" && name === ".git") continue;
-      const abs = path.join(dir, name);
+      const abs = deps.path.join(dir, name);
       const r = rel ? `${rel}/${name}` : name;
       if (r === ".project" || r === ".project/metrics" || r === ".project/metrics/orca-snapshots") continue;
-      const st = fs.lstatSync(abs);
-      if (st.isDirectory()) { out[`${r}/`] = "dir"; walk(abs, r); } else out[r] = st.isSymbolicLink() ? `link:${fs.readlinkSync(abs)}` : `${st.mode & 0o777}:${fs.readFileSync(abs).toString("base64")}`;
+      const st = deps.fs.lstatSync(abs);
+      if (st.isDirectory()) { out[`${r}/`] = "dir"; walk(abs, r); } else out[r] = st.isSymbolicLink() ? `link:${deps.fs.readlinkSync(abs)}` : `${st.mode & 0o777}:${deps.fs.readFileSync(abs).toString("base64")}`;
     }
   };
   walk(root, "");
@@ -132,7 +131,7 @@ test("an admitted change overlapping a dirty file is refused before any write, n
   assert.equal((result as { path?: string }).path, "new.txt");
   assert.deepEqual(tree(root), before);
 
-  fs.rmSync(path.join(root, "new.txt"));
+  deps.fs.rmSync(deps.path.join(root, "new.txt"));
   put(root, "a.txt", "alpha STAGED\nline2\n");
   sh(root, ["add", "a.txt"]);
   put(root, "a.txt", "alpha CHANGED\nline2\n"); // identical to the patch result, still overlapping
@@ -148,7 +147,7 @@ test("an overlap with a directory the user changed, or a rename source, is refus
   const result = await call(root, head, [worker("w1", patch, [entry("c2.txt", "rename", { from: "c.txt" })])]);
   assert.equal((result as { reason: string }).reason, "dirty-overlap");
   assert.equal(read(root, "c.txt"), "charlie LOCAL\n");
-  assert.equal(fs.existsSync(path.join(root, "c2.txt")), false);
+  assert.equal(deps.fs.existsSync(deps.path.join(root, "c2.txt")), false);
 });
 
 test("baseline-moved and malformed baselines are refused with no write", async (t: TestContext) => {
@@ -192,7 +191,7 @@ test("a failure after worker 1's write rolls back exactly the touched paths, inc
   const p1 = patchFrom(t, root, (c) => {
     put(c, "a.txt", "alpha CHANGED\nline2\n");
     put(c, "newdir/sub/created.txt", "created\n");
-    fs.rmSync(path.join(c, "run.sh"));
+    deps.fs.rmSync(deps.path.join(c, "run.sh"));
   });
   const p2 = patchFrom(t, root, (c) => put(c, "c.txt", "charlie CHANGED\n"));
   const w = [worker("w1", p1, [entry("a.txt"), entry("newdir/sub/created.txt", "add"), entry("run.sh", "delete")]), worker("w2", p2, [entry("c.txt")])];
@@ -205,11 +204,11 @@ test("a failure after worker 1's write rolls back exactly the touched paths, inc
   assert.deepEqual([...result.restored].sort(), ["a.txt", "newdir/sub/created.txt", "run.sh"]);
   assert.deepEqual(tree(root), before);
   assert.equal(modeOf(root, "run.sh"), 0o755);
-  assert.equal(fs.existsSync(path.join(root, "newdir")), false);
+  assert.equal(deps.fs.existsSync(deps.path.join(root, "newdir")), false);
 
   // Rollback is idempotent: a second run changes nothing and reports nothing restored.
-  const store = path.join(root, ".project/metrics/orca-snapshots");
-  const snapshot = path.join(store, fs.readdirSync(store)[0]);
+  const store = deps.path.join(root, ".project/metrics/orca-snapshots");
+  const snapshot = deps.path.join(store, deps.fs.readdirSync(store)[0]);
   const again = rollback({ root, snapshot, touched: ["a.txt", "newdir/sub/created.txt", "run.sh"], deps });
   assert.deepEqual(again, { status: "restored", restored: [] });
   assert.deepEqual(tree(root), before);
@@ -218,7 +217,7 @@ test("a failure after worker 1's write rolls back exactly the touched paths, inc
   const rerun = await call(root, head, w);
   assert.equal(rerun.status, "applied");
   assert.equal(read(root, "newdir/sub/created.txt"), "created\n");
-  assert.equal(fs.existsSync(path.join(root, "run.sh")), false);
+  assert.equal(deps.fs.existsSync(deps.path.join(root, "run.sh")), false);
 });
 
 test("rollback restores only the touched paths it is given", async (t: TestContext) => {
@@ -232,46 +231,46 @@ test("rollback restores only the touched paths it is given", async (t: TestConte
   assert.equal(read(root, "a.txt"), BASE["a.txt"]);
   assert.equal(read(root, "c.txt"), "charlie CHANGED\n");
   assert.equal(rollback({ root, snapshot: result.snapshot, touched: ["b.txt"], deps }).status, "refused");
-  assert.equal(rollback({ root, snapshot: path.join(root, ".project"), touched: ["a.txt"], deps }).status, "refused");
+  assert.equal(rollback({ root, snapshot: deps.path.join(root, ".project"), touched: ["a.txt"], deps }).status, "refused");
 });
 
 test("a symlinked target is refused and its victim stays byte-identical", async (t: TestContext) => {
   const outside = tmp(t);
-  const victim = path.join(outside, "victim.txt");
-  fs.writeFileSync(victim, "victim\n");
-  const { root, head } = makeRepo(t, (r) => fs.symlinkSync(victim, path.join(r, "link.txt")));
-  const patch = patchFrom(t, root, (c) => { fs.rmSync(path.join(c, "link.txt")); put(c, "link.txt", "regular now\n"); });
+  const victim = deps.path.join(outside, "victim.txt");
+  deps.fs.writeFileSync(victim, "victim\n");
+  const { root, head } = makeRepo(t, (r) => deps.fs.symlinkSync(victim, deps.path.join(r, "link.txt")));
+  const patch = patchFrom(t, root, (c) => { deps.fs.rmSync(deps.path.join(c, "link.txt")); put(c, "link.txt", "regular now\n"); });
   const before = tree(root);
   const result = await call(root, head, [worker("w1", patch, [entry("link.txt")])]);
   assert.equal((result as { reason: string }).reason, "symlink-path");
-  assert.equal(fs.readFileSync(victim, "utf8"), "victim\n");
+  assert.equal(deps.fs.readFileSync(victim, "utf8"), "victim\n");
   assert.deepEqual(tree(root), before);
   assert.equal(storeExists(root), false);
 });
 
 test("a symlinked ancestor directory is refused and nothing lands behind it", async (t: TestContext) => {
   const outside = tmp(t);
-  const { root, head } = makeRepo(t, (r) => fs.symlinkSync(outside, path.join(r, "sub")));
+  const { root, head } = makeRepo(t, (r) => deps.fs.symlinkSync(outside, deps.path.join(r, "sub")));
   const patch = "diff --git a/sub/new.txt b/sub/new.txt\nnew file mode 100644\n--- /dev/null\n+++ b/sub/new.txt\n@@ -0,0 +1 @@\n+pwn\n";
   const result = await call(root, head, [worker("w1", patch, [entry("sub/new.txt", "add")])]);
   assert.equal((result as { reason: string }).reason, "symlink-path");
-  assert.deepEqual(fs.readdirSync(outside), []);
+  assert.deepEqual(deps.fs.readdirSync(outside), []);
 });
 
 test("rollback refuses to write through a path swapped for a symlink", async (t: TestContext) => {
   const outside = tmp(t);
-  const victim = path.join(outside, "victim.txt");
-  fs.writeFileSync(victim, "victim\n");
+  const victim = deps.path.join(outside, "victim.txt");
+  deps.fs.writeFileSync(victim, "victim\n");
   const { root, head } = makeRepo(t);
   const patch = patchFrom(t, root, (c) => put(c, "a.txt", "alpha CHANGED\nline2\n"));
   const result = await call(root, head, [worker("w1", patch, [entry("a.txt")])]);
   assert.equal(result.status, "applied");
   if (result.status !== "applied") return;
-  fs.rmSync(path.join(root, "a.txt"));
-  fs.symlinkSync(victim, path.join(root, "a.txt"));
+  deps.fs.rmSync(deps.path.join(root, "a.txt"));
+  deps.fs.symlinkSync(victim, deps.path.join(root, "a.txt"));
   const back = rollback({ root, snapshot: result.snapshot, touched: result.touched, deps });
   assert.equal(back.status, "refused");
-  assert.equal(fs.readFileSync(victim, "utf8"), "victim\n");
+  assert.equal(deps.fs.readFileSync(victim, "utf8"), "victim\n");
 });
 
 test("two workers touching the same path, a rename source, or a parent directory are refused", async (t: TestContext) => {
@@ -313,8 +312,8 @@ test("binary patches, renames and mode flips apply and roll back exactly", async
   const patch = patchFrom(t, root, (c) => {
     put(c, "blob.bin", newBin);
     sh(c, ["mv", "c.txt", "c-renamed.txt"]);
-    fs.chmodSync(path.join(c, "run.sh"), 0o644);
-    fs.chmodSync(path.join(c, "b.txt"), 0o755);
+    deps.fs.chmodSync(deps.path.join(c, "run.sh"), 0o644);
+    deps.fs.chmodSync(deps.path.join(c, "b.txt"), 0o755);
   });
   const before = tree(root);
   const result = await call(root, head, [worker("w1", patch, [
@@ -322,8 +321,8 @@ test("binary patches, renames and mode flips apply and roll back exactly", async
     entry("run.sh", "modify"), entry("b.txt", "modify", { mode: "100755" })])]);
   assert.equal(result.status, "applied");
   if (result.status !== "applied") return;
-  assert.deepEqual(fs.readFileSync(path.join(root, "blob.bin")), newBin);
-  assert.equal(fs.existsSync(path.join(root, "c.txt")), false);
+  assert.deepEqual(Buffer.from(deps.fs.readBytesSync(deps.path.join(root, "blob.bin"))), newBin);
+  assert.equal(deps.fs.existsSync(deps.path.join(root, "c.txt")), false);
   assert.equal(read(root, "c-renamed.txt"), "charlie\n");
   assert.equal(modeOf(root, "run.sh"), 0o644);
   assert.equal(modeOf(root, "b.txt"), 0o755);
@@ -334,7 +333,7 @@ test("binary patches, renames and mode flips apply and roll back exactly", async
 
 test("a root given through the macOS /var alias still matches the dirty set and refuses overlap", async (t: TestContext) => {
   const { root: aliased, head } = makeRepo(t, () => {}, false);
-  const real = fs.realpathSync(aliased);
+  const real = deps.fs.realpathSync(aliased);
   const patch = patchFrom(t, real, (c) => put(c, "a.txt", "alpha CHANGED\nline2\n"));
   put(aliased, "a.txt", "alpha LOCAL\nline2\n");
   const refused = await call(aliased, head, [worker("w1", patch, [entry("a.txt")])]);
@@ -349,14 +348,14 @@ test("a root given through the macOS /var alias still matches the dirty set and 
 test("hostile entry paths, patch/entry disagreement and non-root directories are refused", async (t: TestContext) => {
   const { root, head } = makeRepo(t);
   const patch = patchFrom(t, root, (c) => { put(c, "a.txt", "alpha CHANGED\nline2\n"); put(c, "b.txt", "bravo CHANGED\nline2\n"); });
-  for (const bad of ["../x", "/etc/passwd", ".git/config", "a/../b", "a\0b", "", ".project/metrics/orca-snapshots/x", "a\\b", "./a.txt"]) {
+  for (const bad of ["../x", "/etc/passwd", ".git/config", "a/../b", "a\0b", "", ".project/metrics/orca-snapshots/x", ".project/metrics/orca-evidence/w2/manifest.json", ".Project/Metrics/orca-ledger/x.json", "a\\b", "./a.txt"]) {
     const result = await call(root, head, [worker("w1", patch, [entry(bad)])]);
     assert.equal((result as { reason: string }).reason, "invalid-path", JSON.stringify(bad));
   }
   const mismatch = await call(root, head, [worker("w1", patch, [entry("a.txt")])]);
   assert.equal((mismatch as { reason: string }).reason, "patch-entries-mismatch");
   assert.equal((await call(root, head, [])).status, "refused");
-  const sub = path.join(root, "src");
+  const sub = deps.path.join(root, "src");
   const notRoot = await call(sub, head, [worker("w1", patch, [entry("a.txt"), entry("b.txt")])]);
   assert.equal((notRoot as { reason: string }).reason, "not-repo-root");
   assert.equal(read(root, "a.txt"), BASE["a.txt"]);
@@ -418,12 +417,12 @@ test("every git call is hardened and gets a scrubbed environment", async (t: Tes
     assert.equal(env?.GIT_CONFIG_GLOBAL, "/dev/null");
     assert.equal(env?.GIT_TERMINAL_PROMPT, "0");
     assert.ok(!Object.keys(env ?? {}).includes("ORCA_APPLY_TEST_SECRET"));
-    assert.ok(path.isAbsolute((env?.PATH ?? "").split(path.delimiter)[0]));
+    assert.ok(deps.path.isAbsolute((env?.PATH ?? "").split(deps.path.delimiter)[0]));
   }
 });
 
 test("the module never uses destructive git verbs or forcing flags", () => {
-  const source = fs.readFileSync(path.join(HERE, "orca-apply.mts"), "utf8");
+  const source = deps.fs.readFileSync(deps.path.join(HERE, "orca-apply.mts"), "utf8");
   for (const verb of ["stash", "reset", "checkout", "clean", "restore", "revert", "rebase", "merge", "switch"]) {
     assert.doesNotMatch(source, new RegExp(`["'\`]${verb}["'\`]`), `quoted git verb ${verb}`);
     assert.doesNotMatch(source, new RegExp(`git ${verb}\\b`), `git ${verb}`);
@@ -433,7 +432,7 @@ test("the module never uses destructive git verbs or forcing flags", () => {
 });
 
 test("production code imports no node: module and uses no any", () => {
-  const source = fs.readFileSync(path.join(HERE, "orca-apply.mts"), "utf8");
+  const source = deps.fs.readFileSync(deps.path.join(HERE, "orca-apply.mts"), "utf8");
   assert.doesNotMatch(source, /node:/);
   assert.doesNotMatch(source, /: any\b|as any/);
 });

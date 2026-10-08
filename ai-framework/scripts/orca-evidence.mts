@@ -192,8 +192,9 @@ function parseManifest(text: string, attemptKey: string): Manifest | undefined {
   if (typeof value.patchSha256 !== "string" || !SHA.test(value.patchSha256) || !Number.isSafeInteger(value.patchBytes) || (value.patchBytes as number) < 0) return undefined;
   const hasChecks = value.checksSha256 !== undefined;
   if (hasChecks && (typeof value.checksSha256 !== "string" || !SHA.test(value.checksSha256) || !Number.isSafeInteger(value.checksBytes))) return undefined;
-  if (!Array.isArray(value.entries) || !value.entries.every(validEntry)) return undefined;
+  if (!Array.isArray(value.entries) || value.entries.length === 0 || !value.entries.every(validEntry)) return undefined;
   if (!Array.isArray(value.files) || !value.files.every((file) => isPlain(file) && safeRelPath(file.path) && (file.sha256 === null || (typeof file.sha256 === "string" && SHA.test(file.sha256))))) return undefined;
+  if ((value.files as unknown[]).length === 0) return undefined;
   return value as unknown as Manifest;
 }
 
@@ -202,7 +203,8 @@ function manifestFiles(entries: Entry[], realRoot: string, deps: RuntimeDeps): M
   const files: ManifestFile[] = [];
   const seen = new Set<string>();
   const add = (file: string, sha256: string | null): string | undefined => {
-    if (seen.has(file)) return "duplicate-path";
+    // A rename's source is reported by admission as its own delete entry too: the same absent file twice is one fact.
+    if (seen.has(file)) return sha256 === null && files.find((item) => item.path === file)?.sha256 === null ? undefined : "duplicate-path";
     seen.add(file);
     files.push({ path: file, sha256 });
     return undefined;
@@ -290,6 +292,14 @@ export function verifyEvidence(options: { root: string; attemptKey: string; expe
       return { status: "mismatch", reason: `tree:${file.path}` };
     }
   }
+  // File contents match; the executable bit is part of the change too (a reverse `git apply --check` ignores it).
+  for (const entry of manifest.entries) {
+    if (entry.kind === "delete") continue;
+    try {
+      const stat = deps.fs.lstatSync(path.join(realRoot, ...entry.path.split("/")));
+      if (((stat.mode & 0o111) !== 0) !== (entry.mode === "100755")) return { status: "mismatch", reason: `mode:${entry.path}` };
+    } catch { return { status: "mismatch", reason: `mode:${entry.path}` }; }
+  }
   return { status: "ok", manifestSha256, dir: dir.dir, manifest };
 }
 
@@ -306,11 +316,17 @@ function budget(deps: RuntimeDeps, deadlineMs: number | undefined): number | und
   return remaining >= 1 ? Math.min(remaining, DEFAULT_GIT_TIMEOUT_MS) : undefined;
 }
 
+/** Absolute PATH entries only, so a relative entry such as `node_modules/.bin` cannot make git resolve to a worker's file. */
+function absolutePath(deps: RuntimeDeps): string {
+  const entries = (deps.proc.env.PATH ?? "").split(deps.path.delimiter).filter((directory) => deps.path.isAbsolute(directory) && !directory.includes("\0")).slice(0, 64);
+  return entries.length ? entries.join(deps.path.delimiter) : "/usr/bin:/bin";
+}
+
 async function git(deps: RuntimeDeps, cwd: string, args: string[], deadlineMs: number | undefined): Promise<Git> {
   const timeoutMs = budget(deps, deadlineMs);
   if (timeoutMs === undefined) return { ok: false, reason: "time-budget" };
   const env: Record<string, string | undefined> = {
-    PATH: deps.proc.env.PATH, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null", GIT_TERMINAL_PROMPT: "0", LC_ALL: "C",
+    PATH: absolutePath(deps), GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null", GIT_TERMINAL_PROMPT: "0", LC_ALL: "C",
   };
   try {
     const result = await deps.child.run("git", [...GIT_FLAGS, ...args], { cwd, env, timeoutMs, maxBufferBytes: MAX_GIT_OUTPUT });
@@ -395,7 +411,20 @@ export async function decideCleanup(options: { evidence: EvidenceRef; settlement
   for (const item of registered) { try { registeredReal.push(fs.realpathSync(item)); } catch { /* stale entry */ } }
   if (!registeredReal.includes(real)) return keep("worktree-not-registered", leftover);
 
-  const status = await git(deps, real, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignored"], deadlineMs);
+  // `git status` runs clean filters on tracked files; a configured filter driver would execute worker-chosen commands
+  // against the worker's tree, so a repository with any filter driver keeps its worktree.
+  const filters = await git(deps, real, ["config", "--get-regexp", "^filter\\."], deadlineMs);
+  if (!filters.ok) return keep(filters.reason, leftover);
+  if (filters.status === 0) return keep("filter-driver-present", leftover);
+  if (filters.status !== 1) return keep("config-failed", leftover);
+
+  // `git status` descends into nested repositories (gitlinks) and runs their filters; refuse before it can.
+  const gitlinks = await git(deps, real, ["ls-files", "-s", "-z"], deadlineMs);
+  if (!gitlinks.ok) return keep(gitlinks.reason, leftover);
+  if (gitlinks.status !== 0) return keep("ls-files-failed", leftover);
+  if (gitlinks.stdout.split("\0").some((record) => record.startsWith("160000 "))) return keep("submodule-present", leftover);
+
+  const status = await git(deps, real, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignored", "--ignore-submodules=all"], deadlineMs);
   if (!status.ok) return keep(status.reason, leftover);
   if (status.status !== 0) return keep("status-failed", leftover);
   if (status.stdout.length > 0) {
@@ -450,6 +479,20 @@ export async function performCleanup(decision: CleanupDecision, deps: RuntimeDep
   if (real !== target) return { status: "refused", reason: "worktree-path-has-symlink" };
   let realRoot: string;
   try { realRoot = fs.realpathSync(decision.root); } catch { return { status: "refused", reason: "root-unresolvable" }; }
+  // A decision is only a claim: re-verify the evidence it names and that the tree is still clean (ignored files included,
+  // since `git worktree remove` deletes them silently) before anything is removed.
+  const proof = verifyEvidence({ root: decision.root, attemptKey: decision.attemptKey, expectedManifestSha256: decision.manifestSha256, deps });
+  if (proof.status !== "ok") return { status: "refused", reason: `evidence-${proof.status}` };
+  // `git worktree remove` runs its own status in the worker tree: repeat the filter and nested-repository guards now.
+  const driversNow = await git(deps, real, ["config", "--get-regexp", "^filter\\."], deadlineMs);
+  if (!driversNow.ok) return { status: "failed", reason: driversNow.reason };
+  if (driversNow.status !== 1) return { status: "refused", reason: "filter-driver-present" };
+  const linksNow = await git(deps, real, ["ls-files", "-s", "-z"], deadlineMs);
+  if (!linksNow.ok) return { status: "failed", reason: linksNow.reason };
+  if (linksNow.status !== 0 || linksNow.stdout.split("\0").some((record) => record.startsWith("160000 "))) return { status: "refused", reason: "submodule-present" };
+  const cleanNow = await git(deps, real, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignored", "--ignore-submodules=all"], deadlineMs);
+  if (!cleanNow.ok) return { status: "failed", reason: cleanNow.reason };
+  if (cleanNow.status !== 0 || cleanNow.stdout.length > 0) return { status: "refused", reason: "worktree-dirty" };
   const removed = await git(deps, realRoot, ["worktree", "remove", "--", target], deadlineMs);
   if (!removed.ok) return { status: "failed", reason: removed.reason };
   // A crash after git finished but before we saw it is the same as a clean removal: look at the disk, not the exit code alone.
