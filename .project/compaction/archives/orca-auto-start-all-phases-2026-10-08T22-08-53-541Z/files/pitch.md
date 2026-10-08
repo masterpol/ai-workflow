@@ -1,6 +1,6 @@
 # Pitch: orca-auto-start-all-phases
 
-**Date**: 2026-10-08  •  **Appetite**: big-batch (epic risk: decompose if critique projects >15 files — see R8)
+**Date**: 2026-10-08  •  **Appetite**: big-batch, narrowed after critique to batch A+B (core `start` + Claude hook, about 9 files). The 12-skill rollout and the Codex/OpenCode/Cursor adapters are separate pitches (see Critique A1).
 **Stack**: backend (Node `.mts` tooling, hooks, skill playbooks)
 
 ## Problem
@@ -16,6 +16,11 @@ Someone who sets `AI_WORKFLOW_ORCA_MULTI_AGENT=true` expects every workflow phas
 - [issues/prose-instructions-must-specify-how-to-extract-from-free-form-arguments] — constrains: a per-call override token must be extracted from raw, unparsed args the way `caveman=` is (`skill-defaults.mts resolve-mode`), never assumed to be a clean value.
 - [patterns/one-boundary-selects-the-child-runner] — applies: hooks and the start command spawn through `runtime/entry.mts` `workflowInvocation` so `AI_WORKFLOW_RUNNER` is honoured.
 - [decisions/caveman-mode-is-default-everywhere] and [decisions/skill-defaults-attribution-guard-and-runtime-design] — precedent: one resolver script, called from every phase, with an in-message override token and a persistent file. This pitch reuses that shape.
+- [issues/status-dispatch-ready-false-is-not-launch-authority] — **core**: the pitch exists because this misread ran whole phases without Orca. `start` must call `evaluateLaunch`, never read `dispatchReady`.
+- [issues/orca-workers-differ-from-the-coordinator-environment] — constrains `start`: a ready gate does not prove the worker can report back (worker-side `orca` path, stale vendor servers, `collect` rejecting out-of-project report paths, idle workers holding slots, shared checkout).
+- [patterns/a-report-never-overwrites-a-file-it-did-not-write] — applies to anything `start` writes (a startup note must not replace a user's file).
+- [issues/a-local-workflow-env-file-changes-which-runner-path-tests-spawn] — applies: tests for `start` must pin the runner in the child env; run them under Node and Bun.
+- Added by critique (knowledge-historian): [patterns/a-thin-cli-keeps-every-guard-in-the-library] (`start` stays a thin JSON CLI over `orca-start.mts`), [patterns/parse-untrusted-values-and-re-emit-them] (parse `orca=normal`, never a raw substring), [patterns/a-gate-must-not-trust-its-own-author] and [patterns/settle-only-with-proof-bound-to-this-patch] (no cached "already started"), [patterns/keep-the-fakes-guarantee-the-thing-they-replace] and [patterns/prove-a-guard-test-with-an-in-memory-mutant] (guard tests), [patterns/git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded] (worker-PATH probe in a shared checkout), [issues/editing-a-canonical-file-alone-breaks-the-byte-identity-mirror-check], and `ai-framework/rules/{security.md §9,testing.md}`.
 - `ai-framework/integrations/orca-vendors.md`, `build/audit/ship` SKILL.md Orca blocks — constrain: workers never launch workers or ship; gates stay human; worker text is data.
 - Observed here (this session, not a stored entry): `orca-run.mts status` reports `dispatchReady: false` **by design** (the foundation reports never grant launch authority), and `status --probe` shows `caller-unverified` because `ORCA_AGENT_SESSION_ID` is unset. Neither blocks launching: `orca-launch-gate.mts` `evaluateLaunch` is the launch authority and deliberately accepts `caller-unverified` (an external coordinator gets no `caller` block). It returned `allowed: true, launch-allowed` for codex and opencode in this session. Earlier in this session that `dispatchReady: false` was misread as "Orca cannot launch" and phases ran on ordinary subagents. The `start` check must call `evaluateLaunch`, never read `dispatchReady`.
 
@@ -64,7 +69,15 @@ Someone who sets `AI_WORKFLOW_ORCA_MULTI_AGENT=true` expects every workflow phas
 
 - R9 (found by live smoke 2026-10-08): `start` must check what a worker will actually run, not only the coordinator's `orca`. A Codex worker finished its read-only task correctly (named the five exported functions) but could not send `worker_done`: its shell resolved `orca` to `/usr/local/bin/orca`, a root-owned `lrwx------` symlink dated Sep 9 that fails with "Unable to determine Orca.app path from symlink". The coordinator's own PATH finds the working `/Applications/Orca.app/Contents/Resources/bin/orca` first. Plan decides whether `start` runs a cheap worker-PATH `orca status` check (spawn with the worker env allowlist) and what `blocked` says. Also seen: a worker reuses the coordinator's checkout (`worktree ... reused`), and an unsettled attempt keeps holding a `maxConcurrentWorkers` slot (second launch returned `max-concurrent-workers`).
 
+- R10 (critique S1): one cumulative deadline for `start`. Preflight allows three 5 s probes (`orca-preflight.mts`) against a 5 s hook timeout; the hook must fail closed to `blocked: timeout` (never hang, never a silent pass), and its stdout must separate machine JSON from the human line (`orca-run.mts` emits JSON; the pitch promised silence/text).
+- R11 (critique S2): trusted worker identity. `WORKER_ENV_MARKERS` are unverified guesses, are excluded from the child env, and a Skill call carries no `--worker-context`. `start` must get worker identity from a transport it controls (the dispatch brief names an env marker or a ledger lookup), else a worker's phase skill could start Orca and recurse.
+- R12 (critique S3): after `ready`, a later refusal must not fall back silently. `dispatchScope` returns `normal` on cap, drift or gate refusal and `orca-run` maps that to exit 3; `build/audit/ship` SKILL.md still prescribe "continue normally". Under stop-and-ask these become `blocked` outcomes with the reason, which changes those three playbooks' wording (inside batch B, prose only; no change to the dispatch core's checks, see no-gos).
+- R13 (critique S4): define the bypass grammar: `orca=normal` only as a whole token, once, from the user's own invocation; ignore quoted or embedded occurrences; handle empty and `--` args; a nested skill call (`/switch` calling `/checkpoint`, `/resume`) inherits the decision instead of re-asking.
+- R14 (critique S5): the off path is not free. `runtime/cli.mts` selects and re-execs the runner before `main`, and `runtime/entry.mts` reads the runner file, so a disabled Orca with `AI_WORKFLOW_RUNNER=bun` and no Bun on PATH still fails. Either read the switch before any re-exec, or narrow the promise to "no Orca probe or spawn" and test the real entry under Node and Bun with an empty PATH (cf. the runner/PATH test issue).
+- R15 (cross-pitch): `runner-aware-runtime-boundary-validator` scans new `.mts`; new orca/hook files must go through `RuntimeDeps` or the validator allowlist is negotiated first.
+
 **Pushed to no-go** (deferred):
+- The 12-skill block rollout (24 canonical files plus mirrors) and the Codex, OpenCode and Cursor host adapters: separate pitches after this one lands (critique A1).
 - Making any Orca worker answer trust prompts, approve gates, or ship.
 - A persistent "always bypass Orca" setting (would recreate the silent fallback).
 
@@ -79,10 +92,22 @@ Someone who sets `AI_WORKFLOW_ORCA_MULTI_AGENT=true` expects every workflow phas
 
 ## Critique findings (auto-populated by /critique for big-batch + AI scopes)
 
-(Empty until /critique runs.)
+Run 2026-10-08 through Orca workers (coordinator claude; Codex for skeptic + appetite, OpenCode for knowledge-historian + cross-pitch), on a scratch copy; `review-bench guard check` clean (read-only: verified). No canary was planted: pre-bet critique is advisory, so these count as `independent: no` under the audit contract. Advisory, not gating.
+
+| ID | Perspective | Severity | Type | Suggestion | Disposition |
+|----|-------------|----------|------|------------|-------------|
+| A1 | appetite-auditor | high | scope-overrun | Optimized projection 41 files / about 1800-2800 lines (65 files if the four skill surfaces are stamped literally) against 15 / about 1500; split into core, Claude hook, host adapters, then 3-phase rollout batches | Address: narrowed to core + Claude hook (about 9 files); the rest become later pitches (no-go) |
+| S1 | skeptic | high | rabbit-hole | Cumulative hook deadline, fail-closed; separate JSON from human output | Address: R10 |
+| S2 | skeptic | high | rabbit-hole | Trusted worker identity transport; env markers are unverified guesses | Address: R11 |
+| S3 | skeptic | high | rabbit-hole | After `ready`, refusal must stop/inspect, not fall back; build/audit/ship prose still says "continue normally" | Address: R12 |
+| S4 | skeptic | medium | rabbit-hole | Bypass-token grammar and nested-call scope | Address: R13 |
+| S5 | skeptic | high | rabbit-hole | Off path re-execs the runner before `main`: not free; test real entry under Node and Bun | Address: R14 |
+| A2 | appetite-auditor | medium | mirror-contract | Cursor skills are byte copies, Codex/OpenCode are pointer stubs; the sync tool only creates missing copies | Defer to the rollout pitch |
+| K1-K12 | knowledge-historian | low-medium | missed-knowledge | 12 patterns/issues and two rules not listed | Address: added to Knowledge consulted |
+| X1 | cross-pitch | medium | overlap | Validator globs scan new orca files | Address: R15 |
 
 ## Bet decision
 
-☐ **Bet** (→ /plan)  
+☑ **Bet** (→ /plan) — approved 2026-10-08, narrowed scope (batch A+B: core `start` + Claude hook, about 9 files). Critique A1, S1-S5, K1-K12 and X1 addressed in the pitch (R10-R15, no-gos); A2 deferred to the rollout pitch. The 12-skill rollout and host adapters are separate later pitches.  
 ☐ Re-shape — named gap: {which rabbit hole un-resolved? which critique finding?}  
 ☐ Pass — moved to `.project/pitches/_parked/{slug}/`; reason: {…}

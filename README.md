@@ -40,6 +40,16 @@ Codex, and Cursor** — install once, open with whichever tool you have.
 - **Consumption is compact and local.** A post-agent collector keeps current and previous usage,
   lifetime totals, and a small idempotency window in one JSON snapshot, plus regenerated Markdown
   and HTML views. It never retains prompts, responses, or transcripts.
+- **A snapshot of where the project stands.** `/state` writes a linked set of static HTML pages to
+  `.project/reports/` (git-ignored): an overview, a folder-structure diagram for the detected project type with the
+  decisions that touch each folder, base skills versus project skills, token metrics, knowledge counts with a link to
+  the graph, and the pitch list. Every fact carries a status (observed, proposed, stale, unavailable, unconfigured)
+  and the file it came from; the pages contain no scripts. See [State report](ai-framework/integrations/state-report.md).
+- **History stays small.** After a pitch ships, `/pitch-compress` extracts what is worth keeping into the knowledge
+  graph and `.project/done-work.md`, archives the pitch byte-for-byte outside `.project/pitches/`, and deletes the
+  original only after you approve a specific preview. The archive can restore it.
+- **Orca mode is opt-in.** With `AI_WORKFLOW_ORCA_MULTI_AGENT=true`, workflow phases check that Orca can launch
+  workers and stop to ask if it cannot. Off by default; see [Orca mode](#orca-mode-multi-agent).
 
 ## Set up
 
@@ -63,13 +73,44 @@ bundle, also add `ai_workflow_env.json` to its `.gitignore`. To use Bun:
 
 Process environment variables override the file. Bun must be installed and available on `PATH`.
 Orca multi-agent dispatch is off unless `AI_WORKFLOW_ORCA_MULTI_AGENT` is `true` (see
-[Orca vendors](ai-framework/integrations/orca-vendors.md)); any other value keeps the normal workflow.
+[Orca mode](#orca-mode-multi-agent) below); any other value keeps the normal workflow.
 Run scripts directly as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later, or
 `bun ai-framework/scripts/<name>.mts`. Node 22.12–22.17 requires
 `--experimental-strip-types --disable-warning=ExperimentalWarning` before the script path;
 the shipped hooks include these flags. A Node launch with `AI_WORKFLOW_RUNNER=bun` starts Bun
 for the same TypeScript entry. See [Runtime details](ai-framework/scripts/runtime/README.md)
 and [upgrading existing installs](ai-framework/docs/versioning-and-sync.md).
+
+## Orca mode (multi-agent)
+
+*Automatic start added in 2.20.0, 2026-10-08. Proven live for Claude Code only.*
+
+Orca mode lets one agent (the coordinator, for example Claude) hand scopes to other agents (Codex, OpenCode) running
+in [Orca](https://www.onorca.dev). It is off by default; with it off, every phase runs exactly as before, silently.
+
+**Turn it on**
+
+1. Install the Orca app and the worker CLIs you want (`codex`, `opencode`), and make sure `orca` on your `PATH` is the real binary.
+2. Set `"AI_WORKFLOW_ORCA_MULTI_AGENT": true` in `ai_workflow_env.json` (or the environment variable of the same name).
+3. Copy [orca-vendors.example.json](ai-framework/integrations/orca-vendors.example.json) to `.project/orchestration.json`, set
+   `"use-orca-orchestration": true`, and choose the coordinator-to-worker roles. Keep that file out of version control.
+4. Restart nothing: the Claude Code hook in [hooks.json](ai-framework/hooks/hooks.json) is picked up from `.claude/settings.json`.
+
+**What happens with the switch on.** Before each of the 12 workflow phases (`shape`, `shape-lite`, `critique`, `plan`,
+`build`, `audit`, `ship`, `cooldown`, `fix`, `resume`, `switch`, `checkpoint`) the workflow checks that Orca can really
+launch workers, using the launch gate, not the status flag.
+
+| Result | What you see |
+|---|---|
+| Ready | One line, `Orca: ready (coordinator claude, workers codex, opencode)`, then the phase runs |
+| Not ready | The phase **stops and asks**: `Orca requested but not ready: <reason>. Fix it, or re-invoke with orca=normal to run this phase without Orca.` There is never a silent fallback |
+| `orca=normal` in your invocation | That one call runs without Orca and says so |
+| Switch off or unset | Nothing is printed and nothing is probed |
+
+**Limits.** Workers share your checkout, so check each worker's diff; only Claude Code triggers the automatic check today
+(Codex, OpenCode and Cursor triggers, and a start block inside each phase skill, are later work); a hook entry copied
+without the `AI_WORKFLOW_RUNNER=node` prefix can fail open if the configured runner is missing. Details, exit codes and
+the full decision table: [Orca vendors](ai-framework/integrations/orca-vendors.md#automatic-start-every-workflow-phase).
 
 ## Documentation
 
@@ -86,3 +127,4 @@ and [upgrading existing installs](ai-framework/docs/versioning-and-sync.md).
 | [The pipeline](ai-framework/docs/pipeline.md) | Phases, gates and the core skills |
 | [How to improve this flow](ai-framework/docs/extending.md) | When and how to extend the workflow |
 | [Design notes](ai-framework/docs/design-notes.md) | Rationale and safety notes |
+| [State report](ai-framework/integrations/state-report.md) | `/state` pages, snapshot contract and what the report never reads |

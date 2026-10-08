@@ -319,3 +319,9 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Orca: `collect` rejects a worker report whose files list names a path outside the project; read-only reviewers should report in the message body. Idle worker terminals need `worker-release` before the ledger can be settled.
 - `browser-runtime.test.mts` "CLI end to end" fails locally when `ai_workflow_env.json` selects `bun` (the test empties PATH); pin the runner in the child env. `token-consumption.test.mts` has one intermittent failure on a clean HEAD (passed in the final full Node run). See issue `a-local-workflow-env-file-changes-which-runner-path-tests-spawn`.
 - Pitch `orca-auto-start-all-phases` is shaped (critique pending): start gate from `evaluateLaunch`, stop-and-ask, `orca=normal` per-call override.
+
+## orca-auto-start-all-phases leftovers (audit cycles 1-2, 2026-10-08)
+- Defence in depth for the Orca start hook: `runDirect` should accept a fail-closed exit code for hook scripts so an entry copied without the `AI_WORKFLOW_RUNNER=node` prefix cannot fail open when the configured runner is missing.
+- Migrate `orca-start-hook.test.mts` and `orca-start.test.mts` off direct `node:*` imports (`runtime/test-helpers`) before `runner-aware-runtime-boundary-validator` lands.
+- Later pitches: the 12-skill start block rollout (24 canonical files plus mirrors, byte-identity vs pointer stubs), and the Codex, OpenCode and Cursor adapters (OpenCode `tool.hook`, Codex `hooks.json`; no live proof outside Claude Code).
+- Orca coordinator-side `evaluateLaunch` still passes the full parent env to its probe child (existing launch gate; out of scope for this pitch).

@@ -97,6 +97,70 @@ The orchestration interfaces are described by the
 The installed-source contract and live-verification limits are recorded in the foundation
 pitch's S2 evidence. Future dispatch work must obtain live proof before relying on this policy.
 
+## Automatic start (every workflow phase)
+
+`orca-start.mts` makes a fresh readiness decision for each invocation; it does not launch workers.
+The CLI and Claude hook recognize twelve phases: `shape`, `shape-lite`, `critique`, `plan`,
+`build`, `audit`, `ship`, `cooldown`, `fix`, `resume`, `switch`, and `checkpoint`.
+Other skills pass through the hook. Checks run in this fixed order: switch, bypass token,
+worker identity, then gate. Nothing is cached between calls.
+
+| State | Condition | Human line (`line` in the CLI result) |
+|---|---|---|
+| `off` | Switch is off; no Orca policy read, executable lookup or probe | Empty |
+| `bypassed` | Switch is on and raw arguments contain the whole token `orca=normal` | `Orca: bypassed by request (orca=normal)` |
+| `worker` | Switch is on, no bypass, and explicit worker context or terminal lookup identifies a worker | Empty |
+| `ready` | Coordinator gate and worker checks pass | `Orca: ready (coordinator <v>, workers <list>)` |
+| `blocked` | A check refuses, identity lookup cannot be verified, a probe times out, or an internal error occurs | `Orca requested but not ready: <reason>. Fix it, or re-invoke with orca=normal to run this phase without Orca.` |
+
+`orca=normal` must be an unquoted, unescaped, whitespace-delimited whole token in the raw
+invocation arguments. Embedded or quoted occurrences do not match. It bypasses this one call,
+is never persisted, and is ignored when the switch is off. Because bypass precedes worker
+identity, a worker invocation carrying this token returns `bypassed`.
+
+Worker identity comes from the brief's `--worker-context` flag (passed as `workerContext` to
+the decision library), or from matching `ORCA_TERMINAL_HANDLE` against agent terminal handles
+in `orca orchestration worker-list` for an open dispatch. No identifying worker environment
+marker exists in the observed coordinator and worker environments. A terminal lookup that
+cannot be verified blocks rather than assuming the caller is a coordinator.
+
+The decision calls `evaluateLaunch` with the coordinator vendor. It then checks that workers
+named by that coordinator's policy roles belong to its worker list and have executables in
+the worker environment. Worker-side `orca` must resolve to the same executable the gate
+probed, and `orca status --json` in that environment must report a local, ready, reachable
+runtime at the supported version. Neither `status.dispatchReady` nor `ORCA_AGENT_SESSION_ID`
+is the start decision's authority. Executable presence does not verify vendor authentication.
+
+```sh
+node ai-framework/scripts/orca-run.mts start --root . --phase <name> [--vendor v] [--args-text raw]
+```
+
+`--root` and a recognized `--phase` are required; `--vendor` defaults to `claude`.
+The CLI prints one JSON object containing `state`, `reason`, `line`, and, when ready, `workers`.
+It exits 0 for `off`, `worker`, `bypassed`, or `ready`, and 4 for `blocked` (2 for usage errors).
+On `blocked`, stop the phase and ask the user to fix the reason or re-invoke with `orca=normal`;
+do not silently continue with the normal workflow.
+
+Claude Code wiring in `ai-framework/hooks/hooks.json` uses `PreToolUse` with matcher `Skill`,
+reading `tool_input.skill` and `tool_input.args`. Typed slash commands do not fire that hook;
+`UserPromptExpansion` handles them through `command_name` and `command_args` when
+`expansion_type` is `slash_command`. Calls with `agent_id` set pass through, including Claude
+subagent calls. The hook is silent for `off` and `worker`; `ready` and `bypassed` add the line
+as `hookSpecificOutput.additionalContext`. A blocked decision writes the line to stderr and
+exits 2, preventing the phase invocation.
+
+The decision budget is 4 seconds, the hook script deadline is 5 seconds, and each configured
+hook timeout is 8 seconds. The script enforces its own deadline with a timer and an elapsed-time
+check after synchronous probes, exiting 2 itself so blocking does not depend on a host timeout
+that can allow the invocation to continue.
+
+Automatic start is proven live for Claude Code only. Codex, OpenCode and Cursor adapters,
+and start blocks in each phase skill, are later pitches. Both hook commands force
+`AI_WORKFLOW_RUNNER=node` before invoking Node, so a configured Bun runner that is missing
+cannot bypass readiness checks. This environment assignment prefix requires a POSIX shell;
+it is not valid in Windows cmd. Workers share the coordinator checkout;
+automatic start provides no checkout isolation.
+
 ## Dispatch core (opt-in, library only)
 
 `orca-dispatch.mts` sends one scope to one alternate vendor through `orca orchestration worker-start`.

@@ -5,6 +5,7 @@ import type { DispatchOptions, Placement, ScopeSpec } from "./orca-dispatch.mts"
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
+import { decideStart } from "./orca-start.mts";
 import type { CheckSpec, ReconcileAttempt } from "./orca-reconcile.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
@@ -15,16 +16,17 @@ import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
  * The multi-agent switch and every launch, path, ledger and apply guard live in the libraries and are never repeated here.
  *
  * Exit codes: 0 launched / integrated / ok; 3 normal workflow or refused (switch off, ineligible, a library or input guard
- * refused); 2 usage error; 1 internal error.
+ * refused); 2 usage error; 1 internal error; 4 start blocked.
  */
 
-export const COMMANDS: readonly string[] = Object.freeze(["status", "dispatch", "collect", "reconcile"]);
+export const COMMANDS: readonly string[] = Object.freeze(["status", "dispatch", "collect", "reconcile", "start"]);
+const START_PHASES: readonly string[] = Object.freeze(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
 export const MAX_INPUT_BYTES = 64 * 1024;
 export const MAX_TIMEOUT_MS = 30 * 60 * 1000;
-export const EXIT = Object.freeze({ ok: 0, internal: 1, usage: 2, refused: 3 });
+export const EXIT = Object.freeze({ ok: 0, internal: 1, usage: 2, refused: 3, blocked: 4 });
 
 type Json = Record<string, unknown>;
-type Command = "status" | "dispatch" | "collect" | "reconcile";
+type Command = "status" | "dispatch" | "collect" | "reconcile" | "start";
 
 let nodeDeps: RuntimeDeps | undefined;
 const defaultDeps = (): RuntimeDeps => (nodeDeps ??= createNodeDeps());
@@ -52,7 +54,7 @@ export function checkCatalog(deps: RuntimeDeps): Readonly<Record<string, CheckSp
   });
 }
 
-interface Parsed { command: Command; root: string; input?: string; checks: string[]; probe: boolean; vendor?: string; vendors?: string[] }
+interface Parsed { command: Command; root: string; input?: string; checks: string[]; probe: boolean; vendor?: string; vendors?: string[]; phase?: string; argsText?: string }
 
 function parseArgs(argv: readonly string[]): Parsed {
   const command = argv[0];
@@ -66,9 +68,9 @@ function parseArgs(argv: readonly string[]): Parsed {
     if (flag === "--probe") {
       if (probe) throw usage("duplicate-flag");
       probe = true;
-    } else if (flag === "--root" || flag === "--input" || flag === "--vendor" || flag === "--check") {
+    } else if (flag === "--root" || flag === "--input" || flag === "--vendor" || flag === "--check" || flag === "--phase" || flag === "--args-text") {
       const value = argv[++index];
-      if (typeof value !== "string" || value === "" || value.startsWith("--")) throw usage("missing-value");
+      if (typeof value !== "string" || (flag !== "--args-text" && (value === "" || value.startsWith("--")))) throw usage("missing-value");
       if (flag === "--check") {
         if (checks.includes(value)) throw usage("duplicate-flag");
         checks.push(value);
@@ -88,10 +90,21 @@ function parseArgs(argv: readonly string[]): Parsed {
   const root = values.get("--root");
   if (root === undefined) throw usage("missing-root");
   const input = values.get("--input");
-  if (command === "status" ? input !== undefined : input === undefined) throw usage(command === "status" ? "input-not-allowed" : "missing-input");
+  const takesInput = command !== "status" && command !== "start";
+  if (takesInput ? input === undefined : input !== undefined) throw usage(takesInput ? "missing-input" : "input-not-allowed");
   if (probe && command !== "status") throw usage("probe-only-for-status");
-  if (command !== "status" && vendors.length > 0) throw usage("vendor-only-for-status");
+  if (command !== "status" && command !== "start" && vendors.length > 0) throw usage("vendor-only-for-status");
   if (checks.length > 0 && command !== "reconcile") throw usage("check-only-for-reconcile");
+  const phase = values.get("--phase");
+  const argsText = values.get("--args-text");
+  if (command === "start") {
+    if (phase === undefined) throw usage("missing-phase");
+    if (!START_PHASES.includes(phase)) throw usage("invalid-phase");
+    const vendor = vendors[0] ?? "claude";
+    if (!VENDORS.includes(vendor)) throw usage("invalid-vendor");
+    return { command, root, checks, probe, phase, vendor, ...(argsText !== undefined ? { argsText } : {}) };
+  }
+  if (phase !== undefined || argsText !== undefined) throw usage("start-only-flag");
   if (command === "status") {
     return { command: command as Command, root, ...(input !== undefined ? { input } : {}), checks, probe, vendors };
   }
@@ -252,6 +265,7 @@ function collectInput(input: Json): { attemptKey: string; message: Json } {
 
 /** Maps a library outcome to the exit code. Only a launched/resumed, accepted or integrated outcome is 0. */
 export function exitCodeFor(command: Command, outcome: Json): number {
+  if (command === "start") return outcome.state === "blocked" ? EXIT.blocked : EXIT.ok;
   if (command === "dispatch") return outcome.route === "launched" || outcome.route === "resume" ? EXIT.ok : EXIT.refused;
   if (command === "collect") return outcome.accepted === true ? EXIT.ok : EXIT.refused;
   if (command === "reconcile") return outcome.status === "integrated" ? EXIT.ok : EXIT.refused;
@@ -272,6 +286,10 @@ function status(root: string, parsed: Parsed, deps: RuntimeDeps): Json {
 
 async function execute(parsed: Parsed, deps: RuntimeDeps): Promise<{ output: Json; exit: number }> {
   const root = resolveRoot(parsed.root, deps);
+  if (parsed.command === "start") {
+    const output = { ...decideStart({ root, phase: parsed.phase as string, vendor: parsed.vendor as string, argsText: parsed.argsText, deps }) };
+    return { output, exit: exitCodeFor(parsed.command, output) };
+  }
   if (parsed.command === "status") {
     const output = status(root, parsed, deps);
     // The same switch the libraries obey: with it off, status still reports but exits 3.

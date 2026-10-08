@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-auto-start-all-phases",
+  "sourceRoot": ".project/pitches/orca-auto-start-all-phases",
+  "archivedAt": "2026-10-08T22:08:53.541Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "9e6f0aba550c80ffb5d7552470508b158172176855da2b58b588561b8a5be783",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "bea18837f167a86d3f8c0aa820bf2f36b93ae368b7d9dd6ec8a7c6df4b128826",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "c282dad2526e8603b78887fcf2d0e01452d7f3c4cb7bb612ec886ba9cb4baf3b",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "9532ea771072217a612a9d00598c8697e6c94a4ac629f4d5350c41120349ed55",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "c61a8834d0f38042537398764e7ac6ef1ad81b077ed18aa3be8d2304e4aa141c",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "7185ce018e1132e29be64fff72e502f110c8be2eb7b945dc7295a3be1a46a94d",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "827af16ad016797590c280d02e1fd320675f627c6ac6e4efacd585fa391ce4a3",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "52dbb58f038a42e04da9c065be3d9d818f81d734501037874a634be0670d3964",
+      "mode": 420
+    }
+  }
+}

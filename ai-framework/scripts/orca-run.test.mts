@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 import { collectReport, dispatchScope, dispatchWithRetries } from "./orca-dispatch.mts";
 import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
 import { reconcile } from "./orca-reconcile.mts";
+import { decideStart } from "./orca-start.mts";
 import type { CheckSpec } from "./orca-reconcile.mts";
 import { NODE_FLAGS } from "./runtime/entry.mts";
 import { createNodeDeps } from "./runtime/node.mts";
@@ -97,6 +98,50 @@ const walkTree = (dir: string): string[] => fs.readdirSync(dir, { recursive: tru
   .map((entry) => path.join(entry.parentPath, entry.name)).sort().map((file) => `${path.relative(dir, file)}:${fs.lstatSync(file).isFile() ? fs.readFileSync(file, "utf8") : "dir"}`);
 
 // ---- parity: the CLI prints what the library returns, no more, no less ----
+
+test("start off prints the library decision, exits 0 and spawns nothing", async (t: TestContext) => {
+  const f = fixture(t, null);
+  const h = harness(f.env);
+  const result = await exec(["start", "--root", f.root, "--phase", "shape"], h);
+  assert.deepEqual(result.json, decideStart({ root: f.root, phase: "shape", vendor: "claude", deps: harness(f.env).deps }));
+  assert.deepEqual([result.code, result.json.state, result.stderr, spawned(h)], [0, "off", "", 0]);
+});
+
+test("start blocked prints the library decision and exits 4", async (t: TestContext) => {
+  const f = fixture(t);
+  const h = harness(f.env);
+  const result = await exec(["start", "--root", f.root, "--phase", "build", "--vendor", "codex"], h);
+  assert.deepEqual(result.json, decideStart({ root: f.root, phase: "build", vendor: "codex", deps: harness(f.env).deps }));
+  assert.deepEqual([result.code, result.json.state, result.stderr], [4, "blocked", ""]);
+});
+
+test("start passes free-form args-text whole, including empty strings and flag-like text", async (t: TestContext) => {
+  const f = fixture(t);
+  for (const argsText of ["orca=normal fix the login bug", "fix the login bug orca=normal", "orca=normal=value fix the login bug", "'orca=normal fix the login bug'", "--verbose orca=normal", ""]) {
+    const h = harness(f.env);
+    const result = await exec(["start", "--root", f.root, "--phase", "fix", "--args-text", argsText], h);
+    const expected = decideStart({ root: f.root, phase: "fix", vendor: "claude", argsText, deps: harness(f.env).deps });
+    assert.deepEqual(result.json, expected, argsText);
+    assert.equal(result.code, expected.state === "blocked" ? 4 : 0, argsText);
+    if (expected.state === "bypassed") assert.equal(spawned(h), 0);
+  }
+});
+
+test("start accepts every phase and vendor and rejects invalid or repeated flags", async (t: TestContext) => {
+  const f = fixture(t, null);
+  const base = ["start", "--root", f.root];
+  for (const phase of ["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]) {
+    for (const vendor of ["claude", "codex", "opencode"]) {
+      assert.equal((await exec([...base, "--phase", phase, "--vendor", vendor], harness(f.env))).code, 0);
+    }
+  }
+  const valid = [...base, "--phase", "shape"];
+  for (const argv of [base, [...base, "--phase", "unknown"], [...base, "--phase"], [...valid, "--vendor", "gpt"], [...valid, "--phase", "build"], [...valid, "--vendor", "claude", "--vendor", "codex"], [...valid, "--args-text", "", "--args-text", "x"], [...valid, "--args-text"], [...valid, "--root", f.root], [...valid, "--input", "input.json"], [...valid, "--probe"], [...valid, "--check", "graph-check"], ["status", "--root", f.root, "--phase", "shape"], ["status", "--root", f.root, "--args-text", ""]]) {
+    const h = harness(f.env);
+    const result = await exec(argv, h);
+    assert.deepEqual([result.code, result.json.error, spawned(h)], [2, "usage", 0], JSON.stringify(argv));
+  }
+});
 
 test("dispatch parity: the CLI JSON equals dispatchScope for the same input, exit 0 when launched", async (t: TestContext) => {
   const a = fixture(t);
@@ -502,6 +547,7 @@ test("input shapes are validated strictly and unknown keys are refused", async (
 // ---- exit-code mapping, output contract, internal errors ----
 
 test("exit codes follow the outcome: launched/resume/accepted/integrated are 0, everything else 3", () => {
+  assert.deepEqual(["off", "ready", "worker", "bypassed", "blocked"].map((state) => exitCodeFor("start", { state })), [0, 0, 0, 0, 4]);
   assert.deepEqual(["launched", "resume", "normal", "blocked"].map((route) => exitCodeFor("dispatch", { route })), [0, 0, 3, 3]);
   assert.deepEqual([true, false, undefined].map((accepted) => exitCodeFor("collect", { accepted })), [0, 3, 3]);
   assert.deepEqual(["integrated", "refused", "normal", "rolled-back"].map((status) => exitCodeFor("reconcile", { status })), [0, 3, 3, 3]);
@@ -536,6 +582,16 @@ test("run directly, the file prints one JSON object and exits with the mapped co
   assert.equal(off.status, 3);
   assert.equal(JSON.parse(off.stdout).enabled, false);
   assert.equal(off.stdout.trim().split("\n").length, 1);
+  const startOff = run("start", "--root", f.root, "--phase", "shape");
+  assert.deepEqual([startOff.status, JSON.parse(startOff.stdout).state], [0, "off"]);
+  assert.equal(startOff.stdout.trim().split("\n").length, 1);
+  assert.equal(startOff.stderr, "");
+  const startOnEnv = { ...env, [SWITCH]: "true" };
+  const bypass = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "fix", "--args-text", "orca=normal fix the login bug"], { encoding: "utf8", env: startOnEnv, timeout: 30000, cwd: f.root });
+  assert.deepEqual([bypass.status, JSON.parse(bypass.stdout).state], [0, "bypassed"]);
+  assert.equal(bypass.stdout.trim().split("\n").length, 1);
+  const blocked = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "shape", "--vendor", "claude"], { encoding: "utf8", env: { ...startOnEnv, PATH: f.bin }, timeout: 30000, cwd: f.root });
+  assert.deepEqual([blocked.status, JSON.parse(blocked.stdout).state], [4, "blocked"]);
 });
 
 // ---- no duplicated guard ----

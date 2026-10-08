@@ -22,6 +22,17 @@
           }
         ],
         "description": "Reminder before git push to review changes"
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts\"",
+            "timeout": 8
+          }
+        ],
+        "description": "Check Orca readiness before workflow phases; block when requested but unavailable"
       }
     ],
     "SessionStart": [
@@ -88,6 +99,19 @@
           }
         ],
         "description": "Log PR URL and provide review command after PR creation"
+      }
+    ],
+    "UserPromptExpansion": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts\"",
+            "timeout": 8
+          }
+        ],
+        "description": "Check Orca readiness before workflow phases; block when requested but unavailable"
       }
     ]
   }
