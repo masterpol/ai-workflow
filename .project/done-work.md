@@ -302,3 +302,11 @@ Lessons: [[one-boundary-selects-the-child-runner]], [[keep-the-fakes-guarantee-t
 Useful project, pitch, vendor, skill, phase and agent metrics core (v2.16.0): bounded event state, guarded writer, record CLI and shared JSON/Markdown/HTML reports, with no token or cost fields. Node and Bun 156/156; three audit cycles hardened directory identity across async leases. Native capture and adoption remain separate followups.
 
 Lessons: [[metrics-ancestor-swap-during-async-lease]], [[pin-directory-identities-across-async-leases]], [[display-buckets-are-not-lifecycle-identities]].
+
+## fix-orca-dispatch-resume-gate — shipped 2026-10-08
+
+fix-orca-dispatch-resume-gate — shipped 2026-10-08.
+
+dispatchScope() re-checks the multi-agent switch and the launch gate before returning resumeExisting, so a replay under a disabled policy exits 3 instead of a success-shaped 0; status accepts repeated --vendor. Two issues promoted: an-idempotent-replay-path-returned-success-without-re-checking-the-gate and editing-a-canonical-file-alone-breaks-the-byte-identity-mirror-check. A wrong fix (recreating .env.example) was caught at the changelog step and reverted; the lesson is captured at a-missing-tracked-file-is-not-an-undeleted-deletion. Node 1037 pass / 0 fail / 1 skipped, Bun 66/66 on touched files. Full ledger at .project/compaction/ledgers/fix-orca-dispatch-resume-gate.json (94% coverage, one accepted gap superseded by the wrong-fix section). Recovery archive written before any deletion. See runs/2026-10-08-fix-orca-dispatch-resume-gate.md for the ship-time log.
+
+Lessons: [[an-idempotent-replay-path-returned-success-without-re-checking-the-gate]], [[editing-a-canonical-file-alone-breaks-the-byte-identity-mirror-check]], [[a-missing-tracked-file-is-not-an-undeleted-deletion]].

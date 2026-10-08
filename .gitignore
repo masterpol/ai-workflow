@@ -3,6 +3,8 @@
 .env
 .env.*
 !.env.example
+# Workflow settings (runner, Orca switch): no secrets, but local to each checkout; the .example.json stays tracked.
+ai_workflow_env.json
 .opencode/node_modules/
 .claude/settings.local.json
 .project/metrics/

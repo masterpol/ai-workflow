@@ -296,3 +296,19 @@ changed as part of path safety.
 - Test-coverage-checker was not dispatched at audit; the next audit should include it.
 - Bun full suite intermittently fails 1-4 tests when run right after the Node suite (runs: 1, 0, 4, 0 failures). Names were not captured; rerun with output saved to identify the flaky tests.
 - `skill-defaults.test.mts` "doctor and setup-validator report the live caveman state truthfully" fails on a clean `git archive` export (also at HEAD): it needs the gitignored local caveman install (`.project/skills/registry.json`, `.claude/skills/caveman/`). Make it install a fixture skill or skip when absent. A clean export also skips 3 more tests than the working tree.
+
+## Orca smoke followups — 2026-10-08
+
+From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2 are real; F3 and F4 are informational.
+
+- **(F1)** SHIPPED 2026-10-08 as `fix-orca-dispatch-resume-gate`: `orca-dispatch.mts` `resumeExisting` skipped the policy gate and the switch; the CLI exited 0 on a `resume` outcome. Fixed by re-checking `orcaMultiAgentEnabled` and `evaluateLaunch` before the replay branch, plus 2 regression tests.
+- **(F2)** SHIPPED 2026-10-08 as `fix-orca-dispatch-resume-gate`: `parseArgs` rejected repeated `--vendor`. `status` now accepts a repeated vendor; other commands refuse it as `vendor-not-repeatable`.
+- **(F3 informational)** — no action. `orca-eval-grader.mts` reports 3 live-only cases as `not-run` by design; counts separate; `liveCompatibility: "unverified"` stays unverified.
+- **(F4 informational)** — no action. The smoke left one ledger entry under `.project/metrics/orca-ledger/` (Git-ignored).
+
+## follow-orca-dispatch-resume-gate — 2026-10-08
+
+- `workflow-doctor`'s OpenCode check reports `WARN | OpenCode | could not resolve config` whenever `opencode debug config` runs inside a live OpenCode session, because the managed service port is already bound by that session. Truthful, not a code defect. Decide whether the check should detect that case and report "cannot verify inside a live session" instead of a bare warning.
+- Bun parity for the whole repository exceeds a 400 s shell budget (`token-consumption.test.mts` and `browser-runtime.test.mts` carry >100 s integration tests). Either raise the budget or split those files so a full Bun run is practical.
+- The env-source contract moved from `.env` to `ai_workflow_env.json`, but `SETUP.md`, `docs/setup.md` and `docs/design-notes.md` may still tell a reader to put runner settings in `.env`. Check every doc for that claim while the contract is fresh.
+- `fix-orca-dispatch-resume-gate` shipped a wrong fix that only surfaced at the changelog step: a `git show HEAD:<file>` "restore" of `.env.example` reversed a deletion that CHANGELOG 2.18.0 had already recorded as intentional (replaced by `ai_workflow_env.example.json`). When a test or `git diff` says a file is missing, check the recorded decision — CHANGELOG, README link, `.gitignore` — before restoring it. Consider a rule clause: "a missing tracked file is a decision to verify, not a deletion to undo."

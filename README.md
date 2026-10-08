@@ -52,15 +52,17 @@ model setup and verification: [Set up](ai-framework/docs/setup.md).
 
 ## Choose the script runtime
 
-Scripts use Node by default. Use [.env.example](.env.example) as a template for a new project-root `.env`.
-To use Bun, add or update this setting in `.env`:
+Scripts use Node by default. Workflow settings live in the project-root `ai_workflow_env.json`, which holds no
+secrets, is Git-ignored, and is the only file the workflow reads for them (never `.env`). Copy
+[ai_workflow_env.example.json](ai_workflow_env.example.json) to `ai_workflow_env.json`; in a project that received the
+bundle, also add `ai_workflow_env.json` to its `.gitignore`. To use Bun:
 
-```dotenv
-AI_WORKFLOW_RUNNER=bun
+```json
+{ "AI_WORKFLOW_RUNNER": "bun", "AI_WORKFLOW_ORCA_MULTI_AGENT": false }
 ```
 
-Process environment variables override `.env`. Bun must be installed and available on `PATH`.
-Orca multi-agent dispatch is off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true` (see
+Process environment variables override the file. Bun must be installed and available on `PATH`.
+Orca multi-agent dispatch is off unless `AI_WORKFLOW_ORCA_MULTI_AGENT` is `true` (see
 [Orca vendors](ai-framework/integrations/orca-vendors.md)); any other value keeps the normal workflow.
 Run scripts directly as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later, or
 `bun ai-framework/scripts/<name>.mts`. Node 22.12–22.17 requires

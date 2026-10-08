@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { runWorkflow } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
+import { inspectWorkflowEnv } from "./runtime/env.mts";
 /*
  * Verifies that the portable workflow is complete after installation. Checks
  * run concurrently and report as they finish. --fix restores only missing
@@ -351,6 +352,18 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record("pass", name, `active: installed, enabled, covers all recommended phases; default ${modes?.caveman?.default || skillDefaults.CATALOG.defaults.find((entry) => entry.id.endsWith("/caveman")).defaultMode}`);
   }
 
+  // The runner and the Orca switch come from ai_workflow_env.json (never .env). A typo there would silently fall back to
+  // the defaults, so say what would actually be used.
+  function checkWorkflowSettings() {
+    const name = "Workflow settings";
+    const result = inspectWorkflowEnv(deps.fs, deps.path, root);
+    if (result.status === "missing") { record("info", name, "ai_workflow_env.json absent; defaults: runner node, Orca off (copy ai_workflow_env.example.json to set them)"); return; }
+    if (result.status === "refused") { record("fail", name, `ai_workflow_env.json ignored: ${result.problems.join("; ")}`); return; }
+    if (result.status === "invalid") { record("fail", name, `ai_workflow_env.json has problems and is partly or wholly ignored: ${result.problems.join("; ")}`); return; }
+    const ignored = result.ignoredKeys.length ? `; ignored keys: ${result.ignoredKeys.slice(0, 5).join(", ")}` : "";
+    record(result.ignoredKeys.length ? "warn" : "pass", name, `runner ${result.values.AI_WORKFLOW_RUNNER || "node (default)"}; Orca ${result.values.AI_WORKFLOW_ORCA_MULTI_AGENT?.trim().toLowerCase() === "true" ? "on" : "off"}${ignored}; process environment overrides the file`);
+  }
+
   function checkOrcaPolicy() {
     // Optional local policy is inspected without importing preflight or touching executables.
     const result = orcaPolicy.readPolicy(root, deps);
@@ -603,6 +616,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkOpenCodeResolution(),
       checkSkillDefaults(),
       checkCavemanState(),
+      checkWorkflowSettings(),
       checkOrcaPolicy(),
     ]);
     await checkProjectScaffold();

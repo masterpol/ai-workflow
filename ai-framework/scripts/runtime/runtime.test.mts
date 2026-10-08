@@ -8,8 +8,8 @@ import { fileURLToPath } from "node:url";
 
 import { createNodeDeps } from "./node.mts";
 import { createBunDeps } from "./bun.mts";
-import { loadDotenv, parseDotenv } from "./env.mts";
-import { RUNNER_VAR, resolveRunner, selectRuntime } from "./select.mts";
+import { loadWorkflowEnv, WORKFLOW_ENV_FILE } from "./env.mts";
+import { RUNNER_VAR, orcaMultiAgentEnabled, resolveRunner, selectRuntime } from "./select.mts";
 import type { RuntimeDeps } from "./types.mts";
 
 const here = fileURLToPath(new URL(".", import.meta.url));
@@ -278,40 +278,65 @@ test("resolveRunner: unset or node selects node, bun selects bun, anything else 
   assert.throws(() => resolveRunner({ [RUNNER_VAR]: "deno" }), /must be "bun" or unset; got "deno"/);
 });
 
-test("parseDotenv: comments, export, quotes, inline comments, bad keys", () => {
-  const parsed = parseDotenv(["# c", "A=1", "export B='two words'", 'C="x # y"', "D=z # tail", "1BAD=no", "E", "", "F ="].join("\n"));
-  assert.deepEqual(parsed, { A: "1", B: "two words", C: "x # y", D: "z", F: "" });
+const ENV_JSON = (values: Record<string, unknown>): string => JSON.stringify(values);
+
+test("loadWorkflowEnv: only the two allowlisted keys, as string or boolean, are taken from the file", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true, OPENAI_API_KEY: "sk-not-real", NODE_OPTIONS: "--require=/x" }));
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" });
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: 7, AI_WORKFLOW_ORCA_MULTI_AGENT: null }));
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {}, "wrong types contribute nothing");
+    for (const body of ["not json", "[]", "null", '"bun"']) {
+      writeFileSync(join(root, WORKFLOW_ENV_FILE), body);
+      assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, { X: "1" }), { X: "1" }, body);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test("loadDotenv: process env wins, missing .env is a no-op, symlink escaping the root is ignored", () => {
+test("the secret-bearing .env is never read for the runner or the Orca switch", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, ".env"), `${RUNNER_VAR}=bun\nAI_WORKFLOW_ORCA_MULTI_AGENT=true\nOPENAI_API_KEY=sk-not-real\n`);
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {});
+    assert.equal(entry.readRunner(root, {}), "node");
+    assert.equal(orcaMultiAgentEnabled(root, deps, {}), false);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("loadWorkflowEnv: process env wins, a missing file is a no-op, a symlink escaping the root is ignored", () => {
   const deps = createNodeDeps({});
   const root = scratch();
   const outside = scratch();
   try {
-    assert.deepEqual(loadDotenv(deps.fs, deps.path, root, { X: "1" }), { X: "1" });
-    writeFileSync(join(root, ".env"), `${RUNNER_VAR}=bun\nX=file\n`);
-    assert.deepEqual(loadDotenv(deps.fs, deps.path, root, { X: "env" }), { [RUNNER_VAR]: "bun", X: "env" });
-    rmSync(join(root, ".env"));
-    writeFileSync(join(outside, "stolen"), `${RUNNER_VAR}=bun\n`);
-    symlinkSync(join(outside, "stolen"), join(root, ".env"));
-    assert.deepEqual(loadDotenv(deps.fs, deps.path, root, {}), {});
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, { X: "1" }), { X: "1" });
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun" }));
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, { X: "env" }), { [RUNNER_VAR]: "bun", X: "env" });
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, { [RUNNER_VAR]: "node" }), { [RUNNER_VAR]: "node" });
+    rmSync(join(root, WORKFLOW_ENV_FILE));
+    writeFileSync(join(outside, "stolen"), ENV_JSON({ [RUNNER_VAR]: "bun" }));
+    symlinkSync(join(outside, "stolen"), join(root, WORKFLOW_ENV_FILE));
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {});
   } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
 });
 
-test(".env that is a directory, oversize or a FIFO contributes nothing and never blocks or throws", () => {
+test("a settings file that is a directory, oversize or a FIFO contributes nothing and never blocks or throws", () => {
   const deps = createNodeDeps({});
   const root = scratch();
+  const file = join(root, WORKFLOW_ENV_FILE);
   try {
-    mkdirSync(join(root, ".env"));
-    assert.deepEqual(loadDotenv(deps.fs, deps.path, root, { X: "1" }), { X: "1" });
+    mkdirSync(file);
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, { X: "1" }), { X: "1" });
     assert.equal(entry.readRunner(root, {}, deps), "node");
-    rmSync(join(root, ".env"), { recursive: true });
-    writeFileSync(join(root, ".env"), `${RUNNER_VAR}=bun\n${"#".repeat(70 * 1024)}\n`);
-    assert.deepEqual(loadDotenv(deps.fs, deps.path, root, {}), {});
+    rmSync(file, { recursive: true });
+    writeFileSync(file, ENV_JSON({ [RUNNER_VAR]: "bun", pad: "#".repeat(70 * 1024) }));
+    assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {});
     assert.equal(entry.readRunner(root, {}), "node");
-    rmSync(join(root, ".env"));
-    if (spawnSync("mkfifo", [join(root, ".env")]).status === 0) {
-      assert.deepEqual(loadDotenv(deps.fs, deps.path, root, {}), {}); // would hang on a read
+    rmSync(file);
+    if (spawnSync("mkfifo", [file]).status === 0) {
+      assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {}); // would hang on a read
       assert.equal(entry.readRunner(root, {}), "node");
     }
   } finally { rmSync(root, { recursive: true, force: true }); }
@@ -322,11 +347,11 @@ test("an invalid runner value is quoted and capped in the error, never echoed ra
   assert.throws(() => entry.readRunner("/nonexistent-root", { [RUNNER_VAR]: "x\u001b[31m" }), (error: Error) => !error.message.includes("\u001b"));
 });
 
-test("selectRuntime: reads the runner from the trusted root .env; env var beats .env", async () => {
+test("selectRuntime: reads the runner from the trusted root settings file; env var beats the file", async () => {
   const root = scratch();
   try {
     assert.equal((await selectRuntime(root, {})).runtime, "node");
-    writeFileSync(join(root, ".env"), `${RUNNER_VAR}=bun\n`);
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun" }));
     if (underBun) assert.equal((await selectRuntime(root, {})).runtime, "bun");
     else await assert.rejects(selectRuntime(root, {}), /requires running under Bun/);
     assert.equal((await selectRuntime(root, { [RUNNER_VAR]: "node" })).runtime, "node");
@@ -334,10 +359,10 @@ test("selectRuntime: reads the runner from the trusted root .env; env var beats 
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test("selectRuntime: the project .env picks the runner but none of its other variables reach proc.env", async () => {
+test("selectRuntime: the settings file picks the runner but none of its other keys reach proc.env", async () => {
   const root = scratch();
   try {
-    writeFileSync(join(root, ".env"), `OPENAI_API_KEY=sk-not-real\nNODE_OPTIONS=--require=/nonexistent\n${RUNNER_VAR}=node\n`);
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ OPENAI_API_KEY: "sk-not-real", NODE_OPTIONS: "--require=/nonexistent", [RUNNER_VAR]: "node" }));
     const deps = await selectRuntime(root, { PATH: "/usr/bin" });
     assert.deepEqual(deps.proc.env, { PATH: "/usr/bin", [RUNNER_VAR]: "node" });
     const seen = deps.child.runSync(deps.proc.execPath, ["-e", "process.stdout.write(String(process.env.OPENAI_API_KEY)+String(process.env.NODE_OPTIONS))"], { env: deps.proc.env });
@@ -349,9 +374,9 @@ test("entry.mts readRunner agrees with env.mts on every fixture", () => {
   const root = scratch();
   const deps = createNodeDeps({});
   try {
-    for (const body of ["", `${RUNNER_VAR}=bun`, `export ${RUNNER_VAR}="bun"`, `${RUNNER_VAR}='node'`, `# ${RUNNER_VAR}=bun`, `${RUNNER_VAR}=bun # tail`, `X=1\n${RUNNER_VAR}= node `]) {
-      writeFileSync(join(root, ".env"), body);
-      assert.equal(entry.readRunner(root, {}), resolveRunner(loadDotenv(deps.fs, deps.path, root, {})), JSON.stringify(body));
+    for (const body of ["", "{}", "not json", ENV_JSON({ [RUNNER_VAR]: "bun" }), ENV_JSON({ [RUNNER_VAR]: "node" }), ENV_JSON({ [RUNNER_VAR]: " Bun " }), ENV_JSON({ X: 1 })]) {
+      writeFileSync(join(root, WORKFLOW_ENV_FILE), body);
+      assert.equal(entry.readRunner(root, {}), resolveRunner(loadWorkflowEnv(deps.fs, deps.path, root, {})), JSON.stringify(body));
     }
     assert.equal(entry.readRunner(root, { [RUNNER_VAR]: "node" }), "node");
   } finally { rmSync(root, { recursive: true, force: true }); }
@@ -425,7 +450,7 @@ test("direct TypeScript command supports Node with type stripping disabled in NO
 
 test("library imports never run main or load an invalid project runner", (t) => {
   const { root, script } = commandFixture(t);
-  writeFileSync(join(root, ".env"), `${RUNNER_VAR}=deno\n`);
+  writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "deno" }));
   const consumer = join(root, "consumer.mts");
   writeFileSync(consumer, `import { main } from "./ai-framework/scripts/fixture.mts";
 process.stdout.write(typeof main);`);
@@ -480,17 +505,17 @@ test("runtime CLI invoked through a symlink executes the requested module", (t) 
   assert.equal(result.stderr, "");
 });
 
-test("direct command loads only the runner from dotenv and keeps process environment precedence", (t) => {
+test("direct command loads only the runner from the settings file and keeps process environment precedence", (t) => {
   const { root, script } = commandFixture(t);
-  writeFileSync(join(root, ".env"), `OPENAI_API_KEY=dotenv-key\nNODE_OPTIONS=--require=/nonexistent\n${RUNNER_VAR}=bun\n`);
+  writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ OPENAI_API_KEY: "dotenv-key", NODE_OPTIONS: "--require=/nonexistent", [RUNNER_VAR]: "bun" }));
   const result = direct(script, [], { OPENAI_API_KEY: "process-key", [RUNNER_VAR]: "node" });
   assert.equal(result.status, 0, result.stderr);
   assert.deepEqual(JSON.parse(result.stdout), { argv: [], procArgv: [], runtime: "node", key: "process-key", options: null });
 });
 
-test("dotenv selecting Bun re-executes under Bun without importing dotenv keys or NODE_OPTIONS", { skip: !bunAvailable }, (t) => {
+test("the settings file selecting Bun re-executes under Bun without importing its other keys or NODE_OPTIONS", { skip: !bunAvailable }, (t) => {
   const { root, script } = commandFixture(t);
-  writeFileSync(join(root, ".env"), `OPENAI_API_KEY=dotenv-key\nNODE_OPTIONS=--require=/nonexistent\n${RUNNER_VAR}=bun\n`);
+  writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ OPENAI_API_KEY: "dotenv-key", NODE_OPTIONS: "--require=/nonexistent", [RUNNER_VAR]: "bun" }));
   const result = direct(script, ["exit"], { [RUNNER_VAR]: undefined });
   assert.equal(result.status, 7, result.stderr);
   assert.equal(result.stderr, "");

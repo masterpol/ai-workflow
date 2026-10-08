@@ -124,8 +124,9 @@ Norandino, live in their own repositories (`../lasallenorandi`) and are not trac
   Node 22.18 or later runs them without flags; Node 22.12–22.17 requires
   `--experimental-strip-types --disable-warning=ExperimentalWarning`. Tests run with
   `node --experimental-strip-types --disable-warning=ExperimentalWarning --test` or `bun test`.
-- `AI_WORKFLOW_RUNNER` selects Node (default) or Bun through the process environment or the
-  project-root `.env`; process environment wins. The OpenCode plugin is a direct `.ts` entry.
+- `AI_WORKFLOW_RUNNER` selects Node (default) or Bun, and `AI_WORKFLOW_ORCA_MULTI_AGENT` turns Orca on, through the process
+  environment or the project-root `ai_workflow_env.json` (no secrets; agents may read it; process environment wins; `.env`
+  is never read). The OpenCode plugin is a direct `.ts` entry.
 - Supported hosts: Claude Code, OpenCode, Codex and Cursor.
 
 ### Project Records

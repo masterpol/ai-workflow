@@ -10,7 +10,7 @@ import type { RuntimeDeps } from "./runtime/types.mts";
  *
  * WHAT MAKES A LAUNCH ALLOWED (the single place this is defined, see `evaluateLaunch`). A launch is allowed
  * only when, evaluated fresh immediately before that call and never cached:
- *   0. AI_WORKFLOW_ORCA_MULTI_AGENT is `true` (process env or project-root .env); otherwise the normal workflow;
+ *   0. AI_WORKFLOW_ORCA_MULTI_AGENT is `true` (process env or project-root ai_workflow_env.json); otherwise the normal workflow;
  *   1. the caller is not itself a worker (no `--worker-context` flag, no WORKER_ENV_MARKERS in env);
  *   2. the policy file is re-read and the requested coordinator vendor is eligible (policy-eligible);
  *   3. a fresh runtime probe passes: Orca executable present, both guides verified, local runtime reachable

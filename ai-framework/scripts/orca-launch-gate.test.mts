@@ -281,20 +281,24 @@ test("the multi-agent switch: only `true` enables Orca; everything else keeps th
   assert.equal(evaluateLaunch({ ...common, root, env: { ...SAFE_ENV, AI_WORKFLOW_ORCA_MULTI_AGENT: " TRUE " }, run: prober().run }).allowed, true);
 });
 
-test("the switch is read from the project-root .env, and a process value overrides it", (t: TestContext) => {
+test("the switch is read from the project-root ai_workflow_env.json, never .env, and a process value overrides it", (t: TestContext) => {
   const root = fixture(t);
-  fs.writeFileSync(path.join(root, ".env"), "AI_WORKFLOW_ORCA_MULTI_AGENT=true\nSECRET_TOKEN=abc\n");
+  const file = path.join(root, "ai_workflow_env.json");
+  fs.writeFileSync(file, JSON.stringify({ AI_WORKFLOW_ORCA_MULTI_AGENT: true, SECRET_TOKEN: "abc" }));
   const base = { ...common, root, run: prober().run };
-  assert.equal(evaluateLaunch({ ...base, env: { PATH: "/usr/bin" } }).allowed, true, ".env alone enables");
+  assert.equal(evaluateLaunch({ ...base, env: { PATH: "/usr/bin" } }).allowed, true, "the settings file alone enables");
   assert.equal(evaluateLaunch({ ...base, run: prober().run, env: { PATH: "/usr/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "false" } }).reason, "orca-multi-agent-disabled", "process env wins");
-  fs.writeFileSync(path.join(root, ".env"), "AI_WORKFLOW_ORCA_MULTI_AGENT=false\n");
+  fs.writeFileSync(file, JSON.stringify({ AI_WORKFLOW_ORCA_MULTI_AGENT: false }));
   assert.equal(evaluateLaunch({ ...untouchedProbe(root), env: { PATH: "/usr/bin" } }).reason, "orca-multi-agent-disabled");
-  // A symlinked .env outside the root contributes nothing.
+  // A .env that says true is ignored: the secret-bearing file is never read.
+  fs.writeFileSync(path.join(root, ".env"), "AI_WORKFLOW_ORCA_MULTI_AGENT=true\n");
+  assert.equal(evaluateLaunch({ ...untouchedProbe(root), env: { PATH: "/usr/bin" } }).reason, "orca-multi-agent-disabled");
+  // A symlinked settings file outside the root contributes nothing.
   const outside = fs.mkdtempSync(path.join(os.tmpdir(), "orca-env-"));
   t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
-  fs.writeFileSync(path.join(outside, "env"), "AI_WORKFLOW_ORCA_MULTI_AGENT=true\n");
-  fs.rmSync(path.join(root, ".env"));
-  fs.symlinkSync(path.join(outside, "env"), path.join(root, ".env"));
+  fs.writeFileSync(path.join(outside, "env.json"), JSON.stringify({ AI_WORKFLOW_ORCA_MULTI_AGENT: true }));
+  fs.rmSync(file);
+  fs.symlinkSync(path.join(outside, "env.json"), file);
   assert.equal(evaluateLaunch({ ...untouchedProbe(root), env: { PATH: "/usr/bin" } }).reason, "orca-multi-agent-disabled");
 });
 function untouchedProbe(root: string) { return { root, vendor: "codex", deps: nodeDeps, run: refused("run"), present: refused("present") }; }

@@ -18,6 +18,16 @@ Before reviewing, check `ai-framework/rules/security.md` for the stack-agnostic 
 validator API — flag a deviation from the project's own documented pattern as a finding, not
 just a generic OWASP category.
 
+## Hard rules (always apply, no exceptions)
+
+These are promoted from recurring pitch deviations. They are not stylistic; they are
+mandatory reviewer discipline:
+
+- **A gate must not trust its own author.** The tool that verifies a step must re-check the
+  claim at the destructive step (e.g. "this path is inside the project" — verify before
+  every write, not once at startup). Trust the re-check, not the author's assertion. See
+  `.project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md`.
+
 ## Core Responsibilities
 
 1. **Vulnerability Detection** — Identify OWASP Top 10 and common security issues

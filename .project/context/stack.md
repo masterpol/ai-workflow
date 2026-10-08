@@ -3,7 +3,7 @@
 ## Runtime
 
 - TypeScript ES modules (`.mts`) run directly on Node.js or Bun without compilation. The core scripts have no package dependencies. OpenCode has its own plugin dependency manifest.
-- Run `node ai-framework/scripts/<name>.mts` on Node 22.18 or later. Node 22.12–22.17 requires `--experimental-strip-types --disable-warning=ExperimentalWarning` before the entry path; the shipped hooks include these flags. `AI_WORKFLOW_RUNNER` (environment or project-root `.env`, environment wins) selects Node by default or Bun with `bun`; a Node launch configured for Bun starts that runner. See `ai-framework/scripts/runtime/README.md`.
+- Run `node ai-framework/scripts/<name>.mts` on Node 22.18 or later. Node 22.12–22.17 requires `--experimental-strip-types --disable-warning=ExperimentalWarning` before the entry path; the shipped hooks include these flags. `AI_WORKFLOW_RUNNER` (process environment or project-root `ai_workflow_env.json`, environment wins) selects Node by default or Bun with `bun`; a Node launch configured for Bun starts that runner. `.env` is never read. See `ai-framework/scripts/runtime/README.md`.
 - OpenCode discovers the direct `.opencode/plugins/token-consumption.ts` ES module; its package declares `type: module`.
 - Python is only needed when an installed skill's own guard reports it.
 
@@ -21,4 +21,4 @@ There is no build, typecheck, lint or i18n command in this repository. Phases th
 
 ## Environment
 
-No environment variables are required. Secret files such as `.claude/settings.local.json` are never read or copied. Metrics, generated reports and installed skill packages are local instance data. The runtime reads only `AI_WORKFLOW_RUNNER` from the project-root `.env`, without exposing other values; the Orca launch gate separately reads only `AI_WORKFLOW_ORCA_MULTI_AGENT` (exactly `true` enables Orca multi-agent dispatch, anything else keeps the normal workflow).
+No secret environment variables are required. Secret files such as `.claude/settings.local.json` are never read or copied. Metrics, generated reports and installed skill packages are local instance data. The runtime reads only `AI_WORKFLOW_RUNNER` from the process environment or the project-root `ai_workflow_env.json`, without exposing other values; the Orca launch gate separately reads only `AI_WORKFLOW_ORCA_MULTI_AGENT` (exactly `true` enables Orca multi-agent dispatch, anything else keeps the normal workflow). `.env` is never read, because it may carry secrets.

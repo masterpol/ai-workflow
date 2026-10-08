@@ -1,4 +1,4 @@
-import { loadDotenv } from "./env.mts";
+import { loadWorkflowEnv } from "./env.mts";
 import { createNodeDeps } from "./node.mts";
 import type { RunnerName, RuntimeDeps } from "./types.mts";
 
@@ -7,12 +7,12 @@ export const ORCA_MULTI_AGENT_VAR = "AI_WORKFLOW_ORCA_MULTI_AGENT";
 
 /**
  * Orca multi-agent work is used only when this is exactly `true` (case-insensitive). Unset, `false`, empty or any other
- * value keeps the normal workflow. A process environment value wins over the project `.env`, which is read from the
- * trusted `root` for this one key only.
+ * value keeps the normal workflow. A process environment value wins over the project `ai_workflow_env.json`, which is read from the
+ * trusted `root` for this one key only. The secret-bearing `.env` is never read.
  */
 export function orcaMultiAgentEnabled(root: string, deps: RuntimeDeps, env: Record<string, string | undefined> = deps.proc.env): boolean {
   try {
-    const merged = loadDotenv(deps.fs, deps.path, root, { [ORCA_MULTI_AGENT_VAR]: env[ORCA_MULTI_AGENT_VAR] });
+    const merged = loadWorkflowEnv(deps.fs, deps.path, root, { [ORCA_MULTI_AGENT_VAR]: env[ORCA_MULTI_AGENT_VAR] });
     return merged[ORCA_MULTI_AGENT_VAR]?.trim().toLowerCase() === "true";
   } catch { return false; }
 }
@@ -26,13 +26,13 @@ export function resolveRunner(env: Record<string, string | undefined>): RunnerNa
 }
 
 /**
- * `root` must be the trusted project root (never the cwd of untrusted content). The project `.env` is read only to
- * choose the runner: none of its other variables (API keys, NODE_OPTIONS, GIT_*) ever reach `deps.proc.env`
+ * `root` must be the trusted project root (never the cwd of untrusted content). The project `ai_workflow_env.json` is read only to
+ * choose the runner and the Orca switch: no other key in it ever reaches `deps.proc.env`
  * or the children a script starts.
  */
 export async function selectRuntime(root: string, env: Record<string, string | undefined> = process.env): Promise<RuntimeDeps> {
   const boot = createNodeDeps(env);
-  const merged = loadDotenv(boot.fs, boot.path, root, { [RUNNER_VAR]: env[RUNNER_VAR] });
+  const merged = loadWorkflowEnv(boot.fs, boot.path, root, { [RUNNER_VAR]: env[RUNNER_VAR] });
   const runner = resolveRunner(merged);
   const selectedEnv = { ...env, [RUNNER_VAR]: runner };
   if (runner === "node") return createNodeDeps(selectedEnv);

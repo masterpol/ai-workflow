@@ -92,6 +92,29 @@ test("doctor checks TypeScript syntax with Bun instead of skipping it", { skip: 
   assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "fail" && /Unexpected|Expected|error/i.test(item.detail)));
 });
 
+test("doctor reports what ai_workflow_env.json would set and flags a file that would be ignored", async (t) => {
+  const root = fixture(t);
+  const cases: Array<[string | null, string, RegExp]> = [
+    [null, "info", /absent; defaults: runner node, Orca off/],
+    [JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }), "pass", /runner bun; Orca on/],
+    [JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", OPENAI_API_KEY: "x" }), "warn", /ignored keys: OPENAI_API_KEY/],
+    [JSON.stringify({ AI_WORKFLOW_RUNNER: "deno" }), "fail", /must be "node" or "bun"/],
+    [JSON.stringify({ AI_WORKFLOW_ORCA_MULTI_AGENT: 1 }), "fail", /must be a string or boolean/],
+    ["not json", "fail", /not valid JSON/],
+  ];
+  for (const [body, status, detail] of cases) {
+    fs.rmSync(path.join(root, "ai_workflow_env.json"), { force: true });
+    if (body !== null) write(root, "ai_workflow_env.json", body);
+    // A secret-bearing .env must never change the result.
+    write(root, ".env", "AI_WORKFLOW_RUNNER=bun\nAI_WORKFLOW_ORCA_MULTI_AGENT=true\n");
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    const item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+    assert.ok(item, String(body));
+    assert.deepEqual([item.status, detail.test(item.detail)], [status, true], `${body}: ${item.detail}`);
+  }
+});
+
 test("fix restores missing scaffold files while retaining existing instance data", async (t) => {
   const root = fixture(t);
   write(root, "ai-framework/templates/project/context/product.md", "template\n");

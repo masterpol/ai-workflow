@@ -102,7 +102,15 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
 
   const existing = ledger.read(attemptKey);
   if (existing.status === "refused" || existing.status === "corrupt") return { route: "blocked", reason: `ledger-${existing.status}`, attemptKey };
-  if (existing.status === "ok") return resumeExisting(ledger, existing.record, attemptKey);
+  if (existing.status === "ok") {
+    // A gate that previously approved a launch may now refuse (policy disabled, switch off, runtime drifted).
+    // Re-check before handing ownership back; otherwise a resume under a forbidden policy exits the CLI as if
+    // the worker had been launched, when in fact nothing is happening.
+    if (!orcaMultiAgentEnabled(options.root, deps, options.env ?? deps.proc.env)) return { route: "normal", reason: "orca-multi-agent-disabled" };
+    const resumeGate = evaluateLaunch({ ...options, vendor: coordinator });
+    if (!resumeGate.allowed) return { route: "normal", reason: resumeGate.reason };
+    return resumeExisting(ledger, existing.record, attemptKey);
+  }
 
   // Everything up to the claim is side-effect free: unsupported delegation uses the normal workflow.
   const now = options.now ?? (() => deps.clock.perfNowMs());

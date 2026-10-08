@@ -21,7 +21,7 @@ If `NODE_OPTIONS` disables type stripping, pass `--experimental-strip-types` exp
 
 ## Choosing Node or Bun
 
-Set `AI_WORKFLOW_RUNNER` in the environment or the project's `.env` (the environment wins):
+Set `AI_WORKFLOW_RUNNER` in the environment or in the project-root `ai_workflow_env.json` (the environment wins):
 
 | Value | Runtime |
 |---|---|
@@ -37,10 +37,11 @@ they apply Node's compatibility flags only to Node and honor an explicit child r
 An explicit child environment replaces the inherited environment; include `PATH` when selecting
 another executable by name. A sanitized environment without a runner keeps the parent's selection.
 
-`.env` is read only from the project root that contains `ai-framework/`, never from an unrelated
-working directory. A `.env` symlink leaving that root is ignored. Only the runner setting is
-used here (the Orca switch `AI_WORKFLOW_ORCA_MULTI_AGENT` is read separately, by the Orca launch gate, with the same
-rules). A selected executable missing from `PATH` fails with an error; it never falls back to
+`ai_workflow_env.json` (a flat object; see `ai_workflow_env.example.json`) is read only from the project root that
+contains `ai-framework/`, never from an unrelated working directory, and the secret-bearing `.env` is never read. A
+symlink leaving that root, a non-regular file, a file over 64 KiB or malformed JSON is ignored. Only the two keys
+`AI_WORKFLOW_RUNNER` and `AI_WORKFLOW_ORCA_MULTI_AGENT` (string or boolean) are taken from it; other keys never reach a
+child process. The Orca switch is read by the same loader through the Orca launch gate. A selected executable missing from `PATH` fails with an error; it never falls back to
 another runtime. Portable reminder hooks and review-bench test commands use the same selection.
 
 ## Writing a script

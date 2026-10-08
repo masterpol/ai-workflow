@@ -52,13 +52,14 @@ export function checkCatalog(deps: RuntimeDeps): Readonly<Record<string, CheckSp
   });
 }
 
-interface Parsed { command: Command; root: string; input?: string; checks: string[]; probe: boolean; vendor?: string }
+interface Parsed { command: Command; root: string; input?: string; checks: string[]; probe: boolean; vendor?: string; vendors?: string[] }
 
 function parseArgs(argv: readonly string[]): Parsed {
   const command = argv[0];
   if (!COMMANDS.includes(command)) throw usage("unknown-command");
   const values = new Map<string, string>();
   const checks: string[] = [];
+  const vendors: string[] = [];
   let probe = false;
   for (let index = 1; index < argv.length; index++) {
     const flag = argv[index];
@@ -71,6 +72,13 @@ function parseArgs(argv: readonly string[]): Parsed {
       if (flag === "--check") {
         if (checks.includes(value)) throw usage("duplicate-flag");
         checks.push(value);
+      } else if (flag === "--vendor") {
+        // --vendor repeats on `status` to inspect every coordinator in one call. Other commands take one.
+        if (command !== "status") {
+          if (vendors.length > 0) throw usage("vendor-not-repeatable");
+          vendors.push(value);
+        } else if (vendors.includes(value)) throw usage("duplicate-flag");
+        else vendors.push(value);
       } else {
         if (values.has(flag)) throw usage("duplicate-flag");
         values.set(flag, value);
@@ -80,11 +88,14 @@ function parseArgs(argv: readonly string[]): Parsed {
   const root = values.get("--root");
   if (root === undefined) throw usage("missing-root");
   const input = values.get("--input");
-  const vendor = values.get("--vendor");
   if (command === "status" ? input !== undefined : input === undefined) throw usage(command === "status" ? "input-not-allowed" : "missing-input");
   if (probe && command !== "status") throw usage("probe-only-for-status");
-  if (vendor !== undefined && command !== "status") throw usage("vendor-only-for-status");
+  if (command !== "status" && vendors.length > 0) throw usage("vendor-only-for-status");
   if (checks.length > 0 && command !== "reconcile") throw usage("check-only-for-reconcile");
+  if (command === "status") {
+    return { command: command as Command, root, ...(input !== undefined ? { input } : {}), checks, probe, vendors };
+  }
+  const vendor = vendors[0];
   return { command: command as Command, root, ...(input !== undefined ? { input } : {}), checks, probe, ...(vendor !== undefined ? { vendor } : {}) };
 }
 
@@ -248,7 +259,8 @@ export function exitCodeFor(command: Command, outcome: Json): number {
 }
 
 function status(root: string, parsed: Parsed, deps: RuntimeDeps): Json {
-  const vendors = parsed.vendor === undefined ? [...VENDORS] : [parsed.vendor];
+  const requested = parsed.vendors ?? [];
+  const vendors = requested.length === 0 ? [...VENDORS] : requested;
   if (!vendors.every((vendor) => VENDORS.includes(vendor))) throw usage("invalid-vendor");
   const enabled = orcaMultiAgentEnabled(root, deps);
   return { schemaVersion: 1, command: "status", enabled, probe: parsed.probe,

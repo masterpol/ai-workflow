@@ -29,7 +29,7 @@ Phase 2 of the new pipeline. See `ai-framework/workflow/phases/2-build.md` for f
 
 ## Optional Orca dispatch (off by default)
 
-Only when `AI_WORKFLOW_ORCA_MULTI_AGENT=true` (environment or project `.env`), `.project/orchestration.json` opts in, and a scope in `plan.md` is marked for an alternate vendor. Every other case uses the normal workflow above, with no side effects.
+Only when `AI_WORKFLOW_ORCA_MULTI_AGENT=true` (environment or project `ai_workflow_env.json`), `.project/orchestration.json` opts in, and a scope in `plan.md` is marked for an alternate vendor. Every other case uses the normal workflow above, with no side effects.
 
 - Library: `ai-framework/scripts/orca-dispatch.mts` (`dispatchScope`, `dispatchWithRetries`, `collectReport`, `classifyLiveness`, `markUnknownLiveness`). Pass the `coordinator` (the vendor running this task) and the alternate `vendor`; placement is typed fields only, never free text, built on the launch gate (`orca-launch-gate.mts`) and the ownership ledger (`orca-ledger.mts`). Contract and limits: `ai-framework/integrations/orca-vendors.md`.
 - The coordinator stays the current agent. Workers never launch workers or ship; every brief carries `--worker-context`.

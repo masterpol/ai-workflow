@@ -306,6 +306,63 @@ test("status reports with the switch off and makes no Orca call unless --probe",
   assert.equal(preflight.dispatchReady, false);
 });
 
+test("status accepts repeated --vendor and reports every coordinator in one call", async (t: TestContext) => {
+  const on = fixture(t);
+  const quiet = harness(on.env, { runSync: probeSync });
+  const result = await exec(["status", "--root", on.root, "--vendor", "claude", "--vendor", "codex", "--vendor", "opencode"], quiet);
+  assert.equal(result.code, 0);
+  const vendors = Object.keys(result.json.vendors as Obj);
+  assert.deepEqual(vendors.sort(), ["claude", "codex", "opencode"]);
+});
+
+test("status rejects repeated --vendor when the same vendor is named twice", async (t: TestContext) => {
+  const on = fixture(t);
+  const quiet = harness(on.env, { runSync: probeSync });
+  const result = await exec(["status", "--root", on.root, "--vendor", "claude", "--vendor", "claude"], quiet);
+  assert.equal(result.code, 2);
+  assert.equal((result.json as Obj).reason, "duplicate-flag");
+});
+
+test("dispatch refuses repeated --vendor (only status accepts it)", async (t: TestContext) => {
+  const on = fixture(t);
+  const quiet = harness(on.env, { runSync: probeSync });
+  const result = await exec(["dispatch", "--root", on.root, "--input", "input.json", "--vendor", "claude", "--vendor", "codex"], quiet);
+  assert.equal(result.code, 2);
+  assert.equal((result.json as Obj).reason, "vendor-not-repeatable");
+});
+
+test("status reads AI_WORKFLOW_ORCA_MULTI_AGENT from ai_workflow_env.json when the env is silent", async (t: TestContext) => {
+  const root = tmp(t);
+  fs.mkdirSync(path.join(root, ".project"));
+  const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+  policy["use-orca-orchestration"] = true;
+  fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  fs.writeFileSync(path.join(root, "ai_workflow_env.json"), JSON.stringify({ [SWITCH]: "true" }));
+  const bin = tmp(t, "orca-run-bin-");
+  for (const name of ["orca", "claude", "codex", "opencode"]) fs.writeFileSync(path.join(bin, name), "#!/bin/sh\n", { mode: 0o755 });
+  const env: Record<string, string | undefined> = { PATH: bin, ORCA_AGENT_SESSION_ID: "s1" };
+  const quiet = harness(env, { runSync: probeSync });
+  const result = await exec(["status", "--root", root], quiet);
+  assert.equal(result.code, 0, "switch read from ai_workflow_env.json enables the CLI");
+  assert.equal((result.json as Obj).enabled, true);
+});
+
+test("process environment wins over ai_workflow_env.json for the Orca switch", async (t: TestContext) => {
+  const root = tmp(t);
+  fs.mkdirSync(path.join(root, ".project"));
+  const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+  policy["use-orca-orchestration"] = false;
+  fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  fs.writeFileSync(path.join(root, "ai_workflow_env.json"), JSON.stringify({ [SWITCH]: "false" }));
+  const bin = tmp(t, "orca-run-bin-");
+  for (const name of ["orca", "claude", "codex", "opencode"]) fs.writeFileSync(path.join(bin, name), "#!/bin/sh\n", { mode: 0o755 });
+  const env: Record<string, string | undefined> = { PATH: bin, ORCA_AGENT_SESSION_ID: "s1", [SWITCH]: "true" };
+  const quiet = harness(env, { runSync: probeSync });
+  const result = await exec(["status", "--root", root], quiet);
+  assert.equal(result.code, 0, "env value wins");
+  assert.equal((result.json as Obj).enabled, true);
+});
+
 // ---- usage errors ----
 
 test("usage errors exit 2 with a JSON error and run nothing", async (t: TestContext) => {

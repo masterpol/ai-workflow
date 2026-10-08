@@ -119,6 +119,61 @@ test("a replayed attempt resumes by inspection and never launches a second worke
   assert.equal(orca.state.starts.length, 1);
 });
 
+test("resuming under a now-disabled policy refuses with normal route and no spawn", async (t: TestContext) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  const first = await dispatchScope(base(root, orca.deps));
+  assert.equal(first.route, "launched");
+  assert.equal(orca.state.starts.length, 1);
+  // Disable the policy between dispatches: the resume path must re-check before returning ownership.
+  const policyPath = path.join(root, ".project/orchestration.json");
+  const policy = JSON.parse(fs.readFileSync(policyPath, "utf8")) as Obj;
+  policy["use-orca-orchestration"] = false;
+  fs.writeFileSync(policyPath, JSON.stringify(policy));
+  const again = await dispatchScope(base(root, orca.deps));
+  assert.deepEqual([again.route, again.reason], ["normal", "policy-disabled"]);
+  assert.equal(orca.state.starts.length, 1, "no second worker started");
+});
+
+test("resuming with the multi-agent switch turned off refuses before resume", async (t: TestContext) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  await dispatchScope(base(root, orca.deps));
+  const again = await dispatchScope(base(root, orca.deps, { env: { PATH: "/usr/bin", ORCA_AGENT_SESSION_ID: "s1" } }));
+  assert.deepEqual([again.route, again.reason], ["normal", "orca-multi-agent-disabled"]);
+  assert.equal(orca.state.starts.length, 1);
+});
+
+test("the multi-agent switch is read from ai_workflow_env.json when env is silent", async (t: TestContext) => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-dispatch-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, ".project"));
+  const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+  policy["use-orca-orchestration"] = true;
+  fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  fs.writeFileSync(path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }));
+  const orca = fakeOrca();
+  const silent: Obj = { PATH: "/usr/bin", ORCA_AGENT_SESSION_ID: "s1" };
+  const outcome = await dispatchScope(base(root, orca.deps, { env: silent }));
+  assert.equal(outcome.route, "launched", "file-source switch is honoured when env is silent");
+  assert.equal(orca.state.starts.length, 1);
+});
+
+test("process environment wins over ai_workflow_env.json for the multi-agent switch", async (t: TestContext) => {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-dispatch-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.mkdirSync(path.join(root, ".project"));
+  const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+  policy["use-orca-orchestration"] = true;
+  fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  // File says off, env says on: process env wins.
+  fs.writeFileSync(path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_ORCA_MULTI_AGENT: "false" }));
+  const orca = fakeOrca();
+  const outcome = await dispatchScope(base(root, orca.deps));
+  assert.equal(outcome.route, "launched");
+  assert.equal(orca.state.starts.length, 1);
+});
+
 test("a claim with no recorded launch (crash between claim and spawn) becomes unknown-liveness and is not relaunched", async (t: TestContext) => {
   const root = fixture(t);
   const orca = fakeOrca();

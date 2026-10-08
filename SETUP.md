@@ -192,6 +192,10 @@ Steps:
    this just produces the initial empty graph — the point is that it exists and every later phase
    that writes a knowledge entry can rebuild it the same way, so the graph never drifts from the
    entries on disk. See `ai-framework/scripts/graphify.mts`'s header comment for how it works.
+5. **Workflow settings:** copy `ai_workflow_env.example.json` to `ai_workflow_env.json` in the project root and add
+   `ai_workflow_env.json` to the project's `.gitignore`. It holds `AI_WORKFLOW_RUNNER` (`node` or `bun`) and
+   `AI_WORKFLOW_ORCA_MULTI_AGENT` (`true` only to opt in) and no secrets, so agents may read and edit it; the workflow
+   never reads `.env` for these. Process environment variables override it. `workflow-doctor` reports what it sets.
 
 **Gate:** show the tree you'll create, then wait for approval. Step 4 (graphify) only writes
 derived/generated files inside the just-approved `.project/knowledge/`, so it runs immediately

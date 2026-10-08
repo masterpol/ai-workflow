@@ -320,10 +320,10 @@ test("doctor validates optional local policy without probing or repairing it", {
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const bundle = path.resolve(HERE, "../..");
   const skip = new Set(["node_modules", "caveman", "settings.local.json", "credentials.json", ".aws"]);
-  // .env is local and secret-bearing, never copied; .env.example is a tracked template that README links to.
-  const filter = (source: string) => !skip.has(path.basename(source)) && (path.basename(source) === ".env.example" || !path.basename(source).startsWith(".env"));
+  // .env is local and secret-bearing, never copied; the settings file is local too; the .example.json is a tracked template that README links to.
+  const filter = (source: string) => !skip.has(path.basename(source)) && !path.basename(source).startsWith(".env") && path.basename(source) !== "ai_workflow_env.json";
   for (const item of [".claude", ".agents", ".codex", ".cursor", ".opencode", "ai-framework",
-    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md", ".env.example"]) {
+    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md", "ai_workflow_env.example.json"]) {
     fs.cpSync(path.join(bundle, item), path.join(root, item), { recursive: true, filter });
   }
   // No project-local registry/packages or their external wrappers belong to this bundle fixture.

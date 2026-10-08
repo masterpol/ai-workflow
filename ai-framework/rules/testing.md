@@ -48,6 +48,29 @@ describe("<UnitName>", () => {
 ## Mocking Discipline
 
 - Check for an existing shared mock/fixture factory before writing an inline mock.
+
+## Guards and Fixes
+
+These clauses were promoted from recurring pitch deviations; each is keyed to a knowledge
+entry under `.project/knowledge/` and supersedes ad-hoc handling.
+
+- **Event units for completion evidence.** Hooks count completions by the lifecycle unit the
+  hook declares (e.g. `SubagentStop`, request completion). A hook that fires at *launch*
+  (lifecycle event fired before work is done) cannot count as a completion. Async-agent
+  launch events are recorded as model notes, never as completion rows; the matching
+  `SubagentStop` or completion event is what counts. See
+  `.project/knowledge/issues/async-agent-launch-hook-counted-as-completion.md`.
+- **macOS tmpdir realpath.** `os.tmpdir()` resolves through `/private/var` on macOS.
+  Helpers that hand callers a path (fixtures, scratch dirs, output files) MUST keep the
+  `mkdtempSync` result for `existsSync`/`statSync` checks. Callers that need the symlink-
+  resolved form must opt in explicitly (`{ resolve: true }`); the default keeps the alias so
+  exact-path assertions stay meaningful. See
+  `.project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md`.
+- **Prove a guard test with an in-memory mutant.** A guard test's value is the proof that it
+  actually guards: run it against an in-memory mutation of the thing it claims to catch and
+  confirm the test fails for the right reason. A guard test that passes against a planted
+  mutant has not earned its keep. See
+  `.project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md`.
 - Only write inline mocks when the test needs custom behavior (specific return values, spy
   references).
 - When 2+ tests need the same mock, promote it to a shared factory.

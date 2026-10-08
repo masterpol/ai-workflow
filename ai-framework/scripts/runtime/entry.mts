@@ -1,7 +1,7 @@
 import * as path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
-import { loadDotenv } from "./env.mts";
+import { loadWorkflowEnv } from "./env.mts";
 import { createNodeDeps } from "./node.mts";
 import { resolveRunner } from "./select.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./types.mts";
@@ -47,10 +47,10 @@ export function isDirect(moduleUrl: string, deps: RuntimeDeps = createNodeDeps()
 }
 
 export function runnerEnvironment(script: string, env: Record<string, string | undefined>, deps: RuntimeDeps = createNodeDeps(env)): Record<string, string | undefined> {
-  const selected = loadDotenv(deps.fs, deps.path, inferRoot(script), { AI_WORKFLOW_RUNNER: env.AI_WORKFLOW_RUNNER });
+  const selected = loadWorkflowEnv(deps.fs, deps.path, inferRoot(script), { AI_WORKFLOW_RUNNER: env.AI_WORKFLOW_RUNNER });
   return { ...env, AI_WORKFLOW_RUNNER: selected.AI_WORKFLOW_RUNNER };
 }
 
 export function readRunner(root: string, env: Record<string, string | undefined>, deps: RuntimeDeps = createNodeDeps(env)): "node" | "bun" {
-  return resolveRunner(loadDotenv(deps.fs, deps.path, root, env));
+  return resolveRunner(loadWorkflowEnv(deps.fs, deps.path, root, env));
 }

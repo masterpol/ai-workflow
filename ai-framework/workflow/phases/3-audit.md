@@ -36,6 +36,25 @@ Fast-profile reviewers are cheap, and cheap reviewers produce false positives. B
 
 Patching an unverified must-fix wastes a cycle and widens the diff; this step keeps the ≤3-cycle budget for real problems.
 
+## Measurement over assertion
+
+A reviewer's report must agree with the actual code and the test run. Two recurring
+classes of failure, both promoted from pitch deviations:
+
+- **Reviewer report contradicted by measurement.** Numbers, file names, or behaviour
+  claims in a subagent's report that the cited code or a re-run command contradicts must
+  be dropped (or downgraded to should-fix with "unverified" noted). The dispatch record
+  records the discrepancy so `/cooldown` can tune the role prompt. See
+  `.project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md`.
+- **False cross-pitch attribution in a shared uncommitted file.** When ≥ 2 active pitches
+  share an uncommitted file, the `cross-pitch-conflict-checker` cannot decide which pitch
+  owns a line from a dirty diff alone. The check distinguishes *actual ownership* (the
+  pitch whose plan names the file at scope time) from *shared dirty diff* (any pitch
+  whose working tree touched it). Findings of pure overlap require ownership evidence,
+  not just a name match; otherwise the report is marked `attribution: shared-diff` and the
+  merge order is decided by the plan files. See
+  `.project/knowledge/issues/false-cross-pitch-attribution-in-a-shared-uncommitted-file.md`.
+
 ## Reviewer contract (every dispatch)
 
 Written after five reviewer dispatches in one day failed to return, one returned a report the measurements contradicted, and

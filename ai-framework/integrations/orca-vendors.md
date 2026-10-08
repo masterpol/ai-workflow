@@ -13,9 +13,9 @@ not part of it. Quality, latency, and cost improvements require measurements; sp
 ## Switch: `AI_WORKFLOW_ORCA_MULTI_AGENT`
 
 Orca is used only when `AI_WORKFLOW_ORCA_MULTI_AGENT` is exactly `true` (case-insensitive, surrounding spaces ignored).
-Unset, empty, `false`, `1`, `yes` or anything else keeps the normal workflow. Set it in the process environment or the
-project-root `.env` (the environment wins; `.env` is read from the trusted root only and a symlink leaving the root is
-ignored). With the switch off the launch gate returns `orca-multi-agent-disabled` first, before reading the policy,
+Unset, empty, `false`, `1`, `yes` or anything else keeps the normal workflow. Set it in the process environment or in the
+project-root `ai_workflow_env.json` as `"AI_WORKFLOW_ORCA_MULTI_AGENT": true` (the environment wins; the file is read from
+the trusted root only, a symlink leaving the root is ignored, and `.env` is never read). With the switch off the launch gate returns `orca-multi-agent-disabled` first, before reading the policy,
 probing Orca or spawning anything; `dispatchScope` and `dispatchWithRetries` return the normal workflow without a claim;
 `orca-preflight --probe` does not contact Orca. The static policy and presence diagnostics still work. The switch is
 necessary but not sufficient: dispatch also needs an opted-in policy and a supported Orca runtime.
@@ -172,11 +172,17 @@ isolation. Not observed: Codex and OpenCode completion, and peer messaging. Thos
 
 ## CLI, grader and live-smoke status
 
-**CLI.** `node ai-framework/scripts/orca-run.mts <status|dispatch|collect|reconcile> --root <dir> [--input <file>] [--check <name>]...`
+**CLI.** `node ai-framework/scripts/orca-run.mts <status|dispatch|collect|reconcile> --root <dir> [--input <file>] [--vendor <id>]... [--check <name>]...`
 parses arguments, validates input, makes one library call and prints one JSON object. Every switch, launch, path and apply
-guard stays in the libraries. `--input` is a regular file of at most 64 KiB inside `--root` (no symlinks). `status` is
+guard stays in the libraries. `--input` is a regular file of at most 64 KiB inside `--root` (no symlinks). `--vendor` is
+`status`-only and may be repeated to report several coordinators in one call; every other subcommand takes at most one.
+`status` is
 read-only (`--probe` opts into an Orca call). `--check` selects from a fixed catalog by name only: `workflow-doctor`,
 `setup-validator`, `graph-check`, `node-tests`; command text cannot be supplied.
+
+A `resume` outcome is re-checked against the current policy before it is returned: an attempt that already exists is only
+handed back for inspection while the switch and the launch gate still permit the worker. Once the policy is disabled or the
+switch is off, a repeated attempt id returns the same refusal a first attempt would get, not a success-shaped resume.
 
 | Exit | Meaning |
 |---|---|

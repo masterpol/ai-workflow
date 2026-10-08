@@ -58,4 +58,23 @@ None.
 
 ## Result
 
-Learning review complete; no new candidates, no new promotions, no archives. The ten pending per-item proposals (six carried from the prior cooldown and four added now) remain individually user-approvable. The five candidate bundles from the prior cooldown remain pending. Next automatic cooldown is five subsequent ships.
+Learning review complete; user approved all 10 per-item proposals (6 carried from the prior cooldown, 4 added this cycle). Applied edits:
+
+- `ai-framework/rules/testing.md` — added "Guards and Fixes" section covering `async-agent-launch-hook-counted-as-completion`, `macos-tmpdir-realpath-alias-breaks-path-assertions`, `prove-a-guard-test-with-an-in-memory-mutant`.
+- `ai-framework/rules/security.md` — added "Resolve config only from a trusted root" clause for `resolve-config-only-from-trusted-root`. The existing "Never let a helper's absent result stand for refused" clause (line 268) already covers `hardening-a-shared-reader-made-its-writer-destructive`; no edit needed.
+- `ai-framework/rules/coding-standards.md` — added "Cohesive module size exceptions" subsection.
+- `ai-framework/workflow/phases/3-audit.md` — added "Measurement over assertion" subsection covering `reviewer-reports-contradicted-by-measurement` and `false-cross-pitch-attribution-in-a-shared-uncommitted-file`.
+- `.claude/agents/security-reviewer.md` — added "Hard rules" subsection referencing `a-gate-must-not-trust-its-own-author`.
+- `.claude/agents/code-reviewer.md` — added "Hard rules" subsection referencing `a-gate-must-not-trust-its-own-author` and `a-gate-must-not-audit-its-own-instrument`.
+
+Graph rebuilt and rechecked (`node ai-framework/scripts/graphify.mts`): 50 entries, 139 links, CLEAN. Five candidate bundles from prior cooldown remain pending (no user action this cycle). Next automatic cooldown is five subsequent ships.
+
+**Addendum (post-approval, same manual cooldown).** A local orca smoke ran against the installed
+Orca 1.4.222 after the per-item approvals above (see `runs/orca-smoke-2026-10-08.md`). Two real
+findings added to `_followups.md` under a new `## Orca smoke followups — 2026-10-08` heading:
+
+- F1 (medium) — `resumeExisting` skips the policy gate; CLI exits 0 on a `resume` outcome.
+- F2 (low) — `parseArgs` rejects repeated `--vendor` on `status`.
+
+Bundled into a candidate pitch `orca-dispatch-resume-gate` (small build, ≤2 files:
+`orca-dispatch.mts`, `orca-run.mts`, with existing test coverage). Pending shape/bet.
