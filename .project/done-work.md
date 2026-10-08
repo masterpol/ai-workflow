@@ -241,3 +241,64 @@ Knowledge: [[prove-a-guard-test-with-an-in-memory-mutant]] (the mutation method 
 [[reusing-a-transaction-exposes-its-lock-reader-to-new-callers]] (the FIFO/oversized-lock finding from audit cycle 1),
 [[macos-tmpdir-realpath-alias-breaks-path-assertions]]. One new followup: exclude secret filenames in the review bench tree
 guard. Delivery: version 2.8.6; closure only, no commit, merge or publication; cooldown became due.
+
+## fix-workflow-runner-env — shipped 2026-10-08
+
+`AI_WORKFLOW_RUNNER` is now honored at every entry and child boundary through `runtime/entry.mts`; three inline hooks became `workflow-notice.mts` with 64 KiB bounded stdin (v2.16.2). Bun 985 pass; one audit cycle with 0 must-fix (reviewers not canary-independent).
+
+Lesson: [[one-boundary-selects-the-child-runner]]; six acknowledged items are in the followups backlog.
+
+## orca-vendor-dispatch — shipped 2026-10-08
+
+Orca dispatch core (v2.14.0-2.14.1) added the launch gate, the ownership ledger and supervised dispatch behind `AI_WORKFLOW_ORCA_MULTI_AGENT=true`: claim before launch, resume never relaunch, fail-closed retries only on positive proof, one live attempt per task, `worker_done` grammar. Node 846, Bun 817 pass; two audit cycles (4+1 must-fix fixed). Live proof Claude only; Codex and OpenCode launched but did not complete (trust prompt, port conflict, no funds).
+
+No scheduler, remote support, forced parallelism or permission bypass. Lessons: [[retry-only-on-positive-proof-of-a-clean-failure]], [[a-gate-spawns-exactly-what-it-probed]].
+
+## orca-vendor-foundation — shipped 2026-10-08
+
+Orca foundation (v2.10.0) added the opt-in vendor policy (guarded reader, `use-orca-orchestration` flag, three vendor routes), a bounded read-only preflight with conservative fallback and worker-context guard, and static doctor diagnostics. No worker is launched; every result reports normal workflow and `dispatchReady: false`. 109 tests; independent audit with caught canaries; the live Orca launcher stayed broken, so live readiness was unverified.
+
+No-gos held: no launch, messaging, integration, installation, credentials or fabricated savings. Lessons: [[rounded-zero-timeout-disables-cancellation]], [[guard-tests-can-fail-for-the-wrong-reason]]; followups in `.project/pitches/_followups.md`.
+
+## orca-vendor-orchestration — shipped 2026-10-08
+
+Umbrella pitch for multi-vendor Orca orchestration, decomposed into foundation, dispatch, reconcile and integration; all four shipped (2.10.0 to 2.17.0) behind `AI_WORKFLOW_ORCA_MULTI_AGENT`. Live compatibility stays unverified outside Claude.
+
+See [[a-thin-cli-keeps-every-guard-in-the-library]] and [[a-grader-reports-executed-and-unexecuted-cases-separately]].
+
+
+## orca-vendor-reconcile — shipped 2026-10-08
+
+Orca reconcile core (v2.15.0-2.15.1) added hardened diff admission, check-first apply with touched-path rollback, hash-verified evidence, positive-proof cleanup and orchestration, off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true`. Node 982, Bun 966; three audit cycles (13 must-fix fixed) plus a later independent re-review. Incident: a subagent ran a destructive git command in the real repo; subagents now never run destructive git outside scratch repos.
+
+Lessons: [[git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded]], [[prove-a-guard-test-with-an-in-memory-mutant]].
+
+## orca-vendor-reconcile-integration — shipped 2026-10-08
+
+Orca integration (v2.17.0) added the thin `orca-run.mts` CLI (status, dispatch, collect, reconcile; fixed check catalog; guards stay in the libraries), the executable `orca-eval-grader.mts` (7 executed cases, 1 parse-only, 3 live-only, never merged), and inert opt-in wiring in build, audit and ship. One independent audit cycle with 0 must-fix. Live smoke: Claude only; Codex, OpenCode and peer messaging not-run.
+
+Lessons: [[a-thin-cli-keeps-every-guard-in-the-library]], [[a-grader-reports-executed-and-unexecuted-cases-separately]].
+
+## readme-split — shipped 2026-10-08
+
+The 438-line README was split into 64 lines plus eleven docs in `ai-framework/docs/` (bundle-owned, no root `docs/` collision), with a dependency-free link checker `docs-links`, doctor `docsChecks`, bundle-sync coverage and updated references (v2.11.0). 514 tests pass; audit 0 must-fix, 6 should-fix fixed.
+
+No prose rewrites; reviewers were not canary-tested. See [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].
+
+## runtime-test-helpers — shipped 2026-10-08
+
+Shared test helpers (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`) plus three pilots migrated off direct `node:*` imports; `FsDeps.symlinkSync` added (v2.16.1). One audit cycle fixed 3 must-fix (vacuous macOS alias guard, wrong `memoryFs` symlink semantics, path escape in `tempFixture`).
+
+Lessons: [[a-temp-helper-that-realpaths-silently-voids-an-alias-guard]], [[keep-the-fakes-guarantee-the-thing-they-replace]], [[word-boundary-replacement-does-not-see-a-prefixed-property]].
+
+## ts-runtime-injection — shipped 2026-10-08
+
+All workflow scripts, hooks, the OpenCode plugin and the bench were moved to direct `.mts` on injected `RuntimeDeps` for Node and Bun, with no shims and no build step; `runtime/migrate.mts` upgrades old instance entries. Node 762, Bun 731 pass; audit cycle 2 fixed 3 must-fix (symlinks, hook main escape).
+
+Lessons: [[one-boundary-selects-the-child-runner]], [[keep-the-fakes-guarantee-the-thing-they-replace]].
+
+## workflow-usage-metrics — shipped 2026-10-08
+
+Useful project, pitch, vendor, skill, phase and agent metrics core (v2.16.0): bounded event state, guarded writer, record CLI and shared JSON/Markdown/HTML reports, with no token or cost fields. Node and Bun 156/156; three audit cycles hardened directory identity across async leases. Native capture and adoption remain separate followups.
+
+Lessons: [[metrics-ancestor-swap-during-async-lease]], [[pin-directory-identities-across-async-leases]], [[display-buckets-are-not-lifecycle-identities]].

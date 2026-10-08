@@ -1,0 +1,92 @@
+{
+  "schemaVersion": 1,
+  "slug": "ts-runtime-injection",
+  "sourceRoot": ".project/pitches/ts-runtime-injection",
+  "archivedAt": "2026-10-08T16:26:38.601Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "cfb00c3b8af84654745264bf2e1c00d36ffcffb536fa56770a88318c4a3cd84a",
+      "mode": 420
+    },
+    "baseline-g1.md": {
+      "hash": "9cbdc2e9d47457e3f69e820c118875b6951ea6e0bd642efc181ac040af379176",
+      "mode": 420
+    },
+    "baseline-g1b.md": {
+      "hash": "65573e23d11a4f6fb65a0f0dfc0766bc278d761019365775c025a2c32c8e2cbf",
+      "mode": 420
+    },
+    "baseline-g2.md": {
+      "hash": "2e47a9e9f94eaa373042047e70f3c5249d1591489a6bfefa682686815582043d",
+      "mode": 420
+    },
+    "baseline-g3.md": {
+      "hash": "62dbe485c76a7deef555da9f57dd3f5a0e5f5a157793748675ad6e1e74715661",
+      "mode": 420
+    },
+    "baseline-g4.md": {
+      "hash": "26c300708fb9a2da43ab3934dd87d23542302b8a614805a36f5f3b59060fa7cc",
+      "mode": 420
+    },
+    "baseline-g5.md": {
+      "hash": "2d621a886354d7ff6e3d1712c26a0f41e374f53333896f041cc2c5f5ea09e471",
+      "mode": 420
+    },
+    "baseline-g6.md": {
+      "hash": "2992b80617c87397559b26adcd8f5094d07ff50d74bb7521e72156b61db4a6b2",
+      "mode": 420
+    },
+    "baseline-g7.md": {
+      "hash": "b6ea7a5bbbef70240a01055b3fa0f720ec30a094e0fb688ae7ad0a3863ed0f7e",
+      "mode": 420
+    },
+    "baseline-g8.md": {
+      "hash": "927e59432b995deed625121dd3a3e72001097df5fcceaf6ab5235b11fa1f722b",
+      "mode": 420
+    },
+    "baseline-g9.md": {
+      "hash": "4eaa731ac162eed508a72c04f80d6d88577106e5a6be8db9a48e061897d10475",
+      "mode": 420
+    },
+    "baseline.md": {
+      "hash": "eaf460d83861190ff8d12fac6de9be36ac3e571901252221e944f8305632544e",
+      "mode": 420
+    },
+    "checkpoint.md": {
+      "hash": "01c6375b8cce1e43efdbcaaccd897f3b758f26c8eb5142f3db810e57b4a932f8",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "86f85f61a656054f4d4f267d250d9587f175d87eb2c76e7377d437c665dcee1f",
+      "mode": 420
+    },
+    "group-brief.md": {
+      "hash": "f21e3cdf715ef85ea765fbce37a00677f5afc57afcebfc0ee95c8e986da678a2",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "12ad63a664559b586ec055232e4f4c804b78c41a4a347f8aef9680adbd7b980c",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "780624a41a1c3ad9f82adde1f765b7f6783b2ac1837f6623d3e5667d174be3c5",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "fc6757fbd64d1da494bdb556dd2662d95a9c816dcfc7769f03d48777270ad0fa",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "44300576037bda550f0283b45284fea1663edf2d357375147c127cd0c61e3747",
+      "mode": 420
+    },
+    "verification-w2-g8.md": {
+      "hash": "f5554b82b066f4946ffadb763bc7c9819fc4c1f9a1ece4188b7abb38179e5c5e",
+      "mode": 420
+    },
+    "verification-w2.md": {
+      "hash": "34fcefde70d767330041defdaf6970f478b491be025e906d4eb78c65e8498b54",
+      "mode": 420
+    }
+  }
+}

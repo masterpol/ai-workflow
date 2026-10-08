@@ -195,16 +195,34 @@ _none yet_
 graph LR
   caveman-mode-is-default-everywhere --> prose-instructions-must-specify-how-to-extract-from-free-form-arguments
   caveman-mode-is-default-everywhere --> a-gate-must-not-trust-its-own-author
+  collector-metrics-lease-design --> inode-anchoring-and-stable-inode-locks
+  collector-metrics-lease-design --> token-metrics-dimensions-design
+  collector-metrics-lease-design --> reversible-aggregates-store-their-routing
+  collector-metrics-lease-design --> a-gate-must-not-trust-its-own-author
+  compaction-recovery-shares-context-and-trusted-directories --> pitch-compaction-gate-and-recovery-design
+  compaction-recovery-shares-context-and-trusted-directories --> inode-anchoring-and-stable-inode-locks
+  compaction-recovery-shares-context-and-trusted-directories --> hardening-a-shared-reader-made-its-writer-destructive
+  effective-sync-bases-and-bounded-font-discovery --> dual-hash-tracking-for-transformed-content
+  effective-sync-bases-and-bounded-font-discovery --> parse-untrusted-values-and-re-emit-them
+  effective-sync-bases-and-bounded-font-discovery --> project-state-report-design
+  effective-sync-bases-and-bounded-font-discovery --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
+  inode-anchoring-and-stable-inode-locks --> a-gate-must-not-trust-its-own-author
+  inode-anchoring-and-stable-inode-locks --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
+  inode-anchoring-and-stable-inode-locks --> hardening-a-shared-reader-made-its-writer-destructive
+  pitch-compaction-gate-and-recovery-design --> a-gate-must-not-trust-its-own-author
+  pitch-compaction-gate-and-recovery-design --> bare-prefix-match-crosses-entities
+  pitch-compaction-gate-and-recovery-design --> hardening-a-shared-reader-made-its-writer-destructive
+  pitch-compaction-gate-and-recovery-design --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
   project-state-report-design --> parse-untrusted-values-and-re-emit-them
   project-state-report-design --> a-report-over-an-untrusted-tree-runs-only-bundle-code
   project-state-report-design --> hardening-a-shared-reader-made-its-writer-destructive
   project-state-report-design --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
   project-state-report-design --> resolve-before-matching-a-protected-path-allowlist
   project-state-report-design --> a-gate-must-not-audit-its-own-instrument
-  effective-sync-bases-and-bounded-font-discovery --> dual-hash-tracking-for-transformed-content
-  effective-sync-bases-and-bounded-font-discovery --> parse-untrusted-values-and-re-emit-them
-  effective-sync-bases-and-bounded-font-discovery --> project-state-report-design
-  effective-sync-bases-and-bounded-font-discovery --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
+  shape-lite-is-a-gated-escalating-variant-of-shape --> a-gate-must-not-trust-its-own-author
+  shape-lite-is-a-gated-escalating-variant-of-shape --> a-gate-must-not-audit-its-own-instrument
+  shape-lite-is-a-gated-escalating-variant-of-shape --> caveman-mode-is-default-everywhere
+  shape-lite-is-a-gated-escalating-variant-of-shape --> prose-instructions-must-specify-how-to-extract-from-free-form-arguments
   skill-defaults-attribution-guard-and-runtime-design --> caveman-mode-is-default-everywhere
   skill-defaults-attribution-guard-and-runtime-design --> resolve-before-matching-a-protected-path-allowlist
   skill-defaults-attribution-guard-and-runtime-design --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
@@ -214,124 +232,106 @@ graph LR
   token-metrics-dimensions-design --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
   token-metrics-dimensions-design --> false-cross-pitch-attribution-in-a-shared-uncommitted-file
   token-metrics-dimensions-design --> collector-metrics-lease-design
-  inode-anchoring-and-stable-inode-locks --> a-gate-must-not-trust-its-own-author
-  inode-anchoring-and-stable-inode-locks --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
-  inode-anchoring-and-stable-inode-locks --> hardening-a-shared-reader-made-its-writer-destructive
   workflow-tooling-pitches-share-standing-no-gos-and-design-answers --> resolve-config-only-from-trusted-root
   workflow-tooling-pitches-share-standing-no-gos-and-design-answers --> subprocess-revalidation-against-on-disk-code
   workflow-tooling-pitches-share-standing-no-gos-and-design-answers --> dual-hash-tracking-for-transformed-content
   workflow-tooling-pitches-share-standing-no-gos-and-design-answers --> a-gate-must-not-trust-its-own-author
   workflow-tooling-pitches-share-standing-no-gos-and-design-answers --> macos-tmpdir-realpath-alias-breaks-path-assertions
-  compaction-recovery-shares-context-and-trusted-directories --> pitch-compaction-gate-and-recovery-design
-  compaction-recovery-shares-context-and-trusted-directories --> inode-anchoring-and-stable-inode-locks
-  compaction-recovery-shares-context-and-trusted-directories --> hardening-a-shared-reader-made-its-writer-destructive
-  shape-lite-is-a-gated-escalating-variant-of-shape --> a-gate-must-not-trust-its-own-author
-  shape-lite-is-a-gated-escalating-variant-of-shape --> a-gate-must-not-audit-its-own-instrument
-  shape-lite-is-a-gated-escalating-variant-of-shape --> caveman-mode-is-default-everywhere
-  shape-lite-is-a-gated-escalating-variant-of-shape --> prose-instructions-must-specify-how-to-extract-from-free-form-arguments
-  collector-metrics-lease-design --> inode-anchoring-and-stable-inode-locks
-  collector-metrics-lease-design --> token-metrics-dimensions-design
-  collector-metrics-lease-design --> reversible-aggregates-store-their-routing
-  collector-metrics-lease-design --> a-gate-must-not-trust-its-own-author
-  pitch-compaction-gate-and-recovery-design --> a-gate-must-not-trust-its-own-author
-  pitch-compaction-gate-and-recovery-design --> bare-prefix-match-crosses-entities
-  pitch-compaction-gate-and-recovery-design --> hardening-a-shared-reader-made-its-writer-destructive
-  pitch-compaction-gate-and-recovery-design --> workflow-tooling-pitches-share-standing-no-gos-and-design-answers
-  subprocess-revalidation-against-on-disk-code --> dual-hash-tracking-for-transformed-content
-  opt-in-before-runtime-discovery --> resolve-config-only-from-trusted-root
-  opt-in-before-runtime-discovery --> parse-untrusted-values-and-re-emit-them
-  opt-in-before-runtime-discovery --> guard-tests-can-fail-for-the-wrong-reason
-  a-gate-must-not-trust-its-own-author --> resolve-before-matching-a-protected-path-allowlist
-  a-gate-must-not-trust-its-own-author --> bare-prefix-match-crosses-entities
-  a-gate-must-not-trust-its-own-author --> a-gate-must-not-audit-its-own-instrument
-  display-buckets-are-not-lifecycle-identities --> allow-list-untrusted-labels-at-ingest-and-at-render
-  display-buckets-are-not-lifecycle-identities --> async-agent-launch-hook-counted-as-completion
-  display-buckets-are-not-lifecycle-identities --> reversible-aggregates-store-their-routing
-  pin-directory-identities-across-async-leases --> collector-metrics-lease-design
-  pin-directory-identities-across-async-leases --> metrics-ancestor-swap-during-async-lease
-  pin-directory-identities-across-async-leases --> hardening-a-shared-reader-made-its-writer-destructive
-  reversible-aggregates-store-their-routing --> subprocess-revalidation-against-on-disk-code
-  reversible-aggregates-store-their-routing --> dual-hash-tracking-for-transformed-content
-  reversible-aggregates-store-their-routing --> async-agent-launch-hook-counted-as-completion
-  resolve-before-matching-a-protected-path-allowlist --> resolve-config-only-from-trusted-root
-  resolve-before-matching-a-protected-path-allowlist --> prose-instructions-must-specify-how-to-extract-from-free-form-arguments
-  one-boundary-selects-the-child-runner --> keep-the-fakes-guarantee-the-thing-they-replace
-  one-boundary-selects-the-child-runner --> a-temp-helper-that-realpaths-silently-voids-an-alias-guard
-  dual-hash-tracking-for-transformed-content --> subprocess-revalidation-against-on-disk-code
-  dual-hash-tracking-for-transformed-content --> resolve-config-only-from-trusted-root
-  keep-the-fakes-guarantee-the-thing-they-replace --> prove-a-guard-test-with-an-in-memory-mutant
-  keep-the-fakes-guarantee-the-thing-they-replace --> parse-untrusted-values-and-re-emit-them
-  keep-the-fakes-guarantee-the-thing-they-replace --> a-temp-helper-that-realpaths-silently-voids-an-alias-guard
-  a-report-over-an-untrusted-tree-runs-only-bundle-code --> subprocess-revalidation-against-on-disk-code
-  a-report-over-an-untrusted-tree-runs-only-bundle-code --> resolve-config-only-from-trusted-root
-  a-report-over-an-untrusted-tree-runs-only-bundle-code --> resolve-before-matching-a-protected-path-allowlist
-  a-report-over-an-untrusted-tree-runs-only-bundle-code --> parse-untrusted-values-and-re-emit-them
-  git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded --> a-gate-spawns-exactly-what-it-probed
-  git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded --> sync-tools-refuse-symlinks-in-source-and-destination
-  git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded --> a-report-over-an-untrusted-tree-runs-only-bundle-code
-  sync-tools-refuse-symlinks-in-source-and-destination --> resolve-before-matching-a-protected-path-allowlist
-  sync-tools-refuse-symlinks-in-source-and-destination --> a-report-over-an-untrusted-tree-runs-only-bundle-code
-  a-gate-spawns-exactly-what-it-probed --> a-gate-must-not-trust-its-own-author
-  a-gate-spawns-exactly-what-it-probed --> opt-in-before-runtime-discovery
-  a-gate-spawns-exactly-what-it-probed --> resolve-config-only-from-trusted-root
-  allow-list-untrusted-labels-at-ingest-and-at-render --> resolve-config-only-from-trusted-root
-  allow-list-untrusted-labels-at-ingest-and-at-render --> a-gate-must-not-trust-its-own-author
-  allow-list-untrusted-labels-at-ingest-and-at-render --> async-agent-launch-hook-counted-as-completion
-  parse-untrusted-values-and-re-emit-them --> allow-list-untrusted-labels-at-ingest-and-at-render
-  parse-untrusted-values-and-re-emit-them --> resolve-config-only-from-trusted-root
-  parse-untrusted-values-and-re-emit-them --> a-report-over-an-untrusted-tree-runs-only-bundle-code
-  checks-on-doc-structure-name-the-owning-file --> opt-in-before-runtime-discovery
-  checks-on-doc-structure-name-the-owning-file --> guard-tests-can-fail-for-the-wrong-reason
-  resolve-config-only-from-trusted-root --> dual-hash-tracking-for-transformed-content
-  resolve-config-only-from-trusted-root --> resolve-before-matching-a-protected-path-allowlist
-  a-thin-cli-keeps-every-guard-in-the-library --> a-grader-reports-executed-and-unexecuted-cases-separately
-  a-thin-cli-keeps-every-guard-in-the-library --> one-boundary-selects-the-child-runner
-  prove-a-guard-test-with-an-in-memory-mutant --> a-gate-must-not-audit-its-own-instrument
-  prove-a-guard-test-with-an-in-memory-mutant --> a-gate-must-not-trust-its-own-author
-  prove-a-guard-test-with-an-in-memory-mutant --> macos-tmpdir-realpath-alias-breaks-path-assertions
   a-gate-must-not-audit-its-own-instrument --> a-gate-must-not-trust-its-own-author
   a-gate-must-not-audit-its-own-instrument --> a-report-over-an-untrusted-tree-runs-only-bundle-code
   a-gate-must-not-audit-its-own-instrument --> resolve-before-matching-a-protected-path-allowlist
   a-gate-must-not-audit-its-own-instrument --> reviewer-reports-contradicted-by-measurement
-  word-boundary-replacement-does-not-see-a-prefixed-property --> reusing-a-transaction-exposes-its-lock-reader-to-new-callers
-  word-boundary-replacement-does-not-see-a-prefixed-property --> guard-tests-can-fail-for-the-wrong-reason
-  word-boundary-replacement-does-not-see-a-prefixed-property --> keep-the-fakes-guarantee-the-thing-they-replace
+  a-gate-must-not-trust-its-own-author --> resolve-before-matching-a-protected-path-allowlist
+  a-gate-must-not-trust-its-own-author --> bare-prefix-match-crosses-entities
+  a-gate-must-not-trust-its-own-author --> a-gate-must-not-audit-its-own-instrument
+  a-gate-spawns-exactly-what-it-probed --> a-gate-must-not-trust-its-own-author
+  a-gate-spawns-exactly-what-it-probed --> opt-in-before-runtime-discovery
+  a-gate-spawns-exactly-what-it-probed --> resolve-config-only-from-trusted-root
   a-grader-reports-executed-and-unexecuted-cases-separately --> prove-a-guard-test-with-an-in-memory-mutant
   a-grader-reports-executed-and-unexecuted-cases-separately --> keep-the-fakes-guarantee-the-thing-they-replace
+  a-report-over-an-untrusted-tree-runs-only-bundle-code --> subprocess-revalidation-against-on-disk-code
+  a-report-over-an-untrusted-tree-runs-only-bundle-code --> resolve-config-only-from-trusted-root
+  a-report-over-an-untrusted-tree-runs-only-bundle-code --> resolve-before-matching-a-protected-path-allowlist
+  a-report-over-an-untrusted-tree-runs-only-bundle-code --> parse-untrusted-values-and-re-emit-them
+  a-thin-cli-keeps-every-guard-in-the-library --> a-grader-reports-executed-and-unexecuted-cases-separately
+  a-thin-cli-keeps-every-guard-in-the-library --> one-boundary-selects-the-child-runner
+  allow-list-untrusted-labels-at-ingest-and-at-render --> resolve-config-only-from-trusted-root
+  allow-list-untrusted-labels-at-ingest-and-at-render --> a-gate-must-not-trust-its-own-author
+  allow-list-untrusted-labels-at-ingest-and-at-render --> async-agent-launch-hook-counted-as-completion
+  checks-on-doc-structure-name-the-owning-file --> opt-in-before-runtime-discovery
+  checks-on-doc-structure-name-the-owning-file --> guard-tests-can-fail-for-the-wrong-reason
+  display-buckets-are-not-lifecycle-identities --> allow-list-untrusted-labels-at-ingest-and-at-render
+  display-buckets-are-not-lifecycle-identities --> async-agent-launch-hook-counted-as-completion
+  display-buckets-are-not-lifecycle-identities --> reversible-aggregates-store-their-routing
+  dual-hash-tracking-for-transformed-content --> subprocess-revalidation-against-on-disk-code
+  dual-hash-tracking-for-transformed-content --> resolve-config-only-from-trusted-root
+  git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded --> a-gate-spawns-exactly-what-it-probed
+  git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded --> sync-tools-refuse-symlinks-in-source-and-destination
+  git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded --> a-report-over-an-untrusted-tree-runs-only-bundle-code
+  keep-the-fakes-guarantee-the-thing-they-replace --> prove-a-guard-test-with-an-in-memory-mutant
+  keep-the-fakes-guarantee-the-thing-they-replace --> parse-untrusted-values-and-re-emit-them
+  keep-the-fakes-guarantee-the-thing-they-replace --> a-temp-helper-that-realpaths-silently-voids-an-alias-guard
+  one-boundary-selects-the-child-runner --> keep-the-fakes-guarantee-the-thing-they-replace
+  one-boundary-selects-the-child-runner --> a-temp-helper-that-realpaths-silently-voids-an-alias-guard
+  opt-in-before-runtime-discovery --> resolve-config-only-from-trusted-root
+  opt-in-before-runtime-discovery --> parse-untrusted-values-and-re-emit-them
+  opt-in-before-runtime-discovery --> guard-tests-can-fail-for-the-wrong-reason
+  parse-untrusted-values-and-re-emit-them --> allow-list-untrusted-labels-at-ingest-and-at-render
+  parse-untrusted-values-and-re-emit-them --> resolve-config-only-from-trusted-root
+  parse-untrusted-values-and-re-emit-them --> a-report-over-an-untrusted-tree-runs-only-bundle-code
+  pin-directory-identities-across-async-leases --> collector-metrics-lease-design
+  pin-directory-identities-across-async-leases --> metrics-ancestor-swap-during-async-lease
+  pin-directory-identities-across-async-leases --> hardening-a-shared-reader-made-its-writer-destructive
+  prove-a-guard-test-with-an-in-memory-mutant --> a-gate-must-not-audit-its-own-instrument
+  prove-a-guard-test-with-an-in-memory-mutant --> a-gate-must-not-trust-its-own-author
+  prove-a-guard-test-with-an-in-memory-mutant --> macos-tmpdir-realpath-alias-breaks-path-assertions
+  resolve-before-matching-a-protected-path-allowlist --> resolve-config-only-from-trusted-root
+  resolve-before-matching-a-protected-path-allowlist --> prose-instructions-must-specify-how-to-extract-from-free-form-arguments
+  resolve-config-only-from-trusted-root --> dual-hash-tracking-for-transformed-content
+  resolve-config-only-from-trusted-root --> resolve-before-matching-a-protected-path-allowlist
   retry-only-on-positive-proof-of-a-clean-failure --> async-agent-launch-hook-counted-as-completion
   retry-only-on-positive-proof-of-a-clean-failure --> hardening-a-shared-reader-made-its-writer-destructive
   retry-only-on-positive-proof-of-a-clean-failure --> a-gate-must-not-trust-its-own-author
+  reversible-aggregates-store-their-routing --> subprocess-revalidation-against-on-disk-code
+  reversible-aggregates-store-their-routing --> dual-hash-tracking-for-transformed-content
+  reversible-aggregates-store-their-routing --> async-agent-launch-hook-counted-as-completion
   settle-only-with-proof-bound-to-this-patch --> retry-only-on-positive-proof-of-a-clean-failure
   settle-only-with-proof-bound-to-this-patch --> a-gate-must-not-trust-its-own-author
   settle-only-with-proof-bound-to-this-patch --> git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded
-  backtracking-regex-over-untrusted-text-is-quadratic --> parse-untrusted-values-and-re-emit-them
-  backtracking-regex-over-untrusted-text-is-quadratic --> a-gate-must-not-audit-its-own-instrument
-  installed-skill-wrappers-ship-as-orphans --> caveman-mode-is-default-everywhere
-  installed-skill-wrappers-ship-as-orphans --> a-gate-must-not-trust-its-own-author
-  bare-prefix-match-crosses-entities --> a-gate-must-not-trust-its-own-author
+  subprocess-revalidation-against-on-disk-code --> dual-hash-tracking-for-transformed-content
+  sync-tools-refuse-symlinks-in-source-and-destination --> resolve-before-matching-a-protected-path-allowlist
+  sync-tools-refuse-symlinks-in-source-and-destination --> a-report-over-an-untrusted-tree-runs-only-bundle-code
+  word-boundary-replacement-does-not-see-a-prefixed-property --> reusing-a-transaction-exposes-its-lock-reader-to-new-callers
+  word-boundary-replacement-does-not-see-a-prefixed-property --> guard-tests-can-fail-for-the-wrong-reason
+  word-boundary-replacement-does-not-see-a-prefixed-property --> keep-the-fakes-guarantee-the-thing-they-replace
   a-temp-helper-that-realpaths-silently-voids-an-alias-guard --> macos-tmpdir-realpath-alias-breaks-path-assertions
   a-temp-helper-that-realpaths-silently-voids-an-alias-guard --> prove-a-guard-test-with-an-in-memory-mutant
   a-temp-helper-that-realpaths-silently-voids-an-alias-guard --> sync-tools-refuse-symlinks-in-source-and-destination
+  async-agent-launch-hook-counted-as-completion --> bare-prefix-match-crosses-entities
+  async-agent-launch-hook-counted-as-completion --> reversible-aggregates-store-their-routing
+  backtracking-regex-over-untrusted-text-is-quadratic --> parse-untrusted-values-and-re-emit-them
+  backtracking-regex-over-untrusted-text-is-quadratic --> a-gate-must-not-audit-its-own-instrument
+  bare-prefix-match-crosses-entities --> a-gate-must-not-trust-its-own-author
   false-cross-pitch-attribution-in-a-shared-uncommitted-file --> reviewer-reports-contradicted-by-measurement
   false-cross-pitch-attribution-in-a-shared-uncommitted-file --> a-gate-must-not-audit-its-own-instrument
+  guard-tests-can-fail-for-the-wrong-reason --> prove-a-guard-test-with-an-in-memory-mutant
+  guard-tests-can-fail-for-the-wrong-reason --> a-gate-must-not-audit-its-own-instrument
+  hardening-a-shared-reader-made-its-writer-destructive --> a-report-over-an-untrusted-tree-runs-only-bundle-code
+  hardening-a-shared-reader-made-its-writer-destructive --> resolve-before-matching-a-protected-path-allowlist
+  hardening-a-shared-reader-made-its-writer-destructive --> a-gate-must-not-trust-its-own-author
+  installed-skill-wrappers-ship-as-orphans --> caveman-mode-is-default-everywhere
+  installed-skill-wrappers-ship-as-orphans --> a-gate-must-not-trust-its-own-author
   metrics-ancestor-swap-during-async-lease --> collector-metrics-lease-design
   metrics-ancestor-swap-during-async-lease --> hardening-a-shared-reader-made-its-writer-destructive
   metrics-ancestor-swap-during-async-lease --> pin-directory-identities-across-async-leases
   prose-instructions-must-specify-how-to-extract-from-free-form-arguments --> resolve-before-matching-a-protected-path-allowlist
-  rounded-zero-timeout-disables-cancellation --> guard-tests-can-fail-for-the-wrong-reason
-  rounded-zero-timeout-disables-cancellation --> prove-a-guard-test-with-an-in-memory-mutant
-  async-agent-launch-hook-counted-as-completion --> bare-prefix-match-crosses-entities
-  async-agent-launch-hook-counted-as-completion --> reversible-aggregates-store-their-routing
-  guard-tests-can-fail-for-the-wrong-reason --> prove-a-guard-test-with-an-in-memory-mutant
-  guard-tests-can-fail-for-the-wrong-reason --> a-gate-must-not-audit-its-own-instrument
-  reviewer-reports-contradicted-by-measurement --> async-agent-launch-hook-counted-as-completion
-  reviewer-reports-contradicted-by-measurement --> a-gate-must-not-trust-its-own-author
   reusing-a-transaction-exposes-its-lock-reader-to-new-callers --> hardening-a-shared-reader-made-its-writer-destructive
   reusing-a-transaction-exposes-its-lock-reader-to-new-callers --> compaction-recovery-shares-context-and-trusted-directories
   reusing-a-transaction-exposes-its-lock-reader-to-new-callers --> resolve-before-matching-a-protected-path-allowlist
-  hardening-a-shared-reader-made-its-writer-destructive --> a-report-over-an-untrusted-tree-runs-only-bundle-code
-  hardening-a-shared-reader-made-its-writer-destructive --> resolve-before-matching-a-protected-path-allowlist
-  hardening-a-shared-reader-made-its-writer-destructive --> a-gate-must-not-trust-its-own-author
+  reviewer-reports-contradicted-by-measurement --> async-agent-launch-hook-counted-as-completion
+  reviewer-reports-contradicted-by-measurement --> a-gate-must-not-trust-its-own-author
+  rounded-zero-timeout-disables-cancellation --> guard-tests-can-fail-for-the-wrong-reason
+  rounded-zero-timeout-disables-cancellation --> prove-a-guard-test-with-an-in-memory-mutant
 ```
 
 ## Traversal

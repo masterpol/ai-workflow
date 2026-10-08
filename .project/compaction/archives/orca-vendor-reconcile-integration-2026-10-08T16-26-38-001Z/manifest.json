@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-reconcile-integration",
+  "sourceRoot": ".project/pitches/orca-vendor-reconcile-integration",
+  "archivedAt": "2026-10-08T16:26:38.002Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "fb4d33a570b0488650dcb7410da45f0edc6d9719f43213ca80ac72377baf1241",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "3bfc2e1594c73d964b30ce05d2bc143ce71376c6959b1c639c0595ba3e8763cd",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "aad3acaee1e16ad13fe7607d9bbd258dbf9f38ac10d45156fa66b09f06a19900",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "e2ba0dba499a4b1c4eabed6e4472cec1e36cbffccbc10e3906d6b5a82e161492",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "7ff3f130322d64a6f42dfc00165ed4001526e0f689da194dd2e4f235269038e8",
+      "mode": 420
+    }
+  }
+}
