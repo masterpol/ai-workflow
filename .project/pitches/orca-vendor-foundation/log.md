@@ -22,3 +22,11 @@ Observed external shared-checkout commit 8c7474d during S3. Preserved its conten
 
 ## Audit cycles 1-2
 No real must-fix; reviewer must-fixes were planted canaries. Fixed S1 (probe PATH hijack), S2, S3, S5. Deferred S4 (environment allowlist) and S6 (dispatch adjacency). Record in `audit-cycle-1.md`; prompt hashes were not stored (process gap for /cooldown).
+
+## Ship preparation — 2026-10-07
+
+User handed off the external audit and requested ship phase. Final targeted verification passed 109/109 outside the sandbox; the sandbox-only token-report failure was the known denied socket lease. Build/typecheck/lint/i18n are absent in stack context. Extracted two issues and one low-confidence pattern; added four followups and architecture data-flow documentation. Prepared reconciliation and run/hill snapshots. Final closing confirmation remains pending; no live dispatch or external commit was performed.
+
+## Ship closed — 2026-10-07
+
+User selected [1] ship. Closed all three scopes, compacted status, and finalized run/hill snapshots. Dispatch remains separately gated. Cooldown is due.

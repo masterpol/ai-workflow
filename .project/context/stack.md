@@ -2,17 +2,18 @@
 
 ## Runtime
 
-- Node.js with CommonJS scripts (`ai-framework/scripts/package.json` sets the module type). No package manager, no dependency manifest and no build step exist in this repository.
-- OpenCode plugins are ES modules loaded by OpenCode itself.
+- TypeScript ES modules (`.mts`) run directly on Node.js or Bun without compilation. The core scripts have no package dependencies. OpenCode has its own plugin dependency manifest.
+- Run `node ai-framework/scripts/<name>.mts` on Node 22.18 or later. Node 22.12–22.17 requires `--experimental-strip-types --disable-warning=ExperimentalWarning` before the entry path; the shipped hooks include these flags. `AI_WORKFLOW_RUNNER` (environment or project-root `.env`, environment wins) selects Node by default or Bun with `bun`; a Node launch configured for Bun starts that runner. See `ai-framework/scripts/runtime/README.md`.
+- OpenCode discovers the direct `.opencode/plugins/token-consumption.ts` ES module; its package declares `type: module`.
 - Python is only needed when an installed skill's own guard reports it.
 
 ## Commands
 
-- Run tests with `node --test <file>`; scripts and hooks keep their tests next to them as `*.test.js`.
-- Validate workflow records: `node ai-framework/scripts/setup-validator.js`.
-- Diagnose the workflow: `node ai-framework/scripts/workflow-doctor.js`.
-- Validate the knowledge graph: `node ai-framework/scripts/graphify.js --check`.
-- Record a version-log entry: `node ai-framework/scripts/changelog.js`.
+- Run tests with `node --experimental-strip-types --disable-warning=ExperimentalWarning --test <file>` or `bun test <file>`; scripts and hooks keep their tests beside them as `*.test.mts`.
+- Validate workflow records: `node ai-framework/scripts/setup-validator.mts`.
+- Diagnose the workflow: `node ai-framework/scripts/workflow-doctor.mts`.
+- Validate the knowledge graph: `node ai-framework/scripts/graphify.mts --check`.
+- Record a version-log entry: `node ai-framework/scripts/changelog.mts`.
 
 ## Not Applicable
 
@@ -20,4 +21,4 @@ There is no build, typecheck, lint or i18n command in this repository. Phases th
 
 ## Environment
 
-No environment variables are required. Local-only files (`.claude/settings.local.json`, `.project/metrics/`, generated reports and installed skills) are Git-ignored and never read or copied by the workflow.
+No environment variables are required. Secret files such as `.claude/settings.local.json` are never read or copied. Metrics, generated reports and installed skill packages are local instance data. The runtime reads only `AI_WORKFLOW_RUNNER` from the project-root `.env`, without exposing other values.

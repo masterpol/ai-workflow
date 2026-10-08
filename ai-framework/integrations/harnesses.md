@@ -53,7 +53,7 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 One instruction, carried by every canonical skill (`.claude/skills/*`), every canonical agent
 (`.claude/agents/*`), and both entry files, resolved per invocation by
-`ai-framework/scripts/skill-defaults.js` (scopes: the seven phases, `utility`, `agent`). Each
+`ai-framework/scripts/skill-defaults.mts` (scopes: the seven phases, `utility`, `agent`). Each
 vendor reaches it through the file it already loads:
 
 | Vendor | Skills | Agents | Main session |
@@ -64,7 +64,7 @@ vendor reaches it through the file it already loads:
 | Cursor | `.cursor/skills` byte copies | `.cursor/agents` byte copies | `AGENTS.md` |
 
 Verification status, kept honest: file coverage and mirror parity are checked mechanically for
-all four vendors (`workflow-doctor.js`, `skill-defaults.test.js`). The `caveman=<mode>` token was
+all four vendors (`workflow-doctor.mts`, `skill-defaults.test.mts`). The `caveman=<mode>` token was
 exercised end to end only in **Claude Code**; OpenCode passes command text through `$ARGUMENTS`
 the same way, but Codex and Cursor invocation with an inline argument, and whether each host
 honors an installed skill's wrapper, are **unverified** — do not assume parity without running
@@ -89,7 +89,7 @@ The bundle records completion metrics in a bounded local snapshot at
 contains only numeric usage, cost, identifiers, and model metadata: never prompts, responses, or
 transcripts.
 
-- **OpenCode:** `.opencode/plugins/token-consumption.js` automatically records completed assistant
+- **OpenCode:** `.opencode/plugins/token-consumption.ts` automatically records completed assistant
   messages. Its native event includes total message tokens and actual cost. The plugin also passes
   the message's `variant` as reasoning effort and counts skill tool calls by name. Both were
   written against OpenCode's type definitions (plugin 1.17.20) and are unverified in a live
@@ -104,7 +104,7 @@ transcripts.
 - **Codex:** `.codex/hooks.json` records every `SubagentStop`. Codex completion hooks do not expose
   token or cost fields, so those records truthfully show `unavailable` instead of zero.
 - **Cursor and other harnesses:** no portable completion payload is available. Run
-  `node ai-framework/hooks/scripts/token-consumption.js --vendor <vendor> --event agent-complete`
+  `node ai-framework/hooks/scripts/token-consumption.mts --vendor <vendor> --event agent-complete`
   after an agent only when its caller can provide a supported numeric payload on stdin; otherwise
   the collector records the completion as unavailable.
 
@@ -117,7 +117,7 @@ Schema v2 adds aggregates by vendor, model, agent, effort, and skill under `dime
 the reserved names `__proto__`, `constructor`, and `prototype`, fold into `(other)`, and names are
 cut at 80 characters. A v1 file migrates in place with its lifetime totals intact, but an older
 collector cannot read a v2 file and would start a blank snapshot, so update every checkout that
-shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.js`.
+shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.mts`.
 
 ## Sub-agent Dispatch
 

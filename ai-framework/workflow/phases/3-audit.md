@@ -49,7 +49,7 @@ a shallow code review was mistaken for a clean one. It applies to the "Verify be
    reviewers' diff-only and "skip unchanged code" defaults are switched off in the prompt.
 3. **Read-only by construction.** Give a reviewer a scratch copy, never the repo, and let it run proofs of concept only there. Reviewers that
    hold Write or Edit tools are bound by the prompt and by a before/after check of the repo
-   (`node ai-framework/scripts/review-bench.js guard snapshot|check`), and the record states `read-only: verified by <method>`.
+   (`node ai-framework/scripts/review-bench.mts guard snapshot|check`), and the record states `read-only: verified by <method>`.
 4. **Hard limits in the prompt.** Each command at most about 20 seconds, a tool-call budget, and a required final report; anything unfinished is
    reported as unverified. A stalled reviewer leaves no partial findings, so do not wait on one.
 5. **One dispatch at a time when limits bite.** Retry once with a fresh agent on a narrower scope. A role that returns nothing twice is recorded
@@ -61,7 +61,7 @@ a shallow code review was mistaken for a clean one. It applies to the "Verify be
    checklist walked item by item.
 7. **Cross-file interactions.** At least one pass over the interfaces between reviewed files and the callers of any shared helper, or the record
    says `cross-file interactions: not reviewed`.
-8. **The record is checkable.** `node ai-framework/scripts/review-bench.js record-check <record>` fails a record that claims independence without
+8. **The record is checkable.** `node ai-framework/scripts/review-bench.mts record-check <record>` fails a record that claims independence without
    a caught canary, or that lacks the read-only method, the prompt hash, the model, the cross-file line, or a findings table with a `verified`
    column.
 

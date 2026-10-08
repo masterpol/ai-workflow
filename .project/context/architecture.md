@@ -2,7 +2,7 @@
 
 ## Overview
 
-The bundle is a set of Markdown playbooks and role prompts, JSON configuration, and small Node.js scripts. There is no server, database or build step. Each supported vendor reads its own entry file and adapter directory, and all adapters point at one canonical set of playbooks.
+The bundle is a set of Markdown playbooks and role prompts, JSON configuration, and small TypeScript ES modules. There is no server, database or build step. Each supported vendor reads its own entry file and adapter directory, and all adapters point at one canonical set of playbooks.
 
 ## Layout
 
@@ -12,8 +12,9 @@ The bundle is a set of Markdown playbooks and role prompts, JSON configuration, 
 - `ai-framework/workflow/` documents the phases and gate matrix.
 - `ai-framework/rules/` holds the stack-agnostic rules.
 - `ai-framework/hooks/` holds the hook wiring template and hook scripts, including the token-consumption collector and report renderer.
-- `ai-framework/scripts/` holds the Node tools (setup validator, workflow doctor, graph builder, skill installer, bundle-sync, state report, and others), each with tests.
+- `ai-framework/scripts/` holds the direct Node/Bun tools (setup validator, workflow doctor, graph builder, skill installer, bundle-sync, state report, and others), each with tests.
 - `ai-framework/integrations/` documents harness routing, model profiles and skill handling.
+- `ai-framework/docs/` holds the human-facing topic docs; `README.md` is a short index linking to them (`ai-framework/scripts/docs-links.mts` checks the links).
 - `ai-framework/templates/project/` is the scaffold copied into a project during setup.
 
 ## Project Records
@@ -22,8 +23,16 @@ The bundle is a set of Markdown playbooks and role prompts, JSON configuration, 
 
 ## Data Flow
 
-A pitch moves through the phase playbooks, each reading only the records it needs. Hooks and plugins write bounded local metrics. `graphify.js` rebuilds the knowledge graph after entries change. `bundle-sync` compares an unpacked project with a newer bundle copy and applies approved updates.
+A pitch moves through the phase playbooks, each reading only the records it needs. Hooks and plugins write bounded local metrics. `graphify.mts` rebuilds the knowledge graph after entries change. `bundle-sync` compares an unpacked project with a newer bundle copy and applies approved updates.
 
 ## Integrations
 
 Claude Code, OpenCode, Codex and Cursor as hosts. External skills are fetched from pinned Git sources by the installer and are never auto-installed.
+
+### Optional Orca policy diagnostics
+
+`orca-policy.mts` validates the instance-local `.project/orchestration.json`; an absent/false
+`use-orca-orchestration` flag stops all Orca discovery. `orca-preflight.mts` can perform bounded,
+explicit read-only diagnostics after opt-in. Workflow doctor consumes only the guarded policy
+reader. Foundation always preserves normal workflow execution with dispatch disabled. Policy
+schema and runtime-evidence limits are documented in `ai-framework/integrations/orca-vendors.md`.

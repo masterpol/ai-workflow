@@ -7,7 +7,7 @@ description: Resume work on a pitch. Reads the status index, loads only that pit
 
 > **Recommended capability profile:** `fast` — templated status reload, no new judgment. Select an available model using `ai-framework/integrations/harnesses.md`.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 Usage: `/resume` or `/resume {slug}`.
 
@@ -21,7 +21,7 @@ Usage: `/resume` or `/resume {slug}`.
    - `plan.md` — only the current scope's section and exit criteria
    - the last few entries of `log.md` and `deviations.md`
    - `pitch.md` — only if the phase is `shape` or the next step depends on appetite/no-gos
-   Do not bulk-read other pitches, `runs/`, or all of `knowledge/`; traverse `knowledge/graph.json` only for entries tagged to this pitch's area.
+   Do not bulk-read other pitches, `runs/`, or all of `knowledge/`; traverse `graphify-out/graph.json` only for entries tagged to this pitch's area.
 4. **External updates.** If `.project/notion-config.json` exists, run `/sync pull` and surface changes to this pitch.
 5. **Freshness.** If the pitch was last touched more than 7 days ago, say so and ask whether the context still holds before continuing.
 6. **Present and gate:**

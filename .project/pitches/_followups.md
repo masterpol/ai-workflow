@@ -243,3 +243,14 @@ changed as part of path safety.
 - `/shape-lite` step 1: one active pitch plus an unrelated task is ambiguous; add a rule.
 - Run `/shape-lite` end to end on a throwaway task per host (OpenCode, Codex, Cursor); only Claude Code wiring is checked statically.
 - Cycle-2 reviewer lacked `setup-validator.js`/`bundle-sync.js` callers in scratch; a caller-inclusive re-review of the entry-import wiring is open.
+
+## Orca foundation followups — 2026-10-07
+
+- Before dispatch, confirm Orca's required child environment and define an allowlist; preflight currently inherits the operator environment with a sanitized PATH (audit S4).
+- At dispatch /plan, freeze and review the foundation `report --json` contract and rerun cross-pitch overlap checks for preflight, doctor, harness docs, release records, and eval fixtures (audit S6).
+- Add a presence-check fixture with an actual launcher in cwd and relative/empty PATH entries; the shared PATH helper and child regression are covered, but that specific presence-only fixture remains open (audit S7).
+- At /cooldown, require stored exact reviewer prompts and prompt hashes: the external foundation audit omitted them, so `review-bench.js record-check` cannot validate its record.
+
+- readme-split (2026-10-07): `workflow-doctor.js` has no dedicated test file; docs checks covered only indirectly via `skill-defaults.test.mts`. Add one. Also: `docs-links.js` ignores reference-style links, HTML anchors and setext headings.
+
+- ts-runtime-injection (2026-10-08): runtime modules (`bun`, `cli`, `entry`, `env`, `node`, `select`) are only covered through shared tests; add per-module tests. Replace repeated Node flag arrays in spawn sites with the shared `NODE_FLAGS`. Add regression tests for the bundle-sync symlink refusals and `--base-ref` rejection. Post-edit hook: `.claude`-substring skips the secret scan; stdin/file reads are unbounded. Template hook paths are cwd-relative. Doctor/validator print "N files parse" even when some parse checks were skipped (info line emitted).

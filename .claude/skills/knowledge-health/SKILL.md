@@ -5,9 +5,9 @@ description: Audit knowledge graph. Checks for stale entries, unused patterns, i
 
 # /knowledge-health — Knowledge Graph Audit
 
-> **Recommended capability profile:** `standard` — staleness/promotion judgment on top of graphify.js's mechanical checks. Select an available model using `ai-framework/integrations/harnesses.md`.
+> **Recommended capability profile:** `standard` — staleness/promotion judgment on top of graphify.mts's mechanical checks. Select an available model using `ai-framework/integrations/harnesses.md`.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 You are performing a **knowledge health check** — auditing the knowledge graph for quality, staleness, and improvement opportunities.
 
@@ -83,7 +83,7 @@ Scan `knowledge/issues/` for patterns that should graduate to rules:
 ```
 
 ### 5. Cross-reference validation
-Run `node ai-framework/scripts/graphify.js --check --json` and use its report directly instead of
+Run `node ai-framework/scripts/graphify.mts --check --json` and use its report directly instead of
 re-deriving this by hand — it already computes:
 - Orphaned entries (no `related`/`[[wiki-links]]` and no `tags`)
 - Broken links (a `related`/wiki-link target that doesn't resolve to any known entry id)

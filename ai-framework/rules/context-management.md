@@ -29,7 +29,7 @@ Guidelines, not hard limits — tune them at `/cooldown` if a phase keeps overru
 **Load when relevant:**
 3. `plan.md` — only the current scope's section during `/build`
 4. Applicable rules (filtered by file types being touched), plus the matching `.project/rules/` companion
-5. Related knowledge nodes (traversed via `knowledge/graph.json`, not bulk-loaded)
+5. Related knowledge nodes (traversed via `graphify-out/graph.json`, not bulk-loaded)
 
 **Never bulk-load:**
 - All pitches (load only the active one)
@@ -84,7 +84,7 @@ Key schema/data changes and the rough number of new endpoints or functions.
 |------|--------|
 | Current feature requirement | Load directly |
 | Related past feature | Search by keyword, load if relevant |
-| Specific decision | Traverse `knowledge/graph.json` by tag, load if found |
+| Specific decision | Traverse `graphify-out/graph.json` by tag, load if found |
 | All knowledge entries | NEVER — traverse the graph instead |
 | Applicable rules | Filter by file extensions being touched |
 
@@ -110,7 +110,7 @@ The framework maintains context across sessions via:
 
 1. **`status.md`** — the pitch index (always read first)
 2. **`pitches/{slug}/`** — the active pitch's artifacts and `checkpoint.md`
-3. **`knowledge/graph.json`** — extracted decisions, patterns, entities, issues (traversable)
+3. **`graphify-out/graph.json`** — extracted decisions, patterns, entities, issues (traversable)
 4. **`runs/`** — archived ship reports and `/cooldown` reports (history search)
 
 ### Resume Protocol
@@ -164,7 +164,7 @@ If context is getting large:
 ### 3. Ignoring Previous Sessions
 ```
 ❌ Starting fresh, asking questions already answered
-✓ Read status.md and the pitch's checkpoint.md, traverse knowledge/graph.json
+✓ Read status.md and the pitch's checkpoint.md, traverse graphify-out/graph.json
 ```
 
 ### 4. Inline History

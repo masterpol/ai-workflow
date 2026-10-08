@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/token-consumption.js\" --vendor codex --event subagent-complete --root \"$(git rev-parse --show-toplevel)\"",
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/token-consumption.mts\" --vendor codex --event subagent-complete --root \"$(git rev-parse --show-toplevel)\"",
             "timeout": 5
           }
         ]

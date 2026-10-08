@@ -130,7 +130,7 @@ brevity level per invocation (`caveman`, default `full`) through a single preced
 `caveman=<mode>` in the invocation > instance per-scope override > instance default > bundle
 default. Phase commands pass their resolved mode to the agents they dispatch. The instruction is
 carried by every canonical skill and agent and by the entry files, and is inert until the
-`caveman` skill is installed (`/add-skill`); `workflow-doctor.js` reports which state it is in.
+`caveman` skill is installed (`/add-skill`); `workflow-doctor.mts` reports which state it is in.
 Detail and the per-vendor notes: `ai-framework/integrations/skill-defaults.md`.
 
 ## Subagent model routing

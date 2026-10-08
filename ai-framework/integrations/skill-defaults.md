@@ -6,7 +6,7 @@ this bundle's own checkout: a human runs `/add-skill` explicitly, exactly like a
 external skill (`ai-framework/integrations/skills.md`). This is deliberate — "no silent global
 installs" applies here the same as everywhere else in this workflow.
 
-The current catalog (verified by real `add-skill.js inspect` calls, not assumed):
+The current catalog (verified by real `add-skill.mts inspect` calls, not assumed):
 
 | Skill | Purpose | Runtime prerequisite |
 |---|---|---|
@@ -26,9 +26,9 @@ own logic. Only the canonical phase files carry the resolution paragraph — eve
 already says "load the canonical file and follow it exactly," so no mirror needed editing.
 
 ```sh
-node ai-framework/scripts/skill-defaults.js resolve-mode --phase build --args-text "$ARGUMENTS" [--root P] [--json]
-node ai-framework/scripts/skill-defaults.js resolve-mode --phase build --arg lite [--root P] [--json]
-node ai-framework/scripts/skill-defaults.js report [--root P] [--json]
+node ai-framework/scripts/skill-defaults.mts resolve-mode --phase build --args-text "$ARGUMENTS" [--root P] [--json]
+node ai-framework/scripts/skill-defaults.mts resolve-mode --phase build --arg lite [--root P] [--json]
+node ai-framework/scripts/skill-defaults.mts report [--root P] [--json]
 ```
 
 A phase invocation's arguments are free-form text, not a parsed flag set (e.g. a user typing
@@ -41,7 +41,7 @@ rejected loudly — that is a real typo, never silently ignored. `--arg` (an exa
 extraction) remains available for programmatic callers that already have just the mode value —
 the two options are mutually exclusive. Every canonical phase file uses `--args-text
 "$ARGUMENTS"`, verified against the literal invocation shape this would actually receive (see
-`skill-defaults.test.js`'s `extractInvocationArg` coverage) — this was found and fixed after the
+`skill-defaults.test.mts`'s `extractInvocationArg` coverage) — this was found and fixed after the
 first version shipped with a bare `--arg $ARGUMENT`, which fails validation the moment real
 invocation text carries anything beyond the mode word alone.
 
@@ -55,24 +55,24 @@ one of nine scopes: the seven phase names, `utility` (every non-phase skill — 
 that dispatched them (the phase files pass their resolved mode down); a read-only agent that
 cannot run commands simply follows the mode it was handed. OpenCode and Codex agent/skill
 mirrors point at the canonical file, so they inherit it; Cursor mirrors are byte copies and are
-re-synced with `skill-vendors.js cursor-mirrors`.
+re-synced with `skill-vendors.mts cursor-mirrors`.
 
 Everything that describes or validates the workflow knows about it:
-- `workflow-doctor.js` reports a `Caveman mode` line with the live state — `active`, `inert` (not
+- `workflow-doctor.mts` reports a `Caveman mode` line with the live state — `active`, `inert` (not
   installed), disabled, persistently off, or **under-covering** (the installed wrapper omits a
   catalog-recommended phase, and it tells agents not to activate outside its listed phases) — and
   fails on a malformed `.project/skills/modes.json`, which would otherwise make every skill's
   command fail at runtime. It also requires the response-style section in `AGENTS.md`/`CLAUDE.md`
-  of this bundle (`setup-validator.js` only warns in a target project, whose own file may predate it).
-- `skill-defaults.js report` lists each default's installed phases and the gap against
+  of this bundle (`setup-validator.mts` only warns in a target project, whose own file may predate it).
+- `skill-defaults.mts report` lists each default's installed phases and the gap against
   `recommendedPhases` in the catalog.
 - The token-consumption Markdown and HTML reports show a `Caveman mode` column per record
   (`Unavailable` when no mode is configured — never guessed).
 - Per-vendor coverage and verification status: `ai-framework/integrations/harnesses.md`.
 
-This is enforced, not just documented: `workflow-doctor.js` fails if any canonical skill or agent
+This is enforced, not just documented: `workflow-doctor.mts` fails if any canonical skill or agent
 lacks the instruction (registry-installed upstream skills are exempt — they are not ours), and
-`skill-defaults.test.js` checks each file names a scope `resolve-mode` accepts, runs the exact
+`skill-defaults.test.mts` checks each file names a scope `resolve-mode` accepts, runs the exact
 command each one names, and confirms every mirror is current or a pointer. The instruction is
 inert until `caveman` is actually installed with `/add-skill`.
 
@@ -84,7 +84,7 @@ choice across invocations, matching the pitch's "disabling persists only when ex
 requested."
 
 Instance state — `.project/skills/modes.json` (project scope only; this file lives under
-`.project/`, which is outside every `bundle-sync.js` `SYNCED_DIRS` entry, so it is never touched
+`.project/`, which is outside every `bundle-sync.mts` `SYNCED_DIRS` entry, so it is never touched
 by a sync, the same protection `.project/skills/registry.json` already has):
 
 ```json
@@ -97,7 +97,7 @@ error rather than silently falling back.
 
 ## Token-usage attribution
 
-`ai-framework/hooks/scripts/token-consumption.js` tags each recorded event with the
+`ai-framework/hooks/scripts/token-consumption.mts` tags each recorded event with the
 currently-configured mode (best-effort, `null` when `modes.json` doesn't exist), purely for our
 own reporting completeness. It does **not** read, invoke, or duplicate `caveman-stats`'s own
 reporting — that skill is Claude-Code-hook-specific by its own design and already handles other
@@ -107,7 +107,7 @@ coupling. No token savings are ever inferred, invented, or summed from this attr
 ## Compress guard
 
 `caveman-compress` has no knowledge of this project's own historical-record guardrails. Before
-it is ever suggested for a path, `ai-framework/scripts/skill-compress-guard.js`'s `canCompress()`
+it is ever suggested for a path, `ai-framework/scripts/skill-compress-guard.mts`'s `canCompress()`
 refuses anything under `.project/pitches/`, `.project/pitches/_archive/`, `.project/design/`, or
 `.project/knowledge/`, and reports (never assumes) whether `python3` is available. It does not
 run the compression itself or reimplement its backup/restore — upstream already does that
@@ -115,7 +115,7 @@ correctly; this guard is consulted before a human approves running it.
 
 ## Browser runtime
 
-`ai-framework/scripts/browser-runtime.js`'s `report()` checks whether the `agent-browser` skill
+`ai-framework/scripts/browser-runtime.mts`'s `report()` checks whether the `agent-browser` skill
 is installed (via the registry) and whether its CLI resolves on `PATH` — never attempting
 `npm i -g agent-browser` or `agent-browser install` itself. `status` is one of `"unsupported"`
 (CLI absent — a host-capability fact that overrides everything else), `"not-installed"`,
@@ -123,9 +123,9 @@ is installed (via the registry) and whether its CLI resolves on `PATH` — never
 
 ## Existing projects (upgrading from an older bundle version)
 
-`bundle-sync.js --apply` delivers the scripts, all skills and agents with the instruction, and
+`bundle-sync.mts --apply` delivers the scripts, all skills and agents with the instruction, and
 the docs. It cannot deliver what is instance-owned, so it ends with a NEXT STEPS list: run
-`workflow-doctor.js --fix` for new scaffold files, copy the `## Response style (caveman mode)`
+`workflow-doctor.mts --fix` for new scaffold files, copy the `## Response style (caveman mode)`
 section into `AGENTS.md`/`CLAUDE.md`, and install `caveman` with the printed `/add-skill` command.
 Until the last step the instruction is inert and the doctor says so. Verified by simulating a
 v2.3.0 project end to end: after the sync and those three steps the doctor reports 0 failures,
@@ -134,6 +134,6 @@ v2.3.0 project end to end: after the sync and those three steps the doctor repor
 ## Verification
 
 ```sh
-node --test ai-framework/scripts/skill-defaults.test.js ai-framework/scripts/skill-compress-guard.test.js ai-framework/scripts/browser-runtime.test.js ai-framework/hooks/scripts/token-consumption.test.js
-node --check ai-framework/scripts/skill-defaults.js ai-framework/scripts/skill-compress-guard.js ai-framework/scripts/browser-runtime.js
+node --test ai-framework/scripts/skill-defaults.test.mts ai-framework/scripts/skill-compress-guard.test.mts ai-framework/scripts/browser-runtime.test.mts ai-framework/hooks/scripts/token-consumption.test.mts
+node --check ai-framework/scripts/skill-defaults.mts ai-framework/scripts/skill-compress-guard.mts ai-framework/scripts/browser-runtime.mts
 ```

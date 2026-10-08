@@ -1,4 +1,8 @@
 .DS_Store
+# Local environment values stay private; the portable example remains trackable.
+.env
+.env.*
+!.env.example
 .opencode/node_modules/
 .claude/settings.local.json
 .project/metrics/
@@ -19,3 +23,8 @@
 .agents/skills/caveman/
 .cursor/skills/caveman/
 .opencode/skills/
+
+# Graphify: commit graph.json and GRAPH_REPORT.md; the cache, manifest, HTML and snapshots are machine-local.
+graphify-out/*
+!graphify-out/graph.json
+!graphify-out/GRAPH_REPORT.md

@@ -5,4 +5,4 @@ description: Report what this project is and where it stands — workflow versio
 
 # State
 
-Load `.claude/skills/state/SKILL.md` and follow it exactly. Run `node ai-framework/scripts/state-snapshot.js` (and `state-render.js` for the HTML page), report by fact status (observed, proposed, stale, unavailable, unconfigured), and never claim a live database or complete metrics the snapshot does not show.
+Load `.claude/skills/state/SKILL.md` and follow it exactly. Run `node ai-framework/scripts/state-snapshot.mts` (and `state-render.mts` for the HTML page), report by fact status (observed, proposed, stale, unavailable, unconfigured), and never claim a live database or complete metrics the snapshot does not show.

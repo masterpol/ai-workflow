@@ -62,7 +62,7 @@ Three deterministic moves:
 
 Every new or bumped card needs a real `id`, `tags`, and at least one `related`/`[[wiki-link]]` to
 an existing entry — otherwise it can't be found by graph traversal later. Once entries are
-written, run `node ai-framework/scripts/graphify.js` to rebuild `knowledge/graph.json` +
+written, run `node ai-framework/scripts/graphify.mts` to rebuild `graphify-out/graph.json` +
 `index.md` so the new knowledge is traversable immediately, not just on the next `/cooldown`.
 
 ### 4. Status compaction (≤100 lines hard cap)
@@ -111,7 +111,7 @@ Otherwise: explicit "no doc updates needed because {reason}" logged in SHIPPED.m
 ## Output
 
 - `pitches/{slug}/SHIPPED.md`
-- Updated `.project/knowledge/{issues,patterns}/`, rebuilt `knowledge/graph.json` + `index.md`
+- Updated `.project/knowledge/{issues,patterns}/`, rebuilt `graphify-out/graph.json` + `index.md`
 - Compacted `.project/status.md`
 - Archived `runs/{date}-{slug}.md` and `runs/{date}-{slug}-hill.md`
 - Updated `pitches/_followups.md` if any deferred items

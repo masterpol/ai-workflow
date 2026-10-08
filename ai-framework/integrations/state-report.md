@@ -8,19 +8,19 @@ editing it.
 ## Run it
 
 ```sh
-node ai-framework/scripts/state-snapshot.js            # preview: counts by status, writes nothing
-node ai-framework/scripts/state-snapshot.js --json     # full snapshot on stdout
-node ai-framework/scripts/state-snapshot.js --apply    # write .project/reports/state.json
+node ai-framework/scripts/state-snapshot.mts            # preview: counts by status, writes nothing
+node ai-framework/scripts/state-snapshot.mts --json     # full snapshot on stdout
+node ai-framework/scripts/state-snapshot.mts --apply    # write .project/reports/state.json
 ```
 
 Then render the page from that snapshot:
 
 ```sh
-node ai-framework/scripts/state-render.js              # preview: theme mode, changed sources, size
-node ai-framework/scripts/state-render.js --apply      # write state.html and theme.json (atomic)
+node ai-framework/scripts/state-render.mts              # preview: theme mode, changed sources, size
+node ai-framework/scripts/state-render.mts --apply      # write state.html and theme.json (atomic)
 ```
 
-`state-render.js` needs `state.json` (run the snapshot with `--apply` first) and refuses a
+`state-render.mts` needs `state.json` (run the snapshot with `--apply` first) and refuses a
 snapshot whose `schemaVersion` it does not know.
 
 `--root <dir>` targets another project; `--now <ISO time>` fixes the clock so output is
@@ -47,12 +47,12 @@ report.
 ## What it reads, and what it never does
 
 Reads a fixed allowlist: `.project/{status.md, runs/, pitches/*/{pitch,hill,SHIPPED}.md,
-done-work.md, knowledge/graph.json, skills/{registry,modes}.json, .bundle-sync.json,
+done-work.md, graphify-out/graph.json, skills/{registry,modes}.json, .bundle-sync.json,
 metrics/token-consumption.json, context/{product,architecture,stack}.md}`, `README.md`,
 `VERSION`, and a bounded scan for checked-in schema/migration files.
 
 Never reads `.env*`, `credentials.json`, `settings.local.json`, or session transcripts. The one
-child process it starts is this bundle's own `skill-sync.js reconcile` (read-only preview, 15 s
+child process it starts is this bundle's own `skill-sync.mts reconcile` (read-only preview, 15 s
 timeout); it never runs a script that the analyzed project supplies. Never opens
 a database or network connection, so a database is reported `unconfigured` or, when schema files
 are checked in, `observed` as "schema files exist" with the note that live deployment state is

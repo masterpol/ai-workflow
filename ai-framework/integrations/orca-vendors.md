@@ -35,8 +35,8 @@ outcomes are distinct. Diagnostics omit policy contents and raw process errors.
 ## Inspect without execution
 
 ```sh
-node ai-framework/scripts/orca-policy.js report --vendor codex --json
-node ai-framework/scripts/orca-preflight.js report --vendor codex --json
+node ai-framework/scripts/orca-policy.mts report --vendor codex --json
+node ai-framework/scripts/orca-preflight.mts report --vendor codex --json
 ```
 
 Both commands accept `--root <project-directory>`; the default is the current directory.
@@ -50,7 +50,7 @@ and does not prove vendor authentication or an available Orca runtime.
 With a valid opted-in policy and a configured alternate vendor present:
 
 ```sh
-node ai-framework/scripts/orca-preflight.js report --vendor codex --json --probe
+node ai-framework/scripts/orca-preflight.mts report --vendor codex --json --probe
 ```
 
 The only subprocess argv are `skills get orca-cli --json`,

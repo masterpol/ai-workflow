@@ -1,0 +1,12 @@
+# Files Graphify must not index (gitignore syntax). Keep generated, archived and vendored trees out of the graph.
+node_modules/
+graphify-out/
+.project/compaction/
+.project/analysis/
+.project/scratchpad/
+.project/runs/
+.project/metrics/
+.project/reports/
+.project/pitches/_archive/
+_archive/
+.opencode/node_modules/

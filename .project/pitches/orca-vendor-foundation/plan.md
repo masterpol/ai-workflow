@@ -1,7 +1,7 @@
 # Plan: orca-vendor-foundation
 
 **Pitch**: pitch.md • **Appetite**: big-batch • **Hill**: hill.md
-**Status**: approved. User's “next” accepted the foundation bet on 2026-10-07; subsequent approvals acknowledged impact/plan and authorized foundation build start. S1 and S2 continuation gates were approved. S3 is complete with evidence in `s3-evidence.md`; all build scopes await approval to audit.
+**Status**: approved. User's “next” accepted the foundation bet on 2026-10-07; subsequent approvals acknowledged impact/plan and authorized foundation build start. S1 and S2 continuation gates were approved. S3 is complete with evidence in `s3-evidence.md`; external audit completed; user confirmed ship on 2026-10-07; foundation is closed.
 
 ## Result and boundaries
 
@@ -106,4 +106,4 @@ Build-time correction: user requested `use-orca-orchestration` in the same JSON 
 
 ## Confirmation gate
 
-Impact, plan, and foundation build start approved by the user on 2026-10-07. S1 and S2 continuation approved. Next gate: approve foundation build and advance to audit / Revise scope / Back to plan / Stop. Live dispatch remains outside this approval.
+Impact, plan, and foundation build start approved by the user on 2026-10-07. S1 and S2 continuation approved. User requested ship after external audit. User selected ship; closed. See SHIPPED.md. Live dispatch remains outside this approval.

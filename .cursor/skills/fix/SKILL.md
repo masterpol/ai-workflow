@@ -7,7 +7,7 @@ description: Entry point for the bug-fix workflow. Searches knowledge for simila
 
 > **Recommended capability profile:** use `fast` for a simple bug with a clear reproduction; use `standard` for an unknown root cause or multi-file fix. Select an available model using `ai-framework/integrations/harnesses.md`.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 `/fix` is the front door to the **bug-fix variant** in `ai-framework/workflow/overview.md`:
 
@@ -20,7 +20,7 @@ It skips `/shape` and `/plan`; the bug report *is* the plan.
 ## 1. Triage (gated)
 
 1. Get the bug description and reproduction steps — ask if missing.
-2. **Search knowledge first**: traverse `.project/knowledge/graph.json` (tag index, then `issues/` entries) for similar symptoms or root causes. If one matches, show its root cause and solution and ask whether it looks related.
+2. **Search knowledge first**: traverse `graphify-out/graph.json` (tag index, then `issues/` entries) for similar symptoms or root causes. If one matches, show its root cause and solution and ask whether it looks related.
 3. Locate the affected code and state the root cause (or the leading hypothesis, labelled as such).
 4. Create `.project/pitches/fix-{slug}/log.md` with the 3-line entry: symptom, root cause, planned fix. Add a row to `.project/status.md` → Active pitches (appetite `bug-fix`, phase `build`).
 

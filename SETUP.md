@@ -17,14 +17,15 @@ with any supported harness after setup.
 ```
 ai-workflow-portable/
 ├── SETUP.md                     ← you are here
-├── README.md                    ← human-facing orientation
+├── README.md                    ← human-facing orientation (index into ai-framework/docs/)
 ├── AGENTS.md                    ← cross-tool workflow index (copied to project root)
 ├── ai-framework/                ← PORTABLE core (stack-agnostic)
 │   ├── rules/                   ← 15 stack-agnostic coding/security/architecture rules
 │   ├── workflow/                ← pipeline overview + 6 phase specs
 │   ├── hooks/                   ← lifecycle hooks + verification and consumption scripts
 │   ├── templates/project/       ← scaffold for the per-project .project/ dir
-│   └── integrations/            ← model profiles + harness guidance
+│   ├── integrations/            ← model profiles + harness guidance
+│   └── docs/                    ← human-facing topic docs linked from README.md
 ├── .claude/                     ← Claude Code role prompts, skills, and hooks
 ├── .opencode/                   ← OpenCode commands + native role adapters
 ├── .codex/                      ← Codex configuration + native role adapters
@@ -55,6 +56,12 @@ Before touching anything:
 
 ## Step 1 — Place the framework files
 
+Workflow scripts run directly as TypeScript ES modules. Use Node 22.18 or later for the
+`node ...mts` commands below; Node 22.12–22.17 needs
+`--experimental-strip-types --disable-warning=ExperimentalWarning` before each entry path.
+Bun can execute the same files directly. See [runtime details](ai-framework/scripts/runtime/README.md)
+for runner selection.
+
 Copy the portable core and **all** harness adapters to the project root. Do not copy generated
 dependency directories such as `.opencode/node_modules/`; install dependencies separately only
 if a harness requires them.
@@ -63,11 +70,11 @@ if a harness requires them.
 - `ai-workflow-portable/.claude/` → `<root>/.claude/`  *(merge if `.claude/` already exists — never overwrite an existing `settings.local.json`)*
 - `ai-workflow-portable/AGENTS.md` → `<root>/AGENTS.md`  *(see Step 2 for tool nuances)*
 - `ai-workflow-portable/CLAUDE.md` → `<root>/CLAUDE.md`  *(the self-triggering bootstrap — see below)*
-- `ai-workflow-portable/.opencode/{opencode.json,commands/,agents/}` → `<root>/.opencode/`
+- `ai-workflow-portable/.opencode/{opencode.json,commands/,agents/,plugins/,package.json}` → `<root>/.opencode/`
 - `ai-workflow-portable/.codex/` → `<root>/.codex/` and `ai-workflow-portable/.agents/` → `<root>/.agents/`
 - `.claude/agents/*.md` → `<root>/.cursor/agents/` and `.claude/skills/*/` → `<root>/.cursor/skills/`
   *(Cursor uses the same agent and skill format; after copying the rest, run
-  `node ai-framework/scripts/skill-vendors.js cursor-mirrors` to preview and add `--apply` to
+  `node ai-framework/scripts/skill-vendors.mts cursor-mirrors` to preview and add `--apply` to
   create the missing mirrors. It is safe to rerun and never overwrites an existing mirror.)*
 
 **Every one of these is the "first run" artifact for its vendor** — the file that vendor's tool
@@ -113,7 +120,7 @@ Nothing extra to convert — Claude Code auto-discovers `.claude/agents/` and `.
 OpenCode reads `AGENTS.md`, `.opencode/commands/`, and `.opencode/agents/` natively.
 
 - Keep `.opencode/opencode.json`; OpenCode discovers the native phase wrappers in `.agents/skills/`.
-- `.opencode/plugins/token-consumption.js` automatically records completed assistant message
+- `.opencode/plugins/token-consumption.ts` automatically records completed assistant message
   usage and actual cost into the local metrics snapshot.
 - The included adapters intentionally do not pin a provider/model. Select available models by the
   `fast` / `standard` / `deep` profiles in `ai-framework/integrations/harnesses.md`.
@@ -176,13 +183,15 @@ Steps:
 1. Copy the tree from `ai-framework/templates/project/` into `.project/`.
 2. Seed an empty backlog: create `.project/pitches/_followups.md` with a single `# Followups` heading.
 3. Create empty `.project/pitches/_parked/` and `.project/pitches/_archive/` dirs (add `.gitkeep` if your VCS needs it).
-4. **Initialize the knowledge graph:** run `node ai-framework/scripts/graphify.js` from the project
-   root. It scans `.project/knowledge/{decisions,patterns,entities,issues}/`, and writes
-   `.project/knowledge/graph.json` (machine-readable — nodes, edges, tag index) and
+4. **Initialize the knowledge graph:** install [`uv`](https://docs.astral.sh/uv/) if missing, then run
+   `node ai-framework/scripts/graphify.mts setup` from the project root. It runs Graphify
+   (`uv tool run --from graphifyy`, pinned), creates `.graphifyignore` and the `.gitignore` block, installs
+   the rebuild-on-commit git hooks, migrates a legacy `.project/knowledge/graph.json` if present, scans `.project/knowledge/{decisions,patterns,entities,issues}/`, and writes
+   `graphify-out/graph.json` (machine-readable — nodes, edges, tag index) and
    `.project/knowledge/index.md` (human-readable catalog). At this point the scaffold is empty, so
    this just produces the initial empty graph — the point is that it exists and every later phase
    that writes a knowledge entry can rebuild it the same way, so the graph never drifts from the
-   entries on disk. See `ai-framework/scripts/graphify.js`'s header comment for how it works.
+   entries on disk. See `ai-framework/scripts/graphify.mts`'s header comment for how it works.
 
 **Gate:** show the tree you'll create, then wait for approval. Step 4 (graphify) only writes
 derived/generated files inside the just-approved `.project/knowledge/`, so it runs immediately
@@ -216,7 +225,7 @@ project specifics, the full `CLAUDE.md` mirror (required — see below), and
       chance to "use itself well": everything a session needs for phase 1 of any task should be
       readable from this one file without a hop to `AGENTS.md`.
       **Equally valid:** a `CLAUDE.md` whose only workflow content is Claude Code's native
-      `@AGENTS.md` import line (sibling file, regular file, not a symlink). `setup-validator.js`
+      `@AGENTS.md` import line (sibling file, regular file, not a symlink). `setup-validator.mts`
       accepts it only when the imported `AGENTS.md` is complete; keep the import when it is
       already present, and do not expand it into a mirror.
    Both files point at `ai-framework/workflow/overview.md`, `ai-framework/rules/`, and
@@ -291,14 +300,14 @@ three regenerated, Git-ignored local files under `.project/metrics/`:
 The remaining hooks are opt-in. `ai-framework/hooks/hooks.json` is a **wiring template** (not
 auto-loaded) — copy the entries you want into `.claude/settings.json`:
 
-- `.claude/hooks/post-edit-check.js` — deterministic PostToolUse gate, stack-agnostic on
+- `.claude/hooks/post-edit-check.mts` — deterministic PostToolUse gate, stack-agnostic on
   purpose (secrets, `console.log`, oversized files, TODO/FIXME, TS syntax if `typescript` is
   installed). It does not check framework-specific conventions (client/server component
   boundaries, a specific backend's validator API, import-alias rules) — add a project-specific
   hook for those if your stack needs them.
-- `ai-framework/hooks/scripts/stuck-uphill-detector.js` — SessionStart hook that warns when a
+- `ai-framework/hooks/scripts/stuck-uphill-detector.mts` — SessionStart hook that warns when a
   pitch scope sits at the same uphill position across 3+ sessions (rabbit-hole detector).
-- `ai-framework/hooks/scripts/pre-ship-verify.js` — **not** an event hook; it's a build-gate
+- `ai-framework/hooks/scripts/pre-ship-verify.mts` — **not** an event hook; it's a build-gate
   script the `/ship` phase runs. Leave it in place; the ship playbook invokes it.
 
 Minimal merge for the post-edit and hill-chart hooks:
@@ -307,10 +316,10 @@ Minimal merge for the post-edit and hill-chart hooks:
 {
   "hooks": {
     "PostToolUse": [
-      { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": "node .claude/hooks/post-edit-check.js" } ] }
+      { "matcher": "Edit|Write", "hooks": [ { "type": "command", "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning .claude/hooks/post-edit-check.mts" } ] }
     ],
     "SessionStart": [
-      { "matcher": "*", "hooks": [ { "type": "command", "command": "node ai-framework/hooks/scripts/stuck-uphill-detector.js" } ] }
+      { "matcher": "*", "hooks": [ { "type": "command", "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning ai-framework/hooks/scripts/stuck-uphill-detector.mts" } ] }
     ]
   }
 }
@@ -328,7 +337,7 @@ no verified completion-hook payload, so it is intentionally not wired.
 Confirm the install works end-to-end:
 
 1. **Files present:** `ai-framework/`, `.claude/agents/` (18), `.claude/skills/` (pipeline
-   skills), `.opencode/{opencode.json,commands/,agents/}`, `.codex/` + `.agents/`,
+   skills), `.opencode/{opencode.json,commands/,agents/,plugins/,package.json}`, `.codex/` + `.agents/`,
    `.cursor/{agents/,skills/}`, `.project/` scaffold, `AGENTS.md`, and the full `CLAUDE.md`
    mirror (not the Step-1 bootstrap stub — confirm it was replaced in Step 4).
 2. **Each harness resolves its entry points:** Claude Code loads `/shape` from
@@ -338,14 +347,15 @@ Confirm the install works end-to-end:
    Each also exposes `add-skill` for installing external skills (see
    `ai-framework/integrations/skills.md`). Verify directly in each harness that is available
    locally; otherwise report its files as installed but untested.
-3. **Caveman mode is wired:** `node ai-framework/scripts/workflow-doctor.js` reports a
+3. **Caveman mode is wired:** `node ai-framework/scripts/workflow-doctor.mts` reports a
    `Caveman mode` line — `active` once the `caveman` skill is installed with `/add-skill
    juliusbrussee/caveman/caveman` (recommended phases: all seven plus `manual`), `inert` before
-   that. `setup-validator.js` warns if `AGENTS.md`/`CLAUDE.md` lack the response-style section.
+   that. `setup-validator.mts` warns if `AGENTS.md`/`CLAUDE.md` lack the response-style section.
    Every canonical skill and agent must carry the instruction; the doctor fails if one does not.
-4. **Knowledge graph is live:** run `node ai-framework/scripts/graphify.js --check`. It must
+4. **Knowledge graph is live:** run `node ai-framework/scripts/graphify.mts --check` (and
+   `uv --version` — Graphify runs through uv). It must
    exit clean (status `CLEAN` or `OK WITH WARNINGS`, not `NEEDS ATTENTION`) and confirm
-   `.project/knowledge/graph.json` and `.project/knowledge/index.md` exist — this is what lets
+   `graphify-out/graph.json` and `.project/knowledge/index.md` exist — this is what lets
    `/shape`'s knowledge gate, `/search`, `/knowledge-health`, and `/cooldown` traverse prior
    knowledge instead of re-reading every file under `.project/knowledge/`.
 5. **Dry run:** using the active harness, ask the human for a tiny first task and run `/shape` (or read the shape

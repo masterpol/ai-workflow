@@ -3,4 +3,4 @@ description: Verify that workflow setup generated complete project context, entr
 model: opencode-go/minimax-m3
 ---
 
-Run `node ai-framework/scripts/setup-validator.js` and present the setup verdict and each failure to the user. Do not modify generated setup artifacts directly; re-run `/setup` through its confirmation gates. $ARGUMENTS
+Run `node ai-framework/scripts/setup-validator.mts` and present the setup verdict and each failure to the user. Do not modify generated setup artifacts directly; re-run `/setup` through its confirmation gates. $ARGUMENTS

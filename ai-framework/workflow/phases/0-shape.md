@@ -14,9 +14,9 @@ Frame the problem, set appetite, and bound the work — *before* engineering. Mo
 
 ### 1. Knowledge gate (mandatory, FIRST)
 
-Look up `.project/knowledge/graph.json` first — its `tagIndex` and `nodes[].title` let you find
+Look up `graphify-out/graph.json` first — its `tagIndex` and `nodes[].title` let you find
 candidate entries without reading every file, and `edges`/`related` pull in anything one hop
-away from a direct match. Rebuild it (`node ai-framework/scripts/graphify.js`) if it looks
+away from a direct match. Rebuild it (`node ai-framework/scripts/graphify.mts`) if it looks
 missing or stale, then read the matched files under `.project/knowledge/` (issues + patterns +
 decisions). Also check `ai-framework/rules/` and `.project/rules/*.md` for any existing
 constraint on the area the pitch touches (e.g. an auth-related pitch should surface

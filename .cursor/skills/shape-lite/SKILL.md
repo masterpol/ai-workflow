@@ -8,7 +8,7 @@ description: Fast, compressed framing for a small task or a user rejection mid-f
 > **Recommended capability profile:** `standard` — bounded framing, no deep breadboarding. Select an available model using `ai-framework/integrations/harnesses.md`.
 
 Variant of `/shape` (`ai-framework/workflow/phases/0-shape.md`). Full `/shape` is unchanged; this is the short path.
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 ## When to use
 
@@ -28,7 +28,7 @@ Not for: AI-prompt scopes, security-path changes, or anything the escalation tes
    - exactly 1 active pitch, or a slug was named → **inline** on that pitch.
    - ≥2 active pitches and no slug named → **stop and ask which one**. Never guess.
    - Inline: read that pitch's `pitch.md` appetite and `## Bet decision`. Its appetite and gate row (`ai-framework/workflow/overview.md` → Adaptive confirmation gate) stay in force. Lite never replaces them with the small-batch auto path.
-2. **Knowledge gate, graph-only.** Look up `.project/knowledge/graph.json` (`tagIndex`, `related` edges; rebuild with `node ai-framework/scripts/graphify.js` if missing or stale). Read at most 3 matched entries plus any matching `ai-framework/rules/` or `.project/rules/*.md` file. Surface 1-3 hits inline. No bulk reads.
+2. **Knowledge gate, graph-only.** Look up `graphify-out/graph.json` (`tagIndex`, `related` edges; rebuild with `node ai-framework/scripts/graphify.mts` if missing or stale). Read at most 3 matched entries plus any matching `ai-framework/rules/` or `.project/rules/*.md` file. Surface 1-3 hits inline. No bulk reads.
 3. **Escalation test (mechanical, before framing or any pitch or knowledge write; re-run after every Revise or Back).** Stop lite, say which trigger fired, and hand to full `/shape` if ANY holds:
    - projected >2 files or >100 LOC;
    - touches prompt files, `lib/ai/prompts/`, or any LLM call site, however the project lays them out (the golden-eval hard gate lives in `/shape`);
@@ -49,7 +49,7 @@ Not for: AI-prompt scopes, security-path changes, or anything the escalation tes
 6. **Write the output (compressed).**
    - **Inline:** edit only the affected sections of the existing `pitch.md`, and append one row to a `## Revisions` table at the end (create the table if absent): `| date | trigger (what the user rejected or changed) | what changed |`. Do not create new files. Do not touch sections the user did not mention.
    - **Standalone:** create `.project/pitches/{slug}/pitch.md` as a card of ≤150 tokens (Problem · Knowledge hit · Rabbit holes · No-gos · Exit check), tagged `**Appetite**: small-batch (lite)`. The Exit check is one machine-checkable command, replacing `/plan`.
-   - **Knowledge (never when escalated):** write a ≤15-line entry under `.project/knowledge/{decisions,issues,patterns}/` only if the rejection or decision is reusable beyond this task; then run `node ai-framework/scripts/graphify.js`. Otherwise write none.
+   - **Knowledge (never when escalated):** write a ≤15-line entry under `.project/knowledge/{decisions,issues,patterns}/` only if the rejection or decision is reusable beyond this task; then run `node ai-framework/scripts/graphify.mts`. Otherwise write none.
 7. **Gate.** Show the frame and any escalation result. **Approve / Revise / Back / Stop.** Never auto-advance.
 
 ## Transition

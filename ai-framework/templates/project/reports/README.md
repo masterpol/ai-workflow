@@ -15,5 +15,5 @@ reports/
 └── settings.json   # optional, yours: { "schemaVersion": 1, "themeMode": "auto" | "fallback" }
 ```
 
-Regenerate any time with `node ai-framework/scripts/state-snapshot.js --apply` then
-`node ai-framework/scripts/state-render.js --apply`. Everything except `settings.json` is safe to delete.
+Regenerate any time with `node ai-framework/scripts/state-snapshot.mts --apply` then
+`node ai-framework/scripts/state-render.mts --apply`. Everything except `settings.json` is safe to delete.
