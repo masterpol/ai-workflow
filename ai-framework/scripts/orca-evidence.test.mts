@@ -405,7 +405,7 @@ test("cleanup resumes after a crash between steps", async (t: TestContext) => {
     // Crash before removal ran (injected failure), then a second call finishes.
     const { f } = proven(t);
     const decision = await decide(f);
-    const crashing = spyDeps(async (args) => { if (args.includes("remove")) throw new Error("crash"); return { status: args.includes("config") ? 1 : 0, signal: null, stdout: "", stderr: "" }; });
+    const crashing = spyDeps(async (args, real) => { if (args.includes("remove")) throw new Error("crash"); if (args.includes("config")) return { status: 1, signal: null, stdout: "", stderr: "" }; return real(); });
     assert.equal((await performCleanup(decision, crashing.deps)).status, "failed");
     assert.ok(fs.existsSync(f.wt));
     assert.deepEqual(await performCleanup(decision, deps), { status: "ok", reason: "removed" });
@@ -469,4 +469,46 @@ test("late input after settlement never changes a recorded final state", async (
   assert.equal(recordFinalState({ root: f.root, attemptKey: "attempt:../x", state: "cleaned", deps }).status, "invalid");
   fs.writeFileSync(path.join(evidenceDir(f), "final.json"), "junk");
   assert.equal(recordFinalState({ root: f.root, attemptKey: KEY, state: "cleaned", deps }).status, "corrupt");
+});
+
+test("performCleanup honours only decisions made by decideCleanup: pinned evidence, pinned worker HEAD, and the filter and gitlink guards repeated right before the removal", async (t: TestContext) => {
+  const { f } = proven(t);
+  const decision = await decide(f);
+  assert.equal(decision.action, "remove");
+  if (decision.action !== "remove") return;
+  // A forged decision that omits the pins is refused.
+  assert.equal((await performCleanup({ ...decision, manifestSha256: undefined as unknown as string }, deps)).reason, "decision-manifest");
+  assert.equal((await performCleanup({ ...decision, head: undefined }, deps)).reason, "decision-head");
+  assert.equal((await performCleanup({ ...decision, head: "0".repeat(40) }, deps)).reason, "worktree-head-changed");
+  assert.ok(fs.existsSync(f.wt));
+  // A filter driver configured after the decision stops the removal (git worktree remove would run status against the tree).
+  const marker = path.join(path.dirname(f.root), "perform-filter-ran");
+  git(f.root, "config", "filter.late.clean", `touch ${marker}; cat`);
+  assert.equal((await performCleanup(decision, deps)).reason, "filter-driver-present");
+  git(f.root, "config", "--unset", "filter.late.clean");
+  assert.equal(fs.existsSync(marker), false);
+  // A commit made after the decision changes HEAD, so the accounting no longer holds.
+  write(path.join(f.wt, "late.txt"), "late\n");
+  git(f.wt, "add", "late.txt");
+  git(f.wt, "commit", "-q", "-m", "late");
+  assert.equal((await performCleanup(decision, deps)).reason, "worktree-head-changed");
+  assert.ok(fs.existsSync(f.wt));
+});
+
+test("performCleanup repeats the nested-repository guard right before the removal", async (t: TestContext) => {
+  const { f } = proven(t);
+  const decision = await decide(f);
+  assert.equal(decision.action, "remove");
+  if (decision.action !== "remove") return;
+  const nested = path.join(f.wt, "sub");
+  fs.mkdirSync(nested);
+  git(nested, "init", "-q");
+  write(path.join(nested, "x.txt"), "x\n");
+  git(nested, "add", "-A");
+  git(nested, "commit", "-q", "-m", "n");
+  git(f.wt, "update-index", "--add", "--cacheinfo", `160000,${git(nested, "rev-parse", "HEAD").trim()},sub`);
+  const result = await performCleanup(decision, deps);
+  assert.equal(result.status, "refused");
+  assert.equal(result.reason, "submodule-present");
+  assert.ok(fs.existsSync(path.join(nested, "x.txt")));
 });

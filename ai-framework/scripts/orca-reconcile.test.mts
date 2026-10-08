@@ -625,8 +625,50 @@ test("a resumed attempt in a mixed batch is settled only if the checks pass, lik
   complete(f, fresh);
   fs.writeFileSync(path.join(f.root, "a.txt"), "BAD\n");
   const outcome = await run(options(f, [resumed, fresh], { runChecks: ["nobad"] }));
-  assert.equal(outcome.attempts[resumed.attemptKey].reason, "checks-failing-on-resume:nobad");
+  // A failing check is not excused by the baseline when a resumed change is in the tree, so the whole batch backs out.
+  assert.equal(outcome.status, "rolled-back");
+  assert.match(outcome.attempts[resumed.attemptKey].reason ?? "", /^check-failed:nobad|^checks-failing-on-resume:nobad/);
   assert.equal(stateOf(f, resumed), "completed", "not settled without passing checks");
-  assert.equal(outcome.attempts[fresh.attemptKey].state, "integrated");
-  assert.equal(stateOf(f, fresh), "settled");
+  assert.equal(stateOf(f, fresh), "completed");
+});
+
+test("a resumed change in the tree does not excuse a failing check for a fresh worker", async (t: TestContext) => {
+  const f = fixture(t);
+  const resumed = worker(f, "w1", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "BAD\n"));
+  const fresh = worker(f, "w2", (dir) => fs.writeFileSync(path.join(dir, "b.txt"), "fine\n"));
+  complete(f, resumed);
+  complete(f, fresh);
+  fs.writeFileSync(path.join(f.root, "a.txt"), "BAD\n");
+  const outcome = await run(options(f, [resumed, fresh], { runChecks: ["nobad"] }));
+  assert.deepEqual([outcome.status, outcome.reason], ["rolled-back", "check-failed:nobad"]);
+  assert.equal(stateOf(f, fresh), "completed", "the fresh worker is not settled while the checks fail");
+  assert.equal(read(f.root, "b.txt"), "b.txt baseline\n");
+  assert.equal(read(f.root, "a.txt"), "BAD\n", "the resumed change is left exactly as it was");
+});
+
+test("an error from the baseline check run is reported, never thrown, and nothing is applied", async (t: TestContext) => {
+  const f = fixture(t);
+  const w = worker(f, "w1", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "changed\n"));
+  complete(f, w);
+  const throwing = { ...deps, child: { ...deps.child, run: async (command: string, args: string[], opts?: unknown) => {
+    if (command === NODE) throw new Error("boom");
+    return deps.child.run(command, args, opts as never);
+  } } };
+  const outcome = await run(options(f, [w], { deps: throwing }));
+  assert.deepEqual([outcome.status, outcome.reason], ["refused", "check-error"]);
+  assert.equal(read(f.root, "a.txt"), "a.txt baseline\n");
+});
+
+test("an error during cleanup still tells the caller which attempts settled", async (t: TestContext) => {
+  const f = fixture(t);
+  const w1 = worker(f, "w1", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "one\n"));
+  const w2 = worker(f, "w2", (dir) => fs.writeFileSync(path.join(dir, "b.txt"), "two\n"));
+  complete(f, w1);
+  complete(f, w2);
+  const hostile = new Proxy({}, { get() { throw new Error("boom"); }, has() { throw new Error("boom"); }, ownKeys() { throw new Error("boom"); }, getPrototypeOf() { throw new Error("boom"); } });
+  const outcome = await run(options(f, [w1, { ...w2, settlement: hostile }]));
+  assert.equal(outcome.reason, "error-after-apply-partial");
+  assert.equal(outcome.attempts[w1.attemptKey].state, "integrated");
+  assert.equal(outcome.attempts[w2.attemptKey].state, "integrated", "w2 settled before its cleanup threw, and the result says so");
+  assert.equal(stateOf(f, w2), "settled");
 });

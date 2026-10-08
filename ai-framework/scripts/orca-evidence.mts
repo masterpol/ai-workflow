@@ -51,7 +51,7 @@ export interface WorktreeRef { path: string; baseline: string; allowedRoots: str
 export interface Settlement { released: boolean; state: string; reason?: string; processAction?: string }
 
 export type CleanupDecision =
-  | { action: "remove"; root: string; attemptKey: string; manifestSha256: string; worktree: string; gone: boolean }
+  | { action: "remove"; root: string; attemptKey: string; manifestSha256: string; worktree: string; gone: boolean; /** The worker HEAD the commit accounting was done against (absent when the tree is already gone). */ head?: string }
   | { action: "keep"; state: "integrated-uncleaned"; leftover: string[]; reason: string };
 export type CleanupResult =
   | { status: "ok"; reason: "removed" | "already-gone" }
@@ -459,7 +459,11 @@ export async function decideCleanup(options: { evidence: EvidenceRef; settlement
   for (const file of verified.manifest.files) if (!changed.has(file.path)) unaccepted.push(path.join(real, file.path));
   if (unaccepted.length > 0) return keep("unaccepted-commits", [real, ...unaccepted]);
 
-  return { action: "remove", root: evidence.root, attemptKey: evidence.attemptKey, manifestSha256: verified.manifestSha256, worktree: real, gone: false };
+  const headNow = await git(deps, real, ["rev-parse", "--verify", "--end-of-options", "HEAD"], deadlineMs);
+  if (!headNow.ok) return keep(headNow.reason, leftover);
+  const head = headNow.stdout.trim().toLowerCase();
+  if (headNow.status !== 0 || !/^[0-9a-f]{40}$/.test(head)) return keep("head-unreadable", leftover);
+  return { action: "remove", root: evidence.root, attemptKey: evidence.attemptKey, manifestSha256: verified.manifestSha256, worktree: real, gone: false, head };
 }
 
 /** Executes a "remove" decision with the plain worktree removal. Idempotent: a tree that is already gone is success. */
@@ -471,9 +475,13 @@ export async function performCleanup(decision: CleanupDecision, deps: RuntimeDep
   const exists = (): boolean | undefined => {
     try { fs.lstatSync(target); return true; } catch (error) { return errorCode(error) === "ENOENT" ? false : undefined; }
   };
+  // A decision is only a claim, and only one produced by decideCleanup is honoured: it must pin the evidence it was made
+  // from and the worker HEAD whose commits were accounted for.
+  if (typeof decision.manifestSha256 !== "string" || !SHA.test(decision.manifestSha256)) return { status: "refused", reason: "decision-manifest" };
   const before = exists();
   if (before === undefined) return { status: "refused", reason: "worktree-unreadable" };
   if (before === false) return { status: "ok", reason: "already-gone" };
+  if (typeof decision.head !== "string" || !/^[0-9a-f]{40}$/.test(decision.head)) return { status: "refused", reason: "decision-head" };
   let real: string;
   try { real = fs.realpathSync(target); } catch { return { status: "refused", reason: "worktree-unresolvable" }; }
   if (real !== target) return { status: "refused", reason: "worktree-path-has-symlink" };
@@ -490,6 +498,9 @@ export async function performCleanup(decision: CleanupDecision, deps: RuntimeDep
   const linksNow = await git(deps, real, ["ls-files", "-s", "-z"], deadlineMs);
   if (!linksNow.ok) return { status: "failed", reason: linksNow.reason };
   if (linksNow.status !== 0 || linksNow.stdout.split("\0").some((record) => record.startsWith("160000 "))) return { status: "refused", reason: "submodule-present" };
+  const headBefore = await git(deps, real, ["rev-parse", "--verify", "--end-of-options", "HEAD"], deadlineMs);
+  if (!headBefore.ok) return { status: "failed", reason: headBefore.reason };
+  if (headBefore.status !== 0 || headBefore.stdout.trim().toLowerCase() !== decision.head) return { status: "refused", reason: "worktree-head-changed" };
   const cleanNow = await git(deps, real, ["status", "--porcelain=v1", "-z", "--untracked-files=all", "--ignored", "--ignore-submodules=all"], deadlineMs);
   if (!cleanNow.ok) return { status: "failed", reason: cleanNow.reason };
   if (cleanNow.status !== 0 || cleanNow.stdout.length > 0) return { status: "refused", reason: "worktree-dirty" };

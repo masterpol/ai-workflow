@@ -166,8 +166,8 @@ to the separate `orca-vendor-reconcile-integration` pitch). Everything before th
   `user_takeover`), a clean tree registered under an allowed workspace root, and no commits the evidence does not cover.
   Evidence verification also checks each file's executable bit. Otherwise the attempt ends `integrated-uncleaned` with the leftover paths. A repository with any configured `filter.*`
   driver, or a nested repository (gitlink) in the worker tree, keeps that tree (cleanup would run `git status` against it,
-  and `performCleanup` re-verifies the evidence and re-checks that the tree is clean, ignored files included, immediately before `git worktree remove`), and git runs with absolute PATH entries only. A rerun re-admits the worker's diff, detects that it is already in the tree (contents and executable
-  bit), runs the checks (a resumed attempt is settled only if every check passes, even in a batch with new workers), and reuses evidence only if it was written for exactly that patch and those entries; a settled attempt whose worker tree is gone is trusted only on verifying evidence.
+  and `performCleanup` honours only a decision from `decideCleanup` that pins the evidence hash and the worker HEAD, and re-verifies the evidence, the HEAD, the filter and nested-repository guards and that the tree is clean, ignored files included, immediately before `git worktree remove`), and git runs with absolute PATH entries only. A rerun re-admits the worker's diff, detects that it is already in the tree (contents and executable
+  bit), runs the checks (a resumed attempt is settled only if every check passes, even in a batch with new workers, and a resumed change in the tree means no check is excused as already failing at the baseline), and reuses evidence only if it was written for exactly that patch and those entries; a settled attempt whose worker tree is gone is trusted only on verifying evidence.
 - **Limits**: a path could be swapped for a symlink between the check and `git apply` (which itself refuses to write
   through one); snapshot directories are not pruned; a worker that leaves edits uncommitted keeps its tree.
 

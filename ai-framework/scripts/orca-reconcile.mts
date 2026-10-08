@@ -196,10 +196,13 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
   let failedChecks: string[] = [];
   if (workers.length > 0) {
     // Baseline first: a check that already fails there is not the worker's fault.
-    const before = await runCheckSet(names, options, deps, now);
+    let before: CheckResult[] | "time-budget";
+    try { before = await runCheckSet(names, options, deps, now); } catch { return done("refused", "check-error"); }
     if (before === "time-budget") return done("refused", "time-budget");
     baselineChecks = before;
-    baselineFailing = before.filter((check) => !check.ok).map((check) => check.name);
+    // When a resumed change is already in the tree, the baseline run is not a baseline: it contains that unproven change,
+    // so no failing check may be excused as "already failing".
+    baselineFailing = present.length > 0 ? [] : before.filter((check) => !check.ok).map((check) => check.name);
     const applied = await applyAdmitted({ root: options.root, baseline: options.baseline, admitted: workers, workerOrder: workers.map((worker) => worker.attemptKey), deps, deadlineMs: options.deadlineMs, now });
     if (applied.status === "refused" || applied.status === "rolled-back") {
       for (const worker of [...workers, ...present]) attempts[worker.attemptKey] = { state: "excluded", reason: `apply:${applied.reason}` };
@@ -267,7 +270,9 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
         continue;
       }
       settledAny = true;
-      attempts[worker.attemptKey] = await cleanupAttempt(options, deps, attempt, copy.manifestSha256, { state: "integrated", evidence: "ok", cleanup: "not-attempted" });
+      // Record the settle before the cleanup can throw, so the caller always learns that this attempt is settled.
+      attempts[worker.attemptKey] = { state: "integrated", evidence: "ok", cleanup: "not-attempted" };
+      attempts[worker.attemptKey] = await cleanupAttempt(options, deps, attempt, copy.manifestSha256, attempts[worker.attemptKey]);
     }
     for (const attempt of settledNow) {
       const verified = verifyEvidence({ root: options.root, attemptKey: attempt.attemptKey, deps });
@@ -277,6 +282,10 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
     // Something threw after the apply: the change is in the tree and its evidence is unproven. Report it; never throw.
     // A worker that is already settled (evidence verified, ledger updated, tree possibly removed) must never be rolled
     // back; only a failure before any settle is undone.
+    for (const worker of [...workers, ...present]) {
+      // Attempts the loop never reached are reported, not left without a result.
+      if (attempts[worker.attemptKey] === undefined) attempts[worker.attemptKey] = { state: "excluded", reason: "error-after-apply" };
+    }
     if (settledAny) return done("refused", "error-after-apply-partial", { baselineChecks, baselineFailing });
     if (applyDone && options.rollbackOnFailure !== false) {
       const back = rollback({ root: options.root, snapshot: applyDone.snapshot, touched: applyDone.touched, deps });
