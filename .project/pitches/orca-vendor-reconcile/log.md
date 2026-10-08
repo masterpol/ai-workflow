@@ -1,0 +1,2 @@
+- 2026-10-08 R2 built by a sonnet subagent: 20 tests Node and Bun, 7 mutants red (3 re-run by the orchestrator). Incident D2 (hard reset in the real repo, recovered, verified).
+- 2026-10-08 R3 built by a sonnet subagent (files rewritten after the D2 incident): 19 tests Node and Bun, 8 mutants red (1 re-run by the orchestrator).

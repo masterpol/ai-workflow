@@ -5,7 +5,8 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| orca-vendor-reconcile | — | shaped; depends on dispatch | big-batch | 2026-10-08 |
+| orca-vendor-reconcile | — | planned; A+B approved (over LOC cap); building R1-R3 | big-batch (reconcile-core) | 2026-10-08 |
+| orca-vendor-reconcile-integration | — | shaped; depends on reconcile-core | small-batch | 2026-10-08 |
 | orca-vendor-orchestration | — | foundation + dispatch-core shipped; reconcile pending | decomposed: foundation + dispatch | 2026-10-07 |
 
 ## Parked pitches
