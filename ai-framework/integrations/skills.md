@@ -4,7 +4,7 @@ The installer is a portable Node CLI with a native `add-skill` entry point for e
 vendor: `.claude/skills/add-skill/` (canonical playbook), `.agents/skills/add-skill/` (Codex),
 `.opencode/commands/add-skill.md` (OpenCode), and the generated `.cursor/skills/add-skill/`
 (Cursor). The playbook runs inspect → review → explicit choices → preview → approval → apply.
-`ai-framework/scripts/skill-sync.js` migrates instance skill metadata during `bundle-sync` (see
+`ai-framework/scripts/skill-sync.mts` migrates instance skill metadata during `bundle-sync` (see
 below) and formats installed content where the receiving project already configures a
 formatter. No application dependencies or package manager are required to run the installer
 itself.
@@ -15,9 +15,9 @@ about to install without executing anything from the source.
 ## Inspect, choose and install
 
 ```sh
-node ai-framework/scripts/add-skill.js inspect juliusbrussee/caveman/caveman --path skills/caveman/SKILL.md
-node ai-framework/scripts/add-skill.js install juliusbrussee/caveman/caveman --path skills/caveman/SKILL.md --scope project --phases shape,plan
-node ai-framework/scripts/add-skill.js install juliusbrussee/caveman/caveman --path skills/caveman/SKILL.md --scope project --phases shape,plan --apply
+node ai-framework/scripts/add-skill.mts inspect juliusbrussee/caveman/caveman --path skills/caveman/SKILL.md
+node ai-framework/scripts/add-skill.mts install juliusbrussee/caveman/caveman --path skills/caveman/SKILL.md --scope project --phases shape,plan
+node ai-framework/scripts/add-skill.mts install juliusbrussee/caveman/caveman --path skills/caveman/SKILL.md --scope project --phases shape,plan --apply
 ```
 
 An exact `https://skills.sh/<owner>/<repository>/<skill>` URL is also accepted. Bare names
@@ -107,13 +107,13 @@ Limits are 1,000 selected files and 25 MiB of selected content; Git calls time o
 ## Lifecycle and recovery
 
 ```sh
-node ai-framework/scripts/add-skill.js list --scope project
-node ai-framework/scripts/add-skill.js disable owner/repo/skill --scope project --apply
-node ai-framework/scripts/add-skill.js enable owner/repo/skill --scope project --apply
-node ai-framework/scripts/add-skill.js update owner/repo/skill --scope project
-node ai-framework/scripts/add-skill.js update owner/repo/skill --scope project --ref COMMIT --apply
-node ai-framework/scripts/add-skill.js remove owner/repo/skill --scope project --apply
-node ai-framework/scripts/add-skill.js recover --scope project --apply
+node ai-framework/scripts/add-skill.mts list --scope project
+node ai-framework/scripts/add-skill.mts disable owner/repo/skill --scope project --apply
+node ai-framework/scripts/add-skill.mts enable owner/repo/skill --scope project --apply
+node ai-framework/scripts/add-skill.mts update owner/repo/skill --scope project
+node ai-framework/scripts/add-skill.mts update owner/repo/skill --scope project --ref COMMIT --apply
+node ai-framework/scripts/add-skill.mts remove owner/repo/skill --scope project --apply
+node ai-framework/scripts/add-skill.mts recover --scope project --apply
 ```
 
 Update retains selected phases unless `--phases` is supplied; it retains disabled state.
@@ -143,7 +143,7 @@ none is already configured, and formatting an already-installed skill's package 
 only through `install`/`update`, never through `bundle-sync` or `reconcile` (see below), which
 touch vendor wrapper files only.
 
-## Bundle-sync migration (`skill-sync.js`)
+## Bundle-sync migration (`skill-sync.mts`)
 
 `bundle-sync` (see `.claude/skills/bundle-sync/SKILL.md`) excludes every path this project's
 skill registry owns from its structural comparison — those files were never part of the
@@ -151,7 +151,7 @@ canonical bundle, so they are never misread as "removed upstream" and are never 
 candidate, in every receiving project independently of what it has installed.
 
 After syncing, and covered by that same approval (never a second gate), bundle-sync runs
-`node ai-framework/scripts/skill-sync.js reconcile [--apply]` against whatever is now on disk.
+`node ai-framework/scripts/skill-sync.mts reconcile [--apply]` against whatever is now on disk.
 For each installed skill it re-renders only vendor wrapper files against the current vendor
 descriptors and wrapper template — package content is never re-fetched or reformatted. This is
 how a project vendor registered or activated *after* a skill was installed (including one this
@@ -177,8 +177,8 @@ pending transactions are failures. Global registries are reported, not validated
 Cursor mirrors of canonical skills and agents are byte copies. Materialize missing ones with:
 
 ```sh
-node ai-framework/scripts/skill-vendors.js cursor-mirrors            # preview
-node ai-framework/scripts/skill-vendors.js cursor-mirrors --apply    # create missing only
+node ai-framework/scripts/skill-vendors.mts cursor-mirrors            # preview
+node ai-framework/scripts/skill-vendors.mts cursor-mirrors --apply    # create missing only
 ```
 
 It never overwrites a differing mirror: the setup validator reports those as warnings and every
@@ -189,18 +189,18 @@ so external wrappers cannot be mistaken for canonical skills.
 ## Verification
 
 ```sh
-node --test ai-framework/scripts/add-skill.test.js ai-framework/scripts/skill-vendors.test.js ai-framework/scripts/skill-sync.test.js ai-framework/scripts/bundle-sync.test.js
-node --check ai-framework/scripts/add-skill.js ai-framework/scripts/skill-sync.js ai-framework/scripts/bundle-sync.js
-node --test --experimental-test-coverage '--test-coverage-include=**/skill-*.js' --test-coverage-lines=90 ai-framework/scripts/add-skill.test.js
+node --test ai-framework/scripts/add-skill.test.mts ai-framework/scripts/skill-vendors.test.mts ai-framework/scripts/skill-sync.test.mts ai-framework/scripts/bundle-sync.test.mts
+node --check ai-framework/scripts/add-skill.mts ai-framework/scripts/skill-sync.mts ai-framework/scripts/bundle-sync.mts
+node --experimental-strip-types --disable-warning=ExperimentalWarning --test --experimental-test-coverage '--test-coverage-include=**/skill-*.mts' --test-coverage-lines=90 ai-framework/scripts/add-skill.test.mts
 ```
 
 Tests use temporary projects and local Git repositories. They cover all baseline vendors,
 an additional vendor, shared paths, global/project rollback, resource integrity, ownership
-conflicts and real subprocess interruption. `skill-vendors.test.js` also runs the real doctor and setup
-validator against a copy of this bundle with an installed fixture skill. `skill-sync.test.js`
+conflicts and real subprocess interruption. `skill-vendors.test.mts` also runs the real doctor and setup
+validator against a copy of this bundle with an installed fixture skill. `skill-sync.test.mts`
 covers formatting (a deterministic fake `prettier`, success, no-formatter, and failure-aborts
 cases) and reconciliation (drift, conflict, unowned collisions, invalid schema, unresolved
-vendor coverage). `bundle-sync.test.js` covers the full three-way classification (new, changed,
+vendor coverage). `bundle-sync.test.mts` covers the full three-way classification (new, changed,
 local, conflict, unverified, removed/prune, flagged), two projects with different installed
 skills retaining those differences after apply and prune, registry-owned files never
 misclassified as removed, and the skill-sync report surfacing in the same sync. These are

@@ -1,0 +1,4 @@
+{
+  "AI_WORKFLOW_RUNNER": "node",
+  "AI_WORKFLOW_ORCA_MULTI_AGENT": false
+}

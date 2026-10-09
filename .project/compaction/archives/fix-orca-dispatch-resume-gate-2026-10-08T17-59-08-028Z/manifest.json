@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "slug": "fix-orca-dispatch-resume-gate",
+  "sourceRoot": ".project/pitches/fix-orca-dispatch-resume-gate",
+  "archivedAt": "2026-10-08T17:59:08.029Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "55aa99070d7680ca87895c42c0d25809a9b7b179c499efeebcaea6eaedc619f4",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "9fd4be62d8b792c695d1e78728a8573785eaf0c25e95431917a9aa35f73221e8",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "0db70ba469168c3b66f2fe492cccbb9b849006f58ce3780faa705796c1c9c013",
+      "mode": 420
+    }
+  }
+}

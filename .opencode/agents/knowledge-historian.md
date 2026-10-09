@@ -1,7 +1,7 @@
 ---
 description: Fast read-only role that retrieves related project knowledge before decisions.
 mode: subagent
-model: opencode/space-bunny-free
+model: opencode-go/space-bunny
 permission:
   edit: deny
 ---

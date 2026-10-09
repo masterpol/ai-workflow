@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "slug": "fix-workflow-runner-env",
+  "sections": [
+    {
+      "source": "SHIPPED.md#final-verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-1-shippedmdfinal-verification",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-2-shippedmdreconciliation",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-3-shippedmdno-gos-honored",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#known-behavior-change",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-4-shippedmdknown-behavior-change",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-5-shippedmdknowledge-extracted",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-6-shippedmdfollowups",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#verified-triage",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-7-logmdverified-triage",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#approved-build-2026-10-08",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-8-logmdapproved-build-2026-10-08",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#build-evidence",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-9-logmdbuild-evidence",
+      "reason": "Preserved in the compact record section."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T16:24:47.044Z"
+}

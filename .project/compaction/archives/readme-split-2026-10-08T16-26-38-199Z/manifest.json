@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "slug": "readme-split",
+  "sourceRoot": ".project/pitches/readme-split",
+  "archivedAt": "2026-10-08T16:26:38.201Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "bb3b23fe8da039e7f55cd7a8a35e66e0f63ac4c6d94091099e76e384b4e526c4",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "cd84e9aa42a44d5c20937ffa1cf05a4f6a001505d167a66c417b265d1db5966d",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "829111752e97b278b57cc91e5fe96d17e4f2e58f2f05102085711d7bdbb7903a",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "dee94ea980a0b58c1d7e9fe75292deed7ce4376ac3ab13d3084d3323d8b69ed9",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "f0e01750e363ded3ec9d8aef8197b29faaaca4f257574a5a0eac974a6284a39f",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "476ae91b3d83cbbba28e00183bb2381cb0aa5ded9c30181c4c31d802f862cdbd",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "45155ead3642083a7b74453c713207332758db6577177c27fe493757d3e3dad5",
+      "mode": 420
+    }
+  }
+}

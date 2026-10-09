@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-dispatch",
+  "sourceRoot": ".project/pitches/orca-vendor-dispatch",
+  "archivedAt": "2026-10-08T16:26:37.158Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "ae25081d45e0c153bd17632fa8b7be36e4457bbab6c16a25f97aa23bd27ecb02",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "029238eb31d255ac20079ec33179d72687b3ddddc7efc7c7d98b611c677eabe5",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "0fe1a7f594b7d054141596b440867db20a2394ca5a2d5c6d33c659da5c95ebc4",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "f457a03c3172f5987be0c83d7f0b55b6726d278d94e5d7dcceb53bf2945a431d",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "fe028d198f3d678a2740a8d61d60467fe4d991a896b762b54f4e6a9c9ee580ef",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "5747ddf8bdf9afb42a60c07dca22197892795977446ee3b2b06e6636b38bb2ac",
+      "mode": 420
+    },
+    "runtime-contract.md": {
+      "hash": "b808432bde3b776112b5ecae99e02204dae6782ceae233b2226b2a3aae3da909",
+      "mode": 420
+    }
+  }
+}

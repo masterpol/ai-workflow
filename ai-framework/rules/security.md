@@ -270,6 +270,13 @@ If a reader starts refusing symlinks or non-regular files, list every caller tha
 "absent" and give the refusal its own outcome
 (`issues/hardening-a-shared-reader-made-its-writer-destructive.md`).
 
+### ✅ Resolve config only from a trusted root
+When invoking a tool over untrusted content, do not let the analyzed project choose which
+config file the tool reads. Config must come from the running tool's own root (the bundle
+that ships it), never from the project being scanned. Resolve via the trusted root, then
+re-validate as a subprocess before trusting the result. See
+`.project/knowledge/patterns/resolve-config-only-from-trusted-root.md`.
+
 ---
 
 ## Security Checklist (used by `security-reviewer` in `/audit`)

@@ -7,7 +7,7 @@ description: Search knowledge graph, past sessions, ADRs, and requirements. Find
 
 > **Recommended capability profile:** `fast` — repository/graph search and ranking, no judgment. Select an available model using `ai-framework/integrations/harnesses.md`.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 You are searching the project's accumulated knowledge to find relevant context.
 
@@ -43,12 +43,12 @@ Search across all sources, prioritize by relevance:
 5. Other requirements
 
 #### Knowledge (`/search knowledge "query"`)
-Start from `.project/knowledge/graph.json` rather than grepping every file — it's the
+Start from `graphify-out/graph.json` rather than grepping every file — it's the
 pre-built, traversable index: match the query against `nodes[].title`/`tags`/`id` first
 (and check `tagIndex` for a tag-shaped query), then follow `edges`/`related` one hop out to
 pull in adjacent entries the query didn't directly match. Fall back to reading the raw files
 under `.project/knowledge/` only for content the graph doesn't index (full body text). If
-`graph.json` looks missing or stale, rebuild it: `node ai-framework/scripts/graphify.js`.
+`graph.json` looks missing or stale, rebuild it: `node ai-framework/scripts/graphify.mts`.
 - `decisions/` — Technical decisions
 - `patterns/` — Code patterns
 - `entities/` — Key architectural entities

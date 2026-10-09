@@ -7,7 +7,7 @@ description: Record a version-log entry in this bundle's VERSION and CHANGELOG.m
 
 > **Recommended capability profile:** `fast` — deterministic version bump and log entry. Use the paid fast route because the change summary can reference broad project/source content.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 Run this in **this repo (`ai-workflow-portable`)**, not in a project that has unpacked the
 bundle. It is how the bundle tracks its own history, so `bundle-sync` (run inside target
@@ -15,21 +15,21 @@ projects) has a real `VERSION`/`CHANGELOG.md` to diff against.
 
 ## When to run it
 
-Any time you finish a change described in README's "How to improve this flow" — a new or
+Any time you finish a change described in `ai-framework/docs/extending.md` ("How to improve this flow") — a new or
 edited rule, subagent, skill, script, template, or hook — run this **after**
-`node ai-framework/scripts/workflow-doctor.js` passes, as the last step before considering the
+`node ai-framework/scripts/workflow-doctor.mts` passes, as the last step before considering the
 change done. One invocation per logical change, not per file.
 
 ## How to run it
 
 ```
-node ai-framework/scripts/changelog.js --check
+node ai-framework/scripts/changelog.mts --check
 ```
 Read-only: prints the current `VERSION` and the latest `CHANGELOG.md` entry. Use this first to
 see what the next bump should build on.
 
 ```
-node ai-framework/scripts/changelog.js \
+node ai-framework/scripts/changelog.mts \
   --bump patch|minor|major \
   --category Added|Changed|Fixed|Removed \
   --summary "one short line describing the improvement" \

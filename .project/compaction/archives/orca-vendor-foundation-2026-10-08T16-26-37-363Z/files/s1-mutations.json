@@ -1,0 +1,109 @@
+{
+  "date": "2026-10-07",
+  "scratchRoot": "/private/var/folders/77/m2rbzn2n14q3jc82w4lzjj800000gn/T/orca-policy-mutations-3PWKcl",
+  "results": [
+    {
+      "id": "unknown-fields",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "self-worker",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "duplicate-worker",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "role-route",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "concurrency-bound",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "retry-bound",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "schema-version",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "flag-type",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "missing-flag-disabled",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "file-byte-bound",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "symlink-path",
+      "outcome": "survived",
+      "exitCode": 0,
+      "disposition": "Nonregular-path checks and no-follow open independently refuse symlinks."
+    },
+    {
+      "id": "realpath-containment",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "descriptor-inode",
+      "outcome": "survived",
+      "exitCode": 0,
+      "disposition": "Post-open path identity independently checks the same inode; removing both layers is detected."
+    },
+    {
+      "id": "opened-size",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "opened-regular-file",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "post-open-path",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "growth-byte-bound",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "nofollow-open-layer",
+      "outcome": "survived",
+      "exitCode": 0,
+      "disposition": "Pre-open and post-open path/descriptor checks independently refuse symlinks."
+    },
+    {
+      "id": "nonblocking-open",
+      "outcome": "detected",
+      "exitCode": 1
+    },
+    {
+      "id": "both-inode-layers",
+      "outcome": "detected",
+      "exitCode": 1
+    }
+  ]
+}

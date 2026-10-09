@@ -161,6 +161,22 @@ const debouncedSearch = useDebouncedValue(searchTerm, 300)
 
 ## Scalability Patterns
 
+### Cohesive module size exceptions
+
+Module size is normally a soft signal that splitting is overdue, but cohesive transactional
+units (one journal, one guard, one graded transaction whose parts share state) are an
+explicit exception. Splitting them mechanically (per function, per type) widens the diff and
+fragments the unit's proof surface. To exceed a per-file size convention you need:
+
+- **Evidence the unit is cohesive.** A short list of the shared state, the single recovery
+  path, or the single audit record that depends on every part being in one file.
+- **Ownership of the exception.** The pitch's `plan.md` and `deviations.md` both name the
+  unit and the reason; the cohesion is verifiable from those two files alone.
+- **A reasoned alternative considered.** State what would break if it were split and why
+  the trade was not worth it.
+
+Splitting a guarded transaction to satisfy a size number is a regression, not progress.
+
 ### Function Design for Maintainability
 
 ```typescript

@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-multipage-report",
+  "sourceRoot": ".project/pitches/state-multipage-report",
+  "archivedAt": "2026-10-08T20:43:32.790Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "8de00ca0d6c28822c30d88ac1e0b7561e2364b284dfca10a693d68c1af2b09de",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "d1099d99d0e66d55ffbda30fe1d77a31e79522afc157664dcbe7f148693017c3",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "39626faff503d2e8e4e0b6b0716537a2639a1176aafd858a40170fdf04694646",
+      "mode": 420
+    },
+    "audit-cycle-3.md": {
+      "hash": "b947a7d95e963ed39f002e6f4715acd4245a018bb24ad50ecf871577869c975c",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "e8298d49722125c3115207d06479d1edc1d235d16c9ce237b18eaed71dd7bd8d",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "b320c07b922f958a24f232a177edea93067665c224b5a0870f70c6c633240f9e",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "e3212f4b8c3167f93362bb4ca03bc33bb0efbaf6c185774dfd68192b747c0744",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "b59b3d32a3f016ae6c5ea9424734d3670f8a6ad02cc43468c452436eaee29f28",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "405e03b259ef9ccf82095c413cf69c1858bd51c9cd83fc22a71f17189dae6ddb",
+      "mode": 420
+    }
+  }
+}

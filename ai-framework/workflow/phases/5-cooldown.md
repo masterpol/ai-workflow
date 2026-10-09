@@ -14,7 +14,7 @@ The framework's only standalone learning surface. Every other phase weaves learn
 
 ### 1. Knowledge health audit
 
-Runs `/knowledge-health` (existing skill), which leads with `node ai-framework/scripts/graphify.js --check --json` for the mechanical checks (orphans, dead/broken links, duplicate ids), then adds judgment on top. Outputs:
+Runs `/knowledge-health` (existing skill), which leads with `node ai-framework/scripts/graphify.mts --check --json` for the mechanical checks (orphans, dead/broken links, duplicate ids), then adds judgment on top. Outputs:
 - Stale entries (60+ days unused)
 - Orphan entries (no inbound references) — from graphify
 - Confidence distribution across issues/patterns/decisions
@@ -22,7 +22,7 @@ Runs `/knowledge-health` (existing skill), which leads with `node ai-framework/s
 
 ### 2. Issue → pattern → rule promotion
 
-Walk the knowledge graph — traverse `.project/knowledge/graph.json` (`edges`/`related`, `tagIndex`) rather than re-reading every entry:
+Walk the knowledge graph — traverse `graphify-out/graph.json` (`edges`/`related`, `tagIndex`) rather than re-reading every entry:
 
 | Source state | Action proposed |
 |---|---|
@@ -88,7 +88,7 @@ User reviews the report and explicitly approves:
 
 Approved actions are then applied: rules written, pitches moved, archives moved. If any archive
 or promotion changed what's in `.project/knowledge/`, rebuild the graph:
-`node ai-framework/scripts/graphify.js`.
+`node ai-framework/scripts/graphify.mts`.
 
 ## Adaptive frequency
 
@@ -102,7 +102,7 @@ User can override: `/cooldown --force` to run early; `/cooldown --skip` to defer
 - Approved rule promotions written to `ai-framework/rules/`
 - Approved pitch revivals moved out of `_parked/`
 - Approved archives moved to `_archive/`
-- Rebuilt `.project/knowledge/graph.json` + `index.md` if knowledge entries changed
+- Rebuilt `graphify-out/graph.json` + `index.md` if knowledge entries changed
 
 ## Confirmation gate
 

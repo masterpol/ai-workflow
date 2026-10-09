@@ -1,7 +1,7 @@
 ---
 description: Standard read-only security reviewer for vulnerabilities and mitigations.
 mode: subagent
-model: openai/gpt-5.6-terra
+model: opencode-go/minimax-m3
 permission:
   edit: deny
 ---

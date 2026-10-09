@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "runtime-test-helpers",
+  "sourceRoot": ".project/pitches/runtime-test-helpers",
+  "archivedAt": "2026-10-08T16:26:38.406Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "d22a6fef800063fa4bd3cae22d68ca1e7c1c34af9ea3f4a649c26f7c437e989d",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "5ca21eb18745dbb8a6fb30f39f9ea2448cfe498b9c99461bd97be48fec416001",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "dae7fdf4f4a47da3e57ba91cd86ef219173cfd650d893ee9cf2260bc86f1488e",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "76d187d8816a537c14b10123d03b03bba010c1492261518fd300b82795b15928",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "3f19238d62b2f22e36cd18aa2154f72638f15d5f046373e26151b4b3a4407e40",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "eba59dee17283bb7e696fb803485fbbfc7480e988a49e7bee131a2b46304ed80",
+      "mode": 420
+    }
+  }
+}

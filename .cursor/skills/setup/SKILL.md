@@ -7,7 +7,7 @@ description: Scan project and generate context docs (product, architecture, stac
 
 > **Recommended capability profile:** `standard` — project-scan inference and stack-detection judgment. Select an available model using `ai-framework/integrations/harnesses.md`.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 You are running the **SETUP** phase. This command scans the current project and generates (or updates) the framework's project-specific documents.
 
@@ -44,7 +44,7 @@ Existing context documents detected:
 - [✓/✗] .project/context/stack.md
 - [✓/✗] AGENTS.md project specifics
 - [✓/✗] CLAUDE.md full mirror, or a valid `@AGENTS.md` import that is already present — preserve it (⚠️ still the bootstrap stub — needs regenerating, if applicable)
-- [✓/✗] `## Response style (caveman mode)` section in both `AGENTS.md` and `CLAUDE.md` (copy verbatim from the bundle's `AGENTS.md`; the main session agent of every vendor gets caveman mode from it — `setup-validator.js` warns when missing)
+- [✓/✗] `## Response style (caveman mode)` section in both `AGENTS.md` and `CLAUDE.md` (copy verbatim from the bundle's `AGENTS.md`; the main session agent of every vendor gets caveman mode from it — `setup-validator.mts` warns when missing)
 
 How would you like to proceed?
 1. 🔄 Refresh all — re-scan and overwrite everything
@@ -227,7 +227,7 @@ Before writing any files, present a summary:
 3. .project/context/product.md
 4. .project/context/architecture.md
 5. .project/context/stack.md
-6. .project/knowledge/graph.json + index.md (built by `graphify.js` after writes — Step 5b)
+6. graphify-out/graph.json + index.md (built by `graphify.mts` after writes — Step 5b)
 
 ### Stack-Specific Rules (.project/rules/)
 - [list each file this scan supports, e.g. "frontend-framework.md — React + Vite conventions"]
@@ -261,12 +261,19 @@ Only after user approval, write the approved files — including the context doc
 
 ## Step 5b: Build the Knowledge Graph
 
-Run `node ai-framework/scripts/graphify.js` from the project root — no separate approval needed,
-it only writes derived files inside the `.project/knowledge/` just approved in Step 5. It scans
-`.project/knowledge/{decisions,patterns,entities,issues}/` and regenerates:
-- `.project/knowledge/graph.json` — machine-readable nodes/edges/tag-index for other phases and
-  skills to traverse (`/shape`'s knowledge gate, `/search`, `/knowledge-health`, `/cooldown`).
+Graphify runs through `uv`: check `uv --version` first. If uv is missing, tell the user to install it
+(https://docs.astral.sh/uv/) — do not install it yourself — and continue with
+`node ai-framework/scripts/graphify.mts --check` only. Otherwise run
+`node ai-framework/scripts/graphify.mts setup` from the project root. It needs no separate approval for the
+derived files, but it also installs graphify's git hooks (post-commit/post-checkout rebuild), so state that
+in the Step 5 approval. On a project that already has `.project/knowledge/graph.json` (older bundle), the same
+command migrates it into `graphify-out/graph.json` and removes the legacy file once it is covered. It builds:
+- `graphify-out/graph.json` — the project graph (code, docs and the `.project/knowledge/{decisions,patterns,entities,issues}/`
+  entries as `knowledge` nodes with `related` edges and tags) for other phases and skills to traverse
+  (`/shape`'s knowledge gate, `/search`, `/knowledge-health`, `/cooldown`) via
+  `node ai-framework/scripts/graphify.mts query "<question>"`.
 - `.project/knowledge/index.md` — the human-readable catalog.
+- `.graphifyignore` and a `.gitignore` block (commit `graph.json` and `GRAPH_REPORT.md`; the rest is local).
 
 On a first-time setup this just produces the initial empty graph (nothing has been written to
 `knowledge/` yet) — that's expected. On a re-run with existing entries, report its output:
@@ -281,7 +288,7 @@ silently fixing content the user hasn't approved changing.
 Setup complete! Generated files:
 - [list of files written]
 
-Knowledge graph: [N] entries, [N] links — .project/knowledge/graph.json + index.md
+Knowledge graph: [N] entries, [N] links — graphify-out/graph.json + index.md
 [if graphify reported problems: "⚠️ [N] issue(s) flagged — see graphify output above"]
 
 You can re-run /setup anytime to refresh these docs after major changes.

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-orchestration",
+  "sections": [
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-orchestration.md#section-1-pitchmdno-gos",
+      "reason": "No-gos preserved in the compact record."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-orchestration.md#section-2-pitchmdrabbit-holes",
+      "reason": "Rabbit holes and their owning part pitches preserved."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T16:22:37.590Z"
+}

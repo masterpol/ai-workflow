@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-orchestration",
+  "sourceRoot": ".project/pitches/orca-vendor-orchestration",
+  "archivedAt": "2026-10-08T16:26:37.616Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "123cd6c5a35ea8a24974111f777792f9c8fcfa5bf5a57a384431b1da2a57220d",
+      "mode": 420
+    },
+    "critique.md": {
+      "hash": "5259b5fbf37aca1a0b29c6980051f0acb0f89796a8d2009e7783be1ae3854b78",
+      "mode": 420
+    },
+    "investigation.md": {
+      "hash": "cb9ee196d68aecde58a4c18ddded10777bcd789925aaaaa09b0387fff5395ed4",
+      "mode": 420
+    },
+    "online-verification.md": {
+      "hash": "eda97d1d429dd7a52ddf600f50e5b7e28799fb199cd40f93f1c68b7584690880",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "0ecbf3d68fe3aa00bb7ee88235ab538267f934836ba5f63654cba7dcfea8c780",
+      "mode": 420
+    },
+    "runtime-verification.md": {
+      "hash": "b3d25af7355d7d28af84881a82b78351aa7ab09cc62511d56f53e1fa42b60c81",
+      "mode": 420
+    }
+  }
+}

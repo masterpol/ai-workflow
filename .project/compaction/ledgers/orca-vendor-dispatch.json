@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-dispatch",
+  "sections": [
+    {
+      "source": "SHIPPED.md#final-verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-1-shippedmdfinal-verification",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-2-shippedmdreconciliation",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-3-shippedmdaudit",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-4-shippedmdno-gos-honored",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-5-shippedmdfollowups",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-6-pitchmdno-gos",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-7-pitchmdrabbit-holes",
+      "reason": "Preserved in the compact record section."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T16:23:24.813Z"
+}

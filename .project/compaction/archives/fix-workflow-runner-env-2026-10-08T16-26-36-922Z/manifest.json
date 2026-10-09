@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "slug": "fix-workflow-runner-env",
+  "sourceRoot": ".project/pitches/fix-workflow-runner-env",
+  "archivedAt": "2026-10-08T16:26:36.923Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "201c673f84a90255f80a55435fbb84d4f97f58bf300fb40d8b734e9cbdff37a0",
+      "mode": 420
+    },
+    "audit-1-code-prompt.txt": {
+      "hash": "86f4e9271390449303cd2ab01b678296627520fdfd8c5cb40396dfd8e42162ad",
+      "mode": 420
+    },
+    "audit-1-conflicts-prompt.txt": {
+      "hash": "359f598a5f339e38c83d73a1c0e8eaf01edcd6a6bf3d7f44aa53cf3a52687446",
+      "mode": 420
+    },
+    "audit-1-coverage-prompt.txt": {
+      "hash": "d1d054603b0f7e0aa35cc5849b2e18c2bd27c6c2f96cfd752ab06ef1cbdbe4f3",
+      "mode": 420
+    },
+    "audit-1-security-prompt.txt": {
+      "hash": "43489bdaddeb19962627dd17f1e8d45d5780dd7f698ff4006b87f42cffb58020",
+      "mode": 420
+    },
+    "audit-context.json": {
+      "hash": "e3f4dabbe1eb02c900cc821ff124d1e689effabb63bf6fb690b33f395e40e8d0",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "a6f7810035f9463c5f09a4e0ebc79aaa2955f986e3924ce79318af200c777926",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "620606e9ff7131eb3d4289543be0bb12e03d3b7b917d9e2f403637cfdcf3d7c5",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "db5ba4e5c7cf54563780ff40f75bd7c31dcbc254f96e280d02161f1c669ce12d",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "0a3fe9a4affb3445819c8f640e1a08234306aec2e40b9c7e4db3100cfb269526",
+      "mode": 420
+    }
+  }
+}

@@ -1,0 +1,81 @@
+{
+  "method": "Baseline disposable copy passes before mutations. Each guard weakened once; production unchanged. Portable example copied at matching relative path. Fake Orca receipts and local Node fixture subprocesses only.",
+  "baselineExitCode": 0,
+  "results": [
+    {
+      "guard": "opt-in guard",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "worker guard",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "shell disabled",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "per-call timeout",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "output bound",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "fractional budget",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "guide identity",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "local target",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "runtime reachability",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "runtime state",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "version pin",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "caller live",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "caller identity",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "dispatch disabled",
+      "detected": true,
+      "exitCode": 1
+    },
+    {
+      "guard": "output byte validation",
+      "detected": true,
+      "exitCode": 1
+    }
+  ]
+}

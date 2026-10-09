@@ -8,7 +8,7 @@ description: Periodic learning surface. Promotes recurring issues → patterns �
 > **Recommended capability profile:** `standard` — pattern-promotion judgment. Select an available model using `ai-framework/integrations/harnesses.md`.
 
 Phase 5 of the new pipeline. See `ai-framework/workflow/phases/5-cooldown.md` for full activities.
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase cooldown --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this phase's other instructions; pass the same resolved mode to any subagent this phase dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase cooldown --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this phase's other instructions; pass the same resolved mode to any subagent this phase dispatches. If not installed, proceed normally — this is optional, never required.
 
 
 ## When to use
@@ -19,7 +19,7 @@ Phase 5 of the new pipeline. See `ai-framework/workflow/phases/5-cooldown.md` fo
 
 ## Activities (in order)
 
-1. **Knowledge health audit** — run `node ai-framework/scripts/graphify.js --check --json` for the mechanical part (dead links, orphans, duplicate ids, entry counts — it rebuilds nothing in `--check` mode, so also run it without `--check` afterward if you want the graph refreshed); then scan `.project/knowledge/{issues,patterns,decisions}/` for what the script can't see: stale (60+ days, low confidence), confidence distribution.
+1. **Knowledge health audit** — run `node ai-framework/scripts/graphify.mts --check --json` for the mechanical part (dead links, orphans, duplicate ids, entry counts — it rebuilds nothing in `--check` mode, so also run it without `--check` afterward if you want the graph refreshed); then scan `.project/knowledge/{issues,patterns,decisions}/` for what the script can't see: stale (60+ days, low confidence), confidence distribution.
 2. **Issue → pattern → rule promotion** — promote to a candidate rule at `ai-framework/rules/` when EITHER: (a) an issue has 3+ pitch refs, OR (b) the same issue class appears in ≥2 later `pitches/*/deviations.md` — a recurring lesson, **even if the issue is marked `resolved`** (resolved means fixed once, not codified). Scan `deviations.md` across pitches for repeated issue references, not just issue metadata. Patterns with high confidence → hard rule. User approves each individually.
 3. **Parked pitches review** — for each pitch in `_parked/`: revive / keep / discard?
 4. **Followups triage** — bundle related `_followups.md` items into candidate pitches; promote urgent standalones; discard expired items.
@@ -47,4 +47,4 @@ pipeline does.
 - Approved rules written to `ai-framework/rules/`
 - Approved archives moved to `_archive/`
 - Updated `_followups.md`
-- Rebuilt `knowledge/graph.json` + `index.md` (after any promotion/archive changes entries)
+- Rebuilt `graphify-out/graph.json` + `index.md` (after any promotion/archive changes entries)

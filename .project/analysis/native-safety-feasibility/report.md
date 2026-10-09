@@ -1,6 +1,6 @@
 # Native safety feasibility — 2026-09-26
 
-Observed on macOS (Darwin), Python 3.14.7. Linux is unverified; Windows is unsupported. This is a scratch experiment, not an approved production runtime dependency. Reproduce with `node --test .project/analysis/native-safety-feasibility/bench.test.js`; `evidence.json` preserves the initial observed run rather than being overwritten by tests.
+Observed on macOS (Darwin), Python 3.14.7. Linux is unverified; Windows is unsupported. This is a scratch experiment, not an approved production runtime dependency. Reproduce with `node --experimental-strip-types --test .project/analysis/native-safety-feasibility/bench.test.mts`; `evidence.json` preserves the initial observed run rather than being overwritten by tests.
 
 ## Observed
 

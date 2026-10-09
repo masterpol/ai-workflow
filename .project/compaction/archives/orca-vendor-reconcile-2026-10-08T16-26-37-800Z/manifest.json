@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-reconcile",
+  "sourceRoot": ".project/pitches/orca-vendor-reconcile",
+  "archivedAt": "2026-10-08T16:26:37.803Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "bc5be857ed8f2cd2970c477b5547a3e7c179028d63ba734c35e2a4c6b7cb318e",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "81f0667a77ce312db7240afe88ce0462aa5901c786beea4fe09e4e95606505eb",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "f3e076420c6a3554861ab4de7b5fc1c411e2f03bfbd251eef61fa8e73f8b5486",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "41567a8cdfad9fe1d6f5ac5ea9d80340664e4e6e2f7fecd61a9c1ede796ccd3e",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "f69c0bc5f9b4bb76b54bfc384e14f9fe98749c62b2ae247f4c625fa5f64b0338",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "01681c5fb5c7d535fc19635658da6a6679acafec7e8b26f28e456b07aa3b6dc9",
+      "mode": 420
+    }
+  }
+}

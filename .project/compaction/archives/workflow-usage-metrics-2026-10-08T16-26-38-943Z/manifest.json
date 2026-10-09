@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "slug": "workflow-usage-metrics",
+  "sourceRoot": ".project/pitches/workflow-usage-metrics",
+  "archivedAt": "2026-10-08T16:26:38.945Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "87269552b511c4ce824d471086c7c1689da79a2c474e76630d5a6c55ce928aa1",
+      "mode": 420
+    },
+    "audit-prompts/code.txt": {
+      "hash": "f712984ec88d7f2fb75fb6ea6e1598d109248af1c05c3f1f86ae2f6d0dc6df42",
+      "mode": 420
+    },
+    "audit-prompts/conflicts.txt": {
+      "hash": "4140722d812fc77b975eaf812a453597dc2b4b5ca3c23403aacad5c5193c0768",
+      "mode": 420
+    },
+    "audit-prompts/coverage.txt": {
+      "hash": "a12d4e4f9808ab1188e9725640d62857ea4b7879716b6ce67ebf17ff9aa9c7a8",
+      "mode": 420
+    },
+    "audit-prompts/cycle2-code.txt": {
+      "hash": "e2dc12f9e8abb498ff1482ff385e4d6dd239fb90a0f534b291d109f83ecd9ea4",
+      "mode": 420
+    },
+    "audit-prompts/cycle2-coverage.txt": {
+      "hash": "4623427e43103c4d71143aacf055b41a1debbc8037a6a2ab55f0570559e92721",
+      "mode": 420
+    },
+    "audit-prompts/cycle2-security.txt": {
+      "hash": "f36cd940c25f8e5f1804c3579bb63b89c2a90e2e79a48c9d308d595c47db7b0b",
+      "mode": 420
+    },
+    "audit-prompts/cycle2-ux.txt": {
+      "hash": "15d7a9a4268b82f86c570a6bac22a07769851f8e0f2b47db93f1ef1d2a6bdd03",
+      "mode": 420
+    },
+    "audit-prompts/cycle3-code-verify.txt": {
+      "hash": "bd108b3b6e89b4909e8eeb7011c3605b8916716fc202df39f7d803eafe57c962",
+      "mode": 420
+    },
+    "audit-prompts/cycle3-code.txt": {
+      "hash": "40cca1ed8e8fc1de90a374b3df5d8f5b22212cba581e7bde5ec2d7b148cb2aaf",
+      "mode": 420
+    },
+    "audit-prompts/cycle3-coverage.txt": {
+      "hash": "25c47cf3081285f7cac0864bbebc7fb23a3bea0fb2486ee24a8bb507dfa7aaac",
+      "mode": 420
+    },
+    "audit-prompts/cycle3-security.txt": {
+      "hash": "5c6cde604aa648773cabbdf5120ec81ee4410484fc7c7734f18305ccec4bc854",
+      "mode": 420
+    },
+    "audit-prompts/security.txt": {
+      "hash": "cf71a8ec2f39c3bcf8de04b04a63d58b973cf005974a83c032c6782aea9f98e0",
+      "mode": 420
+    },
+    "audit-prompts/ux.txt": {
+      "hash": "88ce33b64c8fde41d4a503a7ab1d984a45ae60be870737a19b95031038abec01",
+      "mode": 420
+    },
+    "audit-reviews/code.md": {
+      "hash": "a6e1398e25e04b74f38a3cdc61d82e5fe6acd94e015e27d8575e09f68884163e",
+      "mode": 420
+    },
+    "audit-reviews/conflicts.md": {
+      "hash": "8e23a0a4d2417abe1de3f5a15fd3fdce5f6d53aacd048ede3a71de0e32d9cc8a",
+      "mode": 420
+    },
+    "audit-reviews/coverage.md": {
+      "hash": "700251152e81d51befac361c0485706ec132aa372815db50c5b1979d148ca3b4",
+      "mode": 420
+    },
+    "audit-reviews/cycle2-code.md": {
+      "hash": "be134a4f5b5f9ea5bf2a1ad5326882739b20ed594827e08a2c16f9388238148d",
+      "mode": 420
+    },
+    "audit-reviews/cycle2-coverage.md": {
+      "hash": "8eeac05a5041d903422ec72c44c35452311a0877e53c726b4346a61183b3fd50",
+      "mode": 420
+    },
+    "audit-reviews/cycle2-security.md": {
+      "hash": "03d043de23322124289f78dc1e64a27c9b7d480fe8fdd38519393867041c2496",
+      "mode": 420
+    },
+    "audit-reviews/cycle2-ux.md": {
+      "hash": "e16ed27fb2f51689b8724e682f066932014a3c65c67c1835aba320d17863825f",
+      "mode": 420
+    },
+    "audit-reviews/cycle3-code-verify.md": {
+      "hash": "9c6642ba4ec83cc17052bc648c40d1f23858e6cf880178baff5f7f4c373c4f95",
+      "mode": 420
+    },
+    "audit-reviews/cycle3-code.md": {
+      "hash": "497981630a2c8b1622060411cb6a7f16be94f5d340deebd7e76f35656587092a",
+      "mode": 420
+    },
+    "audit-reviews/cycle3-coverage.md": {
+      "hash": "9d091335aa8f0b258e0aef4b4a2f01fa307a9181fa887da79f044e69cac24aa3",
+      "mode": 420
+    },
+    "audit-reviews/cycle3-security.md": {
+      "hash": "d3d41080b21486b821c6c7d07575a0f70404f9b50a68476faa3c55875e551982",
+      "mode": 420
+    },
+    "audit-reviews/security.md": {
+      "hash": "a7e53fb75a4e6b57d0b41855b0f32103d53786cc386b8687f3b810469332825d",
+      "mode": 420
+    },
+    "audit-reviews/ux.md": {
+      "hash": "c1861b44bfc27b825823ba112bfbba06836431fc407f5fa2083df144ac24d84c",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "3c80fd55bd27c7f6d4df93b731584e66783f4e6226b56b83d5bd05d8fb311271",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "f7daf3512794b87c8b0ae744fa9d95081e7beec30ed1188f2964cd60e98df399",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "d849d8ffd55c8da4f8955016f43f55e7b671f13cea6c41ae9c0da2cfba085ec9",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "7a30f38d9e90b4971c47d25cf697d54b3d69f613045a1b54091e0d0be0cee3f4",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "61fc6e218baf0833bc529945ed0e49bc31ea99bb48cb32af17f38cfa587e3b1c",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "1330e1c94520d533629e9621ef712ceb3d2b7902fdf9e4049e435cec220a26d6",
+      "mode": 420
+    }
+  }
+}

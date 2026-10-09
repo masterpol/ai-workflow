@@ -7,7 +7,7 @@ description: Validate structural drift between an already-unpacked project and a
 
 > **Recommended capability profile:** `standard` — reviewing a structural diff and deciding what to apply requires judgment, not just mechanical diffing.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
 Run this **inside a target project that already went through `/setup`** (not inside this
 source bundle itself). It fetches `https://github.com/masterpol/ai-workflow.git` at `main` into
@@ -19,27 +19,31 @@ bundle's own canonical files (skills, agents, rules, scripts, templates, hooks).
 ## What it compares
 
 Only the bundle's canonical, "never forked per project" directories (per the source bundle's
-own README, "One source, every vendor"):
+own docs, `ai-framework/docs/vendors.md`, "One source, every vendor"):
 
 ```
-ai-framework/{rules,workflow,contexts,templates,integrations,scripts,hooks}
+ai-framework/{rules,workflow,templates,integrations,docs,scripts,hooks}
 .claude/{agents,skills,hooks}
-.opencode/{commands,agents}
+.opencode/{commands,agents,plugins}
 .codex/agents
 .agents/skills
 .cursor/{agents,skills}
 ```
 
 `AGENTS.md`, `CLAUDE.md`, `.opencode/opencode.json`, and `.codex/config.toml` are **flagged
-only, never auto-applied** (the `## Response style (caveman mode)` section in `AGENTS.md`/`CLAUDE.md`
-arrives this way — merge it by hand; `setup-validator.js` warns while it is missing) — they mix canonical content with this project's own specifics or
-locally connected providers. `.project/`, `.claude/settings.json`, `.claude/settings.local.json`,
-and any credential file are never read from the source or written to.
+for manual merging**, because they mix canonical content with project specifics or connected
+providers. The narrowly scoped direct-TypeScript migration can update recognized workflow
+script references in regular entry files during `--apply`; it does not replace their content.
+For example, a missing `## Response style (caveman mode)` section still needs a manual merge.
+Recognized workflow hook commands in `.claude/settings.json` and `.codex/hooks.json` receive
+the same path migration, preserving unrelated settings. Unsupported/custom commands,
+malformed configuration and symlinks are reported for manual review. `.project/` remains
+instance data; `.claude/settings.local.json` and credential files are never read or written.
 
 ## Step 1 — Dry run
 
 ```
-node ai-framework/scripts/bundle-sync.js [--base-ref <git-ref>]
+node ai-framework/scripts/bundle-sync.mts [--base-ref <git-ref>]
 ```
 
 Read-only. Every differing file is compared three ways — local copy, source, and **base** (the
@@ -68,10 +72,11 @@ Statuses:
   Files owned by this project's skill registry (installed with `/add-skill`, tracked in
   `.project/skills/registry.json`) never appear here — they were never part of the canonical
   bundle, so they are excluded from the comparison entirely rather than misread as removed.
-- **flagged** — `AGENTS.md`, `CLAUDE.md`, `opencode.json`, `.codex/config.toml`: always manual.
+- **flagged** — `AGENTS.md`, `CLAUDE.md`, `opencode.json`, `.codex/config.toml`: manual merging,
+  apart from recognized workflow paths handled by the direct-TypeScript migration above.
 
 Every dry run and apply also reports a **skill registry** section (from
-`ai-framework/scripts/skill-sync.js reconcile`, covered by this same approval — never a second
+`ai-framework/scripts/skill-sync.mts reconcile`, covered by this same approval — never a second
 gate): each installed skill's vendor coverage is checked against whatever vendor descriptors and
 wrapper template are now on disk. `current`/`clean` needs nothing; `needs-reconciliation` means a
 project vendor (existing or newly registered) is missing that skill's adapter and `--apply` will
@@ -92,16 +97,29 @@ These are instance-owned files or choices bundle-sync deliberately never writes,
 named instead of left for the next doctor run to fail on:
 
 1. **Missing scaffold files** (a template added in this bundle version, e.g. `.project/done-work.md`):
-   `node ai-framework/scripts/workflow-doctor.js --fix` — restores missing files only.
+   `node ai-framework/scripts/workflow-doctor.mts --fix` — restores missing files only.
 2. **Entry files** (`AGENTS.md`/`CLAUDE.md`) lacking the `## Response style (caveman mode)` section:
    copy it from the source `AGENTS.md` by hand (these files are flagged, never auto-applied).
 3. **Recommended default skills not installed** (currently `caveman`): the instruction that
    references it now exists in every skill and agent but is inert until it is installed —
    run the printed `/add-skill ...` command. The choice to install stays with the human.
 
-A project synced from an **older** bundle version runs its own older `bundle-sync.js` for that
-first apply, which cannot print this list; re-run `bundle-sync.js` once afterwards (now the new
-script) to see it. Skills installed with `/add-skill` are instance data on **both** sides: a
+A project synced from an **older** bundle version runs its own older script for the first apply.
+For an installation with JavaScript entries, that command is still
+`node ai-framework/scripts/bundle-sync.js` before the update; afterwards, run
+`node ai-framework/scripts/bundle-sync.mts` for another dry run and approved apply, using the
+same `--base-ref` for both passes. The old sync
+may not know new paths such as `.opencode/plugins/`. Review removed JavaScript files and use
+`--prune` for unmodified retired copies; migrate local customizations separately. The first pass
+may report skill reconciliation unavailable after removing the old entry; the new tool handles
+it on the second pass. During `--apply`, the new sync narrowly updates recognized workflow
+script paths in regular `AGENTS.md`/`CLAUDE.md` and recognized commands in instance-owned
+`.claude/settings.json` and `.codex/hooks.json`, preserving unrelated instructions and hooks.
+Review reported manual merges for custom commands or malformed/symlinked configuration.
+Migrated hook commands include `--experimental-strip-types --disable-warning=ExperimentalWarning`
+before their paths. Other flagged content still requires manual review.
+See [the upgrade guide](../../../ai-framework/docs/versioning-and-sync.md) for both passes and
+runtime prerequisites. Skills installed with `/add-skill` are instance data on **both** sides: a
 target's own installs are never overwritten or pruned, and a source checkout's own installs are
 never shipped (keep them untracked — this repo gitignores them — because an older script in a
 target has no such protection and would copy a tracked wrapper as an orphan).
@@ -115,10 +133,11 @@ those need a human decision, not silent application.
 ## Step 3 — Apply (only after approval)
 
 ```
-node ai-framework/scripts/bundle-sync.js [--base-ref <ref>] --apply [--prune]
+node ai-framework/scripts/bundle-sync.mts [--base-ref <ref>] --apply [--prune]
 ```
 
-Writes `new` and `changed` files; never touches `local`, `conflict`, or `flagged` paths.
+Writes `new` and `changed` files; preserves `local` and `conflict` files. Flagged content needs
+manual merging, apart from the recognized workflow path migration described above.
 `--prune` deletes `removed` files only when they are `unmodified` versus base. Records the
 source hashes as the next sync's base in `.project/.bundle-sync.json`. Do this on a branch so the
 whole sync is one reviewable diff. On macOS, `git mv -f` any case-only renames afterwards — git
@@ -130,6 +149,6 @@ After applying, check that `.project/context/stack.md` maps the workflow placeho
 
 ## Step 4 — Verify
 
-Run `node ai-framework/scripts/workflow-doctor.js` to confirm the freshly synced files still
+Run `node ai-framework/scripts/workflow-doctor.mts` to confirm the freshly synced files still
 form a consistent set of mirrors. Report any doctor failures back to the human before
 considering the sync done.

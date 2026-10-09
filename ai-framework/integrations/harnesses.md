@@ -8,9 +8,9 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode/space-bunny-free` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
-| `standard` | Implementation, security, UX, test reasoning | Sonnet | `openai/gpt-5.6-terra` | `gpt-5.6` at medium or high effort |
-| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `openai/gpt-5.6-terra` at xhigh effort | `gpt-5.6` at high or xhigh effort |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/space-bunny` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
+| `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-5.6` at medium or high effort |
+| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-5.6` at high or xhigh effort |
 
 Escalate one profile only when the returned work is demonstrably incomplete or unreliable. A harness that cannot select per-agent models should use its current model and preserve the same role separation.
 
@@ -30,28 +30,17 @@ Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `mod
 
 `.opencode/opencode.json` loads `AGENTS.md`. OpenCode discovers the phase wrappers in `.agents/skills/`; `.opencode/commands/` provides native phase commands, and `.opencode/agents/` provides native subagent definitions. Commands and adapters load the canonical playbooks and role prompts from `.claude/`.
 
-The included OpenCode routes are explicit and, for now, deliberately avoid Anthropic entirely —
-some OpenCode installations only have OpenAI/OpenCode Zen connected, and a route through an
-unconnected provider errors instead of falling back: fast roles use `opencode/space-bunny-free`
-(the OpenCode Zen free tier); standard and deep roles use `openai/gpt-5.6-terra` (deep at
-`xhigh` reasoning via the global provider default in `.opencode/opencode.json`, standard at the
-`high` default, both explicit per-command where they need to differ from that default).
-**Never route to bare `openai/gpt-5.6`** — confirmed via `opencode models openai --verbose`,
-that id is a stub catalog entry (`reasoning: false`, `context: 0`, empty `variants`) despite
-accepting a `reasoningEffort` option, which breaks at runtime. Its named siblings —
-`gpt-5.6-luna`, `gpt-5.6-sol`, `gpt-5.6-terra` — are the real, fully-specified models
-(`reasoning: true`, 400k context, full `none`/`low`/`medium`/`high`/`xhigh`/`max` variants) and
-are otherwise identical; this bundle standardizes on `terra` for standard/deep and `luna` for
-the paid-fast route below, but any of the three works. Before assuming a model id from this doc
-still resolves, check `opencode models <provider> --verbose` against your own installation —
-the catalog changes over time. `workflow-doctor` and `setup-validator` are the exception among
-fast roles: they use the paid `openai/gpt-5.6-luna` because diagnostics can expose broad project
-context, not the free route. Connect OpenAI (and OpenCode Zen for the free tier) before running
-the workflow. The free route is only for short, mechanical, non-sensitive work: OpenCode's
-free-model privacy terms may permit prompt retention or training. Change every affected fast
-adapter to `openai/gpt-5.6-luna` when source or task context is confidential. If Anthropic
-becomes available in your OpenCode installation and you'd
-rather route standard/deep work there, that's a local choice to make deliberately — it isn't the
+The included OpenCode routes are explicit and all run on OpenCode Go, so a single provider
+connection covers them (a route through an unconnected provider errors instead of falling back):
+fast roles use `opencode-go/space-bunny`, standard roles use `opencode-go/minimax-m3`, and deep
+roles (shape, architecture, planning, and the default `build` agent) use
+`opencode-go/kimi-k2.7-code`. `workflow-doctor` and `setup-validator` run on the standard route
+because diagnostics can expose broad project context. Before assuming a model id from this doc
+still resolves, check `opencode models | grep opencode-go` against your own installation — the
+catalog changes over time. Connect OpenCode Go before running the workflow. The fast route is for
+short, mechanical work; change the affected fast adapters to the standard route when source or
+task context is confidential. If another provider is available in your OpenCode installation and
+you would rather route work there, that is a local choice to make deliberately — it isn't the
 bundle's default. Do not commit credentials or provider setup to this bundle.
 
 ## Codex
@@ -60,11 +49,39 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 `.codex/config.toml` only enables a practical concurrency cap. It does not set a provider or a global model, so it does not override a user's Codex configuration.
 
+### Orca coordinator startup
+
+The Codex coordinator follows the startup and Run-binding contract in `AGENTS.md`.
+Always pass `--vendor codex` to `orca-run start`, then verify or create the correct bound
+Orca Run before dispatch. Use `coordinator: "codex"` in dispatch input. A successful start
+is readiness evidence; it does not create the Run or authenticate a worker vendor.
+
+`.codex/hooks.json` retains its `SubagentStop` metrics hook and registers `UserPromptSubmit`
+through `ai-framework/hooks/scripts/orca-start-codex-hook.mts`. The adapter recognizes a
+leading `/phase` or `$phase`, passes raw arguments to the existing decision library with
+the Codex vendor, adds ready/bypass context, and blocks a refused startup. Ordinary prose
+and quoted command examples pass through; phases inferred from conversation still require
+the explicit startup command in the entry instructions. Dispatched Orca workers follow their
+worker brief and are suppressed by the decision library's terminal-membership check.
+
+Project hooks require trust of the current hook definition. Open `/hooks` in Codex to review
+changed definitions, then use a fresh session to verify activation. Do not bypass trust or
+edit global settings to obtain proof. Unavailable or untrusted hooks do not excuse skipping
+the instructed startup check. Hook commands force Node and require a POSIX shell, Git, and a Git checkout. Root lookup
+runs before the adapter: a failed Git lookup blocks every prompt, including when Orca is off.
+The adapter's off/no-probe behavior applies after root bootstrap succeeds. Windows cmd and
+missing Node are not proven blocking paths.
+
+Codex coordinator dispatch, authoritative collection and worker release have been observed
+with Claude and OpenCode workers. Host startup-hook activation is a separate claim and remains
+unverified until observed in a trusted fresh session. See
+[the Orca contract](orca-vendors.md#codex-startup-and-coordinator-preparation).
+
 ## Caveman Mode
 
 One instruction, carried by every canonical skill (`.claude/skills/*`), every canonical agent
 (`.claude/agents/*`), and both entry files, resolved per invocation by
-`ai-framework/scripts/skill-defaults.js` (scopes: the seven phases, `utility`, `agent`). Each
+`ai-framework/scripts/skill-defaults.mts` (scopes: the seven phases, `utility`, `agent`). Each
 vendor reaches it through the file it already loads:
 
 | Vendor | Skills | Agents | Main session |
@@ -75,7 +92,7 @@ vendor reaches it through the file it already loads:
 | Cursor | `.cursor/skills` byte copies | `.cursor/agents` byte copies | `AGENTS.md` |
 
 Verification status, kept honest: file coverage and mirror parity are checked mechanically for
-all four vendors (`workflow-doctor.js`, `skill-defaults.test.js`). The `caveman=<mode>` token was
+all four vendors (`workflow-doctor.mts`, `skill-defaults.test.mts`). The `caveman=<mode>` token was
 exercised end to end only in **Claude Code**; OpenCode passes command text through `$ARGUMENTS`
 the same way, but Codex and Cursor invocation with an inline argument, and whether each host
 honors an installed skill's wrapper, are **unverified** — do not assume parity without running
@@ -100,7 +117,7 @@ The bundle records completion metrics in a bounded local snapshot at
 contains only numeric usage, cost, identifiers, and model metadata: never prompts, responses, or
 transcripts.
 
-- **OpenCode:** `.opencode/plugins/token-consumption.js` automatically records completed assistant
+- **OpenCode:** `.opencode/plugins/token-consumption.ts` automatically records completed assistant
   messages. Its native event includes total message tokens and actual cost. The plugin also passes
   the message's `variant` as reasoning effort and counts skill tool calls by name. Both were
   written against OpenCode's type definitions (plugin 1.17.20) and are unverified in a live
@@ -115,7 +132,7 @@ transcripts.
 - **Codex:** `.codex/hooks.json` records every `SubagentStop`. Codex completion hooks do not expose
   token or cost fields, so those records truthfully show `unavailable` instead of zero.
 - **Cursor and other harnesses:** no portable completion payload is available. Run
-  `node ai-framework/hooks/scripts/token-consumption.js --vendor <vendor> --event agent-complete`
+  `node ai-framework/hooks/scripts/token-consumption.mts --vendor <vendor> --event agent-complete`
   after an agent only when its caller can provide a supported numeric payload on stdin; otherwise
   the collector records the completion as unavailable.
 
@@ -128,7 +145,7 @@ Schema v2 adds aggregates by vendor, model, agent, effort, and skill under `dime
 the reserved names `__proto__`, `constructor`, and `prototype`, fold into `(other)`, and names are
 cut at 80 characters. A v1 file migrates in place with its lifetime totals intact, but an older
 collector cannot read a v2 file and would start a blank snapshot, so update every checkout that
-shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.js`.
+shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.mts`.
 
 ## Sub-agent Dispatch
 

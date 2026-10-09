@@ -7,10 +7,10 @@ description: Compact a shipped pitch's full history into durable knowledge and a
 
 > **Recommended capability profile:** `standard` — bounded extraction and coverage judgment against an existing pitch record, not open-ended architecture.
 
-> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.js resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
+> **Caveman mode:** resolve via `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase utility --args-text "$ARGUMENTS"` (pass the raw, unparsed invocation text — the script extracts a `caveman=<mode>` token if present and ignores everything else; no `caveman=` mention is not an error, it just falls through to the instance/bundle default). If not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level before this skill's other instructions; pass the same resolved mode to any subagent this skill dispatches. If not installed, proceed normally — this is optional, never required.
 
-`ai-framework/scripts/pitch-compress.js` (inventory, coverage ledger, `done-work.md`) and
-`ai-framework/scripts/pitch-archive.js` (recovery archive, transactional deletion, restore) do
+`ai-framework/scripts/pitch-compress.mts` (inventory, coverage ledger, `done-work.md`) and
+`ai-framework/scripts/pitch-archive.mts` (recovery archive, transactional deletion, restore) do
 the mechanical work. This playbook is what decides *what* gets extracted and confirms the
 ledger is actually complete before anything is ever deleted.
 
@@ -25,7 +25,7 @@ ever automatic.
 ## Step 1 — Inventory
 
 ```sh
-node ai-framework/scripts/pitch-compress.js inventory [--json]
+node ai-framework/scripts/pitch-compress.mts inventory [--json]
 ```
 
 Lists every pitch under `.project/pitches/` (excluding `_templates/`, `_archive/`, `_parked/`).
@@ -37,7 +37,7 @@ is already gone (compacted in a prior run) reports `already compacted` from `don
 ## Step 2 — Build the coverage ledger (real extraction work, not a script)
 
 ```sh
-node ai-framework/scripts/pitch-compress.js ledger <slug> [--json]
+node ai-framework/scripts/pitch-compress.mts ledger <slug> [--json]
 ```
 
 This mechanically lists every **required** section for the chosen pitch: every `##` heading in
@@ -49,7 +49,7 @@ Read every required section and do the actual extraction, exactly as `/ship`'s k
 extraction already works:
 - Genuinely reusable lessons → `.project/knowledge/patterns/*.md` or `.project/knowledge/issues/*.md`,
   with a real `id`, `tags`, and at least one `related`/`[[wiki-link]]`. Run
-  `node ai-framework/scripts/graphify.js --check` before committing the ledger — a new entry
+  `node ai-framework/scripts/graphify.mts --check` before committing the ledger — a new entry
   that fails validation must fail the ledger commit too, not pass silently.
 - Decisions, negative constraints, and requirements worth remembering but not "patterns" →
   `.project/knowledge/decisions/*.md` or the appropriate requirements/records location.
@@ -61,11 +61,11 @@ Write the mapping as JSON (`{"sections":[{"source":"...","status":"extracted"|"g
 and commit it:
 
 ```sh
-node ai-framework/scripts/pitch-compress.js commit-ledger <slug> --file <ledger.json> --apply
+node ai-framework/scripts/pitch-compress.mts commit-ledger <slug> --file <ledger.json> --apply
 ```
 
 This **mechanically** validates: every required section is present in the mapping, every
-non-gap destination file actually exists, every gap has a reason, and `graphify.js --check`
+non-gap destination file actually exists, every gap has a reason, and `graphify.mts --check`
 still passes. It writes the verified ledger to `.project/compaction/ledgers/<slug>.json` and
 reports coverage. Every destination must be a real, nonempty file inside the project and
 **outside** the pitch being compacted (anything inside it is deleted with it, so it proves
@@ -79,7 +79,7 @@ claiming "everything extracted" is never sufficient by itself; the ledger is the
 ## Step 3 — Write done-work.md
 
 ```sh
-node ai-framework/scripts/pitch-compress.js write-done-work <slug> --summary <summary.md> --apply
+node ai-framework/scripts/pitch-compress.mts write-done-work <slug> --summary <summary.md> --apply
 ```
 
 Writes (or, on a rerun, replaces only) this pitch's own section in `.project/done-work.md`: a
@@ -91,8 +91,8 @@ regenerated the same way `graph.json`/`CHANGELOG.md` already are.
 ## Step 4 — Archive (recovery, before anything is removed)
 
 ```sh
-node ai-framework/scripts/pitch-archive.js archive <slug> --apply
-node ai-framework/scripts/pitch-archive.js verify <slug>
+node ai-framework/scripts/pitch-archive.mts archive <slug> --apply
+node ai-framework/scripts/pitch-archive.mts verify <slug>
 ```
 
 Writes `.project/compaction/archives/<slug>-<date>/` — a byte-for-byte copy of the pitch
@@ -109,7 +109,7 @@ must explicitly say yes to a deletion — never proceed past it without that app
 ## Step 6 — Remove (only after approval)
 
 ```sh
-node ai-framework/scripts/pitch-archive.js remove <slug> --apply
+node ai-framework/scripts/pitch-archive.mts remove <slug> --apply
 ```
 
 Refuses unless the source content still matches what was archived (a concurrent edit since
@@ -120,7 +120,7 @@ Step 4 is a conflict, not a silent overwrite), the committed ledger has coverage
 ## Restore
 
 ```sh
-node ai-framework/scripts/pitch-archive.js restore <slug> [--to /absolute/path] --apply
+node ai-framework/scripts/pitch-archive.mts restore <slug> [--to /absolute/path] --apply
 ```
 
 Reproduces the original pitch directory byte-for-byte from its verified archive. Refuses to
@@ -129,8 +129,8 @@ overwrite an existing directory without `--force`.
 ## What this skill never touches
 
 `.project/pitches/_archive/` (a separate, pre-existing lifecycle state), `.project/design/`, any
-pitch without `SHIPPED.md`, `.project/runs/`'s ship-time logs, or `.project/knowledge/graph.json`/
-`index.md` (regenerated by `graphify.js`, never hand-written or copied here). This skill never
+pitch without `SHIPPED.md`, `.project/runs/`'s ship-time logs, or `graphify-out/graph.json`/
+`index.md` (regenerated by `graphify.mts`, never hand-written or copied here). This skill never
 invokes `/state` and does not wait on it. After a removal you may run `/state` (snapshot, then
 render) so the report reflects the compacted pitch — compacted pitches appear from `done-work.md`
 — but that is a separate, explicit step the human chooses.

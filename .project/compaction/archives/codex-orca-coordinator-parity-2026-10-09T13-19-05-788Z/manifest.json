@@ -1,0 +1,76 @@
+{
+  "schemaVersion": 1,
+  "slug": "codex-orca-coordinator-parity",
+  "sourceRoot": ".project/pitches/codex-orca-coordinator-parity",
+  "archivedAt": "2026-10-09T13:19:05.791Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "6c85d84b7e57066ee9a210f7b4c85853311b3c23514a9d9c92c0bc170fcab579",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "6f3c85367d87b3ce95ba6b1be48817a030c06dc27a17e75e4771d480f77f0e11",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "48215078dc3a84de1a0ef163e020d599c67aa3dbb66fd6ddd8a170f3b249169c",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "6fef897468dade3f6eae77d647d957752b6c5e89da24a8d001feff131957d97e",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "4f012657d03826db5886f3dab0262e23f8da0dd1d03a2f67cf5e59055e87b7a3",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "898b6f41d8d78db1a989f90b37cf1f60149b11ce882b75bbc945f9d1ba7f8807",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "fcd07dd4a716ff8fdcc2c418329faaec1619604dd6da37581d14f646f58f1cbd",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "b4efab64219c2e0d4faa7d3d518641cd447e1dca6fed8b04af50d4ac96d6c006",
+      "mode": 420
+    },
+    "review-code-c1.md": {
+      "hash": "c95b5bc7a51e386a57d66846f142dce4faafe9df455736416820131c77932ca1",
+      "mode": 420
+    },
+    "review-code-c2.md": {
+      "hash": "f1ff5c52663d91e9336ab7bcb030d90404c386c73036207bbacc9cf2a6e4bf62",
+      "mode": 420
+    },
+    "review-conflicts-c1.md": {
+      "hash": "3eb53df4f6233b9bd724d4ab3f6a5329b0a74ed09fb11bf84f67d48477f7ad55",
+      "mode": 420
+    },
+    "review-security-c1.md": {
+      "hash": "06d84cdf7510f0aae9d6f3c948d75ff8b11ef7e9f553c7e06734a9af85cd4248",
+      "mode": 420
+    },
+    "review-security-c1b.md": {
+      "hash": "bc3bc908c7d7074a4c862bf21d2fb7bdf7555f4746f72c9232ce56cfa4f6144b",
+      "mode": 420
+    },
+    "review-security-c2.md": {
+      "hash": "9e8ffc536f96ee6e9a21bd00b806d2062b5e88526abfc340696dcaed6fe0f818",
+      "mode": 420
+    },
+    "review-tests-c1.md": {
+      "hash": "5522c6be272c6fba57c0e498c3f36e85213de17893e85bf3266ef2f59067d4be",
+      "mode": 420
+    },
+    "review-tests-c1b.md": {
+      "hash": "82d5497936f1b4daa303235f468a232ca8fabe00210cc6b12fa2298c3eb475bd",
+      "mode": 420
+    },
+    "review-tests-c2.md": {
+      "hash": "e142289430e4ab5db9255a54cee96ea394fde4c6c86b0903894fa9f2e1f0fe4e",
+      "mode": 420
+    }
+  }
+}

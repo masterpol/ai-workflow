@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-foundation",
+  "sourceRoot": ".project/pitches/orca-vendor-foundation",
+  "archivedAt": "2026-10-08T16:26:37.366Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "068c6dcb8d0d3b052421990b864afd377bc5e11ed82bec35a65e29bf827a5e37",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "01b478076439807c904b4a95e17aaf9c3b8d66c65c826263179fb92baad86fc6",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "6cc2a590593df9ac48c9f9b505eb31e00d617b97062bd6dd93863d83f4d2d92a",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "877ab8dc198cd4a4e1164f3df8334393a173222c905fe4bd7a9d5b3c3e684829",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "65672181d8c879d134d467c5e0a21d8069495a2309e7a8bccfea2f48538e462e",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "913a60623e133b10a66a8952a30b04cd1a453579e480caa64b33a9347f90e3cd",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "7ff01d0e30ee9a1244ff17580d402be998be92afc014541c939a78db6130a7fb",
+      "mode": 420
+    },
+    "pre-build-inventory.json": {
+      "hash": "58039369d95e73ea0acb0b9dba468c263f77d136207e106e7f573ba375a3cd22",
+      "mode": 420
+    },
+    "s1-evidence.md": {
+      "hash": "5770c3104e318bcb5f9ae37665eda51693badc32260674472544c12a8453c07d",
+      "mode": 420
+    },
+    "s1-mutations.json": {
+      "hash": "a3c961778a30b7990c945b058709a45377af31f55aaad520e590ca58b075a940",
+      "mode": 420
+    },
+    "s2-evidence.md": {
+      "hash": "ce463985264911eb323323e185e4b8bc9f5bab361ed3c2489869e9e4c6fb0504",
+      "mode": 420
+    },
+    "s2-mutations.json": {
+      "hash": "148c4eacb5506b8969cd98da96eb2f77875e8aba7d998c73caed1440f80e5e4b",
+      "mode": 420
+    },
+    "s3-evidence.md": {
+      "hash": "a91945aea916c9836f187312bbebfeb876e5dd77e85a852c34cfc575be0643d4",
+      "mode": 420
+    }
+  }
+}

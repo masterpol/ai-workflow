@@ -8,16 +8,18 @@
 _none_
 
 ## Parked pitches
-_none_
+| Pitch | Parked | Reason |
+|-------|--------|--------|
+| restore-vendor-adapters | 2026-10-08 | Premise invalidated by critique: vendor adapters are already present and pass validators. |
 
 ## Recent ships (last 5)
 | Pitch | Shipped | Notes |
 |-------|---------|-------|
-| shape-lite | 2026-10-07 | `/shape-lite` compressed framing (standalone or inline, mechanical escalation, 4 vendors) + `@AGENTS.md` import validation; v2.9.1; audit 2 cycles, 2 must-fix fixed. See `runs/2026-10-07-shape-lite.md`. |
-| collector-robustness | 2026-09-27 | Kernel-held loopback lease replaces the age/PID lock file; async `recordEvent` awaited by CLI and plugin; legacy lock skips until removed. 117 tests (404 repo suite); audit: 1 must-fix fixed. **macOS only.** See `runs/2026-09-27-collector-robustness.md`. |
-| path-safety-hardening | 2026-09-27 | Approved trusted-directory contract; shared ledger/archive recovery; 231 tests passed, audited, version 2.8.6. See runs/2026-09-27-path-safety-hardening.md. |
-| independent-rereview-catch-up | 2026-09-27 | S0–S4, 268 tests (390 whole repo suite), 31 fixes across 3 re-reviewed subjects + the review tool itself. Outer /audit found 4 must-fix in `review-bench.js` (never independently reviewed until then), all fixed; 1 cross-pitch false positive refuted. Two user-approved cap raises (15→16→19). See `runs/2026-09-27-independent-rereview-catch-up.md`. |
-| native-safety-feasibility | 2026-09-26 | S1 done; four scratch files / 386 lines; audit passed; measured containment/lock limits; production parents remain incomplete. |
+| codex-orca-coordinator-parity | 2026-10-08 | v2.22.0; Codex startup hook, explicit startup/Run binding, doctor wiring; Node169pass/1skip, Bun170pass; host activation unverified. See `runs/2026-10-08-codex-orca-coordinator-parity.md`. |
+| opencode-handoff | 2026-10-08 | Created `.project/context/opencode-handoff.md` documenting OpenCode's Orca adapter state, missing `.opencode/`/`.agents/`/`.codex/` directories, live probe result (`caller-unverified`), and verification commands. Small-batch lite; no code changes. See `.project/pitches/opencode-handoff/SHIPPED.md`. |
+| runner-aware-runtime-boundary-validator | 2026-10-08 | `validateRuntimeImports` (`runtime/validate.mts`), a workflow-doctor `Runtime boundary` check (production and unparsed sources fail, 43 test files warn as one line) and a stricter invariants test; v2.21.0; Node 1238/1239, Bun 1229/1230; audit 2 cycles via Codex/OpenCode workers, 9 valid-JS evasions closed. See `runs/2026-10-08-runner-aware-runtime-boundary-validator.md`. |
+| orca-auto-start-all-phases | 2026-10-08 | Orca decision runs automatically on the 12 workflow phases when the switch is true (`decideStart`, `orca-run start`, Claude hook on `PreToolUse(Skill)` + `UserPromptExpansion`); blocked means stop and ask, `orca=normal` bypasses one call; v2.20.0; Node 1148/1149, Bun 1139/1140; audit 2 cycles, built and audited through real Codex/OpenCode workers. See `runs/2026-10-08-orca-auto-start-all-phases.md`. |
+| state-multipage-report | 2026-10-08 | Multipage `/state` report (index, structure, skills, metrics, knowledge, pitches): project-type folder diagram with decisions, base vs project skills, links to graph and metrics; v2.19.1; Node 1094/1095, Bun 1085/1086; audit 3 cycles (2 via real Orca workers). See `runs/2026-10-08-state-multipage-report.md`. |
 
 ## Open rabbit holes across active pitches
 - Legacy source access, content and media totals, and school-site ownership.
@@ -25,6 +27,7 @@ _none_
 - Canonical paths and redirect treatment for current school domains.
 
 ## Followups backlog
-→ `.project/pitches/_followups.md` (26 items; 3 closed 2026-09-27 by `collector-robustness`)
+→ `.project/pitches/_followups.md` (includes four Orca foundation followups; prior history retained)
 
-## /cooldown due now
+## /cooldown due in: 5 ships
+Last review2026-10-08: `runs/cooldown-2026-10-08-codex-orca-coordinator-parity.md`. Prior same-date reports and pending proposals remain intact. New proposals:C1 guard secret exclusion,C2 trusted Codex hook smoke,C3 coverage instrumentation. No proposal applied; individual approval required.
