@@ -33,7 +33,7 @@ function receipts(): Values {
   return [
     { name: "orca-cli", markdown: "worktree current; terminal" },
     { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
-    { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.222" },
+    { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.223" },
       caller: { live: true, orcaSessionId: "fixture-session" } } },
   ];
 }
@@ -187,7 +187,7 @@ test("probes only fixed read-only argv with one executable and bounded process o
   assert.equal(result.capabilities, "documented");
   assert.equal(result.orchestration, "unverified");
   assert.equal(result.reason, "orchestration-unverified");
-  assert.equal(result.runtimeVersion, "1.4.222");
+  assert.equal(result.runtimeVersion, "1.4.223");
   assertNormal(result);
 });
 
@@ -260,7 +260,7 @@ test("bounds the complete probe and reduces per-call timeout to remaining budget
   assert.equal(CALL_TIMEOUT_MS, 5000);
   assert.equal(TOTAL_TIMEOUT_MS, 20000);
   assert.equal(MAX_OUTPUT_BYTES, 262144);
-  assert.equal(SUPPORTED_VERSION, "1.4.222");
+  assert.equal(SUPPORTED_VERSION, "1.4.223");
   const { options, calls } = probe();
   let time = 0;
   options.now = () => time;

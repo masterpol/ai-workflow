@@ -8,9 +8,9 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/space-bunny` for non-sensitive, bounded work | `gpt-5.6-luna` or `gpt-5.6-terra` |
-| `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-5.6` at medium or high effort |
-| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-5.6` at high or xhigh effort |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/space-bunny` for non-sensitive, bounded work | `gpt-6-luna` |
+| `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-6.1-sol` at medium or high effort |
+| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-6-astra` at high or xhigh effort |
 
 Escalate one profile only when the returned work is demonstrably incomplete or unreliable. A harness that cannot select per-agent models should use its current model and preserve the same role separation.
 

@@ -28,7 +28,7 @@ const args = process.argv.slice(2);
 let value;
 if (args[0] === 'orchestration') value = {ok:true,result:{workers:${JSON.stringify([{ agentTerminalHandle: "worker", dispatchStatus: "running" }])},page:{hasMore:false}}};
 else if (args[0] === 'skills') value = args[2] === 'orca-cli' ? {name:'orca-cli',markdown:'worktree current terminal'} : {name:'orchestration',markdown:'worker-start worker_done orchestration check'};
-else value = {ok:true,result:{target:{kind:'local'},runtime:{reachable:true,state:'ready',appVersion:'1.4.222'}}};
+else value = {ok:true,result:{target:{kind:'local'},runtime:{reachable:true,state:'ready',appVersion:'1.4.223'}}};
 console.log(JSON.stringify(value));
 `;
   for (const name of ["orca", "codex", "opencode"]) {

@@ -2,7 +2,7 @@
 name: test-coverage-checker
 description: Mechanical test coverage audit subagent. Verifies that changed code has corresponding tests, flags missing coverage on new public surfaces, runs the test suite. Use during /audit on every cycle.
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: claude-haiku-4-5-20251001
+model: claude-haiku-5-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

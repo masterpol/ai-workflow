@@ -2,7 +2,7 @@
 name: build-error-resolver
 description: Build and TypeScript error resolution specialist. Use PROACTIVELY when build fails or type errors occur. Fixes build/type errors only with minimal diffs, no architectural edits. Focuses on getting the build green quickly.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

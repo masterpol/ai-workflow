@@ -30,3 +30,6 @@ ai_workflow_env.json
 graphify-out/*
 !graphify-out/graph.json
 !graphify-out/GRAPH_REPORT.md
+
+# Local Orca policy copy, not part of the bundle (the example stays tracked)
+ai-framework/integrations/orca-vendors.json

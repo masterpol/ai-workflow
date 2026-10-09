@@ -508,3 +508,39 @@ test("doctor passes the installed guarded Codex registration", async (t) => {
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some(result => result.name === "Codex startup wiring" && result.status === "pass"));
 });
+
+test("project-owned model routing accepts a project's own routes and bundled routing stays the default", async (t) => {
+  const root = fixture(t);
+  write(root, ".claude/agents/probe.md", "---\nname: probe\nmodel: claude-sonnet-5-5\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
+  write(root, ".opencode/agents/probe.md", "---\nmodel: openai/gpt-5.6-terra\n---\nLoad .claude/agents/probe.md\n");
+  write(root, ".codex/agents/probe.toml", 'name = "probe"\n');
+  const run = async (): Promise<Check[]> => {
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    return checks(capture.output);
+  };
+  const route = (items: Check[]): Check | undefined => items.find((item) => item.name === ".opencode/agents/probe.md" && /model/.test(item.detail));
+  const codex = (items: Check[]): Check | undefined => items.find((item) => item.name === ".codex/agents/probe.toml" && /Codex model/.test(item.detail));
+
+  let items = await run();
+  assert.equal(route(items)?.status, "fail", "the bundled route is enforced by default");
+  assert.equal(codex(items)?.status, "fail");
+  assert.equal(items.find((item) => item.name === "Model routing"), undefined);
+
+  write(root, ".project/workflow-doctor.json", JSON.stringify({ schemaVersion: 1, modelRouting: "project" }));
+  items = await run();
+  assert.equal(route(items)?.status, "pass", "a well-formed project route is accepted");
+  assert.equal(codex(items), undefined, "a missing Codex model inherits the harness configuration");
+  assert.equal(items.find((item) => item.name === "Model routing")?.status, "info");
+
+  write(root, ".opencode/agents/probe.md", "---\nmodel: not a route\n---\nLoad .claude/agents/probe.md\n");
+  assert.equal(route(await run())?.status, "fail", "a malformed route still fails in project mode");
+
+  for (const body of ["not json", JSON.stringify({ schemaVersion: 2, modelRouting: "project" }), JSON.stringify({ schemaVersion: 1, modelRouting: "other" })]) {
+    write(root, ".project/workflow-doctor.json", body);
+    write(root, ".opencode/agents/probe.md", "---\nmodel: openai/gpt-5.6-terra\n---\nLoad .claude/agents/probe.md\n");
+    items = await run();
+    assert.equal(items.find((item) => item.name === "Model routing")?.status, "fail", body);
+    assert.equal(route(items)?.status, "fail", `${body}: invalid config falls back to the bundled routes`);
+  }
+});
