@@ -10,7 +10,7 @@ import type { StartOptions } from "./orca-start.mts";
 const base = createTestDeps({});
 const executable = "/opt/orca/orca";
 const env = { AI_WORKFLOW_ORCA_MULTI_AGENT: "true", PATH: "/opt/orca:/usr/bin", HOME: "/home/test" };
-const status = (version = "1.4.222") => ({ ok: true, result: { target: { kind: "local" },
+const status = (version = "1.4.223") => ({ ok: true, result: { target: { kind: "local" },
   runtime: { reachable: true, state: "ready", appVersion: version } } });
 const example = JSON.parse(base.fs.readFileSync(base.path.join(import.meta.dirname, "../integrations/orca-vendors.example.json")));
 const fail = (): never => { throw new Error("must not be touched"); };
@@ -21,7 +21,7 @@ function fixture(t: TestContext) {
   const root = tempFixture(base, { ".project/orchestration.json": JSON.stringify(policy) }, { resolve: false });
   t.after(() => base.fs.rmSync(root, { recursive: true, force: true }));
   const state = { clock: 0, calls: [] as Array<{ command: string; args: string[]; options: RunOptions }>,
-    version: "1.4.222", workers: [] as unknown[], page: { hasMore: false } as Record<string, unknown>,
+    version: "1.4.223", workers: [] as unknown[], page: { hasMore: false } as Record<string, unknown>,
     missing: new Set<string>(), paths: new Map<string, string>(), brokenWorker: false,
     advance: 0, throwing: false, childError: undefined as string | undefined };
   const isExecutable = (file: string) => [executable, "/opt/orca/codex", "/opt/orca/opencode", "/opt/orca/claude", "/usr/local/bin/orca"].includes(file)
@@ -251,7 +251,7 @@ test("rechecks switch, policy, runtime and identity between calls without cachin
   assert.equal(decideStart(f.options).state, "ready"); assert.equal(f.state.calls.length, 4);
   assert.equal(decideStart(f.options).state, "ready"); assert.equal(f.state.calls.length, 8);
   f.state.version = "9.9.9"; assert.equal(decideStart(f.options).state, "blocked");
-  f.state.version = "1.4.222"; f.policy["use-orca-orchestration"] = false; f.writePolicy();
+  f.state.version = "1.4.223"; f.policy["use-orca-orchestration"] = false; f.writePolicy();
   assert.equal(decideStart(f.options).reason, "policy-disabled");
   f.deps.proc.env.AI_WORKFLOW_ORCA_MULTI_AGENT = "false"; assert.equal(decideStart(f.options).state, "off");
   f.deps.proc.env.AI_WORKFLOW_ORCA_MULTI_AGENT = "true";

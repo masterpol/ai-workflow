@@ -33,7 +33,7 @@ function probe() {
     const values: Obj[] = [
       { name: "orca-cli", markdown: "worktree current; terminal" },
       { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
-      { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.222" } } },
+      { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.223" } } },
     ];
     return { status: 0, signal: null, stdout: JSON.stringify(values[state.calls++ % 3]), stderr: "" };
   };

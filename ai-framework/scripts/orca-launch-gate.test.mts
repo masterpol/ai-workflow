@@ -29,7 +29,7 @@ function setPolicy(root: string, enabled: boolean): void {
   policy["use-orca-orchestration"] = enabled;
   fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
 }
-function receipts(version = "1.4.222", caller = true): Obj[] {
+function receipts(version = "1.4.223", caller = true): Obj[] {
   return [
     { name: "orca-cli", markdown: "worktree current; terminal" },
     { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
@@ -38,7 +38,7 @@ function receipts(version = "1.4.222", caller = true): Obj[] {
   ];
 }
 /** Probe runner that serves 3 receipts per evaluation and counts every call. */
-function prober(version: () => string = () => "1.4.222", caller = true) {
+function prober(version: () => string = () => "1.4.223", caller = true) {
   const state = { calls: 0 };
   const run = () => {
     const values = receipts(version(), caller);
@@ -63,7 +63,7 @@ test("allows a launch only on eligible policy plus a fresh probe of the supporte
 
 test("does not require caller.orcaSessionId for an external coordinator outside an Orca terminal", (t: TestContext) => {
   const root = fixture(t);
-  const p = prober(() => "1.4.222", false);
+  const p = prober(() => "1.4.223", false);
   const decision = evaluateLaunch({ ...common, root, env: { PATH: "/usr/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run: p.run });
   assert.equal(decision.allowed, true);
 });
@@ -84,7 +84,7 @@ test("re-reads policy and re-probes on every call: a flip between two calls refu
 
 test("version drift between two calls refuses the second and the probe really ran again", (t: TestContext) => {
   const root = fixture(t);
-  let version = "1.4.222";
+  let version = "1.4.223";
   const p = prober(() => version);
   assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run }).allowed, true);
   version = "1.5.0";
@@ -92,7 +92,7 @@ test("version drift between two calls refuses the second and the probe really ra
   assert.equal(second.allowed, false);
   assert.equal(second.reason, "runtime-version-unsupported");
   assert.equal(p.state.calls, 6);
-  version = "1.4.222";
+  version = "1.4.223";
   assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run }).allowed, true);
 });
 
@@ -151,7 +151,7 @@ const ok: RunResult = { status: 0, signal: null, stdout: "{}", stderr: "" };
 
 test("launchWorker passes an allowlisted env and a floored timeout, and re-probes every call", async (t: TestContext) => {
   const root = fixture(t);
-  let version = "1.4.222";
+  let version = "1.4.223";
   const p = prober(() => version);
   const seen: SpawnOptions[] = [];
   const deps = childDeps((_c, _a, options) => { seen.push(options); return ok; });

@@ -2,7 +2,7 @@
 name: code-reviewer
 description: Expert code review specialist. Proactively reviews code for quality, security, and maintainability. Use immediately after writing or modifying code. MUST BE USED for all code changes.
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: claude-haiku-4-5-20251001
+model: claude-haiku-5-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

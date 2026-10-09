@@ -7,7 +7,7 @@ import type { RuntimeDeps } from "./runtime/types.mts";
 export const MAX_OUTPUT_BYTES = 256 * 1024;
 export const CALL_TIMEOUT_MS = 5000;
 export const TOTAL_TIMEOUT_MS = 20000;
-export const SUPPORTED_VERSION = "1.4.222";
+export const SUPPORTED_VERSION = "1.4.223";
 const CALLS = Object.freeze({
   cliGuide: ["skills", "get", "orca-cli", "--json"],
   orchestrationGuide: ["skills", "get", "orchestration", "--json"],

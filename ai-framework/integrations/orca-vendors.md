@@ -71,7 +71,7 @@ The selected launcher is never replaced after failure. Selection precedence is a
 is set, then `orca`. On Linux outside an identified Orca session, use `orca-ide` to avoid
 selecting the unrelated screen reader. Unsupported selection keeps the normal workflow.
 
-Runtime diagnostics conservatively target the inspected Orca 1.4.222 contract. Guide
+Runtime diagnostics conservatively target the inspected Orca 1.4.223 contract (first verified against 1.4.222). Guide
 markers establish documented capabilities only. A reachable local runtime, matching version,
 and live caller session matching `ORCA_AGENT_SESSION_ID` provide limited session evidence;
 they do not prove an enabled orchestration feature, authenticated vendors, or safe dispatch.

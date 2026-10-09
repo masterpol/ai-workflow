@@ -2,7 +2,7 @@
 name: security-reviewer
 description: Security vulnerability detection and remediation specialist. Use PROACTIVELY after writing code that handles user input, authentication, API endpoints, or sensitive data. Flags secrets, SSRF, injection, unsafe crypto, and OWASP Top 10 vulnerabilities.
 tools: ["Read", "Write", "Edit", "Bash", "Grep", "Glob"]
-model: claude-sonnet-5
+model: claude-sonnet-5-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

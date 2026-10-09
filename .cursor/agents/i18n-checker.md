@@ -2,7 +2,7 @@
 name: i18n-checker
 description: Mechanical i18n audit subagent. Runs the project's i18n check command, verifies new source-locale keys exist in every configured locale, flags hardcoded user-facing strings in changed components. Use during /audit when diff touches i18n strings.
 tools: ["Read", "Grep", "Glob", "Bash"]
-model: claude-haiku-4-5-20251001
+model: claude-haiku-5-5
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

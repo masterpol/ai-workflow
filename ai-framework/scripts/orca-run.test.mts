@@ -81,7 +81,7 @@ function fixture(t: TestContext, enabled: string | null = "true"): Fixture {
 const probeSync: SyncHandler = (_command, args) => {
   const body = args.includes("orca-cli") ? { name: "orca-cli", markdown: "worktree current; terminal" }
     : args.includes("orchestration") ? { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" }
-      : { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.222" } } };
+      : { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.223" } } };
   return { status: 0, signal: null, stdout: JSON.stringify(body), stderr: "" };
 };
 let workers = 0;

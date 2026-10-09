@@ -29,6 +29,21 @@ reporting the workflow ready. Run it after adding or changing any skill, agent, 
 or the knowledge graph — nothing needs manual registration for the doctor to pick it up; see
 [One source, every vendor](vendors.md).
 
+## Project-owned model routing
+
+By default the doctor enforces the bundled OpenCode routes and the Codex model and effort for each
+profile. A project that deliberately routes its own models can say so in `.project/workflow-doctor.json`:
+
+```json
+{ "schemaVersion": 1, "modelRouting": "project" }
+```
+
+With `"project"`, an OpenCode `model:` line is only required to be a well-formed `provider/model` id
+(a missing line inherits the harness configuration), and a Codex adapter is not required to declare a
+model or `xhigh` effort. Everything else is still checked. `"bundle"` (also the default when the file is
+absent) keeps the full check. A malformed file is reported as a failure and the bundled routes stay
+enforced. The file is instance data: bundle syncs never write or overwrite it.
+
 ---
 
 See also: [setup](setup.md) · [setup-validator](setup-validator.md) · [vendors](vendors.md)

@@ -617,6 +617,38 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
   }
 
+  // `.project/workflow-doctor.json` lets a project own its model routing: {"schemaVersion":1,"modelRouting":"bundle"|"project"}.
+  // "bundle" (the default) enforces the bundled OpenCode and Codex routes below. "project" only requires that a
+  // declared route is well formed, so a deliberate local routing policy is not reported as a failure.
+  let modelRouting: "bundle" | "project" = "bundle";
+  async function checkModelRouting(): Promise<void> {
+    const file = ".project/workflow-doctor.json";
+    const name = "Model routing";
+    if (!(await exists(absolute(file)))) return;
+    try {
+      const value: unknown = JSON.parse(await fsp.readFile(absolute(file)));
+      const record_ = value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
+      if (!record_ || record_.schemaVersion !== 1 || (record_.modelRouting !== "bundle" && record_.modelRouting !== "project")) {
+        record("fail", name, `${file} must be {"schemaVersion":1,"modelRouting":"bundle"|"project"}; the bundled routes are enforced`);
+        return;
+      }
+      modelRouting = record_.modelRouting;
+      record("info", name, modelRouting === "project" ? "project-owned: declared OpenCode and Codex routes are checked for syntax, not against the bundled routes" : "bundled routes enforced");
+    } catch (error) {
+      record("fail", name, `${file} is not readable JSON (${error instanceof Error ? error.message : String(error)}); the bundled routes are enforced`);
+    }
+  }
+
+  // Project-owned routing: a missing model inherits the harness configuration; a declared one must be provider/model.
+  async function checkProjectOpenCodeRoute(relativePath: string): Promise<void> {
+    if (!(await requireFile(relativePath))) return;
+    const content = await fsp.readFile(absolute(relativePath));
+    const line = content.match(/^model:[ \t]*(.*)$/m);
+    if (!line) { record("pass", relativePath, "model inherits the user-selected harness configuration"); return; }
+    const valid = /^[A-Za-z0-9_-]+\/\S+$/.test(line[1].trim().replace(/^(["'])(.*)\1$/, "$2"));
+    record(valid ? "pass" : "fail", relativePath, valid ? "model uses provider/model syntax; runtime availability is separate" : "model must be a provider/model id");
+  }
+
   async function checkSkill(name) {
     const canonical = `.claude/skills/${name}/SKILL.md`;
     await Promise.all([
@@ -647,8 +679,12 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
 
     const command = `.opencode/commands/${name}.md`;
     const expectedModel = skillModelOverrides[name] ?? opencodeModels[profile];
-    await requireFile(command);
-    await matches(command, new RegExp(`^model: ${escapeRegExp(expectedModel)}$`, "m"), `expected OpenCode model (${profile} profile)`);
+    if (modelRouting === "project") {
+      await checkProjectOpenCodeRoute(command);
+    } else {
+      await requireFile(command);
+      await matches(command, new RegExp(`^model: ${escapeRegExp(expectedModel)}$`, "m"), `expected OpenCode model (${profile} profile)`);
+    }
     await matches(command, referencePattern, "loads canonical skill");
   }
 
@@ -673,10 +709,12 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
 
     const opencode = `.opencode/agents/${name}.md`;
     const codex = `.codex/agents/${name}.toml`;
-    await matches(opencode, new RegExp(`^model: ${escapeRegExp(opencodeModels[profile])}$`, "m"), `expected OpenCode model (${profile} profile)`);
+    if (modelRouting === "project") await checkProjectOpenCodeRoute(opencode);
+    else await matches(opencode, new RegExp(`^model: ${escapeRegExp(opencodeModels[profile])}$`, "m"), `expected OpenCode model (${profile} profile)`);
     await matches(opencode, new RegExp(`\\.claude/agents/${escapeRegExp(name)}\\.md`), "loads canonical role prompt");
-    await matches(codex, /^model = ".+"$/m, "declares a Codex model");
-    if (profile === "deep") {
+    if (modelRouting === "project") await requireFile(codex);
+    else await matches(codex, /^model = ".+"$/m, "declares a Codex model");
+    if (profile === "deep" && modelRouting !== "project") {
       // The OpenCode deep route (opencode-go/kimi-k2.7-code) declares no effort override;
       // Codex still needs its explicit effort.
       await matches(codex, /^model_reasoning_effort = "xhigh"$/m, "uses xhigh reasoning");
@@ -742,6 +780,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
     for (const result of external.results) record(result.status, result.name, result.detail);
 
+    await checkModelRouting();
     await Promise.all([
       ...coreFiles.map(requireFile),
       ...(inPortableBundleRepo ? docsChecks.map(([doc, expression, detail]) => matches(`ai-framework/docs/${doc}.md`, expression, detail)) : []),
