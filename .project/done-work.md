@@ -322,3 +322,19 @@ Knowledge: [[a-report-never-overwrites-a-file-it-did-not-write]], [[status-dispa
 Automatic Orca start on every workflow phase shipped as v2.20.0 (big-batch, narrowed after critique to core plus the Claude hook; 2 audit cycles). With `AI_WORKFLOW_ORCA_MULTI_AGENT=true`, each of the 12 phase skills first runs `decideStart` (`orca-start.mts`): switch, then the whole-token `orca=normal` bypass, then worker identity, then the launch gate (`evaluateLaunch` with the coordinator vendor plus worker membership, presence, worker-side `orca` path and a status probe). `off` is silent and spawns nothing; `ready` prints one line; `blocked` stops and asks (hook exit 2, `orca-run start` exit 4), never a silent fallback. A Claude Code hook on `PreToolUse(Skill)` and `UserPromptExpansion` owns a 5 s deadline and forces the node runner so it cannot fail open; `build`, `audit` and `ship` prose and the Cursor mirrors say stop and ask. Audit found and fixed a relative-PATH hijack of the worker lookup and a fail-open hook. Proven live for Claude Code only; the 12-skill start blocks and the Codex, OpenCode and Cursor adapters are later pitches. Built and audited through real Codex and OpenCode workers. Node 1148 pass / Bun 1139 pass, 0 fail.
 
 Knowledge: [[orca-auto-start-design]], [[a-probe-child-ran-a-bare-command-with-the-parent-path]], [[a-blocking-hook-owns-its-runner-and-its-deadline]], [[status-dispatch-ready-false-is-not-launch-authority]], [[orca-workers-differ-from-the-coordinator-environment]].
+
+## runner-aware-runtime-boundary-validator — shipped 2026-10-09
+
+Added `validateRuntimeImports` (`runtime/validate.mts`), a read-only lexical scanner that finds direct `node:*` imports, export-from, dynamic imports and requires in production sources, and suggests the matching `RuntimeDeps` field. `workflow-doctor` now fails on production violations or unparsed sources and gives tests one summary warning; `invariants.test.mts` uses the same validator. Two audit cycles closed nine valid-JS evasions and a fail-open on unparsed files. Purely computed imports and `process.*` globals are advisory only. Shipped in v2.21.0 with Node 1239 and Bun 1230 tests passing. Open followups: migrate 43 test files off `node:*`, remaining test gaps, promote computed imports, a third review of the final fixes.
+
+See [[runtime-boundary-validator-design]] and [[a-source-scanner-fails-closed-on-what-it-cannot-read]].
+
+## codex-orca-coordinator-parity — shipped 2026-10-09
+
+Added a Codex coordinator startup adapter (`orca-start-codex-hook.mts`), explicit Codex entry instructions in AGENTS.md/CLAUDE.md, trusted Run binding before dispatch, and an executable `workflow-doctor` wiring check, with behavior tests for all 12 phases. Shipped in v2.22.0 after two audit cycles using Orca workers (fifteen workers across critique, build and audit). Automatic Codex hook activation stays unverified; explicit startup instructions remain mandatory. Git and a POSIX Node are required for the registration. Followups: guard secret exclusion, trusted host activation, non-Git/direct-root support, coverage environment and Bun coverage crash.
+
+See [[verify-run-binding-before-orca-dispatch]], [[review-guard-hashes-ignored-secret-files]], [[substring-hook-wiring-check-accepts-echoed-commands]], [[coverage-instrumentation-changes-exact-child-environments]].
+
+## opencode-handoff — shipped 2026-10-09
+
+Wrote `.project/context/opencode-handoff.md`, a handoff documenting OpenCode's adapter state, its Orca worker/coordinator configuration, the `caller-unverified` probe result and the commands to verify live Orca use from OpenCode. Small-batch, no code changes and no knowledge entries; the handoff file is the deliverable.

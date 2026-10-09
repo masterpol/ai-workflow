@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "slug": "runner-aware-runtime-boundary-validator",
+  "sourceRoot": ".project/pitches/runner-aware-runtime-boundary-validator",
+  "archivedAt": "2026-10-09T03:55:48.789Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "f390e8ca4367fb051e27cf324e442a2866453547cee59fea41cf1b45b08c9516",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "7603ef64ba2f988d1c24f5a5350d26ba948f6f1a564fbc892c94c782f1a1419b",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "3c7cac98981e7de458d5671f233754570bf1d1cb000fa9f74f3a1e58a265f8ce",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "b1367e8c2e53f33378f8ea2bca57373676805eeba5127f4a8daabb4db44beb86",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "4f78236e2b46a9f32b19b396b353d8b320941300a3b28da00b1abfcdb8507acd",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "62a73fc7aee892fdfe0949aa09b2d1fa5d748e252993bb891c0f7042a137bd48",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "451421ff7440925fbdec13bd7f91e45121aaf6cc912d30789458c3b5ac4e5303",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "a5496fc6dfe12548be2337a5186498178b066a58636f3952908a93c6aa6ff2ac",
+      "mode": 420
+    }
+  }
+}

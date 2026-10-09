@@ -49,6 +49,34 @@ Codex reads `AGENTS.md`, discovers native skills in `.agents/skills/`, and loads
 
 `.codex/config.toml` only enables a practical concurrency cap. It does not set a provider or a global model, so it does not override a user's Codex configuration.
 
+### Orca coordinator startup
+
+The Codex coordinator follows the startup and Run-binding contract in `AGENTS.md`.
+Always pass `--vendor codex` to `orca-run start`, then verify or create the correct bound
+Orca Run before dispatch. Use `coordinator: "codex"` in dispatch input. A successful start
+is readiness evidence; it does not create the Run or authenticate a worker vendor.
+
+`.codex/hooks.json` retains its `SubagentStop` metrics hook and registers `UserPromptSubmit`
+through `ai-framework/hooks/scripts/orca-start-codex-hook.mts`. The adapter recognizes a
+leading `/phase` or `$phase`, passes raw arguments to the existing decision library with
+the Codex vendor, adds ready/bypass context, and blocks a refused startup. Ordinary prose
+and quoted command examples pass through; phases inferred from conversation still require
+the explicit startup command in the entry instructions. Dispatched Orca workers follow their
+worker brief and are suppressed by the decision library's terminal-membership check.
+
+Project hooks require trust of the current hook definition. Open `/hooks` in Codex to review
+changed definitions, then use a fresh session to verify activation. Do not bypass trust or
+edit global settings to obtain proof. Unavailable or untrusted hooks do not excuse skipping
+the instructed startup check. Hook commands force Node and require a POSIX shell, Git, and a Git checkout. Root lookup
+runs before the adapter: a failed Git lookup blocks every prompt, including when Orca is off.
+The adapter's off/no-probe behavior applies after root bootstrap succeeds. Windows cmd and
+missing Node are not proven blocking paths.
+
+Codex coordinator dispatch, authoritative collection and worker release have been observed
+with Claude and OpenCode workers. Host startup-hook activation is a separate claim and remains
+unverified until observed in a trusted fresh session. See
+[the Orca contract](orca-vendors.md#codex-startup-and-coordinator-preparation).
+
 ## Caveman Mode
 
 One instruction, carried by every canonical skill (`.claude/skills/*`), every canonical agent

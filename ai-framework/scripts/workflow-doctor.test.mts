@@ -357,3 +357,154 @@ test("runtime boundary counts computed imports as advisories without failure", a
   assert.equal(boundary.some(item => item.status === "fail" || item.status === "warn"), false);
   assert.ok(boundary.some(item => item.status === "info" && /3 computed imports/.test(item.detail) && /1 process globals/.test(item.detail)));
 });
+
+function codexHooks(userPromptCommand?: string, userTimeout?: number): string {
+  const subagentStop = [
+    {
+      matcher: "*",
+      hooks: [
+        {
+          type: "command",
+          command: `node --experimental-strip-types --disable-warning=ExperimentalWarning "$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/token-consumption.mts" --vendor codex --event subagent-complete --root "$(git rev-parse --show-toplevel)"`,
+          timeout: 5
+        }
+      ]
+    }
+  ];
+  const userPrompt = userPromptCommand === undefined
+    ? []
+    : [
+        {
+          description: "Gates Codex workflow phase prompts on Orca coordinator readiness.",
+          hooks: [
+            {
+              type: "command",
+              command: userPromptCommand,
+              timeout: userTimeout ?? 8
+            }
+          ]
+        }
+      ];
+  return JSON.stringify({
+    description: "Records bounded token-consumption snapshots after Codex subagents and gates Codex workflow phases on Orca readiness.",
+    hooks: { SubagentStop: subagentStop, UserPromptSubmit: userPrompt }
+  }, null, 2);
+}
+
+test("doctor passes a valid Codex UserPromptSubmit startup registration", async (t) => {
+  const root = fixture(t);
+  write(root, ".codex/hooks.json", codexHooks(`AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/orca-start-codex-hook.mts" --root "$(git rev-parse --show-toplevel)"`));
+  write(root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "export const value = 1;\n");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const results = checks(capture.output);
+  assert.ok(results.some((item) => item.name === "Codex startup wiring" && item.status === "pass" && item.detail.includes("Node runner")));
+  assert.ok(results.some((item) => item.name === ".codex/hooks.json" && item.status === "pass" && item.detail.includes("post-agent consumption collector")));
+  assert.ok(results.some((item) => item.name === "ai-framework/hooks/scripts/orca-start-codex-hook.mts" && item.status === "pass"));
+});
+
+test("doctor fails a missing Codex startup registration", async (t) => {
+  const root = fixture(t);
+  write(root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "export const value = 1;\n");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "Codex startup wiring" && item.status === "fail" && /missing/.test(item.detail)));
+});
+
+test("doctor fails a Codex startup hook registered under the wrong event", async (t) => {
+  const root = fixture(t);
+  const payload = {
+    description: "Records bounded token-consumption snapshots after Codex subagents and gates Codex workflow phases on Orca readiness.",
+    hooks: {
+      SubagentStop: [
+        {
+          description: "Gates Codex workflow phase prompts on Orca coordinator readiness.",
+          hooks: [
+            {
+              type: "command",
+              command: `AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/orca-start-codex-hook.mts" --root "$(git rev-parse --show-toplevel)"`,
+              timeout: 8
+            }
+          ]
+        }
+      ],
+      UserPromptSubmit: [
+        {
+          matcher: "*",
+          hooks: [
+            {
+              type: "command",
+              command: `node --experimental-strip-types --disable-warning=ExperimentalWarning "$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/token-consumption.mts" --vendor codex --event subagent-complete --root "$(git rev-parse --show-toplevel)"`,
+              timeout: 5
+            }
+          ]
+        }
+      ]
+    }
+  };
+  write(root, ".codex/hooks.json", JSON.stringify(payload, null, 2));
+  write(root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "export const value = 1;\n");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "Codex startup wiring" && item.status === "fail" && /does not reference ai-framework\/hooks\/scripts\/orca-start-codex-hook\.mts/.test(item.detail)));
+});
+
+test("doctor fails a Codex startup registration missing the Node runner prefix", async (t) => {
+  const root = fixture(t);
+  write(root, ".codex/hooks.json", codexHooks(`node --experimental-strip-types --disable-warning=ExperimentalWarning "$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/orca-start-codex-hook.mts" --root "$(git rev-parse --show-toplevel)"`));
+  write(root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "export const value = 1;\n");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "Codex startup wiring" && item.status === "fail" && /missing AI_WORKFLOW_RUNNER=node prefix/.test(item.detail)));
+});
+
+
+test("doctor rejects malformed Codex startup wiring fields", async (t) => {
+  const command = 'workflow_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 2; AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$workflow_root/ai-framework/hooks/scripts/orca-start-codex-hook.mts" --root "$workflow_root"';
+  const cases = [
+    { label: "missing flags", command: command.replace("--experimental-strip-types ", ""), reason: /Node compatibility flags/ },
+    { label: "missing root", command: command.replace(' --root "$workflow_root"', ''), reason: /trusted --root/ },
+    { label: "conflicting root", command: command.replace(' --root "$workflow_root"', ' --root "/untrusted"'), reason: /trusted --root/ },
+    { label: "unbound root", command: command.replace("workflow_root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 2; ", ""), reason: /trusted --root/ },
+    { label: "wrong timeout", command, timeout: 5, reason: /timeout is not 8/ },
+    { label: "wrong handler type", command, type: "prompt", reason: /not a command hook/ },
+  ];
+  for (const item of cases) {
+    const root = fixture(t);
+    const payload = JSON.parse(codexHooks(item.command, item.timeout));
+    if (item.type) payload.hooks.UserPromptSubmit[0].hooks[0].type = item.type;
+    write(root, ".codex/hooks.json", JSON.stringify(payload));
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    assert.ok(checks(capture.output).some(result => result.name === "Codex startup wiring" && result.status === "fail" && item.reason.test(result.detail)), item.label);
+  }
+});
+
+test("doctor rejects malformed Codex startup JSON and objects", async (t) => {
+  for (const content of ["{", "null", "{}", '{"hooks":null}', '{"hooks":{"UserPromptSubmit":[]}}']) {
+    const root = fixture(t);
+    write(root, ".codex/hooks.json", content);
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    assert.ok(checks(capture.output).some(result => result.name === "Codex startup wiring" && result.status === "fail"));
+  }
+});
+
+test("doctor rejects shell text that mentions the adapter without running it", async (t) => {
+  const invocation = 'AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/orca-start-codex-hook.mts" --root "$(git rev-parse --show-toplevel)"';
+  for (const command of [`echo '${invocation}'`, `# ${invocation}`, `${invocation}; echo done`, `true; # ${invocation}`]) {
+    const root = fixture(t);
+    write(root, ".codex/hooks.json", codexHooks(command));
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    assert.ok(checks(capture.output).some(result => result.name === "Codex startup wiring" && result.status === "fail" && /does not execute/.test(result.detail)), command);
+  }
+});
+
+test("doctor passes the installed guarded Codex registration", async (t) => {
+  const root = fixture(t);
+  write(root, ".codex/hooks.json", fs.readFileSync(path.resolve(import.meta.dirname, "../../.codex/hooks.json"), "utf8"));
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some(result => result.name === "Codex startup wiring" && result.status === "pass"));
+});

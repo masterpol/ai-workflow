@@ -1,5 +1,5 @@
 {
-  "description": "Records a bounded local token-consumption snapshot after every Codex subagent.",
+  "description": "Records bounded token-consumption snapshots after Codex subagents and gates Codex workflow phases on Orca readiness.",
   "hooks": {
     "SubagentStop": [
       {
@@ -9,6 +9,18 @@
             "type": "command",
             "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$(git rev-parse --show-toplevel)/ai-framework/hooks/scripts/token-consumption.mts\" --vendor codex --event subagent-complete --root \"$(git rev-parse --show-toplevel)\"",
             "timeout": 5
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "description": "Gates Codex workflow phase prompts on Orca coordinator readiness.",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "workflow_root=$(git rev-parse --show-toplevel 2>/dev/null) || { printf '%s\\n' 'Orca requested but not ready: project-root-unavailable. Run the Codex startup check from the project root before continuing.' >&2; exit 2; }; AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$workflow_root/ai-framework/hooks/scripts/orca-start-codex-hook.mts\" --root \"$workflow_root\"",
+            "timeout": 8
           }
         ]
       }

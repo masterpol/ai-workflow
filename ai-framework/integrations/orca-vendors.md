@@ -76,8 +76,8 @@ markers establish documented capabilities only. A reachable local runtime, match
 and live caller session matching `ORCA_AGENT_SESSION_ID` provide limited session evidence;
 they do not prove an enabled orchestration feature, authenticated vendors, or safe dispatch.
 Unknown fields and experimental-feature assertions do not supply that proof. Successful
-fixture receipts are test evidence; no successful live Orca probe has been recorded here.
-Other versions remain unverified until their contract is reviewed.
+fixture receipts are test evidence. The live coordinator observations below establish only
+the inspected runtime and flows; other versions remain unverified until their contract is reviewed.
 
 `--worker-context` prevents coordinator selection and all probes when the caller is an
 existing worker. This is an explicit caller guard; session presence alone does not identify
@@ -95,12 +95,13 @@ The orchestration interfaces are described by the
 [official Orca guide](https://www.onorca.dev/docs/cli/orchestration) and
 [maintained coordinator guide](https://github.com/stablyai/orca/blob/main/skill-guides/orchestration.md).
 The installed-source contract and live-verification limits are recorded in the foundation
-pitch's S2 evidence. Future dispatch work must obtain live proof before relying on this policy.
+pitch's S2 evidence. Each new dispatch flow must obtain live proof before relying on this policy;
+the coordinator observations below do not establish every host or authentication state.
 
 ## Automatic start (every workflow phase)
 
 `orca-start.mts` makes a fresh readiness decision for each invocation; it does not launch workers.
-The CLI and Claude hook recognize twelve phases: `shape`, `shape-lite`, `critique`, `plan`,
+The CLI and host adapters recognize twelve phases: `shape`, `shape-lite`, `critique`, `plan`,
 `build`, `audit`, `ship`, `cooldown`, `fix`, `resume`, `switch`, and `checkpoint`.
 Other skills pass through the hook. Checks run in this fixed order: switch, bypass token,
 worker identity, then gate. Nothing is cached between calls.
@@ -154,12 +155,78 @@ hook timeout is 8 seconds. The script enforces its own deadline with a timer and
 check after synchronous probes, exiting 2 itself so blocking does not depend on a host timeout
 that can allow the invocation to continue.
 
-Automatic start is proven live for Claude Code only. Codex, OpenCode and Cursor adapters,
-and start blocks in each phase skill, are later pitches. Both hook commands force
+Automatic start is proven live for Claude Code only. The Codex adapter is described below;
+its host activation requires separate proof. OpenCode and Cursor adapters and start blocks
+in each phase skill remain later pitches. Startup hook commands force
 `AI_WORKFLOW_RUNNER=node` before invoking Node, so a configured Bun runner that is missing
 cannot bypass readiness checks. This environment assignment prefix requires a POSIX shell;
 it is not valid in Windows cmd. Workers share the coordinator checkout;
 automatic start provides no checkout isolation.
+
+### Codex startup and coordinator preparation
+
+Codex registers `UserPromptSubmit` in `.codex/hooks.json`, preserving the existing
+`SubagentStop` metrics registration. Its adapter is
+`ai-framework/hooks/scripts/orca-start-codex-hook.mts`. It uses the same `decideStart`
+library with `vendor: "codex"`, not the CLI's default `claude`. It recognizes only an explicit
+leading `/phase` or `$phase` with an exact supported phase name. Quoted examples, unrelated
+skills, embedded command names and ordinary prose do not trigger it. Arguments after the
+phase name are passed through unchanged, so quoted or escaped `orca=normal` remains data.
+
+The trusted registration resolves the invocation checkout with Git and supplies that same
+root for the script path and `--root`. A failed Git lookup exits 2 with a fixed
+`project-root-unavailable` reason before starting Node. This registration requires Git and
+a Git checkout. Root lookup precedes the adapter switch check, so a failed Git lookup blocks
+any prompt even when Orca is off; the adapter's off/no-probe guarantee applies once bootstrap
+succeeds. Payload `cwd`
+and other vendors' root environment variables cannot select the policy root. Input is
+bounded to 64 KiB. Off and worker decisions are silent; ready and bypass decisions add
+`hookSpecificOutput.additionalContext` for `UserPromptSubmit`. A blocked decision emits
+the safe reason to stderr and exits 2. The adapter enforces the same four-second decision,
+five-second script and eight-second host budgets described above. It never creates a Run
+or launches workers.
+
+Codex requires review and trust of changed hook definitions through `/hooks`; use a fresh
+session to verify activation. Configuration presence and shell fixtures do not prove that
+the host ran a hook. If activation is unavailable, record it as **unverified**. Never bypass
+hook trust or alter global Codex configuration to manufacture proof. The POSIX registration
+pins Node; missing Node, unsupported shells, and bootstrap failures before the adapter starts
+are not proven blocking paths.
+
+The entry instructions in `AGENTS.md` require the Codex coordinator to run startup before
+**every** phase, including phases chosen from conversation and sessions without trusted hooks:
+
+```sh
+node ai-framework/scripts/orca-run.mts start --root . --phase build --vendor codex --args-text ""
+```
+
+Supply the actual phase and unchanged invocation arguments via structured tool arguments or
+safe quoting; never interpolate free-form prompt text into shell code. On blocked/error/refused
+outcomes stop and ask; only an explicit per-call `orca=normal` selects the normal workflow.
+Dispatched workers follow their live brief instead of coordinating.
+
+Before any dispatch after `ready`, inspect `orca orchestration run-current --json` with the
+same selected executable. If absent, create and bind a Run for the pitch using
+`orca orchestration run-create --objective "<pitch objective>" --json`. Preserve its ID in
+local evidence. Reuse an existing binding only after checking the objective and coordinator;
+do not replace an unrelated binding silently. A readiness decision does not establish a bound
+Run. A live Codex session with no bound Run passed readiness but could not dispatch; binding
+the Run resolved that prerequisite.
+
+Dispatch input names `coordinator: "codex"` and an alternate configured `vendor`. Collect the
+attempt's own authoritative `worker_done`, independently inspect edits and rerun exit commands,
+then release settled workers and acknowledge deliveries. Unknown-liveness attempts retain
+ownership until inspected; never retry merely because a launch receipt is missing.
+
+**Observed evidence:** Codex coordinated read-only Claude and OpenCode reviews through the
+existing dispatch library, accepted each worker's own report, and released and settled all
+four workers. Two editing workers and nine audit workers also completed through this Codex
+coordinator; shared-checkout edits were independently verified and every terminal released.
+This proves those coordinator paths for the inspected runtime. It does not prove
+hook activation, isolated editing-worker reconciliation, every authentication state, or other runtime
+versions. The separate host hook case remains unverified until a trusted fresh invocation
+is observed. Existing projects receive entry-file changes through manual bundle-sync review;
+sync does not automatically replace their `AGENTS.md`/`CLAUDE.md`.
 
 ## Dispatch core (opt-in, library only)
 
@@ -269,8 +336,11 @@ stays `liveCompatibility: "unverified"`; a smoke record cannot turn it into a pa
 | Target | Status |
 |---|---|
 | Claude (coordinator and worker) | observed |
-| Codex | not-run (no funds) |
-| OpenCode | not-run (no funds) |
+| Codex coordinator | observed: Claude/OpenCode review dispatch, authoritative collection, release and ledger settlement |
+| Codex startup hook | unverified: requires a trusted fresh host invocation |
+| Codex worker | observed under Claude coordination; see the automatic-start design record |
+| OpenCode worker | observed under Claude and Codex coordination |
+| OpenCode coordinator | unverified |
 | Peer messaging | not-run |
 
 Manual smoke checklist: set the switch in a scratch project; run `status --probe`; dispatch one scope to an alternate vendor

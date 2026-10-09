@@ -224,6 +224,102 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
   }
 
+  // The Codex host wiring is structural: the hook file exists, the JSON is valid, and the
+  // UserPromptSubmit registration points at the adapter with the exact Node runner, flags, root
+  // argument, and timeout required by the coordinator contract. This is separate from live host
+  // activation, which can only be verified by a trusted Codex session.
+  async function checkCodexStartupWiring() {
+    const name = "Codex startup wiring";
+    const relativePath = ".codex/hooks.json";
+    let content: string;
+    try {
+      content = await fsp.readFile(absolute(relativePath));
+    } catch (error) {
+      record("fail", name, `.codex/hooks.json missing: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(content);
+    } catch (error) {
+      record("fail", name, `invalid JSON: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+
+    if (!parsed || typeof parsed !== "object" || !("hooks" in parsed)) {
+      record("fail", name, "missing top-level hooks object");
+      return;
+    }
+    const hooks = (parsed as Record<string, unknown>).hooks;
+    if (!hooks || typeof hooks !== "object") {
+      record("fail", name, "hooks is not an object");
+      return;
+    }
+
+    const userPrompt = (hooks as Record<string, unknown>).UserPromptSubmit;
+    if (!Array.isArray(userPrompt) || userPrompt.length === 0) {
+      record("fail", name, "UserPromptSubmit not registered");
+      return;
+    }
+
+    const candidateHooks: unknown[] = [];
+    for (const registration of userPrompt) {
+      if (registration && typeof registration === "object" && Array.isArray((registration as Record<string, unknown>).hooks)) {
+        candidateHooks.push(...(registration as Record<string, unknown>).hooks as unknown[]);
+      }
+    }
+
+    const commandEntry = candidateHooks.find(
+      (entry) =>
+        entry &&
+        typeof entry === "object" &&
+        typeof (entry as Record<string, unknown>).command === "string" &&
+        String((entry as Record<string, unknown>).command).includes("ai-framework/hooks/scripts/orca-start-codex-hook.mts")
+    );
+    if (!commandEntry) {
+      record("fail", name, "UserPromptSubmit does not reference ai-framework/hooks/scripts/orca-start-codex-hook.mts");
+      return;
+    }
+
+    const command = String((commandEntry as Record<string, unknown>).command);
+    const problems: string[] = [];
+    if ((commandEntry as Record<string, unknown>).type !== "command") {
+      problems.push("startup handler is not a command hook");
+    }
+    if (!/\bAI_WORKFLOW_RUNNER=node\s+node\s+--experimental-strip-types\s+--disable-warning=ExperimentalWarning\b/.test(command)) {
+      problems.push("missing AI_WORKFLOW_RUNNER=node prefix with Node compatibility flags");
+    }
+    const gitRoot = "$(git rev-parse --show-toplevel)";
+    const adapter = "/ai-framework/hooks/scripts/orca-start-codex-hook.mts";
+    const inlineRoot = command.includes(`"${gitRoot}${adapter}" --root "${gitRoot}"`);
+    const assignedRoot = command.includes("workflow_root=$(git rev-parse --show-toplevel 2>/dev/null)")
+      && command.includes(`"$workflow_root${adapter}" --root "$workflow_root"`);
+    if (!inlineRoot && !assignedRoot) {
+      problems.push("missing trusted --root argument");
+    }
+    // Recognize executable registrations, not examples echoed or commented in shell text.
+    // This is a conservative wiring check; host activation still needs separate evidence.
+    const runner = "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning";
+    const inlineCommand = `${runner} "${gitRoot}${adapter}" --root "${gitRoot}"`;
+    const assignedCommand = `${runner} "$workflow_root${adapter}" --root "$workflow_root"`;
+    const guardedAssignment = /^workflow_root=\$\(git rev-parse --show-toplevel 2>\/dev\/null\) \|\| (?:exit 2; |\{ printf '%s\\n' '[^'\u0000-\u001f]*' >&2; exit 2; \}; )$/;
+    const executable = command === inlineCommand
+      || command.endsWith(assignedCommand) && guardedAssignment.test(command.slice(0, -assignedCommand.length));
+    if (!executable) {
+      problems.push("startup command does not execute the adapter with supported wiring");
+    }
+    if ((commandEntry as Record<string, unknown>).timeout !== 8) {
+      problems.push("timeout is not 8");
+    }
+
+    if (problems.length) {
+      record("fail", name, problems.join("; "));
+      return;
+    }
+    record("pass", name, "UserPromptSubmit wired to orca-start-codex-hook.mts with Node runner, root argument, and 8s timeout");
+  }
+
   async function runProcess(command: string, args: string[], options: { timeout?: number } = {}): Promise<{ code?: number | null; stdout: string; stderr: string; error?: Error & { code?: string } }> {
     try {
       const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }) : deps.child.run(command, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }));
@@ -606,7 +702,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     if (inPortableBundleRepo) coreFiles.push("SETUP.md");
     // bundle-sync.mts and skill-sync.mts were missing from this list (found while adding
     // skill-defaults.mts here) — every other script this doctor knows about gets a syntax check.
-    const scripts = [".claude/hooks/post-edit-check.mts", "ai-framework/hooks/scripts/pre-ship-verify.mts", "ai-framework/hooks/scripts/stuck-uphill-detector.mts", "ai-framework/hooks/scripts/token-consumption.mts", "ai-framework/hooks/scripts/token-consumption.test.mts", "ai-framework/hooks/scripts/token-report.mts", "ai-framework/hooks/scripts/token-report.test.mts", "ai-framework/hooks/scripts/opencode-plugin.test.mts", "ai-framework/scripts/graphify.mts", "ai-framework/scripts/workflow-doctor.mts", "ai-framework/scripts/setup-validator.mts", "ai-framework/scripts/entry-import.mts", "ai-framework/scripts/entry-import.test.mts", "ai-framework/scripts/add-skill.mts", "ai-framework/scripts/skill-registry.mts", "ai-framework/scripts/skill-source.mts", "ai-framework/scripts/skill-vendors.mts", "ai-framework/scripts/skill-sync.mts", "ai-framework/scripts/bundle-sync.mts", "ai-framework/scripts/skill-defaults.mts", "ai-framework/scripts/skill-compress-guard.mts", "ai-framework/scripts/browser-runtime.mts", "ai-framework/scripts/pitch-compress.mts", "ai-framework/scripts/pitch-archive.mts", "ai-framework/scripts/state-snapshot.mts", "ai-framework/scripts/state-theme.mts", "ai-framework/scripts/state-render.mts", "ai-framework/scripts/review-bench.mts"];
+    const scripts = [".claude/hooks/post-edit-check.mts", "ai-framework/hooks/scripts/pre-ship-verify.mts", "ai-framework/hooks/scripts/stuck-uphill-detector.mts", "ai-framework/hooks/scripts/token-consumption.mts", "ai-framework/hooks/scripts/token-consumption.test.mts", "ai-framework/hooks/scripts/token-report.mts", "ai-framework/hooks/scripts/token-report.test.mts", "ai-framework/hooks/scripts/opencode-plugin.test.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.test.mts", "ai-framework/scripts/graphify.mts", "ai-framework/scripts/workflow-doctor.mts", "ai-framework/scripts/setup-validator.mts", "ai-framework/scripts/entry-import.mts", "ai-framework/scripts/entry-import.test.mts", "ai-framework/scripts/add-skill.mts", "ai-framework/scripts/skill-registry.mts", "ai-framework/scripts/skill-source.mts", "ai-framework/scripts/skill-vendors.mts", "ai-framework/scripts/skill-sync.mts", "ai-framework/scripts/bundle-sync.mts", "ai-framework/scripts/skill-defaults.mts", "ai-framework/scripts/skill-compress-guard.mts", "ai-framework/scripts/browser-runtime.mts", "ai-framework/scripts/pitch-compress.mts", "ai-framework/scripts/pitch-archive.mts", "ai-framework/scripts/state-snapshot.mts", "ai-framework/scripts/state-theme.mts", "ai-framework/scripts/state-render.mts", "ai-framework/scripts/review-bench.mts"];
     scripts.push("ai-framework/scripts/docs-links.mts", "ai-framework/scripts/docs-links.test.mts");
     scripts.push("ai-framework/scripts/orca-policy.mts", "ai-framework/scripts/orca-preflight.mts");
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
@@ -673,6 +769,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkWorkflowSettings(),
       checkRuntimeBoundary(),
       checkOrcaPolicy(),
+      checkCodexStartupWiring(),
     ]);
     await checkProjectScaffold();
     await checkKnowledgeGraph();

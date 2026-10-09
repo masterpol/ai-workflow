@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "slug": "runner-aware-runtime-boundary-validator",
+  "sections": [
+    {
+      "source": "SHIPPED.md#pitch-implementation",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
+      "reason": "design decision"
+    },
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-runner-aware-runtime-boundary-validator.md",
+      "reason": "ship-time run log"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
+      "reason": "constraints"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
+      "reason": "scanner lessons"
+    },
+    {
+      "source": "SHIPPED.md#deviations-see-deviationsmd-audit-cycle-1md-audit-cycle-2md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
+      "reason": "fail-closed lesson"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-runner-aware-runtime-boundary-validator.md",
+      "reason": "run log"
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
+      "reason": "entries"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": "followups file"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
+      "reason": "constraints"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
+      "reason": "scanner lessons"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
+      "reason": "evasions and fail-open"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
+      "reason": "evasions and fail-open"
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-09T03:55:43.320Z"
+}

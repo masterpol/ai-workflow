@@ -331,3 +331,10 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Remaining validator test gaps left as listed in `audit-cycle-2.md` S7 (root symlink, fstat size/type refusal, close error, default deps, doctor plain output / non-directory / exhausted cap).
 - A purely computed `import(x)` and an uncalled `require` are advisory only; consider promoting them if the 8 current computed imports are all reviewed and justified.
 - Cycle-2 final fixes were verified by coordinator-run probes and suites, not by a third independent review; revisit at the next cooldown or when the validator is next touched.
+
+## codex-orca-coordinator-parity — 2026-10-08
+
+- Priority: fix review-bench guard to exclude secret names before any read/hash, even for Git-ignored files. Test with a read-refusing spy, secret fixture and nonsecret-change control. This audit used secret-excluding injected deps; the CLI remains unfixed.
+- Verify Codex automatic UserPromptSubmit ready context and blocking behavior in a fresh session after `/hooks` trust review. Existing dispatch/collection/release proof does not prove host activation; never bypass trust to manufacture proof.
+- Decide whether to support non-Git hook bootstrap and stricter unsupported direct --root parsing. Current registration requires Git/checkout and blocks before the off check if root lookup fails; documented and tested.
+- Make coverage compatible with the existing exact child-environment assertion without weakening it. Keep Node/Bun regression results separate from instrumentation failures; investigate Bun1.4.2 coverage crash independently.

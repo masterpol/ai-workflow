@@ -72,6 +72,40 @@ profile. Falls back to a sequential pass on a harness without nested dispatch. S
 Dispatch" in `ai-framework/integrations/harnesses.md` for the per-harness capability table and
 the model-selection rule.
 
+## Codex Orca coordination
+
+These steps apply to the **Codex coordinator**, not a dispatched worker. A worker follows its
+live Orca brief and never starts coordinator phases or dispatches nested workers. Other hosts
+use their own startup adapters.
+
+Before every workflow phase, including one selected from ordinary conversation, run
+`node ai-framework/scripts/orca-run.mts start --root <project-root> --phase <phase> --vendor codex`
+and pass the original invocation arguments unchanged through `--args-text`. Use structured tool
+arguments or safe shell quoting; never interpolate prompt text into shell code. Always supply
+`--vendor codex`: the CLI's default is Claude. Supported phases are `shape`, `shape-lite`,
+`critique`, `plan`, `build`, `audit`, `ship`, `cooldown`, `fix`, `resume`, `switch`, and `checkpoint`.
+
+- `off` runs the normal phase; `bypassed` runs it only for that invocation's explicit
+  `orca=normal` request. `worker` means follow the worker brief instead of coordinating.
+- `ready` permits coordinator preparation. Before the first dispatch, use the same Orca
+  executable to inspect `orca orchestration run-current --json`. If no Run is bound, create
+  one with `orca orchestration run-create --objective "<pitch objective>" --json`. Save its
+  ID in local evidence. Reuse a bound Run only after verifying its objective and coordinator;
+  stop and request a choice if it belongs to unrelated work. Readiness alone does not bind a Run.
+- `blocked`, an error, or a refused dispatch stops the phase. Report the exact safe reason
+  and ask whether to fix it or re-invoke with `orca=normal`. Never silently fall back to ordinary
+  subagents while Orca is requested. Diagnostic `status.dispatchReady` is not launch authority.
+- Dispatch input uses `coordinator: "codex"` and a configured alternate worker vendor. Completion
+  requires that attempt's own `worker_done`; independently inspect shared-checkout edits and
+  rerun exit commands. Release settled workers, settle the ledger, and acknowledge processed
+  deliveries. Preserve unknown-liveness ownership until recovery evidence supports a decision.
+
+`.codex/hooks.json` supplements these instructions with `UserPromptSubmit` startup for an
+explicit leading `/phase` or `$phase`. Review changed hooks through `/hooks` and start a fresh
+Codex session to verify activation. Hooks do not create Runs or launch workers. If hooks are
+untrusted or unavailable, the coordinator still runs the startup command above. Contract and
+verification limits: `ai-framework/integrations/orca-vendors.md`.
+
 ## Confirmation gate (always)
 
 Every gated phase ends with **Approve / Revise / Back / Stop**. Never auto-advance. The
