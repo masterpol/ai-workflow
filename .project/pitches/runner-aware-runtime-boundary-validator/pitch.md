@@ -68,7 +68,7 @@ Today the only enforcement is a regex in `runtime/invariants.test.mts` that fail
 
 ## Bet decision
 
-☐ **Bet** (→ /plan)  
+☑ **Bet** (→ /plan) — bet implied by the user running `/plan` on this pitch, 2026-10-08. Small-batch, so no critique. Plan adds two facts the pitch lacked (see plan.md): 41 of 50 test files already import `node:*` beyond test/assert, so the doctor must summarize test findings; some test fixtures hold `node:` text inside strings, so the scanner must skip strings, templates and comments.  
 ☐ Re-shape — named gap: {which rabbit hole un-resolved? which critique finding?}  
 ☐ Pass — moved to `.project/pitches/_parked/runner-aware-runtime-boundary-validator/`; reason: {…}
 

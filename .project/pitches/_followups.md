@@ -325,3 +325,9 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Migrate `orca-start-hook.test.mts` and `orca-start.test.mts` off direct `node:*` imports (`runtime/test-helpers`) before `runner-aware-runtime-boundary-validator` lands.
 - Later pitches: the 12-skill start block rollout (24 canonical files plus mirrors, byte-identity vs pointer stubs), and the Codex, OpenCode and Cursor adapters (OpenCode `tool.hook`, Codex `hooks.json`; no live proof outside Claude Code).
 - Orca coordinator-side `evaluateLaunch` still passes the full parent env to its probe child (existing launch gate; out of scope for this pitch).
+
+## runner-aware-runtime-boundary-validator leftovers (2026-10-08)
+- Migrate the 43 test files that still import `node:fs/os/path/child_process/url/module/crypto/net` to `runtime/test-helpers` (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`); the doctor's Runtime boundary warning lists the count and the first files. The two Orca start test files are in that set.
+- Remaining validator test gaps left as listed in `audit-cycle-2.md` S7 (root symlink, fstat size/type refusal, close error, default deps, doctor plain output / non-directory / exhausted cap).
+- A purely computed `import(x)` and an uncalled `require` are advisory only; consider promoting them if the 8 current computed imports are all reviewed and justified.
+- Cycle-2 final fixes were verified by coordinator-run probes and suites, not by a third independent review; revisit at the next cooldown or when the validator is next touched.

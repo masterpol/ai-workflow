@@ -62,6 +62,66 @@ another runtime. Portable reminder hooks and review-bench test commands use the 
 - The OpenCode plugin is `.opencode/plugins/token-consumption.ts`: its host discovers `.ts`
   files, while shared libraries remain `.mts`.
 
+## Boundary validator
+
+`validateRuntimeImports(root, paths, options, deps?)` in `runtime/validate.mts` scans the listed
+source paths under `root` and returns a `Violation[]`. Each violation carries `file`, `line`,
+`kind`, `module` (when applicable), and `suggestion`. Kinds are `import`, `export-from`,
+`dynamic-import`, `require`, `global`, `dynamic-computed`, and `unparsed`; `unparsed` is emitted when a file cannot be
+read safely or the lexer fails. Lexer errors retain earlier findings. Module string line
+continuations (LF, CRLF, U+2028 and U+2029) are decoded; escaped identifiers produce `unparsed` conservatively.
+
+The scanner is a small lexer, not a TypeScript parser. It detects:
+
+- `import … from 'node:…'`, including side-effect and multi-line declarations
+- `export … from 'node:…'`
+- `import(…)` arguments containing a string or template literal starting with `node:`
+- `require(…)`, optional, comma-operator and tagged-template calls containing such a literal
+
+It skips type-only declarations, inline and block comments, string literals, template text,
+and member access like `object.require('node:fs')`. Nested `${…}` expressions are scanned as code.
+A default binding named `type` remains a value import. Dynamic import and require arguments are inspected through nested parentheses,
+conditionals, concatenations, templates, comma expressions and optional calls. A plain string
+argument is classified by module; other arguments containing a `node:` literal receive the
+suggestion "non-literal import specifier; pass the capability from a caller". Arguments
+containing literals without a `node:` prefix produce no finding. Require declarations and
+object keys are excluded. In test files—by
+default files matching `/\.test\.(mts|ts)$/`—it also skips `node:test`, `node:assert`, and
+`node:assert/strict`. An `adapters` option supplies an allowlist of file paths whose imports and
+globals are suppressed entirely.
+
+`process.*` globals are advisory and off by default. When `includeGlobals` is true, uses of
+`process.env`, `argv`, `exit`, `cwd`, `platform`, `stdin`, `stdout`, and `stderr` are reported with
+kind `global` and suggestion `deps.proc or deps.io`. Arguments with no literal at all,
+such as `import(fileUrl(x))` or `import(variable)`, and uncalled `require` references produce
+opt-in `dynamic-computed` advisories with the suggestion "computed import specifier; review
+manually or pass the capability from a caller". These advisories never fail the boundary check
+and are counted as computed imports in the doctor advisory line.
+
+The suggestion field maps known modules to `RuntimeDeps` fields:
+
+| Module | Suggestion |
+|---|---|
+| `node:fs` | `deps.fs` |
+| `node:path` | `deps.path` |
+| `node:os` | `deps.os` |
+| `node:child_process` | `deps.child` |
+| `node:crypto` | `deps.crypto` |
+| `node:net` | `deps.net` |
+| other `node:*` modules | pass the capability from a caller |
+
+The validator is read-only: it never rewrites source, adds no dependency, and refuses symlinks and
+files over 1 MiB. `runtime/invariants.test.mts` calls the same validator for production code and
+fails on production import violations or unparsed sources; global and computed advisories are excluded. `workflow-doctor` summarizes test findings
+as warnings and fails on production findings, unparsed sources, and paths skipped because of
+scan limits, symlinks, or unreadable state. Doctor text and JSON output strip C0/C1 and bidi
+controls from printed file names.
+
+Many existing tests still import `node:fs`, `node:os`, `node:path` or `node:child_process`; they
+will be migrated by a later pitch, not by the validator. New tests should use the helpers in
+`runtime/test-helpers.mts` instead: `createTestDeps()`, `tempFixture()`, `runScript()`,
+`memoryFs()` and `captureIo()`.
+
 ## Running tests
 
 ```sh
@@ -78,3 +138,10 @@ execution guards, and enforces runtime adapter boundaries. Runtime tests cover r
 Node/Bun behavior and imports without CLI execution. `runtime/upgrade.test.mts` exercises an old
 install's update to the direct TypeScript entries; see the
 [existing-install upgrade steps](../../docs/versioning-and-sync.md).
+
+Audit regression coverage includes invalid escapes, regex newline and template EOF, root
+symlink refusal, descriptor size/type changes before reading, default dependency construction,
+plain doctor output, non-directory scan roots and scan caps exhausted before later roots.
+Scratch mutants under the OS temporary directory prove the node literal rule, computed advisory,
+import argument, require identifier, template expression, value binding named type, Unicode continuation, bidi output and planted
+unparsed invariant guards. No S7 cases from the audit list remain deferred.

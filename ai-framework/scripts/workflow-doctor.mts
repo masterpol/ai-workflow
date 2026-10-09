@@ -2,6 +2,7 @@
 import { runWorkflow } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { inspectWorkflowEnv } from "./runtime/env.mts";
+import { validateRuntimeImports } from "./runtime/validate.mts";
 /*
  * Verifies that the portable workflow is complete after installation. Checks
  * run concurrently and report as they finish. --fix restores only missing
@@ -109,11 +110,64 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   }
 
   function record(status: string, name: string, detail: string): void {
+    const safe = (text: string): string => text.replace(/[\u0000-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/g, "");
+    name = safe(name); detail = safe(detail);
     const result = { status, name, detail };
     results.push(result);
     if (!json) {
       deps.io.stdout.write(`${paint(status, status.toUpperCase().padEnd(5))} ${name}: ${detail}\n`);
     }
+  }
+
+  function checkRuntimeBoundary(): void {
+    const sources: string[] = [];
+    const skip = new Set(["node_modules", ".git", "scratchpad"]);
+    const adapters = new Set(["node", "bun", "cli", "entry"].map((name) => `ai-framework/scripts/runtime/${name}.mts`));
+    const testFile = (file: string): boolean => /\.test\.(mts|ts)$/.test(file);
+    let visited = 0;
+    const skipped: Array<{ file: string; line: number; suggestion: string }> = [];
+    const refuse = (file: string, suggestion: string): void => { skipped.push({ file, line: 1, suggestion }); };
+    const walk = (directory: string, depth: number): void => {
+      if (depth > 64) { refuse(directory, "depth cap exceeded"); return; }
+      if (visited >= 10000) { refuse(directory, "visited entry cap exceeded"); return; }
+      try {
+        const stat = fs.lstatSync(absolute(directory));
+        if (stat.isSymbolicLink()) { refuse(directory, "directory symlink refused"); return; }
+        if (!stat.isDirectory()) return;
+        for (const entry of fs.readdirEntriesSync(absolute(directory)).sort((a, b) => a.name.localeCompare(b.name))) {
+          if (++visited > 10000) { refuse(directory, "visited entry cap exceeded"); break; }
+          if (skip.has(entry.name)) continue;
+          const file = `${directory}/${entry.name}`;
+          const child = fs.lstatSync(absolute(file));
+          if (child.isSymbolicLink()) { refuse(file, "child symlink refused"); continue; }
+          if (child.isDirectory()) walk(file, depth + 1);
+          else if (child.isFile() && /\.(ts|mts)$/.test(file)) sources.push(file);
+        }
+      } catch { refuse(directory, "unreadable path"); }
+    };
+    for (const directory of ["ai-framework", ".claude", ".opencode"]) {
+      if (fs.existsSync(absolute(directory))) walk(directory, 0);
+    }
+    const findings = validateRuntimeImports(root, sources.sort(), { adapters, testFile, includeGlobals: true }, deps);
+    const imports = findings.filter((item) => item.kind !== "global" && item.kind !== "dynamic-computed" && item.kind !== "unparsed");
+    const production = imports.filter((item) => !testFile(item.file));
+    const tests = imports.filter((item) => testFile(item.file));
+    const unparsedProduction = [...findings.filter((item) => item.kind === "unparsed"), ...skipped].filter((item) => !testFile(item.file));
+    record(production.length || unparsedProduction.length ? "fail" : "pass", "Runtime boundary", `production: ${production.length} violations, ${unparsedProduction.length} unparsed${unparsedProduction.length ? `; ${unparsedProduction.slice(0, 5).map((item) => `${item.file}:${item.line} ${item.suggestion}`).join("; ")}` : ""}${production.length ? `; ${production.slice(0, 5).map((item) => `${item.file}:${item.line} imports ${item.module ?? "(non-literal)"}; use ${item.suggestion}`).join("; ")}` : ""}`);
+    if (tests.length) {
+      const files = [...new Set(tests.map((item) => item.file))];
+      const modules = new Map<string, number>();
+      for (const item of tests) {
+        const module = item.module ?? "(non-literal)";
+        modules.set(module, (modules.get(module) ?? 0) + 1);
+      }
+      const top = [...modules].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 3);
+      record("warn", "Runtime boundary", `tests: ${files.length} files, ${tests.length} violations; top modules: ${top.map(([name, count]) => `${name} (${count})`).join(", ")}; first files: ${files.slice(0, 5).join(", ")}`);
+    }
+    const unparsed = findings.filter((item) => item.kind === "unparsed").length;
+    const globals = findings.filter((item) => item.kind === "global").length;
+    const computed = findings.filter((item) => item.kind === "dynamic-computed").length;
+    if (unparsed || globals || computed || skipped.length) record(unparsed || skipped.length ? "warn" : "info", "Runtime boundary", `advisory: ${unparsed} unparsed sources, ${globals} process globals, ${computed} computed imports, ${skipped.length} unreadable or skipped paths`);
   }
 
   async function exists(target) {
@@ -617,6 +671,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkSkillDefaults(),
       checkCavemanState(),
       checkWorkflowSettings(),
+      checkRuntimeBoundary(),
       checkOrcaPolicy(),
     ]);
     await checkProjectScaffold();

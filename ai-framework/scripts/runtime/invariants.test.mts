@@ -7,6 +7,8 @@ import { join, relative, sep } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { NODE_FLAGS } from "./entry.mts";
+import { createTestDeps, memoryFs } from "./test-helpers.mts";
+import { validateRuntimeImports } from "./validate.mts";
 
 const root = fileURLToPath(new URL("../../..", import.meta.url));
 const SKIP = new Set(["node_modules", ".git", "scratchpad"]);
@@ -60,10 +62,55 @@ test("imports all production TypeScript modules silently without running command
   assert.deepEqual(readdirSync(cwd), [], "importing cannot create project state");
 });
 
+function boundaryFindings(rootPath: string, paths: string[], deps: ReturnType<typeof createTestDeps>) {
+  return validateRuntimeImports(rootPath, paths, { adapters: ADAPTERS, includeGlobals: true }, deps)
+    .filter((item) => item.kind !== "global" && item.kind !== "dynamic-computed");
+}
+
 test("uses injected dependencies outside runtime adapters and avoids any-typed escape hatches", () => {
+  const violations = boundaryFindings(root, sources, createTestDeps());
+  assert.deepEqual(violations, [], "production sources import node:* outside runtime adapters or remain unparsed");
   for (const file of sources) {
     const text = readFileSync(join(root, file), "utf8");
-    if (!ADAPTERS.has(file)) assert.doesNotMatch(text, /^import (?!type\b).*from "node:|\brequire\("node:/m, `${file} imports node:*`);
     assert.doesNotMatch(text, /:\s*any\b|\bas any\b/, `${file} uses any`);
   }
+});
+
+function plantedDeps(fixtureRoot: string, file: string, source: string) {
+  const base = createTestDeps();
+  const fake = memoryFs({ [`${fixtureRoot}/${file}`]: source });
+  const handles = new Map<number, string>();
+  let sequence = 10;
+  return { ...base, fs: { ...base.fs, ...fake,
+    openSync: (name: string) => { const fd = sequence++; handles.set(fd, name); return fd; },
+    fstatSync: (fd: number) => fake.statSync!(handles.get(fd)!),
+    readSync: (fd: number, bytes: Uint8Array, offset: number, length: number, position: number | null) => {
+      const data = fake.readBytesSync!(handles.get(fd)!);
+      const chunk = data.subarray(position ?? 0, (position ?? 0) + length);
+      bytes.set(chunk, offset); return chunk.length;
+    },
+    closeSync: (fd: number) => { handles.delete(fd); },
+  } };
+}
+
+test("runtime dependency invariant reports a planted production import in memory", () => {
+  const fixtureRoot = "/fixture", file = "ai-framework/scripts/planted.mts";
+  const deps = plantedDeps(fixtureRoot, file, '// planted violation\nexport { readFile } from "node:fs";\n');
+  assert.deepEqual(validateRuntimeImports(fixtureRoot, [file], { adapters: ADAPTERS }, deps), [
+    { file, line: 2, kind: "export-from", module: "node:fs", suggestion: "deps.fs" },
+  ]);
+});
+
+test("S6 invariant retains planted unparsed production", () => {
+  const file = "ai-framework/scripts/unreadable.mts";
+  const findings = boundaryFindings("/fixture", [file], plantedDeps("/fixture", file, "const source = 'unfinished"));
+  assert.deepEqual(findings.map(v => [v.file, v.kind]), [["ai-framework/scripts/unreadable.mts", "unparsed"]]);
+});
+
+test("runtime dependency invariant excludes computed and global advisories", () => {
+  const file = "ai-framework/scripts/computed.mts";
+  const deps = plantedDeps("/fixture", file, "import(fileUrl(x)); import(variable); const loader = require; process.env;");
+  assert.deepEqual(validateRuntimeImports("/fixture", [file], { includeGlobals: true }, deps).map(v => v.kind),
+    ["dynamic-computed", "dynamic-computed", "dynamic-computed", "global"]);
+  assert.deepEqual(boundaryFindings("/fixture", [file], deps), []);
 });
