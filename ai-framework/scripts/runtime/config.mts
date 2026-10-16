@@ -278,7 +278,8 @@ function parseToon(text: string): ParseResult | Refusal {
         const rest = hasColon ? match[7] : "";
 
         if (FORBIDDEN_KEYS.has(key)) {
-            return refused(errorCodes.parserPrototypePollution, `forbidden key at line ${lineNumber}`);
+            problems.push(problem(errorCodes.parserPrototypePollution, `forbidden key at line ${lineNumber}`, lineNumber, indent + 1));
+            continue;
         }
 
         while (stack.length > 1 && indent <= stack[stack.length - 1].indent) {
@@ -606,7 +607,15 @@ export function loadConfig(root: string, deps: RuntimeDeps = defaultDeps()): Loa
         }
         return refused(errorCodes.loadConfigRefused, `could not inspect config path: ${errorCode(error)}`);
     }
-    if ("status" in location) return location;
+    if ("status" in location) {
+        if (location.code === errorCodes.inspectPathSymlink) {
+            return refused(errorCodes.lexerSymlink, location.text);
+        }
+        if (location.code === errorCodes.inspectPathOversize) {
+            return refused(errorCodes.lexerOversize, location.text);
+        }
+        return location;
+    }
 
     let contents: Refusal | { text: string };
     try {

@@ -12,8 +12,8 @@ phase: plan
 
 | ID  | Title                                        | Position | Notes |
 |-----|----------------------------------------------|----------|-------|
-| a1  | `config.mts` primitives                       | uphill 75% | Primitives landed; placeholder tests green; waiting for a2/a3 consumer verification. |
-| a2  | `config.test.mts` parser mutants              | uphill 0% | Deps: a1 |
+| a1  | `config.mts` primitives                       | over-the-hill | Consumer verification by a2 mutants: errorCodes.foo contracts asserted and passed; two a1 reader-context remaps applied. |
+| a2  | `config.test.mts` parser mutants              | uphill 25% | 7 parser-guard mutants implemented; all exit criteria green; a1 contract verified. |
 | a3  | Writer/path mutants + alias + subprocess     | uphill 0% | Deps: a1, a2 |
 | c1.1| runtime/orca reader glue + grader rewire      | uphill 0% | Deps: a3 |
 | c1.2| Reader tests + grader no-race                 | uphill 0% | Deps: c1.1 |

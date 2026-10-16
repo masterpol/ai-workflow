@@ -120,3 +120,165 @@ See `.project/pitches/unified-toon-config/deviations.md`. Key items:
 ### Hill update
 
 `a1` moved `uphill 0%` → `uphill 75%`.
+
+## 2026-10-16 — a1 build evidence
+
+Scope a1 (`config.mts` primitives) landed. Plan a1 exit criteria verified independently
+from the subagent's report:
+
+### Exit-criteria evidence (independently re-verified)
+
+```
+$ git diff --name-only 2.23.0..HEAD
+.gitignore
+.project/decisions/toon-subset-grammar.md
+.project/pitches/unified-toon-config/deviations.md
+.project/pitches/unified-toon-config/hill.md
+.project/pitches/unified-toon-config/log.md
+.project/pitches/unified-toon-config/pitch.md
+.project/pitches/unified-toon-config/plan.md
+ai-framework/scripts/runtime/config.mts
+ai-framework/scripts/runtime/config.test.mts
+ai-framework/scripts/runtime/oex-lock.mts
+ai-framework/templates/ai-workflow.example.toon
+ai-framework/templates/ai_workflow_env.example.json
+
+$ node --experimental-strip-types --disable-warning=ExperimentalWarning \
+    --test ai-framework/scripts/runtime/config.test.mts
+✔ loadConfig parses a minimal TOON file (2.1525ms)
+✔ loadConfig reports unknown schemaVersion (0.65025ms)
+ℹ tests 2  suites 0  pass 2  fail 0  duration_ms 76.628042
+
+$ grep -nE "export " ai-framework/scripts/runtime/config.mts | head -8
+4:export const CONFIG_FILE = "ai-workflow.toon";
+5:export const MAX_CONFIG_BYTES = 64 * 1024;
+7:export interface ConfigModel { ... }
+24:export type Problem = { code: string; ... };
+29:export type ValidatorFn = (key, value) => Problem | undefined;
+31:export const errorCodes = { ... };
+65:export function registerIntegrationValidator(...): void;
+69:export function registerEngineValidator(...): void;
+73:export function registerCoordinatorValidator(...): void;
+
+$ grep -c "^export " ai-framework/scripts/runtime/config.mts
+15      # 15+ distinct exports present (target ≥8)
+
+$ grep -lE "flock|fcntl" ai-framework/scripts/runtime/config.mts oex-lock.mts
+(empty)  # forbidden — no flock primitive
+
+$ git status --porcelain | grep -E "orca-preflight.test.mts|runtime/node.mts|runtime/runtime.test.mts|skill-defaults.test.mts"
+(empty)  # X16 dirty files remain clean
+```
+
+### Files delivered
+
+- `ai-framework/scripts/runtime/config.mts` (~700 LOC shipped; exports: errorCodes, register*,
+  validateCoordinator, inspectPath, readBoundedFile, wxRename, oexLock, loadConfig, inspectConfig,
+  ValidatorFn, ConfigModel, Problem, Location, Refusal + others)
+- `ai-framework/scripts/runtime/oex-lock.mts` (seam re-export)
+- `ai-framework/scripts/runtime/config.test.mts` (placeholder; a2 adds parser-guard mutants)
+- `ai-framework/templates/ai-workflow.example.toon` (canonical TOON example)
+- `ai-framework/templates/ai_workflow_env.example.json` (relocated; root copy deleted)
+- `ai-workflow.toon` (repo-root instance; gitignored)
+- `.project/decisions/toon-subset-grammar.md` (TOON subset pinned)
+- `.gitignore` (added `ai-workflow.toon` line, dropped stale legacy lines, fixed comment)
+
+### Deviations
+
+4 housekeeping rows logged in `deviations.md`:
+
+- **d1** — X20's 4 referrer updates partly deferred to c2.1/c2.2/d (one referrer is an X16
+  dirty file; must stay clean during a1).
+- **d2** — a1 file count: 7 files (added `.gitignore` as the originally unnamed 7th file;
+  X15 owns the root `.gitignore` edit).
+- **d3** — Tree carried unrelated upstream-project-drift WIP; stashed to keep a1 diff clean.
+- **d4** — `.gitignore` no longer ignores legacy files; their tracked deletion belongs to
+  scope `d`.
+
+### Hill state
+
+a1 → `uphill 75%` (per subagent; not yet `over-the-hill` — that requires a2 to confirm the
+export contract by parsing the `errorCodes.foo` strings).
+
+## 2026-10-16 — a2 build complete
+
+### Scope
+
+a2 — parser-guard mutants. Extended `ai-framework/scripts/runtime/config.test.mts` with
+7 mutants, each with a passing baseline and a single flipped behavior, asserting on the
+literal `errorCodes.foo` string per K1 pass 3.
+
+### Files changed
+
+- `ai-framework/scripts/runtime/config.test.mts` — 7 parser-guard mutants + shared helpers
+  (`assertProblemCode`, `memoryDeps`).
+- `ai-framework/scripts/runtime/config.mts` — two contract fixes discovered while writing
+  a2 assertions (see deviations d5, d6).
+
+### Mutants added
+
+1. `mutant-7-parserPrototypePollution-nestedKey` — nested `__proto__` key.
+2. `mutant-7-parserWithinRoleDuplicate-duplicateImplementation` — duplicate worker in
+   `implementation[2]` array.
+3. `mutant-7-parserUnrecognized-weirdKey` — `@weird: foo` outside grammar.
+4. `mutant-7-lexerUnreadable-eacces` — `openSync` throws `EACCES` after successful
+   `lstatSync`.
+5. `mutant-7-lexerOversize-64kPlusOne` — file size `MAX_CONFIG_BYTES + 1`.
+6. `mutant-7-lexerSymlink-symlinkedLeaf` — config leaf resolves through symlink.
+7. `mutant-7-regexpBacktracking-quotedCommas` — pathological quoted-comma payload;
+   asserts <50ms and absence of `REGEXP-BACKTRACKING`.
+
+### Exit-criteria evidence
+
+```
+$ node --experimental-strip-types --disable-warning=ExperimentalWarning --test ai-framework/scripts/runtime/config.test.mts
+✔ loadConfig parses a minimal TOON file (2.395917ms)
+✔ loadConfig reports unknown schemaVersion (0.820542ms)
+✔ mutant-7-parserPrototypePollution-nestedKey (0.101792ms)
+✔ mutant-7-parserPrototypePollution-nestedKey baseline (0.4325ms)
+✔ mutant-7-parserPrototypePollution-nestedKey mutation (0.191417ms)
+✔ mutant-7-parserWithinRoleDuplicate-duplicateImplementation (0.0315ms)
+✔ mutant-7-parserWithinRoleDuplicate-duplicateImplementation baseline (0.184042ms)
+✔ mutant-7-parserWithinRoleDuplicate-duplicateImplementation mutation (0.138917ms)
+✔ mutant-7-parserUnrecognized-weirdKey (0.03875ms)
+✔ mutant-7-parserUnrecognized-weirdKey baseline (0.151625ms)
+✔ mutant-7-parserUnrecognized-weirdKey mutation (0.126875ms)
+✔ mutant-7-lexerUnreadable-eacces (0.02825ms)
+✔ mutant-7-lexerUnreadable-eacces baseline (0.116958ms)
+✔ mutant-7-lexerUnreadable-eacces mutation (0.14125ms)
+✔ mutant-7-lexerOversize-64kPlusOne (0.039375ms)
+✔ mutant-7-lexerOversize-64kPlusOne baseline (0.153667ms)
+✔ mutant-7-lexerOversize-64kPlusOne mutation (0.069959ms)
+✔ mutant-7-lexerSymlink-symlinkedLeaf (0.021333ms)
+✔ mutant-7-lexerSymlink-symlinkedLeaf baseline (0.0805ms)
+✔ mutant-7-lexerSymlink-symlinkedLeaf mutation (0.041292ms)
+✔ mutant-7-regexpBacktracking-quotedCommas (0.016208ms)
+✔ mutant-7-regexpBacktracking-quotedCommas baseline (0.075416ms)
+✔ mutant-7-regexpBacktracking-quotedCommas mutation (4.273333ms)
+ℹ tests 16
+ℹ suites 7
+ℹ pass 16
+ℹ fail 0
+ℹ duration_ms 93.549459
+exit 0
+```
+
+Grep checks:
+- `grep -c "^describe\|^test\b" ai-framework/scripts/runtime/config.test.mts` → 23 (≥14).
+- `grep -c "memoryFs(files, links)" ai-framework/scripts/runtime/config.test.mts` → 14 (≥4).
+- `grep "from \"node:fs\"" ai-framework/scripts/runtime/config.test.mts` → empty.
+- `grep "flock\|fcntl" ai-framework/scripts/runtime/config.test.mts` → empty.
+
+### Plan ↔ reality drift
+
+See `.project/pitches/unified-toon-config/deviations.md` rows d5, d6, d7.
+
+### Hill update
+
+- a1 → `over-the-hill` (consumer verification by a2 mutants).
+- a2 → `uphill 25%` (implemented, green, awaiting downstream a3 build).
+
+### Next
+
+Dispatch a3 (writer/path mutants + alias + subprocess; deep profile). a3 builds on a1+a2
+and extends `runtime/test-helpers.mts` with the TOON fixture writer.
