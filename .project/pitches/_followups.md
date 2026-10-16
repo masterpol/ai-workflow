@@ -354,3 +354,13 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - The drift ledger read only `ai-framework/` and missed climbing's `.opencode/` fixes. Later drift passes should
   also compare the vendor adapter directories.
 - OpenCode plugin hardening (U4) was not part of this pitch.
+
+## unified-toon-config leftovers (2026-10-16)
+- Parser: an unclosed quote is accepted as a string, and a comma inside quotes is read as an array (both fail closed). Also: inconsistent indentation is accepted silently; dead codes `inspectPathMissing`/`regexpBacktracking`; the `errorCode` helper is copied four times.
+- Migrator: `.gitignore` update has no re-check before its rename (lost update); classification of an unsupported file uses a regex over the message, a structured version field in `config.mts` would be sturdier (d51); no v1-to-v2 key conversion exists (`--force` replaces and keeps a backup).
+- `readLegacyFile` ancestor race is unproven; `maxRetriesPerTask` is unbounded in config but 0..2 in `orca-policy`.
+- TOON `skills.modes` has no per-phase slot, so a valid TOON ignores `modes.json` phases (d40). Move `readLegacyFile` into `config.mts`.
+- For orca-role-pools: `orca-policy` rejects more than 2 workers per coordinator and keeps only the first role target; the grader writes the legacy JSON policy. For orca-engines-range: `engine` is required, so "default when key absent" cannot apply. For upstream-project-drift: its X2 assumes `orca-policy.mts` is unchanged, and its `status.md` row is stale. For workflow-v3-rollout: README/SETUP are now flagged files and v1 TOON files are refused.
+- `orca-start.mts` `lookupWorker` asks for `--limit 100`; the worker list is now over the 256 KiB output cap, so Orca-requested phases block with `worker-identity-unavailable`. Use a smaller page size.
+- Flaky only under full-suite load: skill-defaults "FIFO or oversize modes.json is skipped".
+- `pre-ship-verify.mts` fails in this repo (no package.json or Muro verifier); the real checks are the test suite and validators.
