@@ -1,6 +1,6 @@
 # Optional Orca vendor policy
 
-Orca orchestration is opt-in. The optional local policy is `.project/orchestration.json`;
+Orca orchestration is opt-in. The optional local policy is the `orchestration` block of the project-root `ai-workflow.toon` (legacy fallback: `.project/orchestration.json`);
 the bundle does not create it during setup or doctor repair. Start from
 [orca-vendors.example.json](orca-vendors.example.json), which sets
 `"use-orca-orchestration": false`. Keep this instance file out of version control.
@@ -14,7 +14,7 @@ not part of it. Quality, latency, and cost improvements require measurements; sp
 
 Orca is used only when `AI_WORKFLOW_ORCA_MULTI_AGENT` is exactly `true` (case-insensitive, surrounding spaces ignored).
 Unset, empty, `false`, `1`, `yes` or anything else keeps the normal workflow. Set it in the process environment or in the
-project-root `ai_workflow_env.json` as `"AI_WORKFLOW_ORCA_MULTI_AGENT": true` (the environment wins; the file is read from
+project-root `ai-workflow.toon` as `orchestration.multiAgent: true` (legacy `ai_workflow_env.json` as `"AI_WORKFLOW_ORCA_MULTI_AGENT": true`, used only when no `ai-workflow.toon` exists; the environment wins; the file is read from
 the trusted root only, a symlink leaving the root is ignored, and `.env` is never read). With the switch off the launch gate returns `orca-multi-agent-disabled` first, before reading the policy,
 probing Orca or spawning anything; `dispatchScope` and `dispatchWithRetries` return the normal workflow without a claim;
 `orca-preflight --probe` does not contact Orca. The static policy and presence diagnostics still work. The switch is

@@ -357,3 +357,13 @@ fail: workflow-doctor "exits 0 on a real bundle copy" -> README link (d14, c2.2)
 
 c1.2 -> done; c1.1 -> downhill 75%. Drift d15-d18.
 
+
+## c2.1-c2.4 (parallel build, 4 subagents, shared tree, uncommitted at record time)
+
+- c2.1: `Config validators` doctor check + `Workflow config` setup-validator check; 6 new tests; doctor+setup-validator 66 tests, 0 fail.
+- c2.2: README/AGENTS/CLAUDE (mirror byte-equal) rewritten; VERSION 2.24.0; broken README link fixed; skill-defaults test green.
+- c2.3: 6 framework docs + `.claude`/`.cursor` build SKILL mirrors; docs-links 46 files, 0 broken; `.agents` build SKILL untouched (A10).
+- c2.4: comment-only hook cutover notes; hook tests 36/36.
+- Coordinator re-run (doctor, setup-validator, skill-defaults, both hook tests): 129 tests, 128 pass, 0 fail, 1 skip. AGENTS.md == CLAUDE.md.
+- Drift: d19-d29. Open and unowned: d25, d26.
+- d25, d26 assigned to scope d (user-approved).

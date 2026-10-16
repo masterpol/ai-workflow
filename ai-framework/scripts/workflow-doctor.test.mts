@@ -580,3 +580,51 @@ test("project-owned model routing accepts a project's own routes and bundled rou
     assert.equal(route(items)?.status, "fail", `${body}: invalid config falls back to the bundled routes`);
   }
 });
+
+test("doctor Config validators check: absent is info, valid passes, unregistered slot and invalid TOON fail", async (t) => {
+  const root = fixture(t);
+  const example = fs.readFileSync(fileURLToPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
+  const cases: Array<[string | null, string, RegExp]> = [
+    [null, "info", /absent; no validator slots in use/],
+    [example, "pass", /0 integration\(s\) and 1 engine key\(s\) in use, all registered/],
+    [example.replace("integrations: {}", "integrations:\n  nosuchtool:\n    a: 1"), "fail", /unregistered validator slot\(s\): unknown integration "nosuchtool"/],
+    [example.replace("  orca: \"1.4.224\"", "  orca: \"1.4.224\"\n  nosuchengine: x"), "fail", /unregistered validator slot\(s\): unknown engine key "nosuchengine"/],
+    ["schemaVersion: 2\n", "fail", /problem|refused/],
+  ];
+  for (const [body, status, detail] of cases) {
+    fs.rmSync(path.join(root, "ai-workflow.toon"), { force: true });
+    if (body !== null) write(root, "ai-workflow.toon", body);
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    const item = checks(capture.output).find((entry) => entry.name === "Config validators");
+    assert.ok(item, String(body));
+    assert.deepEqual([item.status, detail.test(item.detail)], [status, true], `${status}: ${item.detail}`);
+  }
+});
+
+test("doctor Config validators check mentions leftover legacy files without failing", async (t) => {
+  const root = fixture(t);
+  write(root, "ai_workflow_env.json", "{}");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const item = checks(capture.output).find((entry) => entry.name === "Config validators");
+  assert.deepEqual([item?.status, /legacy file\(s\) still present: ai_workflow_env\.json/.test(item?.detail ?? "")], ["info", true]);
+});
+
+test("doctor syntax-checks runtime/config.mts and, once it exists, config-migrate.mts", async (t) => {
+  const root = fixture(t);
+  write(root, "ai-framework/scripts/runtime/config.mts", "export const a: number = 1;\n");
+  const real = (capture: ReturnType<typeof injected>) => {
+    const base = createNodeDeps();
+    capture.deps.child.run = async (command, args, options) => args.some((arg) => /\/(config|config-migrate)\.mts$/.test(arg)) ? base.child.run(command, args, options) : { status: 0, signal: null, stdout: "", stderr: "" };
+    return capture;
+  };
+  let capture = real(injected(root));
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/runtime/config.mts" && item.status === "pass"));
+  assert.ok(!checks(capture.output).some((item) => item.name === "ai-framework/scripts/config-migrate.mts"));
+  write(root, "ai-framework/scripts/config-migrate.mts", "export const a: number = ;\n");
+  capture = real(injected(root));
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/config-migrate.mts" && item.status === "fail"));
+});

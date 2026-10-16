@@ -28,6 +28,10 @@ function leadingPhase(prompt: string): { phase: string; argsText: string } | und
   return { phase: token[1], argsText: prompt.slice(token[0].length) };
 }
 
+// Config cutover (unified-toon-config c2.4): the opt-in switch is read through orcaMultiAgentEnabled -> loadConfigEnv ->
+// loadConfig, so a valid <root>/ai-workflow.toon wins and legacy ai_workflow_env.json is only a fallback while no TOON file
+// exists (migrate with ai-framework/scripts/config-migrate.mts). A present but invalid TOON file fails closed (switch off);
+// this hook never reads either file itself.
 /** Only opted-in Codex phase prompts load the start decision library. */
 export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   const given = rootArgument(argv);

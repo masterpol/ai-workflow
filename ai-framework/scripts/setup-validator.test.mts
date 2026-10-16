@@ -316,3 +316,43 @@ test("Node without stripTypeScriptTypes still reports its explicit unsupported b
   const report = JSON.parse(run.out.join("")) as Report;
   assert.ok(report.results.some((result) => result.status === "info" && result.detail.includes("not parse-checked")));
 });
+
+test("Workflow config is info when ai-workflow.toon is absent, and never fails the run by itself", async () => {
+  const run = makeDeps(baseFiles(), healthy);
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  const report = JSON.parse(run.out.join("")) as Report;
+  const item = report.results.find((result) => result.name === "Workflow config");
+  assert.deepEqual([item?.status, /not yet migrated/.test(item?.detail ?? "")], ["info", true]);
+});
+
+test("Workflow config is fail when a present ai-workflow.toon is refused by the reader", async () => {
+  // The in-memory fs cannot inspect paths, so loadConfig refuses; refusal must be fail, never a silent pass.
+  const run = makeDeps({ ...baseFiles(), "ai-workflow.toon": "schemaVersion: 1\n" }, healthy);
+  assert.equal(await main(["--json"], run.deps, libs), 1);
+  const report = JSON.parse(run.out.join("")) as Report;
+  const item = report.results.find((result) => result.name === "Workflow config");
+  assert.deepEqual([item?.status, /refused/.test(item?.detail ?? "")], ["fail", true]);
+});
+
+test("Workflow config reports valid as pass and invalid as fail on a real project dir", async (t) => {
+  const { createNodeDeps } = await import("./runtime/node.mts");
+  const { mkdirSync, readFileSync, writeFileSync } = await import("node:fs");
+  const dir = mkdtempSync(join(tmpdir(), "setup-validator-config-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  mkdirSync(join(dir, ".project"));
+  const valid = readFileSync(fileURLToPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
+  const cases: Array<[string, string, RegExp]> = [
+    [valid, "pass", /valid/],
+    [valid.replace("integrations: {}", "integrations:\n  nosuchtool:\n    a: 1"), "fail", /unknown integration "nosuchtool"/],
+    ["schemaVersion: 2\n", "fail", /invalid|refused/],
+  ];
+  for (const [body, status, detail] of cases) {
+    writeFileSync(join(dir, "ai-workflow.toon"), body);
+    const base = createNodeDeps();
+    const out: string[] = [];
+    const deps: RuntimeDeps = { ...base, proc: { ...base.proc, cwd: () => dir, env: {} }, io: { ...base.io, stdout: { write: (text) => { out.push(text); } } } };
+    await main(["--json"], deps, libs);
+    const item = (JSON.parse(out.join("")) as Report).results.find((result) => result.name === "Workflow config");
+    assert.deepEqual([item?.status, detail.test(item?.detail ?? "")], [status, true], `${status}: ${item?.detail}`);
+  }
+});

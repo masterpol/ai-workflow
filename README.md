@@ -62,17 +62,26 @@ model setup and verification: [Set up](ai-framework/docs/setup.md).
 
 ## Choose the script runtime
 
-Scripts use Node by default. Workflow settings live in the project-root `ai_workflow_env.json`, which holds no
-secrets, is Git-ignored, and is the only file the workflow reads for them (never `.env`). Copy
-[ai_workflow_env.example.json](ai_workflow_env.example.json) to `ai_workflow_env.json`; in a project that received the
-bundle, also add `ai_workflow_env.json` to its `.gitignore`. To use Bun:
+Scripts use Node by default. Workflow settings live in the project-root `ai-workflow.toon`, which holds no
+secrets and is the file the workflow reads for them (never `.env`). Copy
+[ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon) to `ai-workflow.toon`. A project that
+still has the older `ai_workflow_env.json` keeps working: it is read only when `ai-workflow.toon` is absent (see
+[ai_workflow_env.example.json](ai-framework/templates/ai_workflow_env.example.json)). To use Bun, set the runner in
+`ai-workflow.toon`:
+
+```
+runtime:
+  runner: bun
+```
+
+or, in the legacy file:
 
 ```json
 { "AI_WORKFLOW_RUNNER": "bun", "AI_WORKFLOW_ORCA_MULTI_AGENT": false }
 ```
 
 Process environment variables override the file. Bun must be installed and available on `PATH`.
-Orca multi-agent dispatch is off unless `AI_WORKFLOW_ORCA_MULTI_AGENT` is `true` (see
+Orca multi-agent dispatch is off unless `orchestration.multiAgent` (legacy `AI_WORKFLOW_ORCA_MULTI_AGENT`) is `true` (see
 [Orca mode](#orca-mode-multi-agent) below); any other value keeps the normal workflow.
 Run scripts directly as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later, or
 `bun ai-framework/scripts/<name>.mts`. Node 22.12–22.17 requires
@@ -91,9 +100,9 @@ in [Orca](https://www.onorca.dev). It is off by default; with it off, every phas
 **Turn it on**
 
 1. Install the Orca app and the worker CLIs you want (`codex`, `opencode`), and make sure `orca` on your `PATH` is the real binary.
-2. Set `"AI_WORKFLOW_ORCA_MULTI_AGENT": true` in `ai_workflow_env.json` (or the environment variable of the same name).
-3. Copy [orca-vendors.example.json](ai-framework/integrations/orca-vendors.example.json) to `.project/orchestration.json`, set
-   `"use-orca-orchestration": true`, and choose the coordinator-to-worker roles. Keep that file out of version control.
+2. In `ai-workflow.toon`, set `orchestration.multiAgent: true` (or set the `AI_WORKFLOW_ORCA_MULTI_AGENT` environment variable).
+3. In the same file, set `orchestration.enabled: true` and choose the workers and coordinator-to-worker roles; see
+   [ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon). No separate `.project/orchestration.json` is needed.
 4. Restart nothing: the Claude Code hook in [hooks.json](ai-framework/hooks/hooks.json) is picked up from `.claude/settings.json`.
 
 **What happens with the switch on.** Before each of the 12 workflow phases (`shape`, `shape-lite`, `critique`, `plan`,

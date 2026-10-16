@@ -2,6 +2,7 @@
 import { runWorkflow } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { inspectWorkflowEnv } from "./runtime/env.mts";
+import { CONFIG_FILE, errorCodes, loadConfig } from "./runtime/config.mts";
 import { validateRuntimeImports } from "./runtime/validate.mts";
 /*
  * Verifies that the portable workflow is complete after installation. Checks
@@ -514,6 +515,29 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record(result.ignoredKeys.length ? "warn" : "pass", name, `runner ${result.values.AI_WORKFLOW_RUNNER || "node (default)"}; Orca ${result.values.AI_WORKFLOW_ORCA_MULTI_AGENT?.trim().toLowerCase() === "true" ? "on" : "off"}${ignored}; process environment overrides the file`);
   }
 
+  // Runtime-boundary-shaped check for ai-workflow.toon: one library call (loadConfig), one severity ladder.
+  // Every integrations.*, engines.* key must be registered through registerIntegrationValidator /
+  // registerEngineValidator in runtime/config.mts; an unregistered slot is a fail, never a silent pass.
+  // Coordinator slots (registerCoordinatorValidator) are optional by contract, so they cannot be reported
+  // as unregistered here. Legacy files alone are informational: the migrator (config-migrate) owns them.
+  function checkConfigValidators() {
+    const name = "Config validators";
+    const legacy = ["ai_workflow_env.json", ".project/orchestration.json"].filter((file) => deps.fs.existsSync(absolute(file)));
+    const legacyNote = legacy.length ? `; legacy file(s) still present: ${legacy.join(", ")} (migrate with config-migrate)` : "";
+    const result = loadConfig(root, deps);
+    if ("status" in result) {
+      if (result.status === "missing") { record("info", name, `${CONFIG_FILE} absent; no validator slots in use${legacyNote}`); return; }
+      record("fail", name, `${CONFIG_FILE} refused (${result.code}): ${result.text}`);
+      return;
+    }
+    const unregistered = result.problems.filter((item) => item.code === errorCodes.parserUnrecognized && /^unknown (integration|engine key) /.test(item.text));
+    if (unregistered.length) { record("fail", name, `unregistered validator slot(s): ${unregistered.slice(0, 5).map((item) => item.text).join("; ")}; register with registerIntegrationValidator or registerEngineValidator`); return; }
+    if (result.problems.length) { record("fail", name, `${result.problems.length} problem(s): ${result.problems.slice(0, 5).map((item) => `${item.code} ${item.text}`).join("; ")}`); return; }
+    const integrations = Object.keys(result.model.integrations ?? {}).length;
+    const engines = Object.keys(result.model.engines).length;
+    record("pass", name, `${integrations} integration(s) and ${engines} engine key(s) in use, all registered${legacyNote}`);
+  }
+
   function checkOrcaPolicy() {
     // Optional local policy is inspected without importing preflight or touching executables.
     const result = orcaPolicy.readPolicy(root, deps);
@@ -744,6 +768,10 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     scripts.push("ai-framework/scripts/docs-links.mts", "ai-framework/scripts/docs-links.test.mts");
     scripts.push("ai-framework/scripts/orca-policy.mts", "ai-framework/scripts/orca-preflight.mts");
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
+    // Kept-complete list gains the config validity library (config-validate role) and the migrator. The migrator
+    // lands in scope b1, so it is syntax-checked once present; b1 makes it unconditional.
+    scripts.push("ai-framework/scripts/runtime/config.mts");
+    if (await exists(absolute("ai-framework/scripts/config-migrate.mts"))) scripts.push("ai-framework/scripts/config-migrate.mts");
     // The README is now an index; each documented topic lives in ai-framework/docs/.
     const docsChecks = [
       ["setup", /^# Set up$/m, "documents setup"],
@@ -807,6 +835,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkCavemanState(),
       checkWorkflowSettings(),
       checkRuntimeBoundary(),
+      checkConfigValidators(),
       checkOrcaPolicy(),
       checkCodexStartupWiring(),
     ]);

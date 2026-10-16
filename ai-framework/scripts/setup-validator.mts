@@ -5,6 +5,7 @@ import { runDirect } from "./runtime/cli.mts";
 
 import * as skillVendors from "./skill-vendors.mts";
 import * as entryImport from "./entry-import.mts";
+import { CONFIG_FILE, loadConfig } from "./runtime/config.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 type Status = "pass" | "info" | "warn" | "fail";
@@ -200,9 +201,23 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
       record("fail", file, detail);
     }
   }
+  // Severity contract (consumers filter --json results[] by name + status, never by exit code):
+  // absent = info (not yet migrated), invalid or refused = fail, valid = pass.
+  async function checkWorkflowConfig(): Promise<void> {
+    const check = { name: "Workflow config" };
+    if (!(await exists(CONFIG_FILE))) { record("info", check.name, `${CONFIG_FILE} absent; not yet migrated`); return; }
+    const result = loadConfig(root, deps);
+    if ("status" in result) {
+      if (result.status === "missing") record("info", check.name, `${CONFIG_FILE} absent; not yet migrated`);
+      else record("fail", check.name, `${CONFIG_FILE} refused (${result.code}): ${result.text}`);
+      return;
+    }
+    if (result.problems.length) { record("fail", check.name, `${CONFIG_FILE} invalid: ${result.problems.slice(0, 5).map((item) => `${item.code} ${item.text}`).join("; ")}`); return; }
+    record("pass", check.name, `${CONFIG_FILE} valid`);
+  }
   async function validate(): Promise<void> {
     if (!(await exists(".project"))) { record("fail", ".project", "missing; setup has not completed"); return; }
-    await Promise.all([checkWorkflowDoctor(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors(), checkTypeScriptEntries()]);
+    await Promise.all([checkWorkflowDoctor(), checkWorkflowConfig(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors(), checkTypeScriptEntries()]);
   }
   return { results, json, paint, out, validate };
 }

@@ -11,6 +11,10 @@ type ObjectValue = Record<string, unknown>;
 const object = (value: unknown): value is ObjectValue => value !== null && typeof value === "object" && !Array.isArray(value);
 const blockedLine = (reason: string): string => `Orca requested but not ready: ${reason}. Fix it, or re-invoke with orca=normal to run this phase without Orca.\n`;
 
+// Config cutover (unified-toon-config c2.4): the opt-in switch is read through orcaMultiAgentEnabled -> loadConfigEnv ->
+// loadConfig, so a valid <root>/ai-workflow.toon wins and legacy ai_workflow_env.json is only a fallback while no TOON file
+// exists (migrate with ai-framework/scripts/config-migrate.mts). A present but invalid TOON file fails closed (switch off);
+// this hook never reads either file itself.
 /** Only opted-in coordinator phase invocations load the start decision library. */
 export async function main(_argv: string[], deps: RuntimeDeps): Promise<number> {
   const root = deps.proc.env.CLAUDE_PROJECT_DIR || deps.proc.cwd();

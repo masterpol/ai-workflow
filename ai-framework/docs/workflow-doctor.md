@@ -10,7 +10,7 @@ load the canonical file (or, for a script-backed skill like `workflow-doctor` it
 it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
 scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
 It also requires the caveman-mode instruction in every canonical skill, agent, and (in this bundle)
-both entry files, validates `.project/skills/modes.json`, and reports the live state — active, inert
+both entry files, validates `.project/skills/modes.json`, checks the project-root `ai-workflow.toon` when present (see `Workflow config`), and reports the live state — active, inert
 (skill not installed), disabled, or under-covering the workflow — so "carries the instruction" is
 never mistaken for "is on".
 Checks run concurrently and print color-coded progress as each completes. Skills installed with

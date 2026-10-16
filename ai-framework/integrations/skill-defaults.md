@@ -83,7 +83,7 @@ it is never written to disk. Only editing `.project/skills/modes.json` directly 
 choice across invocations, matching the pitch's "disabling persists only when explicitly
 requested."
 
-Instance state — `.project/skills/modes.json` (project scope only; this file lives under
+Instance state — `.project/skills/modes.json` (still the only file this resolver reads; the unified `ai-workflow.toon` reserves a `skills.modes` block for a later cutover, see `ai-framework/templates/ai-workflow.example.toon`; project scope only; this file lives under
 `.project/`, which is outside every `bundle-sync.mts` `SYNCED_DIRS` entry, so it is never touched
 by a sync, the same protection `.project/skills/registry.json` already has):
 
