@@ -65,8 +65,8 @@ model setup and verification: [Set up](ai-framework/docs/setup.md).
 Scripts use Node by default. Workflow settings live in the project-root `ai-workflow.toon`, which holds no
 secrets and is the file the workflow reads for them (never `.env`). Copy
 [ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon) to `ai-workflow.toon`. A project that
-still has the older `ai_workflow_env.json` keeps working: it is read only when `ai-workflow.toon` is absent (see
-[ai_workflow_env.example.json](ai-framework/templates/ai_workflow_env.example.json)). To use Bun, set the runner in
+still has the older `ai_workflow_env.json` or `.project/orchestration.json` is moved over by
+`node ai-framework/scripts/config-migrate.mts`. To use Bun, set the runner in
 `ai-workflow.toon`:
 
 ```

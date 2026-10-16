@@ -327,10 +327,10 @@ function skillsSection(root: string, scrub: (text: unknown) => string) {
   const caveman = report.defaults.find((item) => item.id.endsWith("/caveman"));
   let modes = null;
   let modesProblem = null;
-  try { modes = skillDefaults.loadModes(root, deps); } catch { modesProblem = "is unreadable, invalid, or outside the project"; }
+  try { modes = skillDefaults.loadModes(root, deps); } catch { modesProblem = "(ai-workflow.toon, or legacy modes.json when absent) is unreadable, invalid, or outside the project"; }
   const resolved = {};
   if (!modesProblem) for (const phase of skillDefaults.PHASES) resolved[phase] = skillDefaults.resolveMode(root, { phase }, deps);
-  const cavemanFact = modesProblem ? unavailable(`modes.json ${modesProblem}`, [".project/skills/modes.json"])
+  const cavemanFact = modesProblem ? unavailable(`caveman mode config ${modesProblem}`, ["ai-workflow.toon", ".project/skills/modes.json"])
     : fact({ installed: Boolean(caveman?.installed), enabled: caveman?.enabled ?? null, phaseGap: caveman?.phaseGap || [], persistentlyOff: modes?.caveman?.enabled === false, resolved }, caveman?.installed ? "observed" : "unconfigured", caveman?.installed ? [".project/skills/registry.json"] : [], caveman?.installed ? undefined : "caveman is not installed, so the instruction in every skill and agent is inert");
   return { installed, caveman: cavemanFact, base, project };
 }

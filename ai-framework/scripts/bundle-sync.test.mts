@@ -215,6 +215,18 @@ test("flagged entry files are reported for manual review and never auto-applied"
   assert.equal(read(target, "AGENTS.md"), "target version\n");
 });
 
+test("SETUP.md and README.md are flagged for manual review when they differ, and never auto-applied", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  for (const name of ["SETUP.md", "README.md"]) {
+    write(target, name, "target version\n");
+    write(source, name, "source version\n");
+  }
+  commit(source, "change SETUP.md and README.md");
+  const result = runJson(target, ["--source", source, "--base-ref", baseRef, "--apply"]);
+  assert.deepEqual(result.flagged.map((entry) => entry.path).sort(), ["README.md", "SETUP.md"]);
+  for (const name of ["SETUP.md", "README.md"]) assert.equal(read(target, name), "target version\n");
+});
+
 test("a newly registered target vendor is reconciled for every installed skill in the same apply, with no second approval", (t) => {
   const { source, target, baseRef, directory } = fixture(t);
   installSkill(target, skillRepo(directory, "delta"), { skill: "example/repository/delta" });

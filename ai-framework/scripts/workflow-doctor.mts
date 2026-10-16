@@ -491,15 +491,15 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // would make every one of those instructions' commands fail loudly, is caught here first.
   async function checkCavemanState() {
     const name = "Caveman mode";
-    try { skillDefaults.loadModes(root, deps); } catch (error) { record("fail", ".project/skills/modes.json", `invalid: ${error.message}`); return; }
-    const modes = fs.existsSync(absolute(skillDefaults.MODES_FILE)) ? skillDefaults.loadModes(root, deps) : null;
+    let modes;
+    try { modes = skillDefaults.loadModes(root, deps); } catch (error) { record("fail", error.message.startsWith("ai-workflow.toon") ? "ai-workflow.toon" : ".project/skills/modes.json", `invalid: ${error.message}`); return; }
     const status = skillDefaults.report(root, deps);
     if (status.registryError) { record("warn", name, `skill registry unreadable, cannot tell whether caveman is installed: ${status.registryError}`); return; }
     const caveman = status.defaults.find((entry) => entry.id.endsWith("/caveman"));
     if (!caveman?.installed) { record("info", name, "instruction present in every skill/agent but caveman is not installed, so it is inert; install with /add-skill juliusbrussee/caveman/caveman"); return; }
     if (!caveman.enabled) { record("warn", name, "caveman is installed but disabled in the registry; every skill/agent instruction will skip it"); return; }
     if (caveman.phaseGap.length) { record("warn", name, `installed wrapper does not list recommended phase(s): ${caveman.phaseGap.join(", ")}; it tells agents not to activate outside its listed phases (re-run add-skill update --phases ...)`); return; }
-    if (modes?.caveman?.enabled === false) { record("info", name, "installed and covered, but persistently disabled in .project/skills/modes.json (enabled: false)"); return; }
+    if (modes?.caveman?.enabled === false) { record("info", name, "installed and covered, but persistently disabled in the caveman mode config (ai-workflow.toon skills.modes.caveman: off, or legacy modes.json enabled: false)"); return; }
     record("pass", name, `active: installed, enabled, covers all recommended phases; default ${modes?.caveman?.default || skillDefaults.CATALOG.defaults.find((entry) => entry.id.endsWith("/caveman")).defaultMode}`);
   }
 

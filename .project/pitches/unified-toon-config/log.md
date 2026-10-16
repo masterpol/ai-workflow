@@ -418,3 +418,10 @@ Mutation run: 20 temporary mutants of config-migrate.mts all killed (1 survivor 
 ### Hill
 
 b2 -> over-the-hill, b3 -> over-the-hill (producer invariants hold). Drift d35-d37.
+
+## b2/b3 and d (parts A/B/C, parallel)
+
+- b2+b3 committed ac4a31a: migrator tests 9 → 50 (Node and Bun), 20 mutants killed, bundle-sync TOON-never-synced checks.
+- d-A: env.mts note only (deletions no-op). d-B: modes cutover (loadModes TOON-first). d-C: orca-vendors.md, FLAGGED_FILES, README/SETUP.
+- Coordinator run, whole bundle: 1450 tests, 1448 pass, 0 fail, 2 skipped. setup-validator READY (23 checks). AGENTS.md == CLAUDE.md.
+- Drift d38-d41; d12, d17, d24-d27 closed.

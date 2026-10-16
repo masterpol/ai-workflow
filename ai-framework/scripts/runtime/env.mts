@@ -46,8 +46,9 @@ export function loadWorkflowEnv(
 
 /**
  * TOON-first reader behind the frozen `loadWorkflowEnv` shape. `<root>/ai-workflow.toon` (read through `loadConfig`)
- * wins when it is present and valid; a missing file, or a `fs` too narrow for `loadConfig`, falls back to the legacy
- * `ai_workflow_env.json` reader. A present but refused or invalid TOON file contributes nothing (fail closed, never the
+ * wins when it is present and valid; a missing file falls back to the legacy `ai_workflow_env.json` reader.
+ * X11_no_remove: the legacy fallback stays for one minor (legacy window); the next minor removes the legacy env reader
+ * (`loadWorkflowEnv`) and this fallback together. Never remove it inside this window. A present but refused or invalid TOON file contributes nothing (fail closed, never the
  * legacy file). Variables already in `env` win.
  */
 export function loadConfigEnv(

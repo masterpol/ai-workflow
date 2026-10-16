@@ -51,7 +51,7 @@ The instruction is not limited to the seven phases. Every canonical skill (`.cla
 and every canonical agent (`.claude/agents/*`) carries it, resolved through the same chain under
 one of nine scopes: the seven phase names, `utility` (every non-phase skill — `add-skill`,
 `checkpoint`, `search`, ...), and `agent` (every dispatched role). An instance can override
-`utility` or `agent` in `modes.json` like any phase. Agents also receive the mode from the phase
+`utility` or `agent` in the legacy `modes.json` like any phase. Agents also receive the mode from the phase
 that dispatched them (the phase files pass their resolved mode down); a read-only agent that
 cannot run commands simply follows the mode it was handed. OpenCode and Codex agent/skill
 mirrors point at the canonical file, so they inherit it; Cursor mirrors are byte copies and are
@@ -61,7 +61,7 @@ Everything that describes or validates the workflow knows about it:
 - `workflow-doctor.mts` reports a `Caveman mode` line with the live state — `active`, `inert` (not
   installed), disabled, persistently off, or **under-covering** (the installed wrapper omits a
   catalog-recommended phase, and it tells agents not to activate outside its listed phases) — and
-  fails on a malformed `.project/skills/modes.json`, which would otherwise make every skill's
+  fails on a malformed or refused `ai-workflow.toon` (or, when that file is absent, a malformed `.project/skills/modes.json`), which would otherwise make every skill's
   command fail at runtime. It also requires the response-style section in `AGENTS.md`/`CLAUDE.md`
   of this bundle (`setup-validator.mts` only warns in a target project, whose own file may predate it).
 - `skill-defaults.mts report` lists each default's installed phases and the gap against
@@ -79,13 +79,13 @@ inert until `caveman` is actually installed with `/add-skill`.
 Precedence: an explicit invocation-scoped `caveman=<mode>` argument on that phase command beats
 a per-phase instance override, which beats an instance default, which beats the bundle default
 (`full`). An invocation-scoped choice applies **only to that call and whatever it dispatches** —
-it is never written to disk. Only editing `.project/skills/modes.json` directly persists a
+it is never written to disk. Only editing `skills.modes.caveman` in `ai-workflow.toon` (or the legacy `.project/skills/modes.json`) directly persists a
 choice across invocations, matching the pitch's "disabling persists only when explicitly
 requested."
 
-Instance state — `.project/skills/modes.json` (still the only file this resolver reads; the unified `ai-workflow.toon` reserves a `skills.modes` block for a later cutover, see `ai-framework/templates/ai-workflow.example.toon`; project scope only; this file lives under
+Instance state — `ai-workflow.toon` `skills.modes.caveman` is read first (see `ai-framework/templates/ai-workflow.example.toon`); only when that file is absent does the resolver fall back to the legacy `.project/skills/modes.json`. A present but invalid or refused `ai-workflow.toon` is an error and never falls back. The TOON block holds one mode (`off` means persistently disabled) and has no per-phase slot, so a valid TOON file ignores `phases` in `modes.json`; per-phase overrides remain legacy-only. Project scope only; the legacy file lives under
 `.project/`, which is outside every `bundle-sync.mts` `SYNCED_DIRS` entry, so it is never touched
-by a sync, the same protection `.project/skills/registry.json` already has):
+by a sync, the same protection `.project/skills/registry.json` already has. Legacy shape:
 
 ```json
 { "schemaVersion": 1, "caveman": { "enabled": true, "default": "full", "phases": { "build": "lite" } } }

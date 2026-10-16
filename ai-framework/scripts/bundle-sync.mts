@@ -80,7 +80,7 @@ export const SYNCED_DIRS: readonly string[] = [
 // target side so their files are reported as removed-in-source.
 export const RETIRED_DIRS: readonly string[] = ["ai-framework/contexts"];
 
-export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml"];
+export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml", "SETUP.md", "README.md"];
 
 const IGNORE_NAMES = new Set([".DS_Store"]);
 const MARKER = ".project/.bundle-sync.json";

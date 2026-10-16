@@ -127,6 +127,21 @@ test("a symlinked modes.json is refused, whether the leaf or an ancestor directo
   assert.throws(() => resolveMode(root2, { phase: "build" }), /outside the project root/i, "a symlinked ancestor directory must be caught too, not just the leaf file");
 });
 
+test("ai-workflow.toon skills.modes wins over modes.json; present-but-invalid TOON fails closed with no legacy fallback", (t: TestContext) => {
+  const example = fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)), "../templates/ai-workflow.example.toon"), "utf8");
+  const toon = (caveman: string) => example.replace(/caveman: \w[\w-]*/, `caveman: ${caveman}`);
+  const root = fixture(t);
+  write(root, ".project/skills/modes.json", JSON.stringify({ schemaVersion: 1, caveman: { default: "lite", phases: { build: "ultra" } } }));
+  assert.equal(resolveMode(root, { phase: "build" }), "ultra", "no TOON: legacy file is used");
+  write(root, "ai-workflow.toon", toon("wenyan-lite"));
+  assert.equal(resolveMode(root, { phase: "build" }), "wenyan-lite", "valid TOON wins, legacy phase override ignored");
+  write(root, "ai-workflow.toon", toon("off"));
+  assert.equal(resolveMode(root, { phase: "audit" }), "off");
+  assert.equal(loadModes(root)?.caveman?.enabled, false);
+  write(root, "ai-workflow.toon", toon("turbo"));
+  assert.throws(() => resolveMode(root, { phase: "build" }), /ai-workflow\.toon/, "invalid TOON must not fall back to modes.json");
+});
+
 test("report distinguishes not-installed, installed+enabled, and installed+disabled without throwing", (t: TestContext) => {
   const root = fixture(t);
   for (const dir of [".claude", ".opencode", ".codex", ".cursor", ".project"]) fs.mkdirSync(path.join(root, dir), { recursive: true });
@@ -325,6 +340,17 @@ test("doctor and setup-validator report the live caveman state truthfully across
 
   assert.match(state()!.detail, /^active: installed, enabled, covers all recommended phases; default full/);
   assert.equal(state()!.status, "pass");
+
+  // TOON first: the fixture's own ai-workflow.toon governs; "off" disables, an invalid file fails by name and never falls back.
+  const toonFile = path.join(root, "ai-workflow.toon");
+  const toonText = fs.readFileSync(toonFile, "utf8");
+  fs.writeFileSync(toonFile, toonText.replace(/caveman: \S+/, "caveman: off"));
+  assert.equal(state()!.status, "info");
+  assert.match(state()!.detail, /persistently disabled/);
+  fs.writeFileSync(toonFile, toonText.replace(/caveman: \S+/, "caveman: turbo"));
+  const brokenToon = doctor();
+  assert.match(brokenToon.results.find((item: Check) => item.name === "ai-workflow.toon" && /^invalid:/.test(item.detail))?.detail ?? "", /^invalid: ai-workflow\.toon/);
+  fs.rmSync(toonFile);
 
   const modes = path.join(root, ".project/skills/modes.json");
   fs.writeFileSync(modes, JSON.stringify({ schemaVersion: 1, caveman: { enabled: false } }));

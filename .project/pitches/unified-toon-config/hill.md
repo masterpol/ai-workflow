@@ -13,7 +13,7 @@ phase: plan
 | ID  | Title                                        | Position | Notes |
 |-----|----------------------------------------------|----------|-------|
 | a1  | `config.mts` primitives                       | over-the-hill | Consumer verification by a2 mutants: errorCodes.foo contracts asserted and passed; two a1 reader-context remaps applied. |
-| a2  | `config.test.mts` parser mutants              | uphill 25% | 7 parser-guard mutants implemented; all exit criteria green; a1 contract verified. |
+| a2  | `config.test.mts` parser mutants              | done | 7 parser-guard mutants implemented; all exit criteria green; a1 contract verified. |
 | a3  | Writer/path mutants + alias + subprocess     | over-the-hill | 5 writer/path mutants (each proven to bite via manual source mutation), 4 alias tests, K2-3 subprocess, lock contention + stale recovery green; TOON fixture writer in `test-helpers.mts`. 9-site tempFixture audit carried to c1.2 (d10). |
 | c1.1| runtime/orca reader glue + grader rewire      | done | `loadConfigEnv` (env.mts) feeds select/entry; `readPolicy` TOON-first via shared `validatePolicy`; grader writes via `wxRename`; signatures frozen. c1.2 consumer tests prove both branches. Open: d12 readers (`skill-defaults`/`state-snapshot`), d14 resolved by c2.2. |
 | c1.2| Reader tests + grader no-race                 | done | 11 literal-grep files, grader no-race x2 (concurrent + both preamble branches), tempFixture `{ resolve: false }` audit (grader 6, orca-start 2). Drift d15-d17. |
@@ -24,7 +24,7 @@ phase: plan
 | b1  | Migrator CLI prod                             | over-the-hill | Writer, dual-hash, 3-branch force, backups, lock, subprocess re-parse; no delete pass. Exit commands green; orca-policy parity before/after apply. Drift d30-d34. |
 | b2  | Migrator functional tests                     | over-the-hill | 12 b2 tests (force branches, dry-run, .rejected, unregistered/oversize refusals, dual-hash state, --json, conversion, .gitignore, CLI args). Drift d35-d37. |
 | b3  | Migrator guard proofs + Bun-adapter gate      | over-the-hill | 7 mutant suites (baseline+mutation), dual-hash, .rejected, lock contention/release/stale recovery, bundle-sync exclusion (mutation-checked + old-version), Bun-adapter writeFileSync gate (killed by a manual bun.mts override). 20/20 migrator mutants killed. |
-| d   | Legacy retirement                            | uphill 0% | Deps: all (no scope deletes a legacy file until d lands) |
+| d   | Legacy retirement                            | over-the-hill | Deps: all (no scope deletes a legacy file until d lands) |
 
 ## State transitions
 

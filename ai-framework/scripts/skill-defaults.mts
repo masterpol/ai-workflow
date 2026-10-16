@@ -1,6 +1,7 @@
 import { runDirect } from "./runtime/cli.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { loadConfig } from "./runtime/config.mts";
 import * as registryModule from "./skill-registry.mts";
 import catalogJson from "../integrations/skill-defaults.json" with { type: "json" };
 
@@ -66,7 +67,23 @@ function messageOf(error: unknown): string {
 
 // Resolving the real path and confirming it stays under the real project root catches both a
 // symlinked leaf and a symlinked ancestor directory (e.g. .project/skills/).
+// TOON first: a present `ai-workflow.toon` wins (its single `skills.modes.caveman` value maps to `default`, or to
+// `enabled: false` for "off"); only a missing file falls back to the legacy modes.json. A present but refused or
+// invalid TOON file throws and never falls back (fail closed, same as the env reader). Per-phase overrides exist only
+// in the legacy file, so a valid TOON file drops them (see d31).
 export function loadModes(root: string, deps: RuntimeDeps = defaultDeps()): ModesState | null {
+  const config = loadConfig(root, deps);
+  if ("status" in config) {
+    if (config.status !== "missing") throw new Error(`ai-workflow.toon is ${config.status}: ${config.text ?? config.code ?? "unreadable"}`);
+  } else {
+    if (config.problems.length > 0) throw new Error(`ai-workflow.toon is invalid: ${config.problems[0].text}`);
+    const mode = config.model.skills.modes.caveman;
+    return { schemaVersion: 1, caveman: mode === "off" ? { enabled: false } : { default: mode } } as ModesState;
+  }
+  return loadLegacyModes(root, deps);
+}
+
+function loadLegacyModes(root: string, deps: RuntimeDeps): ModesState | null {
   const { fs, path } = deps;
   const full = path.join(root, MODES_FILE);
   if (!fs.existsSync(full)) return null;
@@ -100,7 +117,7 @@ export function extractInvocationArg(argumentsText: unknown): string | undefined
   return match ? match[1].toLowerCase() : undefined;
 }
 
-// invocationArg is scoped to this one call and never persisted; only an explicit modes.json edit persists.
+// invocationArg is scoped to this one call and never persisted; only an explicit config edit (ai-workflow.toon or legacy modes.json) persists.
 export function resolveMode(root: string, options: ResolveOptions = {}, deps: RuntimeDeps = defaultDeps()): string {
   const { phase, argumentsText } = options;
   let { invocationArg } = options;
