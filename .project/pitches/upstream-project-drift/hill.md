@@ -8,7 +8,7 @@
 |-------|----------|------------|-------|
 | S0 | done | 2026-10-16 | drift-ledger.md: 178 rows; deviations D3, D4 |
 | S1 | done | 2026-10-16 | OpenCode worker updrift-s1-4 (rules) + coordinator (graphify); graphify 16/16 node + bun; check exit 0 |
-| S2 | uphill 0% | 2026-10-16 | Runtime child ownership — not started |
+| S2 | done | 2026-10-16 | climbing runtime + 3 coordinator fixes (D7); GAUNTLET node 1284/2 flaky, bun 1281/1 known timeout; Linux 69/0 |
 | S3 | done | 2026-10-16 | Pulled forward (D6): isSupportedVersion floor 1.4.224, 4 sites; 198/198 node + bun; mutant fails 4 |
 | S4 | uphill 0% | 2026-10-16 | Orca task ownership — not started |
 | S5 | uphill 0% | 2026-10-16 | Orca apply / admit / grader — not started |

@@ -34,3 +34,23 @@ See plan.md D2 (critique X2 partly overridden; `orca-policy.mts` shape and grade
   launch gate refused the first wave 2 dispatch with `runtime-version-unsupported`. Nothing launched.
 - **Now**: with owner approval, the coordinator did S3 before wave 2. S3 touches none of S2's runtime files.
   The wave 3 dependency only ordered work; there was no technical reason for it.
+
+## D7 (S2, 2026-10-16) — climbing's runtime needed three fixes before base could take it
+- **Plan said**: port climbing's runtime child ownership (8 files; base unchanged since sync, so a plain copy).
+- **Reality**: climbing's version was proven on Linux only. On macOS its own `runtime.test.mts` fails 2 to 3 of 52
+  tests (also inside climbing's checkout). Copying it into base also broke the bun GAUNTLET (58 failures).
+- **Now** (coordinator, three fixes on top of the copy):
+  1. `posixGroupIsRunning` and `killGroup` treat `EPERM` on macOS as "the group is still exiting" (macOS answers
+     `EPERM` for `kill(-pgid)` while members exit, then `ESRCH`). `waitForPosixGroupExit` still proves the exit
+     within its 5 s deadline.
+  2. `createNodeDeps` / `createBunDeps` return `child: { ...nodeChild }`. With climbing's single shared `nodeChild`
+     object, tests that replace `deps.child.runSync` in place leaked their fakes into every later test in Bun's
+     single test process. Regression test added.
+  3. `upgrade.test.mts` also tolerates `Codex startup wiring: UserPromptSubmit not registered`: an old install's
+     own bundle-sync never delivers `.codex/hooks.json`, the same case as the README/docs tolerance already there.
+     This clears the 3 pre-existing upgrade failures (decision 3).
+- Linux check (decision 4): Docker `node:24` (24.22.0, Linux 6.12): runtime, invariants and test-helpers 69 pass,
+  0 fail, 5 skipped.
+- Remaining flakiness only under full-suite load (follow-up): "descendant ownership after timeout/output"
+  (node and bun) and the orca-eval-grader mutation proof ("settle without evidence"). Each passes when its file
+  runs alone, 3/3 or more.

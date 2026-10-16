@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
-import { join, relative, sep } from "node:path";
+import { join, posix, relative, sep } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { NODE_FLAGS } from "./entry.mts";
@@ -56,7 +56,7 @@ test("imports all production TypeScript modules silently without running command
   const code = `for (const url of ${JSON.stringify(modules)}) await import(url);`;
   const flags = process.versions.bun ? [] : NODE_FLAGS;
   const result = spawnSync(process.execPath, [...flags, "--input-type=module", "-e", code], {
-    cwd, encoding: "utf8", timeout: 20000, env: { ...process.env, AI_WORKFLOW_RUNNER: "deno" },
+    cwd, encoding: "utf8", timeout: 20000, windowsHide: true, shell: false, env: { ...process.env, AI_WORKFLOW_RUNNER: "deno" },
   });
   assert.deepEqual([result.status, result.stdout, result.stderr], [0, "", ""]);
   assert.deepEqual(readdirSync(cwd), [], "importing cannot create project state");
@@ -81,7 +81,8 @@ function plantedDeps(fixtureRoot: string, file: string, source: string) {
   const fake = memoryFs({ [`${fixtureRoot}/${file}`]: source });
   const handles = new Map<number, string>();
   let sequence = 10;
-  return { ...base, fs: { ...base.fs, ...fake,
+  // The planted tree is POSIX virtual data, independent of the host filesystem.
+  return { ...base, path: posix, fs: { ...base.fs, ...fake,
     openSync: (name: string) => { const fd = sequence++; handles.set(fd, name); return fd; },
     fstatSync: (fd: number) => fake.statSync!(handles.get(fd)!),
     readSync: (fd: number, bytes: Uint8Array, offset: number, length: number, position: number | null) => {

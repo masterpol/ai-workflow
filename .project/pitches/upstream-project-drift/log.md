@@ -72,3 +72,8 @@ Tree: `0deac9a` + uncommitted graphify edit; `ai_workflow_env.json` moved aside;
   `AI_WORKFLOW_RUNNER=node`. Exits: 141/141 node, 141/141 bun (`--timeout 30000`); stuck-uphill
   `$CLAUDE_PROJECT_DIR` path count 1; `"bun ` in hooks.json 0; 1 MiB prompt, >64 KiB args, symlinked
   hill/audit log, bad packageManager covered by tests; doctor exit 0.
+- S2 done (see D7). Exits: runtime node 3 upgrade failures fixed; bun runtime 174+/176 (load flake only);
+  doctor `Runtime boundary` production 0 violations; X3: only new `process.env` read is `SystemRoot` (Windows
+  taskkill path, not config). GAUNTLET(node) 1287 tests: 1284 pass, 2 fail (load flakes, each 3/3 alone),
+  1 skip (baseline 1267/3). GAUNTLET(bun) 1283 tests: 1281 pass, 1 fail (`workflow-doctor` 5 s bun timeout,
+  decision 6), 1 skip (baseline 1256/5). Linux Docker 69/0/5 skipped.

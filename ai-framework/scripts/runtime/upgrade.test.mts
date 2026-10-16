@@ -2,27 +2,34 @@
 // (old) bundle-sync.js against this tree, with plain `node` and no flags, and must end healthy with the same
 // command output as before after a second direct TypeScript sync. Skips when the historical ref is unavailable.
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { appendFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs";
+import { spawnSync as rawSpawnSync, type SpawnSyncOptions } from "node:child_process";
+import { appendFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 import { NODE_FLAGS } from "./entry.mts";
+import { WORKFLOW_ENV_FILE } from "./env.mts";
+
+function spawnSync(command: string, args: string[], options: SpawnSyncOptions = {}) {
+  return rawSpawnSync(command, args, { ...options, shell: false, windowsHide: true, timeout: 120000, killSignal: "SIGKILL" });
+}
 
 /** Last commit before the TypeScript migration (the bundle existing installs hold). */
 const PRE_MIGRATION_REF = "53bca03";
 const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
 /** The tree the old install upgrades TO. Defaults to this checkout; override to test an isolated copy. */
 const source = process.env.UPGRADE_SIM_SOURCE ?? repoRoot;
-const nodeExecutable = spawnSync("node", ["-p", "process.execPath"], { encoding: "utf8" }).stdout.trim();
-const run = (command: string, args: string[], cwd: string, env: Record<string, string> = {}) =>
-  spawnSync(command, args, { cwd, encoding: "utf8", env: { ...process.env, ...env }, maxBuffer: 64 * 1024 * 1024 });
+const nodeExecutable = String(spawnSync("node", ["-p", "process.execPath"], { encoding: "utf8" }).stdout).trim();
+const run = (command: string, args: string[], cwd: string, env: Record<string, string | undefined> = {}) => {
+  const result = spawnSync(command, args, { cwd, encoding: "utf8", env: { ...process.env, AI_WORKFLOW_RUNNER: undefined, ...env }, maxBuffer: 64 * 1024 * 1024 });
+  return { ...result, stdout: String(result.stdout ?? ""), stderr: String(result.stderr ?? "") };
+};
 
 const hasRef = run("git", ["cat-file", "-e", `${PRE_MIGRATION_REF}^{commit}`], repoRoot).status === 0;
 const hasBun = run("bun", ["--version"], source).status === 0;
 const hasNoStripFlag = run(process.execPath, ["--no-experimental-strip-types", "-e", "0"], source).status === 0;
-const skip = hasRef ? false : `git ref ${PRE_MIGRATION_REF} not available`;
+const skip = process.platform === "win32" ? "historical bundle has no verified Windows process lifecycle" : hasRef ? false : `git ref ${PRE_MIGRATION_REF} not available`;
 
 const COMMANDS: Array<{ name: string; args: string[]; identical: boolean }> = [
   { name: "workflow-doctor", args: ["ai-framework/scripts/workflow-doctor.js", "--no-color"], identical: false },
@@ -57,8 +64,10 @@ function snapshot(project: string, env: Record<string, string> = {}, migrated = 
  * An old install never receives README.md (bundle-sync only flags it) and an old bundle-sync never copies a
  * directory it does not know, so a bundle that moves docs into ai-framework/docs makes the doctor fail on exactly
  * those paths. That belongs to the docs change, not to this migration: tolerate it, and nothing else.
+ * Likewise an old bundle-sync never delivers `.codex/hooks.json`, so the later Codex startup wiring check fails
+ * in the upgraded copy; that belongs to the Codex hook change.
  */
-const DOCS_ONLY = /README\.md|ai-framework\/docs\//;
+const DOCS_ONLY = /README\.md|ai-framework\/docs\/|Codex startup wiring: UserPromptSubmit not registered/;
 function docsOnlyDoctorFailures(after: ReturnType<typeof snapshot>): boolean {
   const failures = after["workflow-doctor"].stdout.split("\n").filter((line) => line.startsWith("FAIL "));
   return failures.length > 0 && failures.every((line) => DOCS_ONLY.test(line));
@@ -144,13 +153,21 @@ test("a locally edited script is kept by the old sync and the project still work
   } finally { rmSync(project, { recursive: true, force: true }); }
 });
 
-test("a project whose .env selects bun runs the same commands", { skip: skip || (hasBun ? false : "bun not installed"), timeout: 240000 }, () => {
+test("a project whose workflow settings select Bun actually uses Bun and runs the same commands", { skip: skip || (hasBun ? false : "bun not installed"), timeout: 240000 }, () => {
   const project = oldProject();
   try {
     const before = snapshot(project);
     sync(project, ["--apply", "--prune"]);
     sync(project, ["--apply", "--prune"], true);
-    appendFileSync(join(project, ".env"), "AI_WORKFLOW_RUNNER=bun\n");
-    assertHealthy(".env runner", before, snapshot(project, {}, true));
+    writeFileSync(join(project, WORKFLOW_ENV_FILE), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    const probe = join(project, "ai-framework/scripts/upgrade-runtime-probe.mts");
+    writeFileSync(probe, [
+      'import { runDirect } from "./runtime/cli.mts";',
+      'runDirect(import.meta.url, (_args, deps) => { deps.io.stdout.write(JSON.stringify({ selected: deps.runtime, host: process.versions.bun ? "bun" : "node" })); return 0; });',
+    ].join("\n"));
+    const host = run(nodeExecutable, [...NODE_FLAGS, probe], project);
+    assert.equal(host.status, 0, host.stderr);
+    assert.deepEqual(JSON.parse(host.stdout), { selected: "bun", host: "bun" });
+    assertHealthy("workflow settings runner", before, snapshot(project, {}, true));
   } finally { rmSync(project, { recursive: true, force: true }); }
 });

@@ -29,7 +29,7 @@ test("tempFixture creates a real temp directory and writes files, returning a re
   }
 });
 
-test("tempFixture honours the mode option", () => {
+test("tempFixture honours the mode option", { skip: process.platform === "win32" ? "POSIX executable permission bits are unavailable on Windows" : false }, () => {
   const root = tempFixture(deps, { "exec.sh": { content: "#!/bin/sh\n", mode: 0o755 } });
   try {
     const st = deps.fs.statSync(join(root, "exec.sh"));

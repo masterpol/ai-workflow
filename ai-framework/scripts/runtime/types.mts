@@ -120,6 +120,11 @@ export interface RunResult {
 export interface ChildDeps {
   runBytesSync(command: string, args: string[], options?: SpawnOptions): { status: number | null; signal: string | null; stdout: Uint8Array; stderr: Uint8Array };
   runSync(command: string, args: string[], options?: SpawnOptions): RunResult;
+  /** Hidden and awaited. Deadline/cap cleanup awaits real pipe closure. If cleanup cannot
+   * be confirmed, rejects EPROCESSCLEANUP with ownerPid; the PID remains observable via
+   * pendingChildPids() until close. Callers must treat this as unknown liveness, not a failed launch.
+   * POSIX descendants must remain in their process group; Windows tree cleanup requires
+   * the owning wrapper to remain alive. Detached/daemonized workers need an external supervisor. */
   run(command: string, args: string[], options?: SpawnOptions): Promise<RunResult>;
 }
 
