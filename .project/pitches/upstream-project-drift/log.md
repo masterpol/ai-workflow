@@ -29,3 +29,17 @@ Tree: `0deac9a` + uncommitted graphify edit; `ai_workflow_env.json` moved aside;
 - Climbing's `.opencode/plugins/token-consumption.ts` is byte-identical to base. LAH and RN still carry the
   pre-V2 plugin (+54 −174 vs base): their OpenCode sessions record nothing until `workflow-v3-rollout` (or an
   earlier sync of `.opencode/`).
+
+## 2026-10-16 — Wave 2 start (Orca)
+- Interim pin 1.4.224 committed as `5a6b656` (D5). Orca start: `ready` (coordinator claude, workers codex, opencode).
+- Previous binding `run_e1844e888149` ("S0 smoke…", 2026-10-08) was unrelated. With owner approval, created and
+  bound `run_3bd0c1193ed8` (objective "upstream-project-drift: …(2.23.0)").
+- Graphify part of S1 (dangling-edge overlay) was already in the tree: `bun test graphify.test.mts` 16/16,
+  `graphify.mts --check` CLEAN. The coordinator keeps it; the S1 worker ports the rules only.
+- Runner for this pitch: bun (`ai_workflow_env.json`), at the owner's request.
+- S1 dispatch attempt `updrift-s1-1` refused before launch (`runtime-version-unsupported`: Orca app auto-updated
+  to 1.4.227). Nothing launched. S3 pulled forward (D6).
+- S3 done: `isSupportedVersion` (strict x.y.z, ≤6 digits per part, floor 1.4.224) in preflight, launch gate
+  (reports the observed version), orca-start worker check. Drift fixtures moved to 1.4.223 (below floor). Table
+  test + 1.4.227 probe/gate/start cases. bun 198/198, node 198/198. Mutant (`>`→`<`) fails 4 preflight tests.
+  `grep 'appVersion !== SUPPORTED_VERSION|=== SUPPORTED_VERSION'` empty. Start decision `ready` on 1.4.227.

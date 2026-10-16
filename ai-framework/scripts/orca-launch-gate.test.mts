@@ -87,18 +87,21 @@ test("version drift between two calls refuses the second and the probe really ra
   let version = "1.4.224";
   const p = prober(() => version);
   assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run }).allowed, true);
-  version = "1.5.0";
+  version = "1.4.223";
   const second = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run });
   assert.equal(second.allowed, false);
   assert.equal(second.reason, "runtime-version-unsupported");
   assert.equal(p.state.calls, 6);
   version = "1.4.224";
   assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run }).allowed, true);
+  version = "1.4.227";
+  const later = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run });
+  assert.deepEqual([later.allowed, later.runtimeVersion], [true, "1.4.227"]);
 });
 
 test("version drift also refuses an external coordinator that has no caller block", (t: TestContext) => {
   const root = fixture(t);
-  const p = prober(() => "9.9.9", false);
+  const p = prober(() => "1.4.223", false);
   assert.equal(evaluateLaunch({ ...common, root, env: { PATH: "/usr/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run: p.run }).allowed, false);
 });
 
@@ -163,7 +166,7 @@ test("launchWorker passes an allowlisted env and a floored timeout, and re-probe
   assert.equal(seen[0].timeoutMs, 3);
   assert.equal(seen[0].env?.GITHUB_TOKEN, undefined);
   assert.equal(seen[0].env?.PATH, "/usr/bin");
-  version = "2.0.0";
+  version = "1.4.223";
   const second = await launchWorker(request);
   assert.deepEqual([second.launched, second.reason], [false, "runtime-version-unsupported"]);
   assert.equal(seen.length, 1, "no child spawned after version drift");

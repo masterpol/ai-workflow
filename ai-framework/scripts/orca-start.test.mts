@@ -178,8 +178,13 @@ test("blocks missing or disabled policy with actionable fixed text", (t) => {
 });
 
 test("blocks unsupported runtime versions through evaluateLaunch", (t) => {
-  const f = fixture(t); f.state.version = "9.9.9";
+  const f = fixture(t); f.state.version = "1.4.223";
   assert.equal(decideStart(f.options).reason, "runtime-version-unsupported");
+});
+
+test("accepts a runtime newer than the supported floor, coordinator and worker side", (t) => {
+  const f = fixture(t); f.state.version = "1.4.227";
+  assert.equal(decideStart(f.options).state, "ready");
 });
 
 test("caps every probe by one cumulative deadline", (t) => {
@@ -250,7 +255,7 @@ test("rechecks switch, policy, runtime and identity between calls without cachin
   const f = fixture(t);
   assert.equal(decideStart(f.options).state, "ready"); assert.equal(f.state.calls.length, 4);
   assert.equal(decideStart(f.options).state, "ready"); assert.equal(f.state.calls.length, 8);
-  f.state.version = "9.9.9"; assert.equal(decideStart(f.options).state, "blocked");
+  f.state.version = "1.4.223"; assert.equal(decideStart(f.options).state, "blocked");
   f.state.version = "1.4.224"; f.policy["use-orca-orchestration"] = false; f.writePolicy();
   assert.equal(decideStart(f.options).reason, "policy-disabled");
   f.deps.proc.env.AI_WORKFLOW_ORCA_MULTI_AGENT = "false"; assert.equal(decideStart(f.options).state, "off");
@@ -288,7 +293,7 @@ test("blocks malformed, killed and oversized worker status receipts", (t) => {
     { status: 0, stdout: JSON.stringify(status()), stderr: "", signal: "SIGKILL" },
     { status: 0, stdout: " ".repeat(256 * 1024 + 1) + JSON.stringify(status()), stderr: "" },
     { status: 0, stdout: JSON.stringify(status()), stderr: "x".repeat(256 * 1024 + 1) },
-    { status: 0, stdout: JSON.stringify(status("9.9.9")), stderr: "" },
+    { status: 0, stdout: JSON.stringify(status("1.4.223")), stderr: "" },
   ]) {
     const run: Run = (command, args, options) => options.env.AI_WORKFLOW_ORCA_MULTI_AGENT ? f.run(command, args, options) : result;
     assert.equal(decideStart({ ...f.options, run }).reason, "worker-orca-unavailable");

@@ -27,3 +27,10 @@ See plan.md D2 (critique X2 partly overridden; `orca-policy.mts` shape and grade
 - **Now**: the owner approved an interim exact pin. `SUPPORTED_VERSION = "1.4.224"` in `orca-preflight.mts`,
   test literals updated in seven test files, and one floor line in `orca-vendors.md`, committed on its own.
   S3 still owns the `isSupportedVersion` range check, the four call sites and the table tests.
+
+## D6 (build, 2026-10-16) — S3 pulled forward ahead of S2
+- **Plan said**: S3 runs in wave 3, after S2.
+- **Reality**: minutes after the D5 pin, the Orca app updated itself to 1.4.227 (CLI still 1.4.224), and the
+  launch gate refused the first wave 2 dispatch with `runtime-version-unsupported`. Nothing launched.
+- **Now**: with owner approval, the coordinator did S3 before wave 2. S3 touches none of S2's runtime files.
+  The wave 3 dependency only ordered work; there was no technical reason for it.

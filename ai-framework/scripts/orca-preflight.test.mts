@@ -8,7 +8,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { CALL_TIMEOUT_MS, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, executablePresent, main, report, selectExecutable } from "./orca-preflight.mts";
+import { CALL_TIMEOUT_MS, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, ReportOptions, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
@@ -226,7 +226,7 @@ test("refuses unsupported guides and unproven runtime/caller receipts", (t: Test
     ["runtime-unreachable", (values: Values) => { values[2].result.runtime.reachable = false; }],
     ["runtime-unreachable", (values: Values) => { values[2].result.runtime.state = "starting"; }],
     ["runtime-version-unsupported", (values: Values) => { delete values[2].result.runtime.appVersion; }],
-    ["runtime-version-unsupported", (values: Values) => { values[2].result.runtime.appVersion = "99.0.0"; }],
+    ["runtime-version-unsupported", (values: Values) => { values[2].result.runtime.appVersion = "1.4.223"; }],
     ["caller-unverified", (values: Values) => { delete values[2].result.caller; }],
     ["caller-unverified", (values: Values) => { values[2].result.caller.live = false; }],
     ["caller-unverified", (values: Values) => { values[2].result.caller.orcaSessionId = "stale-session"; }],
@@ -253,6 +253,21 @@ test("does not infer launch authority from an unpinned experimental feature fiel
     assert.equal(result.reason, "orchestration-unverified");
     assertNormal(result);
   }
+});
+
+test("isSupportedVersion accepts the floor and later strict x.y.z versions only", () => {
+  for (const version of ["1.4.224", "1.4.225", "1.4.1000", "1.5.0", "2.0.0", "999999.0.0"]) assert.equal(isSupportedVersion(version), true, version);
+  for (const version of ["1.4.223", "1.3.999", "0.9.300", "01.4.224", "1.04.224", "1.4", "1.4.224.1", "1.4.224-beta", "v1.4.224",
+    " 1.4.224", "1.4.224\n", "", `1.4.${"9".repeat(400)}`, "1000000.0.0"]) assert.equal(isSupportedVersion(version), false, JSON.stringify(version));
+  for (const value of [undefined, null, 1.4, 10424, ["1.4.224"], { version: "1.4.224" }]) assert.equal(isSupportedVersion(value), false, String(value));
+});
+
+test("a later runtime version passes the probe and reports the observed version", (t: TestContext) => {
+  const values = receipts();
+  values[2].result.runtime.appVersion = "1.4.227";
+  const result = report(fixture(t), "codex", probe(values).options);
+  assert.equal(result.reason, "orchestration-unverified");
+  assert.equal(result.runtimeVersion, "1.4.227");
 });
 
 test("bounds the complete probe and reduces per-call timeout to remaining budget", (t: TestContext) => {

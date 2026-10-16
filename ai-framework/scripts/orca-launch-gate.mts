@@ -1,5 +1,5 @@
 import { report as policyReport } from "./orca-policy.mts";
-import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
+import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, isSupportedVersion, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, ReportOptions, Run, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
@@ -14,7 +14,7 @@ import type { RuntimeDeps } from "./runtime/types.mts";
  *   1. the caller is not itself a worker (no `--worker-context` flag, no WORKER_ENV_MARKERS in env);
  *   2. the policy file is re-read and the requested coordinator vendor is eligible (policy-eligible);
  *   3. a fresh runtime probe passes: Orca executable present, both guides verified, local runtime reachable
- *      and ready, and its appVersion equals SUPPORTED_VERSION.
+ *      and ready, and its appVersion passes isSupportedVersion (SUPPORTED_VERSION or later).
  * Foundation preflight/policy keep `dispatchReady: false`; this gate, not those reports, is the launch authority.
  *
  * DEVIATION (runtime-contract.md): an external coordinator outside an Orca terminal gets no `caller` block
@@ -127,11 +127,11 @@ export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
       platform: options.platform, present: options.present }, deps) as Json & { eligible?: boolean; reason?: string; runtimeVersion?: string };
     if (probe.eligible !== true) return deny(String(probe.reason), { policyReason: String(policy.reason) });
     if (!VERSION_PROVEN_REASONS.includes(String(probe.reason))) return deny(String(probe.reason), { policyReason: String(policy.reason) });
-    if (probe.runtimeVersion !== undefined && probe.runtimeVersion !== SUPPORTED_VERSION) return deny("runtime-version-unsupported");
+    if (probe.runtimeVersion !== undefined && !isSupportedVersion(probe.runtimeVersion)) return deny("runtime-version-unsupported");
     // The probe proved this executable and no other; launchWorker spawns exactly it.
     const executable = selectExecutable(env, options.platform ?? deps.proc.platform, deps);
     if (!executable) return deny("launcher-unavailable");
-    return { allowed: true, reason: "launch-allowed", vendor, policyReason: String(policy.reason), runtimeVersion: SUPPORTED_VERSION, executable };
+    return { allowed: true, reason: "launch-allowed", vendor, policyReason: String(policy.reason), runtimeVersion: probe.runtimeVersion ?? SUPPORTED_VERSION, executable };
   } catch { return deny("gate-error"); }
 }
 

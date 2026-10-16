@@ -1,6 +1,6 @@
 import { buildWorkerEnv, evaluateLaunch } from "./orca-launch-gate.mts";
 import { report as policyReport } from "./orca-policy.mts";
-import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, selectExecutable } from "./orca-preflight.mts";
+import { MAX_OUTPUT_BYTES, isSupportedVersion, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, Run, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
@@ -173,7 +173,7 @@ export function decideStart(options: StartOptions): StartDecision {
     if (!object(status) || status.ok !== true || !object(status.result) || !object(status.result.runtime)
       || !object(status.result.target) || status.result.target.kind !== "local"
       || status.result.runtime.reachable !== true || status.result.runtime.state !== "ready"
-      || status.result.runtime.appVersion !== SUPPORTED_VERSION) return blocked("worker-orca-unavailable");
+      || !isSupportedVersion(status.result.runtime.appVersion)) return blocked("worker-orca-unavailable");
     deadline.remaining();
     return { state: "ready", reason: "launch-allowed", line: `Orca: ready (coordinator ${options.vendor}, workers ${workers.join(", ")})`, workers };
   } catch { return blocked(budget?.failure ?? "internal"); }

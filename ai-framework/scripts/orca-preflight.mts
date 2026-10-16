@@ -7,7 +7,16 @@ import type { RuntimeDeps } from "./runtime/types.mts";
 export const MAX_OUTPUT_BYTES = 256 * 1024;
 export const CALL_TIMEOUT_MS = 5000;
 export const TOTAL_TIMEOUT_MS = 20000;
+/** Minimum supported Orca runtime; any later x.y.z release is accepted. */
 export const SUPPORTED_VERSION = "1.4.224";
+/** True for a strict `x.y.z` version (no leading zeros, at most six digits per part) at or above SUPPORTED_VERSION. */
+export function isSupportedVersion(version: unknown): version is string {
+  if (typeof version !== "string" || !/^(?:0|[1-9]\d{0,5})(?:\.(?:0|[1-9]\d{0,5})){2}$/.test(version)) return false;
+  const have = version.split(".").map(Number);
+  const need = SUPPORTED_VERSION.split(".").map(Number);
+  for (let i = 0; i < 3; i++) if (have[i] !== need[i]) return have[i]! > need[i]!;
+  return true;
+}
 const CALLS = Object.freeze({
   cliGuide: ["skills", "get", "orca-cli", "--json"],
   orchestrationGuide: ["skills", "get", "orchestration", "--json"],
@@ -127,13 +136,13 @@ function inspectRuntime(command: string, context: Context): Inspection {
   } | null | undefined;
   if (!result || result.target?.kind !== "local") return { reason: "runtime-unverified" };
   if (result.runtime?.reachable !== true || result.runtime.state !== "ready") return { reason: "runtime-unreachable" };
-  if (result.runtime.appVersion !== SUPPORTED_VERSION) return { reason: "runtime-version-unsupported" };
+  if (!isSupportedVersion(result.runtime.appVersion)) return { reason: "runtime-version-unsupported" };
   if (result.caller?.live !== true || typeof result.caller.orcaSessionId !== "string"
     || !context.env.ORCA_AGENT_SESSION_ID || result.caller.orcaSessionId !== context.env.ORCA_AGENT_SESSION_ID) return { reason: "caller-unverified" };
   // The pinned status contract does not advertise an enabled orchestration field or validate
   // all worker capabilities. A matching live caller is evidence, never launch authority.
   return { reason: "orchestration-unverified", session: "verified", capabilities: "documented",
-    version: SUPPORTED_VERSION };
+    version: result.runtime.appVersion };
 }
 
 export function report(root: string, vendor: string, options: ReportOptions = {}, deps: RuntimeDeps = defaultDeps()): Json {
