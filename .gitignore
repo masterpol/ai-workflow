@@ -3,13 +3,12 @@
 .env
 .env.*
 !.env.example
-# Workflow settings (runner, Orca switch): no secrets, but local to each checkout; the .example.json stays tracked.
-ai_workflow_env.json
+# Workflow settings (runner, Orca switch, TOON config): no secrets, but local to each checkout.
+# The canonical templates live in ai-framework/templates/ and stay tracked.
+ai-workflow.toon
 .opencode/node_modules/
 .claude/settings.local.json
 .project/metrics/
-# Optional per-project vendor orchestration policy; portable example stays tracked.
-.project/orchestration.json
 # /state output; the README scaffold stays tracked so a fresh clone passes the doctor scaffold check.
 .project/reports/*
 !.project/reports/README.md

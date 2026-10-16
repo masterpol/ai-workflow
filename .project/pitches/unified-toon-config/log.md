@@ -61,3 +61,62 @@ Pitch 2's `VERSION` bump lands at `/ship` (per the ship phase; not a build conce
 ### Continuation
 
 a1 build starts now on `feat/unified-toon-config` branched at the local `2.23.0` tag.
+
+## 2026-10-16 — a1 build complete
+
+### Files written
+
+- `ai-framework/scripts/runtime/config.mts` — primitives, parser, validators, `errorCodes`, registrar (~640 LOC).
+- `ai-framework/scripts/runtime/oex-lock.mts` — 5-line seam re-exporting `oexLock`.
+- `ai-framework/scripts/runtime/config.test.mts` — placeholder sanity test (2 tests).
+- `ai-framework/templates/ai-workflow.example.toon` — canonical TOON template.
+- `ai-framework/templates/ai_workflow_env.example.json` — relocated from bundle root (rename-detected).
+- `ai-workflow.toon` — repo-root instance config (gitignored, not tracked).
+- `.project/decisions/toon-subset-grammar.md` — pinned grammar, spec version 1.0, rejection modes, line/column contract.
+- `.gitignore` — added `ai-workflow.toon`, removed stale legacy `ai_workflow_env.json` + `.project/orchestration.json` lines, fixed comment.
+- `.project/pitches/unified-toon-config/deviations.md` — created with 4 drift rows.
+
+### Exit-criteria evidence
+
+1. Test run:
+   ```
+   node --experimental-strip-types --disable-warning=ExperimentalWarning --test ai-framework/scripts/runtime/config.test.mts
+   ✔ loadConfig parses a minimal TOON file
+   ✔ loadConfig reports unknown schemaVersion
+   tests 2 / pass 2 / fail 0
+   exit 0
+   ```
+
+2. Export grep:
+   ```
+   grep -nE "registerIntegrationValidator|registerEngineValidator|registerCoordinatorValidator|errorCodes|oexLock|wxRename|inspectPath|readBoundedFile" ai-framework/scripts/runtime/config.mts
+   ```
+   Returns 8 distinct exported symbols (`errorCodes`, `registerIntegrationValidator`, `registerEngineValidator`, `registerCoordinatorValidator`, `inspectPath`, `readBoundedFile`, `wxRename`, `oexLock`).
+
+3. Diff check (allowlist only):
+   ```
+   git diff --name-only HEAD
+   .gitignore
+   .project/decisions/toon-subset-grammar.md
+   ai-framework/scripts/runtime/config.mts
+   ai-framework/scripts/runtime/config.test.mts
+   ai-framework/scripts/runtime/oex-lock.mts
+   ai-framework/templates/ai-workflow.example.toon
+   ai-framework/templates/ai_workflow_env.example.json
+   ```
+
+4. Forbidden checks:
+   - No `flock` in `config.mts` / `oex-lock.mts`.
+   - `inspectPath` + `readBoundedFile` use `realpathSync` and `lstatSync` and capture/compare `dev`/`ino`.
+   - No raw `node:fs` imports.
+
+### Plan ↔ reality drift
+
+See `.project/pitches/unified-toon-config/deviations.md`. Key items:
+- X20 referrer updates deferred (one referrer is X16 dirty file; others outside a1 diff allowlist).
+- 7th a1 file is `.gitignore`.
+- Unrelated upstream-project-drift WIP was stashed to keep a1 diff clean.
+
+### Hill update
+
+`a1` moved `uphill 0%` → `uphill 75%`.

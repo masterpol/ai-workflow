@@ -1,0 +1,22 @@
+schemaVersion: 1
+runtime:
+  runner: node
+engines:
+  orca: "1.4.224"
+orchestration:
+  multiAgent: true
+  enabled: true
+  maxConcurrentWorkers: 3
+  maxRetriesPerTask: 1
+  workers[2]: opencode,codex
+  coordinators:
+    claude:
+      roles:
+        implementation[1]: opencode
+        review[1]: codex
+doctor:
+  modelRouting: project
+skills:
+  modes:
+    caveman: full
+integrations: {}

@@ -12,7 +12,7 @@ phase: plan
 
 | ID  | Title                                        | Position | Notes |
 |-----|----------------------------------------------|----------|-------|
-| a1  | `config.mts` primitives                       | uphill 0% | Blocked on branch-gate (pre-a1 verifier). |
+| a1  | `config.mts` primitives                       | uphill 75% | Primitives landed; placeholder tests green; waiting for a2/a3 consumer verification. |
 | a2  | `config.test.mts` parser mutants              | uphill 0% | Deps: a1 |
 | a3  | Writer/path mutants + alias + subprocess     | uphill 0% | Deps: a1, a2 |
 | c1.1| runtime/orca reader glue + grader rewire      | uphill 0% | Deps: a3 |
