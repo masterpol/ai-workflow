@@ -282,3 +282,27 @@ See `.project/pitches/unified-toon-config/deviations.md` rows d5, d6, d7.
 
 Dispatch a3 (writer/path mutants + alias + subprocess; deep profile). a3 builds on a1+a2
 and extends `runtime/test-helpers.mts` with the TOON fixture writer.
+
+## 2026-10-16 - a3 build complete
+
+### Files changed
+
+- `ai-framework/scripts/runtime/config.test.mts` - 5 writer/path mutants, 4 alias tests, 3 lock tests + 1 lock io-error, K2-3 subprocess revalidation, probe script.
+- `ai-framework/scripts/runtime/test-helpers.mts` - `toonFixtureText()`, `memoryToonFs()` (TOON fixture writer on `memoryFs(files, links)`); `memoryFs` now honours `wx`, adds `renameSync`/`unlinkSync`.
+- `config.mts` untouched. Hill/deviations/log updated (d8-d10).
+
+### Evidence
+
+```
+$ node --experimental-strip-types --disable-warning=ExperimentalWarning --test ai-framework/scripts/runtime/config.test.mts
+ℹ tests 35  suites 12  pass 35  fail 0   (exit 0)
+$ ...test-helpers.test.mts  -> tests 13 pass 13 fail 0
+$ grep -c "^mutant" ai-framework/scripts/runtime/config.test.mts   -> 12 (7 a2 + 5 a3)
+$ grep -c "resolve: false" config.test.mts -> 5
+```
+
+Mutation proof (temp edits to `config.mts`, restored; `git diff config.mts` empty): removing the dev/ino open pin, re-inspect pin, escape check, temp cleanup, schemaVersion check, or EEXIST-busy mapping each fails at least one named a3 test. The first open-pin attempt was masked by the re-inspect pin; added an isolating case.
+
+### Hill
+
+a3 -> over-the-hill (producer-side invariants hold). Drift: d8, d9, d10.

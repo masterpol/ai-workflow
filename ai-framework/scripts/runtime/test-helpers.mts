@@ -111,7 +111,22 @@ export function memoryFs(files: Record<string, string>, links: Record<string, st
       if (!map.has(file)) throw notFound(file);
       return new TextEncoder().encode(map.get(file) as string);
     },
-    writeFileSync: (file, data) => { map.set(file, typeof data === "string" ? data : new TextDecoder().decode(data)); },
+    writeFileSync: (file, data, options) => {
+      // Honour O_EXCL semantics ("wx") so lock and write-then-rename guards are observable in memory.
+      if (options?.flag === "wx" && (map.has(file) || linkSet.has(file))) {
+        throw Object.assign(new Error(`EEXIST ${file}`), { code: "EEXIST" });
+      }
+      map.set(file, typeof data === "string" ? data : new TextDecoder().decode(data));
+    },
+    renameSync: (from, to) => {
+      if (!map.has(from)) throw notFound(from);
+      map.set(to, map.get(from) as string);
+      map.delete(from);
+    },
+    unlinkSync: (file) => {
+      if (linkSet.delete(file)) { linkMap.delete(file); return; }
+      if (!map.delete(file)) throw notFound(file);
+    },
     existsSync: (file) => map.has(file) || isDir(file) || linkSet.has(file),
     statSync: stat,
     lstatSync: lstat,
@@ -139,6 +154,48 @@ export function memoryFs(files: Record<string, string>, links: Record<string, st
       return entries.sort((a, b) => a.name.localeCompare(b.name));
     },
   };
+}
+
+/**
+ * Builds `ai-workflow.toon` text for tests. The default is the schemaVersion-1 baseline that
+ * `loadConfig` accepts with zero problems. `schemaVersion` replaces the version line; `extraLines`
+ * are appended at the root (use them to inject a mutation).
+ */
+export function toonFixtureText(options: { schemaVersion?: number | string; extraLines?: string[] } = {}): string {
+  const lines = [
+    `schemaVersion: ${options.schemaVersion ?? 1}`,
+    "runtime:",
+    "  runner: node",
+    "engines:",
+    "  orca: \"1.4.224\"",
+    "orchestration:",
+    "  multiAgent: false",
+    "  enabled: false",
+    "  maxConcurrentWorkers: 3",
+    "  maxRetriesPerTask: 1",
+    "doctor:",
+    "  modelRouting: project",
+    "skills:",
+    "  modes:",
+    "    caveman: full",
+    "integrations: {}",
+    ...(options.extraLines ?? []),
+  ];
+  return lines.join("\n");
+}
+
+/**
+ * TOON fixture writer on `memoryFs(files, links)`: places `text` at `<root>/<name>` (default
+ * `ai-workflow.toon`) in an in-memory tree and forwards `links` so symlink/alias layouts follow
+ * `existsSync`/`statSync`/`lstatSync` correctly. `extraFiles` are merged in unchanged.
+ */
+export function memoryToonFs(
+  root: string,
+  text: string,
+  options: { name?: string; links?: Record<string, string>; extraFiles?: Record<string, string> } = {},
+): Partial<FsDeps> {
+  const files = { ...(options.extraFiles ?? {}), [`${root}/${options.name ?? "ai-workflow.toon"}`]: text };
+  return memoryFs(files, options.links ?? {});
 }
 
 /** Returns a new RuntimeDeps with `stdout.write` / `stderr.write` captured into arrays on the returned object. `isTTY` is forced to `false` so results do not depend on the host terminal. */

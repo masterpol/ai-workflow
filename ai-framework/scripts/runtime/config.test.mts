@@ -1,7 +1,7 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { loadConfig, errorCodes, MAX_CONFIG_BYTES } from "./config.mts";
-import { createTestDeps, memoryFs, tempFixture } from "./test-helpers.mts";
+import { loadConfig, errorCodes, MAX_CONFIG_BYTES, inspectPath, oexLock, wxRename } from "./config.mts";
+import { createTestDeps, memoryFs, memoryToonFs, runScript, tempFixture, toonFixtureText } from "./test-helpers.mts";
 import type { FsDeps, RuntimeDeps, StatLike } from "./types.mts";
 
 /*
@@ -12,7 +12,30 @@ mutant-7-lexerUnreadable-eacces
 mutant-7-lexerOversize-64kPlusOne
 mutant-7-lexerSymlink-symlinkedLeaf
 mutant-7-regexpBacktracking-quotedCommas
+mutant-a3-wxRename-failureLeavesTargetIntact
+mutant-a3-inspectPath-realpathEscape
+mutant-a3-loadConfig-unknownSchemaVersion
+mutant-a3-inspectPath-caseFoldedLeafIgnored
+mutant-a3-readBoundedFile-identityPin
 */
+
+const CONFIG_URL = new URL("./config.mts", import.meta.url).href;
+const NODE_URL = new URL("./node.mts", import.meta.url).href;
+const PROBE_SCRIPT = [
+    `import { loadConfig, oexLock } from ${JSON.stringify(CONFIG_URL)};`,
+    `import { createNodeDeps } from ${JSON.stringify(NODE_URL)};`,
+    "const [mode, root] = process.argv.slice(2);",
+    "const deps = createNodeDeps();",
+    "if (mode === \"lock\") {",
+    "  const held = oexLock(root + \"/ai-workflow.toon\", deps);",
+    "  if (\"release\" in held) { held.release(); console.log(JSON.stringify({ acquired: true })); }",
+    "  else console.log(JSON.stringify({ acquired: false, code: held.refused.code }));",
+    "} else {",
+    "  const result = loadConfig(root, deps);",
+    "  if (\"model\" in result) console.log(JSON.stringify({ ok: true, problems: result.problems.length, runner: result.model.runtime.runner }));",
+    "  else console.log(JSON.stringify({ ok: false, code: result.code }));",
+    "}",
+].join("\n");
 
 function assertProblemCode(problems: { code: string }[], code: string): void {
     if (problems.some((p) => p.code === code)) return;
@@ -402,4 +425,306 @@ test("mutant-7-regexpBacktracking-quotedCommas mutation", () => {
     assert.ok(!("status" in result), "pathological content should parse to a model");
     assert.ok(elapsed < 50, "parser should finish in <50ms, took " + elapsed + "ms");
     assert.ok(!result.problems.some((p) => p.code === errorCodes.regexpBacktracking), "REGEXP-BACKTRACKING should be absent");
+});
+
+// ---------------------------------------------------------------------------
+// a3 — writer/path mutants (5). Each: describe marker + passing baseline in the
+// identical fixture layout + single flipped behaviour asserting the fixed-text
+// errorCodes contract. dual-hash / `.rejected` are migrator guards (b1/b3).
+// ---------------------------------------------------------------------------
+
+function refusal(result: unknown): { status: string; code?: string; text?: string } {
+    assert.ok(result !== null && typeof result === "object" && "status" in (result as object), "expected a refusal, got " + JSON.stringify(result));
+    return result as { status: string; code?: string; text?: string };
+}
+
+// mutant-a3-wxRename-failureLeavesTargetIntact
+describe("mutant-a3-wxRename-failureLeavesTargetIntact", () => {
+    // marker grouping the wxRename write-then-rename mutant tests
+});
+
+test("mutant-a3-wxRename-failureLeavesTargetIntact baseline", () => {
+    const files = { "/project/ai-workflow.toon": "old" };
+    const deps = memoryDeps(memoryFs(files, {}));
+    const result = wxRename("/project/ai-workflow.toon", (tmp) => deps.fs.writeFileSync(tmp, "new", { flag: "wx" }), deps);
+    assert.deepEqual(result, { ok: true });
+    assert.equal(deps.fs.readFileSync("/project/ai-workflow.toon"), "new");
+    assert.deepEqual(deps.fs.readdirSync("/project"), ["ai-workflow.toon"], "no temp file may remain after success");
+});
+
+test("mutant-a3-wxRename-failureLeavesTargetIntact mutation", () => {
+    // rename fails: target keeps old bytes, temp is cleaned, code is the io-error contract.
+    const files = { "/project/ai-workflow.toon": "old" };
+    const mem = memoryFs(files, {});
+    const deps = memoryDeps({ ...mem, renameSync: () => { throw Object.assign(new Error("EXDEV"), { code: "EXDEV" }); } });
+    const result = wxRename("/project/ai-workflow.toon", (tmp) => deps.fs.writeFileSync(tmp, "new", { flag: "wx" }), deps);
+    assert.equal(refusal("refused" in result ? result.refused : result).code, errorCodes.wxRenameIoError);
+    assert.equal(deps.fs.readFileSync("/project/ai-workflow.toon"), "old", "target must be untouched when rename fails");
+    assert.deepEqual(deps.fs.readdirSync("/project"), ["ai-workflow.toon"], "temp must be cleaned when rename fails");
+    // writer hits an existing temp (O_EXCL collision): distinct already-exists code, target still intact.
+    const clash = wxRename("/project/ai-workflow.toon", () => { throw Object.assign(new Error("EEXIST"), { code: "EEXIST" }); }, deps);
+    assert.equal(refusal("refused" in clash ? clash.refused : clash).code, errorCodes.wxRenameAlreadyExists);
+    assert.equal(deps.fs.readFileSync("/project/ai-workflow.toon"), "old");
+});
+
+// mutant-a3-inspectPath-realpathEscape
+describe("mutant-a3-inspectPath-realpathEscape", () => {
+    // marker grouping the realpath-escape mutant tests
+});
+
+test("mutant-a3-inspectPath-realpathEscape baseline", () => {
+    const deps = memoryDeps(memoryToonFs("/project", toonFixtureText()));
+    const location = inspectPath("/project", deps);
+    assert.ok(!("status" in location), "baseline stays inside the root");
+    assert.equal(location.file, "/project/ai-workflow.toon");
+});
+
+test("mutant-a3-inspectPath-realpathEscape mutation", () => {
+    const base = memoryDeps(memoryToonFs("/project", toonFixtureText()));
+    const deps = { ...base, fs: { ...base.fs, realpathSync: (f: string) => (f.endsWith("ai-workflow.toon") ? "/outside/ai-workflow.toon" : f) } } as RuntimeDeps;
+    assert.equal(refusal(inspectPath("/project", deps)).code, errorCodes.inspectPathEscape);
+    const dotdot = { ...base, fs: { ...base.fs, realpathSync: (f: string) => (f.endsWith("ai-workflow.toon") ? "/project/../etc/ai-workflow.toon" : f) } } as RuntimeDeps;
+    assert.equal(refusal(inspectPath("/project", dotdot)).code, errorCodes.inspectPathEscape);
+});
+
+// mutant-a3-loadConfig-unknownSchemaVersion
+describe("mutant-a3-loadConfig-unknownSchemaVersion", () => {
+    // marker grouping the unknown schemaVersion mutant tests
+});
+
+test("mutant-a3-loadConfig-unknownSchemaVersion baseline", () => {
+    const deps = memoryDeps(memoryToonFs("/project", toonFixtureText({ schemaVersion: 1 })));
+    const result = loadConfig("/project", deps);
+    assert.ok(!("status" in result));
+    assert.equal(result.problems.length, 0);
+});
+
+test("mutant-a3-loadConfig-unknownSchemaVersion mutation", () => {
+    for (const version of [2, 0, "one"]) {
+        const deps = memoryDeps(memoryToonFs("/project", toonFixtureText({ schemaVersion: version })));
+        const result = refusal(loadConfig("/project", deps));
+        assert.equal(result.status, "refused");
+        assert.equal(result.code, errorCodes.schemaVersionUnknown, "schemaVersion " + version);
+    }
+});
+
+// mutant-a3-inspectPath-caseFoldedLeafIgnored
+describe("mutant-a3-inspectPath-caseFoldedLeafIgnored", () => {
+    // marker grouping the lowercase-allowlist mutant tests
+});
+
+test("mutant-a3-inspectPath-caseFoldedLeafIgnored baseline", () => {
+    const deps = memoryDeps(memoryToonFs("/project", toonFixtureText()));
+    assert.ok(!("status" in loadConfig("/project", deps)));
+});
+
+test("mutant-a3-inspectPath-caseFoldedLeafIgnored mutation", () => {
+    // Only a case-variant leaf exists; the lowercase allowlist must not treat it as the config.
+    for (const name of ["AI-Workflow.toon", "AI-WORKFLOW.TOON"]) {
+        const deps = memoryDeps(memoryToonFs("/project", toonFixtureText(), { name }));
+        const result = refusal(loadConfig("/project", deps));
+        assert.equal(result.status, "missing", name);
+        assert.equal(result.code, errorCodes.loadConfigRefused);
+    }
+});
+
+// mutant-a3-readBoundedFile-identityPin
+describe("mutant-a3-readBoundedFile-identityPin", () => {
+    // marker grouping the dev/ino identity-pin mutant tests
+});
+
+test("mutant-a3-readBoundedFile-identityPin baseline", () => {
+    const deps = memoryDeps(memoryToonFs("/project", toonFixtureText()));
+    assert.ok(!("status" in loadConfig("/project", deps)));
+});
+
+test("mutant-a3-readBoundedFile-identityPin mutation", () => {
+    // File swapped between inspect and open: fstat reports a different inode.
+    const base = memoryDeps(memoryToonFs("/project", toonFixtureText()));
+    const swapped = { ...base, fs: { ...base.fs, fstatSync: (fd: number) => ({ ...base.fs.fstatSync(fd), ino: 99 }) } } as RuntimeDeps;
+    assert.equal(refusal(loadConfig("/project", swapped)).code, errorCodes.inspectPathSymlink);
+    // Isolates the inspect-vs-open pin: the swap is stable after inspect (open and re-inspect agree on ino 5).
+    let seen = 0;
+    const swappedEarly = { ...base, fs: { ...base.fs,
+        lstatSync: (f: string) => { const s = base.fs.lstatSync(f); seen++; return seen > 2 ? { ...s, ino: 5 } : s; },
+        fstatSync: (fd: number) => ({ ...base.fs.fstatSync(fd), ino: 5 }),
+    } } as RuntimeDeps;
+    assert.equal(refusal(loadConfig("/project", swappedEarly)).code, errorCodes.inspectPathSymlink);
+    // Swapped between open and read: the re-inspect sees a different inode than the open descriptor.
+    let calls = 0;
+    const racing = { ...base, fs: { ...base.fs, lstatSync: (f: string) => { const s = base.fs.lstatSync(f); calls++; return calls > 2 ? { ...s, ino: 77 } : s; } } } as RuntimeDeps;
+    assert.equal(refusal(loadConfig("/project", racing)).code, errorCodes.inspectPathSymlink);
+});
+
+// ---------------------------------------------------------------------------
+// a3 — alias-guard tests (K3-2 + K4-2 + K3-3): tempFixture({ resolve: false })
+// and expected paths built from the same form the code returns.
+// ---------------------------------------------------------------------------
+
+test("alias: resolve:false root loads and the returned base is the realpath form", () => {
+    const deps = createTestDeps();
+    const aliasRoot = tempFixture(deps, { "ai-workflow.toon": toonFixtureText() }, { resolve: false });
+    try {
+        const realRoot = deps.fs.realpathSync(aliasRoot);
+        const location = inspectPath(aliasRoot, deps);
+        assert.ok(!("status" in location));
+        assert.equal(location.base, realRoot, "expected path built from the form the code returns");
+        assert.equal(location.file, deps.path.join(realRoot, "ai-workflow.toon"));
+        if (aliasRoot !== realRoot) {
+            assert.notEqual(location.base, aliasRoot, "an aliased root must come back realpathed, not echoed");
+        }
+        assert.ok(!("status" in loadConfig(aliasRoot, deps)));
+    } finally {
+        deps.fs.rmSync(aliasRoot, { recursive: true, force: true });
+    }
+});
+
+test("alias: resolved fixture root is already in the code's form (both directions agree)", () => {
+    const deps = createTestDeps();
+    const root = tempFixture(deps, { "ai-workflow.toon": toonFixtureText() });
+    const aliasRoot = root; // resolved default: raw tmpdir alias must not leak into expectations
+    try {
+        const location = inspectPath(aliasRoot, deps);
+        assert.ok(!("status" in location));
+        assert.equal(location.base, root);
+        assert.equal(deps.fs.realpathSync(location.base), location.base);
+    } finally {
+        deps.fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test("alias: a symlinked root directory resolves and loads", () => {
+    const deps = createTestDeps();
+    const real = tempFixture(deps, { "ai-workflow.toon": toonFixtureText() }, { resolve: false });
+    const holder = tempFixture(deps, {}, { resolve: false });
+    const link = deps.path.join(holder, "root-link");
+    try {
+        deps.fs.symlinkSync(real, link);
+        const location = inspectPath(link, deps);
+        assert.ok(!("status" in location));
+        assert.equal(location.base, deps.fs.realpathSync(real));
+        assert.ok(!("status" in loadConfig(link, deps)));
+    } finally {
+        deps.fs.rmSync(real, { recursive: true, force: true });
+        deps.fs.rmSync(holder, { recursive: true, force: true });
+    }
+});
+
+test("alias: a symlinked leaf under a resolve:false root is refused as lexerSymlink", () => {
+    const deps = createTestDeps();
+    const aliasRoot = tempFixture(deps, { "elsewhere.toon": toonFixtureText() }, { resolve: false });
+    try {
+        deps.fs.symlinkSync(deps.path.join(aliasRoot, "elsewhere.toon"), deps.path.join(aliasRoot, "ai-workflow.toon"));
+        assert.equal(refusal(loadConfig(aliasRoot, deps)).code, errorCodes.lexerSymlink);
+    } finally {
+        deps.fs.rmSync(aliasRoot, { recursive: true, force: true });
+    }
+});
+
+// ---------------------------------------------------------------------------
+// a3 — lock contention + stale recovery (real fs, O_EXCL; no flock).
+// ---------------------------------------------------------------------------
+
+test("lock contention: second acquirer is refused busy until the holder releases", () => {
+    const deps = createTestDeps();
+    const root = tempFixture(deps, { "ai-workflow.toon": toonFixtureText() });
+    const target = deps.path.join(root, "ai-workflow.toon");
+    try {
+        const first = oexLock(target, deps);
+        assert.ok("release" in first, "first acquire succeeds");
+        const second = oexLock(target, deps);
+        assert.ok("refused" in second);
+        assert.equal(second.refused.code, errorCodes.oexLockBusy);
+        assert.ok(deps.fs.existsSync(`${target}.lock`));
+        first.release();
+        assert.ok(!deps.fs.existsSync(`${target}.lock`), "release removes the lock file");
+        const third = oexLock(target, deps);
+        assert.ok("release" in third, "acquire after release succeeds");
+        third.release();
+    } finally {
+        deps.fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test("lock contention: a separate process sees the held lock as busy", () => {
+    const deps = createTestDeps();
+    const root = tempFixture(deps, { "ai-workflow.toon": toonFixtureText(), "probe.mts": PROBE_SCRIPT });
+    const target = deps.path.join(root, "ai-workflow.toon");
+    try {
+        const held = oexLock(target, deps);
+        assert.ok("release" in held);
+        const busy = runScript(deps, deps.path.join(root, "probe.mts"), ["lock", root]);
+        assert.equal(busy.status, 0, busy.stderr);
+        assert.equal(JSON.parse(busy.stdout).code, errorCodes.oexLockBusy);
+        held.release();
+        const free = runScript(deps, deps.path.join(root, "probe.mts"), ["lock", root]);
+        assert.equal(JSON.parse(free.stdout).acquired, true);
+        assert.ok(!deps.fs.existsSync(`${target}.lock`), "the subprocess released its lock");
+    } finally {
+        deps.fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test("stale recovery: a crashed holder's leftover lock fails closed, explicit removal recovers", () => {
+    const deps = createTestDeps();
+    const root = tempFixture(deps, { "ai-workflow.toon": toonFixtureText(), "ai-workflow.toon.lock": "" });
+    const target = deps.path.join(root, "ai-workflow.toon");
+    try {
+        const stale = oexLock(target, deps);
+        assert.ok("refused" in stale);
+        assert.equal(stale.refused.code, errorCodes.oexLockBusy, "no silent lock stealing");
+        assert.ok(deps.fs.existsSync(`${target}.lock`), "the stale lock must not be removed by a refused acquire");
+        deps.fs.unlinkSync(`${target}.lock`);
+        const recovered = oexLock(target, deps);
+        assert.ok("release" in recovered);
+        recovered.release();
+        recovered.release(); // idempotent: a second release of an already-removed lock must not throw
+    } finally {
+        deps.fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+test("lock io error: an unwritable lock location reports oexLockIoError, not busy", () => {
+    const deps = createTestDeps();
+    const root = tempFixture(deps, {});
+    try {
+        const refusedLock = oexLock(deps.path.join(root, "missing-dir", "ai-workflow.toon"), deps);
+        assert.ok("refused" in refusedLock);
+        assert.equal(refusedLock.refused.code, errorCodes.oexLockIoError);
+    } finally {
+        deps.fs.rmSync(root, { recursive: true, force: true });
+    }
+});
+
+// ---------------------------------------------------------------------------
+// a3 — K2-3 subprocess revalidation: a fresh process re-reads the on-disk TOON,
+// so a stale in-process (cached) validation cannot vouch for rewritten bytes.
+// ---------------------------------------------------------------------------
+
+test("K2-3 subprocess: a fresh process re-reads on-disk TOON and sees the rewrite", () => {
+    const deps = createTestDeps();
+    const root = tempFixture(deps, { "ai-workflow.toon": toonFixtureText(), "probe.mts": PROBE_SCRIPT });
+    const probe = deps.path.join(root, "probe.mts");
+    const target = deps.path.join(root, "ai-workflow.toon");
+    try {
+        // Valid on disk: in-process and subprocess agree.
+        assert.ok(!("status" in loadConfig(root, deps)));
+        const before = runScript(deps, probe, ["load", root]);
+        assert.equal(before.status, 0, before.stderr);
+        assert.deepEqual(JSON.parse(before.stdout), { ok: true, problems: 0, runner: "node" });
+
+        // Rewrite on disk (same path, new bytes). The already-loaded module must not vouch for it.
+        deps.fs.writeFileSync(target, toonFixtureText({ schemaVersion: 2 }));
+        const after = runScript(deps, probe, ["load", root]);
+        assert.equal(after.status, 0, after.stderr);
+        assert.equal(JSON.parse(after.stdout).code, errorCodes.schemaVersionUnknown);
+        assert.equal((loadConfig(root, deps) as { code?: string }).code, errorCodes.schemaVersionUnknown, "in-process re-read agrees with the subprocess");
+
+        // Rewrite back to valid with a changed value: the subprocess reports the new bytes, not the earlier ones.
+        deps.fs.writeFileSync(target, toonFixtureText().replace("runner: node", "runner: bun"));
+        const healed = runScript(deps, probe, ["load", root]);
+        assert.deepEqual(JSON.parse(healed.stdout), { ok: true, problems: 0, runner: "bun" });
+    } finally {
+        deps.fs.rmSync(root, { recursive: true, force: true });
+    }
 });
