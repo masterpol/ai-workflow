@@ -14,7 +14,7 @@ function fake(initial: Record<string, string>, dirs: string[] = [], throwOnAppen
   const files = new Map(Object.entries(initial));
   const err: string[] = [];
   const deps = {
-    path: nodePath,
+    path: nodePath.posix,
     fs: {
       existsSync: (file: string) => files.has(file) || dirs.includes(file) || [...files.keys()].some((f) => f.startsWith(`${file}/`)),
       readFileSync: (file: string) => {
@@ -25,13 +25,27 @@ function fake(initial: Record<string, string>, dirs: string[] = [], throwOnAppen
       readdirEntriesSync: (dir: string) =>
         [...new Set([...files.keys(), ...dirs.map((d) => `${d}/x`)].filter((f) => f.startsWith(`${dir}/`)).map((f) => f.slice(dir.length + 1).split("/")[0]))]
           .map((name) => ({ name, isDirectory: () => !name.includes("."), isFile: () => name.includes("."), isSymbolicLink: () => false })),
-      appendFileSync: (file: string, data: string) => {
+      lstatSync: (file: string) => {
+        const text = files.get(file);
+        const dir = text === undefined && (dirs.includes(file) || [...files.keys()].some((f) => f.startsWith(`${file}/`)));
+        if (text === undefined && !dir) throw new Error(`ENOENT: ${file}`);
+        return { isFile: () => !dir, isDirectory: () => dir, isSymbolicLink: () => false, size: text?.length ?? 0 };
+      },
+      realpathSync: (file: string) => {
+        if (!files.has(file) && !dirs.includes(file) && ![...files.keys()].some((f) => f.startsWith(`${file}/`))) throw new Error(`ENOENT: ${file}`);
+        return file;
+      },
+      writeFileSync: (file: string, data: string) => {
         if (throwOnAppend) throw new Error("EACCES: denied");
-        files.set(file, (files.get(file) ?? "") + data);
+        files.set(file, data);
+      },
+      renameSync: (from: string, to: string) => {
+        files.set(to, files.get(from) ?? "");
+        files.delete(from);
       },
     },
     clock: { now: () => NOW },
-    proc: { cwd: () => "/proj" },
+    proc: { cwd: () => "/proj", pid: 7 },
     io: { stderr: { write: (t: string) => err.push(t) } },
   } as unknown as RuntimeDeps;
   return { deps, files, err };
@@ -97,4 +111,50 @@ test("main reports a hook error on stderr but still exits 0", () => {
   const f = fake({ [`${P}/a/hill.md`]: HILL }, [], true);
   assert.equal(main([], f.deps), 0);
   assert.deepEqual(f.err, ["[stuck-uphill] hook error: EACCES: denied\n"]);
+});
+
+test("hill text that is not plain is never logged or echoed", () => {
+  const hostile = "| Scope | Pos | Last |\n|---|---|---|\n| S1 $(id) | uphill; touch PWNED | 2026-01-01 |\n| S2 ok | uphill | 2026-01-01 |\n";
+  const f = fake({ [`${P}/a/hill.md`]: hostile });
+  assert.deepEqual(parseHill("a", f.deps).map((r) => r.scope), ["S2 ok"]);
+});
+
+test("real filesystem: a symlinked audit log is replaced, never written through; FIFO and oversize are ignored", async (t) => {
+  const { createTestDeps, tempFixture } = await import("../../scripts/runtime/test-helpers.mts");
+  const { spawnSync } = await import("node:child_process");
+  const base = createTestDeps();
+  const root = tempFixture(base, { ".project/pitches/a/hill.md": "| S1 api | uphill | 2026-01-01 |\n" }, { resolve: true });
+  const outside = tempFixture(base, { "rc": "original\n" }, { resolve: true });
+  t.after(() => { base.fs.rmSync(root, { recursive: true, force: true }); base.fs.rmSync(outside, { recursive: true, force: true }); });
+  const deps = { ...base, proc: { ...base.proc, cwd: () => root } } as RuntimeDeps;
+  const log = nodePath.join(root, ".project/pitches/a/.hill-audit.log");
+  base.fs.symlinkSync(nodePath.join(outside, "rc"), log);
+  assert.equal(main([], deps), 0);
+  assert.equal(base.fs.readFileSync(nodePath.join(outside, "rc")), "original\n");
+  assert.equal(base.fs.lstatSync(log).isSymbolicLink(), false);
+  assert.match(base.fs.readFileSync(log), /\tS1 api\tuphill\n$/);
+
+  const hill = nodePath.join(root, ".project/pitches/a/hill.md");
+  base.fs.rmSync(hill);
+  if (spawnSync("mkfifo", [hill]).status === 0) {
+    const started = Date.now();
+    assert.equal(main([], deps), 0);
+    assert.ok(Date.now() - started < 2000, "a FIFO hill.md must not block SessionStart");
+    base.fs.rmSync(hill);
+  }
+  base.fs.writeFileSync(hill, `| S1 api | uphill | 2026-01-01 |\n${"x".repeat(300 * 1024)}`);
+  assert.deepEqual(parseHill("a", deps), []);
+});
+
+test("real filesystem: a pitch directory symlinked outside the project is never written", async (t) => {
+  const { createTestDeps, tempFixture } = await import("../../scripts/runtime/test-helpers.mts");
+  const base = createTestDeps();
+  const root = tempFixture(base, { ".project/pitches/.keep": "" }, { resolve: true });
+  const outside = tempFixture(base, { "hill.md": "| S1 api | uphill | 2026-01-01 |\n" }, { resolve: true });
+  t.after(() => { base.fs.rmSync(root, { recursive: true, force: true }); base.fs.rmSync(outside, { recursive: true, force: true }); });
+  base.fs.symlinkSync(outside, nodePath.join(root, ".project/pitches/evil"));
+  const deps = { ...base, proc: { ...base.proc, cwd: () => root } } as RuntimeDeps;
+  appendAudit("evil", [{ scope: "S1", position: "uphill", lastMoved: "x" }], deps);
+  assert.equal(base.fs.existsSync(nodePath.join(outside, ".hill-audit.log")), false);
+  assert.deepEqual(parseHill("evil", deps), []);
 });

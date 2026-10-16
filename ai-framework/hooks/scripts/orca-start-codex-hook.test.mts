@@ -132,12 +132,12 @@ test("malformed, oversized, and mistyped input block with a fixed reason", (t) =
   for (const input of inputs) blocked(f.run(input), "invalid-hook-input");
 });
 
-test("input accepts exactly 64 KiB and rejects one byte more", (t) => {
+test("phase arguments accept exactly 64 KiB and reject one byte more; large ordinary prompts pass silently", (t) => {
   const f = fixture(t);
-  const input = JSON.stringify(prompt("/plan"));
-  const padding = 64 * 1024 - new TextEncoder().encode(input).length;
-  context(f.run(input + " ".repeat(padding)), READY);
-  blocked(f.run(input + " ".repeat(padding + 1)), "invalid-hook-input");
+  const args = (bytes: number) => ` ${"a".repeat(bytes - 1)}`;
+  context(f.run(prompt(`/plan${args(64 * 1024)}`)), READY);
+  blocked(f.run(prompt(`/plan${args(64 * 1024 + 1)}`)), "invalid-hook-input");
+  silent(f.run(prompt(`please summarise this log: ${"x".repeat(1024 * 1024)}`)));
 });
 
 test("post-probe elapsed guard rejects a late ready result and catches its removal", (t) => {

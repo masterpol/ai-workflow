@@ -25,7 +25,12 @@ const BARRIER_MS = 5000; // every wait on a child is bounded; elapsed time is ne
 // failure is reported instead of hanging the run. A passing run exits long before the timer fires.
 // Node only: `node --test` runs each file in its own process, but `bun test <dir>` runs every file in ONE process,
 // where this timer would end the whole run (and its report) two seconds after this file finished.
-if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => { setTimeout(() => process.exit(), 2000).unref(); });
+if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => {
+  setTimeout(() => {
+    process.stderr.write("Test leaked a lease, server or child after cleanup\n");
+    process.exit(1);
+  }, 2000).unref();
+});
 
 // Asserts that no lease was granted; a lease granted by mistake is released first, so the
 // assertion failure is reported instead of leaving a server open.

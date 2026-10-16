@@ -63,3 +63,12 @@ Tree: `0deac9a` + uncommitted graphify edit; `ai_workflow_env.json` moved aside;
   worker had reverted (see the ledger "S8 merge notes"). Exits: docs-links exit 0; next-pitch 0; `bun ai-framework|test`
   in workflow 0; no project names; skill-defaults node 27/27 and bun 27/27 (with opencode-plugin).
   Lesson: reconcile every worker in a wave before committing any scope.
+- S6 done. Worker `updrift-s6-2` worker_done collected and the diff reviewed. The worktree was fast-forwarded to
+  `ea5e5c0`, then reconciled `integrated` (humanConfirmed: owner; hooks are check definitions; workflow-doctor check
+  OK). Coordinator fix: in token-consumption.test.mts the concurrent-writer children inherited the
+  `AI_WORKFLOW_RUNNER` from the repo's `ai_workflow_env.json` (bun). The collector, imported under `node -e`, saw
+  itself as invoked directly (`process.argv[1]`), re-ran itself synchronously under bun with stdin inherited, and
+  hung at the barrier. The worker missed it because its worktree had no runner setting. The children now get
+  `AI_WORKFLOW_RUNNER=node`. Exits: 141/141 node, 141/141 bun (`--timeout 30000`); stuck-uphill
+  `$CLAUDE_PROJECT_DIR` path count 1; `"bun ` in hooks.json 0; 1 MiB prompt, >64 KiB args, symlinked
+  hill/audit log, bad packageManager covered by tests; doctor exit 0.

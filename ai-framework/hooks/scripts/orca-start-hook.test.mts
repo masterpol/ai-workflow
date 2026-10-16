@@ -153,6 +153,14 @@ test("on rejects malformed and oversized stdin with a fixed reason", (t) => {
   }
 });
 
+test("large unrelated skill arguments pass silently; phase arguments over 64 KiB block", (t) => {
+  const f = fixture(t);
+  silent(f.run(skill("frontend-design", "x".repeat(1024 * 1024))));
+  const tooBig = f.run(skill("build", "x".repeat(64 * 1024 + 1)));
+  assert.equal(tooBig.status, 2);
+  assert.match(tooBig.stderr, /invalid-hook-input/);
+});
+
 test("script-owned 5000 ms deadline blocks stdin that never finishes", { timeout: 10_000 }, async (t) => {
   const f = fixture(t);
   const started = performance.now();
@@ -199,8 +207,19 @@ test("both hook configurations use the verified events and eight-second timeout"
 // Direct script invocations still support the configured Bun re-exec.
 test("configured Bun runs the real hook entry with the same decision outputs", (t) => {
   const f = fixture(t);
-  const bun = process.versions.bun ? process.execPath : spawnSync("bun", ["-e", "console.log(process.execPath)"], { encoding: "utf8" }).stdout.trim();
-  assert.ok(bun, "Bun is required for dual-runner verification");
+  const probe = process.versions.bun ? null : spawnSync("bun", ["-e", "console.log(process.execPath)"], {
+    encoding: "utf8", windowsHide: true, shell: false, timeout: 5000,
+  });
+  if ((probe?.error as NodeJS.ErrnoException | undefined)?.code === "ENOENT") {
+    t.skip("Bun is not installed; dual-runner execution remains unverified");
+    return;
+  }
+  if (probe) {
+    assert.equal(probe.error, undefined, "the installed Bun probe must finish successfully");
+    assert.equal(probe.status, 0, String(probe.stderr));
+  }
+  const bun = process.versions.bun ? process.execPath : String(probe?.stdout ?? "").trim();
+  assert.ok(bun, "an available Bun probe must identify its executable");
   const path = join(f.root, "bin");
   symlinkSync(bun, join(path, "bun"));
   context(f.run(skill(), { AI_WORKFLOW_RUNNER: "bun" }), "PreToolUse", "Orca: ready (coordinator claude, workers codex, opencode)");
