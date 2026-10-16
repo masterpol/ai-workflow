@@ -62,7 +62,9 @@ concrete conventions your stack actually uses.
 ## TypeScript Rules
 
 ### Strict Mode (enforced)
-- **Never** use `any` — use `unknown` with type guards
+- **Never** use `any` — use `unknown` with type guards, or a specific type alias or interface
+- Define types that make invalid states unrepresentable: discriminated unions instead of optional fields or flags that can contradict each other, literal unions or branded types for closed sets and identifiers
+- Check that `switch` statements over unions or enums are exhaustive: end with a `default` that assigns the value to `never` (or calls `assertNever`) so a new variant fails compilation
 - Always define explicit return types for exported functions
 - Use `type` keyword for type-only imports: `import type { User } from "..."`
 - Use `const` assertions where appropriate
@@ -84,6 +86,35 @@ function handleError(error: unknown): string {
   if (error instanceof Error) return error.message
   return "An unexpected error occurred"
 }
+
+// Invalid states unrepresentable
+// ✅ Good: each status carries exactly the data it needs
+type Payment =
+  | { status: "pending" }
+  | { status: "paid"; paidAt: Date }
+  | { status: "failed"; reason: string }
+
+// ❌ Bad: allows { status: "pending", paidAt: ... } and { status: "paid" } without paidAt
+interface LoosePayment {
+  status: string
+  paidAt?: Date
+  reason?: string
+}
+
+// Exhaustive switch
+function assertNever(value: never): never {
+  throw new Error(`Unhandled variant: ${JSON.stringify(value)}`)
+}
+
+function describePayment(payment: Payment): string {
+  switch (payment.status) {
+    case "pending": return "Waiting for payment"
+    case "paid": return `Paid on ${payment.paidAt.toISOString()}`
+    case "failed": return payment.reason
+    default: return assertNever(payment)
+  }
+}
+
 ```
 
 ## Naming Conventions
@@ -242,6 +273,7 @@ function renderStep(step: StepType) {
     case "feedback": return <FeedbackStep {...step} />
     case "branching": return <BranchingStep {...step} />
     // Adding new type = add case here, TypeScript catches missing cases
+    default: return assertNever(step)
   }
 }
 
@@ -391,6 +423,8 @@ Before committing, verify:
 - [ ] Functions are < 50 lines
 - [ ] Files are < 150 lines (components) or < 80 lines (utilities)
 - [ ] No `any` types
+- [ ] Invalid states are unrepresentable in the types
+- [ ] `switch` statements over unions/enums are exhaustive
 - [ ] Named exports used
 - [ ] No deep imports from features
 - [ ] Complex logic extracted to utilities

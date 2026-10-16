@@ -7,7 +7,7 @@
 | Scope | Position | Last moved | Notes |
 |-------|----------|------------|-------|
 | S0 | done | 2026-10-16 | drift-ledger.md: 178 rows; deviations D3, D4 |
-| S1 | uphill 0% | 2026-10-16 | Rules + graphify finish — not started |
+| S1 | done | 2026-10-16 | OpenCode worker updrift-s1-4 (rules) + coordinator (graphify); graphify 16/16 node + bun; check exit 0 |
 | S2 | uphill 0% | 2026-10-16 | Runtime child ownership — not started |
 | S3 | done | 2026-10-16 | Pulled forward (D6): isSupportedVersion floor 1.4.224, 4 sites; 198/198 node + bun; mutant fails 4 |
 | S4 | uphill 0% | 2026-10-16 | Orca task ownership — not started |

@@ -397,7 +397,11 @@ export function overlayKnowledge(base: GraphifyGraph, graph: Graph): GraphifyGra
   for (const edge of graph.edges) {
     links.push({ source: idMap.get(edge.from)!, target: idMap.get(edge.to)!, relation: "related", confidence: "EXTRACTED", confidence_score: 1, source_file: graph.nodes.find((node) => node.id === edge.from)?.file, workflow_overlay: true });
   }
-  return { ...base, nodes, links, graph: { ...(base.graph ?? {}), workflow: { generated: graph.generated, stats: graph.stats, tagIndex: graph.tagIndex } } };
+  // Graphify extracts document structure only in its semantic pass, so a markdown link (for example from the generated
+  // index) to an entry added since then points at a page node that does not exist. Drop such edges.
+  const known = new Set(nodes.map((node) => node.id));
+  const connected = links.filter((link) => known.has(link.source) && known.has(link.target));
+  return { ...base, nodes, links: connected, graph: { ...(base.graph ?? {}), workflow: { generated: graph.generated, stats: graph.stats, tagIndex: graph.tagIndex } } };
 }
 
 /** True when every legacy node and edge exists in the freshly built graph, so the old file is redundant. */

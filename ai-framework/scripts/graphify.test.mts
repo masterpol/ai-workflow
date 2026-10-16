@@ -221,6 +221,13 @@ test("overlayKnowledge namespaces an entry id that collides with a graphify node
   assert.ok(merged.links.every((l) => merged.nodes.some((n) => n.id === l.source) && merged.nodes.some((n) => n.id === l.target)));
 });
 
+test("overlayKnowledge drops graphify edges whose endpoint node does not exist", () => {
+  const { graph } = buildGraph(ROOT, fake(cleanTree()).deps);
+  const merged = overlayKnowledge({ nodes: [{ id: "page" }], links: [{ source: "page", target: "missing-page" }, { source: "page", target: "page" }] }, graph);
+  assert.ok(!merged.links.some((l) => l.target === "missing-page"));
+  assert.ok(merged.links.some((l) => l.source === "page" && l.target === "page"));
+});
+
 test("--json prints stats, problems, wrote flag and files", () => {
   const f = fake(cleanTree());
   assert.equal(main(["--json"], f.deps), 0);
