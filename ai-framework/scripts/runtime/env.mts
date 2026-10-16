@@ -64,7 +64,7 @@ export function loadConfigEnv(
   if (result.problems.length > 0) return { ...env };
   const merged: Record<string, string | undefined> = {
     AI_WORKFLOW_RUNNER: result.model.runtime.runner,
-    AI_WORKFLOW_ORCA_MULTI_AGENT: String(result.model.orchestration.multiAgent),
+    AI_WORKFLOW_ORCA_MULTI_AGENT: String(result.model.integrations.orca.multiAgent),
   };
   for (const [key, value] of Object.entries(env)) if (value !== undefined) merged[key] = value;
   return merged;

@@ -516,8 +516,8 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   }
 
   // Runtime-boundary-shaped check for ai-workflow.toon: one library call (loadConfig), one severity ladder.
-  // Every integrations.*, engines.* key must be registered through registerIntegrationValidator /
-  // registerEngineValidator in runtime/config.mts; an unregistered slot is a fail, never a silent pass.
+  // Every integrations.<name> slot other than the built-in integrations.orca must be registered through
+  // registerIntegrationValidator in runtime/config.mts (integrations.orca.engine goes through registerEngineValidator); an unregistered slot is a fail, never a silent pass.
   // Coordinator slots (registerCoordinatorValidator) are optional by contract, so they cannot be reported
   // as unregistered here. Legacy files alone are informational: the migrator (config-migrate) owns them.
   function checkConfigValidators() {
@@ -530,12 +530,12 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       record("fail", name, `${CONFIG_FILE} refused (${result.code}): ${result.text}`);
       return;
     }
-    const unregistered = result.problems.filter((item) => item.code === errorCodes.parserUnrecognized && /^unknown (integration|engine key) /.test(item.text));
-    if (unregistered.length) { record("fail", name, `unregistered validator slot(s): ${unregistered.slice(0, 5).map((item) => item.text).join("; ")}; register with registerIntegrationValidator or registerEngineValidator`); return; }
+    const unregistered = result.problems.filter((item) => item.code === errorCodes.parserUnrecognized && /^unknown integration /.test(item.text));
+    if (unregistered.length) { record("fail", name, `unregistered validator slot(s): ${unregistered.slice(0, 5).map((item) => item.text).join("; ")}; register with registerIntegrationValidator`); return; }
     if (result.problems.length) { record("fail", name, `${result.problems.length} problem(s): ${result.problems.slice(0, 5).map((item) => `${item.code} ${item.text}`).join("; ")}`); return; }
-    const integrations = Object.keys(result.model.integrations ?? {}).length;
-    const engines = Object.keys(result.model.engines).length;
-    record("pass", name, `${integrations} integration(s) and ${engines} engine key(s) in use, all registered${legacyNote}`);
+    const { orca, ...others } = result.model.integrations;
+    const orcaState = orca.enabled && orca.multiAgent ? "on" : "off";
+    record("pass", name, `integrations.orca (engine ${orca.engine || "unset"}, ${orcaState}) and ${Object.keys(others).length} other integration(s) in use, all registered${legacyNote}`);
   }
 
   function checkOrcaPolicy() {

@@ -586,10 +586,10 @@ test("doctor Config validators check: absent is info, valid passes, unregistered
   const example = fs.readFileSync(fileURLToPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
   const cases: Array<[string | null, string, RegExp]> = [
     [null, "info", /absent; no validator slots in use/],
-    [example, "pass", /0 integration\(s\) and 1 engine key\(s\) in use, all registered/],
-    [example.replace("integrations: {}", "integrations:\n  nosuchtool:\n    a: 1"), "fail", /unregistered validator slot\(s\): unknown integration "nosuchtool"/],
-    [example.replace("  orca: \"1.4.224\"", "  orca: \"1.4.224\"\n  nosuchengine: x"), "fail", /unregistered validator slot\(s\): unknown engine key "nosuchengine"/],
-    ["schemaVersion: 2\n", "fail", /problem|refused/],
+    [example, "pass", /integrations\.orca \(engine 1\.4\.224, on\) and 0 other integration\(s\) in use, all registered/],
+    [example.replace("doctor:\n", "  nosuchtool:\n    a: 1\ndoctor:\n"), "fail", /unregistered validator slot\(s\): unknown integration "nosuchtool"/],
+    [example.replace("    engine: \"1.4.224\"\n", ""), "fail", /integrations\.orca\.engine is required/],
+    ["schemaVersion: 3\n", "fail", /problem|refused/],
   ];
   for (const [body, status, detail] of cases) {
     fs.rmSync(path.join(root, "ai-workflow.toon"), { force: true });

@@ -64,3 +64,5 @@ Not required (small-batch, no AI-prompt scope).
 ☐ **Bet** (→ /plan)
 ☐ Re-shape — named gap: {…}
 ☐ Pass — reason: {…}
+
+> **Note (2026-10-16, unified-toon-config d42):** the TOON schema is now `schemaVersion: 2` with Orca nested under `integrations.orca` (`engine`, `enabled`, `multiAgent`, bounds, `coordinators.<vendor>.{workers,roles}`). References to `engines.orca` or top-level `orchestration` below mean `integrations.orca.engine` / `integrations.orca.*`.

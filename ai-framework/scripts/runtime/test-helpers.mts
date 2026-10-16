@@ -157,28 +157,27 @@ export function memoryFs(files: Record<string, string>, links: Record<string, st
 }
 
 /**
- * Builds `ai-workflow.toon` text for tests. The default is the schemaVersion-1 baseline that
+ * Builds `ai-workflow.toon` text for tests. The default is the schemaVersion-2 baseline that
  * `loadConfig` accepts with zero problems. `schemaVersion` replaces the version line; `extraLines`
  * are appended at the root (use them to inject a mutation).
  */
 export function toonFixtureText(options: { schemaVersion?: number | string; extraLines?: string[] } = {}): string {
   const lines = [
-    `schemaVersion: ${options.schemaVersion ?? 1}`,
+    `schemaVersion: ${options.schemaVersion ?? 2}`,
     "runtime:",
     "  runner: node",
-    "engines:",
-    "  orca: \"1.4.224\"",
-    "orchestration:",
-    "  multiAgent: false",
-    "  enabled: false",
-    "  maxConcurrentWorkers: 3",
-    "  maxRetriesPerTask: 1",
+    "integrations:",
+    "  orca:",
+    "    engine: \"1.4.224\"",
+    "    enabled: false",
+    "    multiAgent: false",
+    "    maxConcurrentWorkers: 3",
+    "    maxRetriesPerTask: 1",
     "doctor:",
     "  modelRouting: project",
     "skills:",
     "  modes:",
     "    caveman: full",
-    "integrations: {}",
     ...(options.extraLines ?? []),
   ];
   return lines.join("\n");
@@ -191,35 +190,37 @@ export function toonFixtureText(options: { schemaVersion?: number | string; extr
  */
 export function orcaPolicyToonText(enabled = true): string {
   return [
-    "schemaVersion: 1",
+    "schemaVersion: 2",
     "runtime:",
     "  runner: node",
-    "engines:",
-    "  orca: \"1.4.224\"",
-    "orchestration:",
-    `  multiAgent: ${enabled}`,
-    `  enabled: ${enabled}`,
-    "  maxConcurrentWorkers: 2",
-    "  maxRetriesPerTask: 1",
-    "  coordinators:",
-    "    claude:",
-    "      roles:",
-    "        implementation[1]: codex",
-    "        review[1]: opencode",
-    "    codex:",
-    "      roles:",
-    "        implementation[1]: claude",
-    "        review[1]: opencode",
-    "    opencode:",
-    "      roles:",
-    "        implementation[1]: claude",
-    "        review[1]: codex",
+    "integrations:",
+    "  orca:",
+    "    engine: \"1.4.224\"",
+    `    enabled: ${enabled}`,
+    `    multiAgent: ${enabled}`,
+    "    maxConcurrentWorkers: 2",
+    "    maxRetriesPerTask: 1",
+    "    coordinators:",
+    "      claude:",
+    "        workers[2]: codex,opencode",
+    "        roles:",
+    "          implementation[1]: codex",
+    "          review[1]: opencode",
+    "      codex:",
+    "        workers[2]: claude,opencode",
+    "        roles:",
+    "          implementation[1]: claude",
+    "          review[1]: opencode",
+    "      opencode:",
+    "        workers[2]: claude,codex",
+    "        roles:",
+    "          implementation[1]: claude",
+    "          review[1]: codex",
     "doctor:",
     "  modelRouting: project",
     "skills:",
     "  modes:",
     "    caveman: full",
-    "integrations: {}",
     "",
   ].join("\n");
 }

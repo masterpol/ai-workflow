@@ -100,9 +100,9 @@ function readBoundedFile(location: Location, deps: RuntimeDeps): Refusal | { tex
   } finally { if (descriptor !== undefined) fs.closeSync(descriptor); }
 }
 
-/** Maps the TOON orchestration section onto the frozen legacy shape so both sources share one validation path. */
+/** Maps the TOON integrations.orca section onto the frozen legacy shape so both sources share one validation path. */
 function policyFromConfig(model: ConfigModel): PolicyResult {
-  const { orchestration } = model;
+  const orchestration = model.integrations.orca;
   const coordinators: Json = {};
   for (const [vendor, entry] of Object.entries(orchestration.coordinators ?? {})) {
     const roles: Record<string, string> = {};
@@ -112,7 +112,7 @@ function policyFromConfig(model: ConfigModel): PolicyResult {
       if (list.length) roles[role] = list[0]; // report().roles stays Record<string,string>; pitch 4 widens
       for (const worker of list) if (!pool.includes(worker)) pool.push(worker);
     }
-    const workers = pool.length ? pool : (orchestration.workers ?? []).filter((worker) => worker !== vendor);
+    const workers = entry.workers ? [...entry.workers] : pool;
     coordinators[vendor] = { workers, roles };
   }
   return validatePolicy({ schemaVersion: 1, "use-orca-orchestration": orchestration.enabled,

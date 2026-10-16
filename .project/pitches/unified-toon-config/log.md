@@ -425,3 +425,8 @@ b2 -> over-the-hill, b3 -> over-the-hill (producer invariants hold). Drift d35-d
 - d-A: env.mts note only (deletions no-op). d-B: modes cutover (loadModes TOON-first). d-C: orca-vendors.md, FLAGGED_FILES, README/SETUP.
 - Coordinator run, whole bundle: 1450 tests, 1448 pass, 0 fail, 2 skipped. setup-validator READY (23 checks). AGENTS.md == CLAUDE.md.
 - Drift d38-d41; d12, d17, d24-d27 closed.
+
+## integrations.orca reshape (schemaVersion 2), phases 1, 2a-2c
+
+- Coordinator whole-bundle run: 1456 tests, 1454 pass, 0 fail, 2 skipped. setup-validator 23 checks READY; doctor READY WITH WARNINGS (1, existing Runtime boundary note). `orca-policy report` eligible for all 3 vendors on the real root file. AGENTS.md == CLAUDE.md, build SKILL mirrors identical.
+- Drift d42-d45; d44 open.

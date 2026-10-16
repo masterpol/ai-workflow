@@ -15,13 +15,29 @@ not part of it. Quality, latency, and cost improvements require measurements; sp
 
 Orca is used only when `AI_WORKFLOW_ORCA_MULTI_AGENT` is exactly `true` (case-insensitive, surrounding spaces ignored).
 Unset, empty, `false`, `1`, `yes` or anything else keeps the normal workflow. Set it in the process environment or in the
-project-root `ai-workflow.toon` as `orchestration.multiAgent: true` (the environment wins; the file is read from
+project-root `ai-workflow.toon` as `integrations.orca.multiAgent: true` (the environment wins; the file is read from
 the trusted root only, a symlink leaving the root is ignored, and `.env` is never read). With the switch off the launch gate returns `orca-multi-agent-disabled` first, before reading the policy,
 probing Orca or spawning anything; `dispatchScope` and `dispatchWithRetries` return the normal workflow without a claim;
 `orca-preflight --probe` does not contact Orca. The static policy and presence diagnostics still work. The switch is
 necessary but not sufficient: dispatch also needs an opted-in policy and a supported Orca runtime.
 
-## Policy contract
+## `integrations.orca` in `ai-workflow.toon` (schemaVersion 2)
+
+Orca settings live in one block of the project-root `ai-workflow.toon` (`schemaVersion: 2`):
+`integrations.orca` with `engine` (required string, the Orca engine version), `enabled`, `multiAgent`,
+`maxConcurrentWorkers`, `maxRetriesPerTask` and `coordinators.<vendor>.{workers, roles}`. The layout with flat
+top-level `engines` and `orchestration` sections (schemaVersion 1) is no longer loaded; `config-migrate.mts` converts it.
+
+| Previous key (schemaVersion 1 / legacy file) | Now |
+|---|---|
+| `engines.orca` | `integrations.orca.engine` |
+| `orchestration.enabled` / `use-orca-orchestration` | `integrations.orca.enabled` |
+| `orchestration.multiAgent` / `AI_WORKFLOW_ORCA_MULTI_AGENT` | `integrations.orca.multiAgent` |
+| `orchestration.maxConcurrentWorkers` | `integrations.orca.maxConcurrentWorkers` |
+| `orchestration.maxRetriesPerTask` | `integrations.orca.maxRetriesPerTask` |
+| `orchestration.coordinators.<vendor>` | `integrations.orca.coordinators.<vendor>` |
+
+## Policy contract (legacy `.project/orchestration.json`)
 
 | Field | Contract |
 |---|---|

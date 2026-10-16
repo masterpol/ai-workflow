@@ -5,20 +5,25 @@ export const CONFIG_FILE = "ai-workflow.toon";
 export const MAX_CONFIG_BYTES = 64 * 1024;
 
 export interface ConfigModel {
-    schemaVersion: 1;
+    schemaVersion: 2;
     runtime: { runner: "bun" | "node" };
-    engines: { orca: string };
-    orchestration: {
-        multiAgent: boolean;
-        enabled: boolean;
-        maxConcurrentWorkers: number;
-        maxRetriesPerTask: number;
-        workers?: string[];
-        coordinators?: Record<string, { roles?: Record<string, string | string[]> }>;
-    };
     doctor: { modelRouting: string };
     skills: { modes: { caveman: "lite" | "full" | "ultra" | "wenyan-lite" | "wenyan-full" | "wenyan-ultra" | "off" } };
-    integrations?: Record<string, Record<string, unknown>>;
+    integrations: { orca: OrcaIntegration } & Record<string, Record<string, unknown>>;
+}
+
+export interface OrcaCoordinator {
+    workers?: string[];
+    roles?: Record<string, string | string[]>;
+}
+
+export interface OrcaIntegration {
+    engine: string;
+    enabled: boolean;
+    multiAgent: boolean;
+    maxConcurrentWorkers: number;
+    maxRetriesPerTask: number;
+    coordinators?: Record<string, OrcaCoordinator>;
 }
 
 export type Problem = { code: string; text: string; line?: number; column?: number };
@@ -56,9 +61,13 @@ const defaultDeps = (): RuntimeDeps => (nodeDeps ??= createNodeDeps());
 
 const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 const CAVEMAN_MODES = new Set(["lite", "full", "ultra", "wenyan-lite", "wenyan-full", "wenyan-ultra", "off"]);
-const ROOT_KEYS = new Set(["schemaVersion", "runtime", "engines", "orchestration", "doctor", "skills", "integrations"]);
+const ROOT_KEYS = new Set(["schemaVersion", "runtime", "doctor", "skills", "integrations"]);
+
+const ORCA_KEYS = new Set(["engine", "enabled", "multiAgent", "maxConcurrentWorkers", "maxRetriesPerTask", "coordinators"]);
+const COORDINATOR_KEYS = new Set(["workers", "roles"]);
 
 const integrationValidators = new Map<string, ValidatorFn>();
+// Engine validators receive the value of `integrations.<key>.engine` (e.g. key "orca" gets the Orca engine version string).
 const engineValidators = new Map<string, ValidatorFn>();
 const coordinatorValidators = new Map<string, ValidatorFn>();
 
@@ -367,36 +376,34 @@ function expectStringArray(value: unknown, path: string, line?: number, column?:
     return { ok: true, value: items };
 }
 
-function rolePool(model: ConfigModel): Set<string> {
-    const pool = new Set<string>();
-    for (const coordinator of Object.values(model.orchestration.coordinators ?? {})) {
-        for (const roleValue of Object.values(coordinator.roles ?? {})) {
-            if (typeof roleValue === "string") pool.add(roleValue);
-            else if (Array.isArray(roleValue)) for (const worker of roleValue) pool.add(worker);
-        }
-    }
-    return pool;
-}
-
-function validateCoordinators(
-    raw: unknown,
-    problems: Problem[],
-): ConfigModel["orchestration"]["coordinators"] {
+function validateCoordinators(raw: unknown, problems: Problem[]): OrcaIntegration["coordinators"] {
+    const base = "integrations.orca.coordinators";
     if (raw === undefined) return undefined;
     if (!isRecord(raw)) {
-        problems.push(problem(errorCodes.validationType, "orchestration.coordinators must be an object"));
+        problems.push(problem(errorCodes.validationType, `${base} must be an object`));
         return undefined;
     }
-    const coordinators: ConfigModel["orchestration"]["coordinators"] = {};
+    const coordinators: Record<string, OrcaCoordinator> = {};
     for (const [vendor, entry] of Object.entries(raw)) {
         if (!isRecord(entry)) {
-            problems.push(problem(errorCodes.validationType, `orchestration.coordinators.${vendor} must be an object`));
+            problems.push(problem(errorCodes.validationType, `${base}.${vendor} must be an object`));
             continue;
+        }
+        for (const key of Object.keys(entry)) {
+            if (!COORDINATOR_KEYS.has(key)) {
+                problems.push(problem(errorCodes.parserUnrecognized, `unknown key "${key}" in ${base}.${vendor}`));
+            }
+        }
+        const coordinator: OrcaCoordinator = {};
+        if (entry.workers !== undefined) {
+            const workers = expectStringArray(entry.workers, `${base}.${vendor}.workers`);
+            if (workers.ok) coordinator.workers = workers.value;
+            else problems.push(workers.problem);
         }
         const roles: Record<string, string | string[]> = {};
         if (entry.roles !== undefined) {
             if (!isRecord(entry.roles)) {
-                problems.push(problem(errorCodes.validationType, `orchestration.coordinators.${vendor}.roles must be an object`));
+                problems.push(problem(errorCodes.validationType, `${base}.${vendor}.roles must be an object`));
             } else {
                 for (const [role, roleValue] of Object.entries(entry.roles)) {
                     if (typeof roleValue === "string") {
@@ -408,12 +415,26 @@ function validateCoordinators(
                         }
                         roles[role] = [...roleValue];
                     } else {
-                        problems.push(problem(errorCodes.validationType, `orchestration.coordinators.${vendor}.roles.${role} must be a string or string array`));
+                        problems.push(problem(errorCodes.validationType, `${base}.${vendor}.roles.${role} must be a string or string array`));
                     }
                 }
             }
         }
-        coordinators[vendor] = { roles };
+        coordinator.roles = roles;
+        // A coordinator that lists workers must list every worker its roles use.
+        if (coordinator.workers !== undefined) {
+            const used = new Set<string>();
+            for (const roleValue of Object.values(roles)) {
+                if (typeof roleValue === "string") used.add(roleValue);
+                else for (const worker of roleValue) used.add(worker);
+            }
+            for (const worker of used) {
+                if (!coordinator.workers.includes(worker)) {
+                    problems.push(problem(errorCodes.orchestrationWorkersIncomplete, `worker "${worker}" is not listed in ${base}.${vendor}.workers`));
+                }
+            }
+        }
+        coordinators[vendor] = coordinator;
         const validator = coordinatorValidators.get(vendor);
         if (validator) {
             const finding = validator(vendor, entry);
@@ -423,54 +444,87 @@ function validateCoordinators(
     return coordinators;
 }
 
-function validateEngines(raw: unknown, problems: Problem[]): ConfigModel["engines"] | undefined {
-    if (!isRecord(raw)) {
-        problems.push(problem(errorCodes.validationType, "engines must be an object"));
-        return undefined;
+function validateOrca(raw: Record<string, unknown>, problems: Problem[]): OrcaIntegration {
+    const base = "integrations.orca";
+    const orca: OrcaIntegration = { engine: "", enabled: false, multiAgent: false, maxConcurrentWorkers: 3, maxRetriesPerTask: 1 };
+
+    for (const key of Object.keys(raw)) {
+        if (!ORCA_KEYS.has(key)) problems.push(problem(errorCodes.parserUnrecognized, `unknown key "${key}" in ${base}`));
     }
-    const engines: ConfigModel["engines"] = { orca: "" };
-    let hasOrca = false;
-    for (const [key, value] of Object.entries(raw)) {
-        if (key === "orca") {
-            const result = expectString(value, "engines.orca");
-            if (result.ok) { engines.orca = result.value; hasOrca = true; }
-            else problems.push(result.problem);
-        } else {
-            const validator = engineValidators.get(key);
+
+    if (raw.engine === undefined) {
+        problems.push(problem(errorCodes.validationType, `${base}.engine is required`));
+    } else {
+        const engine = expectString(raw.engine, `${base}.engine`);
+        if (engine.ok) {
+            orca.engine = engine.value;
+            const validator = engineValidators.get("orca");
             if (validator) {
-                const finding = validator(key, value);
+                const finding = validator("orca", engine.value);
                 if (finding) problems.push(finding);
-            } else {
-                problems.push(problem(errorCodes.parserUnrecognized, `unknown engine key "${key}"`));
             }
-        }
+        } else problems.push(engine.problem);
     }
-    if (!hasOrca) problems.push(problem(errorCodes.validationType, "engines.orca is required"));
-    return engines;
+
+    const enabled = expectBoolean(raw.enabled, `${base}.enabled`);
+    if (enabled.ok) orca.enabled = enabled.value;
+    else problems.push(enabled.problem);
+
+    const multiAgent = expectBoolean(raw.multiAgent, `${base}.multiAgent`);
+    if (multiAgent.ok) orca.multiAgent = multiAgent.value;
+    else problems.push(multiAgent.problem);
+
+    const maxConcurrent = expectInteger(raw.maxConcurrentWorkers, `${base}.maxConcurrentWorkers`);
+    if (maxConcurrent.ok) {
+        if (maxConcurrent.value < 1 || maxConcurrent.value > 3) {
+            problems.push(problem(errorCodes.validationType, `${base}.maxConcurrentWorkers must be between 1 and 3`));
+        } else {
+            orca.maxConcurrentWorkers = maxConcurrent.value;
+        }
+    } else problems.push(maxConcurrent.problem);
+
+    const maxRetries = expectInteger(raw.maxRetriesPerTask, `${base}.maxRetriesPerTask`);
+    if (maxRetries.ok) {
+        if (maxRetries.value < 0) {
+            problems.push(problem(errorCodes.validationType, `${base}.maxRetriesPerTask must be >= 0`));
+        } else {
+            orca.maxRetriesPerTask = maxRetries.value;
+        }
+    } else problems.push(maxRetries.problem);
+
+    const coordinators = validateCoordinators(raw.coordinators, problems);
+    if (coordinators !== undefined) orca.coordinators = coordinators;
+    return orca;
 }
 
 function validateIntegrations(raw: unknown, problems: Problem[]): ConfigModel["integrations"] | undefined {
-    if (raw === undefined) return undefined;
     if (!isRecord(raw)) {
         problems.push(problem(errorCodes.validationType, "integrations must be an object"));
         return undefined;
     }
-    const integrations: ConfigModel["integrations"] = {};
+    const others: Record<string, Record<string, unknown>> = {};
+    let orca: OrcaIntegration | undefined;
     for (const [name, entry] of Object.entries(raw)) {
         if (!isRecord(entry)) {
             problems.push(problem(errorCodes.validationType, `integrations.${name} must be an object`));
             continue;
         }
+        // The built-in `orca` validator always runs; a registered validator for the same key adds to it.
+        if (name === "orca") orca = validateOrca(entry, problems);
         const validator = integrationValidators.get(name);
         if (validator) {
             const finding = validator(name, entry);
             if (finding) problems.push(finding);
-        } else {
+        } else if (name !== "orca") {
             problems.push(problem(errorCodes.parserUnrecognized, `unknown integration "${name}"`));
         }
-        integrations[name] = entry as Record<string, unknown>;
+        if (name !== "orca") others[name] = entry;
     }
-    return integrations;
+    if (orca === undefined) {
+        problems.push(problem(errorCodes.validationType, "integrations.orca is required"));
+        return undefined;
+    }
+    return { ...others, orca };
 }
 
 function validateConfig(raw: Record<string, unknown>, parseProblems: Problem[]): { model: ConfigModel; problems: Problem[] } | Refusal {
@@ -483,8 +537,8 @@ function validateConfig(raw: Record<string, unknown>, parseProblems: Problem[]):
     }
 
     const schemaVersion = raw.schemaVersion;
-    if (schemaVersion !== 1) {
-        return refused(errorCodes.schemaVersionUnknown, `unsupported schemaVersion: ${schemaVersion}`);
+    if (schemaVersion !== 2) {
+        return refused(errorCodes.schemaVersionUnknown, `unsupported schemaVersion: ${schemaVersion} (only 2 is supported; run ai-framework/scripts/config-migrate.mts to upgrade a v1 file)`);
     }
 
     const runtimeRaw = raw.runtime;
@@ -494,54 +548,6 @@ function validateConfig(raw: Record<string, unknown>, parseProblems: Problem[]):
     const runnerResult = expectString(runtimeRaw?.runner, "runtime.runner");
     if (runnerResult.ok && (runnerResult.value !== "bun" && runnerResult.value !== "node")) {
         problems.push(problem(errorCodes.validationType, "runtime.runner must be 'bun' or 'node'"));
-    }
-
-    const engines = validateEngines(raw.engines, problems);
-
-    const orchestrationRaw = raw.orchestration;
-    if (!isRecord(orchestrationRaw)) {
-        problems.push(problem(errorCodes.validationType, "orchestration must be an object"));
-    }
-    const orchestration: ConfigModel["orchestration"] = {
-        multiAgent: false,
-        enabled: false,
-        maxConcurrentWorkers: 3,
-        maxRetriesPerTask: 1,
-    };
-    if (isRecord(orchestrationRaw)) {
-        const multiAgent = expectBoolean(orchestrationRaw.multiAgent, "orchestration.multiAgent");
-        if (multiAgent.ok) orchestration.multiAgent = multiAgent.value;
-        else problems.push(multiAgent.problem);
-
-        const enabled = expectBoolean(orchestrationRaw.enabled, "orchestration.enabled");
-        if (enabled.ok) orchestration.enabled = enabled.value;
-        else problems.push(enabled.problem);
-
-        const maxConcurrent = expectInteger(orchestrationRaw.maxConcurrentWorkers, "orchestration.maxConcurrentWorkers");
-        if (maxConcurrent.ok) {
-            if (maxConcurrent.value < 1 || maxConcurrent.value > 16) {
-                problems.push(problem(errorCodes.validationType, "orchestration.maxConcurrentWorkers must be between 1 and 16"));
-            } else {
-                orchestration.maxConcurrentWorkers = maxConcurrent.value;
-            }
-        } else problems.push(maxConcurrent.problem);
-
-        const maxRetries = expectInteger(orchestrationRaw.maxRetriesPerTask, "orchestration.maxRetriesPerTask");
-        if (maxRetries.ok) {
-            if (maxRetries.value < 0) {
-                problems.push(problem(errorCodes.validationType, "orchestration.maxRetriesPerTask must be >= 0"));
-            } else {
-                orchestration.maxRetriesPerTask = maxRetries.value;
-            }
-        } else problems.push(maxRetries.problem);
-
-        if (orchestrationRaw.workers !== undefined) {
-            const workers = expectStringArray(orchestrationRaw.workers, "orchestration.workers");
-            if (workers.ok) orchestration.workers = workers.value;
-            else problems.push(workers.problem);
-        }
-
-        orchestration.coordinators = validateCoordinators(orchestrationRaw.coordinators, problems);
     }
 
     const doctorRaw = raw.doctor;
@@ -569,28 +575,17 @@ function validateConfig(raw: Record<string, unknown>, parseProblems: Problem[]):
 
     const integrations = validateIntegrations(raw.integrations, problems);
 
-    if (!engines || !runnerResult.ok) {
+    if (!integrations || !runnerResult.ok) {
         return refused(errorCodes.loadConfigRefused, "required config sections are missing or invalid");
     }
 
     const model: ConfigModel = {
-        schemaVersion: 1,
+        schemaVersion: 2,
         runtime: { runner: runnerResult.value as "bun" | "node" },
-        engines,
-        orchestration,
         doctor,
         skills,
+        integrations,
     };
-    if (integrations !== undefined) model.integrations = integrations;
-
-    if (orchestration.workers !== undefined && orchestration.coordinators !== undefined) {
-        const pool = rolePool(model);
-        for (const worker of pool) {
-            if (!orchestration.workers.includes(worker)) {
-                problems.push(problem(errorCodes.orchestrationWorkersIncomplete, `worker "${worker}" is not listed in orchestration.workers`));
-            }
-        }
-    }
 
     return { model, problems };
 }

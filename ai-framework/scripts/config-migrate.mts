@@ -1,7 +1,7 @@
 import { validatePolicy } from "./orca-policy.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { CONFIG_FILE, errorCodes, inspectPath, loadConfig, oexLock, readBoundedFile, wxRename } from "./runtime/config.mts";
-import type { ConfigModel } from "./runtime/config.mts";
+import type { ConfigModel, OrcaCoordinator, OrcaIntegration } from "./runtime/config.mts";
 import { workflowInvocation } from "./runtime/entry.mts";
 import type { EntryMigration } from "./runtime/migrate.mts";
 import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
@@ -41,7 +41,7 @@ export interface MigrationOutcome { exitCode: number; results: ConfigMigration[]
 export interface MigrateOptions { apply: boolean; force: boolean }
 
 type Reading = { state: "absent" } | { state: "refused"; reason: string } | { state: "ok"; text: string; stat: StatLike };
-interface Existing { kind: "absent" | "valid" | "unregistered" | "unsafe" | "invalid"; text?: string; stat?: StatLike; detail?: string }
+interface Existing { kind: "absent" | "valid" | "unsupported" | "unregistered" | "unsafe" | "invalid"; text?: string; stat?: StatLike; detail?: string }
 
 const errorCode = (error: unknown): unknown => (error !== null && typeof error === "object" ? (error as { code?: unknown }).code : undefined);
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value)
@@ -144,7 +144,7 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
     }
   }
 
-  const orchestration: ConfigModel["orchestration"] = { multiAgent, enabled: false, maxConcurrentWorkers: 3, maxRetriesPerTask: 1 };
+  const orca: OrcaIntegration = { engine: DEFAULT_ENGINE, enabled: false, multiAgent, maxConcurrentWorkers: 3, maxRetriesPerTask: 1 };
   const policy = read(LEGACY.policy);
   if ("error" in policy) return policy;
   if (policy.text !== undefined) {
@@ -152,21 +152,19 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
     if (!parsed) return { error: `${LEGACY.policy}: not valid JSON` };
     const result = validatePolicy(parsed.value);
     if (!result.policy) return { error: `${LEGACY.policy}: ${result.status}` };
-    orchestration.enabled = result.policy["use-orca-orchestration"];
-    orchestration.maxConcurrentWorkers = result.policy.maxConcurrentWorkers;
-    orchestration.maxRetriesPerTask = result.policy.maxRetriesPerTask;
-    const workers: string[] = [];
-    const coordinators: NonNullable<ConfigModel["orchestration"]["coordinators"]> = {};
+    orca.enabled = result.policy["use-orca-orchestration"];
+    orca.maxConcurrentWorkers = result.policy.maxConcurrentWorkers;
+    orca.maxRetriesPerTask = result.policy.maxRetriesPerTask;
+    const coordinators: Record<string, OrcaCoordinator> = {};
     for (const [vendor, entry] of Object.entries(result.policy.coordinators)) {
       const roles: Record<string, string | string[]> = {};
       for (const [role, worker] of Object.entries(entry.roles)) roles[role] = [worker];
-      coordinators[vendor] = { roles };
-      for (const worker of entry.workers) if (!workers.includes(worker)) workers.push(worker);
-      const used = new Set(Object.values(entry.roles));
-      if (entry.workers.some((worker) => !used.has(worker))) notes.push(`${LEGACY.policy}: coordinators.${vendor}.workers lists workers no role uses; the TOON role pool keeps only role targets`);
+      const coordinator: OrcaCoordinator = { roles };
+      // Legacy per-coordinator workers are preserved as-is (no longer pooled or dropped).
+      if (entry.workers.length) coordinator.workers = [...entry.workers];
+      coordinators[vendor] = coordinator;
     }
-    if (workers.length) orchestration.workers = workers;
-    if (Object.keys(coordinators).length) orchestration.coordinators = coordinators;
+    if (Object.keys(coordinators).length) orca.coordinators = coordinators;
   }
 
   let caveman: ConfigModel["skills"]["modes"]["caveman"] = "full";
@@ -187,13 +185,11 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
   }
 
   const model: ConfigModel = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     runtime: { runner },
-    engines: { orca: DEFAULT_ENGINE },
-    orchestration,
     doctor: { modelRouting: "project" },
     skills: { modes: { caveman } },
-    integrations: {},
+    integrations: { orca },
   };
   return { model, files, notes };
 }
@@ -207,34 +203,34 @@ function scalar(value: string): string {
 
 /** Pure and deterministic: equal models always produce equal bytes (the idempotency contract). */
 export function emitToon(model: ConfigModel): string {
+  const { orca, ...others } = model.integrations;
+  if (Object.keys(others).length) throw new Error("integrations other than orca are not written by the migrator");
   const lines: string[] = [
-    "schemaVersion: 1",
+    "schemaVersion: 2",
     "runtime:", `  runner: ${scalar(model.runtime.runner)}`,
-    "engines:", `  orca: "${scalar(model.engines.orca)}"`,
-    "orchestration:",
-    `  multiAgent: ${model.orchestration.multiAgent}`,
-    `  enabled: ${model.orchestration.enabled}`,
-    `  maxConcurrentWorkers: ${model.orchestration.maxConcurrentWorkers}`,
-    `  maxRetriesPerTask: ${model.orchestration.maxRetriesPerTask}`,
+    "integrations:",
+    "  orca:",
+    `    engine: "${scalar(orca.engine)}"`,
+    `    enabled: ${orca.enabled}`,
+    `    multiAgent: ${orca.multiAgent}`,
+    `    maxConcurrentWorkers: ${orca.maxConcurrentWorkers}`,
+    `    maxRetriesPerTask: ${orca.maxRetriesPerTask}`,
   ];
-  const workers = model.orchestration.workers;
-  if (workers?.length) lines.push(`  workers[${workers.length}]: ${workers.map(scalar).join(",")}`);
-  const coordinators = Object.entries(model.orchestration.coordinators ?? {});
+  const coordinators = Object.entries(orca.coordinators ?? {});
   if (coordinators.length) {
-    lines.push("  coordinators:");
+    lines.push("    coordinators:");
     for (const [vendor, entry] of coordinators) {
-      lines.push(`    ${scalar(vendor)}:`);
+      lines.push(`      ${scalar(vendor)}:`);
+      if (entry.workers?.length) lines.push(`        workers[${entry.workers.length}]: ${entry.workers.map(scalar).join(",")}`);
       const roles = Object.entries(entry.roles ?? {});
-      if (!roles.length) { lines.push("      roles: {}"); continue; }
-      lines.push("      roles:");
+      if (!roles.length) { lines.push("        roles: {}"); continue; }
+      lines.push("        roles:");
       for (const [role, target] of roles) {
-        lines.push(Array.isArray(target) ? `        ${scalar(role)}[${target.length}]: ${target.map(scalar).join(",")}` : `        ${scalar(role)}: ${scalar(target)}`);
+        lines.push(Array.isArray(target) ? `          ${scalar(role)}[${target.length}]: ${target.map(scalar).join(",")}` : `          ${scalar(role)}: ${scalar(target)}`);
       }
     }
   }
   lines.push("doctor:", `  modelRouting: ${scalar(model.doctor.modelRouting)}`, "skills:", "  modes:", `    caveman: ${scalar(model.skills.modes.caveman)}`);
-  if (model.integrations && Object.keys(model.integrations).length) throw new Error("integrations are not written by the migrator");
-  lines.push("integrations: {}");
   return `${lines.join("\n")}\n`;
 }
 
@@ -273,6 +269,8 @@ function inspectExisting(base: string, deps: RuntimeDeps): Existing {
   const common = { text: contents.text, stat: location.stat };
   if ("status" in loaded) {
     if (loaded.status === "missing") return { kind: "absent" };
+    // An old-layout (schemaVersion 1) or future file is a well-formed but unsupported version: handled like any differing file.
+    if (loaded.code === errorCodes.schemaVersionUnknown && /unsupported schemaVersion: -?\d+\b/.test(loaded.text ?? "")) return { kind: "unsupported", detail: loaded.text, ...common };
     return HARD_REFUSALS.has(loaded.code ?? "") ? { kind: "unsafe", detail: loaded.text, ...common } : { kind: "invalid", detail: loaded.text, ...common };
   }
   if (!loaded.problems.length) return { kind: "valid", ...common };
@@ -383,6 +381,11 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
   const plan = (): { outcome?: MigrationOutcome; existing: Existing; action: MigrationAction; provenance?: string } => {
     const existing = inspectExisting(base, deps);
     if (existing.kind === "absent") return { existing, action: "write" };
+    if (existing.kind === "unsupported") {
+      const why = `ai-workflow.toon has an unsupported schemaVersion (${existing.detail}); re-run with --force to back it up and replace it`;
+      if (!options.force) return { existing, action: "refuse", outcome: { exitCode: 1, notes: built.notes, results: [entry(CONFIG_FILE, "manual", "refuse", why)] } };
+      return { existing, action: "overwrite", provenance: "replaced an unsupported schemaVersion file (old layout); original kept in the backup" };
+    }
     if (existing.kind === "valid") {
       if (existing.text === text) return { existing, action: "unchanged" };
       if (!options.force) return { existing, action: "refuse", outcome: { exitCode: 1, notes: built.notes, results: [entry(CONFIG_FILE, "manual", "refuse", "valid ai-workflow.toon already exists and differs from the migration; re-run with --force to back it up and replace it")] } };
@@ -459,7 +462,7 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
     // dev/ino + bytes re-check immediately before the rename, as the pre-write half of the pin.
     const before = inspectExisting(base, deps);
     if (locked.action === "write" ? before.kind !== "absent"
-      : before.kind !== "valid" || before.stat?.dev !== existing.stat?.dev || before.stat?.ino !== existing.stat?.ino || before.text !== existing.text) {
+      : before.kind !== existing.kind || before.stat?.dev !== existing.stat?.dev || before.stat?.ino !== existing.stat?.ino || before.text !== existing.text) {
       results.push(entry(CONFIG_FILE, "manual", "refuse", `${CONFIG_FILE} changed after it was inspected; nothing written`));
       return fail(1, built.notes);
     }

@@ -77,73 +77,70 @@ function memoryDeps(mem: Partial<FsDeps>): RuntimeDeps {
 }
 
 const BASELINE_TOON = [
-    "schemaVersion: 1",
+    "schemaVersion: 2",
     "runtime:",
     "  runner: node",
-    "engines:",
-    "  orca: \"1.4.224\"",
-    "orchestration:",
-    "  multiAgent: false",
-    "  enabled: false",
-    "  maxConcurrentWorkers: 3",
-    "  maxRetriesPerTask: 1",
+    "integrations:",
+    "  orca:",
+    "    engine: \"1.4.224\"",
+    "    multiAgent: false",
+    "    enabled: false",
+    "    maxConcurrentWorkers: 3",
+    "    maxRetriesPerTask: 1",
     "doctor:",
     "  modelRouting: project",
     "skills:",
     "  modes:",
     "    caveman: full",
-    "integrations: {}",
 ].join("\n");
 
 const ROLES_BASELINE_TOON = [
-    "schemaVersion: 1",
+    "schemaVersion: 2",
     "runtime:",
     "  runner: node",
-    "engines:",
-    "  orca: \"1.4.224\"",
-    "orchestration:",
-    "  multiAgent: false",
-    "  enabled: false",
-    "  maxConcurrentWorkers: 3",
-    "  maxRetriesPerTask: 1",
-    "  coordinators:",
-    "    claude:",
-    "      roles:",
-    "        implementation[2]: opencode,codex",
+    "integrations:",
+    "  orca:",
+    "    engine: \"1.4.224\"",
+    "    multiAgent: false",
+    "    enabled: false",
+    "    maxConcurrentWorkers: 3",
+    "    maxRetriesPerTask: 1",
+    "    coordinators:",
+    "      claude:",
+    "        roles:",
+    "          implementation[2]: opencode,codex",
     "doctor:",
     "  modelRouting: project",
     "skills:",
     "  modes:",
     "    caveman: full",
-    "integrations: {}",
 ].join("\n");
 
 test("loadConfig parses a minimal TOON file", () => {
     const deps = createTestDeps();
     const toon = [
-        "schemaVersion: 1",
+        "schemaVersion: 2",
         "runtime:",
         "  runner: node",
-        "engines:",
-        "  orca: \"1.4.224\"",
-        "orchestration:",
-        "  multiAgent: false",
-        "  enabled: false",
-        "  maxConcurrentWorkers: 3",
-        "  maxRetriesPerTask: 1",
+        "integrations:",
+        "  orca:",
+        "    engine: \"1.4.224\"",
+        "    multiAgent: false",
+        "    enabled: false",
+        "    maxConcurrentWorkers: 3",
+        "    maxRetriesPerTask: 1",
         "doctor:",
         "  modelRouting: project",
         "skills:",
         "  modes:",
         "    caveman: full",
-        "integrations: {}",
     ].join("\n");
     const root = tempFixture(deps, { "ai-workflow.toon": toon });
     try {
         const result = loadConfig(root, deps);
         assert.ok("model" in result, "loadConfig should return a model");
         const { model, problems } = result as { model: NonNullable<unknown>; problems: unknown[] };
-        assert.equal((model as { schemaVersion: number }).schemaVersion, 1);
+        assert.equal((model as { schemaVersion: number }).schemaVersion, 2);
         assert.deepEqual((model as { runtime: { runner: string } }).runtime, { runner: "node" });
         assert.equal(problems.length, 0);
     } finally {
@@ -151,25 +148,24 @@ test("loadConfig parses a minimal TOON file", () => {
     }
 });
 
-test("loadConfig reports unknown schemaVersion", () => {
+test("loadConfig refuses schemaVersion 1 (legacy flat layout)", () => {
     const deps = createTestDeps();
     const toon = [
-        "schemaVersion: 2",
+        "schemaVersion: 1",
         "runtime:",
         "  runner: node",
-        "engines:",
-        "  orca: \"1.4.224\"",
-        "orchestration:",
-        "  multiAgent: false",
-        "  enabled: false",
-        "  maxConcurrentWorkers: 3",
-        "  maxRetriesPerTask: 1",
+        "integrations:",
+        "  orca:",
+        "    engine: \"1.4.224\"",
+        "    multiAgent: false",
+        "    enabled: false",
+        "    maxConcurrentWorkers: 3",
+        "    maxRetriesPerTask: 1",
         "doctor:",
         "  modelRouting: project",
         "skills:",
         "  modes:",
         "    caveman: full",
-        "integrations: {}",
     ].join("\n");
     const root = tempFixture(deps, { "ai-workflow.toon": toon });
     try {
@@ -197,23 +193,22 @@ test("mutant-7-parserPrototypePollution-nestedKey baseline", () => {
 
 test("mutant-7-parserPrototypePollution-nestedKey mutation", () => {
     const toon = [
-        "schemaVersion: 1",
+        "schemaVersion: 2",
         "runtime:",
         "  runner: node",
-        "engines:",
-        "  orca: \"1.4.224\"",
-        "orchestration:",
-        "  multiAgent: false",
-        "  enabled: false",
-        "  maxConcurrentWorkers: 3",
-        "  maxRetriesPerTask: 1",
-        "  __proto__: x",
+        "integrations:",
+        "  orca:",
+        "    engine: \"1.4.224\"",
+        "    multiAgent: false",
+        "    enabled: false",
+        "    maxConcurrentWorkers: 3",
+        "    maxRetriesPerTask: 1",
+        "    __proto__: x",
         "doctor:",
         "  modelRouting: project",
         "skills:",
         "  modes:",
         "    caveman: full",
-        "integrations: {}",
     ].join("\n");
     const files = { "/project/ai-workflow.toon": toon };
     const links = {};
@@ -239,26 +234,25 @@ test("mutant-7-parserWithinRoleDuplicate-duplicateImplementation baseline", () =
 
 test("mutant-7-parserWithinRoleDuplicate-duplicateImplementation mutation", () => {
     const toon = [
-        "schemaVersion: 1",
+        "schemaVersion: 2",
         "runtime:",
         "  runner: node",
-        "engines:",
-        "  orca: \"1.4.224\"",
-        "orchestration:",
-        "  multiAgent: false",
-        "  enabled: false",
-        "  maxConcurrentWorkers: 3",
-        "  maxRetriesPerTask: 1",
-        "  coordinators:",
-        "    claude:",
-        "      roles:",
-        "        implementation[2]: opencode,opencode",
+        "integrations:",
+        "  orca:",
+        "    engine: \"1.4.224\"",
+        "    multiAgent: false",
+        "    enabled: false",
+        "    maxConcurrentWorkers: 3",
+        "    maxRetriesPerTask: 1",
+        "    coordinators:",
+        "      claude:",
+        "        roles:",
+        "          implementation[2]: opencode,opencode",
         "doctor:",
         "  modelRouting: project",
         "skills:",
         "  modes:",
         "    caveman: full",
-        "integrations: {}",
     ].join("\n");
     const files = { "/project/ai-workflow.toon": toon };
     const links = {};
@@ -284,23 +278,22 @@ test("mutant-7-parserUnrecognized-weirdKey baseline", () => {
 
 test("mutant-7-parserUnrecognized-weirdKey mutation", () => {
     const toon = [
-        "schemaVersion: 1",
+        "schemaVersion: 2",
         "@weird: foo",
         "runtime:",
         "  runner: node",
-        "engines:",
-        "  orca: \"1.4.224\"",
-        "orchestration:",
-        "  multiAgent: false",
-        "  enabled: false",
-        "  maxConcurrentWorkers: 3",
-        "  maxRetriesPerTask: 1",
+        "integrations:",
+        "  orca:",
+        "    engine: \"1.4.224\"",
+        "    multiAgent: false",
+        "    enabled: false",
+        "    maxConcurrentWorkers: 3",
+        "    maxRetriesPerTask: 1",
         "doctor:",
         "  modelRouting: project",
         "skills:",
         "  modes:",
         "    caveman: full",
-        "integrations: {}",
     ].join("\n");
     const files = { "/project/ai-workflow.toon": toon };
     const links = {};
@@ -399,22 +392,21 @@ test("mutant-7-regexpBacktracking-quotedCommas baseline", () => {
 test("mutant-7-regexpBacktracking-quotedCommas mutation", () => {
     const payload = '"a",' + '"a",'.repeat(12000);
     const toon = [
-        "schemaVersion: 1",
+        "schemaVersion: 2",
         "runtime:",
         "  runner: node",
-        "engines:",
-        "  orca: \"1.4.224\"",
-        "orchestration:",
-        "  multiAgent: false",
-        "  enabled: false",
-        "  maxConcurrentWorkers: 3",
-        "  maxRetriesPerTask: 1",
+        "integrations:",
+        "  orca:",
+        "    engine: \"1.4.224\"",
+        "    multiAgent: false",
+        "    enabled: false",
+        "    maxConcurrentWorkers: 3",
+        "    maxRetriesPerTask: 1",
         "doctor:",
         "  modelRouting: " + payload,
         "skills:",
         "  modes:",
         "    caveman: full",
-        "integrations: {}",
     ].join("\n");
     const files = { "/project/ai-workflow.toon": toon };
     const links = {};
@@ -493,14 +485,14 @@ describe("mutant-a3-loadConfig-unknownSchemaVersion", () => {
 });
 
 test("mutant-a3-loadConfig-unknownSchemaVersion baseline", () => {
-    const deps = memoryDeps(memoryToonFs("/project", toonFixtureText({ schemaVersion: 1 })));
+    const deps = memoryDeps(memoryToonFs("/project", toonFixtureText({ schemaVersion: 2 })));
     const result = loadConfig("/project", deps);
     assert.ok(!("status" in result));
     assert.equal(result.problems.length, 0);
 });
 
 test("mutant-a3-loadConfig-unknownSchemaVersion mutation", () => {
-    for (const version of [2, 0, "one"]) {
+    for (const version of [1, 0, 3, "two"]) {
         const deps = memoryDeps(memoryToonFs("/project", toonFixtureText({ schemaVersion: version })));
         const result = refusal(loadConfig("/project", deps));
         assert.equal(result.status, "refused");
@@ -714,7 +706,7 @@ test("K2-3 subprocess: a fresh process re-reads on-disk TOON and sees the rewrit
         assert.deepEqual(JSON.parse(before.stdout), { ok: true, problems: 0, runner: "node" });
 
         // Rewrite on disk (same path, new bytes). The already-loaded module must not vouch for it.
-        deps.fs.writeFileSync(target, toonFixtureText({ schemaVersion: 2 }));
+        deps.fs.writeFileSync(target, toonFixtureText({ schemaVersion: 1 }));
         const after = runScript(deps, probe, ["load", root]);
         assert.equal(after.status, 0, after.stderr);
         assert.equal(JSON.parse(after.stdout).code, errorCodes.schemaVersionUnknown);
@@ -727,4 +719,43 @@ test("K2-3 subprocess: a fresh process re-reads on-disk TOON and sees the rewrit
     } finally {
         deps.fs.rmSync(root, { recursive: true, force: true });
     }
+});
+
+// ---------------------------------------------------------------------------
+// integrations.orca schema (engines/orchestration removed outright, no alias)
+// ---------------------------------------------------------------------------
+
+function loadText(text: string) {
+    const result = loadConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": text }, {})));
+    assert.ok(!("status" in result), "should return a model with problems");
+    return result;
+}
+
+test("integrations.orca: per-coordinator workers and roles load into the model", () => {
+    const result = loadText(ROLES_BASELINE_TOON.replace("        roles:", "        workers[2]: opencode,codex\n        roles:"));
+    assert.equal(result.problems.length, 0);
+    assert.deepEqual(result.model.integrations.orca.coordinators?.claude, { workers: ["opencode", "codex"], roles: { implementation: ["opencode", "codex"] } });
+    assert.equal(result.model.integrations.orca.engine, "1.4.224");
+});
+
+test("integrations.orca: legacy top-level engines/orchestration keys are rejected, not aliased", () => {
+    const result = loadText(`${BASELINE_TOON}\nengines:\n  orca: "1.4.224"\norchestration:\n  enabled: true`);
+    assert.equal(result.problems.filter((p) => p.code === errorCodes.parserUnrecognized && /unknown root key/.test(p.text)).length, 2);
+});
+
+test("integrations.orca: missing block, missing engine, bad bounds and unknown keys are reported", () => {
+    const noOrca = loadConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": BASELINE_TOON.replace(/integrations:[\s\S]*?doctor:/, "integrations: {}\ndoctor:") }, {})));
+    assert.ok("status" in noOrca && noOrca.code === errorCodes.loadConfigRefused, "missing orca block refuses the load");
+    const bad = loadText(BASELINE_TOON.replace('    engine: "1.4.224"\n', "").replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 17").replace("maxRetriesPerTask: 1", "maxRetriesPerTask: -1\n    bogus: 1"));
+    const texts = bad.problems.map((p) => p.text).join("|");
+    assert.match(texts, /integrations\.orca\.engine is required/);
+    assert.match(texts, /maxConcurrentWorkers must be between 1 and 3/);
+    assert.match(loadText(BASELINE_TOON.replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 4")).problems.map((p) => p.text).join("|"), /between 1 and 3/, "4 matches orca-policy and is refused");
+    assert.match(texts, /maxRetriesPerTask must be >= 0/);
+    assert.match(texts, /unknown key "bogus" in integrations\.orca/);
+});
+
+test("integrations.orca: a role worker missing from that coordinator's workers is incomplete", () => {
+    const text = ROLES_BASELINE_TOON.replace("        roles:", "        workers[1]: opencode\n        roles:");
+    assertProblemCode(loadText(text).problems, errorCodes.orchestrationWorkersIncomplete);
 });

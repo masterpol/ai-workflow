@@ -39,7 +39,7 @@ another executable by name. A sanitized environment without a runner keeps the p
 
 `ai-workflow.toon` (TOON; see `ai-framework/templates/ai-workflow.example.toon`; the legacy flat `ai_workflow_env.json` is the fallback, see `ai-framework/templates/ai_workflow_env.example.json`) is read only from the project root that
 contains `ai-framework/`, never from an unrelated working directory, and the secret-bearing `.env` is never read. A
-symlink leaving that root, a non-regular file, a file over 64 KiB or malformed content is ignored. A present but invalid `ai-workflow.toon` contributes nothing and never falls back to the legacy file. Only the runner (`runtime.runner`) and the Orca switch (`orchestration.multiAgent`; legacy keys `AI_WORKFLOW_RUNNER` and `AI_WORKFLOW_ORCA_MULTI_AGENT`, string or boolean) are taken from it; other keys never reach a
+symlink leaving that root, a non-regular file, a file over 64 KiB or malformed content is ignored. A present but invalid `ai-workflow.toon` contributes nothing and never falls back to the legacy file. Only the runner (`runtime.runner`) and the Orca switch (`integrations.orca.multiAgent` in a `schemaVersion: 2` file; legacy keys `AI_WORKFLOW_RUNNER` and `AI_WORKFLOW_ORCA_MULTI_AGENT`, string or boolean) are taken from it; other keys never reach a
 child process. The Orca switch is read by the same loader through the Orca launch gate. A selected executable missing from `PATH` fails with an error; it never falls back to
 another runtime. Portable reminder hooks and review-bench test commands use the same selection.
 

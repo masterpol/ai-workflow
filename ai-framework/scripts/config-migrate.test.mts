@@ -53,7 +53,7 @@ test("apply writes valid TOON, backs up originals, keeps legacy files, records d
   const loaded = loadConfig(root, deps);
   assert.ok(!("status" in loaded) && loaded.problems.length === 0);
   if ("status" in loaded) return;
-  assert.deepEqual([loaded.model.runtime.runner, loaded.model.orchestration.enabled, loaded.model.orchestration.maxConcurrentWorkers, loaded.model.skills.modes.caveman], ["node", true, 2, "lite"]);
+  assert.deepEqual([loaded.model.runtime.runner, loaded.model.integrations.orca.enabled, loaded.model.integrations.orca.maxConcurrentWorkers, loaded.model.skills.modes.caveman], ["node", true, 2, "lite"]);
   for (const name of Object.keys(LEGACY).filter((file) => file !== ".gitignore")) assert.equal(read(root, name), LEGACY[name as keyof typeof LEGACY], `${name} untouched`);
   const backups = outcome.results.filter((item) => item.action === "backup" && item.status === "applied");
   assert.equal(backups.length, 3);
@@ -194,7 +194,7 @@ test("b2 --force on an absent target is the plain write branch: no overwrite, no
 });
 
 test("b2 unparseable TOON stays unparseable: --force does not change the .rejected branch and legacy files are kept", (t) => {
-  const root = project(t, { ...LEGACY, [CONFIG_FILE]: "schemaVersion: 1\nruntime:\n  runner: \"unterminated\n" });
+  const root = project(t, { ...LEGACY, [CONFIG_FILE]: "schemaVersion: 2\nruntime:\n  runner: \"unterminated\n" });
   const outcome = migrate(root, { apply: true, force: true }, deps);
   assert.equal(outcome.exitCode, 1);
   assert.equal(exists(root, CONFIG_FILE), false);
@@ -206,7 +206,7 @@ test("b2 unparseable TOON stays unparseable: --force does not change the .reject
 test("b2 an unregistered integration slot in an existing TOON is a refusal without a move", (t) => {
   const root = project(t);
   migrate(root, { apply: true, force: false }, deps);
-  const withSlot = read(root, CONFIG_FILE).replace("integrations: {}", "integrations:\n  mystery:\n    enabled: true");
+  const withSlot = read(root, CONFIG_FILE).replace("\ndoctor:", "\n  mystery:\n    enabled: true\ndoctor:");
   deps.fs.writeFileSync(toonPath(root), withSlot);
   const outcome = migrate(root, { apply: true, force: true }, deps);
   assert.equal(outcome.exitCode, 1);
@@ -216,7 +216,7 @@ test("b2 an unregistered integration slot in an existing TOON is a refusal witho
 });
 
 test("b2 an oversized existing TOON is an unsafe refusal, not an unparseable one", (t) => {
-  const root = project(t, { ...LEGACY, [CONFIG_FILE]: `schemaVersion: 1\n# ${"x".repeat(70 * 1024)}\n` });
+  const root = project(t, { ...LEGACY, [CONFIG_FILE]: `schemaVersion: 2\n# ${"x".repeat(70 * 1024)}\n` });
   const outcome = migrate(root, { apply: true, force: true }, deps);
   assert.equal(outcome.exitCode, 1);
   assert.match(outcome.results[0].reason ?? "", /unsafe or unreadable/);
@@ -247,7 +247,7 @@ test("b2 --json apply output is machine-readable and exit-code consistent", (t) 
   assert.ok(parsed.results.some((item) => item.action === "revalidate" && item.status === "applied"));
   const dry = JSON.parse(capture(["--dry-run", "--json", "--root", exists(root, CONFIG_FILE) ? project(t) : root], root).out) as { mode: string; toon?: string };
   assert.equal(dry.mode, "dry-run");
-  assert.match(dry.toon ?? "", /^schemaVersion: 1\n/);
+  assert.match(dry.toon ?? "", /^schemaVersion: 2\n/);
 });
 
 test("b2 conversion semantics: caveman off, defaults without legacy files, notes for what TOON cannot hold", (t) => {
@@ -261,7 +261,7 @@ test("b2 conversion semantics: caveman off, defaults without legacy files, notes
   assert.equal(defaults.exitCode, 0, JSON.stringify(defaults.results));
   const loaded = loadConfig(empty, deps);
   assert.ok(!("status" in loaded));
-  if (!("status" in loaded)) assert.deepEqual([loaded.model.runtime.runner, loaded.model.orchestration.enabled, loaded.model.skills.modes.caveman], ["node", false, "full"]);
+  if (!("status" in loaded)) assert.deepEqual([loaded.model.runtime.runner, loaded.model.integrations.orca.enabled, loaded.model.skills.modes.caveman], ["node", false, "full"]);
   assert.equal(exists(empty, BACKUP_DIR + "/state.json"), true);
   const extra = project(t, { "ai_workflow_env.json": JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", OTHER: 1 }) });
   assert.ok(migrate(extra, { apply: false, force: false }, deps).notes.some((note) => /ignored key OTHER/.test(note)));
@@ -633,4 +633,38 @@ test("b3 Bun adapter never overrides writeFileSync: wx stays the Node primitive 
     assert.throws(() => deps.fs.writeFileSync(deps.path.join(probe, "existing.txt"), "clobber", { flag: "wx" }), (error) => (error as { code?: string }).code === "EEXIST");
     assert.equal(deps.fs.readFileSync(deps.path.join(probe, "existing.txt")), "keep");
   } finally { deps.fs.rmSync(probe, { recursive: true, force: true }); }
+});
+
+test("c1 legacy policy maps into integrations.orca and per-coordinator workers are preserved", (t) => {
+  const root = project(t);
+  assert.equal(migrate(root, { apply: true, force: false }, deps).exitCode, 0);
+  const toon = read(root, CONFIG_FILE);
+  assert.match(toon, /^schemaVersion: 2\n/);
+  assert.doesNotMatch(toon, /^(engines|orchestration):/m);
+  const loaded = loadConfig(root, deps);
+  assert.ok(!("status" in loaded) && loaded.problems.length === 0);
+  if ("status" in loaded) return;
+  const orca = loaded.model.integrations.orca;
+  assert.deepEqual([orca.engine, orca.enabled, orca.multiAgent, orca.maxConcurrentWorkers, orca.maxRetriesPerTask], ["1.4.224", true, true, 2, 1]);
+  assert.deepEqual(orca.coordinators?.claude, { workers: ["codex", "opencode"], roles: { implementation: ["codex"], review: ["opencode"] } });
+  assert.deepEqual(orca.coordinators?.codex?.workers, ["claude", "opencode"]);
+  assert.deepEqual(orca.coordinators?.opencode?.workers, ["claude", "codex"]);
+});
+
+test("c1 a schemaVersion 1 (old flat layout) ai-workflow.toon is refused without --force and backed up and replaced with it", (t) => {
+  const old = "schemaVersion: 1\nruntime:\n  runner: node\nengines:\n  orca: \"1.4.224\"\norchestration:\n  multiAgent: false\n  enabled: false\n  maxConcurrentWorkers: 3\n  maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nintegrations: {}\n";
+  const root = project(t, { ...LEGACY, [CONFIG_FILE]: old });
+  const refused = migrate(root, { apply: true, force: false }, deps);
+  assert.equal(refused.exitCode, 1);
+  assert.match(refused.results[0].reason ?? "", /unsupported schemaVersion.*--force/);
+  assert.equal(read(root, CONFIG_FILE), old);
+  assert.equal(exists(root, BACKUP_DIR), false);
+  assert.deepEqual(rejectedFiles(root), []);
+  const forced = migrate(root, { apply: true, force: true }, deps);
+  assert.equal(forced.exitCode, 0, JSON.stringify(forced.results));
+  assert.match(read(root, CONFIG_FILE), /^schemaVersion: 2\n/);
+  const backup = forced.results.find((item) => item.action === "backup" && item.path === CONFIG_FILE && item.status === "applied");
+  assert.equal(read(root, backup?.reason ?? ""), old);
+  const loaded = loadConfig(root, deps);
+  assert.ok(!("status" in loaded) && loaded.problems.length === 0);
 });

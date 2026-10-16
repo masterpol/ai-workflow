@@ -327,7 +327,7 @@ test("Workflow config is info when ai-workflow.toon is absent, and never fails t
 
 test("Workflow config is fail when a present ai-workflow.toon is refused by the reader", async () => {
   // The in-memory fs cannot inspect paths, so loadConfig refuses; refusal must be fail, never a silent pass.
-  const run = makeDeps({ ...baseFiles(), "ai-workflow.toon": "schemaVersion: 1\n" }, healthy);
+  const run = makeDeps({ ...baseFiles(), "ai-workflow.toon": "schemaVersion: 2\n" }, healthy);
   assert.equal(await main(["--json"], run.deps, libs), 1);
   const report = JSON.parse(run.out.join("")) as Report;
   const item = report.results.find((result) => result.name === "Workflow config");
@@ -343,8 +343,8 @@ test("Workflow config reports valid as pass and invalid as fail on a real projec
   const valid = readFileSync(fileURLToPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
   const cases: Array<[string, string, RegExp]> = [
     [valid, "pass", /valid/],
-    [valid.replace("integrations: {}", "integrations:\n  nosuchtool:\n    a: 1"), "fail", /unknown integration "nosuchtool"/],
-    ["schemaVersion: 2\n", "fail", /invalid|refused/],
+    [valid.replace("doctor:\n", "  nosuchtool:\n    a: 1\ndoctor:\n"), "fail", /unknown integration "nosuchtool"/],
+    ["schemaVersion: 3\n", "fail", /invalid|refused/],
   ];
   for (const [body, status, detail] of cases) {
     writeFileSync(join(dir, "ai-workflow.toon"), body);

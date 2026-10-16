@@ -81,7 +81,7 @@ or, in the legacy file:
 ```
 
 Process environment variables override the file. Bun must be installed and available on `PATH`.
-Orca multi-agent dispatch is off unless `orchestration.multiAgent` (legacy `AI_WORKFLOW_ORCA_MULTI_AGENT`) is `true` (see
+Orca multi-agent dispatch is off unless `integrations.orca.multiAgent` (legacy `AI_WORKFLOW_ORCA_MULTI_AGENT`) is `true` (see
 [Orca mode](#orca-mode-multi-agent) below); any other value keeps the normal workflow.
 Run scripts directly as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later, or
 `bun ai-framework/scripts/<name>.mts`. Node 22.12–22.17 requires
@@ -100,9 +100,9 @@ in [Orca](https://www.onorca.dev). It is off by default; with it off, every phas
 **Turn it on**
 
 1. Install the Orca app and the worker CLIs you want (`codex`, `opencode`), and make sure `orca` on your `PATH` is the real binary.
-2. In `ai-workflow.toon`, set `orchestration.multiAgent: true` (or set the `AI_WORKFLOW_ORCA_MULTI_AGENT` environment variable).
-3. In the same file, set `orchestration.enabled: true` and choose the workers and coordinator-to-worker roles; see
-   [ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon). No separate `.project/orchestration.json` is needed.
+2. In `ai-workflow.toon`, set `integrations.orca.multiAgent: true` under `schemaVersion: 2` (or set the `AI_WORKFLOW_ORCA_MULTI_AGENT` environment variable).
+3. In the same file, set `integrations.orca.enabled: true` and choose the workers and coordinator-to-worker roles; see
+   [ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon). No separate `.project/orchestration.json` is needed. The earlier flat `engines` / `orchestration` layout (schemaVersion 1) is no longer loaded; run `node ai-framework/scripts/config-migrate.mts` to convert it (`engines.orca` becomes `integrations.orca.engine`, `orchestration.*` becomes `integrations.orca.*`).
 4. Restart nothing: the Claude Code hook in [hooks.json](ai-framework/hooks/hooks.json) is picked up from `.claude/settings.json`.
 
 **What happens with the switch on.** Before each of the 12 workflow phases (`shape`, `shape-lite`, `critique`, `plan`,
