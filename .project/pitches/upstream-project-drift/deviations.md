@@ -19,3 +19,11 @@ See plan.md D2 (critique X2 partly overridden; `orca-policy.mts` shape and grade
   commands, doctor runner checks) moves to `unified-toon-config`, recorded as a follow-up.
 - RN real improvements are 10 rows: the Orca start hooks, `stuck-uphill-detector`, `pre-ship-verify`,
   `hooks.json` path fix (S6) and the `skill-defaults.test.mts` `IN_BUNDLE_REPO` guard (S7, not in plan).
+
+## D5 (build, 2026-10-16) — interim exact Orca pin 1.4.224 before S3
+- **Plan said**: S3 (wave 3, after S2) moves the Orca floor to 1.4.224 with `isSupportedVersion`.
+- **Reality**: the installed Orca is 1.4.224, so the exact pin `1.4.223` blocked every phase start with
+  `runtime-version-unsupported`, including the wave 2 Orca dispatch.
+- **Now**: the owner approved an interim exact pin. `SUPPORTED_VERSION = "1.4.224"` in `orca-preflight.mts`,
+  test literals updated in seven test files, and one floor line in `orca-vendors.md`, committed on its own.
+  S3 still owns the `isSupportedVersion` range check, the four call sites and the table tests.
