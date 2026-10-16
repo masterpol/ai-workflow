@@ -1,12 +1,13 @@
 // b1 smoke tests: the migrator's producer invariants. Functional (b2) and guard-proof (b3) suites build on these exports.
 import assert from "node:assert/strict";
-import { test } from "node:test";
+import { describe, test } from "node:test";
 import { CONFIG_FILE, loadConfig, oexLock } from "./runtime/config.mts";
 import { BACKUP_DIR, STATE_FILE, emitToon, main, migrate } from "./config-migrate.mts";
 import { createTestDeps, tempFixture } from "./runtime/test-helpers.mts";
-import type { RuntimeDeps } from "./runtime/types.mts";
+import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
 
 const deps = createTestDeps();
+const SCRIPTS_DIR = deps.path.dirname(decodeURIComponent(new URL(import.meta.url).pathname));
 const POLICY = JSON.stringify({ schemaVersion: 1, "use-orca-orchestration": true, maxConcurrentWorkers: 2, maxRetriesPerTask: 1,
   coordinators: {
     claude: { workers: ["codex", "opencode"], roles: { implementation: "codex", review: "opencode" } },
@@ -147,4 +148,489 @@ test("invalid legacy JSON aborts before any write; --verify re-parses in a fresh
   assert.equal(verified.code, 0);
   assert.equal((JSON.parse(verified.out) as { ok: boolean }).ok, true);
   assert.equal(capture(["--bogus"], good).code, 2);
+});
+
+// ---------------------------------------------------------------------------
+// b2 - functional tests. Real temp projects through the real runtime deps; the
+// migrator is exercised through `migrate` (library) and `main` (CLI contract).
+// ---------------------------------------------------------------------------
+
+const withFs = (overrides: Partial<FsDeps>): RuntimeDeps => ({ ...deps, fs: { ...deps.fs, ...overrides } }) as RuntimeDeps;
+const toonPath = (root: string): string => deps.path.join(root, CONFIG_FILE);
+const rejectedFiles = (root: string): string[] => deps.fs.readdirSync(root).filter((name) => name.startsWith(`${CONFIG_FILE}.rejected`));
+
+test("b2 dry-run on a differing valid TOON plans a backup and replace only under --force; exit codes follow", (t) => {
+  const root = project(t);
+  migrate(root, { apply: true, force: false }, deps);
+  deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+  const before = read(root, CONFIG_FILE);
+  const tree = (deps.fs.readdirSync(deps.path.join(root, BACKUP_DIR)) as string[]).join(",");
+  const plain = capture(["--dry-run", "--root", root], root);
+  assert.equal(plain.code, 1);
+  assert.match(plain.out, /--force/);
+  const forced = capture(["--dry-run", "--force", "--root", root], root);
+  assert.equal(forced.code, 0);
+  assert.match(forced.out, /ready backup ai-workflow\.toon: would back up the existing file \(matches the bytes this migrator last wrote \(stale\)\)/);
+  assert.match(forced.out, /ready overwrite ai-workflow\.toon/);
+  assert.equal(read(root, CONFIG_FILE), before, "dry-run never writes");
+  assert.equal((deps.fs.readdirSync(deps.path.join(root, BACKUP_DIR)) as string[]).join(","), tree, "dry-run creates no backup directory");
+});
+
+test("b2 dry-run on an unparseable TOON reports the planned .rejected move and moves nothing", (t) => {
+  const root = project(t, { ...LEGACY, [CONFIG_FILE]: "garbage !!\n" });
+  const run = capture(["--dry-run", "--root", root], root);
+  assert.equal(run.code, 1);
+  assert.match(run.out, /manual reject ai-workflow\.toon: unparseable .* would move it aside as ai-workflow\.toon\.rejected/);
+  assert.equal(read(root, CONFIG_FILE), "garbage !!\n");
+  assert.deepEqual(rejectedFiles(root), []);
+});
+
+test("b2 --force on an absent target is the plain write branch: no overwrite, no TOON backup", (t) => {
+  const root = project(t);
+  const outcome = migrate(root, { apply: true, force: true }, deps);
+  assert.equal(outcome.exitCode, 0, JSON.stringify(outcome.results));
+  assert.ok(outcome.results.some((item) => item.action === "write" && item.status === "applied"));
+  assert.ok(!outcome.results.some((item) => item.action === "overwrite" || (item.action === "backup" && item.path === CONFIG_FILE)));
+});
+
+test("b2 unparseable TOON stays unparseable: --force does not change the .rejected branch and legacy files are kept", (t) => {
+  const root = project(t, { ...LEGACY, [CONFIG_FILE]: "schemaVersion: 1\nruntime:\n  runner: \"unterminated\n" });
+  const outcome = migrate(root, { apply: true, force: true }, deps);
+  assert.equal(outcome.exitCode, 1);
+  assert.equal(exists(root, CONFIG_FILE), false);
+  assert.equal(rejectedFiles(root).length, 1);
+  assert.equal(exists(root, BACKUP_DIR), false, "nothing is written, not even a backup");
+  for (const name of ["ai_workflow_env.json", ".project/orchestration.json", ".project/skills/modes.json"]) assert.equal(read(root, name), LEGACY[name as keyof typeof LEGACY]);
+});
+
+test("b2 an unregistered integration slot in an existing TOON is a refusal without a move", (t) => {
+  const root = project(t);
+  migrate(root, { apply: true, force: false }, deps);
+  const withSlot = read(root, CONFIG_FILE).replace("integrations: {}", "integrations:\n  mystery:\n    enabled: true");
+  deps.fs.writeFileSync(toonPath(root), withSlot);
+  const outcome = migrate(root, { apply: true, force: true }, deps);
+  assert.equal(outcome.exitCode, 1);
+  assert.match(outcome.results[0].reason ?? "", /unregistered slot/);
+  assert.equal(read(root, CONFIG_FILE), withSlot);
+  assert.deepEqual(rejectedFiles(root), []);
+});
+
+test("b2 an oversized existing TOON is an unsafe refusal, not an unparseable one", (t) => {
+  const root = project(t, { ...LEGACY, [CONFIG_FILE]: `schemaVersion: 1\n# ${"x".repeat(70 * 1024)}\n` });
+  const outcome = migrate(root, { apply: true, force: true }, deps);
+  assert.equal(outcome.exitCode, 1);
+  assert.match(outcome.results[0].reason ?? "", /unsafe or unreadable/);
+  assert.deepEqual(rejectedFiles(root), []);
+  assert.ok(exists(root, CONFIG_FILE));
+});
+
+test("b2 dual-hash: state.json holds the canonical-bytes digest and the parsed-model digest that --verify reports", (t) => {
+  const root = project(t);
+  migrate(root, { apply: true, force: false }, deps);
+  const state = JSON.parse(read(root, STATE_FILE)) as { schemaVersion: number; bytesSha256: string; modelSha256: string; writtenAt: string };
+  assert.equal(state.schemaVersion, 1);
+  assert.equal(state.bytesSha256, deps.crypto.sha256Hex(read(root, CONFIG_FILE)));
+  const verified = JSON.parse(capture(["--verify", "--root", root], root).out) as { ok: boolean; modelSha256: string };
+  assert.equal(verified.modelSha256, state.modelSha256, "parsed-model digest equals what a fresh read computes");
+  assert.notEqual(state.bytesSha256, state.modelSha256, "the two digests are over different things");
+  assert.ok(!Number.isNaN(Date.parse(state.writtenAt)));
+});
+
+test("b2 --json apply output is machine-readable and exit-code consistent", (t) => {
+  const root = project(t);
+  const run = capture(["--apply", "--json", "--root", root], root);
+  assert.equal(run.code, 0);
+  const parsed = JSON.parse(run.out) as { mode: string; exitCode: number; results: Array<{ action: string; status: string }>; notes: string[]; toon?: string };
+  assert.equal(parsed.mode, "apply");
+  assert.equal(parsed.exitCode, 0);
+  assert.equal(parsed.toon, undefined, "apply never echoes the TOON");
+  assert.ok(parsed.results.some((item) => item.action === "revalidate" && item.status === "applied"));
+  const dry = JSON.parse(capture(["--dry-run", "--json", "--root", exists(root, CONFIG_FILE) ? project(t) : root], root).out) as { mode: string; toon?: string };
+  assert.equal(dry.mode, "dry-run");
+  assert.match(dry.toon ?? "", /^schemaVersion: 1\n/);
+});
+
+test("b2 conversion semantics: caveman off, defaults without legacy files, notes for what TOON cannot hold", (t) => {
+  const off = project(t, { "ai_workflow_env.json": "{}", ".project/skills/modes.json": JSON.stringify({ schemaVersion: 1, caveman: { enabled: false, default: "ultra", phases: { build: "lite" } } }) });
+  const outcome = migrate(off, { apply: true, force: false }, deps);
+  assert.equal(outcome.exitCode, 0, JSON.stringify(outcome.results));
+  assert.match(read(off, CONFIG_FILE), /caveman: off/);
+  assert.ok(outcome.notes.some((note) => /per-phase caveman modes/.test(note)));
+  const empty = project(t, {});
+  const defaults = migrate(empty, { apply: true, force: false }, deps);
+  assert.equal(defaults.exitCode, 0, JSON.stringify(defaults.results));
+  const loaded = loadConfig(empty, deps);
+  assert.ok(!("status" in loaded));
+  if (!("status" in loaded)) assert.deepEqual([loaded.model.runtime.runner, loaded.model.orchestration.enabled, loaded.model.skills.modes.caveman], ["node", false, "full"]);
+  assert.equal(exists(empty, BACKUP_DIR + "/state.json"), true);
+  const extra = project(t, { "ai_workflow_env.json": JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", OTHER: 1 }) });
+  assert.ok(migrate(extra, { apply: false, force: false }, deps).notes.some((note) => /ignored key OTHER/.test(note)));
+});
+
+test("b2 .gitignore: never created, never duplicated, not followed through a symlink", (t) => {
+  const bare = project(t, { "ai_workflow_env.json": "{}" });
+  const result = migrate(bare, { apply: true, force: false }, deps);
+  assert.equal(exists(bare, ".gitignore"), false);
+  assert.match(result.results.find((item) => item.action === "ignore")?.reason ?? "", /no \.gitignore/);
+  const have = project(t, { "ai_workflow_env.json": "{}", ".gitignore": "/ai-workflow.toon\n" });
+  migrate(have, { apply: true, force: false }, deps);
+  assert.equal(read(have, ".gitignore"), "/ai-workflow.toon\n");
+  const linked = project(t, { "ai_workflow_env.json": "{}", "elsewhere.txt": "keep\n" });
+  deps.fs.symlinkSync(deps.path.join(linked, "elsewhere.txt"), deps.path.join(linked, ".gitignore"));
+  const out = migrate(linked, { apply: true, force: false }, deps);
+  assert.equal(read(linked, "elsewhere.txt"), "keep\n");
+  assert.equal(out.exitCode, 1, "a manual .gitignore step is reported as manual");
+  assert.ok(exists(linked, CONFIG_FILE), "the TOON itself was still written");
+});
+
+test("b2 a legacy file larger than the bound is refused rather than read", (t) => {
+  const root = project(t, { ".project/orchestration.json": ` ${" ".repeat(70 * 1024)}{}` });
+  const outcome = migrate(root, { apply: true, force: false }, deps);
+  assert.equal(outcome.exitCode, 1);
+  assert.match(outcome.results[0].reason ?? "", /larger than 65536 bytes/);
+  assert.equal(exists(root, CONFIG_FILE), false);
+});
+
+test("b2 CLI argument contract: conflicting, duplicate or unknown flags exit 2 with usage", (t) => {
+  const root = project(t);
+  for (const argv of [["--dry-run", "--apply"], ["--apply", "--apply"], ["--root"], ["--root", "--apply"], ["--verify", "--apply"], ["extra"]]) {
+    const run = capture(argv, root);
+    assert.equal(run.code, 2, argv.join(" "));
+    assert.match(run.err, /usage: config-migrate/);
+  }
+  assert.equal(exists(root, CONFIG_FILE), false);
+});
+
+// ---------------------------------------------------------------------------
+// b3 - guard proofs. Each mutant: a passing baseline in the same layout, then a
+// single injected fault through `deps.fs` / `deps.child` asserting the migrator's
+// guard holds (fail closed, nothing half-written, original bytes kept).
+// ---------------------------------------------------------------------------
+
+const underBackup = (file: unknown): boolean => typeof file === "string" && file.includes(`${BACKUP_DIR}/`);
+const sentinel = (kind: string): Error => Object.assign(new Error(kind), { code: kind });
+const stranded = (root: string): string[] => (deps.fs.readdirSync(root) as string[]).filter((name) => name.endsWith(".tmp"));
+
+describe("mutant-b3-wxRename-targetWriteFailureLeavesTargetIntact", () => {
+  test("baseline: a clean apply leaves no temp file and replaces the target atomically", (t) => {
+    const root = project(t);
+    assert.equal(migrate(root, { apply: true, force: false }, deps).exitCode, 0);
+    assert.deepEqual(stranded(root), []);
+  });
+  test("mutation: rename of the new TOON fails -> previous TOON intact, temp cleaned, exit 1, no state record", (t) => {
+    const root = project(t);
+    migrate(root, { apply: true, force: false }, deps);
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    const previous = read(root, CONFIG_FILE);
+    const state = read(root, STATE_FILE);
+    const broken = withFs({ renameSync: (from, to) => { if (to === toonPath(root)) throw sentinel("EXDEV"); deps.fs.renameSync(from, to); } });
+    const outcome = migrate(root, { apply: true, force: true }, broken);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /write failed/);
+    assert.equal(read(root, CONFIG_FILE), previous);
+    assert.equal(read(root, STATE_FILE), state, "the dual-hash record is only advanced after a verified write");
+    assert.deepEqual(stranded(root), []);
+    assert.equal(exists(root, `${CONFIG_FILE}.lock`), false, "lock released on the failure path");
+  });
+});
+
+describe("mutant-b3-backup-failureBlocksTargetWrite", () => {
+  test("baseline: three legacy originals are backed up before the TOON appears", (t) => {
+    const root = project(t);
+    const order: string[] = [];
+    const watched = withFs({ renameSync: (from, to) => { order.push(to.includes(BACKUP_DIR) ? "backup" : to === toonPath(root) ? "toon" : "other"); deps.fs.renameSync(from, to); } });
+    assert.equal(migrate(root, { apply: true, force: false }, watched).exitCode, 0);
+    assert.deepEqual(order.slice(0, 3), ["backup", "backup", "backup"]);
+    assert.equal(order.indexOf("toon") >= 3, true);
+  });
+  test("mutation: a backup write fails -> no TOON written, legacy untouched, exit 1", (t) => {
+    const root = project(t);
+    const broken = withFs({ writeFileSync: (file, data, options) => { if (underBackup(file) && String(file).includes("modes")) throw sentinel("ENOSPC"); deps.fs.writeFileSync(file, data, options); } });
+    const outcome = migrate(root, { apply: true, force: false }, broken);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /backup failed, nothing written to ai-workflow\.toon/);
+    assert.equal(exists(root, CONFIG_FILE), false);
+    assert.equal(exists(root, STATE_FILE), false);
+    for (const name of ["ai_workflow_env.json", ".project/orchestration.json", ".project/skills/modes.json"]) assert.equal(read(root, name), LEGACY[name as keyof typeof LEGACY]);
+  });
+  test("mutation: a backup that reads back differently is a failure, not a success", (t) => {
+    const root = project(t);
+    const broken = withFs({ readFileSync: (file) => { const text = deps.fs.readFileSync(file); return underBackup(file) ? `${text}tampered` : text; } });
+    const outcome = migrate(root, { apply: true, force: false }, broken);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /backup read-back differs/);
+    assert.equal(exists(root, CONFIG_FILE), false);
+  });
+});
+
+describe("mutant-b3-ensureDirectory-symlinkedRecordsAncestor", () => {
+  test("baseline: the records directory is created as plain directories", (t) => {
+    const root = project(t);
+    migrate(root, { apply: true, force: false }, deps);
+    assert.equal(deps.fs.lstatSync(deps.path.join(root, ".project/records")).isDirectory(), true);
+  });
+  test("mutation: .project/records is a symlink out of the tree -> refused, nothing written through it", (t) => {
+    const root = project(t);
+    const outside = tempFixture(deps, { "keep.txt": "outside\n" });
+    t.after(() => deps.fs.rmSync(outside, { recursive: true, force: true }));
+    deps.fs.symlinkSync(outside, deps.path.join(root, ".project/records"));
+    const outcome = migrate(root, { apply: true, force: false }, deps);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /not a plain directory/);
+    assert.deepEqual(deps.fs.readdirSync(outside), ["keep.txt"]);
+    assert.equal(exists(root, CONFIG_FILE), false);
+  });
+  test("mutation: a legacy ancestor (.project) that is a file is a refusal, not absence", (t) => {
+    const root = project(t, { ".project": "i am a file", "ai_workflow_env.json": "{}" });
+    const outcome = migrate(root, { apply: true, force: false }, deps);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results[0].reason ?? "", /ancestor is not a directory/);
+    assert.equal(exists(root, CONFIG_FILE), false);
+  });
+});
+
+describe("mutant-b3-prewriteRecheck-targetAppearsAfterInspect", () => {
+  test("baseline: with no interference the absent target is written", (t) => {
+    const root = project(t);
+    assert.equal(migrate(root, { apply: true, force: false }, deps).exitCode, 0);
+  });
+  test("mutation: another writer creates the TOON between inspect and rename -> refused, its bytes win", (t) => {
+    const root = project(t);
+    let fired = false;
+    const racing = withFs({ writeFileSync: (file, data, options) => {
+      deps.fs.writeFileSync(file, data, options);
+      if (!fired && underBackup(file) && String(file).includes("modes")) { fired = true; deps.fs.writeFileSync(toonPath(root), "# concurrent writer\n"); }
+    } });
+    const outcome = migrate(root, { apply: true, force: false }, racing);
+    assert.equal(fired, true);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /changed after it was inspected; nothing written/);
+    assert.equal(read(root, CONFIG_FILE), "# concurrent writer\n");
+  });
+  test("mutation: identical bytes but a different inode (dev/ino pin) still counts as changed", (t) => {
+    const root = project(t);
+    migrate(root, { apply: true, force: false }, deps);
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    const original = read(root, CONFIG_FILE);
+    let fired = false;
+    const swapping = withFs({ writeFileSync: (file, data, options) => {
+      deps.fs.writeFileSync(file, data, options);
+      if (!fired && underBackup(file) && String(file).includes("ai-workflow.toon")) {
+        fired = true;
+        const twin = deps.path.join(root, "twin.tmp");
+        deps.fs.writeFileSync(twin, original);
+        deps.fs.renameSync(twin, toonPath(root));
+      }
+    } });
+    const outcome = migrate(root, { apply: true, force: true }, swapping);
+    assert.equal(fired, true);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /changed after it was inspected/);
+    assert.equal(read(root, CONFIG_FILE), original);
+  });
+});
+
+describe("mutant-b3-postwriteVerification-rollsBack", () => {
+  const failingChild = (status: number, stdout = ""): RuntimeDeps => ({ ...deps, child: { ...deps.child, runSync: () => ({ status, signal: null, stdout, stderr: "" }) } }) as RuntimeDeps;
+  test("baseline: the fresh-process re-parse agrees with the in-process digest", (t) => {
+    const root = project(t);
+    const outcome = migrate(root, { apply: true, force: false }, deps);
+    assert.ok(outcome.results.some((item) => item.action === "revalidate" && item.status === "applied"));
+  });
+  test("mutation: subprocess exits non-zero on a first write -> output moved to .rejected, no TOON remains, no state", (t) => {
+    const root = project(t);
+    const outcome = migrate(root, { apply: true, force: false }, failingChild(1));
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /post-write verification failed: subprocess re-parse exited 1/);
+    assert.equal(exists(root, CONFIG_FILE), false);
+    assert.equal(rejectedFiles(root).length, 1);
+    assert.ok(outcome.notes.some((note) => /rejected output kept at ai-workflow\.toon\.rejected/.test(note)));
+    assert.equal(exists(root, STATE_FILE), false);
+  });
+  test("mutation: subprocess reports a different parsed-model digest on --force -> previous bytes restored", (t) => {
+    const root = project(t);
+    migrate(root, { apply: true, force: false }, deps);
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    const previous = read(root, CONFIG_FILE);
+    const state = read(root, STATE_FILE);
+    const outcome = migrate(root, { apply: true, force: true }, failingChild(0, JSON.stringify({ ok: true, modelSha256: "0".repeat(64) })));
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /parsed-model digest differs from the in-process digest/);
+    assert.equal(read(root, CONFIG_FILE), previous);
+    assert.ok(outcome.notes.includes("previous file restored"));
+    assert.equal(read(root, STATE_FILE), state);
+  });
+  test("mutation: non-JSON subprocess output and a spawn failure both fail closed", (t) => {
+    const noisy = project(t);
+    assert.match(migrate(noisy, { apply: true, force: false }, failingChild(0, "not json")).results.at(-1)?.reason ?? "", /output was not JSON/);
+    const dead = project(t);
+    const spawnFails = { ...deps, child: { ...deps.child, runSync: () => { throw sentinel("ENOENT"); } } } as RuntimeDeps;
+    assert.match(migrate(dead, { apply: true, force: false }, spawnFails).results.at(-1)?.reason ?? "", /subprocess could not start/);
+    assert.equal(exists(dead, CONFIG_FILE), false);
+  });
+  test("mutation: bytes on disk differ from the bytes written (canonical-bytes digest) -> rolled back", (t) => {
+    const root = project(t);
+    const tampering = withFs({ renameSync: (from, to) => {
+      deps.fs.renameSync(from, to);
+      if (to === toonPath(root)) deps.fs.writeFileSync(to, `${deps.fs.readFileSync(to)}# drift\n`);
+    } });
+    const outcome = migrate(root, { apply: true, force: false }, tampering);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /canonical-bytes digest of the file on disk differs/);
+    assert.equal(exists(root, CONFIG_FILE), false);
+  });
+});
+
+describe("mutant-b3-dualHash-bytesDecideProvenance", () => {
+  const edited = (t: { after(fn: () => void): void }): { root: string; written: string } => {
+    const root = project(t);
+    migrate(root, { apply: true, force: false }, deps);
+    return { root, written: read(root, CONFIG_FILE) };
+  };
+  test("baseline: untouched bytes are stale", (t) => {
+    const { root } = edited(t);
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    assert.match(migrate(root, { apply: true, force: true }, deps).results.find((item) => item.action === "overwrite")?.reason ?? "", /\(stale\)/);
+  });
+  test("mutation: a comment-only edit keeps the parsed model identical but is hand-edited (bytes digest decides)", (t) => {
+    const { root, written } = edited(t);
+    const before = JSON.parse(read(root, STATE_FILE)) as { modelSha256: string };
+    deps.fs.writeFileSync(toonPath(root), `# note\n${written}`);
+    assert.equal(JSON.parse(capture(["--verify", "--root", root], root).out).modelSha256, before.modelSha256, "same parsed model");
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    assert.match(migrate(root, { apply: true, force: true }, deps).results.find((item) => item.action === "overwrite")?.reason ?? "", /hand-edited or unknown provenance/);
+  });
+  test("mutation: a corrupted or missing state.json means unknown provenance, never stale", (t) => {
+    const { root } = edited(t);
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    deps.fs.writeFileSync(deps.path.join(root, STATE_FILE), "{ broken");
+    assert.match(migrate(root, { apply: true, force: true }, deps).results.find((item) => item.action === "overwrite")?.reason ?? "", /hand-edited or unknown provenance/);
+    const other = edited(t);
+    deps.fs.rmSync(deps.path.join(other.root, STATE_FILE), { force: true });
+    deps.fs.writeFileSync(deps.path.join(other.root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    assert.match(migrate(other.root, { apply: true, force: true }, deps).results.find((item) => item.action === "overwrite")?.reason ?? "", /unknown provenance/);
+  });
+  test("mutation: a state.json whose bytes digest matches but model digest is wrong is still stale (model digest never gates --force)", (t) => {
+    const { root } = edited(t);
+    const state = JSON.parse(read(root, STATE_FILE)) as Record<string, unknown>;
+    deps.fs.writeFileSync(deps.path.join(root, STATE_FILE), JSON.stringify({ ...state, modelSha256: "f".repeat(64) }));
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    assert.match(migrate(root, { apply: true, force: true }, deps).results.find((item) => item.action === "overwrite")?.reason ?? "", /\(stale\)/);
+  });
+  test("mutation: the previous (hand-edited) bytes survive in the backup after the overwrite", (t) => {
+    const { root, written } = edited(t);
+    const handEdited = `${written}# mine\n`;
+    deps.fs.writeFileSync(toonPath(root), handEdited);
+    deps.fs.writeFileSync(deps.path.join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    const outcome = migrate(root, { apply: true, force: true }, deps);
+    const backup = outcome.results.find((item) => item.action === "backup" && item.path === CONFIG_FILE);
+    assert.equal(read(root, backup?.reason ?? ""), handEdited);
+  });
+});
+
+describe("mutant-b3-rejected-neverOverwritten", () => {
+  const bad = (root: string, text: string): void => deps.fs.writeFileSync(toonPath(root), text);
+  test("baseline: the first unparseable file takes the plain .rejected name", (t) => {
+    const root = project(t, { ...LEGACY, [CONFIG_FILE]: "bad one !!\n" });
+    migrate(root, { apply: true, force: false }, deps);
+    assert.equal(read(root, `${CONFIG_FILE}.rejected`), "bad one !!\n");
+  });
+  test("mutation: three rejections never overwrite an earlier one; names are .rejected, then unique stamped names", (t) => {
+    const root = project(t, { ...LEGACY, [CONFIG_FILE]: "bad one !!\n" });
+    migrate(root, { apply: true, force: false }, deps);
+    bad(root, "bad two !!\n");
+    migrate(root, { apply: true, force: true }, deps);
+    bad(root, "bad three !!\n");
+    migrate(root, { apply: true, force: true }, deps);
+    const names = rejectedFiles(root).sort();
+    assert.equal(names.length, 3);
+    assert.equal(read(root, `${CONFIG_FILE}.rejected`), "bad one !!\n");
+    const texts = names.map((name) => read(root, name)).sort();
+    assert.deepEqual(texts, ["bad one !!\n", "bad three !!\n", "bad two !!\n"]);
+    assert.ok(names.filter((name) => /^ai-workflow\.toon\.rejected\.\d{8}T\d{6}Z-[0-9a-f]{8}$/.test(name)).length === 2);
+  });
+  test("mutation: the file swapped for another inode after it was classified is not moved aside (dev/ino pin)", (t) => {
+    const root = project(t, { ...LEGACY, [CONFIG_FILE]: "bad one !!\n" });
+    let swapped = false;
+    const swapping = { ...deps, crypto: { ...deps.crypto, randomUUID: () => {
+      if (!swapped) { swapped = true; deps.fs.rmSync(toonPath(root)); deps.fs.writeFileSync(toonPath(root), "bad swapped !!\n"); }
+      return deps.crypto.randomUUID();
+    } } } as RuntimeDeps;
+    const outcome = migrate(root, { apply: true, force: false }, swapping);
+    assert.equal(swapped, true);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results[0].reason ?? "", /changed before it could be moved aside/);
+    assert.deepEqual(rejectedFiles(root), []);
+    assert.equal(read(root, CONFIG_FILE), "bad swapped !!\n");
+  });
+  test("mutation: a symlink at the target path is a refusal and is never renamed to .rejected", (t) => {
+    const root = project(t, { ...LEGACY, "elsewhere.toon": "schemaVersion: 1\n" });
+    deps.fs.symlinkSync(deps.path.join(root, "elsewhere.toon"), toonPath(root));
+    const outcome = migrate(root, { apply: true, force: true }, deps);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results[0].reason ?? "", /unsafe or unreadable/);
+    assert.deepEqual(rejectedFiles(root), []);
+    assert.equal(deps.fs.lstatSync(toonPath(root)).isSymbolicLink(), true);
+  });
+});
+
+test("b3 lock contention: a second migration started mid-apply is refused with the recovery text and the first still succeeds", (t) => {
+  const root = project(t);
+  let inner: ReturnType<typeof migrate> | undefined;
+  const contended = withFs({ writeFileSync: (file, data, options) => {
+    deps.fs.writeFileSync(file, data, options);
+    if (!inner && underBackup(file)) inner = migrate(root, { apply: true, force: true }, deps);
+  } });
+  const outer = migrate(root, { apply: true, force: false }, contended);
+  assert.equal(outer.exitCode, 0, JSON.stringify(outer.results));
+  assert.equal(inner?.exitCode, 1);
+  assert.match(inner?.results[0].reason ?? "", /ai-workflow\.toon\.lock exists: if no config migration is running, remove that file and re-run/);
+  assert.equal(exists(root, CONFIG_FILE), true);
+  assert.equal(exists(root, `${CONFIG_FILE}.lock`), false);
+});
+
+test("b3 lock is released on every exit path (refusal, backup failure, post-write rollback)", (t) => {
+  const lock = (root: string): boolean => exists(root, `${CONFIG_FILE}.lock`);
+  const guarded = project(t, { ...LEGACY, [CONFIG_FILE]: "bad !!\n" });
+  migrate(guarded, { apply: true, force: false }, deps);
+  assert.equal(lock(guarded), false, "reject path");
+  const failing = project(t);
+  migrate(failing, { apply: true, force: false }, withFs({ writeFileSync: (file, data, options) => { if (underBackup(file)) throw sentinel("EIO"); deps.fs.writeFileSync(file, data, options); } }));
+  assert.equal(lock(failing), false, "backup-failure path");
+  const rolled = project(t);
+  migrate(rolled, { apply: true, force: false }, { ...deps, child: { ...deps.child, runSync: () => ({ status: 1, signal: null, stdout: "", stderr: "" }) } } as RuntimeDeps);
+  assert.equal(lock(rolled), false, "rollback path");
+});
+
+test("b3 stale recovery: a leftover lock is never stolen; the refusal names the file; removing it recovers; release is idempotent", (t) => {
+  const root = project(t);
+  deps.fs.writeFileSync(deps.path.join(root, `${CONFIG_FILE}.lock`), "", { flag: "wx" });
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const outcome = migrate(root, { apply: true, force: true }, deps);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results[0].reason ?? "", /remove that file and re-run/);
+    assert.ok(exists(root, `${CONFIG_FILE}.lock`), "stale lock retained");
+    assert.equal(exists(root, CONFIG_FILE), false);
+    assert.equal(exists(root, BACKUP_DIR), false, "nothing written while locked");
+  }
+  deps.fs.rmSync(deps.path.join(root, `${CONFIG_FILE}.lock`));
+  assert.equal(migrate(root, { apply: true, force: false }, deps).exitCode, 0);
+  assert.equal(capture(["--dry-run", "--root", root], root).code, 0);
+  const held = oexLock(toonPath(root), deps);
+  assert.ok("release" in held);
+  const dry = capture(["--dry-run", "--root", root], root);
+  assert.equal(dry.code, 0, "dry-run takes no lock, so a held lock does not block it");
+  if ("release" in held) { held.release(); held.release(); }
+});
+
+test("b3 Bun adapter never overrides writeFileSync: wx stays the Node primitive on both runners", () => {
+  const source = deps.fs.readFileSync(deps.path.join(SCRIPTS_DIR, "runtime/bun.mts")).replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+  const block = /fs:\s*\{([\s\S]*?)\n\s{4}\},/.exec(source)?.[1] ?? "";
+  assert.ok(block.includes("readFile") && block.includes("writeFile"), "located the createBunDeps fs override block");
+  assert.doesNotMatch(block, /\bwriteFileSync\b/, "the Bun adapter must not override writeFileSync (migrator wx + rename relies on it)");
+  const probe = tempFixture(deps, { "existing.txt": "keep" });
+  try {
+    assert.throws(() => deps.fs.writeFileSync(deps.path.join(probe, "existing.txt"), "clobber", { flag: "wx" }), (error) => (error as { code?: string }).code === "EEXIST");
+    assert.equal(deps.fs.readFileSync(deps.path.join(probe, "existing.txt")), "keep");
+  } finally { deps.fs.rmSync(probe, { recursive: true, force: true }); }
 });

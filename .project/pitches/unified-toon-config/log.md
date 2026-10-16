@@ -392,3 +392,29 @@ workflow-doctor: READY WITH WARNINGS (1), the pre-existing Runtime boundary test
 ### Hill
 
 b1 -> over-the-hill (producer invariants hold). Drift d30-d34. Not committed.
+
+## 2026-10-16 - b2 + b3 build complete (one pass)
+
+### Files changed
+
+- `ai-framework/scripts/config-migrate.test.mts` (9 -> 50 tests: b2 functional + b3 guard proofs + Bun-adapter gate).
+- `ai-framework/scripts/bundle-sync.test.mts` (+3 tests: root `ai-workflow.toon` exclusion, simulated old-version sync, mutation check via mutated script copies).
+- Production code untouched (`git diff` on `config-migrate.mts` empty); no bug found. Stashes untouched; not committed.
+
+### Evidence
+
+```
+node --test config-migrate.test.mts: tests 50 pass 50 fail 0 (exit 0)
+bun test config-migrate.test.mts: 50 pass 0 fail
+node --test workflow-doctor + bundle-sync + runtime/config.test.mts: tests 100 pass 99 fail 0 (1 skipped), exit 0
+bun test bundle-sync.test.mts: 20 pass 0 fail
+grep -c "^describe\b\|^test\b" config-migrate.test.mts -> 32 (>= 6)
+grep -c "Bun adapter.*writeFileSync|..." config-migrate.test.mts -> 2 (>= 1)
+grep -c "dual-hash|canonical-bytes|parsed-model" config-migrate.mts -> 9
+setup-validator: READY, 23 checks
+Mutation run: 20 temporary mutants of config-migrate.mts all killed (1 survivor -> new moveAside pin test); bun.mts writeFileSync override killed by the gate; file restored each time.
+```
+
+### Hill
+
+b2 -> over-the-hill, b3 -> over-the-hill (producer invariants hold). Drift d35-d37.

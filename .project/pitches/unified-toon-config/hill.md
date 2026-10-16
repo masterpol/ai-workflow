@@ -22,8 +22,8 @@ phase: plan
 | c2.3| Framework docs + build SKILL mirrors         | over-the-hill | Deps: a1 (parallel with c2.2) |
 | c2.4| Hooks cutover                                 | over-the-hill | Deps: c1.1 (parallel with c2.1/c2.2/c2.3 if file sets disjoint — verified) |
 | b1  | Migrator CLI prod                             | over-the-hill | Writer, dual-hash, 3-branch force, backups, lock, subprocess re-parse; no delete pass. Exit commands green; orca-policy parity before/after apply. Drift d30-d34. |
-| b2  | Migrator functional tests                     | uphill 0% | Deps: b1 |
-| b3  | Migrator guard proofs + Bun-adapter gate      | uphill 0% | Deps: b1 (parallel-with b2; reads b1's exports) |
+| b2  | Migrator functional tests                     | over-the-hill | 12 b2 tests (force branches, dry-run, .rejected, unregistered/oversize refusals, dual-hash state, --json, conversion, .gitignore, CLI args). Drift d35-d37. |
+| b3  | Migrator guard proofs + Bun-adapter gate      | over-the-hill | 7 mutant suites (baseline+mutation), dual-hash, .rejected, lock contention/release/stale recovery, bundle-sync exclusion (mutation-checked + old-version), Bun-adapter writeFileSync gate (killed by a manual bun.mts override). 20/20 migrator mutants killed. |
 | d   | Legacy retirement                            | uphill 0% | Deps: all (no scope deletes a legacy file until d lands) |
 
 ## State transitions
