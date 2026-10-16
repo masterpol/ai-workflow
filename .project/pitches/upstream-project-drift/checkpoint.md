@@ -6,6 +6,7 @@
 - S0 done: `drift-ledger.md` (178 rows), `deviations.md` D3/D4, `log.md`.
 - Nothing committed yet. Uncommitted: `.project/status.md`, five pitch folders, `ai-framework/scripts/graphify{,.test}.mts` (pre-existing partial port of climbing `c376bda`, owned by S1).
 - Shaping, critique, plan and S0 ran from a session rooted in `../LAH`; owner asked to continue from this repo.
+- Baseline and OpenCode V2 validation recorded in log.md.
 
 ## Next
 1. Owner decisions pending: (a) one local commit per scope, no push? (b) wave 2 via Orca workers or `orca=normal`?
