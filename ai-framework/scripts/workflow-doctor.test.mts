@@ -611,7 +611,7 @@ test("doctor Config validators check mentions leftover legacy files without fail
   assert.deepEqual([item?.status, /legacy file\(s\) still present: ai_workflow_env\.json/.test(item?.detail ?? "")], ["info", true]);
 });
 
-test("doctor syntax-checks runtime/config.mts and, once it exists, config-migrate.mts", async (t) => {
+test("doctor syntax-checks runtime/config.mts and always lists config-migrate.mts (b1: unconditional)", async (t) => {
   const root = fixture(t);
   write(root, "ai-framework/scripts/runtime/config.mts", "export const a: number = 1;\n");
   const real = (capture: ReturnType<typeof injected>) => {
@@ -622,7 +622,7 @@ test("doctor syntax-checks runtime/config.mts and, once it exists, config-migrat
   let capture = real(injected(root));
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/runtime/config.mts" && item.status === "pass"));
-  assert.ok(!checks(capture.output).some((item) => item.name === "ai-framework/scripts/config-migrate.mts"));
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/config-migrate.mts" && item.status === "fail"), "listed even when absent, and absence fails");
   write(root, "ai-framework/scripts/config-migrate.mts", "export const a: number = ;\n");
   capture = real(injected(root));
   await main(["--json"], capture.deps);

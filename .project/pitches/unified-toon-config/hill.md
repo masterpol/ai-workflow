@@ -21,7 +21,7 @@ phase: plan
 | c2.2| Root docs rewrite                             | over-the-hill | Deps: a1 (parallel with c2.3) |
 | c2.3| Framework docs + build SKILL mirrors         | over-the-hill | Deps: a1 (parallel with c2.2) |
 | c2.4| Hooks cutover                                 | over-the-hill | Deps: c1.1 (parallel with c2.1/c2.2/c2.3 if file sets disjoint — verified) |
-| b1  | Migrator CLI prod                             | uphill 0% | Deps: c1.1 (loadConfig exists) |
+| b1  | Migrator CLI prod                             | over-the-hill | Writer, dual-hash, 3-branch force, backups, lock, subprocess re-parse; no delete pass. Exit commands green; orca-policy parity before/after apply. Drift d30-d34. |
 | b2  | Migrator functional tests                     | uphill 0% | Deps: b1 |
 | b3  | Migrator guard proofs + Bun-adapter gate      | uphill 0% | Deps: b1 (parallel-with b2; reads b1's exports) |
 | d   | Legacy retirement                            | uphill 0% | Deps: all (no scope deletes a legacy file until d lands) |

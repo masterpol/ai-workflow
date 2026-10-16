@@ -367,3 +367,28 @@ c1.2 -> done; c1.1 -> downhill 75%. Drift d15-d18.
 - Coordinator re-run (doctor, setup-validator, skill-defaults, both hook tests): 129 tests, 128 pass, 0 fail, 1 skip. AGENTS.md == CLAUDE.md.
 - Drift: d19-d29. Open and unowned: d25, d26.
 - d25, d26 assigned to scope d (user-approved).
+
+## 2026-10-16 - b1 build complete
+
+### Files changed
+
+- New: `ai-framework/scripts/config-migrate.mts` (CLI + `migrate`, `emitToon`, `main`), `ai-framework/scripts/config-migrate.test.mts` (9 smoke tests).
+- `ai-framework/scripts/workflow-doctor.mts`: `config-migrate.mts` in the script list unconditionally (d20/d33); `workflow-doctor.test.mts` updated.
+- No legacy file deleted; stashes untouched.
+
+### Evidence
+
+```
+node ai-framework/scripts/config-migrate.mts --dry-run --root <scratch>/proj1   exit 0 (prints TOON, tree unchanged)
+node ai-framework/scripts/config-migrate.mts --apply   --root <scratch>/proj1   exit 0 (toon + 3 backups + state.json + .gitignore line, legacy kept, fresh-process re-parse matched)
+re-run --apply -> unchanged (exit 0); differing input -> refuse exit 1; --force -> backup + overwrite (stale); garbage toon -> .rejected exit 1
+orca-policy report (3 vendors) identical before and after apply (legacy vs TOON)
+grep -c "dual-hash|canonical-bytes|parsed-model" config-migrate.mts -> 9
+config-migrate.test.mts: node tests 9 pass 9 fail 0; bun test 9 pass
+runtime/*.test.mts + workflow-doctor + setup-validator + orca-policy + skill-defaults tests: 346, pass 345, fail 0, skipped 1
+workflow-doctor: READY WITH WARNINGS (1), the pre-existing Runtime boundary tests warning
+```
+
+### Hill
+
+b1 -> over-the-hill (producer invariants hold). Drift d30-d34. Not committed.

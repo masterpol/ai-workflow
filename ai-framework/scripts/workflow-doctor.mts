@@ -768,10 +768,8 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     scripts.push("ai-framework/scripts/docs-links.mts", "ai-framework/scripts/docs-links.test.mts");
     scripts.push("ai-framework/scripts/orca-policy.mts", "ai-framework/scripts/orca-preflight.mts");
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
-    // Kept-complete list gains the config validity library (config-validate role) and the migrator. The migrator
-    // lands in scope b1, so it is syntax-checked once present; b1 makes it unconditional.
-    scripts.push("ai-framework/scripts/runtime/config.mts");
-    if (await exists(absolute("ai-framework/scripts/config-migrate.mts"))) scripts.push("ai-framework/scripts/config-migrate.mts");
+    // Kept-complete list gains the config validity library (config-validate role) and the migrator (b1: unconditional).
+    scripts.push("ai-framework/scripts/runtime/config.mts", "ai-framework/scripts/config-migrate.mts");
     // The README is now an index; each documented topic lives in ai-framework/docs/.
     const docsChecks = [
       ["setup", /^# Set up$/m, "documents setup"],
