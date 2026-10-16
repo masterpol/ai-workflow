@@ -621,3 +621,66 @@ test("the CLI source imports no launch or path guard, repeats no switch check, a
   const catalog: Readonly<Record<string, CheckSpec>> = checkCatalog(createNodeDeps());
   assert.ok(Object.isFrozen(catalog));
 });
+
+// ---- OpenCode: free the managed server port before the first OpenCode worker ----
+
+const SERVE_COMMAND = "/opt/homebrew/bin/opencode serve --service";
+function opencodeHarness(f: Fixture, listener?: { pid: number; port: number }): Harness & { killed: Array<[number, string | number]> } {
+  workers = 0;
+  const sync: SyncHandler = (command, args, options) => {
+    if (command === "lsof") return listener ? { status: 0, signal: null, stdout: `p${listener.pid}\nn127.0.0.1:${listener.port}\n`, stderr: "" } : { status: 1, signal: null, stdout: "", stderr: "" };
+    if (command === "ps") return { status: 0, signal: null, stdout: `${SERVE_COMMAND}\n`, stderr: "" };
+    if (command === "opencode") return { status: 0, signal: null, stdout: "", stderr: "" };
+    return probeSync(command, args, options);
+  };
+  const h = harness(f.env, { runSync: sync, run: startRun });
+  const killed: Array<[number, string | number]> = [];
+  h.deps.proc = { ...h.deps.proc, kill: (pid, signal) => { killed.push([pid, signal]); } };
+  return { ...h, killed };
+}
+const ran = (h: Harness, command: string): boolean => h.calls.runSync.some((call) => call[0] === command);
+const opencodeInput = (attemptId: string, id = attemptId): Obj => dispatchInput({ vendor: "opencode", attemptId, scope: { ...scope, id } });
+
+test("the first OpenCode dispatch checks the port, then launches; a live OpenCode attempt skips the check", async (t: TestContext) => {
+  const f = fixture(t);
+  writeInput(f.root, opencodeInput("oc1"));
+  const first = opencodeHarness(f);
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], first);
+  assert.deepEqual([result.code, result.json.route], [0, "launched"]);
+  assert.ok(ran(first, "lsof"), "the port was inspected before the first OpenCode worker");
+  assert.ok(!ran(first, "opencode"), "nothing listened, so the service was not stopped");
+  assert.deepEqual(first.killed, []);
+
+  writeInput(f.root, opencodeInput("oc2", "s2"));
+  const second = opencodeHarness(f, { pid: 4242, port: 49374 });
+  const next = await exec(["dispatch", "--root", f.root, "--input", "input.json"], second);
+  assert.deepEqual([next.code, next.json.route], [0, "launched"]);
+  assert.ok(!ran(second, "lsof"), "a live OpenCode attempt may own the server: no inspection");
+  assert.deepEqual(second.killed, []);
+});
+
+test("other vendors and a disabled switch never inspect OpenCode's port", async (t: TestContext) => {
+  const f = fixture(t);
+  writeInput(f.root, dispatchInput());
+  const codex = opencodeHarness(f, { pid: 4242, port: 49374 });
+  assert.equal((await exec(["dispatch", "--root", f.root, "--input", "input.json"], codex)).code, 0);
+  assert.ok(!ran(codex, "lsof"));
+  const off = fixture(t, null);
+  writeInput(off.root, opencodeInput("oc1"));
+  const h = opencodeHarness(off, { pid: 4242, port: 49374 });
+  assert.equal((await exec(["dispatch", "--root", off.root, "--input", "input.json"], h)).code, 3);
+  assert.ok(!ran(h, "lsof"));
+  assert.deepEqual(h.killed, []);
+});
+
+test("a stale opencode serve that survives stop and signals refuses the launch with opencode-port-held", async (t: TestContext) => {
+  const f = fixture(t);
+  writeInput(f.root, opencodeInput("oc1"));
+  const h = opencodeHarness(f, { pid: 4242, port: 49374 });
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], h);
+  assert.deepEqual([result.code, result.json.route, result.json.reason], [3, "blocked", "opencode-port-held"]);
+  assert.deepEqual(result.json.opencodePort, { status: "held", remaining: [{ pid: 4242, port: 49374 }] });
+  assert.ok(ran(h, "opencode"), "opencode service stop ran first");
+  assert.deepEqual(h.killed, [[4242, "SIGTERM"], [4242, "SIGKILL"]]);
+  assert.equal(h.calls.run.length, 0, "no worker was launched");
+});

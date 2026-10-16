@@ -63,3 +63,17 @@ See plan.md D2 (critique X2 partly overridden; `orca-policy.mts` shape and grade
 - **Now**: the owner asked for this to ship in 2.23.0. S10 adds `opencode-service.mts free` and an automatic call
   from `orca-run.mts dispatch` for the first live OpenCode attempt only. Ordered after S5 because S4 also edits
   `orca-run.mts`. The owner approved the design.
+
+## D9 (build, 2026-10-16) — S3 gap found in S4; S5 by the coordinator; S7 applied without Orca evidence
+- **S3 gap**: the ledger gave climbing's `orca-launch-gate.mts` and preflight probe-runner hunks to S3. The
+  coordinator's S3 ported only the version check. The S4 worker worked around the missing
+  `launch-cleanup-unconfirmed` path with `watchCleanup` wrappers in dispatch and reconcile. The coordinator ported
+  the missing hunks (`4e8a99e`) and took climbing's dispatch and reconcile, so the wrappers are gone. The worker's
+  ledger `schemaVersion` handling (absent = 1, legacy records still read) is kept as the old-record proof S4 required.
+- **S5**: with owner approval, done by the coordinator. All six files were unchanged copies, and climbing's
+  diff-admit is what the reconcile path needs. S4 (`3239f40`) is green only together with S5 (`47c4421`).
+- **S7**: reconcile refused `authorized-paths-missing`. S7 was dispatched before S4 was integrated, so its
+  ledger record has no `authorizedPaths`. After an upgrade to 2.23.0, an attempt dispatched under 2.22.x cannot
+  be reconciled; it has to be applied by hand. This goes in the CHANGELOG (S9). The diff was reviewed and applied with
+  `git apply`. The coordinator reverted one worker change: the setup-validator placeholder regex
+  (`_Detecting\._\._` no longer matched `_Detecting..._`). A regression test is added; it fails on the worker's regex.

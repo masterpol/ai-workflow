@@ -77,3 +77,11 @@ Tree: `0deac9a` + uncommitted graphify edit; `ai_workflow_env.json` moved aside;
   taskkill path, not config). GAUNTLET(node) 1287 tests: 1284 pass, 2 fail (load flakes, each 3/3 alone),
   1 skip (baseline 1267/3). GAUNTLET(bun) 1283 tests: 1281 pass, 1 fail (`workflow-doctor` 5 s bun timeout,
   decision 6), 1 skip (baseline 1256/5). Linux Docker 69/0/5 skipped.
+- Wave 3: S7 `updrift-s7-1` and S4 `updrift-s4-1` (OpenCode, after `opencode service stop` + kill of stale PID
+  37137, whose parent was a finished worker's TUI). Both ran about 30 minutes (S4 $1.97+, S7 $0.35+).
+- S4 integrated `integrated` (humanConfirmed); see D9. S5 by the coordinator. S7 applied by `git apply` (D9).
+  Commits: S7 `d5c13fa`, S3 completion `4e8a99e`, S4 `3239f40`, S5 `47c4421`.
+  Orca suite (13 files): bun 356/356; node 355/356 (one load flake; that file 3/3 alone).
+- S10: `opencode-service.mts` + test 8/8; dispatch hook + 3 tests; orca-run + opencode-service 38/38 node + bun;
+  doctor exit 0, production runtime boundary 0 violations. Live smoke: `free --json` →
+  `{"status":"free","stopped":true,"signalled":[40797],"remaining":[]}`; no `opencode serve` left afterwards.

@@ -5,7 +5,8 @@ import type { DispatchOptions, Placement, ScopeSpec } from "./orca-dispatch.mts"
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
-import { validAuthorizedPaths } from "./orca-ledger.mts";
+import { createLedger, validAuthorizedPaths } from "./orca-ledger.mts";
+import { freeOpencodePort } from "./opencode-service.mts";
 import { decideStart } from "./orca-start.mts";
 import type { CheckSpec, ReconcileAttempt } from "./orca-reconcile.mts";
 import { createNodeDeps } from "./runtime/node.mts";
@@ -287,6 +288,27 @@ function status(root: string, parsed: Parsed, deps: RuntimeDeps): Json {
     }])) };
 }
 
+const LIVE_STATES = ["claimed", "launched", "unknown-liveness"];
+/**
+ * Free OpenCode's managed server port before the first OpenCode worker: a stale `opencode serve --service` from an
+ * earlier session makes a new worker fail at agent readiness. Runs only for vendor `opencode`, with the switch on,
+ * an eligible policy naming that worker, and no OpenCode attempt that may still own the server. An unreadable
+ * ledger slot counts as such an attempt, so nothing is signalled. Returns a refusal when the port stays held.
+ */
+async function prepareOpencode(root: string, coordinator: string, vendor: string, deps: RuntimeDeps): Promise<Json | undefined> {
+  if (vendor !== "opencode" || !orcaMultiAgentEnabled(root, deps)) return undefined;
+  const policy = policyReport(root, coordinator, deps) as Json & { eligible?: boolean; workers?: string[] };
+  if (policy.eligible !== true || !Array.isArray(policy.workers) || !policy.workers.includes("opencode")) return undefined;
+  const listed = createLedger(root, deps).list();
+  if (listed.status === "refused") return undefined;
+  if (listed.entries.some(({ result }) => result.status !== "ok"
+    || (result.record.vendor === "opencode" && LIVE_STATES.includes(result.record.state)))) return undefined;
+  const port = await freeOpencodePort(deps);
+  if (port.status !== "held" && port.status !== "foreign") return undefined;
+  return { route: "blocked", reason: "opencode-port-held", humanAction: "stop the program holding OpenCode's service port, then dispatch again",
+    opencodePort: { status: port.status, remaining: port.remaining.map((item) => ({ pid: item.pid, port: item.port })) } };
+}
+
 async function execute(parsed: Parsed, deps: RuntimeDeps): Promise<{ output: Json; exit: number }> {
   const root = resolveRoot(parsed.root, deps);
   if (parsed.command === "start") {
@@ -304,6 +326,8 @@ async function execute(parsed: Parsed, deps: RuntimeDeps): Promise<{ output: Jso
   if (parsed.command === "dispatch") {
     const { base, attemptId, timeoutMs, maxRetries } = dispatchInput(input);
     const options = { ...base, root, deps, deadlineMs: deadlineFor(timeoutMs) };
+    const refused = await prepareOpencode(root, base.coordinator, base.vendor, deps);
+    if (refused) return { output: refused, exit: exitCodeFor(parsed.command, refused) };
     output = { ...(maxRetries !== undefined ? await dispatchWithRetries({ ...options, baseAttemptId: attemptId, maxRetries }) : await dispatchScope({ ...options, attemptId })) };
   } else if (parsed.command === "collect") {
     const { attemptKey, message } = collectInput(input);

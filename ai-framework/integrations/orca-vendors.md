@@ -228,6 +228,28 @@ versions. The separate host hook case remains unverified until a trusted fresh i
 is observed. Existing projects receive entry-file changes through manual bundle-sync review;
 sync does not automatically replace their `AGENTS.md`/`CLAUDE.md`.
 
+## OpenCode port before the first OpenCode worker
+
+OpenCode V2 runs a managed background server (`opencode serve --service`) on a fixed loopback port. A server left
+running by an earlier session holds that port, and a new OpenCode worker then fails at `agent_readiness` while it
+tries to start its own server (`Managed service port … is already in use`). Observed with OpenCode 2.0.29 here and
+in another project on 2026-10-15.
+
+`node ai-framework/scripts/opencode-service.mts free [--json]` frees it:
+
+1. List loopback TCP listeners with `lsof`, and read the service port from OpenCode's `service.json`
+   (`$XDG_STATE_HOME` or `~/.local/state`). No listener: nothing else happens.
+2. Run `opencode service stop`. This also removes `service.json`, so the next steps don't rely on it.
+3. Send SIGTERM, then SIGKILL, to any listener whose command is still `opencode … serve`. The OpenCode TUI and
+   every other program are never signalled.
+4. Re-check. Status `free` (exit 0), `held` or `foreign` (another program on the service port; exit 1),
+   `unverified` (no `lsof`; exit 1) or `unsupported` (Windows; exit 0, no action).
+
+`orca-run.mts dispatch` with `vendor: "opencode"` runs it before launching, but only when no other OpenCode
+attempt in the ledger is `claimed`, `launched` or `unknown-liveness`. Later workers share the server that the
+first worker starts, so a live worker's server is never ended. A `held` or `foreign` result refuses the launch
+with `opencode-port-held`; `unverified` and `unsupported` let it continue.
+
 ## Dispatch core (opt-in, library only)
 
 `orca-dispatch.mts` sends one scope to one alternate vendor through `orca orchestration worker-start`.
