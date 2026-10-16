@@ -88,7 +88,7 @@ let workers = 0;
 const startRun: RunHandler = () => { workers++; return { status: 0, signal: null, stderr: "", stdout: JSON.stringify({ result: { stage: "input_accepted", dispatch: { id: `ctx_${workers}` } } }) }; };
 const dispatching = (f: Fixture): Harness => { workers = 0; return harness(f.env, { runSync: probeSync, run: startRun }); };
 
-const scope = { id: "s1", target: "b.mjs", change: "return b-done", constraints: "edit only b.mjs", ownership: "b.mjs", acceptance: "node prints b-done" };
+const scope = { id: "s1", target: "b.mjs", change: "return b-done", constraints: "edit only b.mjs", ownership: "b.mjs", authorizedPaths: ["b.mjs"], acceptance: "node prints b-done" };
 const dispatchInput = (extra: Obj = {}): Obj => ({ coordinator: "claude", vendor: "codex", scope, attemptId: "a1", timeoutMs: 600000, ...extra });
 function writeInput(root: string, value: unknown, name = "input.json"): string {
   fs.writeFileSync(path.join(root, name), typeof value === "string" ? value : JSON.stringify(value));
@@ -158,6 +158,17 @@ test("dispatch parity: the CLI JSON equals dispatchScope for the same input, exi
   assert.deepEqual([again.code, again.json.route], [0, "resume"]);
 });
 
+test("dispatch preserves explicit file and directory authority independently of ownership prose", async (t: TestContext) => {
+  const f = fixture(t);
+  const authorizedPaths = ["b.mjs", "src/components/"];
+  writeInput(f.root, dispatchInput({ scope: { ...scope, ownership: "all files in the repository", authorizedPaths } }));
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], dispatching(f));
+  assert.equal(result.code, 0);
+  const read = createLedger(f.root, createNodeDeps()).read(attemptKeyOf("a1"));
+  assert.equal(read.status, "ok");
+  if (read.status === "ok") assert.deepEqual(read.record.authorizedPaths, authorizedPaths);
+});
+
 test("dispatch parity: a refusal from the library is exit 3 with the same outcome, and maxRetries selects dispatchWithRetries", async (t: TestContext) => {
   const a = fixture(t);
   const b = fixture(t);
@@ -200,7 +211,7 @@ test("collect parity: the CLI JSON equals collectReport, exit 0 when accepted an
 // ---- real git fixtures for reconcile ----
 
 function git(cwd: string, ...args: string[]): string {
-  const result = spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1" } });
+  const result = spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1" }, windowsHide: true, shell: false, timeout: 30000 });
   assert.equal(result.status, 0, `git ${args.join(" ")}: ${result.stderr}`);
   return result.stdout.trim();
 }
@@ -225,7 +236,7 @@ function repo(t: TestContext, enabled: string | null = "true", complete = true):
   const attemptKey = attemptKeyOf("w1");
   if (complete) {
     const ledger = createLedger(root, createNodeDeps());
-    assert.equal(ledger.claim({ attemptKey, taskKey: taskKeyOf("scope-w1"), vendor: "codex", state: "claimed", createdAt: 1790000000000 }).outcome, "claimed");
+    assert.equal(ledger.claim({ attemptKey, taskKey: taskKeyOf("scope-w1"), authorizedPaths: ["a.txt"], vendor: "codex", state: "claimed", createdAt: 1790000000000 }).outcome, "claimed");
     assert.equal(ledger.update(attemptKey, { state: "launched", dispatchId: "ctx_w1" }).status, "ok");
     assert.equal(ledger.update(attemptKey, { state: "completed", reportId: "msg_w1" }).status, "ok");
   }
@@ -464,7 +475,7 @@ test("an unsafe --input is refused with exit 3 and no side effects", async (t: T
   fs.symlinkSync(path.join(f.root, "sub"), path.join(f.root, "sublink"));
   fs.mkdirSync(path.join(f.root, "dir.json"));
   fs.writeFileSync(path.join(f.root, "big.json"), `${" ".repeat(MAX_INPUT_BYTES + 1 - 2)}{}`);
-  const fifo = spawnSync("mkfifo", [path.join(f.root, "pipe.json")]);
+  const fifo = spawnSync("mkfifo", [path.join(f.root, "pipe.json")], { windowsHide: true, shell: false, timeout: 10000 });
   assert.equal(fifo.status, 0, "mkfifo");
   writeInput(f.root, "{not json", "bad.json");
   writeInput(f.root, "[]", "array.json");
@@ -527,6 +538,9 @@ test("input shapes are validated strictly and unknown keys are refused", async (
     ["placement value not text", dispatchInput({ placement: { name: 1 } })],
     ["placement as list", dispatchInput({ placement: ["--name"] })],
     ["constraints as number", dispatchInput({ scope: { ...scope, constraints: 3 } })],
+    ["missing authorized paths", dispatchInput({ scope: (({ authorizedPaths, ...brief }) => brief)(scope) })],
+    ...[null, "b.mjs", [], [1], ["../b.mjs"], ["/b.mjs"], ["C:/b.mjs"], ["src\\b.mjs"], ["src/**"], ["./b.mjs"], ["src/../b.mjs"], ["b.mjs", "b.mjs"]].map((authorizedPaths): [string, Obj] =>
+      [`invalid authorized paths ${JSON.stringify(authorizedPaths)}`, dispatchInput({ scope: { ...scope, authorizedPaths } })]),
   ];
   for (const [label, value] of bads) {
     writeInput(f.root, value);
@@ -575,7 +589,7 @@ test("run directly, the file prints one JSON object and exits with the mapped co
   const file = target.startsWith("file:") ? fileURLToPath(target) : path.resolve(HERE, target);
   const flags = process.versions.bun ? [] : NODE_FLAGS;
   const env = { PATH: process.env.PATH, HOME: process.env.HOME, AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
-  const run = (...args: string[]) => spawnSync(process.execPath, [...flags, file, ...args], { encoding: "utf8", env, timeout: 30000, cwd: f.root });
+  const run = (...args: string[]) => spawnSync(process.execPath, [...flags, file, ...args], { encoding: "utf8", env, timeout: 30000, cwd: f.root, windowsHide: true, shell: false });
   const usageRun = run("bogus");
   assert.deepEqual([usageRun.status, JSON.parse(usageRun.stdout)], [2, { error: "usage", reason: "unknown-command" }]);
   const off = run("status", "--root", f.root);
@@ -587,10 +601,10 @@ test("run directly, the file prints one JSON object and exits with the mapped co
   assert.equal(startOff.stdout.trim().split("\n").length, 1);
   assert.equal(startOff.stderr, "");
   const startOnEnv = { ...env, [SWITCH]: "true" };
-  const bypass = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "fix", "--args-text", "orca=normal fix the login bug"], { encoding: "utf8", env: startOnEnv, timeout: 30000, cwd: f.root });
+  const bypass = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "fix", "--args-text", "orca=normal fix the login bug"], { encoding: "utf8", env: startOnEnv, timeout: 30000, cwd: f.root, windowsHide: true, shell: false });
   assert.deepEqual([bypass.status, JSON.parse(bypass.stdout).state], [0, "bypassed"]);
   assert.equal(bypass.stdout.trim().split("\n").length, 1);
-  const blocked = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "shape", "--vendor", "claude"], { encoding: "utf8", env: { ...startOnEnv, PATH: f.bin }, timeout: 30000, cwd: f.root });
+  const blocked = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "shape", "--vendor", "claude"], { encoding: "utf8", env: { ...startOnEnv, PATH: f.bin }, timeout: 30000, cwd: f.root, windowsHide: true, shell: false });
   assert.deepEqual([blocked.status, JSON.parse(blocked.stdout).state], [4, "blocked"]);
 });
 

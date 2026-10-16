@@ -5,6 +5,7 @@ import type { DispatchOptions, Placement, ScopeSpec } from "./orca-dispatch.mts"
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
+import { validAuthorizedPaths } from "./orca-ledger.mts";
 import { decideStart } from "./orca-start.mts";
 import type { CheckSpec, ReconcileAttempt } from "./orca-reconcile.mts";
 import { createNodeDeps } from "./runtime/node.mts";
@@ -222,9 +223,11 @@ const optionalBool = (value: unknown, what: string): boolean | undefined => {
 
 function dispatchInput(input: Json): { base: Omit<DispatchOptions, "attemptId" | "root" | "deps">; attemptId: string; timeoutMs: number; maxRetries?: number } {
   const value = exactKeys(input, ["coordinator", "vendor", "scope", "attemptId", "timeoutMs"], ["placement", "maxRetries"], "dispatch");
-  const scope = exactKeys(value.scope, ["id", "target", "change", "constraints", "ownership", "acceptance"], [], "scope");
+  const scope = exactKeys(value.scope, ["id", "target", "change", "constraints", "ownership", "acceptance", "authorizedPaths"], [], "scope");
+  if (!validAuthorizedPaths(scope.authorizedPaths)) throw bad("authorizedPaths");
   const spec: ScopeSpec = { id: text(scope.id, "scope"), target: text(scope.target, "scope"), change: text(scope.change, "scope"),
-    constraints: textOrList(scope.constraints, "scope"), ownership: textOrList(scope.ownership, "scope"), acceptance: text(scope.acceptance, "scope") };
+    constraints: textOrList(scope.constraints, "scope"), ownership: textOrList(scope.ownership, "scope"), acceptance: text(scope.acceptance, "scope"),
+    authorizedPaths: [...scope.authorizedPaths] };
   let placement: Placement | undefined;
   if (value.placement !== undefined) {
     if (!isPlain(value.placement) || !Object.values(value.placement).every((item) => typeof item === "string")) throw bad("placement");

@@ -11,6 +11,8 @@ import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
 
 export const LEDGER_DIR_PARTS: readonly string[] = Object.freeze([".project", "metrics", "orca-ledger"]);
 export const MAX_RECORD_BYTES = 64 * 1024;
+/** On-disk schema version for ledger records. Absent/missing means version 1 (legacy). */
+export const SCHEMA_VERSION = 1;
 export const ATTEMPT_PREFIX = "attempt:";
 export const TASK_PREFIX = "task:";
 export const STATES = Object.freeze(["claimed", "launched", "unknown-liveness", "completed", "failed", "settled"] as const);
@@ -22,11 +24,17 @@ export interface LedgerRecord {
   vendor: string;
   state: LedgerState;
   createdAt: number;
+  /** On-disk schema version; absent means version 1 (legacy). */
+  schemaVersion?: number;
+  /** Immutable coordinator authority: exact repo-relative files or prefixes ending in `/`. Absent only on legacy records. */
+  authorizedPaths?: readonly string[];
+  /** An unconfirmed local child lifetime blocks reconciliation until its owner is manually reconciled. */
+  processOwnerPid?: number;
   dispatchId?: string;
   /** Present once a worker's authoritative report completed the attempt. */
   reportId?: string;
 }
-export interface LedgerPatch { state?: LedgerState; dispatchId?: string; reportId?: string }
+export interface LedgerPatch { state?: LedgerState; dispatchId?: string; reportId?: string; processOwnerPid?: number }
 
 export type ReadResult =
   | { status: "missing" | "refused" | "corrupt" }
@@ -34,19 +42,30 @@ export type ReadResult =
 export type ClaimResult =
   | { outcome: "claimed" | "replayed"; record: LedgerRecord }
   | { outcome: "conflict"; record: LedgerRecord }
-  | { outcome: "refused" | "corrupt" | "invalid" | "failed" };
+  | { outcome: "refused" | "corrupt" | "invalid" | "failed" | "busy" };
+export type ReserveResult = ClaimResult
+  | { outcome: "task-owned"; record: LedgerRecord }
+  | { outcome: "at-capacity" };
 export type UpdateResult =
   | { status: "ok"; record: LedgerRecord }
-  | { status: "missing" | "refused" | "corrupt" | "invalid" | "rejected" };
+  | { status: "missing" | "refused" | "corrupt" | "invalid" | "rejected" | "busy" };
 export type ListResult =
   | { status: "ok"; entries: Array<{ attemptKey: string; result: ReadResult }> }
   | { status: "missing" | "refused"; entries: [] };
 
+export type LedgerLease =
+  | { status: "acquired"; release(): void; retain(): void }
+  | { status: "missing" | "refused" | "busy" };
+
 export interface Ledger {
+  /** One checkout-wide reconciliation from admission through rollback/settlement. Retain when child cleanup is unconfirmed. */
+  acquireIntegration(): LedgerLease;
   /** Reads one attempt. Takes the prefixed key (`attempt:<id>`). */
   read(attemptKey: string): ReadResult;
   /** Atomic exclusive create. Identical replay returns the existing record; a different record for the same key is `conflict`. */
   claim(record: LedgerRecord): ClaimResult;
+  /** Launch admission: atomically check task ownership/capacity and create the claim. Use this for every dispatch. */
+  reserve(record: LedgerRecord, maxConcurrentWorkers: number): ReserveResult;
   /** Applies a patch along an allowed transition. Never touches a refused, corrupt or missing slot. */
   update(attemptKey: string, patch: LedgerPatch): UpdateResult;
   /** Reads every slot; refused and corrupt slots are listed as such, never skipped. */
@@ -64,7 +83,7 @@ const TRANSITIONS: Readonly<Record<LedgerState, readonly LedgerState[]>> = Objec
   failed: ["settled"],
   settled: [],
 });
-const RECORD_KEYS = ["attemptKey", "taskKey", "vendor", "state", "createdAt", "dispatchId", "reportId"];
+const RECORD_KEYS = ["attemptKey", "taskKey", "vendor", "state", "createdAt", "schemaVersion", "authorizedPaths", "processOwnerPid", "dispatchId", "reportId"];
 
 const validId = (id: unknown): id is string => typeof id === "string" && ID.test(id) && !id.includes("..");
 export const attemptKeyOf = (id: string): string => ATTEMPT_PREFIX + id;
@@ -80,12 +99,40 @@ const errorCode = (error: unknown): unknown => (error !== null && typeof error =
 const isPlain = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value)
   && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 
+/** No globs, aliases, traversal or platform-dependent separators. A directory needs its trailing slash. */
+export function validAuthorizedPaths(value: unknown): value is readonly string[] {
+  if (!Array.isArray(value) || value.length === 0 || value.length > 128) return false;
+  if (new Set(value).size !== value.length) return false;
+  let length = 0;
+  for (const entry of value) {
+    if (typeof entry !== "string" || entry.length === 0 || entry.length > 2048 || entry.normalize("NFC") !== entry) return false;
+    length += entry.length;
+    if (length > 16384 || /[\\:*?"<>|\u0000-\u001f\u007f-\u009f]/.test(entry)) return false;
+    const parts = (entry.endsWith("/") ? entry.slice(0, -1) : entry).split("/");
+    if (parts.some((part) => !part || part === "." || part === ".." || /[ .]$/.test(part)
+      || part.toLowerCase() === ".git" || /^(con|prn|aux|nul|com[1-9]|lpt[1-9])(\.|$)/i.test(part))) return false;
+  }
+  return true;
+}
+
+export function pathAuthorized(file: string, authorizedPaths: readonly string[]): boolean {
+  return validAuthorizedPaths([file]) && !file.endsWith("/")
+    && authorizedPaths.some((entry) => entry.endsWith("/") ? file.startsWith(entry) : file === entry);
+}
+
+/** Retained after a crash: inspect this owner and all attempt records before manual removal. Never steal by age/PID. */
+export const MUTATION_LOCK = ".mutation-lock";
+export const INTEGRATION_LOCK = ".integration-lock";
+
 /** Shape check shared by read and claim. A record that fails it is `corrupt` on disk and `invalid` as input. */
 export function validateRecord(value: unknown): value is LedgerRecord {
   if (!isPlain(value) || !Object.keys(value).every((key) => RECORD_KEYS.includes(key))) return false;
   if (idOf(value.attemptKey, ATTEMPT_PREFIX) === undefined || idOf(value.taskKey, TASK_PREFIX) === undefined) return false;
   if (!VENDORS.includes(value.vendor as string) || !STATES.includes(value.state as LedgerState)) return false;
   if (!Number.isSafeInteger(value.createdAt) || (value.createdAt as number) < 0) return false;
+  if (Object.hasOwn(value, "schemaVersion") && (!Number.isSafeInteger(value.schemaVersion) || (value.schemaVersion as number) !== SCHEMA_VERSION)) return false;
+  if (Object.hasOwn(value, "authorizedPaths") && !validAuthorizedPaths(value.authorizedPaths)) return false;
+  if (Object.hasOwn(value, "processOwnerPid") && (!Number.isSafeInteger(value.processOwnerPid) || (value.processOwnerPid as number) < 1)) return false;
   if (Object.hasOwn(value, "dispatchId") && !validId(value.dispatchId)) return false;
   if (Object.hasOwn(value, "reportId") && !validId(value.reportId)) return false;
   const hasReport = Object.hasOwn(value, "reportId");
@@ -93,7 +140,7 @@ export function validateRecord(value: unknown): value is LedgerRecord {
   if ((value.state === "claimed" || value.state === "launched" || value.state === "unknown-liveness" || value.state === "failed") && hasReport) return false;
   return true;
 }
-const canonical = (record: LedgerRecord): string => JSON.stringify(RECORD_KEYS.filter((key) => Object.hasOwn(record, key)).map((key) => [key, (record as unknown as Record<string, unknown>)[key]]));
+const canonical = (record: LedgerRecord): string => JSON.stringify(RECORD_KEYS.filter((key) => key === "schemaVersion" || Object.hasOwn(record, key)).map((key) => [key, key === "schemaVersion" ? (record.schemaVersion ?? SCHEMA_VERSION) : (record as unknown as Record<string, unknown>)[key]]));
 const serialize = (record: LedgerRecord): string => JSON.stringify(Object.fromEntries(RECORD_KEYS.filter((key) => Object.hasOwn(record, key)).map((key) => [key, (record as unknown as Record<string, unknown>)[key]])));
 
 type Dir = { kind: "dir"; dir: string } | { kind: "missing" } | { kind: "refused" };
@@ -113,7 +160,10 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
       }
       if (!stat) {
         if (!create) return { kind: "missing" };
-        try { fs.mkdirSync(current, { recursive: false, mode: 0o700 }); stat = fs.lstatSync(current); } catch { return { kind: "refused" }; }
+        try {
+          try { fs.mkdirSync(current, { recursive: false, mode: 0o700 }); } catch (error) { if (errorCode(error) !== "EEXIST") throw error; }
+          stat = fs.lstatSync(current);
+        } catch { return { kind: "refused" }; }
       }
       if (stat.isSymbolicLink() || !stat.isDirectory()) return { kind: "refused" };
     }
@@ -164,7 +214,93 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
     return readSlot(dir.dir, id);
   }
 
+  function acquireLock(name: string, create: boolean): LedgerLease {
+    const located = walkDir(create);
+    if (located.kind !== "dir") return { status: located.kind };
+    const lock = path.join(located.dir, name);
+    let fd: number;
+    try { fd = fs.openSync(lock, "wx", 0o600); } catch (error) {
+      if (errorCode(error) !== "EEXIST") return { status: "refused" };
+      try {
+        const existing = fs.lstatSync(lock);
+        return { status: existing.isFile() && !existing.isSymbolicLink() && existing.nlink === 1 ? "busy" : "refused" };
+      } catch { return { status: "refused" }; }
+    }
+    let owner: StatLike | undefined;
+    let closed = false;
+    const close = (remove: boolean): void => {
+      if (closed) return;
+      closed = true;
+      try { fs.closeSync(fd); } catch { return; /* an uncertain descriptor retains the ownership marker */ }
+      if (!remove) return;
+      // Remove only the inode this lease created. Redirected/replaced paths are never touched.
+      try {
+        const again = walkDir(false);
+        const leaf = fs.lstatSync(lock);
+        if (owner && again.kind === "dir" && again.dir === located.dir && leaf.isFile() && !leaf.isSymbolicLink()
+          && leaf.dev === owner.dev && leaf.ino === owner.ino) fs.unlinkSync(lock);
+      } catch { /* retained for explicit owner reconciliation, never stolen by age or PID */ }
+    };
+    try {
+      owner = fs.fstatSync(fd);
+      if (!owner.isFile() || owner.nlink !== 1) { close(true); return { status: "refused" }; }
+      fs.writeSync(fd, JSON.stringify({ pid: deps.proc.pid, token: deps.crypto.randomUUID(), createdAt: Math.trunc(deps.clock.now()) }));
+      fs.fsyncSync(fd);
+      const again = walkDir(false);
+      const leaf = fs.lstatSync(lock);
+      if (again.kind !== "dir" || again.dir !== located.dir || leaf.isSymbolicLink() || !leaf.isFile()
+        || leaf.dev !== owner.dev || leaf.ino !== owner.ino) { close(true); return { status: "refused" }; }
+      return { status: "acquired", release: () => close(true), retain: () => close(false) };
+    } catch { close(true); return { status: "refused" }; }
+  }
+
+  function withMutationLock<T>(create: boolean, action: () => T, denied: (reason: "missing" | "refused" | "busy") => T): T {
+    const lease = acquireLock(MUTATION_LOCK, create);
+    if (lease.status !== "acquired") return denied(lease.status);
+    try { return action(); } catch { return denied("refused"); } finally { lease.release(); }
+  }
+
+  function acquireIntegration(): LedgerLease { return acquireLock(INTEGRATION_LOCK, false); }
+
+  const withSchema = (record: LedgerRecord): LedgerRecord => ({ ...record, schemaVersion: record.schemaVersion ?? SCHEMA_VERSION });
+
   function claim(record: LedgerRecord): ClaimResult {
+    if (!validateRecord(record) || record.state !== "claimed") return { outcome: "invalid" };
+    const normalized = withSchema(record);
+    return withMutationLock<ClaimResult>(true, () => claimUnlocked(normalized), (reason) => ({ outcome: reason === "missing" ? "refused" : reason }));
+  }
+
+  function reserve(record: LedgerRecord, maxConcurrentWorkers: number): ReserveResult {
+    if (!validateRecord(record) || record.state !== "claimed" || !validAuthorizedPaths(record.authorizedPaths)
+      || !Number.isSafeInteger(maxConcurrentWorkers) || maxConcurrentWorkers < 1) return { outcome: "invalid" };
+    const normalized = withSchema(record);
+    return withMutationLock<ReserveResult>(true, () => {
+      const current = read(normalized.attemptKey);
+      if (current.status === "ok") return canonical(current.record) === canonical(record)
+        ? { outcome: "replayed", record: current.record } : { outcome: "conflict", record: current.record };
+      if (current.status !== "missing") return { outcome: current.status };
+      const all = list();
+      if (all.status !== "ok") return { outcome: "refused" };
+      let running = 0;
+      for (const entry of all.entries) {
+        if (entry.result.status !== "ok") return { outcome: entry.result.status === "corrupt" ? "corrupt" : "refused" };
+        const other = entry.result.record;
+        if (other.processOwnerPid !== undefined || ["claimed", "launched", "unknown-liveness"].includes(other.state)) running++;
+        if (other.taskKey === record.taskKey && (other.processOwnerPid !== undefined || ["claimed", "launched", "unknown-liveness", "completed"].includes(other.state))) {
+          return { outcome: "task-owned", record: other };
+        }
+      }
+      if (running >= maxConcurrentWorkers) return { outcome: "at-capacity" };
+      return claimUnlocked(record);
+    }, (reason) => ({ outcome: reason === "missing" ? "refused" : reason }));
+  }
+
+  function update(attemptKey: string, patch: LedgerPatch): UpdateResult {
+    if (idOf(attemptKey, ATTEMPT_PREFIX) === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => ["state", "dispatchId", "reportId", "processOwnerPid"].includes(key))) return { status: "invalid" };
+    return withMutationLock<UpdateResult>(false, () => updateUnlocked(attemptKey, patch), (reason) => ({ status: reason }));
+  }
+
+  function claimUnlocked(record: LedgerRecord): ClaimResult {
     if (!validateRecord(record) || record.state !== "claimed") return { outcome: "invalid" };
     const id = idOf(record.attemptKey, ATTEMPT_PREFIX) as string;
     const dir = walkDir(true);
@@ -196,9 +332,9 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
     return { outcome: "failed" };
   }
 
-  function update(attemptKey: string, patch: LedgerPatch): UpdateResult {
+  function updateUnlocked(attemptKey: string, patch: LedgerPatch): UpdateResult {
     const id = idOf(attemptKey, ATTEMPT_PREFIX);
-    if (id === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => ["state", "dispatchId", "reportId"].includes(key))) return { status: "invalid" };
+    if (id === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => ["state", "dispatchId", "reportId", "processOwnerPid"].includes(key))) return { status: "invalid" };
     const dir = walkDir(false);
     if (dir.kind !== "dir") return { status: dir.kind };
     const current = readSlot(dir.dir, id);
@@ -207,6 +343,10 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
     if (patch.state !== undefined) {
       if (!STATES.includes(patch.state) || !TRANSITIONS[current.record.state].includes(patch.state)) return { status: "rejected" };
       next.state = patch.state;
+    }
+    if (patch.processOwnerPid !== undefined) {
+      if (current.record.processOwnerPid !== undefined && current.record.processOwnerPid !== patch.processOwnerPid) return { status: "rejected" };
+      next.processOwnerPid = patch.processOwnerPid;
     }
     // A recorded dispatch id is the attempt's identity: it can be set once and never replaced.
     if (patch.dispatchId !== undefined) {
@@ -252,5 +392,5 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
     return { status: "ok", entries };
   }
 
-  return { read, claim, update, list };
+  return { read, claim, reserve, update, list, acquireIntegration };
 }

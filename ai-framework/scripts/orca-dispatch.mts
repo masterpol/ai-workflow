@@ -1,4 +1,4 @@
-import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
+import { attemptKeyOf, createLedger, taskKeyOf, validAuthorizedPaths } from "./orca-ledger.mts";
 import type { Ledger, LedgerRecord } from "./orca-ledger.mts";
 import { evaluateLaunch, launchWorker, workerBrief } from "./orca-launch-gate.mts";
 import type { BriefSpec, LaunchOptions } from "./orca-launch-gate.mts";
@@ -25,7 +25,11 @@ import type { RuntimeDeps } from "./runtime/types.mts";
  */
 
 export type Route = "normal" | "launched" | "resume" | "blocked";
-export interface ScopeSpec extends BriefSpec { id: string }
+export interface ScopeSpec extends BriefSpec {
+  id: string;
+  /** Coordinator-approved exact files or directory prefixes ending `/`; never inferred from worker text. */
+  authorizedPaths: readonly string[];
+}
 export interface Placement { worktree?: string; repo?: string; name?: string; baseBranch?: string; setup?: string; model?: string; effort?: string }
 export interface DispatchOptions extends Omit<LaunchOptions, "vendor"> {
   /** The vendor running this task; selects the policy entry. */
@@ -41,7 +45,7 @@ export interface DispatchOptions extends Omit<LaunchOptions, "vendor"> {
   placement?: Placement;
 }
 export interface DispatchOutcome {
-  route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string;
+  route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string; ownerPid?: number;
 }
 
 const ID = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
@@ -52,7 +56,6 @@ const PLACEMENT_FLAGS: Readonly<Record<keyof Placement, string>> = Object.freeze
 /** Longest base attempt id that still leaves room for the `-r<n>` retry suffix inside the 64-character id grammar. */
 const MAX_BASE_ID = 60;
 const MAX_RETRIES = 5;
-const LIVE_STATES = ["claimed", "launched", "unknown-liveness", "completed"];
 let nodeDeps: RuntimeDeps | undefined;
 const defaultDeps = (): RuntimeDeps => (nodeDeps ??= createNodeDeps());
 
@@ -120,29 +123,23 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   if (!decision.allowed) return { route: "normal", reason: decision.reason };
   const policy = policyReport(options.root, coordinator, deps) as { workers?: unknown; maxConcurrentWorkers?: unknown };
   if (!Array.isArray(policy.workers) || !policy.workers.includes(vendor)) return { route: "normal", reason: "worker-not-configured" };
-  const brief = workerBrief(scope);
+  if (!validAuthorizedPaths(scope.authorizedPaths)) return { route: "normal", reason: "authorized-paths-invalid" };
+  const brief = workerBrief({ ...scope, ownership: [...(Array.isArray(scope.ownership) ? scope.ownership : [scope.ownership]),
+    `Authorized paths (exact files or directory prefixes): ${JSON.stringify(scope.authorizedPaths)}`] });
   if (!brief.ok) return { route: "normal", reason: brief.reason };
   if (options.launcher !== undefined && options.launcher !== decision.executable) return { route: "normal", reason: "launcher-refused" };
 
-  // One live attempt per task: another claimed, launched, unknown or completed attempt blocks a second worker.
+  // Task ownership, capacity and claim are one shared filesystem transaction across coordinator processes.
   const taskKey = taskKeyOf(scope.id);
-  const all = ledger.list();
-  if (all.status === "refused") return { route: "blocked", reason: "ledger-refused", attemptKey };
   const cap = typeof policy.maxConcurrentWorkers === "number" ? policy.maxConcurrentWorkers : 0;
-  let running = 0;
-  for (const entry of all.entries) {
-    if (entry.result.status !== "ok") return { route: "blocked", reason: `ledger-${entry.result.status}`, attemptKey };
-    if (["claimed", "launched", "unknown-liveness"].includes(entry.result.record.state)) running++;
-    if (entry.result.record.taskKey === taskKey && LIVE_STATES.includes(entry.result.record.state)) {
-      return { route: "resume", reason: "task-already-owned", attemptKey: entry.attemptKey, humanAction: "inspect the existing attempt before dispatching this task again" };
-    }
-  }
-
-  if (running >= cap) return { route: "normal", reason: "max-concurrent-workers" };
-
-  const claim = ledger.claim({ attemptKey, taskKey, vendor, state: "claimed", createdAt: Math.trunc(deps.clock.now()) });
+  const claim = ledger.reserve({ attemptKey, taskKey, vendor, state: "claimed", createdAt: Math.trunc(deps.clock.now()),
+    authorizedPaths: [...scope.authorizedPaths] }, cap);
   if (claim.outcome === "replayed") return resumeExisting(ledger, claim.record, attemptKey);
-  if (claim.outcome !== "claimed") return { route: "blocked", reason: `ledger-claim-${claim.outcome}`, attemptKey };
+  if (claim.outcome === "task-owned") return { route: "resume", reason: "task-already-owned", attemptKey: claim.record.attemptKey,
+    humanAction: "inspect the existing attempt before dispatching this task again" };
+  if (claim.outcome === "at-capacity") return { route: "normal", reason: "max-concurrent-workers" };
+  if (claim.outcome !== "claimed") return { route: "blocked", reason: `ledger-claim-${claim.outcome}`, attemptKey,
+    ...(claim.outcome === "busy" ? { humanAction: "inspect .project/metrics/orca-ledger/.mutation-lock and its owner; retry only after the active mutation finishes, or reconcile a crashed owner before removing its lock" } : {}) };
 
   const args = ["orchestration", "worker-start", "--spec", brief.brief, "--agent", vendor, ...flags, "--json"];
   const launch = await launchWorker({ ...gateOptions, deps, command: options.launcher, args, workerContext: false });
@@ -157,6 +154,11 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
     }
     if (!recorded({ state: "launched", dispatchId })) return { route: "blocked", reason: "ledger-update-failed", attemptKey, dispatchId, humanAction: "a worker is running; repair the ledger record before anything else" };
     return { route: "launched", reason: "launched", attemptKey, dispatchId };
+  }
+  if (launch.reason === "launch-cleanup-unconfirmed") {
+    recorded({ state: "unknown-liveness", ...(launch.ownerPid ? { processOwnerPid: launch.ownerPid } : {}) });
+    return { route: "blocked", reason: launch.reason, attemptKey, ...(launch.ownerPid ? { ownerPid: launch.ownerPid } : {}),
+      humanAction: "inspect and reconcile the local process owner and its descendants before retrying or clearing its ledger ownership" };
   }
   // A timeout, overflow or signal exit means a worker may exist: ownership is preserved and the attempt is inspected, never repeated.
   const killed = launch.reason === "launch-failed" && (Boolean(launch.signal) || launch.status === null || launch.status === undefined);
@@ -174,8 +176,8 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const residual = receipts.some((receipt) => Array.isArray(receipt.residualResources) && receipt.residualResources.length > 0);
   const failedStage = receipts.map((receipt) => receipt.failedStage).find((stage): stage is string => typeof stage === "string");
   if (residual || failedStage) {
-    // Orca itself reports the dispatch failed, so the task is free; the person must clean up what it left behind.
-    recorded({ state: "failed" });
+    // A failed stage/residual receipt does not prove that every writer exited. Keep both the task and capacity.
+    recorded({ state: "unknown-liveness" });
     return { route: "blocked", reason: failedStage ? `launch-failed:${failedStage}` : "launch-failed:residual", attemptKey,
       humanAction: "a person must resolve the blocker (trust prompt, port, funds) and clean residual resources; no automatic retry" };
   }

@@ -5,7 +5,7 @@ import * as path from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { ATTEMPT_PREFIX, MAX_RECORD_BYTES, TASK_PREFIX, attemptKeyOf, createLedger, idOf, taskKeyOf } from "./orca-ledger.mts";
+import { ATTEMPT_PREFIX, MAX_RECORD_BYTES, TASK_PREFIX, SCHEMA_VERSION, MUTATION_LOCK, INTEGRATION_LOCK, pathAuthorized, validAuthorizedPaths, attemptKeyOf, createLedger, idOf, taskKeyOf } from "./orca-ledger.mts";
 import type { LedgerRecord } from "./orca-ledger.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
@@ -23,11 +23,11 @@ const ledgerDir = (root: string): string => path.join(root, ...LEDGER);
 const slot = (root: string, id: string): string => path.join(ledgerDir(root), `attempt-${id}.json`);
 const mkLedgerDir = (root: string): void => fs.mkdirSync(ledgerDir(root), { recursive: true });
 function rec(id = "a1", extra: Partial<LedgerRecord> = {}): LedgerRecord {
-  return { attemptKey: attemptKeyOf(id), taskKey: taskKeyOf("t1"), vendor: "codex", state: "claimed", createdAt: 1000, ...extra };
+  return { attemptKey: attemptKeyOf(id), taskKey: taskKeyOf("t1"), vendor: "codex", state: "claimed", createdAt: 1000, schemaVersion: SCHEMA_VERSION, ...extra };
 }
 const withFs = (overrides: Partial<FsDeps>): RuntimeDeps => ({ ...deps, fs: { ...deps.fs, ...overrides } });
 const tree = (dir: string): string[] => (fs.existsSync(dir) ? fs.readdirSync(dir, { recursive: true }).map(String).sort() : []);
-const fifoOk = (): boolean => deps.child.runSync("mkfifo", ["--help"]).status !== null;
+const fifoOk = (): boolean => process.platform !== "win32" && deps.child.runSync("mkfifo", ["--help"], { timeoutMs: 2000 }).status !== null;
 
 test("read reports missing, refused, corrupt and ok as four distinct outcomes", (t) => {
   const root = fixture(t);
@@ -70,7 +70,7 @@ test("a lost create race is re-read and classified, never overwritten", (t) => {
   let raced = false;
   const racing = withFs({
     openSync(file, flags, mode) {
-      if (!raced && flags === "wx") {
+      if (!raced && flags === "wx" && file.endsWith("attempt-a1.json")) {
         raced = true;
         fs.writeFileSync(file, serializeFor(rec("a1", { vendor: "claude" })));
         throw Object.assign(new Error("exists"), { code: "EEXIST" });
@@ -248,7 +248,7 @@ test("update follows the allowed transitions only and never mutates identity fie
   assert.equal(ledger.update(key, { state: "settled" }).status, "rejected");
   assert.equal(ledger.update(key, { state: "claimed" }).status, "rejected");
   assert.equal(ledger.update(key, { state: "bogus" as never }).status, "rejected");
-  for (const field of ["attemptKey", "taskKey", "vendor", "createdAt"]) {
+  for (const field of ["attemptKey", "taskKey", "vendor", "createdAt", "authorizedPaths"]) {
     assert.equal(ledger.update(key, { [field]: "x" } as never).status, "invalid", field);
   }
   assert.equal(ledger.update(key, { state: "unknown-liveness" }).status, "ok");
@@ -317,4 +317,129 @@ test("a root reached through a symlink alias works and writes land under its rea
 test("the module imports no node: builtin", () => {
   const source = fs.readFileSync(path.join(import.meta.dirname, "orca-ledger.mts"), "utf8");
   assert.equal(/node:/.test(source), false);
+});
+
+
+test("reserve serializes task ownership and worker capacity; completed work still owns its task", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  const a = rec("first", { authorizedPaths: ["src/a.mts", "docs/"] });
+  assert.equal(ledger.reserve(a, 1).outcome, "claimed");
+  assert.equal(ledger.reserve(a, 1).outcome, "replayed");
+  assert.equal(ledger.reserve(rec("other", { authorizedPaths: ["other.mts"] }), 2).outcome, "task-owned");
+  const b = rec("different-task", { taskKey: taskKeyOf("t2"), authorizedPaths: ["src/b.mts"] });
+  assert.equal(ledger.reserve(b, 1).outcome, "at-capacity");
+  assert.equal(ledger.update(a.attemptKey, { state: "launched", dispatchId: "dispatch" }).status, "ok");
+  assert.equal(ledger.update(a.attemptKey, { state: "completed", reportId: "report" }).status, "ok");
+  assert.equal(ledger.reserve(b, 1).outcome, "claimed", "completed does not consume a running slot");
+  assert.equal(ledger.reserve(rec("same-task", { authorizedPaths: ["src/a.mts"] }), 2).outcome, "task-owned", "completed keeps task ownership until settled");
+  assert.deepEqual((ledger.read(a.attemptKey) as { record: LedgerRecord }).record.authorizedPaths, a.authorizedPaths);
+  assert.equal(ledger.update(a.attemptKey, { authorizedPaths: ["other/"] } as never).status, "invalid");
+  assert.equal(fs.existsSync(path.join(ledgerDir(root), MUTATION_LOCK)), false);
+});
+
+test("reservation refuses absent/malformed authority and corrupt occupied slots", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  assert.equal(ledger.reserve(rec(), 1).outcome, "invalid");
+  for (const authorizedPaths of [[], ["../x"], ["src/*"], ["/x"], ["src\\x"], ["x", "x"], [".git/config"], ["src/NUL.txt"]]) {
+    assert.equal(ledger.reserve(rec("invalid", { authorizedPaths }), 1).outcome, "invalid");
+  }
+  for (const cap of [0, -1, 1.2, NaN]) assert.equal(ledger.reserve(rec("a1", { authorizedPaths: ["a"] }), cap).outcome, "invalid");
+  assert.equal(fs.existsSync(path.join(root, ".project")), false, "invalid input has no write side effect");
+  mkLedgerDir(root);
+  fs.writeFileSync(slot(root, "broken"), "{torn-owner");
+  assert.equal(ledger.reserve(rec("new", { authorizedPaths: ["a"] }), 1).outcome, "corrupt");
+  assert.equal(fs.readFileSync(slot(root, "broken"), "utf8"), "{torn-owner");
+  assert.equal(fs.existsSync(slot(root, "new")), false);
+});
+
+test("mutation lock contention is bounded, leaves owner metadata and never follows links", (t) => {
+  const root = fixture(t);
+  mkLedgerDir(root);
+  const lock = path.join(ledgerDir(root), MUTATION_LOCK);
+  const metadata = JSON.stringify({ pid: 999999, token: "unknown-owner", createdAt: 0 });
+  fs.writeFileSync(lock, metadata);
+  const ledger = createLedger(root, deps);
+  assert.equal(ledger.reserve(rec("a", { authorizedPaths: ["a"] }), 1).outcome, "busy");
+  assert.equal(ledger.claim(rec()).outcome, "busy");
+  assert.equal(ledger.update(attemptKeyOf("a1"), { state: "launched" }).status, "busy");
+  assert.equal(fs.readFileSync(lock, "utf8"), metadata);
+  fs.unlinkSync(lock);
+  const victim = path.join(root, "victim");
+  fs.writeFileSync(victim, "untouched");
+  fs.symlinkSync(victim, lock);
+  assert.equal(ledger.reserve(rec("a", { authorizedPaths: ["a"] }), 1).outcome, "refused");
+  assert.equal(fs.readFileSync(victim, "utf8"), "untouched");
+  assert.equal(fs.lstatSync(lock).isSymbolicLink(), true);
+});
+
+test("scope paths have literal portable semantics: prefixes never include siblings or traversal", () => {
+  assert.equal(validAuthorizedPaths(["src/a.mts", "docs/"]), true);
+  for (const file of ["src/a.mts", "docs/intro.md", "docs/sub/page.md"]) assert.equal(pathAuthorized(file, ["src/a.mts", "docs/"]), true);
+  for (const file of ["src/a.mts.backup", "docs-elsewhere/page.md", "docs", "docs/../private", "docs//a", "docs\\a", "/docs/a"]) {
+    assert.equal(pathAuthorized(file, ["src/a.mts", "docs/"]), false, file);
+  }
+  for (const value of [undefined, [], [""], ["./a"], ["a//b"], ["a/../b"], ["a/./b"], ["a."], ["a "], ["C:/a"], ["a?b"], ["a\0b"], ["../"], ["/"], [".git/"], ["CON"], ["a", "a"]]) {
+    assert.equal(validAuthorizedPaths(value), false, JSON.stringify(value));
+  }
+});
+
+
+test("unconfirmed process ownership accepts only positive integer PIDs, is immutable and retains capacity", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  const a = rec("owner", { authorizedPaths: ["a.txt"] });
+  assert.equal(ledger.reserve(a, 1).outcome, "claimed");
+  for (const processOwnerPid of [0, -1, 1.5, NaN, Infinity, "7"]) {
+    assert.equal(ledger.update(a.attemptKey, { processOwnerPid } as never).status, "invalid");
+  }
+  assert.equal(ledger.update(a.attemptKey, { processOwnerPid: 4242, state: "unknown-liveness" }).status, "ok");
+  assert.equal(ledger.update(a.attemptKey, { processOwnerPid: 9999 }).status, "rejected");
+  assert.equal(ledger.update(a.attemptKey, { state: "failed" }).status, "ok");
+  assert.equal(ledger.reserve(rec("replacement", { authorizedPaths: ["a.txt"] }), 2).outcome, "task-owned", "failed worker receipt does not prove its local launcher exited");
+  assert.equal(ledger.reserve(rec("other", { taskKey: taskKeyOf("other"), authorizedPaths: ["b.txt"] }), 1).outcome, "at-capacity");
+});
+
+
+test("checkout integration lease is independent of short ledger mutations and only its owner releases it", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  assert.equal(ledger.acquireIntegration().status, "missing");
+  assert.deepEqual(tree(root), []);
+  ledger.claim(rec());
+  const lease = ledger.acquireIntegration();
+  assert.equal(lease.status, "acquired");
+  assert.equal(createLedger(root, deps).acquireIntegration().status, "busy");
+  assert.equal(ledger.update(attemptKeyOf("a1"), { state: "launched" }).status, "ok", "integration owns the checkout while its ledger updates still work");
+  if (lease.status !== "acquired") return;
+  lease.release();
+  lease.release();
+  assert.equal(fs.existsSync(path.join(ledgerDir(root), INTEGRATION_LOCK)), false);
+  const retained = ledger.acquireIntegration();
+  assert.equal(retained.status, "acquired");
+  if (retained.status !== "acquired") return;
+  retained.retain();
+  retained.release();
+  const marker = fs.readFileSync(path.join(ledgerDir(root), INTEGRATION_LOCK), "utf8");
+  assert.equal(JSON.parse(marker).pid, process.pid);
+  assert.equal(createLedger(root, deps).acquireIntegration().status, "busy", "an uncertain transaction is never reopened automatically");
+  assert.equal(fs.readFileSync(path.join(ledgerDir(root), INTEGRATION_LOCK), "utf8"), marker);
+});
+
+test("legacy schemaVersion-less records still read without silent drop", (t) => {
+  const root = fixture(t);
+  mkLedgerDir(root);
+  const legacy: Record<string, unknown> = { attemptKey: attemptKeyOf("legacy"), taskKey: taskKeyOf("t1"), vendor: "codex", state: "claimed", createdAt: 1000 };
+  fs.writeFileSync(slot(root, "legacy"), JSON.stringify(legacy));
+  const ledger = createLedger(root, deps);
+  const read = ledger.read(attemptKeyOf("legacy"));
+  assert.equal(read.status, "ok");
+  if (read.status === "ok") {
+    assert.equal(read.record.schemaVersion, undefined);
+    assert.equal(read.record.authorizedPaths, undefined);
+    assert.equal(read.record.processOwnerPid, undefined);
+  }
+  // A new claim identical under the normalized schema replays; the legacy record is never overwritten.
+  assert.equal(ledger.claim(rec("legacy")).outcome, "replayed");
 });
