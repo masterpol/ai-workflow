@@ -5,7 +5,11 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-_none_
+| upstream-project-drift | uphill 0% (S0-S9) | plan (awaiting approval) | big-batch (10 scopes) | 2026-10-16 |
+| unified-toon-config | shaped | shape (critique pending) | big-batch | 2026-10-16 |
+| orca-engines-range | shaped | shape | small-batch | 2026-10-16 |
+| orca-role-pools | shaped | shape (critique pending) | big-batch | 2026-10-16 |
+| workflow-v3-rollout | shaped | shape | small-batch | 2026-10-16 |
 
 ## Parked pitches
 | Pitch | Parked | Reason |
