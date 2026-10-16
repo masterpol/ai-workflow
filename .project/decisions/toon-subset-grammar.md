@@ -39,7 +39,7 @@ Unknown future grammar is refused at read time. The writer re-emits only this su
 
 ## Config schema (schemaVersion 2)
 
-schemaVersion 2 is the `integrations.orca` nesting. schemaVersion 1 (flat top-level `engines`/`orchestration`) is no longer loaded: it is refused with `CONFIG-SCHEMA-VERSION-UNKNOWN`; run `ai-framework/scripts/config-migrate.mts` to upgrade.
+schemaVersion 2 is the `integrations.orca` nesting. schemaVersion 1 (flat top-level `engines`/`orchestration`) is no longer loaded: it is refused with `CONFIG-SCHEMA-VERSION-UNKNOWN`. `ai-framework/scripts/config-migrate.mts` does not convert the old keys: `--force` replaces an unsupported file with one built from the legacy settings and defaults, and keeps a backup of the original.
 
 Root keys: `schemaVersion`, `runtime`, `integrations`, `doctor`, `skills`. The former top-level `engines` and `orchestration` sections were removed outright (unreleased; no alias): they are now `PARSER-UNRECOGNIZED` unknown root keys. Orca configuration lives under `integrations.orca`:
 

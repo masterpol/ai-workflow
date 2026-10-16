@@ -97,9 +97,8 @@ export function loadConfigEnv(
   root: string,
   env: Record<string, string | undefined>,
 ): Record<string, string | undefined> {
-  let result: ReturnType<typeof loadConfig>;
-  try { result = loadConfig(root, { fs, path } as unknown as RuntimeDeps); }
-  catch { return { ...env }; } // a throw is a refusal, never a reason to widen to the legacy file
+  // `loadConfig` never throws (each failure is a refusal result), and a refusal contributes nothing (never the legacy file).
+  const result = loadConfig(root, { fs, path } as unknown as RuntimeDeps);
   if ("status" in result) return result.status === "missing" ? loadWorkflowEnv(fs, path, root, env) : { ...env };
   if (result.problems.length > 0) return { ...env };
   const merged: Record<string, string | undefined> = {

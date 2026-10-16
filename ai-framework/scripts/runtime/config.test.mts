@@ -922,3 +922,13 @@ test("schemaVersion refusal wording matches migrator behavior; a BOM has its own
     assert.match(bom.text ?? "", /byte order mark|BOM/i);
     assert.doesNotMatch(bom.text ?? "", /undefined/);
 });
+
+test("schemaVersion refusal never echoes a raw value", () => {
+    for (const raw of ["\u001b]0;PWNED\u0007\u001b[2J", "\"x\u001b[2J\""]) {
+        const result = loadConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": `schemaVersion: ${raw}\n` }, {})));
+        assert.ok("status" in result && result.status === "refused", "an unusable version is refused");
+        const text = JSON.stringify(result);
+        assert.ok(!text.includes("PWNED") && !text.includes("\\u001b") && !text.includes("\u001b"), "no raw value or escape in the refusal");
+        assert.match(text, /not a small integer/);
+    }
+});

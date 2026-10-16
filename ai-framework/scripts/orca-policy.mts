@@ -120,10 +120,9 @@ function policyFromConfig(model: ConfigModel): PolicyResult {
 }
 
 export function readPolicy(root: string, deps: RuntimeDeps = defaultDeps()): PolicyResult | Refusal {
-  // `ai-workflow.toon` wins when present; only a missing file (or an unusable `deps`) falls back to the legacy JSON.
-  let config: ReturnType<typeof loadConfig>;
-  try { config = loadConfig(root, deps); }
-  catch { return { status: "refused" }; } // a throw is a refusal: never widen to the legacy file
+  // `ai-workflow.toon` wins when present; only a missing file falls back to the legacy JSON. `loadConfig` never throws
+  // (every I/O, parse and validator failure becomes a refusal/problem result), so a refusal never widens to the legacy file.
+  const config = loadConfig(root, deps);
   if (!("status" in config)) return config.problems.length ? { status: "malformed" } : policyFromConfig(config.model);
   if (config.status !== "missing") return { status: "refused" };
   let location: Location | Refusal;

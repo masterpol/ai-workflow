@@ -555,7 +555,7 @@ function validateConfig(raw: Record<string, unknown>, parseProblems: Problem[]):
 
     const schemaVersion = raw.schemaVersion;
     if (schemaVersion !== 2) {
-        return refused(errorCodes.schemaVersionUnknown, `unsupported schemaVersion: ${schemaVersion} (only 2 is supported; config-migrate.mts does not convert older keys: it replaces an unsupported file with one built from legacy settings and defaults, and keeps a backup of the original)`);
+        return refused(errorCodes.schemaVersionUnknown, `unsupported schemaVersion: ${typeof schemaVersion === "number" && Number.isInteger(schemaVersion) && Math.abs(schemaVersion) < 1e9 ? String(schemaVersion) : "(not a small integer)"} (only 2 is supported; config-migrate.mts does not convert older keys: it replaces an unsupported file with one built from legacy settings and defaults, and keeps a backup of the original)`);
     }
 
     const runtimeRaw = raw.runtime;

@@ -55,6 +55,12 @@ const defaultRegistry: RegistryApi = registryModule as RegistryApi;
 
 let nodeDeps: RuntimeDeps | undefined;
 /** Lazily created Node deps, so old-signature callers (state-snapshot, workflow-doctor, ...) need no change. */
+/** Untrusted values are shown JSON-quoted, control-free and capped, never raw. */
+function shown(value: unknown): string {
+  const text = typeof value === "string" ? value : JSON.stringify(value) ?? String(typeof value);
+  return JSON.stringify(text.replace(/[^\x20-\x7e]/g, "?").slice(0, 40));
+}
+
 function defaultDeps(): RuntimeDeps {
   return (nodeDeps ??= createNodeDeps());
 }
@@ -94,12 +100,12 @@ function loadLegacyModes(root: string, deps: RuntimeDeps): ModesState | null {
   if (caveman !== undefined) {
     if (!isRecord(caveman)) throw new Error("Invalid caveman mode state");
     if (caveman.enabled !== undefined && typeof caveman.enabled !== "boolean") throw new Error("caveman.enabled must be boolean");
-    if (caveman.default !== undefined && !(typeof caveman.default === "string" && MODES.has(caveman.default))) throw new Error(`Invalid caveman.default: ${String(caveman.default)}`);
+    if (caveman.default !== undefined && !(typeof caveman.default === "string" && MODES.has(caveman.default))) throw new Error(`Invalid caveman.default: ${shown(caveman.default)}`);
     if (caveman.phases !== undefined) {
       if (!isRecord(caveman.phases)) throw new Error("caveman.phases must be an object");
       for (const [phase, mode] of Object.entries(caveman.phases)) {
-        if (!PHASES.has(phase)) throw new Error(`Unknown phase in caveman.phases: ${phase}`);
-        if (!(typeof mode === "string" && MODES.has(mode))) throw new Error(`Invalid mode for phase ${phase}: ${String(mode)}`);
+        if (!PHASES.has(phase)) throw new Error(`Unknown phase in caveman.phases: ${shown(phase)}`);
+        if (!(typeof mode === "string" && MODES.has(mode))) throw new Error(`Invalid mode for phase ${shown(phase)}: ${shown(mode)}`);
       }
     }
   }

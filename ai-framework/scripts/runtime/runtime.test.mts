@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { copyFileSync, linkSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
 import { spawnSync as rawSpawnSync, type SpawnSyncOptionsWithStringEncoding } from "node:child_process";
 import { connect } from "node:net";
 import { setTimeout as delay } from "node:timers/promises";
@@ -813,6 +813,26 @@ test("legacy settings reader is pinned: a file swapped for a FIFO or an out-of-r
       assert.equal(inspectWorkflowEnv(racing, base.path, root).status === "valid", false, kind);
     }
   } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("readLegacyFile: a leaf replaced by a different regular file (hard link) after the realpath check is refused by the open-time dev/ino pin", () => {
+  const base = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, "a.json"), '{"a":1}');
+    writeFileSync(join(root, "other.json"), '{"evil":1}');
+    const realRoot = base.fs.realpathSync(root);
+    const file = join(realRoot, "a.json");
+    let swapped = false;
+    const racing: RuntimeDeps["fs"] = { ...base.fs, realpathSync: (p: string) => {
+      const out = base.fs.realpathSync(p);
+      if (!swapped && p === file) { swapped = true; rmSync(file); linkSync(join(realRoot, "other.json"), file); }
+      return out;
+    } };
+    const result = readLegacyFile(racing, base.path, root, "a.json");
+    assert.equal(swapped, true, "the race fired");
+    assert.deepEqual(result, { status: "refused", reason: "changed between inspect and open" });
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
 test("readLegacyFile: symlink leaf, FIFO, directory and oversize are refused; a plain file is read; absent is missing", needsFileSymlink, () => {

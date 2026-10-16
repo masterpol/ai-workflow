@@ -564,6 +564,20 @@ describe("mutant-b3-rejected-neverOverwritten", () => {
     assert.deepEqual(rejectedFiles(root), []);
     assert.equal(read(root, CONFIG_FILE), "bad swapped !!\n");
   });
+  test("mutation: the file swapped between the first lstat and the link is detected by the post-link recheck; the wrong inode is not moved aside", (t) => {
+    const root = project(t, { ...LEGACY, [CONFIG_FILE]: "bad one !!\n" });
+    let swapped = false;
+    const racing = withFs({ linkSync: (from: string, to: string) => {
+      if (!swapped && String(to).includes(".rejected")) { swapped = true; deps.fs.rmSync(toonPath(root)); deps.fs.writeFileSync(toonPath(root), "bad swapped !!\n"); }
+      deps.fs.linkSync(from, to);
+    } } as Partial<FsDeps>);
+    const outcome = migrate(root, { apply: true, force: false }, racing);
+    assert.equal(swapped, true);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results[0].reason ?? "", /changed before it could be moved aside/);
+    assert.deepEqual(rejectedFiles(root), [], "the link to the wrong inode was removed");
+    assert.equal(read(root, CONFIG_FILE), "bad swapped !!\n", "the swapped-in file was not unlinked");
+  });
   test("mutation: a symlink at the target path is a refusal and is never renamed to .rejected", (t) => {
     const root = project(t, { ...LEGACY, "elsewhere.toon": "schemaVersion: 1\n" });
     deps.fs.symlinkSync(deps.path.join(root, "elsewhere.toon"), toonPath(root));
@@ -730,6 +744,36 @@ describe("f2 ancestor swap during a pinned write is refused", () => {
     assert.equal(record?.status, "manual");
     assert.match(record?.reason ?? "", /DIR-PIN-CHANGED/);
     assert.equal(outcome.exitCode, 1);
+  });
+
+  test("backup directory swapped for a different plain directory (no symlink): refused by the dev/ino pin", (t) => {
+    const root = project(t, { "ai_workflow_env.json": JSON.stringify({ AI_WORKFLOW_RUNNER: "node" }) });
+    let done = false;
+    const fsSwap = { writeFileSync: (file: string, data: string, options?: unknown) => {
+      const name = String(file);
+      const dir = deps.path.dirname(name);
+      if (!done && name.endsWith(".tmp") && dir.includes("/config-migration/")) {
+        done = true;
+        deps.fs.renameSync(dir, `${dir}.moved`);
+        deps.fs.mkdirSync(dir, { recursive: false, mode: 0o755 }); // a different, plain, non-link directory at the same path
+      }
+      deps.fs.writeFileSync(file, data, options as never);
+    } };
+    const outcome = migrate(root, { apply: true, force: false }, withFs(fsSwap as Partial<FsDeps>));
+    assert.equal(done, true, "the race fired");
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /backup failed, nothing written to ai-workflow\.toon: .*DIR-PIN-CHANGED/);
+    assert.equal(exists(root, CONFIG_FILE), false);
+  });
+
+  test("backup directory whose realpath differs from its lexical path is refused even when dev/ino match", (t) => {
+    const root = project(t, { "ai_workflow_env.json": JSON.stringify({ AI_WORKFLOW_RUNNER: "node" }) });
+    // Same inode on disk, but the OS reports a different canonical path (an aliased ancestor): only the realpath check can see it.
+    const aliased = withFs({ realpathSync: (p: string) => (String(p).includes("/config-migration/") ? `${p}-alias` : deps.fs.realpathSync(p)) } as Partial<FsDeps>);
+    const outcome = migrate(root, { apply: true, force: false }, aliased);
+    assert.equal(outcome.exitCode, 1);
+    assert.match(outcome.results.at(-1)?.reason ?? "", /DIR-PIN-CHANGED/);
+    assert.equal(exists(root, CONFIG_FILE), false);
   });
 
   test("backup read-back does not follow a link planted at the backup path", (t) => {

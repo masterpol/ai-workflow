@@ -437,3 +437,10 @@ Dispatched: code-reviewer (opus), security-reviewer (opus), test-coverage-checke
 Findings: 1 must-fix (verified: 6234 ms on a 64 KiB file), 15 should-fix, ~15 acknowledged. Fixes applied in three disjoint-file passes (F1 config.mts, F2 migrator, F3 readers/doctor/docs).
 Evidence after fixes (coordinator): full suite 1489 tests, 1487 pass, 0 fail, 2 skipped; Bun config/migrate/bundle-sync 139/139; redos PoC 2 ms (was 6234); ancestor-race PoC DIR-PIN-CHANGED, victim untouched; postthrow PoC rolled back, no path; envrace FIFO no longer hangs; setup-validator READY (23), doctor READY WITH WARNINGS (1, existing), graphify CLEAN, docs-links 47 files 0 broken, AGENTS.md == CLAUDE.md.
 Drift: d48-d53.
+
+## Audit cycle 2 (2026-10-16, orca=normal; reviewed HEAD fee770a)
+
+Dispatched: security-reviewer (opus), code-reviewer (opus), fresh agents, scratch worktree; independent: no (no canary). Cross-file interactions: reviewed. Both reviewers hit a rate limit once and were resumed.
+Findings: 1 must-fix (verified by running resolve-mode on a file with ESC bytes), 6+1 should-fix fixed, rest acknowledged (d55).
+Evidence after fixes (coordinator): full suite 1494 tests, 1492 pass, 0 fail, 2 skipped; Bun config/migrate/bundle-sync 143/143; setup-validator READY; doctor READY WITH WARNINGS (1, existing); graphify CLEAN; docs-links 47 files 0 broken; AGENTS.md == CLAUDE.md; resolve-mode on the escape file prints "(not a small integer)", no ESC.
+Gate: 0 must-fix open after cycle 2. Drift d54-d55.
