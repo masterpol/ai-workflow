@@ -49,6 +49,7 @@ Shorthand: `NT` = `node --experimental-strip-types --disable-warning=Experimenta
 | S6 | Hooks hardening | `hooks/scripts/{orca-start-hook,orca-start-codex-hook,stuck-uphill-detector,pre-ship-verify}.mts` + 4 tests, `hooks/hooks.json`, `hooks/scripts/{metrics-lock,token-consumption}.test.mts` | ~700 | S0 (S3 for the two orca-start tests) | S1, S2, S7, S8 | yes — hooks are leaf scripts | standard |
 | S7 | Doctor / validator / skill tests | `scripts/setup-validator.mts` + test, `workflow-doctor.test.mts`, `skill-{defaults,sync,vendors}.test.mts`, `pitch-{archive,compress}.test.mts` | ~200 | S0, S2 | S1, S6, S8 | yes — test-heavy, small source change | standard |
 | S8 | Templates + phase docs | `templates/project/{runs/README.md,pitches/_templates/plan.md,design/**,requirements/features/template.md}`, `workflow/{overview.md,phases/0-4}.md`, `integrations/harnesses.md`, `docs/{vendors,extending,setup,design-notes,workflow-doctor}.md` | ~400 (doc) | S0 | S1, S2, S6, S7 | yes — docs; each 3-way file merged by hand | fast |
+| S10 | OpenCode port before first worker | `scripts/opencode-service.mts` + test (new), `scripts/orca-run.mts` (dispatch call), `scripts/orca-run.test.mts`, `integrations/orca-vendors.md`, `.claude/skills/build/SKILL.md` Orca block (+ vendor mirrors) | ~250 | S5 | — | no — process-killing code; coordinator | — |
 | S9 | Release + sync proof | `CHANGELOG.md`, `VERSION`, `.project/pitches/_followups.md`, `drift-ledger.md` (results), regenerated `graphify-out/`, `.project/knowledge/index.md` | ~80 | S1-S8 | — | no — release gate | — |
 
 Counts: ~33 source/test files in S1-S7, ~18 doc files in S8, 4 release files. Every scope is one commit and
@@ -129,6 +130,17 @@ leaves base green, so the epic can pause after any scope.
   (runner-neutral text).
 - Each 3-way doc (`harnesses.md`, `overview.md`, `phases/0,3,4`) has a ledger note: what came from where.
 - `NT ai-framework/scripts/skill-defaults.test.mts` exit 0 (mirror and doc-structure checks).
+
+### S10 — OpenCode port before the first OpenCode worker (added 2026-10-16, D8)
+- `NT` and `BT` pass for `opencode-service.test.mts` and `orca-run.test.mts`.
+- Tests prove: no listener means no stop and no kill; a listener goes through `opencode service stop` first; a
+  listener that is still present is killed only when its command is `opencode`; another program on the port is
+  reported, never killed; the result reports the port as free only after a re-check; a missing `service.json` is a
+  no-op.
+- `orca-run.mts dispatch` with `vendor: "opencode"` calls it only when no other OpenCode attempt in the ledger is
+  `claimed`, `launched` or `unknown-liveness`; tests cover both branches. Other vendors never call it.
+- `grep -c 'opencode-service' ai-framework/integrations/orca-vendors.md .claude/skills/build/SKILL.md` ≥ 1 each;
+  `node ai-framework/scripts/skill-vendors.mts cursor-mirrors` reports no stale mirror.
 
 ### S9 — Release + sync proof
 - `cat VERSION` = `2.23.0`; `grep -q '## 2.23.0' CHANGELOG.md`.

@@ -54,3 +54,12 @@ See plan.md D2 (critique X2 partly overridden; `orca-policy.mts` shape and grade
 - Remaining flakiness only under full-suite load (follow-up): "descendant ownership after timeout/output"
   (node and bun) and the orca-eval-grader mutation proof ("settle without evidence"). Each passes when its file
   runs alone, 3/3 or more.
+
+## D8 (build, 2026-10-16) — new scope S10: free OpenCode's port before the first OpenCode worker
+- **Plan said**: nothing; OpenCode launch failures were not in the inventory.
+- **Reality**: every OpenCode worker failed at `agent_readiness` while a stale `opencode serve --service` held its
+  port (here and in climbing on 10-15). Freeing the port fixed it. Later workers share the server that the first
+  worker starts.
+- **Now**: the owner asked for this to ship in 2.23.0. S10 adds `opencode-service.mts free` and an automatic call
+  from `orca-run.mts dispatch` for the first live OpenCode attempt only. Ordered after S5 because S4 also edits
+  `orca-run.mts`. The owner approved the design.

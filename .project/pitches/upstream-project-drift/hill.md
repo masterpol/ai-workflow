@@ -15,6 +15,7 @@
 | S6 | done | 2026-10-16 | OpenCode worker updrift-s6-2 + coordinator writer-runner pin; 141/141 node + bun; doctor exit 0 |
 | S7 | uphill 0% | 2026-10-16 | Doctor / validator / skill tests — not started |
 | S8 | done | 2026-10-16 | OpenCode worker updrift-s8-2 + coordinator restores (ledger S8 notes); docs-links 0; skill-defaults OK
+| S10 | uphill 0% | 2026-10-16 | OpenCode port before first worker — not started (D8) |
 | S9 | uphill 0% | 2026-10-16 | Release + sync proof — not started |
 
 ## Hill positions reference
