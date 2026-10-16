@@ -3,7 +3,7 @@ runtime:
   runner: node
 integrations:
   orca:
-    engine: "1.4.224"
+    engine: ">=1.4.224"
     enabled: true
     multiAgent: true
     maxConcurrentWorkers: 3

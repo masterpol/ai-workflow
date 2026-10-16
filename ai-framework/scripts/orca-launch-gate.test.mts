@@ -334,3 +334,43 @@ test("loadConfig branch: a present but invalid ai-workflow.toon refuses the laun
   assert.equal(p.state.calls, 0, "no probe ran");
   assert.equal(evaluateLaunch({ ...common, root: toonRoot(t, true, true), env: SAFE_ENV, run: prober().run }).allowed, true, "valid TOON wins over legacy");
 });
+
+// ---- integrations.orca.engine range ----
+function engineRoot(t: TestContext, engine: string): string {
+  const root = toonRoot(t);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(true).replace('engine: ">=1.4.224"', `engine: "${engine}"`));
+  return root;
+}
+
+test("engine range: the configured range decides, and a denial names the range and the found version", (t: TestContext) => {
+  const ranged = engineRoot(t, ">=1.4.224 <1.6.0");
+  assert.equal(evaluateLaunch({ ...common, root: ranged, env: SAFE_ENV, run: prober(() => "1.5.9").run }).allowed, true);
+  const above = evaluateLaunch({ ...common, root: ranged, env: SAFE_ENV, run: prober(() => "1.6.0").run });
+  assert.deepEqual([above.allowed, above.reason, above.engine, above.foundVersion], [false, "runtime-version-unsupported", ">=1.4.224 <1.6.0", "1.6.0"]);
+  const exact = evaluateLaunch({ ...common, root: engineRoot(t, "1.4.224"), env: SAFE_ENV, run: prober(() => "1.4.227").run });
+  assert.deepEqual([exact.allowed, exact.reason], [false, "runtime-version-unsupported"]);
+  assert.equal(evaluateLaunch({ ...common, root: engineRoot(t, "^1.4.223 || ^2.0.0"), env: SAFE_ENV, run: prober(() => "2.3.0").run }).allowed, true);
+});
+
+test("engine range: an absent range keeps the SUPPORTED_VERSION floor", (t: TestContext) => {
+  const root = fixture(t);
+  assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: prober(() => "1.4.223").run }).reason, "runtime-version-unsupported");
+  assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: prober(() => "1.9.0").run }).allowed, true);
+});
+
+test("engine range: an invalid range fails closed before any probe (config validation rejects it first) and never falls back to the default", (t: TestContext) => {
+  for (const engine of ["^^1", "1.5.0-beta.1", ">= 1.4.224", "latest"]) {
+    const p = prober();
+    const decision = evaluateLaunch({ ...common, root: engineRoot(t, engine), env: SAFE_ENV, run: p.run });
+    assert.deepEqual([decision.allowed, decision.reason, p.state.calls], [false, "policy-malformed", 0], engine);
+  }
+});
+
+test("engine range: a hostile runtime version is refused and never echoed into the decision", (t: TestContext) => {
+  const root = engineRoot(t, ">=1.4.224");
+  for (const hostile of [`\u001b[31mFAKE\nline2${"A".repeat(5000)}`, "1.5.0-beta.1", "undefined", "01.4.224"]) {
+    const decision = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: prober(() => hostile).run });
+    assert.deepEqual([decision.allowed, decision.reason, decision.foundVersion], [false, "runtime-version-unsupported", undefined], JSON.stringify(hostile.slice(0, 20)));
+    assert.ok(!JSON.stringify(decision).includes("FAKE"));
+  }
+});

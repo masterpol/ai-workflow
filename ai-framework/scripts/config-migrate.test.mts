@@ -660,7 +660,7 @@ test("c1 legacy policy maps into integrations.orca and per-coordinator workers a
   assert.ok(!("status" in loaded) && loaded.problems.length === 0);
   if ("status" in loaded) return;
   const orca = loaded.model.integrations.orca;
-  assert.deepEqual([orca.engine, orca.enabled, orca.multiAgent, orca.maxConcurrentWorkers, orca.maxRetriesPerTask], ["1.4.224", true, true, 2, 1]);
+  assert.deepEqual([orca.engine, orca.enabled, orca.multiAgent, orca.maxConcurrentWorkers, orca.maxRetriesPerTask], [">=1.4.224", true, true, 2, 1]);
   assert.deepEqual(orca.coordinators?.claude, { workers: ["codex", "opencode"], roles: { implementation: ["codex"], review: ["opencode"] } });
   assert.deepEqual(orca.coordinators?.codex?.workers, ["claude", "opencode"]);
   assert.deepEqual(orca.coordinators?.opencode?.workers, ["claude", "codex"]);

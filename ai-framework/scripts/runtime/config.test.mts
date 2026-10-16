@@ -932,3 +932,22 @@ test("schemaVersion refusal never echoes a raw value", () => {
         assert.match(text, /not a small integer/);
     }
 });
+
+test("integrations.orca.engine must be a valid version range", () => {
+    const load = (engine: string) => loadText(toonFixtureText().replace('engine: "1.4.224"', `engine: "${engine}"`));
+    for (const good of ["1.4.224", ">=1.4.224", "^1.4.223", ">=1.4.224 <1.6.0 || ^2.0.0", "1.4.x", "1.4.223 - 1.5.0"]) {
+        const result = load(good);
+        assert.ok("model" in result, good);
+        assert.deepStrictEqual("model" in result ? result.problems : null, [], good);
+    }
+    for (const [bad, text] of [["^^1", /unknown operator/], ["1.5.0-beta.1", /prerelease/], [">= 1.4.224", /missing version/], ["", /empty range/]] as const) {
+        const result = load(bad);
+        assert.ok("model" in result, bad);
+        const problems = "model" in result ? result.problems : [];
+        assert.strictEqual(problems.length, 1, bad);
+        assert.strictEqual(problems[0]!.code, errorCodes.validationType);
+        assert.match(problems[0]!.text, /integrations\.orca\.engine is not a valid version range/);
+        assert.match(problems[0]!.text, text);
+        assert.match(problems[0]!.text, /at position \d+/);
+    }
+});

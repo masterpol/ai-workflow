@@ -1,5 +1,5 @@
 import { report as policyReport } from "./orca-policy.mts";
-import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, isSupportedVersion, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
+import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, engineRange, isSupportedVersion, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, ReportOptions, Run, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
@@ -108,7 +108,7 @@ export interface LaunchOptions {
   platform?: string;
   present?: ReportOptions["present"];
 }
-export interface LaunchDecision { allowed: boolean; reason: string; vendor: string; policyReason?: string; runtimeVersion?: string; executable?: string }
+export interface LaunchDecision { allowed: boolean; reason: string; vendor: string; policyReason?: string; runtimeVersion?: string; executable?: string; engine?: string; foundVersion?: string }
 
 /** Fresh policy read plus fresh probe on every call. Fails closed on any thrown error. */
 export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
@@ -124,10 +124,13 @@ export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
     const policy = policyReport(root, vendor, deps) as Json & { eligible?: boolean; reason?: string };
     if (policy.eligible !== true) return deny(String(policy.reason ?? "policy-ineligible"), { policyReason: String(policy.reason) });
     const probe = preflightReport(root, vendor, { probe: true, env, run: options.run, now: options.now,
-      platform: options.platform, present: options.present }, deps) as Json & { eligible?: boolean; reason?: string; runtimeVersion?: string };
-    if (probe.eligible !== true) return deny(String(probe.reason), { policyReason: String(policy.reason) });
-    if (!VERSION_PROVEN_REASONS.includes(String(probe.reason))) return deny(String(probe.reason), { policyReason: String(policy.reason) });
-    if (probe.runtimeVersion !== undefined && !isSupportedVersion(probe.runtimeVersion)) return deny("runtime-version-unsupported");
+      platform: options.platform, present: options.present }, deps) as Json & { eligible?: boolean; reason?: string; runtimeVersion?: string; engine?: string; foundVersion?: string };
+    const why = { policyReason: String(policy.reason), ...(probe.engine ? { engine: probe.engine } : {}), ...(probe.foundVersion ? { foundVersion: probe.foundVersion } : {}) };
+    if (probe.eligible !== true) return deny(String(probe.reason), why);
+    if (!VERSION_PROVEN_REASONS.includes(String(probe.reason))) return deny(String(probe.reason), why);
+    const engine = engineRange(root, deps);
+    if ("invalid" in engine) return deny("engine-range-invalid");
+    if (probe.runtimeVersion !== undefined && !isSupportedVersion(probe.runtimeVersion, engine.range)) return deny("runtime-version-unsupported", { engine: engine.text, foundVersion: probe.runtimeVersion });
     // The probe proved this executable and no other; launchWorker spawns exactly it.
     const executable = selectExecutable(env, options.platform ?? deps.proc.platform, deps);
     if (!executable) return deny("launcher-unavailable");

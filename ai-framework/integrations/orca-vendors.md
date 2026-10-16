@@ -90,7 +90,15 @@ The selected launcher is never replaced after failure. Selection precedence is a
 is set, then `orca`. On Linux outside an identified Orca session, use `orca-ide` to avoid
 selecting the unrelated screen reader. Unsupported selection keeps the normal workflow.
 
-Runtime diagnostics conservatively accept Orca 1.4.224 or any later strict `x.y.z` release (`isSupportedVersion` in `orca-preflight.mts`; contract inspected at 1.4.223, first verified against 1.4.222). Guide
+Runtime diagnostics accept the Orca versions named by `integrations.orca.engine` in `ai-workflow.toon` (default `>=1.4.224`, the floor
+`SUPPORTED_VERSION` in `orca-preflight.mts`; contract inspected at 1.4.223, first verified against 1.4.222). The value is an npm-style range
+subset: an exact version (`1.4.224`), `^`, `~`, `>`, `>=`, `<`, `<=`, partials and wildcards (`1.4`, `1.x`, `*`), a space for AND,
+`||` for OR, and a hyphen range (`1.4.223 - 1.5.0`). Prerelease and build tags, leading zeros, parts over six digits, a space between an
+operator and its version, and ranges over 256 characters are rejected; `runtime/semver-range.mts` is the parser. A bare version is an
+exact pin, so `1.4.224` refuses 1.4.225. An invalid range is a config problem (doctor "Config validators" fails and the policy is
+malformed), never a silent fallback to the default. The reported Orca version must be a strict `x.y.z`; a refusal names the range and the
+found version. Guide
+Guide
 markers establish documented capabilities only. A reachable local runtime, matching version,
 and live caller session matching `ORCA_AGENT_SESSION_ID` provide limited session evidence;
 they do not prove an enabled orchestration feature, authenticated vendors, or safe dispatch.
@@ -277,7 +285,7 @@ It is a library for the build phase, not a command, and stays inert unless the p
 - **Roles**: the `coordinator` is the vendor running the task and selects the policy entry; the worker (`vendor`) must be
   one of that coordinator's configured workers. A coordinator is never launched as its own worker.
 - **Launch gate** (`orca-launch-gate.mts`): re-reads the policy and re-probes the runtime immediately before every
-  launch; allowed only for an eligible policy and a supported Orca version (`isSupportedVersion`: 1.4.224 or later). It spawns exactly the executable the
+  launch; allowed only for an eligible policy and an Orca version inside `integrations.orca.engine` (`isSupportedVersion`; default `>=1.4.224`). It spawns exactly the executable the
   probe selected (`ORCA_CLI_COMMAND`, `orca-dev` or `orca`); a different `launcher` is refused. An external coordinator
   has no `caller.orcaSessionId`, so the gate does not require it. A worker (the `--worker-context` flag, or a worker env
   marker, which is unverified) is always denied. The child environment is an allowlist with absolute PATH entries only.

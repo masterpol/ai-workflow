@@ -195,7 +195,7 @@ export function orcaPolicyToonText(enabled = true): string {
     "  runner: node",
     "integrations:",
     "  orca:",
-    "    engine: \"1.4.224\"",
+    "    engine: \">=1.4.224\"",
     `    enabled: ${enabled}`,
     `    multiAgent: ${enabled}`,
     "    maxConcurrentWorkers: 2",

@@ -1,8 +1,9 @@
 import { buildWorkerEnv, evaluateLaunch } from "./orca-launch-gate.mts";
 import { report as policyReport } from "./orca-policy.mts";
-import { MAX_OUTPUT_BYTES, isSupportedVersion, selectExecutable } from "./orca-preflight.mts";
+import { MAX_OUTPUT_BYTES, engineRange, isSupportedVersion, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, Run, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { parseVersion } from "./runtime/semver-range.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
@@ -24,8 +25,14 @@ export interface StartOptions {
 type Env = Record<string, string | undefined>;
 type Obj = Record<string, unknown>;
 const object = (value: unknown): value is Obj => value !== null && typeof value === "object" && !Array.isArray(value);
-const blocked = (reason: string): StartDecision => ({ state: "blocked", reason,
-  line: `Orca requested but not ready: ${reason}. Fix it, or re-invoke with orca=normal to run this phase without Orca.` });
+const blocked = (reason: string, detail = ""): StartDecision => ({ state: "blocked", reason,
+  line: `Orca requested but not ready: ${reason}${detail}. Fix it, or re-invoke with orca=normal to run this phase without Orca.` });
+/** Names the configured range and the strict x.y.z Orca reported, e.g. ` (Orca 1.6.0 is outside engine ">=1.4.224 <1.6.0")`. */
+export const versionDetail = (engine: string, found?: string): string => {
+  // Both values are untrusted text: print only printable ASCII, and only a strict x.y.z as the found version.
+  const shown = /^[\x20-\x7e]{1,256}$/.test(engine) ? JSON.stringify(engine) : "(not printable)";
+  return found && parseVersion(found) ? ` (Orca ${found} is outside engine ${shown})` : ` (engine ${shown})`;
+};
 
 /** Quoted passages are data, even when they contain an otherwise standalone token. */
 export function hasNormalBypass(text: string = ""): boolean {
@@ -159,7 +166,8 @@ export function decideStart(options: StartOptions): StartDecision {
     const decision = evaluateLaunch({ root: options.root, vendor: options.vendor, deps, env, run, now: deadline.now });
     deadline.remaining();
     if (deadline.failure) return blocked(deadline.failure);
-    if (!decision.allowed) return blocked(decision.reason === "gate-error" ? "internal" : decision.reason);
+    if (!decision.allowed) return blocked(decision.reason === "gate-error" ? "internal" : decision.reason,
+      decision.engine ? versionDetail(decision.engine, decision.foundVersion) : "");
     const workerEnv = buildWorkerEnv(env, deps);
     for (const worker of workers) {
       deadline.remaining();
@@ -169,11 +177,13 @@ export function decideStart(options: StartOptions): StartDecision {
     const probed = decision.executable && resolveExecutable(decision.executable, env, deps);
     const resolved = resolveExecutable("orca", workerEnv, deps);
     if (!probed || !resolved || resolved !== probed) return blocked("worker-orca-path-mismatch");
+    const engine = engineRange(options.root, deps);
+    if ("invalid" in engine) return blocked("engine-range-invalid", versionDetail(engine.text));
     const status = valueFrom(run(resolved, ["status", "--json"], probeOptions(options.root, workerEnv, deadline)));
     if (!object(status) || status.ok !== true || !object(status.result) || !object(status.result.runtime)
       || !object(status.result.target) || status.result.target.kind !== "local"
       || status.result.runtime.reachable !== true || status.result.runtime.state !== "ready"
-      || !isSupportedVersion(status.result.runtime.appVersion)) return blocked("worker-orca-unavailable");
+      || !isSupportedVersion(status.result.runtime.appVersion, engine.range)) return blocked("worker-orca-unavailable");
     deadline.remaining();
     return { state: "ready", reason: "launch-allowed", line: `Orca: ready (coordinator ${options.vendor}, workers ${workers.join(", ")})`, workers };
   } catch { return blocked(budget?.failure ?? "internal"); }

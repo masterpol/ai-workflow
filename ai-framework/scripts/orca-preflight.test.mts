@@ -8,7 +8,8 @@ import * as path from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { CALL_TIMEOUT_MS, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
+import { CALL_TIMEOUT_MS, DEFAULT_ENGINE_RANGE, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, engineRange, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
+import { parseRange } from "./runtime/semver-range.mts";
 import type { Receipt, ReportOptions, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
@@ -561,4 +562,20 @@ test("loadConfig branch: a present but invalid ai-workflow.toon is policy-bound 
   const result = report(root, "codex", options);
   assert.match(String(result.reason), /^policy-(malformed|refused)$/);
   assertNormal(result);
+});
+
+test("isSupportedVersion honors a parsed range and engineRange falls back to the floor or reports an invalid range", () => {
+  const ranged = engineRange(fs.mkdtempSync(path.join(os.tmpdir(), "orca-engine-")));
+  assert.ok("range" in ranged);
+  assert.equal(ranged.text, DEFAULT_ENGINE_RANGE);
+  assert.equal(isSupportedVersion("1.4.223", ranged.range), false);
+  assert.equal(isSupportedVersion("1.4.224", ranged.range), true);
+  for (const [text, version, expected] of [[">=1.4.224 <1.6.0", "1.6.0", false], [">=1.4.224 <1.6.0", "1.5.0", true], ["1.4.x", "1.5.0", false]] as const) {
+    const parsed = parseRange(text);
+    assert.ok(parsed.ok);
+    assert.equal(isSupportedVersion(version, parsed.ok ? parsed.range : undefined), expected, `${text} ${version}`);
+  }
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "orca-engine-"));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(true).replace('engine: ">=1.4.224"', 'engine: "^^1"'));
+  assert.deepEqual(engineRange(root), { invalid: true, text: "^^1" });
 });

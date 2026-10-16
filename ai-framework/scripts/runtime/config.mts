@@ -1,4 +1,5 @@
 import { createNodeDeps } from "./node.mts";
+import { parseRange } from "./semver-range.mts";
 import type { RuntimeDeps, StatLike } from "./types.mts";
 
 export const CONFIG_FILE = "ai-workflow.toon";
@@ -479,6 +480,8 @@ function validateOrca(raw: Record<string, unknown>, problems: Problem[]): OrcaIn
         const engine = expectString(raw.engine, `${base}.engine`);
         if (engine.ok) {
             orca.engine = engine.value;
+            const range = parseRange(engine.value);
+            if (!range.ok) problems.push(problem(errorCodes.validationType, `${base}.engine is not a valid version range: ${range.error.message} at position ${range.error.position}`));
             const validator = engineValidators.get("orca");
             if (validator) runValidator("engine", validator, "orca", engine.value, problems);
         } else problems.push(engine.problem);

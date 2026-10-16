@@ -28,11 +28,14 @@ export const LEGACY = Object.freeze({
   policy: ".project/orchestration.json",
   modes: ".project/skills/modes.json",
 });
-const DEFAULT_ENGINE = "1.4.224";
+// A bare version is an exact-match range, so the default is the floor and anything later.
+const DEFAULT_ENGINE = ">=1.4.224";
 const MAX_LEGACY_BYTES = 64 * 1024;
 const MAX_GITIGNORE_BYTES = 1024 * 1024;
 const MODE_NAMES = new Set(["lite", "full", "ultra", "wenyan-lite", "wenyan-full", "wenyan-ultra"]);
 const SAFE_TOKEN = /^[A-Za-z0-9._:-]+$/;
+// Version-range characters only (no quotes, backslashes or control characters), so the value stays inside its quotes.
+const SAFE_RANGE = /^[A-Za-z0-9.<>=~^| *-]{1,256}$/;
 const USAGE = "usage: config-migrate [--dry-run | --apply] [--force] [--json] [--root <project>]";
 
 export type MigrationAction = "write" | "overwrite" | "unchanged" | "refuse" | "reject" | "backup" | "ignore" | "revalidate";
@@ -214,6 +217,11 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
 
 // ---- canonical TOON writer ------------------------------------------------------------------------------------
 
+function rangeScalar(value: string): string {
+  if (!SAFE_RANGE.test(value)) throw new MigrateError("a value cannot be written as a TOON token");
+  return value;
+}
+
 function scalar(value: string): string {
   if (!SAFE_TOKEN.test(value)) throw new MigrateError("a value cannot be written as a TOON token");
   return value;
@@ -228,7 +236,7 @@ export function emitToon(model: ConfigModel): string {
     "runtime:", `  runner: ${scalar(model.runtime.runner)}`,
     "integrations:",
     "  orca:",
-    `    engine: "${scalar(orca.engine)}"`,
+    `    engine: "${rangeScalar(orca.engine)}"`,
     `    enabled: ${orca.enabled}`,
     `    multiAgent: ${orca.multiAgent}`,
     `    maxConcurrentWorkers: ${orca.maxConcurrentWorkers}`,
