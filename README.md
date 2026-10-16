@@ -102,7 +102,7 @@ in [Orca](https://www.onorca.dev). It is off by default; with it off, every phas
 1. Install the Orca app and the worker CLIs you want (`codex`, `opencode`), and make sure `orca` on your `PATH` is the real binary.
 2. In `ai-workflow.toon`, set `integrations.orca.multiAgent: true` under `schemaVersion: 2` (or set the `AI_WORKFLOW_ORCA_MULTI_AGENT` environment variable).
 3. In the same file, set `integrations.orca.enabled: true` and choose the workers and coordinator-to-worker roles; see
-   [ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon). No separate `.project/orchestration.json` is needed. The earlier flat `engines` / `orchestration` layout (schemaVersion 1) is no longer loaded; run `node ai-framework/scripts/config-migrate.mts` to convert it (`engines.orca` becomes `integrations.orca.engine`, `orchestration.*` becomes `integrations.orca.*`).
+   [ai-workflow.example.toon](ai-framework/templates/ai-workflow.example.toon). No separate `.project/orchestration.json` is needed. The earlier flat `engines` / `orchestration` layout (schemaVersion 1) is no longer loaded; `config-migrate.mts --force` does not convert it: it replaces the unsupported v1 file with one built from the legacy JSON files or the defaults and keeps a backup, so re-apply the old values by hand (`engines.orca` is now `integrations.orca.engine`, `orchestration.*` is now `integrations.orca.*`).
 4. Restart nothing: the Claude Code hook in [hooks.json](ai-framework/hooks/hooks.json) is picked up from `.claude/settings.json`.
 
 **What happens with the switch on.** Before each of the 12 workflow phases (`shape`, `shape-lite`, `critique`, `plan`,

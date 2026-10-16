@@ -121,11 +121,11 @@ function policyFromConfig(model: ConfigModel): PolicyResult {
 
 export function readPolicy(root: string, deps: RuntimeDeps = defaultDeps()): PolicyResult | Refusal {
   // `ai-workflow.toon` wins when present; only a missing file (or an unusable `deps`) falls back to the legacy JSON.
-  try {
-    const config = loadConfig(root, deps);
-    if (!("status" in config)) return config.problems.length ? { status: "malformed" } : policyFromConfig(config.model);
-    if (config.status === "refused") return { status: "refused" };
-  } catch { /* fall through to the legacy file */ }
+  let config: ReturnType<typeof loadConfig>;
+  try { config = loadConfig(root, deps); }
+  catch { return { status: "refused" }; } // a throw is a refusal: never widen to the legacy file
+  if (!("status" in config)) return config.problems.length ? { status: "malformed" } : policyFromConfig(config.model);
+  if (config.status !== "missing") return { status: "refused" };
   let location: Location | Refusal;
   try { location = inspectPath(root, deps); }
   catch (error) { return { status: errorCode(error) === "ENOENT" ? "missing" : "refused" }; }

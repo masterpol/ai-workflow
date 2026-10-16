@@ -83,9 +83,39 @@ export function registerCoordinatorValidator(vendor: string, fn: ValidatorFn): v
     coordinatorValidators.set(vendor, fn);
 }
 
-export function validateCoordinator(_vendor: string, _value: unknown): { roles?: Record<string, string | string[]> } | null {
-    // Pitch 4 owns the body. The signature is frozen here so c2.1 can register the slot.
-    return null;
+// A registered validator is third-party code: a throw becomes a problem, never an exception out of loadConfig.
+function runValidator(kind: string, fn: ValidatorFn, key: string, value: unknown, problems: Problem[]): void {
+    try {
+        const finding = fn(key, value);
+        if (finding) problems.push(finding);
+    } catch (error) {
+        const reason = error instanceof Error ? error.message : String(error);
+        problems.push(problem(errorCodes.validationType, `${kind} validator for "${key}" threw: ${reason}`));
+    }
+}
+
+interface LineParts { indent: number; key: string; arraySize?: number; hasColon: boolean; rest: string }
+
+const KEY_PATTERN = /^([a-zA-Z0-9_-]+)(\[(\d+)\])?$/;
+const LINE_TERMINATOR = /[\r\n\u2028\u2029]/;
+
+// Linear scan: split on the first colon, then match only the short key segment.
+function scanLine(content: string): LineParts | null {
+    let indent = 0;
+    while (indent < content.length && content.charCodeAt(indent) === 32) indent++;
+    const colon = content.indexOf(":", indent);
+    let keyEnd = colon === -1 ? content.length : colon;
+    while (keyEnd > indent && content.charCodeAt(keyEnd - 1) === 32) keyEnd--;
+    const match = KEY_PATTERN.exec(content.slice(indent, keyEnd));
+    if (!match) return null;
+    let rest = "";
+    if (colon !== -1) {
+        let restStart = colon + 1;
+        while (restStart < content.length && content.charCodeAt(restStart) === 32) restStart++;
+        rest = content.slice(restStart);
+        if (LINE_TERMINATOR.test(rest)) return null;
+    }
+    return { indent, key: match[1], arraySize: match[3] !== undefined ? Number(match[3]) : undefined, hasColon: colon !== -1, rest };
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -274,17 +304,13 @@ function parseToon(text: string): ParseResult | Refusal {
         const content = stripComment(raw);
         if (/^\s*$/.test(content)) continue;
 
-        const match = /^( *)(([a-zA-Z0-9_-]+)(\[(\d+)\])?) *(: *(.*))?$/.exec(content);
-        if (!match) {
+        const parts = scanLine(content);
+        if (!parts) {
             problems.push(problem(errorCodes.parserUnrecognized, "unrecognized TOON line", lineNumber, 1));
             continue;
         }
 
-        const indent = match[1].length;
-        let key = match[3];
-        const arraySize = match[5] ? Number(match[5]) : undefined;
-        const hasColon = match[6] !== undefined;
-        const rest = hasColon ? match[7] : "";
+        const { indent, key, arraySize, hasColon, rest } = parts;
 
         if (FORBIDDEN_KEYS.has(key)) {
             problems.push(problem(errorCodes.parserPrototypePollution, `forbidden key at line ${lineNumber}`, lineNumber, indent + 1));
@@ -300,7 +326,7 @@ function parseToon(text: string): ParseResult | Refusal {
             problems.push(problem(errorCodes.parserUnrecognized, "indentation does not open a nested object", lineNumber, indent + 1));
         }
 
-        if (parent.obj[key] !== undefined) {
+        if (Object.hasOwn(parent.obj, key)) {
             problems.push(problem(errorCodes.parserUnrecognized, `duplicate key "${key}"`, lineNumber, indent + 1));
         }
 
@@ -409,11 +435,9 @@ function validateCoordinators(raw: unknown, problems: Problem[]): OrcaIntegratio
                     if (typeof roleValue === "string") {
                         roles[role] = roleValue;
                     } else if (Array.isArray(roleValue)) {
-                        const distinct = new Set(roleValue);
-                        if (distinct.size !== roleValue.length) {
-                            problems.push(problem(errorCodes.parserWithinRoleDuplicate, `duplicate worker in role ${role}`));
-                        }
-                        roles[role] = [...roleValue];
+                        const items = expectStringArray(roleValue, `${base}.${vendor}.roles.${role}`);
+                        if (items.ok) roles[role] = items.value;
+                        else problems.push(items.problem);
                     } else {
                         problems.push(problem(errorCodes.validationType, `${base}.${vendor}.roles.${role} must be a string or string array`));
                     }
@@ -436,10 +460,7 @@ function validateCoordinators(raw: unknown, problems: Problem[]): OrcaIntegratio
         }
         coordinators[vendor] = coordinator;
         const validator = coordinatorValidators.get(vendor);
-        if (validator) {
-            const finding = validator(vendor, entry);
-            if (finding) problems.push(finding);
-        }
+        if (validator) runValidator("coordinator", validator, vendor, entry, problems);
     }
     return coordinators;
 }
@@ -459,10 +480,7 @@ function validateOrca(raw: Record<string, unknown>, problems: Problem[]): OrcaIn
         if (engine.ok) {
             orca.engine = engine.value;
             const validator = engineValidators.get("orca");
-            if (validator) {
-                const finding = validator("orca", engine.value);
-                if (finding) problems.push(finding);
-            }
+            if (validator) runValidator("engine", validator, "orca", engine.value, problems);
         } else problems.push(engine.problem);
     }
 
@@ -513,8 +531,7 @@ function validateIntegrations(raw: unknown, problems: Problem[]): ConfigModel["i
         if (name === "orca") orca = validateOrca(entry, problems);
         const validator = integrationValidators.get(name);
         if (validator) {
-            const finding = validator(name, entry);
-            if (finding) problems.push(finding);
+            runValidator("integration", validator, name, entry, problems);
         } else if (name !== "orca") {
             problems.push(problem(errorCodes.parserUnrecognized, `unknown integration "${name}"`));
         }
@@ -538,7 +555,7 @@ function validateConfig(raw: Record<string, unknown>, parseProblems: Problem[]):
 
     const schemaVersion = raw.schemaVersion;
     if (schemaVersion !== 2) {
-        return refused(errorCodes.schemaVersionUnknown, `unsupported schemaVersion: ${schemaVersion} (only 2 is supported; run ai-framework/scripts/config-migrate.mts to upgrade a v1 file)`);
+        return refused(errorCodes.schemaVersionUnknown, `unsupported schemaVersion: ${schemaVersion} (only 2 is supported; config-migrate.mts does not convert older keys: it replaces an unsupported file with one built from legacy settings and defaults, and keeps a backup of the original)`);
     }
 
     const runtimeRaw = raw.runtime;
@@ -620,6 +637,10 @@ export function loadConfig(root: string, deps: RuntimeDeps = defaultDeps()): Loa
     }
     if ("status" in contents) return contents;
 
+    if (contents.text.charCodeAt(0) === 0xFEFF) {
+        return refused(errorCodes.schemaVersionUnknown, "ai-workflow.toon starts with a UTF-8 byte order mark (BOM), so its first key is unreadable; save the file as UTF-8 without a BOM");
+    }
+
     const parsed = parseToon(contents.text);
     if ("status" in parsed) return parsed;
 
@@ -633,5 +654,8 @@ export function loadConfig(root: string, deps: RuntimeDeps = defaultDeps()): Loa
 export function inspectConfig(root: string, deps: RuntimeDeps = defaultDeps()): ConfigModel | Refusal {
     const result = loadConfig(root, deps);
     if ("status" in result) return result;
+    if (result.problems.length > 0) {
+        return refused(errorCodes.loadConfigRefused, `config has ${result.problems.length} problem(s); first: ${result.problems[0].text}`);
+    }
     return result.model;
 }

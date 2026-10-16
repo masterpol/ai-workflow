@@ -60,6 +60,8 @@ export interface FsDeps {
   lstatSync(file: string): StatLike;
   fstatSync(fd: number): StatLike;
   symlinkSync(target: string, link: string): void;
+  /** Hard link; fails with EEXIST when `link` exists (used for no-overwrite moves). */
+  linkSync(existing: string, link: string): void;
   rmSync(file: string, options?: { recursive?: boolean; force?: boolean }): void;
   rmdirSync(dir: string): void;
   renameSync(from: string, to: string): void;

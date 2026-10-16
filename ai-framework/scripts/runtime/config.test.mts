@@ -1,6 +1,6 @@
 import { describe, test } from "node:test";
 import assert from "node:assert";
-import { loadConfig, errorCodes, MAX_CONFIG_BYTES, inspectPath, oexLock, wxRename } from "./config.mts";
+import { loadConfig, inspectConfig, errorCodes, MAX_CONFIG_BYTES, inspectPath, oexLock, wxRename, registerIntegrationValidator, registerEngineValidator, registerCoordinatorValidator } from "./config.mts";
 import { createTestDeps, memoryFs, memoryToonFs, runScript, tempFixture, toonFixtureText } from "./test-helpers.mts";
 import type { FsDeps, RuntimeDeps, StatLike } from "./types.mts";
 
@@ -758,4 +758,167 @@ test("integrations.orca: missing block, missing engine, bad bounds and unknown k
 test("integrations.orca: a role worker missing from that coordinator's workers is incomplete", () => {
     const text = ROLES_BASELINE_TOON.replace("        roles:", "        workers[1]: opencode\n        roles:");
     assertProblemCode(loadText(text).problems, errorCodes.orchestrationWorkersIncomplete);
+});
+
+// ---------------------------------------------------------------------------
+// Audit cycle 1 (F1): parser linearity, validator isolation, array typing, seams.
+// ---------------------------------------------------------------------------
+
+function loadAny(text: string) {
+    return loadConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": text }, {})));
+}
+
+test("parser: pathological `key:` + spaces + lone line terminator stays linear at the 64 KiB cap", () => {
+    const cases: Record<string, string> = {
+        CR: "\r",
+        LS: "\u2028",
+        PS: "\u2029",
+        spaces: " ",
+    };
+    for (const [name, terminator] of Object.entries(cases)) {
+        const head = "a:";
+        const tail = terminator + "x\n";
+        const filler = " ".repeat(MAX_CONFIG_BYTES - 5 - (name === "spaces" ? 0 : terminator.length === 1 && terminator.charCodeAt(0) > 0x7f ? 2 : 0));
+        const text = head + filler + tail;
+        assert.ok(Buffer.byteLength(text) <= MAX_CONFIG_BYTES, name + " fixture within cap");
+        const start = Date.now();
+        const result = loadAny(text);
+        const elapsed = Date.now() - start;
+        assert.ok(elapsed < 500, name + " took " + elapsed + "ms");
+        assert.ok("status" in result || result.problems.length > 0, name + " must not be accepted silently");
+    }
+});
+
+test("parser: a lone CR/LS/PS inside a line is unrecognized, trailing CRLF still works", () => {
+    for (const bad of ["a: b\rc", "a: b\u2028c", "a: b\u2029c", "a\rb: 1"]) {
+        const result = loadAny(BASELINE_TOON + "\n" + bad);
+        assert.ok("model" in result, "should parse to a model with problems");
+        assert.ok(result.problems.some((p) => p.code === errorCodes.parserUnrecognized && p.text === "unrecognized TOON line"), JSON.stringify(bad));
+    }
+    const crlf = loadAny(BASELINE_TOON.split("\n").join("\r\n"));
+    assert.ok("model" in crlf);
+    assert.equal(crlf.problems.length, 0);
+});
+
+test("parser: line grammar equivalence for normal and malformed lines", () => {
+    const ok = loadAny(ROLES_BASELINE_TOON.replace("          implementation[2]: opencode,codex", "          implementation[2]  :   opencode,codex   \n          solo   : opencode"));
+    assert.ok("model" in ok);
+    assert.equal(ok.problems.length, 0);
+    assert.deepEqual(ok.model.integrations.orca.coordinators?.claude.roles, { implementation: ["opencode", "codex"], solo: "opencode" });
+    for (const bad of ["  : x", "has space: 1", "a[x]: 1", "a[1: 1", "a b", "\tkey: 1", "a[1][2]: 1", "ke.y: 1"]) {
+        const result = loadAny(BASELINE_TOON + "\n" + bad);
+        assert.ok("model" in result, JSON.stringify(bad));
+        assertProblemCode(result.problems, errorCodes.parserUnrecognized);
+        assert.ok(result.problems.some((p) => p.text === "unrecognized TOON line"), "line rejected: " + JSON.stringify(bad));
+    }
+});
+
+test("parser: duplicate-key check ignores inherited Object.prototype names", () => {
+    const text = ROLES_BASELINE_TOON.replace("          implementation[2]: opencode,codex", "          toString: opencode");
+    const result = loadAny(text);
+    assert.ok("model" in result);
+    assert.equal(result.problems.length, 0, JSON.stringify(result.problems));
+    assert.equal(result.model.integrations.orca.coordinators?.claude.roles?.toString, "opencode");
+    const dup = loadAny(ROLES_BASELINE_TOON.replace("          implementation[2]: opencode,codex", "          toString: a\n          toString: b"));
+    assert.ok("model" in dup && dup.problems.some((p) => /duplicate key "toString"/.test(p.text)));
+});
+
+test("loadConfig never throws when a registered validator throws", () => {
+    const boom = (): never => { throw new Error("boom"); };
+    registerEngineValidator("orca", boom);
+    try {
+        const result = loadAny(BASELINE_TOON);
+        assert.ok("model" in result);
+        assert.ok(result.problems.some((p) => p.code === errorCodes.validationType && /engine validator/.test(p.text) && /boom/.test(p.text)), JSON.stringify(result.problems));
+    } finally { registerEngineValidator("orca", () => null); }
+    registerIntegrationValidator("orca", boom);
+    try {
+        const result = loadAny(BASELINE_TOON);
+        assert.ok("model" in result);
+        assert.ok(result.problems.some((p) => p.code === errorCodes.validationType && /integration validator/.test(p.text)), JSON.stringify(result.problems));
+    } finally { registerIntegrationValidator("orca", () => null); }
+    registerCoordinatorValidator("claude", boom);
+    try {
+        const result = loadAny(ROLES_BASELINE_TOON);
+        assert.ok("model" in result);
+        assert.ok(result.problems.some((p) => p.code === errorCodes.validationType && /coordinator validator/.test(p.text)), JSON.stringify(result.problems));
+    } finally { registerCoordinatorValidator("claude", () => null); }
+});
+
+test("registered validators are invoked with the right value and their problems surface", () => {
+    const calls: Array<[string, string, unknown]> = [];
+    const finding = (code: string, text: string) => ({ code, text });
+    registerEngineValidator("orca", (k, v) => { calls.push(["engine", k, v]); return finding("ENGINE-X", "engine bad"); });
+    registerIntegrationValidator("orca", (k, v) => { calls.push(["integration", k, v]); return finding("INTEG-X", "integration bad"); });
+    registerCoordinatorValidator("claude", (k, v) => { calls.push(["coordinator", k, v]); return finding("COORD-X", "coordinator bad"); });
+    try {
+        const result = loadAny(ROLES_BASELINE_TOON);
+        assert.ok("model" in result);
+        const codes = result.problems.map((p) => p.code);
+        assert.ok(codes.includes("ENGINE-X") && codes.includes("INTEG-X") && codes.includes("COORD-X"), codes.join(","));
+        assert.deepEqual(calls.find((c) => c[0] === "engine"), ["engine", "orca", "1.4.224"]);
+        const integ = calls.find((c) => c[0] === "integration");
+        assert.equal(integ?.[1], "orca");
+        assert.equal((integ?.[2] as { engine: string }).engine, "1.4.224");
+        const coord = calls.find((c) => c[0] === "coordinator");
+        assert.equal(coord?.[1], "claude");
+        assert.deepEqual((coord?.[2] as { roles: unknown }).roles, { implementation: ["opencode", "codex"] });
+    } finally {
+        registerEngineValidator("orca", () => null);
+        registerIntegrationValidator("orca", () => null);
+        registerCoordinatorValidator("claude", () => null);
+    }
+});
+
+test("unknown integration slot is reported until a validator is registered for it", () => {
+    const text = BASELINE_TOON.replace("doctor:", "  extra:\n    k: v\ndoctor:");
+    const before = loadAny(text);
+    assert.ok("model" in before && before.problems.some((p) => /unknown integration "extra"/.test(p.text)));
+    let seen: unknown;
+    registerIntegrationValidator("extra", (_k, v) => { seen = v; return null; });
+    try {
+        const after = loadAny(text);
+        assert.ok("model" in after);
+        assert.equal(after.problems.length, 0);
+        assert.deepEqual(seen, { k: "v" });
+        assert.deepEqual(after.model.integrations.extra, { k: "v" });
+    } finally { registerIntegrationValidator("extra", () => null); }
+});
+
+test("coordinator role arrays reject non-string items", () => {
+    const result = loadAny(ROLES_BASELINE_TOON.replace("implementation[2]: opencode,codex", "implementation[2]: 7,null"));
+    assert.ok("model" in result);
+    assert.ok(result.problems.some((p) => p.code === errorCodes.validationType && /roles\.implementation/.test(p.text)), JSON.stringify(result.problems));
+});
+
+test("maxConcurrentWorkers: 0 is rejected, 1 is accepted", () => {
+    const zero = loadAny(BASELINE_TOON.replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 0"));
+    assert.ok("model" in zero);
+    assert.ok(zero.problems.some((p) => /maxConcurrentWorkers must be between 1 and 16/.test(p.text)));
+    const one = loadAny(BASELINE_TOON.replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 1"));
+    assert.ok("model" in one);
+    assert.equal(one.problems.length, 0);
+});
+
+test("inspectConfig returns the model when clean and a refusal when the load has problems", () => {
+    const clean = inspectConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": BASELINE_TOON }, {})));
+    assert.ok(!("status" in clean));
+    assert.equal(clean.schemaVersion, 2);
+    const proto = inspectConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": BASELINE_TOON + "\n__proto__: x" }, {})));
+    assert.equal(refusal(proto).status, "refused");
+    const unknown = inspectConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": BASELINE_TOON + "\nbogus: 1" }, {})));
+    assert.equal(refusal(unknown).status, "refused");
+    const absent = inspectConfig("/project", memoryDeps(memoryFs({}, {})));
+    assert.equal(refusal(absent).status, "missing");
+});
+
+test("schemaVersion refusal wording matches migrator behavior; a BOM has its own message", () => {
+    const v1 = refusal(loadAny(BASELINE_TOON.replace("schemaVersion: 2", "schemaVersion: 1")));
+    assert.equal(v1.code, errorCodes.schemaVersionUnknown);
+    assert.doesNotMatch(v1.text ?? "", /upgrade a v1 file/);
+    assert.match(v1.text ?? "", /replace|backup/i);
+    const bom = refusal(loadAny("\uFEFF" + BASELINE_TOON));
+    assert.equal(bom.code, errorCodes.schemaVersionUnknown);
+    assert.match(bom.text ?? "", /byte order mark|BOM/i);
+    assert.doesNotMatch(bom.text ?? "", /undefined/);
 });

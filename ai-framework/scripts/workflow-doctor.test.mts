@@ -8,6 +8,7 @@ import { fileURLToPath } from "node:url";
 import { createNodeDeps } from "./runtime/node.mts";
 import { createTestDeps } from "./runtime/test-helpers.mts";
 import { main } from "./workflow-doctor.mts";
+import { toonFixtureText } from "./runtime/test-helpers.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import type { TestContext } from "node:test";
@@ -212,7 +213,7 @@ test("doctor checks TypeScript syntax with Bun instead of skipping it", { skip: 
 test("doctor reports what ai_workflow_env.json would set and flags a file that would be ignored", async (t) => {
   const root = fixture(t);
   const cases: Array<[string | null, string, RegExp]> = [
-    [null, "info", /absent; defaults: runner node, Orca off/],
+    [null, "info", /absent; defaults: runner node, Orca off \(copy ai-framework\/templates\/ai-workflow\.example\.toon/],
     [JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }), "pass", /runner bun; Orca on/],
     [JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", OPENAI_API_KEY: "x" }), "warn", /ignored keys: OPENAI_API_KEY/],
     [JSON.stringify({ AI_WORKFLOW_RUNNER: "deno" }), "fail", /must be "node" or "bun"/],
@@ -230,6 +231,28 @@ test("doctor reports what ai_workflow_env.json would set and flags a file that w
     assert.ok(item, String(body));
     assert.deepEqual([item.status, detail.test(item.detail)], [status, true], `${body}: ${item.detail}`);
   }
+});
+
+test("doctor Workflow settings: a present ai-workflow.toon governs (TOON values, no legacy advice); a refused one fails", async (t) => {
+  const root = fixture(t);
+  write(root, "ai_workflow_env.json", JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" })); // must not be consulted
+  write(root, "ai-workflow.toon", toonFixtureText());
+  let capture = injected(root);
+  await main(["--json"], capture.deps);
+  let item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+  assert.deepEqual([item?.status, /governed by ai-workflow\.toon: runner node; Orca off/.test(item?.detail ?? "")], ["pass", true], item?.detail);
+  write(root, "ai-workflow.toon", toonFixtureText().replace("runner: node", "runner: bun"));
+  capture = injected(root);
+  await main(["--json"], capture.deps);
+  item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+  assert.match(item?.detail ?? "", /runner bun/);
+  fs.rmSync(path.join(root, "ai-workflow.toon"));
+  fs.symlinkSync(path.join(root, "nowhere"), path.join(root, "ai-workflow.toon"));
+  capture = injected(root);
+  await main(["--json"], capture.deps);
+  item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+  assert.equal(item?.status, "fail");
+  assert.doesNotMatch(item?.detail ?? "", /ai_workflow_env\.example\.json/);
 });
 
 test("fix restores missing scaffold files while retaining existing instance data", async (t) => {

@@ -10,7 +10,7 @@ import { fileURLToPath } from "node:url";
 
 import { createNodeDeps, pendingChildPids, posixGroupIsRunning } from "./node.mts";
 import { createBunDeps } from "./bun.mts";
-import { loadConfigEnv, loadWorkflowEnv, WORKFLOW_ENV_FILE } from "./env.mts";
+import { inspectWorkflowEnv, loadConfigEnv, loadWorkflowEnv, readLegacyFile, WORKFLOW_ENV_FILE } from "./env.mts";
 import { RUNNER_VAR, orcaMultiAgentEnabled, resolveRunner, selectRuntime } from "./select.mts";
 import type { RuntimeDeps } from "./types.mts";
 import { toonFixtureText } from "./test-helpers.mts";
@@ -784,5 +784,72 @@ test("loadConfig branch: selectRuntime reads the runner from ai-workflow.toon an
     assert.equal((await selectRuntime(root, { [RUNNER_VAR]: "node" })).runtime, "node");
     writeFileSync(join(root, TOON_FILE), "schemaVersion: 99\n");
     assert.equal((await selectRuntime(root, {})).runtime, "node", "invalid TOON selects the default runner");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("legacy settings reader is pinned: a file swapped for a FIFO or an out-of-root symlink after inspection is never read", needsFileSymlink, () => {
+  const base = createNodeDeps({});
+  const root = scratch();
+  const outside = scratch();
+  const file = join(root, WORKFLOW_ENV_FILE);
+  try {
+    writeFileSync(join(outside, "big.json"), ENV_JSON({ [RUNNER_VAR]: "bun", pad: "x".repeat(2_000_000) }));
+    for (const kind of ["fifo", "symlink"]) {
+      if (kind === "fifo" && (process.platform === "win32" || spawnSync("mkfifo", [join(outside, "probe")]).status !== 0)) continue;
+      rmSync(file, { force: true });
+      writeFileSync(file, ENV_JSON({ [RUNNER_VAR]: "node" }));
+      let swapped = false;
+      const swap = (): void => {
+        if (swapped) return;
+        swapped = true;
+        rmSync(file);
+        if (kind === "fifo") spawnSync("mkfifo", [file]); else symlinkSync(join(outside, "big.json"), file);
+      };
+      // Swap the leaf right after the first look at it: a check-then-read reader would follow the swap.
+      const racing: RuntimeDeps["fs"] = { ...base.fs,
+        lstatSync: (p: string) => { const stat = base.fs.lstatSync(p); if (p === file) swap(); return stat; },
+        statSync: (p: string) => { const stat = base.fs.statSync(p); if (p === file) swap(); return stat; } };
+      assert.deepEqual(loadConfigEnv(racing, base.path, root, {}), {}, kind);
+      assert.equal(inspectWorkflowEnv(racing, base.path, root).status === "valid", false, kind);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("readLegacyFile: symlink leaf, FIFO, directory and oversize are refused; a plain file is read; absent is missing", needsFileSymlink, () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  const outside = scratch();
+  try {
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "a.json").status, "missing");
+    writeFileSync(join(root, "a.json"), "{}");
+    assert.deepEqual(readLegacyFile(deps.fs, deps.path, root, "a.json"), { status: "ok", text: "{}" });
+    writeFileSync(join(outside, "x.json"), "{}");
+    symlinkSync(join(outside, "x.json"), join(root, "link.json"));
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "link.json").status, "refused");
+    writeFileSync(join(root, "big.json"), "#".repeat(70 * 1024));
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "big.json").status, "refused");
+    mkdirSync(join(root, "dir.json"));
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "dir.json").status, "refused");
+    if (process.platform !== "win32" && spawnSync("mkfifo", [join(root, "pipe.json")]).status === 0) {
+      assert.equal(readLegacyFile(deps.fs, deps.path, root, "pipe.json").status, "refused"); // would hang on a blocking read
+    }
+    // A stat that lies about the size cannot bypass the cap: the read itself is bounded.
+    const lying: RuntimeDeps["fs"] = { ...deps.fs, lstatSync: (p: string) => { const stat = deps.fs.lstatSync(p); return p.endsWith("big.json") ? Object.assign(Object.create(Object.getPrototypeOf(stat)), stat, { size: 10, isSymbolicLink: () => false, isFile: () => true }) : stat; },
+      fstatSync: (fd: number) => { const stat = deps.fs.fstatSync(fd); return Object.assign(Object.create(Object.getPrototypeOf(stat)), stat, { size: 10, isFile: () => true }); } };
+    assert.equal(readLegacyFile(lying, deps.path, root, "big.json").status, "refused");
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("loadConfigEnv: a throwing loader contributes nothing and never falls back to the legacy file", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun" }));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "bun" }, "no TOON: legacy fallback applies");
+    const throwing = { ...deps.fs, realpathSync: (): never => { throw new TypeError("boom"); } } as RuntimeDeps["fs"];
+    // realpath throwing is a refusal inside loadConfig (not "missing"), so the legacy file is not consulted.
+    assert.deepEqual(loadConfigEnv(throwing, deps.path, root, { X: "1" }), { X: "1" });
+    const exploding = new Proxy(deps.fs, { get: (target, key) => { if (key === "constants") throw new Error("boom"); return Reflect.get(target, key); } });
+    assert.deepEqual(loadConfigEnv(exploding, deps.path, root, { X: "1" }), { X: "1" });
   } finally { rmSync(root, { recursive: true, force: true }); }
 });

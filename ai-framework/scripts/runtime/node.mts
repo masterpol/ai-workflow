@@ -322,6 +322,7 @@ export const nodeFs: FsDeps = {
   lstatSync: (file) => fs.lstatSync(file),
   fstatSync: (fd) => fs.fstatSync(fd),
   symlinkSync: (target, link) => { fs.symlinkSync(target, link); },
+  linkSync: (existing, link) => { fs.linkSync(existing, link); },
   rmSync: (file, options) => { fs.rmSync(file, options); },
   rmdirSync: (dir) => { fs.rmdirSync(dir); },
   renameSync: (from, to) => { fs.renameSync(from, to); },

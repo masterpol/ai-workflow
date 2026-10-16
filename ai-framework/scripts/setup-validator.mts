@@ -205,7 +205,6 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   // absent = info (not yet migrated), invalid or refused = fail, valid = pass.
   async function checkWorkflowConfig(): Promise<void> {
     const check = { name: "Workflow config" };
-    if (!(await exists(CONFIG_FILE))) { record("info", check.name, `${CONFIG_FILE} absent; not yet migrated`); return; }
     const result = loadConfig(root, deps);
     if ("status" in result) {
       if (result.status === "missing") record("info", check.name, `${CONFIG_FILE} absent; not yet migrated`);

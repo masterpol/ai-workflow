@@ -44,6 +44,17 @@ type Reading = { state: "absent" } | { state: "refused"; reason: string } | { st
 interface Existing { kind: "absent" | "valid" | "unsupported" | "unregistered" | "unsafe" | "invalid"; text?: string; stat?: StatLike; detail?: string }
 
 const errorCode = (error: unknown): unknown => (error !== null && typeof error === "object" ? (error as { code?: unknown }).code : undefined);
+/** An error whose message is safe to print: it never carries an absolute path or raw OS/legacy text. */
+class MigrateError extends Error {
+  readonly code: string;
+  constructor(message: string, code = "MIGRATE-ERROR") { super(message); this.code = code; }
+}
+const safeCode = (error: unknown): string => {
+  const code = errorCode(error);
+  return typeof code === "string" && /^[A-Z0-9_-]{1,40}$/.test(code) ? code : "UNKNOWN";
+};
+/** Printable description of a caught error: our own messages verbatim, anything else only as an error code. */
+const describe = (error: unknown): string => (error instanceof MigrateError ? error.message : `error ${safeCode(error)}`);
 const isRecord = (value: unknown): value is Record<string, unknown> => value !== null && typeof value === "object" && !Array.isArray(value)
   && [Object.prototype, null].includes(Object.getPrototypeOf(value));
 
@@ -130,7 +141,14 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
   if (env.text !== undefined) {
     const value = parse(env.text)?.value;
     if (!isRecord(value)) return { error: `${LEGACY.env}: must be a JSON object` };
-    for (const key of Object.keys(value)) if (key !== "AI_WORKFLOW_RUNNER" && key !== "AI_WORKFLOW_ORCA_MULTI_AGENT") notes.push(`${LEGACY.env}: ignored key ${key}`);
+    let unprintable = 0;
+    for (const key of Object.keys(value)) {
+      if (key === "AI_WORKFLOW_RUNNER" || key === "AI_WORKFLOW_ORCA_MULTI_AGENT") continue;
+      // Legacy keys are untrusted: only a short [A-Za-z0-9_-] key is echoed; anything else is counted, never printed.
+      if (/^[A-Za-z0-9_-]{1,64}$/.test(key)) notes.push(`${LEGACY.env}: ignored key ${key}`);
+      else unprintable++;
+    }
+    if (unprintable) notes.push(`${LEGACY.env}: ${unprintable} ignored key(s) (unprintable)`);
     const rawRunner = value.AI_WORKFLOW_RUNNER;
     if (rawRunner !== undefined) {
       const name = typeof rawRunner === "string" ? rawRunner.trim().toLowerCase() : "";
@@ -140,7 +158,7 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
     const rawSwitch = value.AI_WORKFLOW_ORCA_MULTI_AGENT;
     if (rawSwitch !== undefined) {
       if (typeof rawSwitch !== "string" && typeof rawSwitch !== "boolean") return { error: `${LEGACY.env}: AI_WORKFLOW_ORCA_MULTI_AGENT must be a string or boolean` };
-      multiAgent = String(rawSwitch) === "true";
+      multiAgent = String(rawSwitch).trim().toLowerCase() === "true";
     }
   }
 
@@ -197,7 +215,7 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
 // ---- canonical TOON writer ------------------------------------------------------------------------------------
 
 function scalar(value: string): string {
-  if (!SAFE_TOKEN.test(value)) throw new Error(`value cannot be written as a TOON token: ${JSON.stringify(value)}`);
+  if (!SAFE_TOKEN.test(value)) throw new MigrateError("a value cannot be written as a TOON token");
   return value;
 }
 
@@ -256,6 +274,22 @@ function roundTrip(text: string, deps: RuntimeDeps): { model: ConfigModel } | { 
 
 const HARD_REFUSALS = new Set<string>([errorCodes.lexerSymlink, errorCodes.lexerOversize, errorCodes.lexerUnreadable, errorCodes.inspectPathEscape, errorCodes.inspectPathNotFile, errorCodes.inspectPathSymlink, errorCodes.inspectPathOversize]);
 
+/**
+ * Structured classification: the reader's `CONFIG-SCHEMA-VERSION-UNKNOWN` refusal counts as "unsupported" only when the
+ * version it names is a plain integer AND the file itself carries exactly that bare integer on a top-level
+ * `schemaVersion:` line. A quoted/crafted string value therefore never qualifies, whatever the message text contains.
+ */
+function unsupportedVersion(message: string | undefined, fileText: string): number | undefined {
+  const named = /^unsupported schemaVersion: (-?\d{1,9}) \(only 2 is supported[^\r\n]*\)$/.exec(message ?? "");
+  if (!named) return undefined;
+  const version = Number(named[1]);
+  if (!Number.isSafeInteger(version) || version === 2) return undefined;
+  const lines = fileText.split(/\r?\n/).filter((line) => /^schemaVersion\s*:/.test(line));
+  if (lines.length !== 1) return undefined;
+  const bare = /^schemaVersion\s*:\s*(-?\d{1,9})\s*(?:#.*)?$/.exec(lines[0]);
+  return bare !== null && Number(bare[1]) === version ? version : undefined;
+}
+
 function inspectExisting(base: string, deps: RuntimeDeps): Existing {
   let location: ReturnType<typeof inspectPath>;
   try { location = inspectPath(base, deps); }
@@ -270,12 +304,15 @@ function inspectExisting(base: string, deps: RuntimeDeps): Existing {
   if ("status" in loaded) {
     if (loaded.status === "missing") return { kind: "absent" };
     // An old-layout (schemaVersion 1) or future file is a well-formed but unsupported version: handled like any differing file.
-    if (loaded.code === errorCodes.schemaVersionUnknown && /unsupported schemaVersion: -?\d+\b/.test(loaded.text ?? "")) return { kind: "unsupported", detail: loaded.text, ...common };
+    if (loaded.code === errorCodes.schemaVersionUnknown) {
+      const version = unsupportedVersion(loaded.text, contents.text);
+      if (version !== undefined) return { kind: "unsupported", detail: `schemaVersion ${version}`, ...common };
+    }
     return HARD_REFUSALS.has(loaded.code ?? "") ? { kind: "unsafe", detail: loaded.text, ...common } : { kind: "invalid", detail: loaded.text, ...common };
   }
   if (!loaded.problems.length) return { kind: "valid", ...common };
   // A name no validator is registered for is an unregistered slot (X4 pass 3): refuse, but it is not a corrupt file.
-  const slots = loaded.problems.filter((item) => /^unknown (integration|engine key) /.test(item.text));
+  const slots = loaded.problems.filter((item) => /^unknown integration /.test(item.text));
   if (slots.length && loaded.problems.every((item) => slots.includes(item) || item.text === "unparsed content remains after errors")) {
     return { kind: "unregistered", detail: slots.map((item) => item.text).join("; "), ...common };
   }
@@ -296,44 +333,74 @@ function readState(base: string, deps: RuntimeDeps): WrittenState | undefined {
 
 // ---- guarded writers ------------------------------------------------------------------------------------------
 
-/** Creates `relative` one component at a time; a symlink or a non-directory component is a refusal. */
-function ensureDirectory(base: string, relative: string, deps: RuntimeDeps): void {
+interface DirPin { relative: string; dev: number; ino: number }
+
+/** Creates `relative` one component at a time; a symlink or a non-directory component is a refusal. Returns the final directory's identity. */
+function ensureDirectory(base: string, relative: string, deps: RuntimeDeps): DirPin {
   const { fs, path } = deps;
   let current = base;
+  let stat: StatLike | undefined;
   for (const part of relative.split("/")) {
     current = path.join(current, part);
-    let stat: StatLike | undefined;
+    stat = undefined;
     try { stat = fs.lstatSync(current); }
     catch (error) { if (errorCode(error) !== "ENOENT") throw error; }
-    if (!stat) { fs.mkdirSync(current, { recursive: false, mode: 0o755 }); continue; }
-    if (stat.isSymbolicLink() || !stat.isDirectory()) throw new Error(`${relative}: ${part} is not a plain directory`);
+    if (!stat) { fs.mkdirSync(current, { recursive: false, mode: 0o755 }); stat = fs.lstatSync(current); }
+    if (stat.isSymbolicLink() || !stat.isDirectory()) throw new MigrateError(`${relative}: ${part} is not a plain directory`, "DIR-NOT-PLAIN");
   }
+  return { relative, dev: stat?.dev as number, ino: stat?.ino as number };
 }
 
-/** wx temp + rename, then read-back; the destination is never written in place. */
-function writeGuarded(target: string, text: string, mode: number, deps: RuntimeDeps): string | undefined {
-  const outcome = wxRename(target, (temp) => deps.fs.writeFileSync(temp, text, { flag: "wx", mode }), deps);
+/** Re-walks every ancestor (lstat, no links), compares the final directory's dev/ino with the pin, and requires realpath to equal the lexical path. */
+function assertPinned(base: string, pin: DirPin, deps: RuntimeDeps): void {
+  const { fs, path } = deps;
+  let current = base;
+  let stat: StatLike | undefined;
+  for (const part of pin.relative.split("/")) {
+    current = path.join(current, part);
+    stat = fs.lstatSync(current);
+    if (stat.isSymbolicLink() || !stat.isDirectory()) throw new MigrateError("a backup directory was replaced during the write", "DIR-PIN-CHANGED");
+  }
+  if (!stat || stat.dev !== pin.dev || stat.ino !== pin.ino || fs.realpathSync(current) !== current) throw new MigrateError("a backup directory was replaced during the write", "DIR-PIN-CHANGED");
+}
+
+/** wx temp + rename; with a pin the parent directory identity is re-checked before the temp is written and again right before the rename. */
+function writeGuarded(target: string, text: string, mode: number, deps: RuntimeDeps, pinned?: { base: string; pin: DirPin }): string | undefined {
+  const outcome = wxRename(target, (temp) => {
+    if (pinned) assertPinned(pinned.base, pinned.pin, deps);
+    deps.fs.writeFileSync(temp, text, { flag: "wx", mode });
+    if (pinned) assertPinned(pinned.base, pinned.pin, deps);
+  }, deps);
   if ("refused" in outcome) return outcome.refused.text ?? outcome.refused.code;
+  if (pinned) { try { assertPinned(pinned.base, pinned.pin, deps); } catch { return "directory identity changed after the rename"; } }
   return undefined;
-}
-
-function rejectedPath(base: string, stamp: string, deps: RuntimeDeps): string {
-  const first = deps.path.join(base, `${CONFIG_FILE}.rejected`);
-  try { deps.fs.lstatSync(first); } catch (error) { if (errorCode(error) === "ENOENT") return first; throw error; }
-  return deps.path.join(base, `${CONFIG_FILE}.rejected.${stamp}`);
 }
 
 function stampNow(deps: RuntimeDeps): string {
   return `${new Date(deps.clock.now()).toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "Z")}-${deps.crypto.randomUUID().slice(0, 8)}`;
 }
 
+/** link-then-unlink: `link` fails with EEXIST, so an existing `.rejected` is never overwritten, even under a race. */
 function moveAside(base: string, expected: StatLike, stamp: string, deps: RuntimeDeps): string {
-  const target = deps.path.join(base, CONFIG_FILE);
-  const current = inspectPath(base, deps);
-  if ("status" in current || current.stat.dev !== expected.dev || current.stat.ino !== expected.ino) throw new Error(`${CONFIG_FILE} changed before it could be moved aside`);
-  const destination = rejectedPath(base, stamp, deps);
-  deps.fs.renameSync(target, destination);
-  return deps.path.relative(base, destination);
+  const { fs, path } = deps;
+  const target = path.join(base, CONFIG_FILE);
+  // lstat only (no realpath/open): this must also work for an unreadable file, e.g. when rolling back a failed verification.
+  const current = fs.lstatSync(target);
+  if (current.isSymbolicLink() || !current.isFile() || current.dev !== expected.dev || current.ino !== expected.ino) throw new MigrateError(`${CONFIG_FILE} changed before it could be moved aside`, "CHANGED");
+  let destination: string | undefined;
+  for (const candidate of [path.join(base, `${CONFIG_FILE}.rejected`), path.join(base, `${CONFIG_FILE}.rejected.${stamp}`)]) {
+    try { fs.linkSync(target, candidate); destination = candidate; break; }
+    catch (error) { if (errorCode(error) !== "EEXIST") throw error; }
+  }
+  if (!destination) throw new MigrateError("no free .rejected name", "REJECTED-EXISTS");
+  const linked = fs.lstatSync(destination);
+  const now = fs.lstatSync(target);
+  if (linked.dev !== expected.dev || linked.ino !== expected.ino || now.dev !== expected.dev || now.ino !== expected.ino) {
+    try { fs.unlinkSync(destination); } catch { /* the link is ours; best effort */ }
+    throw new MigrateError(`${CONFIG_FILE} changed before it could be moved aside`, "CHANGED");
+  }
+  fs.unlinkSync(target);
+  return path.relative(base, destination);
 }
 
 /** Fresh Node/Bun process re-parses the on-disk file with the on-disk reader; the running module's cache is not trusted. */
@@ -370,7 +437,7 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
   if ("error" in built) { results.push(entry(CONFIG_FILE, "manual", "refuse", built.error)); return fail(1); }
   let text: string;
   try { text = emitToon(built.model); }
-  catch (error) { results.push(entry(CONFIG_FILE, "manual", "refuse", `transform failed before any write: ${error instanceof Error ? error.message : String(error)}`)); return fail(1, built.notes); }
+  catch (error) { results.push(entry(CONFIG_FILE, "manual", "refuse", `transform failed before any write: ${describe(error)}`)); return fail(1, built.notes); }
   const trip = roundTrip(text, deps);
   if ("error" in trip) { results.push(entry(CONFIG_FILE, "manual", "refuse", `transform failed before any write: ${trip.error}`)); return fail(1, built.notes); }
   const bytesSha = deps.crypto.sha256Hex(text);
@@ -382,9 +449,9 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
     const existing = inspectExisting(base, deps);
     if (existing.kind === "absent") return { existing, action: "write" };
     if (existing.kind === "unsupported") {
-      const why = `ai-workflow.toon has an unsupported schemaVersion (${existing.detail}); re-run with --force to back it up and replace it`;
+      const why = `ai-workflow.toon has an unsupported schemaVersion (${existing.detail}); --force replaces it with a file built from the legacy settings or defaults (its values are not converted); the original is kept in the backup`;
       if (!options.force) return { existing, action: "refuse", outcome: { exitCode: 1, notes: built.notes, results: [entry(CONFIG_FILE, "manual", "refuse", why)] } };
-      return { existing, action: "overwrite", provenance: "replaced an unsupported schemaVersion file (old layout); original kept in the backup" };
+      return { existing, action: "overwrite", provenance: "replaced an unsupported schemaVersion file with one built from legacy settings/defaults (values not converted); original kept in the backup" };
     }
     if (existing.kind === "valid") {
       if (existing.text === text) return { existing, action: "unchanged" };
@@ -436,7 +503,7 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
         const moved = moveAside(base, existing.stat, stamp, deps);
         results.push(entry(CONFIG_FILE, "manual", "reject", `unparseable (${existing.detail}); moved to ${moved}; fix or discard it, then re-run --apply`));
       } catch (error) {
-        results.push(entry(CONFIG_FILE, "manual", "reject", error instanceof Error ? error.message : "could not move the file aside"));
+        results.push(entry(CONFIG_FILE, "manual", "reject", error instanceof MigrateError ? error.message : `could not move the file aside (${describe(error)})`));
       }
       return fail(1, built.notes);
     }
@@ -446,16 +513,19 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
     const toBackup: LegacyFile[] = [...built.files];
     if (locked.action === "overwrite" && existing.text !== undefined) toBackup.push({ relative: CONFIG_FILE, text: existing.text });
     try {
-      if (toBackup.length) ensureDirectory(base, backupRoot, deps);
+      const pin = toBackup.length ? ensureDirectory(base, backupRoot, deps) : undefined;
       for (const file of toBackup) {
-        const destination = path.join(base, backupRoot, file.relative.replace(/\//g, "__"));
-        const problem = writeGuarded(destination, file.text, 0o600, deps);
-        if (problem) throw new Error(problem);
-        if (fs.readFileSync(destination) !== file.text) throw new Error("backup read-back differs");
-        results.push(entry(file.relative, "applied", "backup", `${backupRoot}/${file.relative.replace(/\//g, "__")}`));
+        const flat = file.relative.replace(/\//g, "__");
+        const problem = writeGuarded(path.join(base, backupRoot, flat), file.text, 0o600, deps, pin && { base, pin });
+        if (problem) throw new MigrateError(problem, "BACKUP-WRITE");
+        // lstat-based read-back (no link following, identity-checked), then the parent pin once more.
+        const back = readSafe(base, `${backupRoot}/${flat}`, Math.max(MAX_LEGACY_BYTES, file.text.length * 4 + 16), deps);
+        if (back.state !== "ok" || back.text !== file.text) throw new MigrateError("backup read-back differs", "BACKUP-READBACK");
+        if (pin) assertPinned(base, pin, deps);
+        results.push(entry(file.relative, "applied", "backup", `${backupRoot}/${flat}`));
       }
     } catch (error) {
-      results.push(entry(BACKUP_DIR, "manual", "backup", `backup failed, nothing written to ${CONFIG_FILE}: ${error instanceof Error ? error.message : String(error)}`));
+      results.push(entry(BACKUP_DIR, "manual", "backup", `backup failed, nothing written to ${CONFIG_FILE}: ${describe(error)}`));
       return fail(1, built.notes);
     }
 
@@ -470,29 +540,31 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
     if (problem) { results.push(entry(CONFIG_FILE, "manual", "refuse", `write failed: ${problem}`)); return fail(1, built.notes); }
 
     // Post-write: path pin, canonical-bytes digest, parsed-model digest, then the subprocess re-parse.
-    const failure = (() => {
-      const location = inspectPath(base, deps);
-      if ("status" in location) return location.text ?? "config path refused after write";
-      if (existing.stat && location.stat.dev === existing.stat.dev && location.stat.ino === existing.stat.ino) return "destination inode did not change";
-      const read = readBoundedFile(location, deps);
-      if ("status" in read) return read.text ?? "config file refused after write";
-      if (deps.crypto.sha256Hex(read.text) !== bytesSha) return "canonical-bytes digest of the file on disk differs from what was written";
-      const loaded = loadConfig(base, deps);
-      if ("status" in loaded || loaded.problems.length) return "written file does not parse cleanly";
-      if (modelHash(loaded.model, deps) !== parsedSha) return "parsed-model digest of the file on disk differs";
-      return revalidate(base, parsedSha, deps);
+    const failure = ((): string | undefined => {
+      try {
+        const location = inspectPath(base, deps);
+        if ("status" in location) return location.text ?? "config path refused after write";
+        if (existing.stat && location.stat.dev === existing.stat.dev && location.stat.ino === existing.stat.ino) return "destination inode did not change";
+        const read = readBoundedFile(location, deps);
+        if ("status" in read) return read.text ?? "config file refused after write";
+        if (deps.crypto.sha256Hex(read.text) !== bytesSha) return "canonical-bytes digest of the file on disk differs from what was written";
+        const loaded = loadConfig(base, deps);
+        if ("status" in loaded || loaded.problems.length) return "written file does not parse cleanly";
+        if (modelHash(loaded.model, deps) !== parsedSha) return "parsed-model digest of the file on disk differs";
+        return revalidate(base, parsedSha, deps);
+      } catch (error) { return `verification error (${describe(error)})`; }
     })();
     if (failure !== undefined) {
       const notes = [...built.notes];
       try {
-        const location = inspectPath(base, deps);
-        const aside = "status" in location ? undefined : moveAside(base, location.stat, stamp, deps);
+        const placed = fs.lstatSync(target);
+        const aside = placed.isSymbolicLink() || !placed.isFile() ? undefined : moveAside(base, placed, stamp, deps);
         if (aside) notes.push(`rejected output kept at ${aside}`);
         if (locked.action === "overwrite" && existing.text !== undefined) {
           const restore = writeGuarded(target, existing.text, 0o644, deps);
           notes.push(restore ? `could not restore the previous file: ${restore}` : "previous file restored");
         }
-      } catch (error) { notes.push(`rollback incomplete: ${error instanceof Error ? error.message : "unknown"}`); }
+      } catch (error) { notes.push(`rollback incomplete: ${describe(error)}`); }
       results.push(entry(CONFIG_FILE, "manual", "revalidate", `post-write verification failed: ${failure}`));
       return fail(1, notes);
     }
@@ -501,12 +573,12 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
 
     // dual-hash record: canonical-bytes-written + parsed-model-as-read. --force compares disk bytes to the first only.
     try {
-      ensureDirectory(base, BACKUP_DIR, deps);
+      const pin = ensureDirectory(base, BACKUP_DIR, deps);
       const record: WrittenState = { schemaVersion: 1, bytesSha256: bytesSha, modelSha256: parsedSha, writtenAt: new Date(deps.clock.now()).toISOString() };
-      const recordProblem = writeGuarded(path.join(base, STATE_FILE), `${JSON.stringify(record, null, 2)}\n`, 0o600, deps);
-      if (recordProblem) throw new Error(recordProblem);
+      const recordProblem = writeGuarded(path.join(base, STATE_FILE), `${JSON.stringify(record, null, 2)}\n`, 0o600, deps, { base, pin });
+      if (recordProblem) throw new MigrateError(recordProblem, "STATE-WRITE");
     } catch (error) {
-      results.push(entry(STATE_FILE, "manual", "write", `could not record the dual-hash state: ${error instanceof Error ? error.message : String(error)}`));
+      results.push(entry(STATE_FILE, "manual", "write", `could not record the dual-hash state: ${describe(error)}`));
     }
     results.push(...ignoreLine(base, deps));
     const exitCode = results.some((item) => item.status === "manual") ? 1 : 0;
@@ -516,15 +588,18 @@ export function migrate(root: string, options: MigrateOptions, deps: RuntimeDeps
   }
 }
 
-/** Appends `ai-workflow.toon` to an existing target `.gitignore`; never creates one and never follows a symlink. */
+/** Appends `ai-workflow.toon` and the backup directory to an existing target `.gitignore`; never creates one and never follows a symlink. */
 function ignoreLine(base: string, deps: RuntimeDeps): ConfigMigration[] {
   const reading = readSafe(base, ".gitignore", MAX_GITIGNORE_BYTES, deps);
-  if (reading.state === "absent") return [entry(".gitignore", "ready", "ignore", `no .gitignore; add "${CONFIG_FILE}" yourself if the file should stay local`)];
-  if (reading.state === "refused") return [entry(".gitignore", "manual", "ignore", `${reading.reason}; add "${CONFIG_FILE}" manually`)];
-  if (reading.text.split(/\r?\n/).some((line) => line.trim().replace(/^\//, "") === CONFIG_FILE)) return [entry(".gitignore", "applied", "ignore", "already ignored")];
-  const next = `${reading.text}${reading.text === "" || reading.text.endsWith("\n") ? "" : "\n"}${CONFIG_FILE}\n`;
+  const wanted = [CONFIG_FILE, `${BACKUP_DIR}/`];
+  if (reading.state === "absent") return [entry(".gitignore", "ready", "ignore", `no .gitignore; add "${CONFIG_FILE}" and "${BACKUP_DIR}/" yourself if they should stay local`)];
+  if (reading.state === "refused") return [entry(".gitignore", "manual", "ignore", `${reading.reason}; add "${CONFIG_FILE}" and "${BACKUP_DIR}/" manually`)];
+  const normalised = new Set(reading.text.split(/\r?\n/).map((line) => line.trim().replace(/^\//, "").replace(/\/$/, "")));
+  const missing = wanted.filter((line) => !normalised.has(line.replace(/\/$/, "")));
+  if (!missing.length) return [entry(".gitignore", "applied", "ignore", "already ignored")];
+  const next = `${reading.text}${reading.text === "" || reading.text.endsWith("\n") ? "" : "\n"}${missing.join("\n")}\n`;
   const problem = writeGuarded(deps.path.join(base, ".gitignore"), next, reading.stat.mode & 0o777, deps);
-  return [problem ? entry(".gitignore", "manual", "ignore", `could not append: ${problem}`) : entry(".gitignore", "applied", "ignore", `appended ${CONFIG_FILE}`)];
+  return [problem ? entry(".gitignore", "manual", "ignore", `could not append: ${problem}`) : entry(".gitignore", "applied", "ignore", `appended ${missing.join(", ")}`)];
 }
 
 // ---- CLI ------------------------------------------------------------------------------------------------------
@@ -555,7 +630,7 @@ export function main(argv: string[], deps: RuntimeDeps): number {
   const apply = flags.has("--apply");
   let outcome: MigrationOutcome;
   try { outcome = migrate(root, { apply, force: flags.has("--force") }, deps); }
-  catch (error) { deps.io.stderr.write(`config-migrate: ${error instanceof Error ? error.message : String(error)}\n`); return 1; }
+  catch (error) { deps.io.stderr.write(`config-migrate: ${describe(error)}\n`); return 1; }
   if (flags.has("--json")) {
     deps.io.stdout.write(`${JSON.stringify({ mode: apply ? "apply" : "dry-run", exitCode: outcome.exitCode, results: outcome.results, notes: outcome.notes, toon: apply ? undefined : outcome.toon }, null, 2)}\n`);
     return outcome.exitCode;

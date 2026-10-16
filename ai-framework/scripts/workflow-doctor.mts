@@ -507,8 +507,17 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // the defaults, so say what would actually be used.
   function checkWorkflowSettings() {
     const name = "Workflow settings";
+    let config: ReturnType<typeof loadConfig> | undefined;
+    try { config = loadConfig(root, deps); } catch { config = undefined; }
+    if (config === undefined) { record("fail", name, `${CONFIG_FILE} could not be read; the legacy file is not consulted`); return; }
+    if (!("status" in config)) {
+      if (config.problems.length) { record("fail", name, `${CONFIG_FILE} invalid; settings ignored (see the Workflow config check)`); return; }
+      record("pass", name, `governed by ${CONFIG_FILE}: runner ${config.model.runtime.runner}; Orca ${config.model.integrations.orca.multiAgent ? "on" : "off"}; process environment overrides the file`);
+      return;
+    }
+    if (config.status !== "missing") { record("fail", name, `${CONFIG_FILE} refused (${config.code}); settings governed by it are not applied and the legacy file is not consulted`); return; }
     const result = inspectWorkflowEnv(deps.fs, deps.path, root);
-    if (result.status === "missing") { record("info", name, "ai_workflow_env.json absent; defaults: runner node, Orca off (copy ai_workflow_env.example.json to set them)"); return; }
+    if (result.status === "missing") { record("info", name, `${CONFIG_FILE} and ai_workflow_env.json absent; defaults: runner node, Orca off (copy ai-framework/templates/ai-workflow.example.toon to ${CONFIG_FILE} to set them)`); return; }
     if (result.status === "refused") { record("fail", name, `ai_workflow_env.json ignored: ${result.problems.join("; ")}`); return; }
     if (result.status === "invalid") { record("fail", name, `ai_workflow_env.json has problems and is partly or wholly ignored: ${result.problems.join("; ")}`); return; }
     const ignored = result.ignoredKeys.length ? `; ignored keys: ${result.ignoredKeys.slice(0, 5).join(", ")}` : "";

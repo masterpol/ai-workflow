@@ -2,6 +2,7 @@ import { runDirect } from "./runtime/cli.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { loadConfig } from "./runtime/config.mts";
+import { readLegacyFile } from "./runtime/env.mts";
 import * as registryModule from "./skill-registry.mts";
 import catalogJson from "../integrations/skill-defaults.json" with { type: "json" };
 
@@ -84,14 +85,10 @@ export function loadModes(root: string, deps: RuntimeDeps = defaultDeps()): Mode
 }
 
 function loadLegacyModes(root: string, deps: RuntimeDeps): ModesState | null {
-  const { fs, path } = deps;
-  const full = path.join(root, MODES_FILE);
-  if (!fs.existsSync(full)) return null;
-  const realRoot = fs.realpathSync(root);
-  const realFull = fs.realpathSync(full);
-  const relative = path.relative(realRoot, realFull);
-  if (relative.startsWith("..") || path.isAbsolute(relative)) throw new Error("Mode state file resolves outside the project root");
-  const value: unknown = JSON.parse(fs.readFileSync(full));
+  const read = readLegacyFile(deps.fs, deps.path, root, MODES_FILE);
+  if (read.status === "missing") return null;
+  if (read.status === "refused") throw new Error(`Mode state file refused: ${read.reason}`);
+  const value: unknown = JSON.parse(read.text);
   if (!isRecord(value) || value.schemaVersion !== 1) throw new Error("Unsupported or invalid mode state schema");
   const caveman = value.caveman;
   if (caveman !== undefined) {

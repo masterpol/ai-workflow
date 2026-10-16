@@ -430,3 +430,10 @@ b2 -> over-the-hill, b3 -> over-the-hill (producer invariants hold). Drift d35-d
 
 - Coordinator whole-bundle run: 1456 tests, 1454 pass, 0 fail, 2 skipped. setup-validator 23 checks READY; doctor READY WITH WARNINGS (1, existing Runtime boundary note). `orca-policy report` eligible for all 3 vendors on the real root file. AGENTS.md == CLAUDE.md, build SKILL mirrors identical.
 - Drift d42-d45; d44 open.
+
+## Audit cycle 1 (2026-10-16, orca=normal; HEAD b8aee99)
+
+Dispatched: code-reviewer (opus), security-reviewer (opus), test-coverage-checker (sonnet), cross-pitch-conflict-checker (sonnet), each in a detached scratch worktree; independent: no (no canary); read-only: verified by `review-bench guard check` (headChanged false, changed []). Cross-file interactions: reviewed.
+Findings: 1 must-fix (verified: 6234 ms on a 64 KiB file), 15 should-fix, ~15 acknowledged. Fixes applied in three disjoint-file passes (F1 config.mts, F2 migrator, F3 readers/doctor/docs).
+Evidence after fixes (coordinator): full suite 1489 tests, 1487 pass, 0 fail, 2 skipped; Bun config/migrate/bundle-sync 139/139; redos PoC 2 ms (was 6234); ancestor-race PoC DIR-PIN-CHANGED, victim untouched; postthrow PoC rolled back, no path; envrace FIFO no longer hangs; setup-validator READY (23), doctor READY WITH WARNINGS (1, existing), graphify CLEAN, docs-links 47 files 0 broken, AGENTS.md == CLAUDE.md.
+Drift: d48-d53.

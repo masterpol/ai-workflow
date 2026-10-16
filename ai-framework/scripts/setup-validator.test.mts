@@ -56,7 +56,10 @@ function makeDeps(files: Record<string, string>, script: (call: Call) => RunResu
   const deps: RuntimeDeps = {
     runtime: "node",
     fs: {
-      readFileSync: unsupported, writeFileSync: unsupported, existsSync: unsupported, readdirSync: unsupported, mkdirSync: unsupported, realpathSync: unsupported, writeFile: unsupported,
+      readFileSync: unsupported, writeFileSync: unsupported, existsSync: unsupported, readdirSync: unsupported, mkdirSync: unsupported, writeFile: unsupported,
+      // The in-memory fs cannot inspect real paths: an absent path is ENOENT, a present one is an unsupported (refused) inspection.
+      realpathSync: (file) => { if (file === ROOT) return ROOT; throw Object.assign(new Error(`ENOENT ${file}`), { code: "ENOENT" }); },
+      lstatSync: (file) => { throw store.has(file) ? new Error("not inspectable in memory") : Object.assign(new Error(`ENOENT ${file}`), { code: "ENOENT" }); },
       readFile: async (file) => { const text = store.get(file); if (text === undefined) throw new Error(`ENOENT ${file}`); return text; },
       exists: async (file) => store.has(file),
       readdir: async (dir) => { const names = dirEntries(dir); if (!names) throw new Error(`ENOENT ${dir}`); return names; },
@@ -323,6 +326,18 @@ test("Workflow config is info when ai-workflow.toon is absent, and never fails t
   const report = JSON.parse(run.out.join("")) as Report;
   const item = report.results.find((result) => result.name === "Workflow config");
   assert.deepEqual([item?.status, /not yet migrated/.test(item?.detail ?? "")], ["info", true]);
+});
+
+test("Workflow config is fail (LEXER-SYMLINK) for a dangling symlink ai-workflow.toon, never absent", async () => {
+  // A dangling symlink does not "exist" for exists(), so the old pre-check reported it as absent.
+  const base = makeDeps(baseFiles(), healthy);
+  const target = `${ROOT}/ai-workflow.toon`;
+  const lstat = base.deps.fs.lstatSync;
+  const deps: RuntimeDeps = { ...base.deps, fs: { ...base.deps.fs, lstatSync: (file: string) => file === target ? ({ isSymbolicLink: () => true } as ReturnType<typeof lstat>) : lstat(file) } };
+  assert.equal(await main(["--json"], deps, libs), 1);
+  const item = (JSON.parse(base.out.join("")) as Report).results.find((result) => result.name === "Workflow config");
+  assert.equal(item?.status, "fail");
+  assert.match(item?.detail ?? "", /symlink/i);
 });
 
 test("Workflow config is fail when a present ai-workflow.toon is refused by the reader", async () => {

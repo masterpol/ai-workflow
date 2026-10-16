@@ -117,7 +117,7 @@ test("a symlinked modes.json is refused, whether the leaf or an ancestor directo
   write(outside, "modes.json", JSON.stringify({ schemaVersion: 1, caveman: { default: "full" } }));
   fs.mkdirSync(path.join(root, ".project/skills"), { recursive: true });
   fs.symlinkSync(path.join(outside, "modes.json"), path.join(root, ".project/skills/modes.json"));
-  assert.throws(() => resolveMode(root, { phase: "build" }), /outside the project root/i);
+  assert.throws(() => resolveMode(root, { phase: "build" }), /symlink/i);
 
   const root2 = fixture(t);
   const outside2 = fixture(t);
@@ -426,6 +426,7 @@ function fake(files: Record<string, string>, options: { cwd?: string; status?: n
   const err: string[] = [];
   const spawned: string[][] = [];
   const base = createNodeDeps({});
+  const cursors = new Map<number, number>();
   const deps: RuntimeDeps = {
     ...base,
     fs: {
@@ -433,6 +434,21 @@ function fake(files: Record<string, string>, options: { cwd?: string; status?: n
       existsSync: (file) => Object.hasOwn(files, file),
       readFileSync: (file) => { if (!Object.hasOwn(files, file)) throw new Error(`ENOENT: ${file}`); return files[file]; },
       realpathSync: (file) => file,
+      lstatSync: (file) => {
+        if (!Object.hasOwn(files, file)) throw Object.assign(new Error(`ENOENT: ${file}`), { code: "ENOENT" });
+        return { isSymbolicLink: () => false, isFile: () => true, size: files[file].length, dev: 1, ino: Object.keys(files).indexOf(file) + 1 } as ReturnType<RuntimeDeps["fs"]["lstatSync"]>;
+      },
+      openSync: (file) => { const index = Object.keys(files).indexOf(file); if (index < 0) throw new Error(`ENOENT: ${file}`); return 100 + index; },
+      fstatSync: (fd) => ({ isFile: () => true, size: files[Object.keys(files)[fd - 100]].length, dev: 1, ino: fd - 99 }) as ReturnType<RuntimeDeps["fs"]["fstatSync"]>,
+      readSync: (fd, buffer, offset, length, position) => {
+        const bytes = new TextEncoder().encode(files[Object.keys(files)[fd - 100]]);
+        const start = position ?? cursors.get(fd) ?? 0;
+        const count = Math.max(0, Math.min(length, bytes.length - start));
+        cursors.set(fd, start + count);
+        buffer.set(bytes.subarray(start, start + count), offset);
+        return count;
+      },
+      closeSync: () => undefined,
     },
     child: {
       runSync: (command, args) => { spawned.push([command, ...args]); return { status: options.status ?? 0, signal: null, stdout: "", stderr: "" }; },

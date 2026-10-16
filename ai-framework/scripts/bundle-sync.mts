@@ -11,7 +11,8 @@ import { migrateInstanceEntries } from "./runtime/migrate.mts";
  * Only the bundle's canonical directories are compared (rules, workflow, templates,
  * integrations, scripts, hooks, canonical agents/skills, and their OpenCode/Codex/Cursor
  * mirrors). .project/, settings files, and credentials are never touched; AGENTS.md,
- * CLAUDE.md, opencode.json, and .codex/config.toml are only flagged for manual review.
+ * CLAUDE.md, SETUP.md, README.md, opencode.json, and .codex/config.toml are only flagged for
+ * manual review.
  *
  * Local customizations are protected by a three-way comparison against the bundle version
  * the project was last synced from ("base"): the hash manifest in .project/.bundle-sync.json,

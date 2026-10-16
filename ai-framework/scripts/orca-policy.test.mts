@@ -11,7 +11,8 @@ import { pathToFileURL } from "node:url";
 
 import { MAX_POLICY_BYTES, POLICY_FILE, VENDORS, main, readPolicy, report, validatePolicy } from "./orca-policy.mts";
 import { createNodeDeps } from "./runtime/node.mts";
-import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
+import { orcaPolicyToonText, toonFixtureText } from "./runtime/test-helpers.mts";
+import { registerIntegrationValidator } from "./runtime/config.mts";
 import type { FsDeps, RuntimeDeps, StatLike } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -514,4 +515,19 @@ test("loadConfig branch: a TOON policy keeps the 1..16 concurrency and legacy re
   const ok = report(toonRoot(t, orcaPolicyToonText(true)), "claude");
   assert.deepEqual(ok.roles, { implementation: "codex", review: "opencode" });
   assert.deepEqual(ok.workers, ["codex", "opencode"]);
+});
+
+test("a throw while loading ai-workflow.toon never widens to the legacy orchestration.json (fail closed)", (t) => {
+  const root = fixture(t);
+  write(root, policy(true)); // a valid legacy policy that would be eligible
+  assert.equal(readPolicy(root).status, "valid", "legacy file alone is valid");
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), toonFixtureText().replace("doctor:", "  zz-throws:\n    a: 1\ndoctor:"));
+  registerIntegrationValidator("zz-throws", () => { throw new Error("validator exploded"); });
+  const result = readPolicy(root);
+  assert.notEqual(result.status, "valid", "a throwing loader is a refusal, not a fallback to the legacy file");
+  assert.notEqual(result.status, "missing");
+  // Stub deps whose loader cannot even start must also fail closed.
+  const base = createNodeDeps({});
+  const broken = { ...base, get fs(): never { throw new Error("fs unavailable"); } } as unknown as RuntimeDeps;
+  assert.notEqual(readPolicy(root, broken).status, "valid");
 });

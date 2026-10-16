@@ -1,9 +1,9 @@
 # Optional Orca vendor policy
 
-Orca orchestration is opt-in. The optional local policy is the `orchestration` block of the project-root
-`ai-workflow.toon`; the bundle does not create it during setup or doctor repair. Start from the `orchestration`
-block of [ai-workflow.example.toon](../templates/ai-workflow.example.toon), which sets
-`use-orca-orchestration: false`. Keep this instance file out of version control. A project that still has the
+Orca orchestration is opt-in. The optional local policy is the `integrations.orca` block (schemaVersion 2) of the
+project-root `ai-workflow.toon`; the bundle does not create it during setup or doctor repair. Start from the
+`integrations.orca` block of [ai-workflow.example.toon](../templates/ai-workflow.example.toon), which sets
+`enabled: false`. Keep this instance file out of version control. A project that still has the
 older `.project/orchestration.json` is migrated by `node ai-framework/scripts/config-migrate.mts`.
 
 The policy and preflight commands below are read-only diagnostics: every result uses the normal workflow
@@ -26,7 +26,9 @@ necessary but not sufficient: dispatch also needs an opted-in policy and a suppo
 Orca settings live in one block of the project-root `ai-workflow.toon` (`schemaVersion: 2`):
 `integrations.orca` with `engine` (required string, the Orca engine version), `enabled`, `multiAgent`,
 `maxConcurrentWorkers`, `maxRetriesPerTask` and `coordinators.<vendor>.{workers, roles}`. The layout with flat
-top-level `engines` and `orchestration` sections (schemaVersion 1) is no longer loaded; `config-migrate.mts` converts it.
+top-level `engines` and `orchestration` sections (schemaVersion 1) is no longer loaded. `config-migrate.mts` does not convert such a file in place: with `--force` it replaces the unsupported v1 file with one built from the legacy JSON files (`ai_workflow_env.json`, `.project/orchestration.json`) or the defaults, and keeps a backup of the original. Re-apply any v1 values by hand using the table below.
+
+A coordinator accepts at most 2 workers today (`validatePolicy` in `orca-policy.mts`), and a role pool of several targets uses only its first target, until the orca-role-pools pitch lands.
 
 | Previous key (schemaVersion 1 / legacy file) | Now |
 |---|---|
