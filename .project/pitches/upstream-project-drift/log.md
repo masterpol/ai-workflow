@@ -43,3 +43,23 @@ Tree: `0deac9a` + uncommitted graphify edit; `ai_workflow_env.json` moved aside;
   (reports the observed version), orca-start worker check. Drift fixtures moved to 1.4.223 (below floor). Table
   test + 1.4.227 probe/gate/start cases. bun 198/198, node 198/198. Mutant (`>`→`<`) fails 4 preflight tests.
   `grep 'appVersion !== SUPPORTED_VERSION|=== SUPPORTED_VERSION'` empty. Start decision `ready` on 1.4.227.
+- OpenCode launches `updrift-s1-1` (new-child) and `updrift-s1-2` (no placement) failed at `agent_readiness`:
+  the worker's client tried to start its own server and found port 49374 held by a stale
+  `opencode serve --service` (PID 13944, started 2026-10-15). Climbing hit the same failure on 10-15.
+- Codex fallback `updrift-s1-3`, `updrift-s6-1` and `updrift-s8-1` failed at `agent_readiness`: Codex showed an
+  interactive update prompt (0.162.1 → 0.163.0). It was not answered. Those three terminals are still retained.
+- With owner approval (standing rule), `opencode service stop`. Port free. Relaunched on OpenCode: S1 `updrift-s1-4`
+  (`ctx_c675a2ef33bb`), S8 `updrift-s8-2` (`ctx_5ae0a634fff6`; adds climbing `.opencode` fixes cca360a +
+  plugins/package.json), S6 `updrift-s6-2` (`ctx_36b765ef481d`). The second and third workers share the server
+  that the first worker started.
+- Stale ledger entry `attempt-v223-opencode-1` (10-09; Orca: outcome failed, process exited) held a slot.
+  Archived to `.project/metrics/orca-ledger-archive-20261016/` with owner approval.
+- S1 done. Worker `updrift-s1-4` worker_done collected, diff reviewed by the coordinator (generic only), reconciled
+  `integrated` (graph-check baseline + after OK). Exits: `grep exhaustive` OK; graphify tests node 16/16, bun 16/16;
+  `graphify.mts check` exit 0.
+- S8 done. Worker `updrift-s8-2` worker_done collected. Reconcile first refused `apply:baseline-moved` because the S1
+  commit had moved HEAD. The S8 worktree was fast-forwarded to `f36db13` (no shared files); reconcile then
+  returned `integrated` with humanConfirmed (owner; `.opencode` adapters). The coordinator restored base text the
+  worker had reverted (see the ledger "S8 merge notes"). Exits: docs-links exit 0; next-pitch 0; `bun ai-framework|test`
+  in workflow 0; no project names; skill-defaults node 27/27 and bun 27/27 (with opencode-plugin).
+  Lesson: reconcile every worker in a wave before committing any scope.

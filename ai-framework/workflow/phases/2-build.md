@@ -14,26 +14,26 @@ Execute scopes with **evidence before assertion**, parallel subagent dispatch wh
 
 ```
 1. Load scope context: pitch + plan + scope's exit criteria + filtered rules (`ai-framework/rules/` for the stack-agnostic principle, plus the matching `.project/rules/*.md` companion for this project's concrete convention — both, not either) + matched knowledge
-2. /hill {scope} uphill-25       — exploring code, reading constraints
-3. /hill {scope} uphill-75       — approach decided, key unknowns resolved
-4. /hill {scope} over-the-hill   — about to execute
+2. Record uphill-25 in the owning hill row: exploring code, reading constraints
+3. Record uphill-75: approach decided, key unknowns resolved
+4. Record over-the-hill: about to execute
 5. Implement
 6. (UI scopes) inline UX 5-question check (see below)
 7. Run each exit-criterion command, paste output verbatim
-8. /hill {scope} downhill-75 → done — only after all commands evidenced
+8. Record downhill-75, then done only after all commands are evidenced
 9. Append deviations.md and log.md if any
 ```
 
 ## Verification-before-completion (hard rule)
 
-A scope **cannot** be marked `done` without evidence. Before `/hill {scope} done` flips:
+A scope **cannot** be marked `done` without evidence. Before recording completion:
 
-- Every exit-criterion command from `plan.md` is run **in the current session**
+- Every exit-criterion command from the owning `plan.md`, or the implicit bug's `log.md`, is run **in the current session**
 - Exit code and last 5–20 lines of output are pasted into the scope-completion summary
 - If any command fails, the scope stays `downhill-X%` — failure logged to `log.md`
-- The framework refuses the `/hill done` transition without evidence
+- The assistant must withhold completion without evidence; this is an instruction, not an installed `/hill` command or an automatic runtime gate
 
-This is what makes "it compiled on my machine" and the lint-debt class of failures unrebreakable. Every UI scope's exit criteria includes `<build-command>` exit 0 (resolved from `.project/context/stack.md`) — and the framework refuses scope-completion until that command actually ran.
+Every scope uses commands verified against `.project/context/stack.md` and actual project configuration. UI scopes require the relevant build or artifact checks; documentation-only work uses its content, link and integrity checks. Do not invent a package manager or application build. Record why a check does not apply; a missing prerequisite or failed required check is a failure, not an exemption.
 
 ## Three-strike rule (in-session thrash guard)
 
@@ -93,18 +93,20 @@ Direct application of ShapeUp's hill-chart insight: a stuck dot signals hidden p
 
 ## Bug-fix variant
 
-Single implicit scope. Exit criteria:
+Use a single implicit scope in `log.md` with expected behavior, boundaries, and verification exits. If an existing pitch owns the fix, follow its links to shared tracking. Without a plan or hill chart, record progress and completion in the bug log; do not create duplicate planning files. The general scope loop uses this record in place of absent pitch, plan, and hill files.
+
+For a behavioral code bug, exit criteria:
 - Failing test now passes
 - Regression test added
 - Full test suite still green
-- `<build-command>` exit 0
+- The affected surface's actual build or artifact check passes; record a reason when no application build applies
 - `log.md` entry mandatory (the bug *is* the knowledge)
 
-Flows directly into `/audit` (skipped only for trivial typo / copy fix).
+Flows directly into `/audit`. For a trivial typo or copy correction, keep the review proportionate and use the relevant document checks; do not invent application tests.
 
 ## Output
 
-- All scopes at `done` on hill chart
+- All tracked scopes at `done` on the owning hill chart, or the implicit bug's completion recorded in `log.md`
 - Working code matching plan (deviations logged)
 - `log.md` and `deviations.md` populated as needed
 - Evidence (command outputs) inline in scope-completion summaries

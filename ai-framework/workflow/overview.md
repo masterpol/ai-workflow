@@ -16,9 +16,9 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 | 0 | **/shape** | Frame problem, set appetite, name rabbit holes, write no-gos | Knowledge gate (mandatory first) + breadboard + bet/re-shape/pass |
 | — | **/critique** | Pre-bet red-team (auto for big-batch + AI) | 5 perspective subagents fan out: knowledge-historian, skeptic, appetite-auditor, cross-pitch-projector, eval-regression-projector |
 | 1 | **/plan** | Decompose into independent scopes with machine-checkable exits | Parallel-dispatch plan + hill chart initialized |
-| 2 | **/build** | Execute scopes, hill-tracked, parallel where flagged | Verification-before-completion enforced — `/hill {scope} done` requires evidence |
+| 2 | **/build** | Execute scopes, hill-tracked, parallel where flagged | Verification-before-completion enforced; marking a scope done in `hill.md` requires evidence |
 | 3 | **/audit** | Parallel fan-out of review/security/test/ux/i18n/eval/cross-pitch | Cycle ≤3; must-fix tier blocks /ship |
-| 4 | **/ship** | Reconcile pitch ↔ implementation, extract knowledge, compact status | Final /verify mandatory; status capped at ≤100 lines |
+| 4 | **/ship** | Reconcile pitch ↔ implementation, extract knowledge, compact status | Final verification mandatory; status capped at ≤100 lines |
 | 5 | **/cooldown** | Promote issue → pattern → rule; prune stale; triage backlog | Every 5 ships; per-item approval |
 
 ## Workflow variants
@@ -159,3 +159,7 @@ See `workflow/phases/`:
 - `3-audit.md`
 - `4-ship.md`
 - `5-cooldown.md`
+
+The portable bundle contains the current phase documents. Older phase names may appear in historical records, but no `workflow/phases/_legacy/` directory is included. Use the current pipeline for active work.
+
+Hill updates and final verification are activities inside `/build` and `/ship`; they do not require separate `/hill` or `/verify` commands. Supporting skills such as `/impact`, `/ui-design`, and `/test-strategy` contribute to those phases without adding new pipeline stages.

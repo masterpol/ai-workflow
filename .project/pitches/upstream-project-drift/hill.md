@@ -14,7 +14,7 @@
 | S5 | uphill 0% | 2026-10-16 | Orca apply / admit / grader — not started |
 | S6 | uphill 0% | 2026-10-16 | Hooks hardening — not started |
 | S7 | uphill 0% | 2026-10-16 | Doctor / validator / skill tests — not started |
-| S8 | uphill 0% | 2026-10-16 | Templates + phase docs — not started |
+| S8 | done | 2026-10-16 | OpenCode worker updrift-s8-2 + coordinator restores (ledger S8 notes); docs-links 0; skill-defaults OK
 | S9 | uphill 0% | 2026-10-16 | Release + sync proof — not started |
 
 ## Hill positions reference

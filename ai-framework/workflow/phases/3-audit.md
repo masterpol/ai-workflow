@@ -17,7 +17,7 @@ Replace sequential review/security/test phases with a single **parallel fan-out*
 | `security-reviewer` | always | standard | Severity / vulnerability class / file:line / mitigation (per `security.md` + OWASP Top 10) |
 | `test-coverage-checker` | always | fast | Uncovered behavior / missing regressions / flaky tests (per `testing.md`) |
 | `ux-reviewer` | UI scopes | standard | 10-heuristic scores + simplification opportunities (per `ui-ux-review.md`); H8 ≥ 2 hard gate |
-| `i18n-checker` | i18n strings touched | fast | Missing keys / parity across the project's configured locales / `<i18n-check-command>` results |
+| `i18n-checker` | i18n strings touched | fast | Missing keys / supported-locale parity / actual configured check results |
 | `eval-runner` | AI-prompt scopes | fast | Per-criterion score + delta vs baseline + pass/fail per gate |
 | `cross-pitch-conflict-checker` | ≥2 active pitches | fast | Pure overlap / adjacent overlap / disjoint vs other pitches' diffs |
 
@@ -101,7 +101,7 @@ Return findings as: severity / file:line / rule violated / failure scenario with
 
 ## Synthesis (single-threaded, main thread)
 
-After dispatch and verification, main thread combines findings into a single report:
+After dispatch, main thread combines findings into a single report:
 
 ```markdown
 # Audit cycle 1 — {pitch-slug}

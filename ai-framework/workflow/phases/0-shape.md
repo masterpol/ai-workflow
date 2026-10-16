@@ -65,7 +65,7 @@ Parallel fan-out of perspective subagents that pre-mortem the pitch. **Advisory,
 | `cross-pitch-projector` | ≥2 active pitches | fast | Projects file-set overlap against other active pitches' planned work |
 | `eval-regression-projector` | AI-prompt scopes | standard | "What regression types is your golden case *not* checking?" |
 
-Skipped automatically for small-batch, bug-fix, hotfix.
+Skip for non-AI small-batch, bug-fix, and hotfix work. Changes to AI behavior require critique regardless of appetite or file location.
 
 Output: a "Critique findings" section appended to `pitch.md` with severity / type / suggested addition.
 

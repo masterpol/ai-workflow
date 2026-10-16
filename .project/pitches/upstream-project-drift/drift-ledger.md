@@ -251,3 +251,20 @@ The same recipe applies to climbing's project-local rule rows (companion links m
 | RN | `workflow/phases/3-audit.md` | both-changed | project-local (runner) | — | conflict | node→bun runner rewrite; portable fix is runner-aware text in unified-toon-config |
 | RN | `workflow/phases/4-ship.md` | both-changed | project-local (runner) | — | conflict | node→bun runner rewrite; portable fix is runner-aware text in unified-toon-config |
 | RN | `workflow/phases/5-cooldown.md` | both-changed | project-local (runner) | — | conflict | node→bun runner rewrite; portable fix is runner-aware text in unified-toon-config |
+
+## S8 merge notes (3-way docs, 2026-10-16)
+
+Worker `updrift-s8-2` (OpenCode) ported climbing hunks. The coordinator reviewed the diff and restored base text
+that base added after climbing synced.
+
+| File | From climbing | Kept from base (restored by coordinator) |
+|---|---|---|
+| `workflow/overview.md` | `/hill` and `/verify` described as activities, not commands; note on current phase docs | `/fix (triage)` bug-fix flow; single-pass `/audit` hotfix flow; "Never auto-advance" gate philosophy |
+| `workflow/phases/0-shape.md` | critique also required for AI-behavior changes at any appetite | — |
+| `workflow/phases/1-plan.md` | runner-neutral, stack-verified exit checks | — |
+| `workflow/phases/2-build.md` | hill rows recorded rather than run as `/hill`; stack-verified checks; bug-fix variant without planning files | Three-strike rule |
+| `workflow/phases/3-audit.md` | runner-neutral i18n wording | — |
+| `workflow/phases/4-ship.md` | final verification through `pre-ship-verify.mts`; non-applicable checks recorded with reasons | dropped "Replaces today's `/finish`"; repaired a table row |
+| `templates/project/runs/README.md` | — (climbing's session-log rewrite rejected) | base file restored unchanged: it describes what `/ship` and `/cooldown` write |
+| other templates | placeholders replace product-specific values and fixed thresholds | — |
+| `.opencode/opencode.json` | climbing `cca360a` plugin registration | base `agent.build.model` block. `.opencode/plugins/package.json` is not ported: OpenCode generates it and both repos ignore it |

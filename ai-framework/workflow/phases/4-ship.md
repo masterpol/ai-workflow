@@ -11,20 +11,15 @@ Close the pitch cleanly: final verification, pitch ↔ implementation reconcilia
 
 ## Activities (in order)
 
-### 1. Final /verify (mandatory)
+### 1. Final verification (mandatory)
 
-Runs the 6-phase gauntlet one last time, using the real commands recorded in `.project/context/stack.md` (skip a line only when the project has no such command, and say so in the summary):
+For an implicit bug fix, use the expected behavior, scope, and exit criteria in `log.md` wherever this phase refers to a pitch, plan, or hill chart. Reconcile those actual records without fabricating missing planning documents.
 
-```
-✓ <build-command> exit 0
-✓ <typecheck-command> exit 0
-✓ <lint-command> exit 0
-✓ <test-command> exit 0 (non-watch mode)
-✓ <i18n-check-command> exit 0 (i18n projects only)
-✓ git diff: no uncommitted .env / no debug code
-```
+Read `.project/context/stack.md` and the scope exit criteria. Run `node ai-framework/hooks/scripts/pre-ship-verify.mts`, then execute any scope checks not covered by that verifier. Use only the real project commands and the execution route required by AGENTS.md.
 
-If any fails, `/ship` aborts and drops back to `/audit` cycle 2. Catches drift between audit-fixes and final state — twice in recent history this caught what audit missed.
+Build, type checking, lint, tests and i18n checks apply when the actual project and changed scope require them. Record a concrete reason for every non-applicable check; documentation-only work still needs its content, link and integrity checks. A missing prerequisite or failed available required check is a failure, not an exemption. Do not report a nonexistent application build or test as passed.
+
+When Git exists, inspect the diff without reading secrets. Without Git, compare the scoped files and hashes against the recorded baseline, document that limitation and do not initialize Git or fabricate commits. If any required check fails, `/ship` aborts and returns to `/audit` cycle 2.
 
 ### 2. Pitch ↔ implementation reconciliation → SHIPPED.md
 
@@ -126,7 +121,7 @@ Before the final /verify, when `AI_WORKFLOW_ORCA_MULTI_AGENT=true` and worker ch
 
 ```
 /ship: pitch {slug} ready to close.
-- Verify: ✅ all 6 phases green
+- Verify: required checks passed; non-applicable checks and their reasons listed
 - Reconciliation: {n}/{total} scopes shipped, {m} deferred
 - Knowledge: {x} issues promoted, {y} new patterns, {z} rule changes proposed
 - Status: compacted to {N} lines
