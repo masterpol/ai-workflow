@@ -136,7 +136,16 @@ test("prettier configured via package.json is also discovered", (t: TestContext)
 test("a configured formatter with no installed binary is treated as no formatter", (t: TestContext) => {
   const { root } = fixture(t);
   write(root, ".prettierrc.json", "{}\n");
-  assert.equal(discoverFormatter(root), null);
+  const base = createNodeDeps();
+  let probes = 0;
+  const deps: RuntimeDeps = { ...base, child: { ...base.child, runSync(command, args) {
+    assert.equal(command, "prettier");
+    assert.deepEqual(args, ["--version"]);
+    probes++;
+    throw Object.assign(new Error("fixture executable missing"), { code: "ENOENT" });
+  } } };
+  assert.equal(discoverFormatter(root, deps), null);
+  assert.equal(probes, 1, "the fixture checks the PATH fallback without consulting the host installation");
 });
 
 test("formatter failure throws and no bytes are queued for writing", (t: TestContext) => {

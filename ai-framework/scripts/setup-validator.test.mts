@@ -137,6 +137,16 @@ test("missing records fail with exit 1 and INCOMPLETE text", async () => {
   assert.ok(text.includes("\nSetup status: INCOMPLETE (2 issue(s))\nNext: re-run /setup"));
 });
 
+test("a long context file that still carries a setup placeholder is an unfilled draft", async () => {
+  for (const placeholder of ["_Detecting..._", "_Scanning project..._"]) {
+    const files = baseFiles();
+    files[".project/context/stack.md"] = `# Stack\n\nThis section is long enough to pass the length check on its own.\n\n${placeholder}\n`;
+    const { deps, out } = makeDeps(files, healthy);
+    assert.equal(await main(["--no-color"], deps, libs), 1, placeholder);
+    assert.ok(out.join("").includes("FAIL  .project/context/stack.md: appears to be an unfilled setup draft\n"), placeholder);
+  }
+});
+
 test("missing .project short-circuits to one failure", async () => {
   const { deps, out, calls } = makeDeps({}, healthy);
   const code = await main(["--json"], deps, libs);
@@ -246,11 +256,63 @@ test("integration: the direct TypeScript command runs the validator in an empty 
   const shim = fileURLToPath(new URL("./setup-validator.mts", import.meta.url));
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "setup-validator-")));
   try {
-    const run = spawnSync(process.execPath, [...RUNTIME_FLAGS, shim, "--no-color"], { cwd: dir, encoding: "utf8", env: { ...process.env, NO_COLOR: "1" } });
+    const run = spawnSync(process.execPath, [...RUNTIME_FLAGS, shim, "--no-color"], { cwd: dir, encoding: "utf8", shell: false, windowsHide: true, timeout: 15000, env: { ...process.env, NO_COLOR: "1" } });
     assert.equal(run.stderr, "");
     assert.equal(run.status, 1);
     assert.ok(run.stdout.includes("FAIL  .project: missing; setup has not completed\n"));
     assert.ok(run.stdout.includes("Setup status: INCOMPLETE (1 issue(s))"));
     assert.match(run.stdout, /Validated 0 checks\./);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test("parser probes are bounded and all settle exactly once before validation completes", async () => {
+  const files = baseFiles();
+  delete files["ai-framework/scripts/demo.mts"];
+  for (let index = 0; index < 12; index++) files["ai-framework/scripts/probe-" + index + ".mts"] = "export {};";
+  let active = 0;
+  let peak = 0;
+  const finished: string[] = [];
+  const run = makeDeps(files, async (call) => {
+    if (!call.args.includes("-e")) return healthy(call);
+    active++;
+    peak = Math.max(peak, active);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    active--;
+    finished.push(call.args.at(-1)!);
+    return ok("");
+  });
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  assert.equal(active, 0);
+  assert.ok(peak >= 2 && peak <= 4);
+  assert.equal(finished.length, 12);
+  assert.equal(new Set(finished).size, 12);
+  assert.equal(run.calls.filter((call) => call.args.includes("-e")).length, 12);
+});
+
+test("parser process failures retain safe diagnostics rather than claiming syntax errors", async () => {
+  const cases: { result?: RunResult; error?: Error; expected: string }[] = [
+    { result: { status: null, signal: "SIGKILL", stdout: "", stderr: "", errorCode: "ETIMEDOUT" }, expected: "parse check timed out (ETIMEDOUT; signal SIGKILL; limit 30000ms)" },
+    { result: { status: null, signal: "SIGKILL", stdout: "", stderr: "" }, expected: "parse check terminated (signal SIGKILL)" },
+    { result: { status: 7, signal: null, stdout: "", stderr: "" }, expected: "parse check exited with code 7" },
+    { error: Object.assign(new Error("sensitive-marker"), { code: "EAGAIN" }), expected: "parse check could not run (EAGAIN)" },
+    { error: Object.assign(new Error("sensitive-marker"), { code: "secret: sensitive-marker" }), expected: "parse check could not run (SPAWN_FAILED)" },
+  ];
+  for (const entry of cases) {
+    const run = makeDeps(baseFiles(), (call) => {
+      if (!call.args.includes("-e")) return healthy(call);
+      if (entry.error) throw entry.error;
+      return entry.result!;
+    });
+    assert.equal(await main(["--no-color"], run.deps, libs), 1);
+    assert.ok(run.out.join("").includes(entry.expected));
+    assert.doesNotMatch(run.out.join("") + run.err.join(""), /sensitive-marker|does not parse/);
+  }
+});
+
+test("Node without stripTypeScriptTypes still reports its explicit unsupported boundary", async () => {
+  const run = makeDeps(baseFiles(), (call) => call.args.includes("-e") ? { status: 3, signal: null, stdout: "", stderr: "" } : healthy(call));
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  const report = JSON.parse(run.out.join("")) as Report;
+  assert.ok(report.results.some((result) => result.status === "info" && result.detail.includes("not parse-checked")));
 });

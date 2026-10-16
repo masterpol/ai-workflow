@@ -12,6 +12,7 @@ import { fileURLToPath } from "node:url";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { effectiveEntryText } from "./entry-import.mts";
 import { CATALOG, MODES, PHASES, main, resolveMode, report, loadModes, extractInvocationArg } from "./skill-defaults.mts";
 import type { CatalogEntry } from "./skill-defaults.mts";
 
@@ -281,21 +282,27 @@ test("every vendor mirror of a skill or agent either points at the canonical fil
   }
 });
 
-test("both cross-vendor entry files carry the same working caveman instruction for the main session agent", () => {
-  const section = (file: string) => fs.readFileSync(path.join(BUNDLE, file), "utf8").match(/## Response style \(caveman mode\)\n[\s\S]*?(?=\n## )/)?.[0];
-  const agents = section("AGENTS.md");
+test("both cross-vendor entry files resolve to the same working caveman instruction", async () => {
+  const section = (text: string) => text.match(/## Response style \(caveman mode\)\n[\s\S]*?(?=\n## |$)/)?.[0];
+  const agents = section(fs.readFileSync(path.join(BUNDLE, "AGENTS.md"), "utf8"));
   assert.ok(agents, "AGENTS.md needs the Response style section");
-  assert.equal(section("CLAUDE.md"), agents, "CLAUDE.md is a required full mirror of AGENTS.md — the section must be identical");
-  const phase = agents!.match(/resolve-mode --phase ([a-z]+)/)![1];
+  // The shared resolver accepts only the regular sibling AGENTS.md, rejects
+  // outside/symlinked targets and never recursively follows another import.
+  const claude = await effectiveEntryText(BUNDLE, "CLAUDE.md");
+  assert.notEqual(claude.kind, "invalid", claude.detail);
+  assert.equal(section(claude.content), agents, "the effective CLAUDE.md instructions match AGENTS.md");
+  const phase = agents.match(/resolve-mode --phase ([a-z]+)/)![1];
   assert.ok(PHASES.has(phase), `entry files name --phase ${phase}, which resolve-mode would reject`);
-  assert.match(agents!, /caveman=<lite\|full\|ultra\|wenyan-lite\|wenyan-full\|wenyan-ultra\|off>/);
+  assert.match(agents, /caveman=<lite\|full\|ultra\|wenyan-lite\|wenyan-full\|wenyan-ultra\|off>/);
 });
 
+// The doctor checks the AGENTS.md/CLAUDE.md caveman section only inside the portable bundle's own repo (SETUP.md present).
+const IN_BUNDLE_REPO = fs.existsSync(path.join(BUNDLE, "SETUP.md"));
 test("doctor and setup-validator report the live caveman state truthfully across every state it can be in", (t: TestContext) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "caveman-state-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");
-  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source: string) => !new Set([".git", "node_modules", "metrics", ".DS_Store", ".env"]).has(path.basename(source)) });
+  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source: string) => !new Set([".git", "node_modules", "metrics", ".DS_Store", "credentials.json", "settings.local.json"]).has(path.basename(source)) && !/^\.env(?:\.|$)/.test(path.basename(source)) });
   // Pin this fixture to its actual host; the restricted PATH contains only that executable.
   const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
   const node = (script: string, ...args: string[]) => spawnSync(process.execPath, [...RUNTIME_FLAGS, path.join(root, "ai-framework/scripts", script), ...args], { cwd: root, encoding: "utf8", env });
@@ -305,6 +312,16 @@ test("doctor and setup-validator report the live caveman state truthfully across
   const installer = (...args: string[]) => spawnSync(process.execPath, [...RUNTIME_FLAGS, path.join(root, "ai-framework/scripts/add-skill.mts"), ...args], { cwd: root, encoding: "utf8" });
   const addSkill = (...args: string[]) => { const result = installer(...args, "--root", root, "--scope", "project", "--apply"); assert.equal(result.status, 0, result.stderr); };
   const id = "juliusbrussee/caveman/caveman";
+
+  // The source bundle fixture no longer ships with caveman pre-installed, so seed it before
+  // exercising the state transitions the test was written to cover.
+  const repo = path.join(directory, "upstream");
+  fs.mkdirSync(path.join(repo, "skills/caveman"), { recursive: true });
+  fs.writeFileSync(path.join(repo, "skills/caveman/SKILL.md"), "---\nname: caveman\ndescription: Fixture caveman\n---\nBody.\n");
+  const git = (...args: string[]) => spawnSync("git", ["-c", "core.hooksPath=/dev/null", "-C", repo, ...args], { encoding: "utf8", env: { ...process.env, GIT_AUTHOR_NAME: "f", GIT_AUTHOR_EMAIL: "f@x.test", GIT_COMMITTER_NAME: "f", GIT_COMMITTER_EMAIL: "f@x.test" } });
+  git("init", "-b", "main"); git("add", "."); git("commit", "-m", "fixture");
+  const initial = installer("install", id, "--root", root, "--repo", repo, "--scope", "project", "--phases", "shape,critique,plan,build,audit,ship,cooldown,manual", "--apply");
+  assert.equal(initial.status, 0, initial.stderr);
 
   assert.match(state()!.detail, /^active: installed, enabled, covers all recommended phases; default full/);
   assert.equal(state()!.status, "pass");
@@ -329,11 +346,6 @@ test("doctor and setup-validator report the live caveman state truthfully across
   assert.equal(state()!.status, "info");
   assert.match(state()!.detail, /not installed, so it is inert/, "carrying the instruction must never be mistaken for being active");
 
-  const repo = path.join(directory, "upstream");
-  fs.mkdirSync(path.join(repo, "skills/caveman"), { recursive: true });
-  fs.writeFileSync(path.join(repo, "skills/caveman/SKILL.md"), "---\nname: caveman\ndescription: Fixture caveman\n---\nBody.\n");
-  const git = (...args: string[]) => spawnSync("git", ["-c", "core.hooksPath=/dev/null", "-C", repo, ...args], { encoding: "utf8", env: { ...process.env, GIT_AUTHOR_NAME: "f", GIT_AUTHOR_EMAIL: "f@x.test", GIT_COMMITTER_NAME: "f", GIT_COMMITTER_EMAIL: "f@x.test" } });
-  git("init", "-b", "main"); git("add", "."); git("commit", "-m", "fixture");
   const install = installer("install", id, "--root", root, "--repo", repo, "--scope", "project", "--phases", "build", "--apply");
   assert.equal(install.status, 0, install.stderr);
   assert.equal(state()!.status, "warn");
@@ -342,9 +354,13 @@ test("doctor and setup-validator report the live caveman state truthfully across
   const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
   fs.writeFileSync(path.join(root, "AGENTS.md"), agents.replace(/## Response style \(caveman mode\)[\s\S]*?(?=\n## )/, ""));
   const missing = doctor();
-  assert.equal(missing.results.find((item: Check) => item.name === "AGENTS.md" && item.detail === "carries the caveman response-style section")!.status, "fail");
+  const section = missing.results.find((item: Check) => item.name === "AGENTS.md" && item.detail === "carries the caveman response-style section");
+  if (IN_BUNDLE_REPO) assert.equal(section!.status, "fail");
+  else assert.equal(section, undefined, "an installed project's doctor does not police the bundle's own AGENTS.md section");
   const validator = parseChecks(node("setup-validator.mts", "--json").stdout);
-  assert.equal(validator.results.find((item: Check) => item.name === "AGENTS.md" && /caveman/.test(item.detail))!.status, "warn", "in a target project this is a warning, not a failure");
+  const targetCheck = validator.results.find((item: Check) => item.name === "AGENTS.md" && /caveman/.test(item.detail));
+  assert.ok(targetCheck, "installed-project validator must report the missing instruction");
+  assert.equal(targetCheck.status, "warn", "in a target project this is a warning, not a failure");
 });
 
 test("the token report shows the caveman mode column, and labels it Unavailable rather than inventing one", async () => {

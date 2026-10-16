@@ -3,6 +3,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 import { createNodeDeps } from "./runtime/node.mts";
 import { createTestDeps } from "./runtime/test-helpers.mts";
@@ -38,6 +39,33 @@ function injected(root: string): { deps: RuntimeDeps; output: string[]; errors: 
   };
   return { deps, output, errors, calls };
 }
+/** Supply names NTFS cannot create while exercising the real scanner, descriptor reader, and sanitizer. */
+function injectBoundaryFile(deps: RuntimeDeps, root: string, name: string, content: string, symbolicLink = false): { reads: () => number } {
+  const directory = path.join(root, "ai-framework"), file = path.join(directory, name);
+  const backing = path.join(root, "outside", "virtual-source.mts");
+  write(root, "outside/virtual-source.mts", content);
+  const readdir = deps.fs.readdirEntriesSync, lstat = deps.fs.lstatSync;
+  const open = deps.fs.openSync, read = deps.fs.readSync, close = deps.fs.closeSync, exists = deps.fs.existsSync;
+  const base = lstat(backing), descriptors = new Set<number>();
+  let reads = 0;
+  const flags = { isDirectory: () => false, isFile: () => !symbolicLink, isSymbolicLink: () => symbolicLink };
+  deps.fs.readdirEntriesSync = dir => dir === directory
+    ? [...readdir(dir), { name, ...flags }] : readdir(dir);
+  deps.fs.lstatSync = candidate => candidate === file ? { ...base, ...flags } : lstat(candidate);
+  deps.fs.existsSync = candidate => candidate === file || exists(candidate);
+  deps.fs.openSync = (candidate, openFlags, mode) => {
+    const fd = open(candidate === file ? backing : candidate, openFlags, mode);
+    if (candidate === file) descriptors.add(fd);
+    return fd;
+  };
+  deps.fs.readSync = (fd, buffer, offset, length, position) => {
+    if (descriptors.has(fd)) reads++;
+    return read(fd, buffer, offset, length, position);
+  };
+  deps.fs.closeSync = fd => { descriptors.delete(fd); close(fd); };
+  return { reads: () => reads };
+}
+
 function checks(output: string[]): Check[] { return JSON.parse(output.join("")).results as Check[]; }
 
 test("runtime boundary rejects production imports with file, line and dependency guidance", async (t) => {
@@ -91,7 +119,7 @@ for (const [label, before, after, guard] of [
 ]) {
   test(`scratch mutant proves ${label} guard`, () => {
     const deps = createTestDeps();
-    const project = deps.path.resolve(decodeURIComponent(new URL("../..", import.meta.url).pathname));
+    const project = fileURLToPath(new URL("../..", import.meta.url));
     const scratch = deps.fs.realpathSync(deps.fs.mkdtempSync(deps.path.join(deps.os.tmpdir(), "runtime-boundary-mutant-")));
     try {
       const copied = new Set<string>();
@@ -221,7 +249,7 @@ test("fix refuses a scaffold repair through a symbolic-link ancestor", async (t)
   write(root, "ai-framework/templates/project/rules/README.md", "new rules\n");
   fs.mkdirSync(path.join(root,".project"));
   fs.mkdirSync(path.join(root,"outside"));
-  fs.symlinkSync(path.join(root,"outside"),path.join(root,".project/rules"));
+  fs.symlinkSync(path.join(root,"outside"),path.join(root,".project/rules"), process.platform === "win32" ? "junction" : "dir");
   const capture = injected(root);
   await main(["--json", "--fix"], capture.deps);
   assert.equal(fs.existsSync(path.join(root,"outside/README.md")),false);
@@ -253,12 +281,14 @@ test("runtime boundary anchors test classification", async (t) => {
 });
 test("runtime boundary sanitizes printed control characters", async (t) => {
   const root = fixture(t);
-  write(root, "ai-framework/forged\n\x1b[32mPASS.mts", "import 'node:fs';");
   const capture = injected(root);
+  const source = injectBoundaryFile(capture.deps, root, "forged\n\x1b[32mPASS.mts", "import 'node:fs';");
   await main(["--json"], capture.deps);
   const detail = checks(capture.output).filter(item => item.name === "Runtime boundary").map(item => item.detail).join("");
   assert.doesNotMatch(detail, /[\x00-\x1f\x7f-\x9f]/);
   assert.match(detail, /forged\[32mPASS/);
+  assert.match(detail, /imports node:fs; use deps\.fs/);
+  assert.ok(source.reads() > 0, "the scanner must inspect the virtual source");
 });
 test("runtime boundary enforces depth cap", async (t) => {
   const root = fixture(t);
@@ -286,7 +316,7 @@ test("runtime boundary enforces visited cap", async (t) => {
 test("runtime boundary refuses directory symlinks", async (t) => {
   const root = fixture(t);
   write(root, "outside/hidden.mts", "import 'node:fs';");
-  fs.symlinkSync(path.join(root, "outside"), path.join(root, ".opencode"));
+  fs.symlinkSync(path.join(root, "outside"), path.join(root, ".opencode"), process.platform === "win32" ? "junction" : "dir");
   const capture = injected(root);
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some(item => item.name === "Runtime boundary" && item.status === "fail" && /\.opencode:1 directory symlink refused/.test(item.detail)));
@@ -294,10 +324,14 @@ test("runtime boundary refuses directory symlinks", async (t) => {
 test("runtime boundary refuses child symlinks", async (t) => {
   const root = fixture(t);
   write(root, "outside/hidden.mts", "export const ok = 1;");
-  fs.symlinkSync(path.join(root, "outside/hidden.mts"), path.join(root, "ai-framework/link.mts"));
   const capture = injected(root);
+  // File symlinks require elevated privilege or Developer Mode on Windows.
+  const source = process.platform === "win32"
+    ? injectBoundaryFile(capture.deps, root, "link.mts", "export const ok = 1;", true) : undefined;
+  if (!source) fs.symlinkSync(path.join(root, "outside/hidden.mts"), path.join(root, "ai-framework/link.mts"), "file");
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some(item => item.name === "Runtime boundary" && item.status === "fail" && /link.mts:1 child symlink refused/.test(item.detail)));
+  if (source) assert.equal(source.reads(), 0, "a refused symbolic link must never be read");
 });
 test("runtime boundary filters source extensions", async (t) => {
   const root = fixture(t);
@@ -318,13 +352,15 @@ test("runtime boundary fails unreadable production paths", async (t) => {
 test("S5 strips bidi and controls in JSON and plain output", async (t) => {
   const root = fixture(t);
   const controls = "\u0001\u007f\u0085\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069";
-  write(root, "ai-framework/forged" + controls + ".mts", "import 'node:fs';");
   for (const args of [["--json"], ["--no-color"]]) {
     const capture = injected(root);
+    const source = injectBoundaryFile(capture.deps, root, "forged" + controls + ".mts", "import 'node:fs';");
     await main(args, capture.deps);
     const text = args.includes("--json") ? checks(capture.output).map(c => c.detail).join("") : capture.output.join("");
     assert.doesNotMatch(text, /[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/);
     assert.match(text, /forged\.mts/);
+    assert.match(text, /imports node:fs; use deps\.fs/);
+    assert.ok(source.reads() > 0, "the scanner must inspect the virtual source");
   }
 });
 test("S7 boundary ignores non-directory scan roots", async (t) => {

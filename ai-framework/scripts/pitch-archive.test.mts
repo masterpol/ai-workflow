@@ -9,6 +9,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { buildGraph, overlayKnowledge, renderIndex } from "./graphify.mts";
 import * as archiveModule from "./pitch-archive.mts";
 import * as compressModule from "./pitch-compress.mts";
 
@@ -28,9 +29,14 @@ function exists(root, name) { return fs.existsSync(path.join(root, name)); }
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pitch-archive-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, "ai-framework/scripts"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "graphify.mts"), path.join(root, "ai-framework/scripts/graphify.mts"));
   for (const dir of ["decisions", "patterns", "entities", "issues"]) fs.mkdirSync(path.join(root, `.project/knowledge/${dir}`), { recursive: true });
+  // Ledger validation reads real generated artifacts, including through its child process.
+  // Build only this fixture's knowledge overlay; no Graphify installation or external command is needed.
+  const deps = createNodeDeps();
+  const { graph, problems } = buildGraph(root, deps);
+  assert.deepEqual(problems, []);
+  write(root, "graphify-out/graph.json", JSON.stringify(overlayKnowledge({ nodes: [], links: [] }, graph)) + "\n");
+  write(root, ".project/knowledge/index.md", renderIndex(graph, root, deps));
   return root;
 }
 

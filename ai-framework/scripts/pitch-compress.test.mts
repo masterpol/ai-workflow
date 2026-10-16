@@ -8,6 +8,7 @@ import { spawnSync } from "node:child_process";
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { buildGraph, overlayKnowledge, renderIndex } from "./graphify.mts";
 import * as compressModule from "./pitch-compress.mts";
 
 const { inventory, buildLedger, requiredSections, commitLedger, writeDoneWork, slugifyHeading, extractSection, createPitchCompress } = compressModule;
@@ -25,11 +26,14 @@ function exists(root, name) { return fs.existsSync(path.join(root, name)); }
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pitch-compress-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  // graphify.mts is dependency-free (fs/path only per its own header) — safe and fast to copy
-  // whole so commitLedger's real --check call has something real to run against.
-  fs.mkdirSync(path.join(root, "ai-framework/scripts"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "graphify.mts"), path.join(root, "ai-framework/scripts/graphify.mts"));
   for (const dir of ["decisions", "patterns", "entities", "issues", "templates"]) fs.mkdirSync(path.join(root, `.project/knowledge/${dir}`), { recursive: true });
+  // Ledger validation reads real generated artifacts, including through its child process.
+  // Build only this fixture's knowledge overlay; no Graphify installation or external command is needed.
+  const deps = createNodeDeps();
+  const { graph, problems } = buildGraph(root, deps);
+  assert.deepEqual(problems, []);
+  write(root, "graphify-out/graph.json", JSON.stringify(overlayKnowledge({ nodes: [], links: [] }, graph)) + "\n");
+  write(root, ".project/knowledge/index.md", renderIndex(graph, root, deps));
   return root;
 }
 
@@ -257,7 +261,7 @@ test("commit-ledger rejects a new knowledge entry that fails graphify's own vali
   write(root, ".project/knowledge/patterns/broken-dupe.md", "---\nid: broken\ntype: pattern\n---\n\nDuplicate id on purpose.\n");
   const required = buildLedger(root, "bad-knowledge").required;
   const mapping = { sections: required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" })) };
-  assert.throws(() => commitLedger(root, "bad-knowledge", mapping), /Knowledge graph invalid/);
+  assert.throws(() => commitLedger(root, "bad-knowledge", mapping), /Knowledge graph invalid: .*duplicate id "broken"/);
 });
 
 test("write-done-work is idempotent: a rerun for the same slug replaces only its own section", (t) => {
@@ -586,7 +590,7 @@ test("a failing graph check reports graphify's own problem list, not raw stderr 
   const sections = buildLedger(root, "graphfail").required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" }));
   let message = "";
   try { commitLedger(root, "graphfail", { sections }, {}); } catch (error) { message = error.message; }
-  assert.match(message, /^Knowledge graph invalid: /);
+  assert.match(message, /^Knowledge graph invalid: .*duplicate id "broken"/);
   assert.ok(!message.includes(root), "no absolute path from the child process");
 });
 

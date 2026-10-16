@@ -76,7 +76,15 @@ test("every bundled vendor entry point exposes add-skill from one canonical play
     assert.equal(text.match(/^description: (.+)$/m)![1], description, mirror);
     assert.match(text, /Load `\.claude\/skills\/add-skill\/SKILL\.md` and follow it exactly/);
   }
-  assert.match(read(BUNDLE, ".opencode/commands/add-skill.md"), /^model: opencode-go\/minimax-m3$/m);
+  // This project's OpenCode route is configured separately from Claude/Codex.
+  // Keep the adapter aligned with its documented standard profile, never an upstream account's model.
+  const standard = read(BUNDLE, "ai-framework/integrations/harnesses.md").split("\n")
+    .find((line) => line.startsWith("| `standard`"));
+  assert.ok(standard, "the project documents its standard capability route");
+  const documented = standard.split("|")[4]?.match(/`([^`]+)`/)?.[1];
+  assert.ok(documented, "the OpenCode column names the configured standard model");
+  const configured = read(BUNDLE, ".opencode/commands/add-skill.md").match(/^model: (.+)$/m)?.[1];
+  assert.equal(configured, documented, "add-skill follows the project's documented OpenCode standard route");
   assert.match(read(BUNDLE, ".agents/skills/add-skill/SKILL.md"), /^name: add-skill$/m);
   for (const command of canonical.match(/node ai-framework\/scripts\/[a-z-]+\.mts/g)!) assert.ok(fs.existsSync(path.join(BUNDLE, command.split(" ")[1])), command);
 });
