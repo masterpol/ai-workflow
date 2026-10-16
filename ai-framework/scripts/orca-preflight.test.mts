@@ -454,13 +454,24 @@ test("main returns 1 with the fixed stderr line for any invalid invocation", (t:
   }
 });
 
-test("default runner reports a killed child after the full timeout as probe-timeout", (t: TestContext) => {
+test("default runner preserves byte/time budgets and adapter failure codes", (t: TestContext) => {
   const root = fixture(t);
-  let clock = 0;
-  const h = harness(root, () => { clock += CALL_TIMEOUT_MS; return { status: null, signal: "SIGTERM", stdout: "", stderr: "" }; }, undefined, () => clock);
-  assert.equal(main(["report", "--root", root, "--vendor", "codex", "--json", "--probe"], h.deps), 0);
-  assert.equal(JSON.parse(h.out.join("")).reason, "probe-timeout");
-  assert.equal(h.spawned.length, 1);
+  for (const [errorCode, reason] of [["ETIMEDOUT", "probe-timeout"], ["ENOBUFS", "probe-output-limit"], ["EIO", "probe-failed"]]) {
+    const { run: _injectedRunner, ...options } = probe().options;
+    const calls: Array<Parameters<RuntimeDeps["child"]["runSync"]>> = [];
+    const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child,
+      runSync: (...args) => { calls.push(args); return { status: null, signal: "SIGKILL", stdout: "", stderr: "", errorCode }; },
+    } };
+    assert.equal(report(root, "codex", options, deps).reason, reason);
+    assert.equal(calls.length, 1);
+    const limits = calls[0][2]!;
+    assert.equal(limits.cwd, root);
+    assert.equal(limits.shell, false);
+    assert.equal(limits.encoding, "utf8");
+    assert.equal(limits.killSignal, "SIGKILL");
+    assert.equal(limits.maxBufferBytes, MAX_OUTPUT_BYTES);
+    assert.ok(limits.timeoutMs! > 0 && limits.timeoutMs! <= CALL_TIMEOUT_MS);
+  }
 });
 
 test("default runner maps a signal before the timeout, a spawn failure and oversized output", (t: TestContext) => {

@@ -78,19 +78,14 @@ export function executablePresent(command: string, env: Env, platform: string, d
   return false;
 }
 
-/**
- * Default probe runner over deps.child.runSync. The shared adapter has no maxBuffer, killSignal or error
- * code, so a timeout is recognised by a killed child (status null, signal set) after the full timeout, and
- * oversized output is caught by the byte checks in readReceipt.
- */
+/** Keep the probe budget and failure codes intact across the runtime adapter. */
 function defaultRun(deps: RuntimeDeps): Run {
   return (command, args, options) => {
-    const started = deps.clock.perfNowMs();
-    const result = deps.child.runSync(command, args, { cwd: options.cwd, env: options.env, timeoutMs: options.timeout });
-    if (result.status === null && result.signal && deps.clock.perfNowMs() - started >= options.timeout) {
-      return { ...result, error: { code: "ETIMEDOUT" } };
-    }
-    return result;
+    const result = deps.child.runSync(command, args, {
+      cwd: options.cwd, env: options.env, shell: options.shell, encoding: options.encoding,
+      timeoutMs: options.timeout, maxBufferBytes: options.maxBuffer, killSignal: options.killSignal,
+    });
+    return result.errorCode ? { ...result, error: { code: result.errorCode } } : result;
   };
 }
 

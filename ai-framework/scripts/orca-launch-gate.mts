@@ -143,7 +143,7 @@ export interface LaunchRequest extends LaunchOptions {
   deadlineMs: number;
 }
 export interface LaunchResult {
-  launched: boolean; reason: string; status?: number | null; signal?: string | null; stdout?: string; stderr?: string; decision?: LaunchDecision;
+  launched: boolean; reason: string; status?: number | null; signal?: string | null; stdout?: string; stderr?: string; decision?: LaunchDecision; ownerPid?: number;
 }
 
 const launcherAcceptable = (command: string, deps: RuntimeDeps): boolean =>
@@ -174,7 +174,14 @@ export async function launchWorker(request: LaunchRequest): Promise<LaunchResult
     if (result.errorCode === "ENOBUFS") return { launched: false, reason: "launch-output-limit", decision };
     if (result.status !== 0 || result.signal) return { launched: false, reason: "launch-failed", status: result.status, signal: result.signal, stdout: result.stdout, stderr: result.stderr, decision };
     return { launched: true, reason: "launched", status: 0, stdout: result.stdout, stderr: result.stderr, decision };
-  } catch { return { launched: false, reason: "launch-failed", decision }; }
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "EPROCESSCLEANUP") {
+      const pid = "ownerPid" in error ? error.ownerPid : undefined;
+      return { launched: false, reason: "launch-cleanup-unconfirmed", decision,
+        ...(Number.isSafeInteger(pid) && (pid as number) > 0 ? { ownerPid: pid as number } : {}) };
+    }
+    return { launched: false, reason: "launch-failed", decision };
+  }
 }
 
 export type { Receipt, RunOptions };
