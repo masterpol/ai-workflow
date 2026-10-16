@@ -8,7 +8,7 @@ import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 // ORCA_APPLY_UNDER_TEST lets a mutant copy of the module be exercised by the same assertions (mutant proofs).
 const mod = await import(process.env.ORCA_APPLY_UNDER_TEST ?? "./orca-apply.mts") as typeof import("./orca-apply.mts");
-const { applyAdmitted, rollback, validRelativePath, parseStatus, parseNumstat } = mod;
+const { applyAdmitted, isApplied, rollback, validRelativePath, parseStatus, parseNumstat } = mod;
 type Worker = import("./orca-apply.mts").AdmittedWorker;
 type Entry = import("./orca-apply.mts").AdmittedEntry;
 
@@ -397,6 +397,39 @@ test("a timeout during the apply phase rolls back instead of leaving a partial t
   assert.equal(result.status, "rolled-back");
   assert.equal((result as { reason: string }).reason, "git-timeout");
   assert.deepEqual(tree(root), before);
+});
+
+test("unknown process cleanup during apply preserves the partial tree and snapshot without rollback", async (t: TestContext) => {
+  const { root, head } = makeRepo(t);
+  const p1 = patchFrom(t, root, (c) => put(c, "a.txt", "alpha CHANGED\nline2\n"));
+  const p2 = patchFrom(t, root, (c) => put(c, "c.txt", "charlie CHANGED\n"));
+  const error = Object.assign(new Error("cleanup unknown"), { code: "EPROCESSCLEANUP", ownerPid: 4242 });
+  let writes = 0;
+  const d = wrapped((args, n) => {
+    if (args.includes("apply") && !args.includes("--check") && !args.includes("--numstat")) {
+      writes = n.writes;
+      if (n.writes === 2) {
+        put(root, "c.txt", "partial write still owned\n");
+        throw error;
+      }
+    }
+    return undefined;
+  });
+  await assert.rejects(call(root, head, [worker("w1", p1, [entry("a.txt")]), worker("w2", p2, [entry("c.txt")])], d), (caught: unknown) => caught === error);
+  assert.equal(writes, 2);
+  assert.equal(read(root, "a.txt"), "alpha CHANGED\nline2\n");
+  assert.equal(read(root, "c.txt"), "partial write still owned\n");
+  assert.equal(storeExists(root), true, "the recovery snapshot is retained");
+});
+
+test("unknown process cleanup from isApplied is never a false negative allowing a fresh apply", async (t: TestContext) => {
+  const { root } = makeRepo(t);
+  const error = Object.assign(new Error("cleanup unknown"), { code: "EPROCESSCLEANUP", ownerPid: 4242 });
+  let calls = 0;
+  const d = wrapped(() => { calls++; throw error; });
+  await assert.rejects(isApplied({ root, patch: "patch", entries: [entry("a.txt")], deps: d }), (caught: unknown) => caught === error);
+  assert.equal(calls, 1);
+  assert.equal(storeExists(root), false);
 });
 
 test("every git call is hardened and gets a scrubbed environment", async (t: TestContext) => {

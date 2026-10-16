@@ -143,8 +143,10 @@ function fakeOrca(base: RuntimeDeps, script: readonly Behaviour[]): FakeOrca {
   return { deps: { ...base, child: { ...base.child, run } }, calls };
 }
 
-function scopeSpec(id: string, text: string, ownership: string): ScopeSpec {
-  return { id, target: text, change: text, constraints: "edit only the owned paths", ownership, acceptance: "coordinator checks pass on the integrated tree" };
+function scopeSpec(id: string, text: string, authorizedPaths: readonly string[]): ScopeSpec {
+  // Fixture authority is structured coordinator input, never parsed from a worker report or ownership prose.
+  return { id, target: text, change: text, constraints: "edit only the owned paths", ownership: authorizedPaths.join(", "),
+    authorizedPaths: [...authorizedPaths], acceptance: "coordinator checks pass on the integrated tree" };
 }
 
 interface LaunchArgs { root: string; deps: RuntimeDeps; coordinator: string; vendor: string; scope: ScopeSpec; attemptId: string; mode?: ProbeMode; present?: boolean; argv?: readonly string[]; placement?: Placement }
@@ -195,7 +197,7 @@ async function worker(ctx: Ctx, fx: Repo, name: string, files: Readonly<Record<s
 }
 /** Completes an attempt the way production does: a real dispatch, then the worker's own worker_done. */
 async function complete(ctx: Ctx, fx: Repo, name: string, files: readonly string[], body = "done"): Promise<boolean> {
-  const out = await ctx.libs.dispatchScope(launch(ctx, { root: fx.root, deps: fx.orca.deps, coordinator: "claude", vendor: "codex", scope: scopeSpec(`scope-${name}`, `change ${files.join(", ")}`, files.join(", ")), attemptId: name }));
+  const out = await ctx.libs.dispatchScope(launch(ctx, { root: fx.root, deps: fx.orca.deps, coordinator: "claude", vendor: "codex", scope: scopeSpec(`scope-${name}`, `change ${files.join(", ")}`, files), attemptId: name }));
   if (out.route !== "launched" || !out.dispatchId || !out.attemptKey) return false;
   return ctx.libs.collectReport({ root: fx.root, attemptKey: out.attemptKey, message: workerDone(`msg-${name}`, out.dispatchId, files, body), deps: ctx.deps }).accepted;
 }
@@ -228,15 +230,15 @@ const observeAlternateVendors: Observer = async (given, ctx) => {
   const outcomes: DispatchOutcome[] = [];
   for (const [index, text] of scopes.entries()) {
     outcomes.push(await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor: workers[index % Math.max(1, workers.length)] ?? "", mode,
-      scope: scopeSpec(`scope-${index + 1}`, text, `checkout-${index + 1}`), attemptId: `alt-${index + 1}`, placement: { worktree: `checkout-${index + 1}` } })));
+      scope: scopeSpec(`scope-${index + 1}`, text, [`checkout-${index + 1}/`]), attemptId: `alt-${index + 1}`, placement: { worktree: `checkout-${index + 1}` } })));
   }
   const starts = orca.calls.slice();
   // The coordinator never delegates to itself, and a task that already has a writer gets no second one.
-  const self = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor: harness, mode, scope: scopeSpec("scope-self", "self", "self"), attemptId: "alt-self" }));
+  const self = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor: harness, mode, scope: scopeSpec("scope-self", "self", ["self.txt"]), attemptId: "alt-self" }));
   const again = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor: workers[0] ?? "", mode,
-    scope: scopeSpec("scope-1", scopes[0] ?? "x", "checkout-1"), attemptId: "alt-again", placement: { worktree: "checkout-again" } }));
+    scope: scopeSpec("scope-1", scopes[0] ?? "x", ["checkout-1/"]), attemptId: "alt-again", placement: { worktree: "checkout-again" } }));
   const specs = starts.map((args) => argAfter(args, "--spec") ?? "");
-  const full = scopeSpec("probe", "t", "o");
+  const full = scopeSpec("probe", "t", ["probe.txt"]);
   const briefRequires = BRIEF_FIELDS.filter(([, label, key]) => specs.length > 0 && specs.every((spec) => spec.split("\n").some((line) => line.startsWith(`${label}: `)))
     && !ctx.libs.workerBrief({ ...full, [key]: "" }).ok).map(([name]) => name);
   const worktrees = starts.map((args) => argAfter(args, "--worktree"));
@@ -275,7 +277,7 @@ const observePreflightFallback: Observer = async (given, ctx) => {
     writePolicy(ctx, root, harness, VENDORS.filter((vendor) => vendor !== harness));
     const orca = fakeOrca(ctx.deps, ["ok"]);
     const out = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor: VENDORS.find((vendor) => vendor !== harness) ?? "",
-      scope: scopeSpec("scope-1", "fallback", "a.txt"), attemptId: "fb-1", mode: scenario.mode, present: scenario.present }));
+      scope: scopeSpec("scope-1", "fallback", ["a.txt"]), attemptId: "fb-1", mode: scenario.mode, present: scenario.present }));
     launches += orca.calls.length;
     written ||= metricsWritten(ctx, root);
     routes.push(out.route);
@@ -285,7 +287,7 @@ const observePreflightFallback: Observer = async (given, ctx) => {
   const root = fresh(ctx, "fallback-caller");
   writePolicy(ctx, root, harness, VENDORS.filter((vendor) => vendor !== harness));
   const callerOnly = await ctx.libs.dispatchScope(launch(ctx, { root, deps: fakeOrca(ctx.deps, ["ok"]).deps, coordinator: harness,
-    vendor: VENDORS.find((vendor) => vendor !== harness) ?? "", scope: scopeSpec("scope-1", "fallback", "a.txt"), attemptId: "fb-caller", mode: "caller-unverified" }));
+    vendor: VENDORS.find((vendor) => vendor !== harness) ?? "", scope: scopeSpec("scope-1", "fallback", ["a.txt"]), attemptId: "fb-caller", mode: "caller-unverified" }));
   return {
     actual: {
       route: routes.every((route) => route === "normal") ? "normal workflow" : routes.join(","),
@@ -301,30 +303,27 @@ const observeUncertainWorker: Observer = async (given, ctx) => {
   const input = obj(given.input);
   const harness = str(input.harness);
   const vendor = VENDORS.find((candidate) => candidate !== harness) ?? "";
-  const preserving: Behaviour[] = [...(input.timeout === true ? ["timeout" as const] : []), "signal", "unproven"];
+  const preserving: Behaviour[] = [...(input.timeout === true ? ["timeout" as const] : []), "signal", "unproven", "residual"];
   let replacement = false;
   let stopped = false;
   const preserved: boolean[] = [];
   const routed: boolean[] = [];
   const notes: string[] = [];
-  for (const behaviour of [...preserving, "residual" as const]) {
+  for (const behaviour of preserving) {
     const root = fresh(ctx, `uncertain-${behaviour}`);
     writePolicy(ctx, root, harness, VENDORS.filter((candidate) => candidate !== harness));
     const orca = fakeOrca(ctx.deps, [behaviour, "ok"]);
-    const base = launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor, scope: scopeSpec("scope-u", "uncertain", "a.txt"), attemptId: "unused" });
+    const base = launch(ctx, { root, deps: orca.deps, coordinator: harness, vendor, scope: scopeSpec("scope-u", "uncertain", ["a.txt"]), attemptId: "unused" });
     const { attemptId: _unused, ...rest } = base;
     const loop = await ctx.libs.dispatchWithRetries({ ...rest, baseAttemptId: "u1", maxRetries: 2 });
     const loopSpawns = orca.calls.length;
-    const isPreserving = behaviour !== "residual";
     // A fallback writer for the same task is what a coordinator would try next; it must not start while ownership is unknown.
-    const fallback = isPreserving ? await ctx.libs.dispatchScope({ ...base, attemptId: "fallback" }) : undefined;
+    const fallback = await ctx.libs.dispatchScope({ ...base, attemptId: "fallback" });
     replacement ||= loopSpawns > 1 || orca.calls.length > loopSpawns;
     stopped ||= orca.calls.some((args) => args[1] !== "worker-start");
-    if (isPreserving) {
-      preserved.push(stateOf(ctx, root, "attempt:u1") === "unknown-liveness");
-      routed.push(loop.route === "resume" || loop.route === "blocked");
-      routed.push(Boolean(loop.humanAction) && fallback?.reason === "task-already-owned");
-    } else preserved.push(loop.route === "blocked" && Boolean(loop.humanAction));
+    preserved.push(stateOf(ctx, root, "attempt:u1") === "unknown-liveness");
+    routed.push(loop.route === "resume" || loop.route === "blocked");
+    routed.push(Boolean(loop.humanAction) && fallback.reason === "task-already-owned");
     notes.push(`${behaviour}: ${loop.route}/${loop.reason} spawns ${orca.calls.length}`);
   }
   const verdict = ctx.libs.classifyLiveness({ projection: { liveness: { verdict: input.workerLiveness } } });
@@ -346,7 +345,7 @@ const observeWorkerPreamble: Observer = async (given, ctx) => {
   const root = fresh(ctx, "preamble");
   writePolicy(ctx, root, harness, VENDORS.filter((vendor) => vendor !== harness));
   if (input.policyMode !== "auto") ctx.deps.fs.rmSync(ctx.deps.path.join(root, ".project", "orchestration.json"), { force: true });
-  const scope = scopeSpec("scope-p", "nested", "a.txt");
+  const scope = scopeSpec("scope-p", "nested", ["a.txt"]);
   const brief = ctx.libs.workerBrief(scope);
   // The worker reads its own brief: those lines are its argv when it considers coordinating.
   const argv = input.activeDispatchPreamble === true && brief.ok ? brief.brief.split("\n") : [];
@@ -369,7 +368,7 @@ type VariantRunner = (ctx: Ctx) => Promise<Facts>;
 async function launchedAttempt(ctx: Ctx, label: string): Promise<{ root: string; attemptKey: string; dispatchId: string }> {
   const root = fresh(ctx, label);
   writePolicy(ctx, root, "claude", ["codex", "opencode"]);
-  const out = await ctx.libs.dispatchScope(launch(ctx, { root, deps: fakeOrca(ctx.deps, ["ok"]).deps, coordinator: "claude", vendor: "codex", scope: scopeSpec("scope-c", "complete", "a.txt"), attemptId: "c1" }));
+  const out = await ctx.libs.dispatchScope(launch(ctx, { root, deps: fakeOrca(ctx.deps, ["ok"]).deps, coordinator: "claude", vendor: "codex", scope: scopeSpec("scope-c", "complete", ["a.txt"]), attemptId: "c1" }));
   return { root, attemptKey: out.attemptKey ?? "attempt:c1", dispatchId: out.dispatchId ?? "" };
 }
 
@@ -487,12 +486,13 @@ const observeHostileSummary: Observer = async (given, ctx) => {
     const root = fresh(ctx, "hostile");
     writePolicy(ctx, root, "claude", ["codex", "opencode"]);
     const orca = fakeOrca(ctx.deps, ["ok"]);
-    const first = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: "claude", vendor: "codex", scope: scopeSpec("scope-h1", "first", "src/a.txt"), attemptId: "h1" }));
+    const first = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: "claude", vendor: "codex", scope: scopeSpec("scope-h1", "first", ["src/a.txt"]), attemptId: "h1" }));
     const report = ctx.libs.collectReport({ root, attemptKey: first.attemptKey ?? "attempt:h1", message: workerDone("msg-h1", first.dispatchId ?? "", ["src/a.txt"], body), deps: ctx.deps });
-    const next = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: "claude", vendor: "codex", scope: scopeSpec("scope-h2", "second", "src/b.txt"), attemptId: "h2" }));
+    const next = await ctx.libs.dispatchScope(launch(ctx, { root, deps: orca.deps, coordinator: "claude", vendor: "codex", scope: scopeSpec("scope-h2", "second", ["src/b.txt"]), attemptId: "h2" }));
     const read = createLedger(root, ctx.deps).read("attempt:h1");
     return { report, route: `${next.route}/${next.reason}`, agents: orca.calls.map((args) => argAfter(args, "--agent")).join(","),
-      vendor: read.status === "ok" ? read.record.vendor : read.status, state: read.status === "ok" ? read.record.state : read.status };
+      vendor: read.status === "ok" ? read.record.vendor : read.status, state: read.status === "ok" ? read.record.state : read.status,
+      authorizedPaths: read.status === "ok" ? read.record.authorizedPaths : undefined };
   };
   const benign = await flow("done");
   const hostile = await flow(summary);
@@ -501,7 +501,9 @@ const observeHostileSummary: Observer = async (given, ctx) => {
     actual: {
       routeUnchanged: hostile.route === benign.route && hostile.state === benign.state,
       vendorUnchanged: hostile.agents === benign.agents && hostile.vendor === benign.vendor,
-      pathsUnchanged: JSON.stringify(hostile.report.filesModified) === JSON.stringify(benign.report.filesModified),
+      pathsUnchanged: JSON.stringify(hostile.report.filesModified) === JSON.stringify(benign.report.filesModified)
+        && JSON.stringify(hostile.authorizedPaths) === JSON.stringify(benign.authorizedPaths)
+        && JSON.stringify(hostile.authorizedPaths) === JSON.stringify(["src/a.txt"]),
       approvalsUnchanged: hostile.report.accepted === benign.report.accepted && Object.keys(hostile.report).every((key) => REPORT_KEYS.includes(key))
         && text.length <= 500 && !CONTROL.test(text),
     },

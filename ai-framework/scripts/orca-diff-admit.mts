@@ -140,6 +140,7 @@ interface RawRecord { oldMode: string; newMode: string; status: string; path: st
 export async function admitDiff(options: AdmitOptions): Promise<AdmitResult> {
   const { deps } = options;
   let scratch: string | undefined;
+  let cleanupUnknown = false;
   try {
     const { fs, path } = deps;
     const baseline: unknown = options.baseline;
@@ -165,7 +166,7 @@ export async function admitDiff(options: AdmitOptions): Promise<AdmitResult> {
     const spawnOptions = (input: string | undefined, maxBufferBytes: number): SpawnOptions => {
       const remaining = deadline - deps.clock.monotonicMs();
       if (!(remaining >= 1)) reject("git-timeout");
-      return { cwd: root, env: { ...baseEnv, ...stageEnv }, input, timeoutMs: Math.floor(Math.min(GIT_TIMEOUT_MS, remaining)), maxBufferBytes, killSignal: "SIGKILL" };
+      return { cwd: stageEnv.GIT_WORK_TREE ?? root, env: { ...baseEnv, ...stageEnv }, input, timeoutMs: Math.floor(Math.min(GIT_TIMEOUT_MS, remaining)), maxBufferBytes, killSignal: "SIGKILL" };
     };
     const checked = (result: RunResult, okStatuses: readonly number[]): RunResult => {
       if (result.errorCode === "ETIMEDOUT") reject("git-timeout");
@@ -185,7 +186,8 @@ export async function admitDiff(options: AdmitOptions): Promise<AdmitResult> {
     try { toplevel = fs.realpathSync(located[0]); } catch { return { status: "rejected", reason: "worktree-mismatch" }; }
     if (toplevel !== root) reject("worktree-mismatch");
     const objects = path.join(located[1], "objects");
-    if (!path.isAbsolute(objects) || /[:"\0\n]/.test(objects)) reject("worktree-invalid");
+    // Git separates alternates with the platform delimiter; a Windows drive colon is part of one valid path.
+    if (!path.isAbsolute(objects) || objects.includes(path.delimiter) || /["\0\r\n]/.test(objects)) reject("worktree-invalid");
 
     // Baseline: an existing commit that is an ancestor of the worker HEAD.
     const resolved = await git(["rev-parse", "--verify", "--quiet", "--end-of-options", `${baseline}^{commit}`], { ok: [0, 1, 128] });
@@ -361,21 +363,37 @@ export async function admitDiff(options: AdmitOptions): Promise<AdmitResult> {
     }
 
     // The patch: exact bytes, required to be UTF-8 so it survives a string round-trip to `git apply`. Non-UTF-8 text is
-    // re-emitted as binary hunks via an attribute tree we create (worker attributes no longer apply to that pass).
+    // re-emitted as binary hunks from a scratch worktree containing only our trusted .gitattributes. This works
+    // on Git 2.39 without --attr-source (a later option), modifying repository/global attributes or relying on
+    // tree-to-tree diff to load an alternate index for attribute lookup.
     const patchArgs = ["diff", "--binary", "--no-renames", "-U3", ...DIFF_FLAGS, baseline, tree, "--"];
     let patch = patchText(deps.child.runSync("git", [...GIT_HARDENING, ...patchArgs], { ...spawnOptions(undefined, PATCH_MAX_BYTES), encoding: "buffer" }), checked);
     if (patch === undefined) {
-      const blob = mustHex((await git(["hash-object", "-w", "--stdin"], { input: "* -diff\n" })).stdout.trim());
-      const attributes = mustHex((await git(["mktree", "-z"], { input: `100644 blob ${blob}\t.gitattributes\0` })).stdout.trim());
-      patch = patchText(deps.child.runSync("git", [...GIT_HARDENING, `--attr-source=${attributes}`, ...patchArgs], { ...spawnOptions(undefined, PATCH_MAX_BYTES), encoding: "buffer" }), checked);
+      const gitDir = (await git(["rev-parse", "--absolute-git-dir"])).stdout.replace(/\r?\n$/, "");
+      if (!path.isAbsolute(gitDir) || CONTROL.test(gitDir)) reject("worktree-invalid");
+      const attributesWorktree = path.join(scratch, "attributes-worktree");
+      fs.mkdirSync(attributesWorktree, { recursive: false, mode: 0o700 });
+      fs.writeFileSync(path.join(attributesWorktree, ".gitattributes"), "* -diff\n", { encoding: "utf8", mode: 0o600 });
+      // Keep the original linked-worktree Git directory, whose info/attributes retains its higher precedence.
+      // Only attributes in the worker worktree/index are replaced; forced text in info/attributes still fails below.
+      stageEnv = { ...stageEnv, GIT_DIR: gitDir, GIT_WORK_TREE: attributesWorktree, GIT_INDEX_FILE: path.join(scratch, "attributes-index") };
+      patch = patchText(deps.child.runSync("git", [...GIT_HARDENING, ...patchArgs], { ...spawnOptions(undefined, PATCH_MAX_BYTES), encoding: "buffer" }), checked);
       if (patch === undefined) reject("patch-not-utf8");
     }
     return { status: "admitted", entries, patch: patch as string };
   } catch (error) {
+    if (errorCode(error) === "EPROCESSCLEANUP") {
+      // The child can still use the temporary object/index store. Preserve it together with its tracked owner.
+      cleanupUnknown = true;
+      if (scratch !== undefined && error !== null && typeof error === "object") {
+        Object.assign(error, { retainedPaths: [scratch] });
+      }
+      throw error;
+    }
     if (error instanceof Rejection) return error.path === undefined ? { status: "rejected", reason: error.reason } : { status: "rejected", reason: error.reason, path: error.path };
     return { status: "rejected", reason: "admit-error" };
   } finally {
-    if (scratch !== undefined) { try { deps.fs.rmSync(scratch, { recursive: true, force: true }); } catch { /* temp dir; best effort */ } }
+    if (scratch !== undefined && !cleanupUnknown) { try { deps.fs.rmSync(scratch, { recursive: true, force: true }); } catch { /* temp dir; best effort */ } }
   }
 }
 
