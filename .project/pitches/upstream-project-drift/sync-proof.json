@@ -1,0 +1,373 @@
+{
+ "climbing.new": {
+  "rows": 76,
+  "match": 48,
+  "summary": {
+   "new": 2,
+   "changed": 6,
+   "local": 42,
+   "conflict": 139,
+   "unverified": 0,
+   "removed": 34
+  },
+  "mismatch": [
+   {
+    "file": "README.md",
+    "classification": "project-local",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "identical"
+   },
+   {
+    "file": "SETUP.md",
+    "classification": "project-local",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "identical"
+   },
+   {
+    "file": "hooks/scripts/orca-start-hook.test.mts",
+    "classification": "upstream",
+    "scope": "S3",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "hooks/scripts/pre-ship-verify.mts",
+    "classification": "upstream",
+    "scope": "S6",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "hooks/scripts/pre-ship-verify.test.mts",
+    "classification": "upstream",
+    "scope": "S6",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "hooks/scripts/stuck-uphill-detector.test.mts",
+    "classification": "upstream",
+    "scope": "S6",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "hooks/scripts/token-consumption.test.mts",
+    "classification": "upstream",
+    "scope": "S6",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-dispatch.test.mts",
+    "classification": "upstream",
+    "scope": "S4",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-launch-gate.mts",
+    "classification": "upstream",
+    "scope": "S3",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-launch-gate.test.mts",
+    "classification": "upstream",
+    "scope": "S3",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-ledger.mts",
+    "classification": "upstream",
+    "scope": "S4",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-ledger.test.mts",
+    "classification": "upstream",
+    "scope": "S4",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-preflight.mts",
+    "classification": "upstream",
+    "scope": "S3",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-preflight.test.mts",
+    "classification": "upstream",
+    "scope": "S3",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-reconcile.test.mts",
+    "classification": "upstream",
+    "scope": "S4",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-run.mts",
+    "classification": "upstream",
+    "scope": "S4",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-run.test.mts",
+    "classification": "upstream",
+    "scope": "S4",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/orca-start.test.mts",
+    "classification": "upstream",
+    "scope": "S3",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/runtime/bun.mts",
+    "classification": "upstream",
+    "scope": "S2",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/runtime/node.mts",
+    "classification": "upstream",
+    "scope": "S2",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/runtime/runtime.test.mts",
+    "classification": "upstream",
+    "scope": "S2",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/runtime/upgrade.test.mts",
+    "classification": "upstream",
+    "scope": "S2",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/setup-validator.test.mts",
+    "classification": "upstream",
+    "scope": "S7",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "scripts/skill-defaults.test.mts",
+    "classification": "upstream",
+    "scope": "S7",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "templates/project/runs/README.md",
+    "classification": "upstream (hunk)",
+    "scope": "S8",
+    "expected": "identical",
+    "actual": "local"
+   },
+   {
+    "file": "workflow/phases/0-shape.md",
+    "classification": "upstream (hunk)",
+    "scope": "S8",
+    "expected": "conflict",
+    "actual": "identical"
+   },
+   {
+    "file": "workflow/phases/2-build.md",
+    "classification": "upstream (hunk)",
+    "scope": "S8",
+    "expected": "identical",
+    "actual": "conflict"
+   },
+   {
+    "file": "workflow/phases/3-audit.md",
+    "classification": "upstream (hunk)",
+    "scope": "S8",
+    "expected": "conflict",
+    "actual": "identical"
+   }
+  ]
+ },
+ "RN.new": {
+  "rows": 87,
+  "match": 73,
+  "summary": {
+   "new": 3,
+   "changed": 36,
+   "local": 45,
+   "conflict": 131,
+   "unverified": 0,
+   "removed": 61
+  },
+  "mismatch": [
+   {
+    "file": "docs/design-notes.md",
+    "classification": "project-local (runner)",
+    "scope": "\u2014",
+    "expected": "conflict",
+    "actual": "local"
+   },
+   {
+    "file": "docs/extending.md",
+    "classification": "project-local (runner)",
+    "scope": "\u2014",
+    "expected": "conflict",
+    "actual": "local"
+   },
+   {
+    "file": "docs/setup.md",
+    "classification": "project-local (runner)",
+    "scope": "\u2014",
+    "expected": "conflict",
+    "actual": "local"
+   },
+   {
+    "file": "docs/workflow-doctor.md",
+    "classification": "project-local (runner)",
+    "scope": "\u2014",
+    "expected": "conflict",
+    "actual": "local"
+   },
+   {
+    "file": "hooks/scripts/opencode-plugin.test.mts",
+    "classification": "drop",
+    "scope": "\u2014",
+    "expected": "changed",
+    "actual": "identical"
+   },
+   {
+    "file": "hooks/scripts/orca-start-codex-hook.mts",
+    "classification": "upstream (hunk)",
+    "scope": "S6",
+    "expected": "conflict",
+    "actual": "identical"
+   },
+   {
+    "file": "hooks/scripts/orca-start-hook.mts",
+    "classification": "upstream (hunk)",
+    "scope": "S6",
+    "expected": "conflict",
+    "actual": "identical"
+   },
+   {
+    "file": "rules/README.md",
+    "classification": "project-local (relocate)",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   },
+   {
+    "file": "rules/mobile-performance-review.md",
+    "classification": "project-local (relocate)",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   },
+   {
+    "file": "rules/react-native.md",
+    "classification": "project-local (relocate)",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   },
+   {
+    "file": "rules/styling.md",
+    "classification": "project-local (relocate)",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   },
+   {
+    "file": "scripts/graphify.mts",
+    "classification": "project-local (runner)",
+    "scope": "\u2014",
+    "expected": "conflict",
+    "actual": "local"
+   },
+   {
+    "file": "scripts/next-pitch.mts",
+    "classification": "followup",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   },
+   {
+    "file": "scripts/next-pitch.test.mts",
+    "classification": "followup",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   }
+  ]
+ },
+ "LAH.new": {
+  "rows": 15,
+  "match": 10,
+  "summary": {
+   "new": 3,
+   "changed": 57,
+   "local": 0,
+   "conflict": 12,
+   "unverified": 0,
+   "removed": 1
+  },
+  "mismatch": [
+   {
+    "file": "hooks/scripts/opencode-plugin.test.mts",
+    "classification": "drop",
+    "scope": "\u2014",
+    "expected": "changed",
+    "actual": "identical"
+   },
+   {
+    "file": "integrations/orca-vendors.json",
+    "classification": "superseded-by-orca-role-pools",
+    "scope": "\u2014",
+    "expected": "untouched",
+    "actual": "removed"
+   },
+   {
+    "file": "rules/testing.md",
+    "classification": "upstream",
+    "scope": "S1",
+    "expected": "conflict",
+    "actual": "identical"
+   },
+   {
+    "file": "scripts/graphify.test.mts",
+    "classification": "drop",
+    "scope": "\u2014",
+    "expected": "changed",
+    "actual": "identical"
+   },
+   {
+    "file": "scripts/orca-start.mts",
+    "classification": "superseded-by-S3",
+    "scope": "S3",
+    "expected": "conflict",
+    "actual": "identical"
+   }
+  ]
+ }
+}

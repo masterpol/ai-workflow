@@ -85,3 +85,10 @@ Tree: `0deac9a` + uncommitted graphify edit; `ai_workflow_env.json` moved aside;
 - S10: `opencode-service.mts` + test 8/8; dispatch hook + 3 tests; orca-run + opencode-service 38/38 node + bun;
   doctor exit 0, production runtime boundary 0 violations. Live smoke: `free --json` →
   `{"status":"free","stopped":true,"signalled":[40797],"remaining":[]}`; no `opencode serve` left afterwards.
+- S9: VERSION 2.23.0, CHANGELOG `## [2.23.0]` (the plan's `grep '## 2.23.0'` does not match the generator's
+  bracketed heading; checked `## \[2.23.0\]` instead). Decision 6: two slow child-process tests get `timeout: 30000`.
+  The bun GAUNTLET then showed a third macOS EPERM site (the `exit` handler's group SIGKILL in `node.mts`); now
+  fixed the same way, and the test failure message includes the cleanup cause. Final GAUNTLET(node) 1329 tests:
+  1327 pass, 0 fail, 2 skip; GAUNTLET(bun) 1325 tests: 1323 pass, 0 fail, 2 skip (default 5 s timeout). Linux
+  Docker runtime 69/0. Graph rebuilt and CLEAN; doctor, setup-validator exit 0; cursor-mirrors clean. Sync
+  proof: see the ledger "S9 sync proof"; the projects are untouched.

@@ -268,3 +268,36 @@ that base added after climbing synced.
 | `templates/project/runs/README.md` | — (climbing's session-log rewrite rejected) | base file restored unchanged: it describes what `/ship` and `/cooldown` write |
 | other templates | placeholders replace product-specific values and fixed thresholds | — |
 | `.opencode/opencode.json` | climbing `cca360a` plugin registration | base `agent.build.model` block. `.opencode/plugins/package.json` is not ported: OpenCode generates it and both repos ignore it |
+
+## S9 sync proof (2026-10-16, base 2.23.0)
+
+Method: the bundle-relevant parts of each project (`ai-framework/`, vendor adapter directories, entry files,
+`.project/` without metrics; no `.git`, `node_modules` or secret-shaped files) were copied to the session
+scratchpad. In each copy, the new base `bundle-sync.mts --source <base> --json` ran as a dry run, and so did the
+project's own 2.22.5 `bundle-sync.mts`. The raw comparison is in `sync-proof.json`. `git status --porcelain` in
+all three projects was identical before and after (0 dirty; HEADs `02a2f91`, `48a721d`, `bfb81b6`).
+
+| Project | Ledger rows | Match | Mismatch | Dry run: new / changed / local / conflict / removed |
+|---|---|---|---|---|
+| climbing | 76 | 48 | 28 | 2 / 6 / 42 / 139 / 34 |
+| RN | 87 | 73 | 14 | 3 / 36 / 45 / 131 / 61 |
+| LAH | 15 | 10 | 5 | 3 / 57 / 0 / 12 / 1 |
+
+- The new and the 2.22.5 `bundle-sync` give the same result for all three projects.
+- Mismatches, grouped:
+  1. **Better than expected** (`conflict` → `identical`): RN `orca-start{,-codex}-hook.mts`, LAH `rules/testing.md`
+     and `orca-start.mts`, climbing `phases/0-shape.md` and `3-audit.md`. Base now holds those projects' change.
+  2. **Same result, other words**: `changed` rows now report `identical` (opencode-plugin and graphify tests);
+     project-only files report `removed` but are kept because they are modified (RN rules, LAH
+     `orca-vendors.json`). Climbing's `README.md`/`SETUP.md` are untouched; the comparison counted them as
+     `identical` only because they appear in no list.
+  3. **Decided in this pitch**: climbing `templates/project/runs/README.md` stays `local` (rewrite rejected, S8);
+     RN runner-only docs and `graphify.mts` stay `local` (D4).
+  4. **24 climbing files `identical` → `conflict`**: base took climbing's version and then changed it (1.4.224
+     literals, macOS EPERM handling, child isolation, ledger `schemaVersion`, RN hook hardening and tests, the
+     S8 restorations). For each file the difference from climbing is only those base additions, so
+     `workflow-v3-rollout` takes base for all 24.
+- **Rollout warning (`workflow-v3-rollout`)**: never run `--prune` on climbing or RN without reviewing the list
+  first. Their sync markers still list files that base no longer ships, and those files are unmodified, so a
+  prune would delete climbing's `frontend-craft` skill and its `e2e-runner` / `tdd-guide` agents (34 files across
+  all vendor copies) and RN's `next-pitch.mts` and its test.

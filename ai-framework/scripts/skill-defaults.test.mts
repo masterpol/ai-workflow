@@ -298,7 +298,7 @@ test("both cross-vendor entry files resolve to the same working caveman instruct
 
 // The doctor checks the AGENTS.md/CLAUDE.md caveman section only inside the portable bundle's own repo (SETUP.md present).
 const IN_BUNDLE_REPO = fs.existsSync(path.join(BUNDLE, "SETUP.md"));
-test("doctor and setup-validator report the live caveman state truthfully across every state it can be in", (t: TestContext) => {
+test("doctor and setup-validator report the live caveman state truthfully across every state it can be in", { timeout: 30000 }, (t: TestContext) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "caveman-state-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");

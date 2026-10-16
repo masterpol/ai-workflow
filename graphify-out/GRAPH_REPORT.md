@@ -1,17 +1,17 @@
-# Graph Report - ai-workflow-portable  (2026-10-09)
+# Graph Report - ai-workflow-portable  (2026-10-16)
 
 ## Corpus Check
-- 453 files · ~395,170 words
+- 465 files · ~425,142 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 23 file(s) not represented in the graph (top: .toml 17, (none) 6)
 
 ## Summary
-- 4689 nodes · 8122 edges · 389 communities (259 shown, 130 thin omitted)
-- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 391 edges (avg confidence: 0.91)
+- 4889 nodes · 8505 edges · 409 communities (275 shown, 134 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 419 edges (avg confidence: 0.91)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `d1d3b571`
+- Built from commit: `b5d3d7f3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,12 +21,12 @@
 - createPitchArchive
 - bindStateSnapshot
 - token-report.mts
-- review-bench.mts
-- bundle-sync.mts
+- Followups
+- makeSync
 - token-consumption.mts
 - Security Rules
-- createNodeDeps
-- orca-ledger.mts
+- entry-import.mts
+- createLedger
 - main
 - state-theme.mts
 - ref_node_assert
@@ -39,16 +39,16 @@
 - .claude/agents/architect.md
 - .cursor/agents/architect.md
 - graphify.mts
-- state-snapshot.test.mts
+- state-snapshot.mts
 - Compaction record: independent-rereview-catch-up
-- metrics-lock.test.mts
+- createNodeDeps
 - FsDeps
 - orca-apply.test.mts
 - Eval Harness Skill
 - Eval Harness Skill
 - orca-diff-admit.test.mts
 - add-skill.mts
-- setup-validator.test.mts
+- isSupportedVersion
 - Observability Rules
 - Performance Rules
 - pitch-compress.mts
@@ -57,8 +57,8 @@
 - orca-policy.mts
 - orca-diff-admit.mts
 - skill-vendors.test.mts
-- Pattern: keep the fake's guarantee the same as the thing it replaces
-- orca-start.mts
+- Issue: a temp-fixture helper that realpaths its result silently voids a macOS alias guard
+- orca-start.test.mts
 - /search — Search Project Knowledge
 - /setup — Project Setup & Context Generation
 - /test-strategy — Smart Testing
@@ -68,14 +68,14 @@
 - Pattern: a read-only report over a project tree treats the tree as data, never as code
 - pre-ship-verify.mts
 - workflow-metrics-report.mts
-- makeValidator
+- setup-validator.test.mts
 - full
 - skill-source.mts
 - browser-runtime.test.mts
 - changelog.test.mts
 - orca-eval-grader.mts
 - skill-defaults.test.mts
-- orca-ledger.test.mts
+- orca-ledger.mts
 - Phase 3: Audit
 - Compaction record: orca-vendor-foundation
 - bundle-sync.test.mts
@@ -86,7 +86,7 @@
 - state-html.test.mts
 - Model Routing Strategy
 - orca-run.mts
-- .mkdtempSync
+- .rmSync
 - Activities (in order)
 - Phase 1: Plan
 - Phase 2: Build
@@ -97,7 +97,7 @@
 - /sync — Sync Tasks with Notion
 - Steps
 - review-bench.test.mts
-- orcaMultiAgentEnabled
+- orca-start-codex-hook.mts
 - orca-launch-gate.mts
 - AI Tool Use Constraints & Enforcement
 - Phase 5: Cooldown
@@ -133,7 +133,7 @@
 - token-report.test.mts
 - Eval Harness
 - commitLedger
-- types.mts
+- node.mts
 - Wireframe: [Feature Name]
 - Wireframe: [Feature Name]
 - Audit
@@ -141,8 +141,8 @@
 - Wireframe: [Feature Name]
 - Wireframe: [Feature Name]
 - Compaction record: native-safety-feasibility
-- invariants.test.mts
-- Harness Integration Guide
+- types.mts
+- opencode-plugin.test.mts
 - [2.12.0] - 2026-10-08
 - Internationalization (i18n) Rules
 - Testing Rules
@@ -153,10 +153,10 @@
 - Pitch Compress
 - ADR-NNNN: [Decision Title]
 - Feature: [Feature Name]
-- orca-start-hook.test.mts
+- node
 - README.md
 - orca-run.test.mts
-- skill-vendors.mts
+- orca-start.mts
 - entry.mts
 - recordEvent
 - state-render.mts
@@ -168,8 +168,8 @@
 - Plan
 - Plan
 - Entity: Name
-- orca-reconcile.test.mts
-- ref_node_os
+- fail
+- post-edit-check.mts
 - install
 - orca-dispatch.test.mts
 - Pitch: {slug}
@@ -191,7 +191,7 @@
 - add-skill.test.mts
 - Issue: Title
 - Pattern: Title
-- skill-sync.mts
+- review-bench.mts
 - orca-launch-gate.test.mts
 - Pattern: the tool that verifies independence must itself be independently verified
 - Compaction record: orca-vendor-reconcile-integration
@@ -209,11 +209,11 @@
 - Ship
 - State
 - Product Context
-- Issue: making a shared reader treat a symlink as "absent" turned its writer into a data-destroyer
+- index.md
 - Compaction record: readme-split
-- orca-policy.test.mts
+- bundle-sync.mts
 - Compaction record: orca-vendor-dispatch
-- skill-compress-guard.test.mts
+- ref_node_fs
 - Decision Title
 - Compaction record: orca-vendor-reconcile
 - Pattern: A safety gate must not accept the claims of whoever it is gating — and must re-check at the destructive step
@@ -229,13 +229,13 @@
 - reconcile
 - orca-dispatch.mts
 - OpenCode + Orca Handoff
-- Decision: how `/pitch-compress` decides a deletion is safe
+- Issue: Matching entities by a bare `${id}-` prefix lets one entity resolve to another's
 - workflow-metrics-state.mts
-- Optional Orca vendor policy
-- opencode-plugin.test.mts
+- recordWorkflowEvent
+- Workflow usage metrics
 - Compaction record: orca-vendor-orchestration
 - Instance-managed skills
-- ref_node_child_process
+- docs/setup.md
 - Issue: a skill installed in the source checkout ships to every synced project as a broken orphan
 - orca-evidence.test.mts
 - PitchArchiveApi
@@ -261,20 +261,20 @@
 - .cursor/agents/ux-reviewer.md
 - Changelog
 - [2.8.1] - 2026-09-25
-- Pattern: a grader reports executed and unexecuted cases separately
+- Pattern: keep the fake's guarantee the same as the thing it replaces
 - Hill chart: {slug}
 - skill-sync.test.mts
 - Codex handoff — start here
-- Pattern: a word-boundary search-and-replace still matches inside a longer identifier
+- migrate.mts
 - [2.0.1] - 2026-09-23
-- Portable AI Development Workflow
+- /fix — Bug-Fix Entry
 - Runs
 - /switch — Switch Pitches
 - /switch — Switch Pitches
 - Issue: A hook that fires at launch was counted as a completion, so async agents counted twice
-- formatFiles
+- validState
 - [2.8.2] - 2026-09-26
-- pitch-archive.test.mts
+- docs-links.mts
 - [2.8.3] - 2026-09-26
 - [2.14.1] - 2026-10-08
 - [1.0.0] - 2026-09-23
@@ -286,7 +286,7 @@
 - [2.15.1] - 2026-10-08
 - [2.19.0] - 2026-10-08
 - [2.2.0] - 2026-09-23
-- [1.2.1] - 2026-09-23
+- Pitch: orca-role-pools
 - [2.18.1] - 2026-10-08
 - SETUP — Portable AI Development Workflow
 - .agents/skills/add-skill/SKILL.md
@@ -327,21 +327,21 @@
 - [2.0.0] - 2026-09-23
 - Decision: caveman brevity mode is the default for every skill, agent, and session
 - [2.11.1] - 2026-10-08
-- [2.22.0] - 2026-10-09
+- [2.22.5] - 2026-10-09
 - [2.11.0] - 2026-10-08
 - [2.16.1] - 2026-10-08
-- index.md
+- Issue: a worker's environment differs from the coordinator's, and the first live smoke tests failed for that reason
 - [2.19.1] - 2026-10-08
 - [2.1.0] - 2026-09-23
 - [2.13.0] - 2026-10-08
 - [2.18.0] - 2026-10-08
-- [2.16.0] - 2026-10-08
+- Pitch: unified-toon-config
 - RuntimeDeps
 - [2.8.5] - 2026-09-26
 - [2.3.0] - 2026-09-24
 - [2.20.0] - 2026-10-08
 - [2.20.1] - 2026-10-08
-- [2.8.6] - 2026-09-28
+- Deviations: upstream-project-drift
 - [2.22.1] - 2026-10-09
 - .claude/skills/setup-validator/SKILL.md
 - .claude/skills/workflow-doctor/SKILL.md
@@ -349,38 +349,58 @@
 - .cursor/skills/workflow-doctor/SKILL.md
 - .project/context/README.md
 - [2.9.0] - 2026-10-07
+- digest
+- Pitch: orca-engines-range
 - /fix — Bug-Fix Entry
 - unfinished-pitches-assessment-2026-09-27.md
 - .project/rules/README.md
+- Drift ledger: upstream-project-drift (S0)
+- Pitch: workflow-v3-rollout
 - DirEntryLike
-- [2.8.0] - 2026-09-25
+- Project specifics
+- Project specifics
+- Log: upstream-project-drift
+- Portable AI Development Workflow
+- Step 2 — Wire all harnesses
+- .lstatSync
+- Checkpoint: upstream-project-drift
+- Hill chart: upstream-project-drift
+- state
+- [2.15.0] - 2026-10-08
 - [2.10.0] - 2026-10-07
+- [2.22.2] - 2026-10-09
 - [2.21.0] - 2026-10-09
+- [2.22.3] - 2026-10-09
+- [2.22.4] - 2026-10-09
+- [2.4.0] - 2026-09-25
+- [2.6.0] - 2026-09-25
+- [2.8.4] - 2026-09-26
 - [2.5.0] - 2026-09-25
+- [2.9.1] - 2026-10-07
 - createPitchCompress
 - [2.16.2] - 2026-10-08
 - [2.17.0] - 2026-10-08
 - [2.7.0] - 2026-09-25
 
 ## God Nodes (most connected - your core abstractions)
-1. `RuntimeDeps` - 132 edges
-2. `createNodeDeps()` - 117 edges
+1. `RuntimeDeps` - 133 edges
+2. `createNodeDeps()` - 126 edges
 3. `createPitchCompress()` - 51 edges
 4. `FsDeps` - 51 edges
-5. `Changelog` - 46 edges
+5. `Changelog` - 51 edges
 6. `bindStateSnapshot()` - 41 edges
-7. `main()` - 38 edges
-8. `runDirect()` - 36 edges
-9. `Followups` - 35 edges
-10. `createPitchArchive()` - 31 edges
+7. `main()` - 40 edges
+8. `createLedger()` - 38 edges
+9. `runDirect()` - 37 edges
+10. `Followups` - 36 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `Summary` --references--> `dispatchScope()`  [INFERRED]
   .project/knowledge/issues/an-idempotent-replay-path-returned-success-without-re-checking-the-gate.md → ai-framework/scripts/orca-dispatch.mts
-- `bundle-sync marker misclassifies un-applied unverified files as `local` on the next run` --references--> `base()`  [INFERRED]
-  .project/pitches/_followups.md → ai-framework/scripts/orca-dispatch.test.mts
 - `Symptoms` --references--> `deepEqual()`  [INFERRED]
   .project/knowledge/issues/editing-a-canonical-file-alone-breaks-the-byte-identity-mirror-check.md → ai-framework/scripts/orca-eval-grader.mts
+- `Fix / rule` --references--> `buildWorkerEnv()`  [INFERRED]
+  .project/knowledge/issues/a-probe-child-ran-a-bare-command-with-the-parent-path.md → ai-framework/scripts/orca-launch-gate.mts
 - `Decision` --references--> `evaluateLaunch()`  [INFERRED]
   .project/knowledge/decisions/orca-auto-start-design.md → ai-framework/scripts/orca-launch-gate.mts
 - `Fix / rule` --references--> `evaluateLaunch()`  [INFERRED]
@@ -389,19 +409,19 @@
 ## Import Cycles
 - None detected.
 
-## Communities (389 total, 130 thin omitted)
+## Communities (409 total, 134 thin omitted)
 
 ### Community 0 - "skill-registry.mts"
-Cohesion: 0.16
-Nodes (26): acquire(), cleanup(), codeOf(), Created, digest(), fromBase64(), Journal, json() (+18 more)
+Cohesion: 0.14
+Nodes (27): acquire(), cleanup(), codeOf(), Created, defaultDeps(), fromBase64(), Journal, json() (+19 more)
 
 ### Community 1 - "orca-evidence.mts"
 Cohesion: 0.08
-Nodes (47): Reconcile core (opt-in, library only), Entry, absolutePath(), budget(), Bytes, CleanupDecision, CleanupResult, copyEvidence() (+39 more)
+Nodes (46): Reconcile core (opt-in, library only), Entry, absolutePath(), budget(), Bytes, CleanupDecision, CleanupResult, copyEvidence() (+38 more)
 
 ### Community 2 - "createPitchArchive"
-Cohesion: 0.20
-Nodes (23): codeOf(), createPitchArchive(), archive(), checkSlug(), isRegularFile(), latestArchiveDir(), ledgerCommitted(), ledgerPath() (+15 more)
+Cohesion: 0.19
+Nodes (20): archive(), codeOf(), createPitchArchive(), archive(), checkSlug(), cli(), isRegularFile(), latestArchiveDir() (+12 more)
 
 ### Community 3 - "bindStateSnapshot"
 Cohesion: 0.18
@@ -411,41 +431,41 @@ Nodes (29): inventory(), bindStateSnapshot(), buildSnapshot(), contextFacts(), c
 Cohesion: 0.10
 Nodes (51): AVAILABILITY, basisText(), change(), cleanDimension(), CleanRecord, CleanSnapshot, collect(), Collected (+43 more)
 
-### Community 5 - "review-bench.mts"
-Cohesion: 0.05
-Nodes (63): BOOKKEEPING_FILES, BOOKKEEPING_PREFIXES, canaryCheck(), CanaryResult, CanarySpec, cli(), CliResult, count() (+55 more)
+### Community 5 - "Followups"
+Cohesion: 0.09
+Nodes (22): Candidate pitches (cooldown 2026-09-25, approved item by item), codex-orca-coordinator-parity — 2026-10-08, commitLedger's transaction context differs from pitch-archive's guard and recover, Confirm the new Claude Skill hook fires in a fresh session, /cooldown: should a slice's file cap reserve headroom for "review finds more than the known bug"?, First real-use trial of /pitch-compress, follow-orca-dispatch-resume-gate — 2026-10-08, Followups (+14 more)
 
-### Community 6 - "bundle-sync.mts"
-Cohesion: 0.08
-Nodes (47): argValue(), BaseLookup, classify(), codeOf(), colors, commandFailure(), Digest, Flagged (+39 more)
+### Community 6 - "makeSync"
+Cohesion: 0.23
+Nodes (22): argValue(), codeOf(), commandFailure(), main(), makeSync(), applyEntry(), assertNoSymlinkPath(), compareDir() (+14 more)
 
 ### Community 7 - "token-consumption.mts"
 Cohesion: 0.08
-Nodes (40): LockOptions, addNumber(), applyDimensions(), applyRecord(), applyToRow(), applyToSnapshot(), blankRow(), ByVendor (+32 more)
+Nodes (45): addNumber(), applyDimensions(), applyRecord(), applyToRow(), applyToSnapshot(), blankDimensions(), blankRow(), blankSnapshot() (+37 more)
 
 ### Community 8 - "Security Rules"
 Cohesion: 0.04
 Nodes (44): 1. Authentication & Authorization, 2. Data Validation, 3. Secrets & Credentials, 4. Input Safety (XSS Prevention), 5. API Routes, 6. Multi-Tenancy / Organization Isolation, 7. File Uploads (if applicable), 8. Security Anti-Patterns (Auto-Flagged) (+36 more)
 
-### Community 9 - "createNodeDeps"
-Cohesion: 0.07
-Nodes (25): defaultDeps(), effectiveEntryText(), EntryKind, EntryResolution, outsideCode(), resolveClaudeEntry(), __dirname, memoryDeps() (+17 more)
+### Community 9 - "entry-import.mts"
+Cohesion: 0.28
+Nodes (8): defaultDeps(), effectiveEntryText(), EntryKind, EntryResolution, outsideCode(), resolveClaudeEntry(), Symptom, shape-lite followups — 2026-10-07
 
-### Community 10 - "orca-ledger.mts"
-Cohesion: 0.15
-Nodes (28): canonical(), ClaimResult, createLedger(), claim(), inspectFile(), list(), read(), readSlot() (+20 more)
+### Community 10 - "createLedger"
+Cohesion: 0.26
+Nodes (22): canonical(), createLedger(), acquireIntegration(), acquireLock(), claim(), claimUnlocked(), inspectFile(), list() (+14 more)
 
 ### Community 11 - "main"
 Cohesion: 0.06
-Nodes (67): runWorkflow(), inspectWorkflowEnv(), boundaryFindings(), createValidator(), lex(), MAX_SOURCE_BYTES, scan(), suggestions (+59 more)
+Nodes (69): runWorkflow(), inspectWorkflowEnv(), boundaryFindings(), createValidator(), lex(), MAX_SOURCE_BYTES, scan(), suggestions (+61 more)
 
 ### Community 12 - "state-theme.mts"
 Cohesion: 0.08
 Nodes (42): stylesheet(), assemble(), Built, channel(), collect(), COLOR_TOKENS, contrastRatio(), CSS_NAMES (+34 more)
 
 ### Community 13 - "ref_node_assert"
-Cohesion: 0.10
-Nodes (36): blocked(), blockedText(), deps, fixture(), run(), PHASES, repo, script (+28 more)
+Cohesion: 0.06
+Nodes (53): blocked(), blockedText(), deps, fixture(), run(), PHASES, repo, script (+45 more)
 
 ### Community 14 - "state-structure.mts"
 Cohesion: 0.13
@@ -460,8 +480,8 @@ Cohesion: 0.06
 Nodes (31): Accept the minimum data needed, Component Architecture Patterns, Component Layers, Component Size Rules, Cross-feature dependency?, Dual-Path Rendering Parity, Enforcement during `/build`, Extract a component when: (+23 more)
 
 ### Community 17 - "orca-apply.mts"
-Cohesion: 0.09
-Nodes (28): AdmittedEntry, applyAdmitted(), ApplyResult, entryPaths(), ENV_ALLOWLIST, Fail, git(), gitEnv() (+20 more)
+Cohesion: 0.11
+Nodes (33): AdmittedEntry, applyAdmitted(), ApplyResult, entryPaths(), ENV_ALLOWLIST, errorCode(), Fail, git() (+25 more)
 
 ### Community 18 - "Context Management"
 Cohesion: 0.07
@@ -480,24 +500,24 @@ Cohesion: 0.07
 Nodes (27): 1. Current State Analysis, 1. Modularity & Separation of Concerns, 2. Requirements Gathering, 2. Scalability, 3. Design Proposal, 3. Maintainability, 4. Security, 4. Trade-Off Analysis (+19 more)
 
 ### Community 22 - "graphify.mts"
-Cohesion: 0.08
-Nodes (35): buildGraph(), ensureProjectFiles(), extractTitle(), extractWikiLinks(), FrontmatterValue, GITIGNORE_BLOCK, Graph, GRAPH_FILE (+27 more)
+Cohesion: 0.06
+Nodes (41): OpenCode port before the first OpenCode worker, buildGraph(), ensureProjectFiles(), extractTitle(), extractWikiLinks(), FrontmatterValue, GITIGNORE_BLOCK, Graph (+33 more)
 
-### Community 23 - "state-snapshot.test.mts"
+### Community 23 - "state-snapshot.mts"
 Cohesion: 0.09
-Nodes (26): RootName, snapshotOf(), checkSnapshot(), cli(), facts(), buildSnapshot(), checkSnapshot(), { context, readRegistry, resolveFile, snapshot: registrySnapshot } (+18 more)
+Nodes (25): snapshotOf(), checkSnapshot(), cli(), facts(), buildSnapshot(), checkSnapshot(), { context, readRegistry, resolveFile, snapshot: registrySnapshot }, createStateSnapshot() (+17 more)
 
 ### Community 24 - "Compaction record: independent-rereview-catch-up"
 Cohesion: 0.07
 Nodes (26): Compaction record: independent-rereview-catch-up, Section 10: pitch.md#rabbit-holes, Section 11: audit-cycle-1.md, Section 12: deviations.md#s0-2026-09-26, Section 13: deviations.md#s4-2026-09-26, Section 14: deviations.md#s1-2026-09-26, Section 15: deviations.md#s2-2026-09-26, Section 16: deviations.md#s2-gate-2026-09-27 (+18 more)
 
-### Community 25 - "metrics-lock.test.mts"
-Cohesion: 0.10
-Nodes (22): acquire(), Acquired, codeOf(), defaultDeps(), Endpoint, endpointFor(), Lease, Leased (+14 more)
+### Community 25 - "createNodeDeps"
+Cohesion: 0.08
+Nodes (28): acquire(), Acquired, codeOf(), defaultDeps(), Endpoint, endpointFor(), Lease, Leased (+20 more)
 
 ### Community 26 - "FsDeps"
-Cohesion: 0.07
-Nodes (6): FsDeps, The Pattern, The Pattern, The Pattern, The Pattern, Metrics collector: TOCTOU on reads, and clamped lifetime totals
+Cohesion: 0.08
+Nodes (4): FsDeps, The Pattern, The Pattern, Metrics collector: TOCTOU on reads, and clamped lifetime totals
 
 ### Community 27 - "orca-apply.test.mts"
 Cohesion: 0.14
@@ -512,16 +532,16 @@ Cohesion: 0.08
 Nodes (25): 1. Code-Based Grader, 1. Define (Before Coding), 2. Implement, 2. Model-Based Grader, 3. Evaluate, 3. Human Grader, 4. Report, Best Practices (+17 more)
 
 ### Community 30 - "orca-diff-admit.test.mts"
-Cohesion: 0.08
-Nodes (20): addCollision(), admitChecked(), AdmitResult, applyToBaseline(), Entry, Fixture, git(), SETUP_ENV (+12 more)
+Cohesion: 0.12
+Nodes (13): addCollision(), admitChecked(), AdmitResult, applyToBaseline(), Entry, Fixture, git(), SETUP_ENV (+5 more)
 
 ### Community 31 - "add-skill.mts"
-Cohesion: 0.11
-Nodes (22): AddSkillOptions, AddSkillResult, checkNamespace(), cli(), { context, digest, json, snapshot, readRegistry, transact, recover, resolveFile }, defaultDeps(), { discoverVendors, adapters }, globalLink() (+14 more)
+Cohesion: 0.07
+Nodes (40): AddSkillOptions, AddSkillResult, checkNamespace(), cli(), { context, digest, json, snapshot, readRegistry, transact, recover, resolveFile }, defaultDeps(), { discoverVendors, adapters }, globalLink() (+32 more)
 
-### Community 32 - "setup-validator.test.mts"
-Cohesion: 0.29
-Nodes (5): Call, healthy(), libs, ok(), Report
+### Community 32 - "isSupportedVersion"
+Cohesion: 0.08
+Nodes (27): isSupportedVersion(), Bet decision, Critique findings, Drift inventory (observed 2026-10-16, all projects synced from 2.22.5 on 2026-10-09), No-gos (this pitch), Pitch: upstream-project-drift, Problem, Rabbit holes (+19 more)
 
 ### Community 33 - "Observability Rules"
 Cohesion: 0.08
@@ -536,32 +556,32 @@ Cohesion: 0.11
 Nodes (23): AcceptedGap, buildLedger(), CliOptions, commitLedger(), CommitOptions, CommitResult, cli(), parseJson() (+15 more)
 
 ### Community 36 - "orca-preflight.mts"
-Cohesion: 0.08
-Nodes (30): report(), absolutePathEntries(), byteLength(), CALL_TIMEOUT_MS, CALLS, cli(), Context, defaultDeps() (+22 more)
+Cohesion: 0.09
+Nodes (29): absolutePathEntries(), byteLength(), CALL_TIMEOUT_MS, CALLS, cli(), Context, defaultDeps(), defaultRun() (+21 more)
 
 ### Community 37 - "CI/CD & Deployment Rules"
 Cohesion: 0.09
 Nodes (21): 1. Pre-Merge Requirements (Local), 2. Backend/Schema Deployment, 3. Environment Variables, 4. Rollback Plan, 5. Deployment Checklist, 6. What Must NOT Go to Production, 7. Multi-Service Deployment Order, Backend environment variables (+13 more)
 
 ### Community 38 - "orca-policy.mts"
-Cohesion: 0.16
-Nodes (19): boundedInteger(), cli(), Coordinator, defaultDeps(), errorCode(), hasKeys(), inspectPath(), isRecord() (+11 more)
+Cohesion: 0.09
+Nodes (27): boundedInteger(), cli(), Coordinator, defaultDeps(), errorCode(), hasKeys(), inspectPath(), isRecord() (+19 more)
 
 ### Community 39 - "orca-diff-admit.mts"
 Cohesion: 0.09
-Nodes (30): ADMIT_BUDGET_MS, admitDiff(), AdmitOptions, AdmitResult, byteLength(), CONTROL, DIFF_FLAGS, encoder (+22 more)
+Nodes (31): ADMIT_BUDGET_MS, admitDiff(), AdmitOptions, AdmitResult, byteLength(), CONTROL, DIFF_FLAGS, encoder (+23 more)
 
 ### Community 40 - "skill-vendors.test.mts"
-Cohesion: 0.10
-Nodes (16): mutant(), BUNDLE, { context, readRegistry }, __dirname, { discoverVendors, externalSkillReport, cursorMirrors }, fixture(), git(), MirrorReport (+8 more)
+Cohesion: 0.06
+Nodes (34): directory(), context(), Registry, RegistryEntry, AdapterFile, cursorMirrors(), defaultDeps(), defaults (+26 more)
 
-### Community 41 - "Pattern: keep the fake's guarantee the same as the thing it replaces"
+### Community 41 - "Issue: a temp-fixture helper that realpaths its result silently voids a macOS alias guard"
 Cohesion: 0.09
 Nodes (24): Issue: the git-ignored `ai_workflow_env.json` (runner `bun`) makes a test that empties PATH fail on a developer machine, Rule, Summary, Issue: a temp-fixture helper that realpaths its result silently voids a macOS alias guard, Prevention, Related, Root Cause, Solution (+16 more)
 
-### Community 42 - "orca-start.mts"
-Cohesion: 0.11
-Nodes (27): Run, RunOptions, selectExecutable(), blocked(), Budget, decideStart(), Env, hasNormalBypass() (+19 more)
+### Community 42 - "orca-start.test.mts"
+Cohesion: 0.17
+Nodes (13): Run, RunOptions, hasNormalBypass(), StartOptions, base, clock(), env, example (+5 more)
 
 ### Community 43 - "/search — Search Project Knowledge"
 Cohesion: 0.10
@@ -592,28 +612,28 @@ Cohesion: 0.15
 Nodes (15): Pattern: a read-only report over a project tree treats the tree as data, never as code, Related Patterns, Summary, What happened, When NOT to Use, When to Use, Pattern: git run against a worker's tree executes worker code unless every command is guarded, Summary (+7 more)
 
 ### Community 50 - "pre-ship-verify.mts"
-Cohesion: 0.18
-Nodes (17): asRecord(), buildChecks(), changedFiles(), Check, CheckResult, commandOutput(), diffSanity(), errorMessage() (+9 more)
+Cohesion: 0.17
+Nodes (19): asRecord(), buildChecks(), Check, CheckResult, CLI_BY_MANAGER, diffSanity(), errorMessage(), git() (+11 more)
 
 ### Community 51 - "workflow-metrics-report.mts"
-Cohesion: 0.14
-Nodes (25): allTables(), buildReport(), Cell, createReports(), display(), Format, HEADLINES, HEALTH (+17 more)
+Cohesion: 0.13
+Nodes (26): allTables(), buildReport(), Cell, createReports(), display(), Format, HEADLINES, HEALTH (+18 more)
 
-### Community 52 - "makeValidator"
-Cohesion: 0.29
-Nodes (15): main(), makeValidator(), checkCavemanEntryFiles(), checkContext(), checkCursorMirrors(), checkEntryFiles(), checkKnowledgeGraph(), checkScaffold() (+7 more)
+### Community 52 - "setup-validator.test.mts"
+Cohesion: 0.11
+Nodes (29): CheckResult, CheckRun, ClaudeEntry, CursorReport, defaultLibs, main(), makeValidator(), checkCavemanEntryFiles() (+21 more)
 
 ### Community 53 - "full"
 Cohesion: 0.22
 Nodes (16): assertPlainPath(), classify(), codeOf(), assertPlainPath(), checkDestination(), checkSlug(), doneWorkSlugs(), full() (+8 more)
 
 ### Community 54 - "skill-source.mts"
-Cohesion: 0.16
-Nodes (18): defaultDeps(), frontmatter(), git(), gitBytes(), GitFailure, gitRun(), identity(), InspectedSource (+10 more)
+Cohesion: 0.18
+Nodes (16): frontmatter(), git(), gitBytes(), GitFailure, gitRun(), identity(), InspectedSource, inspectSource() (+8 more)
 
 ### Community 55 - "browser-runtime.test.mts"
 Cohesion: 0.13
-Nodes (19): BrowserReport, catalogEntry(), cli(), CliOptions, CliState, cliStatus(), defaultDeps(), defaultRegistry (+11 more)
+Nodes (20): BrowserReport, catalogEntry(), cli(), CliOptions, CliState, cliStatus(), defaultDeps(), defaultRegistry (+12 more)
 
 ### Community 56 - "changelog.test.mts"
 Cohesion: 0.19
@@ -621,15 +641,15 @@ Nodes (19): allArgs(), arg(), buildEntry(), bump(), codeOf(), Context, EntryPart
 
 ### Community 57 - "orca-eval-grader.mts"
 Cohesion: 0.07
-Nodes (59): allTrue(), argAfter(), Behaviour, BRIEF_FIELDS, CaseResult, catalog(), compare(), complete() (+51 more)
+Nodes (60): allTrue(), argAfter(), Behaviour, BRIEF_FIELDS, CaseResult, catalog(), compare(), complete() (+52 more)
 
 ### Community 58 - "skill-defaults.test.mts"
 Cohesion: 0.05
-Nodes (42): Browser runtime, Bundle default skills, Caveman mode, Coverage: every skill and every agent, Existing projects (upgrading from an older bundle version), Token-usage attribution, Verification, CATALOG (+34 more)
+Nodes (42): Browser runtime, Bundle default skills, Caveman mode, Coverage: every skill and every agent, Existing projects (upgrading from an older bundle version), Token-usage attribution, Verification, CatalogEntry (+34 more)
 
-### Community 59 - "orca-ledger.test.mts"
-Cohesion: 0.13
-Nodes (15): ATTEMPT_PREFIX, LedgerRecord, MAX_RECORD_BYTES, TASK_PREFIX, taskKeyOf(), deps, LEDGER, ledgerDir() (+7 more)
+### Community 59 - "orca-ledger.mts"
+Cohesion: 0.06
+Nodes (29): ATTEMPT_PREFIX, ClaimResult, Dir, INTEGRATION_LOCK, Ledger, LEDGER_DIR_PARTS, LedgerLease, LedgerPatch (+21 more)
 
 ### Community 60 - "Phase 3: Audit"
 Cohesion: 0.10
@@ -645,7 +665,7 @@ Nodes (15): ADD_SKILL, commit(), __dirname, fixture(), git(), read(), run(), run
 
 ### Community 63 - "Compaction record: workflow-usage-metrics"
 Cohesion: 0.09
-Nodes (22): Compaction record: workflow-usage-metrics, Section 10: deviations.md#d3-audit-hardening-and-path-check-boundary, Section 11: deviations.md#d4-coupled-modules-and-explicit-schema-validation, Section 12: log.md#2026-10-08-s1-start, Section 13: log.md#s1-verification-attempt-1, Section 14: log.md#s1-compatibility-run, Section 15: log.md#s1-exit-evidence-complete, Section 16: log.md#s2-start-approved (+14 more)
+Nodes (21): Compaction record: workflow-usage-metrics, Section 10: deviations.md#d3-audit-hardening-and-path-check-boundary, Section 11: deviations.md#d4-coupled-modules-and-explicit-schema-validation, Section 12: log.md#2026-10-08-s1-start, Section 13: log.md#s1-verification-attempt-1, Section 14: log.md#s1-compatibility-run, Section 15: log.md#s1-exit-evidence-complete, Section 16: log.md#s2-start-approved (+13 more)
 
 ### Community 64 - "AI-Assisted Development Workflow"
 Cohesion: 0.12
@@ -660,7 +680,7 @@ Cohesion: 0.12
 Nodes (16): Auditing, Confidence Levels, Decisions (`decisions/`), Entities (`entities/`), Entry Format, How Knowledge is Used, Index Format, Issues (`issues/`) (+8 more)
 
 ### Community 67 - "state-html.test.mts"
-Cohesion: 0.15
+Cohesion: 0.14
 Nodes (15): ALLOWED_ATTRS, ALLOWED_TAGS, evidenceHeavy(), fact(), fixture(), page(), PAGES, pageSize() (+7 more)
 
 ### Community 68 - "Model Routing Strategy"
@@ -668,12 +688,12 @@ Cohesion: 0.12
 Nodes (15): Always, Cascade Pipeline, Conditional Phases, Context budget discipline, Cost Measurement, Cost Optimization Rules, Don't over-front-load context, Model Routing Strategy (+7 more)
 
 ### Community 69 - "orca-run.mts"
-Cohesion: 0.13
-Nodes (34): bad(), checkCatalog(), CliError, collectInput(), Command, COMMANDS, dispatchInput(), exactKeys() (+26 more)
+Cohesion: 0.12
+Nodes (38): report(), bad(), checkCatalog(), CliError, collectInput(), Command, COMMANDS, defaultDeps() (+30 more)
 
-### Community 70 - ".mkdtempSync"
+### Community 70 - ".rmSync"
 Cohesion: 0.14
-Nodes (14): fixture(), withCli(), write(), commandFixture(), scratch(), OsDeps, makeRepo(), put() (+6 more)
+Nodes (14): fixture(), withCli(), write(), commandFixture(), nestedCommand(), portOpen(), scratch(), supportsFileSymlinks() (+6 more)
 
 ### Community 71 - "Activities (in order)"
 Cohesion: 0.12
@@ -712,16 +732,16 @@ Cohesion: 0.12
 Nodes (15): 1. Understand the UI requirement, 2. Load design rules, 3. Design component hierarchy, 4. ASCII wireframe (for complex layouts), 5. Generate component skeletons, 6. Generate i18n key list (if applicable), 7. Self-validate each generated file, 8. Present for approval (+7 more)
 
 ### Community 80 - "review-bench.test.mts"
-Cohesion: 0.12
-Nodes (15): Call, Fake, CANARY, Fake, git(), GUARD_GIT, here, repo() (+7 more)
+Cohesion: 0.13
+Nodes (14): Fake, CANARY, Fake, git(), GUARD_GIT, here, repo(), SCRIPT (+6 more)
 
-### Community 81 - "orcaMultiAgentEnabled"
-Cohesion: 0.21
-Nodes (13): blockedLine(), leadingPhase(), main(), object(), ObjectValue, PHASES, rootArgument(), blockedLine() (+5 more)
+### Community 81 - "orca-start-codex-hook.mts"
+Cohesion: 0.39
+Nodes (7): blockedLine(), leadingPhase(), main(), object(), ObjectValue, PHASES, rootArgument()
 
 ### Community 82 - "orca-launch-gate.mts"
-Cohesion: 0.13
-Nodes (20): BriefResult, CONTROL, defaultDeps(), Env, evaluateLaunch(), isWorkerContext(), Json, LaunchDecision (+12 more)
+Cohesion: 0.11
+Nodes (25): Automatic start (every workflow phase), Codex startup and coordinator preparation, BriefResult, CONTROL, defaultDeps(), Env, evaluateLaunch(), isWorkerContext() (+17 more)
 
 ### Community 83 - "AI Tool Use Constraints & Enforcement"
 Cohesion: 0.13
@@ -740,12 +760,12 @@ Cohesion: 0.13
 Nodes (14): 1. Load the design plan, 2. Trace downstream consumers, 3. Check boundary violations, 4. Identify affected tests, 5. Check knowledge graph for relevant warnings, 6. Risk summary, Confirmation Gate, Context Budget (+6 more)
 
 ### Community 87 - "AGENTS.md"
-Cohesion: 0.13
-Nodes (13): Architecture, Codex Orca coordination, Confirmation gate (always), Guardrails, Product, Project Records, Project specifics, Response style (caveman mode) (+5 more)
+Cohesion: 0.22
+Nodes (7): Codex Orca coordination, Confirmation gate (always), Guardrails, Response style (caveman mode), Subagents, The pipeline, What this project uses
 
 ### Community 88 - "token-consumption.test.mts"
 Cohesion: 0.11
-Nodes (15): CollectorInput, CompletionRecord, Routing, adapterDeps(), CLI, COLLECTOR, FakeRun, here (+7 more)
+Nodes (16): CollectorInput, CompletionRecord, Routing, adapterDeps(), CLI, COLLECTOR, FakeRun, here (+8 more)
 
 ### Community 89 - "Architectural Boundaries"
 Cohesion: 0.14
@@ -753,11 +773,11 @@ Nodes (13): App-local code (routes, screens, UI), Architectural Boundaries, Back
 
 ### Community 91 - "Phase 4: Ship"
 Cohesion: 0.13
-Nodes (14): 1. Final /verify (mandatory), 2. Pitch ↔ implementation reconciliation → SHIPPED.md, 3. Knowledge extraction (mandatory, structured), 4. Status compaction (≤100 lines hard cap), 5. Followups handling, 6. Doc updates (conditional, recorded), Activities (in order), Confirmation gate (+6 more)
+Nodes (14): 1. Final verification (mandatory), 2. Pitch ↔ implementation reconciliation → SHIPPED.md, 3. Knowledge extraction (mandatory, structured), 4. Status compaction (≤100 lines hard cap), 5. Followups handling, 6. Doc updates (conditional, recorded), Activities (in order), Confirmation gate (+6 more)
 
 ### Community 92 - "AGENTS.md"
-Cohesion: 0.14
-Nodes (13): AGENTS.md, Architecture, Confirmation gate (always), Guardrails, Product, Project Records, Project specifics, Response style (caveman mode) (+5 more)
+Cohesion: 0.22
+Nodes (8): AGENTS.md, Codex Orca coordination, Confirmation gate (always), Guardrails, Response style (caveman mode), Subagents, The pipeline, What this project uses
 
 ### Community 93 - ".claude/agents/code-reviewer.md"
 Cohesion: 0.13
@@ -776,16 +796,16 @@ Cohesion: 0.14
 Nodes (13): 1. Inventory all knowledge entries, 2. Check for staleness, 3. Check usage (pattern references), 4. Issue-to-Rule Promotion Check, 5. Cross-reference validation, 6. Tag coverage, 7. Generate recommendations, 8. Update usage log (+5 more)
 
 ### Community 97 - "Done Work"
-Cohesion: 0.08
-Nodes (25): bundle-sync-marker-fix — shipped 2026-09-26, codex-orca-coordinator-parity — shipped 2026-10-09, collector-robustness — shipped 2026-09-27, Done Work, fix-orca-dispatch-resume-gate — shipped 2026-10-08, fix-workflow-runner-env — shipped 2026-10-08, independent-rereview-catch-up — shipped 2026-09-27, metrics-report-dimensions — shipped 2026-09-25 (+17 more)
+Cohesion: 0.07
+Nodes (27): bundle-sync-marker-fix — shipped 2026-09-26, codex-orca-coordinator-parity — shipped 2026-10-09, collector-robustness — shipped 2026-09-27, Done Work, fix-orca-dispatch-resume-gate — shipped 2026-10-08, fix-workflow-runner-env — shipped 2026-10-08, independent-rereview-catch-up — shipped 2026-09-27, metrics-report-dimensions — shipped 2026-09-25 (+19 more)
 
 ### Community 98 - "Issue: a subagent's audit report contained numbers and names the code and the test run contradicted"
 Cohesion: 0.17
 Nodes (12): Fix, Issue: a cross-pitch-conflict-checker cannot separate authorship in a file two uncommitted pitches share, Prevention, Related Patterns, Root Cause, What happened, Issue: a subagent's audit report contained numbers and names the code and the test run contradicted, Prevention (+4 more)
 
 ### Community 99 - "token-consumption.ts"
-Cohesion: 0.32
-Nodes (7): BusEvent, hook(), MessageInfo, PluginContext, setup(), subscribe(), ToolEvent
+Cohesion: 0.15
+Nodes (17): hook(), recordCompletion(), recordSkillUse(), subscribe(), tokenConsumptionV1(), tokenConsumptionV2(), V1BusEvent, V1MessageInfo (+9 more)
 
 ### Community 100 - "Rollback Plan: [Feature Name]"
 Cohesion: 0.15
@@ -840,12 +860,12 @@ Cohesion: 0.15
 Nodes (12): Compaction record: state-quoted-fonts, Section 10: audit-cycle-1.md, Section 11: log.md#s1-2026-09-26, Section 1: SHIPPED.md#scope-reconciliation, Section 2: SHIPPED.md#verification, Section 3: SHIPPED.md#audit, Section 4: SHIPPED.md#no-gos-honored, Section 5: SHIPPED.md#rabbit-holes-and-deviations (+4 more)
 
 ### Community 113 - "stuck-uphill-detector.mts"
-Cohesion: 0.36
-Nodes (10): appendAudit(), detectStuck(), HillRow, listActivePitches(), main(), parseHill(), pitchesDir(), StuckScope (+2 more)
+Cohesion: 0.38
+Nodes (11): appendAudit(), checkPitchFile(), detectStuck(), HillRow, insidePitches(), listActivePitches(), main(), parseHill() (+3 more)
 
 ### Community 114 - "token-report.test.mts"
-Cohesion: 0.14
-Nodes (15): blankDimensions(), blankSnapshot(), blankTotals(), Dimensions, nullMap(), readSnapshot(), reviveMaps(), Snapshot (+7 more)
+Cohesion: 0.17
+Nodes (9): Dimensions, Snapshot, main(), here, Loose, Nested, SnapshotParts, snapshotWith() (+1 more)
 
 ### Community 115 - "Eval Harness"
 Cohesion: 0.17
@@ -855,9 +875,9 @@ Nodes (11): Adding a new case, Adding a new judge rubric, Cost control, Dataset 
 Cohesion: 0.20
 Nodes (9): checkDestination(), CompactionContext, checkGraph(), commitLedger(), compactionContext(), requireNoPendingCompaction(), encode(), RegistryApi (+1 more)
 
-### Community 117 - "types.mts"
-Cohesion: 0.10
-Nodes (11): nodeChild, nodeFs, nodeNet, readStdin(), ChildDeps, FsConstants, IoDeps, ListenResult (+3 more)
+### Community 117 - "node.mts"
+Cohesion: 0.11
+Nodes (15): boundedClose(), cleanupError(), closedChildren, nodeNet, ownedChildren, pendingChildPids(), posixGroupIsRunning(), ProcessGroupInspection (+7 more)
 
 ### Community 118 - "Wireframe: [Feature Name]"
 Cohesion: 0.17
@@ -887,25 +907,25 @@ Nodes (11): Accessibility Notes, Component Map, Design Tokens Used, Desktop (>= 
 Cohesion: 0.17
 Nodes (11): Compaction record: native-safety-feasibility, Section 10: log.md#2026-09-26-shipped, Section 1: SHIPPED.md#reconciliation, Section 2: SHIPPED.md#verification-and-audit, Section 3: SHIPPED.md#no-gos-and-documentation, Section 4: SHIPPED.md#knowledge-and-remaining-work, Section 5: SHIPPED.md#delivery, Section 6: pitch.md#no-gos (+3 more)
 
-### Community 125 - "invariants.test.mts"
-Cohesion: 0.17
-Nodes (7): ADAPTERS, files, root, SKIP, sources, walk(), ProcDeps
+### Community 125 - "types.mts"
+Cohesion: 0.11
+Nodes (21): commandOf(), defaultDeps(), freeOpencodePort(), FreeOptions, FreeResult, FreeStatus, isServe(), Listener (+13 more)
 
-### Community 126 - "Harness Integration Guide"
-Cohesion: 0.17
-Nodes (10): Capability Profiles, Caveman Mode, Claude Code, Codex, Harness Integration Guide, Instance-managed Skills, Orca coordinator startup, Role Profiles (+2 more)
+### Community 126 - "opencode-plugin.test.mts"
+Cohesion: 0.06
+Nodes (28): Event, here, PluginRun, snapshot(), snapshotOf(), ToolHook, V1Hooks, V1Plugin (+20 more)
 
 ### Community 128 - "Internationalization (i18n) Rules"
 Cohesion: 0.18
 Nodes (10): AI Language Behavior (if applicable), Hardcoded Copy Policy, Internationalization (i18n) Rules, Key Design, Locale Strategy, Message File Structure, Plurals and Variable Messages, Scope (+2 more)
 
 ### Community 129 - "Testing Rules"
-Cohesion: 0.12
-Nodes (14): Coverage Targets (starting point — adjust per project), E2E Scope, File Organization, Guards and Fixes, Guards and Fixes: Prove the Test Can Fail, Mocking Discipline, Naming Convention, Testing Checklist for New Features (+6 more)
+Cohesion: 0.11
+Nodes (16): Coverage Targets (starting point — adjust per project), E2E Scope, File Organization, Guards and Fixes, Guards and Fixes: Prove the Test Can Fail, Mocking Discipline, Naming Convention, Testing Checklist for New Features (+8 more)
 
 ### Community 130 - "pitch-archive.mts"
-Cohesion: 0.11
-Nodes (23): archive(), ArchiveOptions, ArchiveResult, CliOptions, CompactionContext, cli(), Ledger, main() (+15 more)
+Cohesion: 0.13
+Nodes (19): ArchiveOptions, ArchiveResult, CliOptions, CompactionContext, defaultDeps(), Ledger, main(), Manifest (+11 more)
 
 ### Community 131 - "ADR-NNNN: [Decision Title]"
 Cohesion: 0.18
@@ -931,29 +951,29 @@ Nodes (10): ADR-NNNN: [Decision Title], Alternatives Considered, Consequences, C
 Cohesion: 0.18
 Nodes (10): Acceptance Criteria, Affected Areas, Description, Feature: [Feature Name], i18n Requirements, In Scope, Notes, Out of Scope (+2 more)
 
-### Community 137 - "orca-start-hook.test.mts"
-Cohesion: 0.06
-Nodes (29): fixture(), run(), flags, repo, script, node(), Choosing Node or Bun, Guarantees checked by tests (+21 more)
+### Community 137 - "node"
+Cohesion: 0.11
+Nodes (18): cleanTree(), entry(), node(), Orca foundation followups — 2026-10-07, Runner env followups — 2026-10-08, upstream-project-drift leftovers (2026-10-16), Knowledge consulted, Compaction record: fix-workflow-runner-env (+10 more)
 
 ### Community 138 - "README.md"
-Cohesion: 0.14
-Nodes (12): Design notes, Managed-write safety and interrupted compaction, How to improve this flow, Knowledge Graph, Set up, Setup Validator, Token Consumption, One source, every vendor (+4 more)
+Cohesion: 0.21
+Nodes (8): Design notes, Managed-write safety and interrupted compaction, How to improve this flow, Knowledge Graph, One source, every vendor, Upgrade from JavaScript entry files, Version Log & Bundle Sync, What you get
 
 ### Community 139 - "orca-run.test.mts"
-Cohesion: 0.11
-Nodes (15): Calls, dispatching(), EXAMPLE, failing, Fixture, git(), Harness, Obj (+7 more)
+Cohesion: 0.06
+Nodes (31): attemptKeyOf(), taskKeyOf(), CheckSpec, CATALOG, complete(), deps, ENV, Fixture (+23 more)
 
-### Community 140 - "skill-vendors.mts"
+### Community 140 - "orca-start.mts"
 Cohesion: 0.14
-Nodes (17): context(), Registry, RegistryEntry, AdapterFile, cursorMirrors(), defaultDeps(), defaults, discoverVendors() (+9 more)
+Nodes (20): blockedLine(), main(), object(), ObjectValue, PHASES, MAX_OUTPUT_BYTES, Receipt, blocked() (+12 more)
 
 ### Community 141 - "entry.mts"
-Cohesion: 0.10
-Nodes (30): main(), execute(), runCli(), runDirect(), inferRoot(), isDirect(), readRunner(), runnerEnvironment() (+22 more)
+Cohesion: 0.07
+Nodes (42): Beyond the core pipeline, The pipeline, main(), execute(), runCli(), runDirect(), inferRoot(), isDirect() (+34 more)
 
 ### Community 142 - "recordEvent"
-Cohesion: 0.18
-Nodes (20): boundedId(), boundedName(), bucketKey(), bundleDefaultMode(), currentCavemanMode(), field(), integerOrNull(), isLink() (+12 more)
+Cohesion: 0.19
+Nodes (19): boundedId(), boundedName(), bundleDefaultMode(), currentCavemanMode(), field(), integerOrNull(), isLink(), isoNow() (+11 more)
 
 ### Community 143 - "state-render.mts"
 Cohesion: 0.12
@@ -991,12 +1011,12 @@ Nodes (8): Activities, Adaptive plan size, Confirmation gate, Output, Plan, Tran
 Cohesion: 0.22
 Nodes (8): Dependencies, Entity: Name, Interactions, Key APIs, Location, Notes, Responsibilities, Summary
 
-### Community 152 - "orca-reconcile.test.mts"
-Cohesion: 0.16
-Nodes (10): attemptKeyOf(), CheckSpec, CATALOG, deps, ENV, Fixture, git(), read() (+2 more)
+### Community 152 - "fail"
+Cohesion: 0.23
+Nodes (20): canaryCheck(), cli(), count(), fail(), git(), guard(), hexOf(), inside() (+12 more)
 
-### Community 153 - "ref_node_os"
-Cohesion: 0.20
+### Community 153 - "post-edit-check.mts"
+Cohesion: 0.22
 Nodes (10): check(), fileUrl(), loadTypescript(), main(), Plain, resolveMain(), Fake, projectWithTypescript() (+2 more)
 
 ### Community 154 - "install"
@@ -1004,8 +1024,8 @@ Cohesion: 0.11
 Nodes (18): Formatting installed content, files(), walk(), commit(), git(), install(), Add Skill, Bundle default skills (+10 more)
 
 ### Community 155 - "orca-dispatch.test.mts"
-Cohesion: 0.16
-Nodes (15): base(), Behaviour, EXAMPLE, fakeOrca(), fixture(), launched(), ledgerOf(), nodeDeps (+7 more)
+Cohesion: 0.12
+Nodes (17): markUnknownLiveness(), base(), Behaviour, EXAMPLE, fakeOrca(), fixture(), launched(), ledgerOf() (+9 more)
 
 ### Community 156 - "Pitch: {slug}"
 Cohesion: 0.22
@@ -1020,7 +1040,7 @@ Cohesion: 0.22
 Nodes (8): Affected Files, Bug: [Short Description], Description, Environment, Expected Behavior, Fix, Reproduction Steps, Root Cause
 
 ### Community 159 - "Pattern: parse an untrusted value against a grammar and re-emit it from the parsed numbers"
-Cohesion: 0.12
+Cohesion: 0.11
 Nodes (19): Consequences, Decision, Decision: Effective sync bases and bounded font discovery, References, Summary, Consequences, Decision, Decision: how `/state` builds its snapshot and themed HTML report (+11 more)
 
 ### Community 160 - "hooks"
@@ -1028,8 +1048,8 @@ Cohesion: 0.22
 Nodes (8): _comment, hooks, PostToolUse, PreToolUse, SessionStart, SubagentStop, UserPromptExpansion, $schema
 
 ### Community 161 - "orca-reconcile.mts"
-Cohesion: 0.14
-Nodes (20): AdmittedWorker, GIT_HARDENING, WorktreeRef, buildWorkerEnv(), AttemptResult, AttemptState, CHECK_DEFINITIONS, CheckResult (+12 more)
+Cohesion: 0.13
+Nodes (23): AdmittedWorker, WorktreeRef, buildWorkerEnv(), pathAuthorized(), validAuthorizedPaths(), AttemptResult, AttemptState, CHECK_DEFINITIONS (+15 more)
 
 ### Community 162 - "Decision: workflow-tooling pitches share the same no-gos, and the installer's design answers stand"
 Cohesion: 0.09
@@ -1052,8 +1072,8 @@ Cohesion: 0.25
 Nodes (7): Active pitches, /cooldown due in: 5 ships, Followups backlog, Open rabbit holes across active pitches, Parked pitches, Recent ships (last 5), Status
 
 ### Community 167 - "Changelog"
-Cohesion: 0.17
-Nodes (11): [2.15.0] - 2026-10-08, [2.4.0] - 2026-09-25, [2.6.0] - 2026-09-25, [2.8.4] - 2026-09-26, [2.9.1] - 2026-10-07, Added, Added, Added (+3 more)
+Cohesion: 0.14
+Nodes (13): [1.2.1] - 2026-09-23, [2.16.0] - 2026-10-08, [2.22.0] - 2026-10-09, [2.23.0] - 2026-10-16, [2.8.0] - 2026-09-25, [2.8.6] - 2026-09-28, Added, Added (+5 more)
 
 ### Community 168 - "Shape"
 Cohesion: 0.25
@@ -1072,8 +1092,8 @@ Cohesion: 0.25
 Nodes (8): Decisions (13 entries), Entities (0 entries), Graph, Issues (24 entries), Knowledge Index, Patterns (29 entries), Tag Index, Traversal
 
 ### Community 172 - "add-skill.test.mts"
-Cohesion: 0.27
-Nodes (10): phases, afterWrite(), captureDeps(), commit(), { context, digest, json, snapshot, readRegistry, transact, recover, resolveFile }, fixture(), git(), here (+2 more)
+Cohesion: 0.08
+Nodes (20): fixture(), run(), flags, repo, script, phases, afterWrite(), captureDeps() (+12 more)
 
 ### Community 173 - "Issue: Title"
 Cohesion: 0.25
@@ -1083,17 +1103,17 @@ Nodes (7): Issue: Title, Prevention, Related, Root Cause, Solution, Summary, Sym
 Cohesion: 0.25
 Nodes (7): Examples in Codebase, Pattern: Title, Related Patterns, Summary, The Pattern, When NOT to Use, When to Use
 
-### Community 175 - "skill-sync.mts"
-Cohesion: 0.13
-Nodes (15): CONFIG_NAMES, { context, digest, json, snapshot, readRegistry, transact, resolveFile }, defaultDeps(), { discoverVendors, adapters }, FormatResult, Formatter, main(), messageOf() (+7 more)
+### Community 175 - "review-bench.mts"
+Cohesion: 0.11
+Nodes (18): BOOKKEEPING_FILES, BOOKKEEPING_PREFIXES, CanaryResult, CanarySpec, CliResult, CountResult, defaultDeps(), GUARD_ROOTS (+10 more)
 
 ### Community 176 - "orca-launch-gate.test.mts"
 Cohesion: 0.15
 Nodes (12): common, EXAMPLE, fixture(), nodeDeps, Obj, ok, prober(), receipts() (+4 more)
 
 ### Community 177 - "Pattern: the tool that verifies independence must itself be independently verified"
-Cohesion: 0.12
-Nodes (19): Consequences, Decision, Decision: how the runtime boundary is validated, Summary, Fix and rule, Issue: a lazy fence-stripping regex over CLAUDE.md was quadratic, Pattern: the tool that verifies independence must itself be independently verified, Related Patterns (+11 more)
+Cohesion: 0.13
+Nodes (18): Consequences, Decision, Decision: how the runtime boundary is validated, Summary, Issue: rounding a remaining budget to zero disables subprocess cancellation, Pattern: the tool that verifies independence must itself be independently verified, Related Patterns, Summary (+10 more)
 
 ### Community 178 - "Compaction record: orca-vendor-reconcile-integration"
 Cohesion: 0.20
@@ -1155,25 +1175,25 @@ Nodes (6): State, Step 1 — Preview, Step 2 — Write the snapshot (only if the
 Cohesion: 0.29
 Nodes (6): Core Capabilities, Product, Product Constraints, Product Context, Product Goal, Users
 
-### Community 193 - "Issue: making a shared reader treat a symlink as "absent" turned its writer into a data-destroyer"
-Cohesion: 0.13
-Nodes (19): Consequences, Decision: the metrics collector holds a kernel-owned loopback lease, not a lock file, References, Summary, Decision: shared compaction recovery context and trusted directories, Decision and consequences, Decision: Inode anchoring and stable-inode locks, Observations (+11 more)
+### Community 193 - "index.md"
+Cohesion: 0.11
+Nodes (26): Consequences, Decision: the metrics collector holds a kernel-owned loopback lease, not a lock file, References, Summary, Decision: shared compaction recovery context and trusted directories, Decision and consequences, Decision: Inode anchoring and stable-inode locks, Observations (+18 more)
 
 ### Community 194 - "Compaction record: readme-split"
 Cohesion: 0.20
 Nodes (9): Compaction record: readme-split, Section 1: SHIPPED.md#final-verification, Section 2: SHIPPED.md#reconciliation, Section 3: SHIPPED.md#no-gos-honored, Section 4: SHIPPED.md#followups, Section 5: pitch.md#no-gos, Section 6: pitch.md#rabbit-holes, Section 7: log.md#2026-10-07 (+1 more)
 
-### Community 195 - "orca-policy.test.mts"
-Cohesion: 0.14
-Nodes (7): POLICY_FILE, Coord, EXAMPLE, MemNode, nodeDeps, Policy, SCRIPT
+### Community 195 - "bundle-sync.mts"
+Cohesion: 0.12
+Nodes (15): BaseLookup, classify(), colors, Digest, Flagged, FLAGGED_FILES, IGNORE_NAMES, Manifest (+7 more)
 
 ### Community 196 - "Compaction record: orca-vendor-dispatch"
 Cohesion: 0.22
 Nodes (8): Compaction record: orca-vendor-dispatch, Section 1: SHIPPED.md#final-verification, Section 2: SHIPPED.md#reconciliation, Section 3: SHIPPED.md#audit, Section 4: SHIPPED.md#no-gos-honored, Section 5: SHIPPED.md#followups, Section 6: pitch.md#no-gos, Section 7: pitch.md#rabbit-holes
 
-### Community 197 - "skill-compress-guard.test.mts"
-Cohesion: 0.21
-Nodes (8): Compress guard, canCompress(), CompressVerdict, defaultDeps(), PROTECTED_DIRS, pythonAvailable(), resolveReal(), Examples in Codebase
+### Community 197 - "ref_node_fs"
+Cohesion: 0.10
+Nodes (14): Compress guard, fixture(), readFileSync(), settings, write(), canCompress(), CompressVerdict, defaultDeps() (+6 more)
 
 ### Community 198 - "Decision Title"
 Cohesion: 0.29
@@ -1200,8 +1220,8 @@ Cohesion: 0.33
 Nodes (5): After Approved Remediation, Dependency Security, Output, Procedure, Safety Rules
 
 ### Community 204 - "build"
-Cohesion: 0.24
-Nodes (13): OpenCode, createStatePages(), build(), renderPages(), shell(), skillGroup(), structureBody(), writeSet() (+5 more)
+Cohesion: 0.31
+Nodes (11): createStatePages(), build(), renderPages(), shell(), skillGroup(), structureBody(), writeSet(), writeSetInner() (+3 more)
 
 ### Community 205 - ".cursor/agents/eval-runner.md"
 Cohesion: 0.33
@@ -1212,56 +1232,56 @@ Cohesion: 0.33
 Nodes (5): After Approved Remediation, Dependency Security, Output, Procedure, Safety Rules
 
 ### Community 207 - "StatLike"
-Cohesion: 0.21
-Nodes (9): ensureParents(), errorCode(), hasStatMode(), hex(), rollback(), SnapshotError, takeSnapshot(), Location (+1 more)
+Cohesion: 0.40
+Nodes (3): ensureParents(), Location, StatLike
 
 ### Community 208 - "opencode.json"
-Cohesion: 0.33
-Nodes (5): agent, build, model, instructions, $schema
+Cohesion: 0.29
+Nodes (6): agent, build, model, instructions, plugin, $schema
 
 ### Community 209 - "Stack Context"
 Cohesion: 0.33
 Nodes (5): Commands, Environment, Not Applicable, Runtime, Stack Context
 
 ### Community 210 - "reconcile"
-Cohesion: 0.22
-Nodes (6): checkCollisions(), ownedPaths(), reconcile(), reconcileEntry(), RegistryApi, VendorsApi
+Cohesion: 0.19
+Nodes (8): checkCollisions(), main(), messageOf(), ownedPaths(), reconcile(), reconcileEntry(), RegistryApi, VendorsApi
 
 ### Community 211 - "orca-dispatch.mts"
-Cohesion: 0.05
-Nodes (52): Switch: `AI_WORKFLOW_ORCA_MULTI_AGENT`, classifyLiveness(), collectReport(), defaultDeps(), dispatchIdOf(), DispatchOptions, DispatchOutcome, dispatchScope() (+44 more)
+Cohesion: 0.06
+Nodes (49): Switch: `AI_WORKFLOW_ORCA_MULTI_AGENT`, classifyLiveness(), collectReport(), defaultDeps(), dispatchIdOf(), DispatchOptions, DispatchOutcome, dispatchScope() (+41 more)
 
 ### Community 212 - "OpenCode + Orca Handoff"
 Cohesion: 0.17
 Nodes (11): Configuration, Current adapter state, How to verify, Known blockers, Next steps to make Orca work from OpenCode, OpenCode + Orca Handoff, Orca runtime probe, Related files (+3 more)
 
-### Community 213 - "Decision: how `/pitch-compress` decides a deletion is safe"
-Cohesion: 0.17
-Nodes (12): Consequences, Decision, Decision: how `/pitch-compress` decides a deletion is safe, References, Summary, Issue: Matching entities by a bare `${id}-` prefix lets one entity resolve to another's, Prevention, Related (+4 more)
+### Community 213 - "Issue: Matching entities by a bare `${id}-` prefix lets one entity resolve to another's"
+Cohesion: 0.29
+Nodes (7): Issue: Matching entities by a bare `${id}-` prefix lets one entity resolve to another's, Prevention, Related, Root Cause, Solution, Summary, Symptoms
 
 ### Community 214 - "workflow-metrics-state.mts"
-Cohesion: 0.09
-Nodes (54): withLease(), main(), generateReport(), scenario(), activityKey(), add(), applyEvent(), blankState() (+46 more)
+Cohesion: 0.10
+Nodes (28): scenario(), activityKey(), add(), applyEvent(), blankState(), blankSummary(), bucket(), counts() (+20 more)
 
-### Community 215 - "Optional Orca vendor policy"
-Cohesion: 0.22
-Nodes (9): Automatic start (every workflow phase), CLI, grader and live-smoke status, Codex startup and coordinator preparation, Dispatch core (opt-in, library only), Explicit runtime inspection, Inspect without execution, Optional Orca vendor policy, Policy contract (+1 more)
+### Community 215 - "recordWorkflowEvent"
+Cohesion: 0.33
+Nodes (13): main(), generateReport(), errorCode(), failure(), inspect(), installedVersion(), metricsDirectory(), readText() (+5 more)
 
-### Community 216 - "opencode-plugin.test.mts"
-Cohesion: 0.13
-Nodes (14): completed(), Event, fakeEventStream(), here, Plugin, PluginRun, Stream, ToolHook (+6 more)
+### Community 216 - "Workflow usage metrics"
+Cohesion: 0.40
+Nodes (5): Bounds and failures, Event contract, Reading the evidence, Record and report, Workflow usage metrics
 
 ### Community 217 - "Compaction record: orca-vendor-orchestration"
 Cohesion: 0.50
 Nodes (3): Compaction record: orca-vendor-orchestration, Section 1: pitch.md#no-gos, Section 2: pitch.md#rabbit-holes
 
 ### Community 218 - "Instance-managed skills"
-Cohesion: 0.22
-Nodes (8): All vendors available in the project, Bundle-sync migration (`skill-sync.mts`), Doctor and setup integration, Inspect, choose and install, Instance-managed skills, Lifecycle and recovery, Registry and source packages, Verification
+Cohesion: 0.20
+Nodes (9): All vendors available in the project, Bundle-sync migration (`skill-sync.mts`), Doctor and setup integration, Inspect, choose and install, Instance-managed skills, Lifecycle and recovery, Registry and source packages, Verification (+1 more)
 
-### Community 219 - "ref_node_child_process"
-Cohesion: 0.12
-Nodes (15): Beyond the core pipeline, The pipeline, seedShippedPitch(), write(), NODE_FLAGS, assertHealthy(), COMMANDS, comparable() (+7 more)
+### Community 219 - "docs/setup.md"
+Cohesion: 0.24
+Nodes (5): Set up, Setup Validator, Token Consumption, Project-owned model routing, Workflow Doctor
 
 ### Community 220 - "Issue: a skill installed in the source checkout ships to every synced project as a broken orphan"
 Cohesion: 0.11
@@ -1355,29 +1375,29 @@ Nodes (4): Constraints, Inputs (provided by dispatcher), Output structure, Proce
 Cohesion: 0.40
 Nodes (4): Changelog, How to run it, What it writes, When to run it
 
-### Community 245 - "Pattern: a grader reports executed and unexecuted cases separately"
-Cohesion: 0.25
-Nodes (8): Evidence, Pattern: a grader reports executed and unexecuted cases separately, Summary, The Pattern, Evidence, Pattern: a thin CLI keeps every guard in the library, Summary, The Pattern
+### Community 245 - "Pattern: keep the fake's guarantee the same as the thing it replaces"
+Cohesion: 0.11
+Nodes (19): Evidence, Pattern: a grader reports executed and unexecuted cases separately, Summary, The Pattern, Evidence, Pattern: a thin CLI keeps every guard in the library, Summary, The Pattern (+11 more)
 
 ### Community 246 - "Hill chart: {slug}"
 Cohesion: 0.40
 Nodes (4): Hill chart: {slug}, Hill positions reference, Positions, Stuck-uphill watch
 
 ### Community 247 - "skill-sync.test.mts"
-Cohesion: 0.27
+Cohesion: 0.24
 Nodes (9): options(), captureDeps(), { context, snapshot }, fixture(), git(), here, installFakePrettier(), sourceRepo() (+1 more)
 
 ### Community 248 - "Codex handoff — start here"
 Cohesion: 0.22
 Nodes (8): Codex handoff — start here, How Codex finds things here, Orca (opt-in, off unless `AI_WORKFLOW_ORCA_MULTI_AGENT` is exactly `true`), Rules that bite, Run and verify, State right now, Suggested first steps in Codex, What this repository is
 
-### Community 249 - "Pattern: a word-boundary search-and-replace still matches inside a longer identifier"
-Cohesion: 0.33
-Nodes (6): Examples in Codebase, Pattern: a word-boundary search-and-replace still matches inside a longer identifier, Related Patterns, Summary, When NOT to Use, When to Use
+### Community 249 - "migrate.mts"
+Cohesion: 0.38
+Nodes (9): Change, EntryMigration, FILES, migrateHooks(), migrateInstanceEntries(), REFERENCES, regular(), replace() (+1 more)
 
-### Community 251 - "Portable AI Development Workflow"
-Cohesion: 0.15
-Nodes (11): 1. Triage (gated), 2. Build → Audit → Ship, Agent recommendations, /fix — Bug-Fix Entry, When NOT to use /fix, Choose the script runtime, Concepts (read this first), Documentation (+3 more)
+### Community 251 - "/fix — Bug-Fix Entry"
+Cohesion: 0.33
+Nodes (5): 1. Triage (gated), 2. Build → Audit → Ship, Agent recommendations, /fix — Bug-Fix Entry, When NOT to use /fix
 
 ### Community 252 - "Runs"
 Cohesion: 0.50
@@ -1395,57 +1415,121 @@ Nodes (3): Parallel pitches, Steps, /switch — Switch Pitches
 Cohesion: 0.09
 Nodes (26): Consequences, Decision, Decision: how token metrics record and report vendor, model, agent, effort and skill, References, Summary, Issue: A hook that fires at launch was counted as a completion, so async agents counted twice, Prevention, Related (+18 more)
 
-### Community 256 - "formatFiles"
-Cohesion: 0.50
-Nodes (5): makeEntry(), discoverFormatter(), formatFiles(), Examples in Codebase, Examples in Codebase
+### Community 256 - "validState"
+Cohesion: 0.42
+Nodes (10): count(), date(), keysAre(), normalizeEvent(), object(), apply(), validCounts(), validRows() (+2 more)
 
-### Community 258 - "pitch-archive.test.mts"
-Cohesion: 0.14
-Nodes (14): anchorsOf(), BrokenLink, checkLinks(), collect(), defaultDeps(), LinkReport, linksOf(), main() (+6 more)
+### Community 258 - "docs-links.mts"
+Cohesion: 0.31
+Nodes (10): anchorsOf(), BrokenLink, checkLinks(), collect(), defaultDeps(), LinkReport, linksOf(), main() (+2 more)
+
+### Community 270 - "Pitch: orca-role-pools"
+Cohesion: 0.20
+Nodes (9): Bet decision, Critique findings, Knowledge consulted, No-gos (this pitch), Owner decisions (2026-10-16), Pitch: orca-role-pools, Problem, Rabbit holes (+1 more)
 
 ### Community 272 - "SETUP — Portable AI Development Workflow"
-Cohesion: 0.12
-Nodes (16): 2a — Claude Code, 2b — OpenCode, 2c — Codex, 2d — Cursor, 2e — Other CLI agents, Guardrails (apply during setup and after), SETUP — Portable AI Development Workflow, Step 0 — Orient (+8 more)
+Cohesion: 0.18
+Nodes (10): Guardrails (apply during setup and after), SETUP — Portable AI Development Workflow, Step 0 — Orient, Step 1 — Place the framework files, Step 4 — Generate project context + entry file, Step 5 — Generate stack-specific rules (and agents, if needed), Step 6 — Verify lifecycle hooks, Step 7 — Verify (+2 more)
 
 ### Community 309 - "Decision: caveman brevity mode is the default for every skill, agent, and session"
 Cohesion: 0.13
 Nodes (16): Consequences, Context, Decision, Decision: caveman brevity mode is the default for every skill, agent, and session, Related, Consequences, Decision, Decision: `/shape-lite` is a compressed variant of `/shape` that escalates mechanically (+8 more)
 
-### Community 314 - "index.md"
-Cohesion: 0.17
-Nodes (20): Consequences, Decision, Decision: how Orca starts automatically on workflow phases, Issue: the new start check validated an absolute `orca` but spawned the bare name with the parent's full PATH, Summary, Issue: guard tests can fail for the wrong reason, Issue: a worker's environment differs from the coordinator's, and the first live smoke tests failed for that reason, Rule (+12 more)
+### Community 314 - "Issue: a worker's environment differs from the coordinator's, and the first live smoke tests failed for that reason"
+Cohesion: 0.14
+Nodes (20): Consequences, Decision, Decision: how Orca starts automatically on workflow phases, Fix / rule, Issue: the new start check validated an absolute `orca` but spawned the bare name with the parent's full PATH, Summary, Issue: guard tests can fail for the wrong reason, Issue: a worker's environment differs from the coordinator's, and the first live smoke tests failed for that reason (+12 more)
+
+### Community 319 - "Pitch: unified-toon-config"
+Cohesion: 0.20
+Nodes (9): Bet decision, Critique findings, Knowledge consulted, No-gos (this pitch), Owner decisions (2026-10-16), Pitch: unified-toon-config, Problem, Rabbit holes (+1 more)
 
 ### Community 320 - "RuntimeDeps"
-Cohesion: 0.12
-Nodes (15): ApplyOptions, Ctx, RollbackOptions, Mem, RuntimeDeps, runner-aware-runtime-boundary-validator — shipped 2026-10-09, ts-runtime-injection — shipped 2026-10-08, Compaction record: ts-runtime-injection (+7 more)
+Cohesion: 0.13
+Nodes (14): Fake, ApplyOptions, Ctx, RollbackOptions, Mem, RuntimeDeps, Compaction record: ts-runtime-injection, Section 1: SHIPPED.md#final-verification (+6 more)
+
+### Community 325 - "Deviations: upstream-project-drift"
+Cohesion: 0.20
+Nodes (9): D1 (plan) — S3 rewires the version call sites now, D2 (plan) — climbing ownership fixes stay in this pitch, D3 (S0, 2026-10-16) — S8 and S1 shrink: most climbing docs/rules are project adaptations, D4 (S0) — RN is mostly a runner rewrite, not improvements, D5 (build, 2026-10-16) — interim exact Orca pin 1.4.224 before S3, D6 (build, 2026-10-16) — S3 pulled forward ahead of S2, D8 (build, 2026-10-16) — new scope S10: free OpenCode's port before the first OpenCode worker, D9 (build, 2026-10-16) — S3 gap found in S4; S5 by the coordinator; S7 applied without Orca evidence (+1 more)
+
+### Community 333 - "digest"
+Cohesion: 0.28
+Nodes (9): parseJson(), readGuarded(), readManifest(), requireCompleteLedger(), verify(), decode(), latestArchiveDir(), ledgerCommitted() (+1 more)
+
+### Community 334 - "Pitch: orca-engines-range"
+Cohesion: 0.22
+Nodes (8): Bet decision, Critique findings, Knowledge consulted, No-gos (this pitch), Pitch: orca-engines-range, Problem, Rabbit holes, Solution sketch (breadboard)
 
 ### Community 335 - "/fix — Bug-Fix Entry"
 Cohesion: 0.33
 Nodes (5): 1. Triage (gated), 2. Build → Audit → Ship, Agent recommendations, /fix — Bug-Fix Entry, When NOT to use /fix
+
+### Community 382 - "Drift ledger: upstream-project-drift (S0)"
+Cohesion: 0.22
+Nodes (8): Drift ledger: upstream-project-drift (S0), Expected post-sync vocabulary, Follow-ups recorded by this ledger, Ledger, Method, RN rule relocation recipe (for `workflow-v3-rollout`, S4), S8 merge notes (3-way docs, 2026-10-16), Summary
+
+### Community 383 - "Pitch: workflow-v3-rollout"
+Cohesion: 0.25
+Nodes (7): Bet decision, Knowledge consulted, No-gos (this pitch), Pitch: workflow-v3-rollout, Problem, Rabbit holes, Solution sketch (breadboard)
+
+### Community 385 - "Project specifics"
+Cohesion: 0.33
+Nodes (6): Architecture, Product, Project Records, Project specifics, Technology, Verification
+
+### Community 386 - "Project specifics"
+Cohesion: 0.33
+Nodes (6): Architecture, Product, Project Records, Project specifics, Technology, Verification
+
+### Community 387 - "Log: upstream-project-drift"
+Cohesion: 0.33
+Nodes (5): 2026-10-16 — Baseline (before S1-S8), node v24.21.0, bun 1.4.3, 2026-10-16 — OpenCode V2 token-consumption fix (`300fa80`) validated, 2026-10-16 — S0, 2026-10-16 — Wave 2 start (Orca), Log: upstream-project-drift
+
+### Community 388 - "Portable AI Development Workflow"
+Cohesion: 0.33
+Nodes (6): Choose the script runtime, Concepts (read this first), Documentation, Orca mode (multi-agent), Portable AI Development Workflow, Set up
+
+### Community 389 - "Step 2 — Wire all harnesses"
+Cohesion: 0.33
+Nodes (6): 2a — Claude Code, 2b — OpenCode, 2c — Codex, 2d — Cursor, 2e — Other CLI agents, Step 2 — Wire all harnesses
+
+### Community 390 - ".lstatSync"
+Cohesion: 0.50
+Nodes (3): The Pattern, TOCTOU: ancestor-symlink race between resolveFile's check and the later write, Section 3: SHIPPED.md#audit
+
+### Community 391 - "Checkpoint: upstream-project-drift"
+Cohesion: 0.40
+Nodes (4): Checkpoint: upstream-project-drift, Next, Rules learned this session, Where we are
+
+### Community 392 - "Hill chart: upstream-project-drift"
+Cohesion: 0.40
+Nodes (4): Hill chart: upstream-project-drift, Hill positions reference, Positions, Stuck-uphill watch
+
+### Community 393 - "state"
+Cohesion: 0.50
+Nodes (4): sha(), state(), walkTree(), Verify /state on Codex and Cursor in a running host
 
 ### Community 422 - "createPitchCompress"
 Cohesion: 0.25
 Nodes (15): createPitchCompress(), bodyUnder(), buildLedger(), classify(), extractSection(), headingLines(), hillOpenCount(), isRegularFile() (+7 more)
 
 ## Knowledge Gaps
-- **2336 isolated node(s):** `TsDiagnostic`, `Plain`, `$schema`, `instructions`, `model` (+2331 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2761 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **130 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **2429 isolated node(s):** `TsDiagnostic`, `Plain`, `$schema`, `plugin`, `instructions` (+2424 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 2870 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **134 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `RuntimeDeps` connect `RuntimeDeps` to `skill-registry.mts`, `orca-evidence.mts`, `pitch-archive.test.mts`, `pitch-archive.mts`, `createPitchArchive`, `review-bench.mts`, `bundle-sync.mts`, `token-consumption.mts`, `createNodeDeps`, `orca-ledger.mts`, `orca-run.test.mts`, `main`, `entry.mts`, `ref_node_assert`, `skill-vendors.mts`, `state-render.mts`, `orca-apply.mts`, `state-structure.mts`, `state-theme.mts`, `graphify.mts`, `state-snapshot.test.mts`, `metrics-lock.test.mts`, `ref_node_os`, `orca-apply.test.mts`, `orca-dispatch.test.mts`, `orca-diff-admit.test.mts`, `add-skill.mts`, `setup-validator.test.mts`, `orca-reconcile.mts`, `pitch-compress.mts`, `orca-preflight.mts`, `orca-policy.mts`, `orca-diff-admit.mts`, `skill-vendors.test.mts`, `orca-start.mts`, `add-skill.test.mts`, `skill-sync.mts`, `orca-launch-gate.test.mts`, `Pattern: the tool that verifies independence must itself be independently verified`, `pre-ship-verify.mts`, `workflow-metrics-report.mts`, `skill-source.mts`, `browser-runtime.test.mts`, `changelog.test.mts`, `orca-eval-grader.mts`, `skill-defaults.test.mts`, `orca-ledger.test.mts`, `orca-policy.test.mts`, `orca-run.mts`, `skill-compress-guard.test.mts`, `review-bench.test.mts`, `orcaMultiAgentEnabled`, `orca-launch-gate.mts`, `orca-dispatch.mts`, `workflow-metrics-state.mts`, `token-consumption.test.mts`, `opencode-plugin.test.mts`, `orca-evidence.test.mts`, `skill-registry.test.mts`, `stuck-uphill-detector.mts`, `commitLedger`, `types.mts`, `skill-sync.test.mts`, `Codex handoff — start here`?**
-  _High betweenness centrality (0.083) - this node is a cross-community bridge._
+- **Why does `RuntimeDeps` connect `RuntimeDeps` to `skill-registry.mts`, `orca-evidence.mts`, `docs-links.mts`, `pitch-archive.mts`, `createPitchArchive`, `token-consumption.mts`, `entry-import.mts`, `orca-run.test.mts`, `orca-start.mts`, `entry.mts`, `ref_node_assert`, `main`, `state-render.mts`, `orca-apply.mts`, `state-structure.mts`, `state-theme.mts`, `graphify.mts`, `state-snapshot.mts`, `createNodeDeps`, `post-edit-check.mts`, `orca-apply.test.mts`, `orca-dispatch.test.mts`, `orca-diff-admit.test.mts`, `add-skill.mts`, `orca-reconcile.mts`, `pitch-compress.mts`, `orca-preflight.mts`, `orca-policy.mts`, `orca-diff-admit.mts`, `skill-vendors.test.mts`, `orca-start.test.mts`, `add-skill.test.mts`, `review-bench.mts`, `orca-launch-gate.test.mts`, `Pattern: the tool that verifies independence must itself be independently verified`, `pre-ship-verify.mts`, `workflow-metrics-report.mts`, `setup-validator.test.mts`, `skill-source.mts`, `browser-runtime.test.mts`, `changelog.test.mts`, `orca-eval-grader.mts`, `skill-defaults.test.mts`, `orca-ledger.mts`, `bundle-sync.mts`, `orca-run.mts`, `ref_node_fs`, `review-bench.test.mts`, `orca-start-codex-hook.mts`, `orca-launch-gate.mts`, `orca-dispatch.mts`, `workflow-metrics-state.mts`, `recordWorkflowEvent`, `token-consumption.test.mts`, `Workflow usage metrics`, `orca-evidence.test.mts`, `Done Work`, `skill-registry.test.mts`, `stuck-uphill-detector.mts`, `commitLedger`, `node.mts`, `skill-sync.test.mts`, `Codex handoff — start here`, `migrate.mts`, `types.mts`?**
+  _High betweenness centrality (0.079) - this node is a cross-community bridge._
 - **Are the 7 inferred relationships involving `RuntimeDeps` (e.g. with `Event contract` and `Boundary validator`) actually correct?**
   _`RuntimeDeps` has 7 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `TsDiagnostic`, `Plain`, `$schema` to the rest of the system?**
-  _2336 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _2429 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `skill-registry.mts` be split into smaller, more focused modules?**
+  _Cohesion score 0.14482758620689656 - nodes in this community are weakly interconnected._
+- **Why does `createNodeDeps()` connect `createNodeDeps` to `skill-registry.mts`, `docs-links.mts`, `pitch-archive.mts`, `token-consumption.mts`, `entry-import.mts`, `orca-run.test.mts`, `orca-start.mts`, `entry.mts`, `ref_node_assert`, `main`, `state-render.mts`, `state-structure.mts`, `state-theme.mts`, `graphify.mts`, `state-snapshot.mts`, `post-edit-check.mts`, `orca-dispatch.test.mts`, `orca-apply.test.mts`, `orca-diff-admit.test.mts`, `add-skill.mts`, `orca-reconcile.mts`, `pitch-compress.mts`, `orca-preflight.mts`, `orca-policy.mts`, `skill-vendors.test.mts`, `add-skill.test.mts`, `review-bench.mts`, `orca-launch-gate.test.mts`, `pre-ship-verify.mts`, `skill-source.mts`, `browser-runtime.test.mts`, `orca-eval-grader.mts`, `skill-defaults.test.mts`, `orca-ledger.mts`, `state-html.test.mts`, `orca-run.mts`, `ref_node_fs`, `orca-launch-gate.mts`, `orca-dispatch.mts`, `token-consumption.test.mts`, `orca-evidence.test.mts`, `skill-registry.test.mts`, `stuck-uphill-detector.mts`, `node.mts`, `skill-sync.test.mts`, `types.mts`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Are the 2 inferred relationships involving `createNodeDeps()` (e.g. with `readStdin()` and `D7 (S2, 2026-10-16) — climbing's runtime needed three fixes before base could take it`) actually correct?**
+  _`createNodeDeps()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Should `orca-evidence.mts` be split into smaller, more focused modules?**
-  _Cohesion score 0.08156028368794327 - nodes in this community are weakly interconnected._
-- **Why does `createNodeDeps()` connect `createNodeDeps` to `skill-registry.mts`, `pitch-archive.test.mts`, `pitch-archive.mts`, `review-bench.mts`, `token-consumption.mts`, `orca-run.test.mts`, `main`, `entry.mts`, `ref_node_assert`, `skill-vendors.mts`, `state-render.mts`, `state-structure.mts`, `state-theme.mts`, `state-snapshot.test.mts`, `orca-reconcile.test.mts`, `metrics-lock.test.mts`, `ref_node_os`, `orca-dispatch.test.mts`, `orca-apply.test.mts`, `orca-diff-admit.test.mts`, `add-skill.mts`, `orca-reconcile.mts`, `pitch-compress.mts`, `orca-preflight.mts`, `orca-policy.mts`, `skill-vendors.test.mts`, `orca-start.mts`, `add-skill.test.mts`, `skill-sync.mts`, `orca-launch-gate.test.mts`, `pre-ship-verify.mts`, `skill-source.mts`, `browser-runtime.test.mts`, `orca-eval-grader.mts`, `skill-defaults.test.mts`, `orca-ledger.test.mts`, `orca-policy.test.mts`, `state-html.test.mts`, `orca-run.mts`, `skill-compress-guard.test.mts`, `orca-launch-gate.mts`, `orca-dispatch.mts`, `token-consumption.test.mts`, `ref_node_child_process`, `orca-evidence.test.mts`, `skill-registry.test.mts`, `stuck-uphill-detector.mts`, `types.mts`, `skill-sync.test.mts`?**
-  _High betweenness centrality (0.032) - this node is a cross-community bridge._
-- **Are the 7 inferred relationships involving `createPitchCompress()` (e.g. with `assertPlainPath()` and `buildLedger()`) actually correct?**
-  _`createPitchCompress()` has 7 INFERRED edges - model-reasoned connections that need verification._
-- **Should `token-report.mts` be split into smaller, more focused modules?**
-  _Cohesion score 0.09502262443438914 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.08325624421831637 - nodes in this community are weakly interconnected._

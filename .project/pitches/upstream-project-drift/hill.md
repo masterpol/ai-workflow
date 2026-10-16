@@ -16,7 +16,7 @@
 | S7 | done | 2026-10-16 | OpenCode worker updrift-s7-1, applied by git apply (D9); regex fix + test; 201/202 node/bun |
 | S8 | done | 2026-10-16 | OpenCode worker updrift-s8-2 + coordinator restores (ledger S8 notes); docs-links 0; skill-defaults OK
 | S10 | done | 2026-10-16 | opencode-service free + dispatch hook; 38/38 node + bun; live smoke freed PID 40797 |
-| S9 | uphill 0% | 2026-10-16 | Release + sync proof — not started |
+| S9 | done | 2026-10-16 | 2.23.0; GAUNTLET node 1327/0, bun 1323/0; sync proof in ledger (131/178 rows match, rest explained) |
 
 ## Hill positions reference
 

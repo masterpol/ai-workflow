@@ -330,7 +330,7 @@ test("keeps public CLI default/probe/worker diagnostics read-only and normal", (
   }
 });
 
-test("doctor validates optional local policy without probing or repairing it", { skip: process.platform === "win32" }, (t: TestContext) => {
+test("doctor validates optional local policy without probing or repairing it", { skip: process.platform === "win32", timeout: 30000 }, (t: TestContext) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-doctor-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const bundle = path.resolve(HERE, "../..");

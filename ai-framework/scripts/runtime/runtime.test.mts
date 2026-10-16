@@ -63,7 +63,8 @@ async function nestedCommand(deps: RuntimeDeps, mode: "timeout" | "output" | "ea
     port = receipt.port;
     const survived = await portOpen(port!);
     if (failure) {
-      assert.equal(mode, "early", "a live owning wrapper must support cleanup");
+      const cause = (failure as { cause?: { code?: string; message?: string } }).cause;
+      assert.equal(mode, "early", `a live owning wrapper must support cleanup (${failure.code}: ${cause?.code ?? ""} ${cause?.message ?? ""})`);
       assert.equal(process.platform, "win32");
       assert.equal(failure.code, "EPROCESSCLEANUP");
       assert.ok(pendingChildPids().includes(failure.ownerPid!), "uncertain ownership stays observable");

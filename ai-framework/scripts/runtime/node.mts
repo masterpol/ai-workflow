@@ -250,7 +250,11 @@ export const nodeChild: ChildDeps = {
           // The root may heed SIGTERM before a descendant with ignored stdio does.
           // Finish its still-owned group before observing close and clearing escalation.
           try { process.kill(-child.pid!, "SIGKILL"); }
-          catch (error) { if ((error as NodeJS.ErrnoException).code !== "ESRCH") { fail(cleanupError(child, error)); return; } }
+          catch (error) {
+            const code = (error as NodeJS.ErrnoException).code;
+            // macOS answers EPERM for a group that is already exiting; stop() below still proves the exit.
+            if (code !== "ESRCH" && !(code === "EPERM" && process.platform === "darwin")) { fail(cleanupError(child, error)); return; }
+          }
           if (!stopping) stop(undefined, "SIGKILL");
         } else if (!stopping) {
           closeWatch = setTimeout(() => fail(cleanupError(child, new Error("the wrapper exited but its pipes remain open"))), CLEANUP_TIMEOUT_MS);

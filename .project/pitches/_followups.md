@@ -338,3 +338,19 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Verify Codex automatic UserPromptSubmit ready context and blocking behavior in a fresh session after `/hooks` trust review. Existing dispatch/collection/release proof does not prove host activation; never bypass trust to manufacture proof.
 - Decide whether to support non-Git hook bootstrap and stricter unsupported direct --root parsing. Current registration requires Git/checkout and blocks before the off check if root lookup fails; documented and tested.
 - Make coverage compatible with the existing exact child-environment assertion without weakening it. Keep Node/Bun regression results separate from instrumentation failures; investigate Bun1.4.2 coverage crash independently.
+
+## upstream-project-drift leftovers (2026-10-16)
+- RN's `next-pitch.mts` pitch numbering: decide whether it becomes a base feature (its own pitch) or stays RN-only (decision 14).
+- Runner-aware usage text and hook commands, so projects that run Bun stop hand-editing `node` into `bun` (RN did
+  this across docs and hooks). Belongs to `unified-toon-config` (decision 11).
+- Climbing: upgrade Orca to 1.4.224 or later before `workflow-v3-rollout` syncs it (decision 13).
+- Flaky tests that fail only under full-suite load, and pass when their file runs alone: "descendant ownership
+  after timeout/output" (runtime, node and bun), the orca-eval-grader mutation proof ("settle without evidence"),
+  diff-admit "a rename is annotated on the add…", reconcile "a diff that touches check definitions…".
+- Orca attempts dispatched under 2.22.x have no `authorizedPaths` and cannot be reconciled after 2.23.0. Decide
+  whether reconcile should accept a legacy attempt when a person confirms its file claims.
+- Codex workers stop at an interactive update prompt (seen with 0.162.1 → 0.163.0) and fail at `agent_readiness`.
+  Consider detecting this in the launch receipt and reporting it as its own reason.
+- The drift ledger read only `ai-framework/` and missed climbing's `.opencode/` fixes. Later drift passes should
+  also compare the vendor adapter directories.
+- OpenCode plugin hardening (U4) was not part of this pitch.
