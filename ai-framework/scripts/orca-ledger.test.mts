@@ -8,6 +8,7 @@ import type { TestContext } from "node:test";
 import { ATTEMPT_PREFIX, MAX_RECORD_BYTES, TASK_PREFIX, SCHEMA_VERSION, MUTATION_LOCK, INTEGRATION_LOCK, pathAuthorized, validAuthorizedPaths, attemptKeyOf, createLedger, idOf, taskKeyOf } from "./orca-ledger.mts";
 import type { LedgerRecord } from "./orca-ledger.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
 import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
 
 const deps = createNodeDeps();
@@ -442,4 +443,17 @@ test("legacy schemaVersion-less records still read without silent drop", (t) => 
   }
   // A new claim identical under the normalized schema replays; the legacy record is never overwritten.
   assert.equal(ledger.claim(rec("legacy")).outcome, "replayed");
+});
+
+test("loadConfig branch: the ledger needs no config reader; claim/read beside ai-workflow.toon leaves it byte-identical and adds no legacy policy", (t) => {
+  const root = fixture(t);
+  const toon = path.join(root, "ai-workflow.toon");
+  fs.writeFileSync(toon, orcaPolicyToonText(true));
+  const before = fs.readFileSync(toon);
+  const ledger = createLedger(root, deps);
+  assert.equal(ledger.claim(rec("a1")).outcome, "claimed");
+  assert.equal(ledger.read(attemptKeyOf("a1")).status, "ok");
+  assert.deepEqual(fs.readFileSync(toon), before);
+  assert.deepEqual(tree(path.join(root, ".project")).filter((entry) => !entry.startsWith("metrics")), [], "no policy or env file is created");
+  assert.equal(fs.existsSync(path.join(root, "ai_workflow_env.json")), false);
 });

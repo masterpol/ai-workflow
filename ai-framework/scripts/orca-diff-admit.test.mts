@@ -642,3 +642,10 @@ test("a thrown dependency error fails closed as admit-error", async (t: TestCont
   const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child, run: async () => { throw new Error("spawn boom"); } } };
   rejected(await admitChecked(f, { deps }), "admit-error");
 });
+
+test("loadConfig branch: validatePath treats ai-workflow.toon like the legacy config files, and still rejects local data and traversal", () => {
+  for (const name of ["ai-workflow.toon", "ai_workflow_env.json", ".project/orchestration.json"]) assert.equal(validatePath(name), undefined, name);
+  assert.equal(validatePath(".project/metrics/orca-ledger/x.json"), "path-local-data");
+  assert.equal(validatePath("../ai-workflow.toon"), "path-dotdot");
+  assert.equal(validatePath("/ai-workflow.toon"), "path-absolute");
+});

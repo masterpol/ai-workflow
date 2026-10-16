@@ -10,9 +10,10 @@ import { fileURLToPath } from "node:url";
 
 import { createNodeDeps, pendingChildPids, posixGroupIsRunning } from "./node.mts";
 import { createBunDeps } from "./bun.mts";
-import { loadWorkflowEnv, WORKFLOW_ENV_FILE } from "./env.mts";
+import { loadConfigEnv, loadWorkflowEnv, WORKFLOW_ENV_FILE } from "./env.mts";
 import { RUNNER_VAR, orcaMultiAgentEnabled, resolveRunner, selectRuntime } from "./select.mts";
 import type { RuntimeDeps } from "./types.mts";
+import { toonFixtureText } from "./test-helpers.mts";
 
 function spawnSync(command: string, args: string[], options: SpawnSyncOptionsWithStringEncoding = { encoding: "utf8" }) {
   return rawSpawnSync(command, args, { ...options, encoding: "utf8", shell: false, windowsHide: true,
@@ -718,4 +719,70 @@ test("every deps object owns its child methods, so replacing one in a test canno
   first.child.runSync = () => ({ status: 9, signal: null, stdout: "fake", stderr: "" });
   assert.equal(second.child.runSync(process.execPath, ["-e", "process.stdout.write('real')"]).stdout, "real");
   if (process.versions.bun) assert.notEqual(createBunDeps().child, createBunDeps().child);
+});
+
+// ---- loadConfig reader branches (loadConfigEnv): TOON-first, legacy fallback, fail closed ----
+const TOON_FILE = "ai-workflow.toon";
+const toonText = (runner: string, multiAgent: boolean): string =>
+  toonFixtureText().replace("runner: node", `runner: ${runner}`).replace("multiAgent: false", `multiAgent: ${multiAgent}`);
+
+test("loadConfig branch: loadConfigEnv takes runner and switch from ai-workflow.toon; process env wins; legacy-only roots still work", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, TOON_FILE), toonText("bun", true));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" });
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, { [RUNNER_VAR]: "node", X: "1" }), { [RUNNER_VAR]: "node", AI_WORKFLOW_ORCA_MULTI_AGENT: "true", X: "1" });
+    assert.equal(entry.readRunner(root, {}, deps), "bun");
+    assert.equal(orcaMultiAgentEnabled(root, deps, {}), true);
+    const legacyOnly = scratch();
+    try {
+      writeFileSync(join(legacyOnly, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }));
+      assert.deepEqual(loadConfigEnv(deps.fs, deps.path, legacyOnly, {}), loadWorkflowEnv(deps.fs, deps.path, legacyOnly, {}), "missing TOON: identical to the legacy reader");
+      assert.equal(entry.readRunner(legacyOnly, {}, deps), "bun");
+    } finally { rmSync(legacyOnly, { recursive: true, force: true }); }
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("loadConfig branch: TOON beats a disagreeing legacy file; an invalid TOON contributes nothing and never falls back to legacy", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }));
+    writeFileSync(join(root, TOON_FILE), toonText("node", false));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "node", AI_WORKFLOW_ORCA_MULTI_AGENT: "false" });
+    for (const body of ["schemaVersion: 99\n", "garbage ::\n  x", ""]) {
+      writeFileSync(join(root, TOON_FILE), body);
+      assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, { X: "1" }), { X: "1" }, JSON.stringify(body));
+      assert.equal(entry.readRunner(root, {}, deps), "node", "legacy bun is not read");
+      assert.equal(orcaMultiAgentEnabled(root, deps, {}), false);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("loadConfig branch: a symlinked ai-workflow.toon is ignored without reading its target, then a regular one wins over legacy", needsFileSymlink, () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  const outside = scratch();
+  try {
+    writeFileSync(join(outside, "stolen"), toonText("bun", true));
+    symlinkSync(join(outside, "stolen"), join(root, TOON_FILE));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), {}, "refused TOON, no legacy file");
+    rmSync(join(root, TOON_FILE));
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun" }));
+    writeFileSync(join(root, TOON_FILE), toonText("node", false));
+    assert.equal(loadConfigEnv(deps.fs, deps.path, root, {})[RUNNER_VAR], "node", "a valid regular TOON file wins over the legacy file");
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("loadConfig branch: selectRuntime reads the runner from ai-workflow.toon and the env var still beats it", async () => {
+  const root = scratch();
+  try {
+    writeFileSync(join(root, TOON_FILE), toonText("bun", false));
+    if (underBun) assert.equal((await selectRuntime(root, {})).runtime, "bun");
+    else await assert.rejects(selectRuntime(root, {}), /requires running under Bun/);
+    assert.equal((await selectRuntime(root, { [RUNNER_VAR]: "node" })).runtime, "node");
+    writeFileSync(join(root, TOON_FILE), "schemaVersion: 99\n");
+    assert.equal((await selectRuntime(root, {})).runtime, "node", "invalid TOON selects the default runner");
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

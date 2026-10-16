@@ -11,6 +11,7 @@ import type { TestContext } from "node:test";
 import { CALL_TIMEOUT_MS, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, ReportOptions, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
 import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -526,4 +527,38 @@ test("without the multi-agent switch --probe never contacts Orca", (t: TestConte
     assert.equal(result.reason, "orca-multi-agent-disabled", String(flag));
     assert.equal(harness.calls.length, 0, String(flag));
   }
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonFixture(t: TestContext, enabled = true, legacyToo = false): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-preflight-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(enabled));
+  if (legacyToo) {
+    fs.mkdirSync(path.join(root, ".project"));
+    const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+    policy["use-orca-orchestration"] = true;
+    fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  }
+  return root;
+}
+
+test("loadConfig branch: ai-workflow.toon and the legacy policy file give identical preflight reports", (t: TestContext) => {
+  const options = { env: { PATH: "/usr/bin" }, platform: "darwin", present: () => false };
+  for (const enabled of [true, false]) {
+    const viaLegacy = report(fixture(t, enabled), "codex", options);
+    const viaToon = report(toonFixture(t, enabled), "codex", options);
+    assert.deepEqual(viaToon, viaLegacy, `enabled=${enabled}`);
+    assert.equal(String(viaToon.reason).startsWith("policy-"), !enabled, `enabled=${enabled} reason ${String(viaToon.reason)}`);
+  }
+});
+
+test("loadConfig branch: a present but invalid ai-workflow.toon is policy-bound normal workflow, never the legacy file", (t: TestContext) => {
+  const root = toonFixture(t, true, true);
+  const options = { probe: true, present: () => { throw Error("availability must not run"); }, run: () => { throw Error("probe must not run"); } };
+  assert.equal(report(root, "codex", { env: { PATH: "/usr/bin" }, platform: "darwin", present: () => false }).reason !== "policy-disabled", true);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), "schemaVersion: 99\n");
+  const result = report(root, "codex", options);
+  assert.match(String(result.reason), /^policy-(malformed|refused)$/);
+  assertNormal(result);
 });

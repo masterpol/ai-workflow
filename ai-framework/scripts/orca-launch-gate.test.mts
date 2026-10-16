@@ -6,6 +6,7 @@ import { test } from "node:test";
 import type { TestContext } from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 // ORCA_GATE_UNDER_TEST lets a mutant copy of the gate be exercised by the same assertions (mutant proofs).
@@ -305,3 +306,31 @@ test("the switch is read from the project-root ai_workflow_env.json, never .env,
   assert.equal(evaluateLaunch({ ...untouchedProbe(root), env: { PATH: "/usr/bin" } }).reason, "orca-multi-agent-disabled");
 });
 function untouchedProbe(root: string) { return { root, vendor: "codex", deps: nodeDeps, run: refused("run"), present: refused("present") }; }
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonRoot(t: TestContext, enabled = true, legacy = false): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-gate-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(enabled));
+  if (legacy) { fs.mkdirSync(path.join(root, ".project")); setPolicy(root, true); }
+  return root;
+}
+
+test("loadConfig branch: ai-workflow.toon and the legacy policy file give identical launch decisions", (t: TestContext) => {
+  for (const enabled of [true, false]) {
+    const viaLegacy = evaluateLaunch({ ...common, root: fixture(t, enabled), env: SAFE_ENV, run: prober().run });
+    const viaToon = evaluateLaunch({ ...common, root: toonRoot(t, enabled), env: SAFE_ENV, run: prober().run });
+    assert.deepEqual(viaToon, viaLegacy, `enabled=${enabled}`);
+    assert.equal(viaToon.allowed, enabled);
+  }
+});
+
+test("loadConfig branch: a present but invalid ai-workflow.toon refuses the launch and never falls back to a valid legacy file", (t: TestContext) => {
+  const root = toonRoot(t, true, true);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), "schemaVersion: 99\n");
+  const p = prober();
+  const decision = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run });
+  assert.equal(decision.allowed, false);
+  assert.equal(p.state.calls, 0, "no probe ran");
+  assert.equal(evaluateLaunch({ ...common, root: toonRoot(t, true, true), env: SAFE_ENV, run: prober().run }).allowed, true, "valid TOON wins over legacy");
+});

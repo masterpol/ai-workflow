@@ -9,7 +9,7 @@ import type { GradeOptions, GradeReport, GraderLibraries } from "./orca-eval-gra
 import { WORKER_ENV_MARKERS, WORKER_FLAG } from "./orca-launch-gate.mts";
 import { createLedger, validAuthorizedPaths } from "./orca-ledger.mts";
 import type { ReconcileOptions, ReconcileOutcome } from "./orca-reconcile.mts";
-import { captureIo, createTestDeps, tempFixture } from "./runtime/test-helpers.mts";
+import { captureIo, createTestDeps, orcaPolicyToonText, tempFixture } from "./runtime/test-helpers.mts";
 
 const deps = createTestDeps();
 const ROOT = deps.path.resolve(import.meta.dirname, "../..");
@@ -20,7 +20,7 @@ type Grade = (options: GradeOptions) => Promise<GradeReport>;
 
 const dataset = (): { schemaVersion: number; cases: Obj[] } => JSON.parse(deps.fs.readFileSync(deps.path.join(ROOT, DATASET_FILE))) as { schemaVersion: number; cases: Obj[] };
 function rootWith(t: TestContext, cases: Obj[], extra: Record<string, string> = {}): string {
-  const root = tempFixture(deps, { [DATASET_FILE]: JSON.stringify({ schemaVersion: 1, cases }), ...extra });
+  const root = tempFixture(deps, { [DATASET_FILE]: JSON.stringify({ schemaVersion: 1, cases }), ...extra }, { resolve: false });
   t.after(() => deps.fs.rmSync(root, { recursive: true, force: true }));
   return root;
 }
@@ -220,7 +220,7 @@ test("unknown case ids are not passes, and a missing dataset is reported as an e
   const entry = caseOf(report, "brand-new-case");
   assert.deepEqual([entry.mode, entry.pass], ["parses-only", false]);
   assert.deepEqual(report.summary.parsesOnly, { total: 1, parsed: 0, failed: 1 });
-  const empty = tempFixture(deps, {});
+  const empty = tempFixture(deps, {}, { resolve: false });
   t.after(() => deps.fs.rmSync(empty, { recursive: true, force: true }));
   const missing = await gradeAll({ deps, root: empty });
   assert.deepEqual(missing.cases, []);
@@ -231,15 +231,15 @@ test("unknown case ids are not passes, and a missing dataset is reported as an e
 });
 
 test("the dataset reader refuses a symlinked file, a symlinked parent and an oversize file", async (t: TestContext) => {
-  const outside = tempFixture(deps, { "o/orca-vendor-orchestration.json": JSON.stringify({ schemaVersion: 1, cases: [] }) });
+  const outside = tempFixture(deps, { "o/orca-vendor-orchestration.json": JSON.stringify({ schemaVersion: 1, cases: [] }) }, { resolve: false });
   t.after(() => deps.fs.rmSync(outside, { recursive: true, force: true }));
   const real = deps.path.join(outside, "o/orca-vendor-orchestration.json");
-  const link = tempFixture(deps, { ".project/evals/datasets/x": "" });
+  const link = tempFixture(deps, { ".project/evals/datasets/x": "" }, { resolve: false });
   t.after(() => deps.fs.rmSync(link, { recursive: true, force: true }));
   const file = deps.path.join(link, DATASET_FILE);
   deps.fs.rmSync(deps.path.join(link, ".project/evals/datasets/x"));
   deps.fs.symlinkSync(real, file);
-  const parent = tempFixture(deps, {});
+  const parent = tempFixture(deps, {}, { resolve: false });
   t.after(() => deps.fs.rmSync(parent, { recursive: true, force: true }));
   deps.fs.symlinkSync(deps.path.join(outside, "o"), deps.path.join(parent, ".project"));
   const big = rootWith(t, [], { "pad.txt": "" });
@@ -256,4 +256,64 @@ test("the module imports no node: module, uses no any and guards its main with o
   assert.doesNotMatch(text, /:\s*any\b|\bas any\b/);
   assert.equal(text.match(/runDirect\(import\.meta\.url, main\);/g)?.length, 1);
   assert.doesNotMatch(text, /expected\)\s*\(|observer\([^)]*expected/, "observers never receive expected");
+});
+
+// ---- policy writes: wxRename only, never an unlink, never a truncating write (no-race, concurrent runs) ----
+interface FsOp { op: string; path: string }
+function recordingDeps(ops: FsOp[]) {
+  const log = (op: string, file: unknown): void => { ops.push({ op, path: String(file) }); };
+  return { ...deps, fs: { ...deps.fs,
+    writeFileSync: ((file: never, ...rest: never[]) => { log("write", file); return (deps.fs.writeFileSync as (...a: unknown[]) => unknown)(file, ...rest); }) as typeof deps.fs.writeFileSync,
+    renameSync: ((from: never, to: never) => { log("rename", to); return deps.fs.renameSync(from, to); }) as typeof deps.fs.renameSync,
+    unlinkSync: ((file: never) => { log("unlink", file); return deps.fs.unlinkSync(file); }) as typeof deps.fs.unlinkSync,
+    rmSync: ((file: never, ...rest: never[]) => { log("rm", file); return (deps.fs.rmSync as (...a: unknown[]) => unknown)(file, ...rest); }) as typeof deps.fs.rmSync,
+  } };
+}
+const POLICY_NAME = "orchestration.json";
+
+test("no-race: concurrent graders write each policy via a unique wx temp then rename, and never unlink or truncate it", SLOW, async (t: TestContext) => {
+  const ops: FsOp[] = [];
+  const root = rootWith(t, dataset().cases);
+  const reports = await Promise.all([1, 2, 3, 4].map(() => gradeAll({ deps: recordingDeps(ops) as typeof deps, root })));
+  for (const report of reports) {
+    assert.deepEqual(report.summary.executes, { total: 7, passed: 7, failed: 0 });
+    assert.deepEqual(report.cases.map((entry) => [entry.id, entry.pass]), reports[0].cases.map((entry) => [entry.id, entry.pass]));
+  }
+  const policyOps = ops.filter((entry) => entry.path.endsWith(POLICY_NAME) || entry.path.includes(`${POLICY_NAME}.`));
+  const renames = policyOps.filter((entry) => entry.op === "rename");
+  assert.ok(renames.length >= 4, `policy writes happened (${renames.length})`);
+  assert.ok(renames.every((entry) => entry.path.endsWith(POLICY_NAME)));
+  assert.deepEqual(policyOps.filter((entry) => entry.op === "write" && entry.path.endsWith(POLICY_NAME)), [], "no direct write over the policy path");
+  assert.deepEqual(policyOps.filter((entry) => entry.op === "rm" || (entry.op === "unlink" && entry.path.endsWith(POLICY_NAME))), [], "policy path is never removed");
+  const temps = new Set(policyOps.filter((entry) => entry.op === "write").map((entry) => entry.path));
+  assert.equal(temps.size, policyOps.filter((entry) => entry.op === "write").length, "every temp name is unique across concurrent runs");
+});
+
+test("no-race: both preamble branches (policy written for auto, none written otherwise) leave no policy unlink and no stray temp", SLOW, async (t: TestContext) => {
+  const preamble = dataset().cases.find((entry) => entry.id === "worker-preamble-prevents-recursive-coordination");
+  assert.ok(preamble);
+  const withMode = (policyMode: string): Obj => ({ ...preamble, input: { ...(preamble.input as Obj), policyMode } });
+  const written: boolean[] = [];
+  for (const mode of ["auto", "off"]) {
+    const ops: FsOp[] = [];
+    const report = await gradeAll({ deps: recordingDeps(ops) as typeof deps, root: rootWith(t, [withMode(mode)]) });
+    assert.equal(report.cases.length, 1);
+    assert.equal(ops.some((entry) => entry.op === "rename" && entry.path.endsWith(POLICY_NAME)), mode === "auto", `mode ${mode}`);
+    assert.equal(ops.some((entry) => entry.op === "unlink" && entry.path.endsWith(POLICY_NAME)), false, `mode ${mode}: no unlink`);
+    assert.equal(ops.filter((entry) => entry.op === "unlink" && entry.path.includes(`${POLICY_NAME}.`)).length, 0, `mode ${mode}: no cleanup needed`);
+    written.push(mode === "auto" && caseOf(report, "worker-preamble-prevents-recursive-coordination").pass);
+  }
+  assert.deepEqual(written, [true, false], "auto passes with a policy; the non-auto branch writes none");
+});
+
+test("loadConfig branch: the grader's written policy is read through loadConfig/readPolicy as legacy, and a TOON file beside it wins", async (t: TestContext) => {
+  const { readPolicy } = await import("./orca-policy.mts");
+  const root = tempFixture(deps, { ".project/.gitkeep": "" }, { resolve: false });
+  t.after(() => deps.fs.rmSync(root, { recursive: true, force: true }));
+  const legacy = JSON.parse(deps.fs.readFileSync(deps.path.join(ROOT, "ai-framework/integrations/orca-vendors.example.json"))) as Obj;
+  legacy["use-orca-orchestration"] = true;
+  deps.fs.writeFileSync(deps.path.join(root, ".project", POLICY_NAME), JSON.stringify(legacy));
+  assert.equal((readPolicy(root, deps) as { status: string }).status, "valid");
+  deps.fs.writeFileSync(deps.path.join(root, "ai-workflow.toon"), orcaPolicyToonText(false));
+  assert.equal((readPolicy(root, deps) as { status: string }).status, "disabled", "TOON (disabled) wins over the enabled legacy file");
 });

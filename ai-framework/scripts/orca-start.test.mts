@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
-import { createTestDeps, tempFixture } from "./runtime/test-helpers.mts";
+import { createTestDeps, orcaPolicyToonText, tempFixture } from "./runtime/test-helpers.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 import type { Run, RunOptions } from "./orca-preflight.mts";
 import { decideStart, hasNormalBypass } from "./orca-start.mts";
@@ -398,7 +398,7 @@ console.log(JSON.stringify(value));
     "orca": { content: forged, mode: 0o755 }, "relative/orca": { content: forged, mode: 0o755 },
     "bin/orca": { content: trusted, mode: 0o755 }, "bin/codex": { content: trusted, mode: 0o755 },
     "bin/opencode": { content: trusted, mode: 0o755 },
-  });
+  }, { resolve: false });
   t.after(() => base.fs.rmSync(root, { recursive: true, force: true }));
   const executable = base.fs.realpathSync(base.path.join(root, "bin/orca"));
   for (const prefix of [".", "relative", "", ".:relative:"]) {
@@ -430,4 +430,31 @@ console.log(JSON.stringify(value));
   const deps = createTestDeps({ ...env, PATH: `relative::${root}/bin`, ORCA_TERMINAL_HANDLE: "agent" });
   assert.equal(decideStart({ root, phase: "shape", vendor: "claude", deps }).state, "worker");
   assert.equal(base.fs.existsSync(base.path.join(root, markerName)), false);
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function switchToToon(f: ReturnType<typeof fixture>, text: string, keepLegacy = false): void {
+  if (!keepLegacy) base.fs.rmSync(base.path.join(f.root, ".project/orchestration.json"), { force: true });
+  base.fs.writeFileSync(base.path.join(f.root, "ai-workflow.toon"), text);
+}
+
+test("loadConfig branch: an ai-workflow.toon policy gives the same start decision as the legacy file (unresolved temp root)", (t) => {
+  const legacy = fixture(t);
+  const toon = fixture(t);
+  switchToToon(toon, orcaPolicyToonText(true));
+  assert.equal(base.fs.existsSync(base.path.join(toon.root, ".project/orchestration.json")), false);
+  const expected = decideStart({ ...legacy.options, terminalHandle: "agent" });
+  assert.equal(expected.state, "ready");
+  assert.deepEqual(decideStart({ ...toon.options, terminalHandle: "agent" }), expected);
+});
+
+test("loadConfig branch: TOON disabled beats an enabled legacy file, and an invalid TOON blocks instead of falling back", (t) => {
+  const disabled = fixture(t);
+  switchToToon(disabled, orcaPolicyToonText(false), true);
+  assert.notEqual(decideStart({ ...disabled.options, terminalHandle: "agent" }).state, "ready", "TOON policy-disabled wins");
+  const invalid = fixture(t);
+  switchToToon(invalid, "schemaVersion: 99\n", true);
+  const decision = decideStart({ ...invalid.options, terminalHandle: "agent" });
+  assert.notEqual(decision.state, "ready", "invalid TOON never reads the valid legacy file");
+  assert.ok(invalid.state.calls.every((call) => call.args[0] === "orchestration" && call.args[1] === "worker-list"), "no gate probe ran");
 });

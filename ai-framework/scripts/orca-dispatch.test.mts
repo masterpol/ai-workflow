@@ -12,6 +12,7 @@ import { WORKER_FLAG } from "./orca-launch-gate.mts";
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
 import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, markUnknownLiveness } from "./orca-dispatch.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -705,5 +706,41 @@ test("residual receipts keep ownership even when a caller creates a new attempt 
     const replacement = await dispatchScope(base(root, orca.deps, { attemptId: "new-id" }));
     assert.deepEqual([replacement.route, replacement.reason], ["resume", "task-already-owned"]);
     assert.equal(orca.state.starts.length, 1, behaviour);
+  }
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonFixture(t: TestContext, text: string, legacy = false): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-dispatch-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), text);
+  if (legacy) {
+    fs.mkdirSync(path.join(root, ".project"));
+    const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+    policy["use-orca-orchestration"] = true;
+    fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  }
+  return root;
+}
+
+test("loadConfig branch: a TOON-configured root launches exactly like the legacy-configured root", async (t: TestContext) => {
+  const legacyOrca = fakeOrca();
+  const legacy = await dispatchScope(base(fixture(t), legacyOrca.deps));
+  const toonOrca = fakeOrca();
+  const toonRoot = toonFixture(t, orcaPolicyToonText(true));
+  const viaToon = await dispatchScope(base(toonRoot, toonOrca.deps));
+  assert.deepEqual([viaToon.route, viaToon.dispatchId], [legacy.route, legacy.dispatchId]);
+  assert.equal(viaToon.route, "launched");
+  assert.equal(toonOrca.state.starts.length, legacyOrca.state.starts.length);
+  assert.equal(ledgerOf(toonRoot).read(attemptKeyOf("a1")).status, "ok");
+});
+
+test("loadConfig branch: a disabled or invalid ai-workflow.toon keeps the normal workflow with no spawn, even beside an enabled legacy file", async (t: TestContext) => {
+  for (const text of [orcaPolicyToonText(false), "schemaVersion: 99\n"]) {
+    const orca = fakeOrca();
+    const root = toonFixture(t, text, true);
+    const outcome = await dispatchScope(base(root, orca.deps));
+    assert.equal(outcome.route, "normal", JSON.stringify(text.slice(0, 20)));
+    assert.equal(orca.state.starts.length, 0);
   }
 });

@@ -185,6 +185,46 @@ export function toonFixtureText(options: { schemaVersion?: number | string; extr
 }
 
 /**
+ * `ai-workflow.toon` text that expresses the same policy as `integrations/orca-vendors.example.json` (three
+ * coordinators, `maxConcurrentWorkers` 2, `maxRetriesPerTask` 1), with `enabled` / `multiAgent` set from `enabled`.
+ * Reader tests use it to prove the TOON branch and the legacy branch return identical policy decisions.
+ */
+export function orcaPolicyToonText(enabled = true): string {
+  return [
+    "schemaVersion: 1",
+    "runtime:",
+    "  runner: node",
+    "engines:",
+    "  orca: \"1.4.224\"",
+    "orchestration:",
+    `  multiAgent: ${enabled}`,
+    `  enabled: ${enabled}`,
+    "  maxConcurrentWorkers: 2",
+    "  maxRetriesPerTask: 1",
+    "  coordinators:",
+    "    claude:",
+    "      roles:",
+    "        implementation[1]: codex",
+    "        review[1]: opencode",
+    "    codex:",
+    "      roles:",
+    "        implementation[1]: claude",
+    "        review[1]: opencode",
+    "    opencode:",
+    "      roles:",
+    "        implementation[1]: claude",
+    "        review[1]: codex",
+    "doctor:",
+    "  modelRouting: project",
+    "skills:",
+    "  modes:",
+    "    caveman: full",
+    "integrations: {}",
+    "",
+  ].join("\n");
+}
+
+/**
  * TOON fixture writer on `memoryFs(files, links)`: places `text` at `<root>/<name>` (default
  * `ai-workflow.toon`) in an in-memory tree and forwards `links` so symlink/alias layouts follow
  * `existsSync`/`statSync`/`lstatSync` correctly. `extraFiles` are merged in unchanged.

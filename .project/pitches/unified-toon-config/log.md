@@ -334,3 +334,26 @@ orca-policy report --root . --vendor claude --json  -> valid, workers opencode/c
 ### Hill
 
 c1.1 -> over-the-hill. Drift d11-d14. Open: c1.2 must cover both branches, the 9-site tempFixture audit (d10), and the grader no-race test.
+
+## 2026-10-16 - c1.2 build complete
+
+### Files changed
+
+- Tests only: `orca-{apply,diff-admit,dispatch,eval-grader,launch-gate,ledger,policy,preflight,run,start}.test.mts`, `runtime/{runtime,entry}.test.mts`, `runtime/test-helpers.mts` (+ `orcaPolicyToonText`).
+- `orca-eval-grader.test.mts`: 2 "no-race" tests (4 concurrent `gradeAll` runs record fs ops: every policy lands by unique temp write then rename, no direct write, no remove/unlink; both preamble branches `auto` vs non-auto), 1 loadConfig test, 5 tempFixture sites to `{ resolve: false }`.
+- Production code untouched. Stashes untouched (2 remain).
+
+### Evidence
+
+```
+orca-eval-grader.test.mts   tests 14 pass 14 fail 0 (exit 0)
+grep -rln "loadConfig\|legacyFallback" scripts/**/runtime.test.mts scripts/**/orca-*.test.mts   -> 11 files
+grep -c "no-race" orca-eval-grader.test.mts -> 3
+runtime/*.test.mts + orca-*.test.mts + hooks tests + skill-defaults + workflow-doctor: tests 839, pass 836, fail 1, skipped 2
+fail: workflow-doctor "exits 0 on a real bundle copy" -> README link (d14, c2.2)
+```
+
+### Hill
+
+c1.2 -> done; c1.1 -> downhill 75%. Drift d15-d18.
+

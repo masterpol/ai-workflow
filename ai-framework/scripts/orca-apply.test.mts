@@ -469,3 +469,8 @@ test("production code imports no node: module and uses no any", () => {
   assert.doesNotMatch(source, /node:/);
   assert.doesNotMatch(source, /: any\b|as any/);
 });
+
+test("loadConfig branch: config files are ordinary paths for apply, while local data stays off limits (no special case for ai-workflow.toon)", () => {
+  for (const name of ["ai-workflow.toon", "ai_workflow_env.json", ".project/orchestration.json", "ai-workflow.toon.bak"]) assert.equal(validRelativePath(name), true, name);
+  for (const name of [".project/metrics/orca-ledger/x.json", "../ai-workflow.toon", "/ai-workflow.toon", ".git/ai-workflow.toon"]) assert.equal(validRelativePath(name), false, name);
+});

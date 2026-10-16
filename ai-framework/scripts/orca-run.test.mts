@@ -14,6 +14,7 @@ import { decideStart } from "./orca-start.mts";
 import type { CheckSpec } from "./orca-reconcile.mts";
 import { NODE_FLAGS } from "./runtime/entry.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 // ORCA_RUN_UNDER_TEST lets a mutant copy of the CLI be exercised by the same assertions (mutant proofs).
@@ -683,4 +684,29 @@ test("a stale opencode serve that survives stop and signals refuses the launch w
   assert.ok(ran(h, "opencode"), "opencode service stop ran first");
   assert.deepEqual(h.killed, [[4242, "SIGTERM"], [4242, "SIGKILL"]]);
   assert.equal(h.calls.run.length, 0, "no worker was launched");
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+test("loadConfig branch: start and dispatch on a TOON-configured root equal the legacy-configured root", async (t: TestContext) => {
+  const legacy = fixture(t);
+  const toon = fixture(t);
+  fs.rmSync(path.join(toon.root, ".project/orchestration.json"));
+  fs.writeFileSync(path.join(toon.root, "ai-workflow.toon"), orcaPolicyToonText(true));
+  const args = (root: string) => ["start", "--root", root, "--phase", "build", "--vendor", "codex"];
+  const viaLegacy = await exec(args(legacy.root), harness(legacy.env));
+  const viaToon = await exec(args(toon.root), harness(toon.env));
+  assert.deepEqual([viaToon.code, viaToon.json], [viaLegacy.code, viaLegacy.json]);
+  const dispatchViaToon = await exec(["dispatch", "--root", toon.root, "--input", writeInput(toon.root, dispatchInput())], dispatching(toon));
+  const dispatchViaLegacy = await exec(["dispatch", "--root", legacy.root, "--input", writeInput(legacy.root, dispatchInput())], dispatching(legacy));
+  assert.deepEqual([dispatchViaToon.code, dispatchViaToon.json.route], [dispatchViaLegacy.code, dispatchViaLegacy.json.route]);
+  assert.equal(dispatchViaToon.json.route, "launched");
+});
+
+test("loadConfig branch: an invalid ai-workflow.toon refuses dispatch even when a valid legacy policy exists", async (t: TestContext) => {
+  const f = fixture(t);
+  fs.writeFileSync(path.join(f.root, "ai-workflow.toon"), "schemaVersion: 99\n");
+  const h = dispatching(f);
+  const result = await exec(["dispatch", "--root", f.root, "--input", writeInput(f.root, dispatchInput())], h);
+  assert.notEqual(result.json.route, "launched");
+  assert.equal(h.calls.run.length, 0, "no worker started");
 });

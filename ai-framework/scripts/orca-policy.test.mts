@@ -11,6 +11,7 @@ import { pathToFileURL } from "node:url";
 
 import { MAX_POLICY_BYTES, POLICY_FILE, VENDORS, main, readPolicy, report, validatePolicy } from "./orca-policy.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText } from "./runtime/test-helpers.mts";
 import type { FsDeps, RuntimeDeps, StatLike } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -462,4 +463,55 @@ test("main returns 1 when writing the report fails", () => {
   mem.deps.io.stdout.write = () => { throw new Error("EPIPE"); };
   assert.equal(main(["report", "--root", "/proj", "--vendor", "codex"], mem.deps), 1);
   assert.equal(mem.err.join(""), "orca-policy: invalid invocation or internal failure\n");
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonRoot(t: TestContext, text: string, legacy?: unknown): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-policy-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), text);
+  if (legacy !== undefined) { fs.mkdirSync(path.join(root, ".project")); write(root, legacy); }
+  return root;
+}
+
+test("loadConfig branch: ai-workflow.toon yields the same readPolicy result and report as the legacy JSON for every vendor", (t) => {
+  for (const enabled of [true, false]) {
+    const legacy = fixture(t);
+    write(legacy, policy(enabled));
+    const toon = toonRoot(t, orcaPolicyToonText(enabled));
+    assert.deepEqual(readPolicy(toon), readPolicy(legacy), `enabled=${enabled}`);
+    for (const vendor of VENDORS) assert.deepEqual(report(toon, vendor), report(legacy, vendor), `${vendor} enabled=${enabled}`);
+  }
+});
+
+test("loadConfig branch: TOON wins over a disagreeing legacy file, and a missing TOON falls back to legacy", (t) => {
+  const both = toonRoot(t, orcaPolicyToonText(true), policy(false));
+  assert.equal(report(both, "codex").eligible, true, "TOON enabled beats legacy disabled");
+  const legacyOnly = fixture(t);
+  write(legacyOnly, policy(true));
+  assert.equal(report(legacyOnly, "codex").eligible, true, "no TOON: legacy is read");
+  assert.equal(readPolicy(fixture(t)).status, "missing", "neither file: missing");
+});
+
+test("loadConfig branch: an invalid, unsupported or symlinked ai-workflow.toon fails closed and never falls back to a valid legacy file", (t) => {
+  for (const text of ["schemaVersion: 99\n", "not toon at all\n  ::\n", ""]) {
+    const root = toonRoot(t, text, policy(true));
+    const result = readPolicy(root);
+    assert.match(result.status, /^(malformed|refused)$/, JSON.stringify(text));
+    assert.equal(report(root, "codex").eligible, false, JSON.stringify(text));
+  }
+  if (process.platform !== "win32") {
+    const root = toonRoot(t, orcaPolicyToonText(true), policy(true));
+    fs.renameSync(path.join(root, "ai-workflow.toon"), path.join(root, "real.toon"));
+    fs.symlinkSync(path.join(root, "real.toon"), path.join(root, "ai-workflow.toon"));
+    assert.equal(readPolicy(root).status, "refused");
+  }
+});
+
+test("loadConfig branch: a TOON policy keeps the frozen legacy bounds and Record<string,string> roles", (t) => {
+  const over = toonRoot(t, orcaPolicyToonText(true).replace("maxConcurrentWorkers: 2", "maxConcurrentWorkers: 9"));
+  assert.equal(readPolicy(over).status, "malformed");
+  const ok = report(toonRoot(t, orcaPolicyToonText(true)), "claude");
+  assert.deepEqual(ok.roles, { implementation: "codex", review: "opencode" });
+  assert.deepEqual(ok.workers, ["codex", "opencode"]);
 });
