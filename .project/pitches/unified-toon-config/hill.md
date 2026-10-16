@@ -15,7 +15,7 @@ phase: plan
 | a1  | `config.mts` primitives                       | over-the-hill | Consumer verification by a2 mutants: errorCodes.foo contracts asserted and passed; two a1 reader-context remaps applied. |
 | a2  | `config.test.mts` parser mutants              | uphill 25% | 7 parser-guard mutants implemented; all exit criteria green; a1 contract verified. |
 | a3  | Writer/path mutants + alias + subprocess     | over-the-hill | 5 writer/path mutants (each proven to bite via manual source mutation), 4 alias tests, K2-3 subprocess, lock contention + stale recovery green; TOON fixture writer in `test-helpers.mts`. 9-site tempFixture audit carried to c1.2 (d10). |
-| c1.1| runtime/orca reader glue + grader rewire      | uphill 0% | Deps: a3 |
+| c1.1| runtime/orca reader glue + grader rewire      | over-the-hill | `loadConfigEnv` (env.mts) feeds select/entry; `readPolicy` TOON-first via shared `validatePolicy`; grader writes via `wxRename`; signatures frozen. Awaiting c1.2 consumer tests (both branches). Drift d11-d14. |
 | c1.2| Reader tests + grader no-race                 | uphill 0% | Deps: c1.1 |
 | c2.1| Doctor validators + setup-validator          | uphill 0% | Deps: a1 (parallel with c2.2 / c2.3 after c1.1) |
 | c2.2| Root docs rewrite                             | uphill 0% | Deps: a1 (parallel with c2.3) |

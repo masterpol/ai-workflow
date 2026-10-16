@@ -1,4 +1,6 @@
 import { runDirect } from "./runtime/cli.mts";
+import { loadConfig } from "./runtime/config.mts";
+import type { ConfigModel } from "./runtime/config.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
 
@@ -98,7 +100,32 @@ function readBoundedFile(location: Location, deps: RuntimeDeps): Refusal | { tex
   } finally { if (descriptor !== undefined) fs.closeSync(descriptor); }
 }
 
+/** Maps the TOON orchestration section onto the frozen legacy shape so both sources share one validation path. */
+function policyFromConfig(model: ConfigModel): PolicyResult {
+  const { orchestration } = model;
+  const coordinators: Json = {};
+  for (const [vendor, entry] of Object.entries(orchestration.coordinators ?? {})) {
+    const roles: Record<string, string> = {};
+    const pool: string[] = [];
+    for (const [role, target] of Object.entries(entry.roles ?? {})) {
+      const list = Array.isArray(target) ? target : [target];
+      if (list.length) roles[role] = list[0]; // report().roles stays Record<string,string>; pitch 4 widens
+      for (const worker of list) if (!pool.includes(worker)) pool.push(worker);
+    }
+    const workers = pool.length ? pool : (orchestration.workers ?? []).filter((worker) => worker !== vendor);
+    coordinators[vendor] = { workers, roles };
+  }
+  return validatePolicy({ schemaVersion: 1, "use-orca-orchestration": orchestration.enabled,
+    maxConcurrentWorkers: orchestration.maxConcurrentWorkers, maxRetriesPerTask: orchestration.maxRetriesPerTask, coordinators });
+}
+
 export function readPolicy(root: string, deps: RuntimeDeps = defaultDeps()): PolicyResult | Refusal {
+  // `ai-workflow.toon` wins when present; only a missing file (or an unusable `deps`) falls back to the legacy JSON.
+  try {
+    const config = loadConfig(root, deps);
+    if (!("status" in config)) return config.problems.length ? { status: "malformed" } : policyFromConfig(config.model);
+    if (config.status === "refused") return { status: "refused" };
+  } catch { /* fall through to the legacy file */ }
   let location: Location | Refusal;
   try { location = inspectPath(root, deps); }
   catch (error) { return { status: errorCode(error) === "ENOENT" ? "missing" : "refused" }; }

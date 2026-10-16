@@ -306,3 +306,31 @@ Mutation proof (temp edits to `config.mts`, restored; `git diff config.mts` empt
 ### Hill
 
 a3 -> over-the-hill (producer-side invariants hold). Drift: d8, d9, d10.
+
+## 2026-10-16 - c1.1 build complete
+
+### Files changed
+
+- `runtime/env.mts` - new `loadConfigEnv` (TOON via `loadConfig`, legacy fallback); `loadWorkflowEnv` untouched.
+- `runtime/select.mts`, `runtime/entry.mts` - call `loadConfigEnv`.
+- `orca-policy.mts` - `readPolicy` TOON-first via `loadConfig` + `policyFromConfig` -> shared `validatePolicy`; signature and `report()` shape unchanged.
+- `orca-launch-gate.mts` - line-13 doc comment only.
+- `orca-eval-grader.mts` - `writePolicy` via `wxRename`; `:347` unlink removed (conditional write).
+- `orca-preflight.test.mts` - fixture filter/example copy (d14).
+- Stashes untouched (one accidental `git stash` of this scope's own changes was popped immediately; the two older stashes are intact).
+
+### Evidence
+
+```
+runtime.test.mts                      tests 53 pass 53 fail 0
+grep -L loadConfig {env,select,entry,orca-policy,orca-launch-gate}.mts   -> empty
+grep -rln "wxRename" orca-eval-grader.mts                                -> orca-eval-grader.mts
+runtime/*.test.mts + orca-*.test.mts   tests 568 pass 567 fail 0 (1 skipped)
+runtime+config+orca-*+hooks+skill-defaults+workflow-doctor tests: 712 tests, 709 pass, 1 fail
+fail: skill-defaults.test.mts "workflow-doctor exits 0 on a real bundle copy" -> README.md docs links broken (a1 relocation, d14)
+orca-policy report --root . --vendor claude --json  -> valid, workers opencode/codex (read from ai-workflow.toon)
+```
+
+### Hill
+
+c1.1 -> over-the-hill. Drift d11-d14. Open: c1.2 must cover both branches, the 9-site tempFixture audit (d10), and the grader no-race test.

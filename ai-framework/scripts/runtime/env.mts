@@ -1,4 +1,5 @@
-import type { FsDeps } from "./types.mts";
+import { loadConfig } from "./config.mts";
+import type { FsDeps, RuntimeDeps } from "./types.mts";
 import type nodePath from "node:path";
 
 /** Project-root file that carries the workflow settings. It holds no secrets, so agents may read and edit it. */
@@ -39,6 +40,31 @@ export function loadWorkflowEnv(
     return { ...env }; // an unreadable or malformed file contributes nothing
   }
   const merged: Record<string, string | undefined> = { ...values };
+  for (const [key, value] of Object.entries(env)) if (value !== undefined) merged[key] = value;
+  return merged;
+}
+
+/**
+ * TOON-first reader behind the frozen `loadWorkflowEnv` shape. `<root>/ai-workflow.toon` (read through `loadConfig`)
+ * wins when it is present and valid; a missing file, or a `fs` too narrow for `loadConfig`, falls back to the legacy
+ * `ai_workflow_env.json` reader. A present but refused or invalid TOON file contributes nothing (fail closed, never the
+ * legacy file). Variables already in `env` win.
+ */
+export function loadConfigEnv(
+  fs: Pick<FsDeps, "existsSync" | "readFileSync" | "realpathSync" | "statSync">,
+  path: typeof nodePath,
+  root: string,
+  env: Record<string, string | undefined>,
+): Record<string, string | undefined> {
+  let result: ReturnType<typeof loadConfig>;
+  try { result = loadConfig(root, { fs, path } as unknown as RuntimeDeps); }
+  catch { return loadWorkflowEnv(fs, path, root, env); }
+  if ("status" in result) return result.status === "missing" ? loadWorkflowEnv(fs, path, root, env) : { ...env };
+  if (result.problems.length > 0) return { ...env };
+  const merged: Record<string, string | undefined> = {
+    AI_WORKFLOW_RUNNER: result.model.runtime.runner,
+    AI_WORKFLOW_ORCA_MULTI_AGENT: String(result.model.orchestration.multiAgent),
+  };
   for (const [key, value] of Object.entries(env)) if (value !== undefined) merged[key] = value;
   return merged;
 }

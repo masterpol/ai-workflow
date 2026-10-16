@@ -9,6 +9,7 @@ import type { Receipt, Run } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
 import type { CheckSpec, ReconcileAttempt, ReconcileOptions } from "./orca-reconcile.mts";
 import { runDirect } from "./runtime/cli.mts";
+import { wxRename } from "./runtime/config.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
@@ -105,7 +106,10 @@ function writePolicy(ctx: Ctx, root: string, coordinator: string, workers: reado
   }
   const policy = { schemaVersion: 1, "use-orca-orchestration": true, maxConcurrentWorkers: 3, maxRetriesPerTask: 2, coordinators };
   ctx.deps.fs.mkdirSync(ctx.deps.path.join(root, ".project"), { recursive: true });
-  ctx.deps.fs.writeFileSync(ctx.deps.path.join(root, ".project", "orchestration.json"), JSON.stringify(policy));
+  // wx temp file then rename: no truncating write over an existing or symlinked policy path.
+  const written = wxRename(ctx.deps.path.join(root, ".project", "orchestration.json"),
+    (temp) => ctx.deps.fs.writeFileSync(temp, JSON.stringify(policy), { flag: "wx" }), ctx.deps);
+  if (!("ok" in written)) throw new Error(`grader policy write refused: ${written.refused.code}`);
 }
 
 type ProbeMode = "verified" | "caller-unverified" | "status-failed" | "runtime-unreachable" | "version-drift" | "guide-missing";
@@ -343,8 +347,9 @@ const observeWorkerPreamble: Observer = async (given, ctx) => {
   const input = obj(given.input);
   const harness = str(input.harness);
   const root = fresh(ctx, "preamble");
-  writePolicy(ctx, root, harness, VENDORS.filter((vendor) => vendor !== harness));
-  if (input.policyMode !== "auto") ctx.deps.fs.rmSync(ctx.deps.path.join(root, ".project", "orchestration.json"), { force: true });
+  // Policy is written only for "auto"; a fresh root never holds one, so nothing is unlinked.
+  if (input.policyMode === "auto") writePolicy(ctx, root, harness, VENDORS.filter((vendor) => vendor !== harness));
+  else ctx.deps.fs.mkdirSync(ctx.deps.path.join(root, ".project"), { recursive: true });
   const scope = scopeSpec("scope-p", "nested", ["a.txt"]);
   const brief = ctx.libs.workerBrief(scope);
   // The worker reads its own brief: those lines are its argv when it considers coordinating.

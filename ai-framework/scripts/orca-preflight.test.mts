@@ -335,12 +335,14 @@ test("doctor validates optional local policy without probing or repairing it", {
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const bundle = path.resolve(HERE, "../..");
   const skip = new Set(["node_modules", "caveman", "settings.local.json", "credentials.json", ".aws"]);
-  // .env is local and secret-bearing, never copied; the settings file is local too; the .example.json is a tracked template that README links to.
-  const filter = (source: string) => !skip.has(path.basename(source)) && !path.basename(source).startsWith(".env") && path.basename(source) !== "ai_workflow_env.json";
+  // .env is local and secret-bearing, never copied; the settings file is local too; the example templates live under ai-framework/templates; the local ai-workflow.toon is never copied.
+  const filter = (source: string) => !skip.has(path.basename(source)) && !path.basename(source).startsWith(".env") && path.basename(source) !== "ai_workflow_env.json" && path.basename(source) !== "ai-workflow.toon";
   for (const item of [".claude", ".agents", ".codex", ".cursor", ".opencode", "ai-framework",
-    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md", "ai_workflow_env.example.json"]) {
+    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md"]) {
     fs.cpSync(path.join(bundle, item), path.join(root, item), { recursive: true, filter });
   }
+  // The example template now lives under ai-framework/templates; README still links to it at the root until c2.2 rewrites that link.
+  fs.cpSync(path.join(bundle, "ai-framework/templates/ai_workflow_env.example.json"), path.join(root, "ai_workflow_env.example.json"));
   // No project-local registry/packages or their external wrappers belong to this bundle fixture.
   fs.rmSync(path.join(root, ".opencode/skills"), { recursive: true, force: true });
   const bin = path.join(root, "fixture-bin");
