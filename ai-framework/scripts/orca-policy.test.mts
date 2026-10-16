@@ -100,7 +100,7 @@ test("rejects malformed routing and bounds with exact fallback outcomes", async 
     ["flag null", (p) => { p["use-orca-orchestration"] = null; }],
     ["legacy mode rejected", (p) => { p.mode = "auto"; }],
     ["concurrency low", (p) => { p.maxConcurrentWorkers = 0; }],
-    ["concurrency high", (p) => { p.maxConcurrentWorkers = 4; }],
+    ["concurrency high", (p) => { p.maxConcurrentWorkers = 17; }],
     ["concurrency far above", (p) => { p.maxConcurrentWorkers = 30; }],
     ["concurrency string", (p) => { p.maxConcurrentWorkers = "2"; }],
     ["concurrency NaN", (p) => { p.maxConcurrentWorkers = null; }],
@@ -508,8 +508,8 @@ test("loadConfig branch: an invalid, unsupported or symlinked ai-workflow.toon f
   }
 });
 
-test("loadConfig branch: a TOON policy keeps the frozen legacy bounds and Record<string,string> roles", (t) => {
-  const over = toonRoot(t, orcaPolicyToonText(true).replace("maxConcurrentWorkers: 2", "maxConcurrentWorkers: 9"));
+test("loadConfig branch: a TOON policy keeps the 1..16 concurrency and legacy retry bounds and Record<string,string> roles", (t) => {
+  const over = toonRoot(t, orcaPolicyToonText(true).replace("maxConcurrentWorkers: 2", "maxConcurrentWorkers: 17"));
   assert.equal(readPolicy(over).status, "malformed");
   const ok = report(toonRoot(t, orcaPolicyToonText(true)), "claude");
   assert.deepEqual(ok.roles, { implementation: "codex", review: "opencode" });

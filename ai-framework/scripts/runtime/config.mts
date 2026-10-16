@@ -476,8 +476,8 @@ function validateOrca(raw: Record<string, unknown>, problems: Problem[]): OrcaIn
 
     const maxConcurrent = expectInteger(raw.maxConcurrentWorkers, `${base}.maxConcurrentWorkers`);
     if (maxConcurrent.ok) {
-        if (maxConcurrent.value < 1 || maxConcurrent.value > 3) {
-            problems.push(problem(errorCodes.validationType, `${base}.maxConcurrentWorkers must be between 1 and 3`));
+        if (maxConcurrent.value < 1 || maxConcurrent.value > 16) {
+            problems.push(problem(errorCodes.validationType, `${base}.maxConcurrentWorkers must be between 1 and 16`));
         } else {
             orca.maxConcurrentWorkers = maxConcurrent.value;
         }

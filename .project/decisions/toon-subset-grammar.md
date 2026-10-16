@@ -49,7 +49,7 @@ integrations:
     engine: "1.4.224"          # was engines.orca; required string
     enabled: true              # was orchestration.enabled
     multiAgent: true           # was orchestration.multiAgent
-    maxConcurrentWorkers: 3    # integer 1..3 (matches orca-policy; pitch 4 widens per coordinator)
+    maxConcurrentWorkers: 3    # integer 1..16
     maxRetriesPerTask: 1       # integer >= 0
     coordinators:
       claude:

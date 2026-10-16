@@ -46,7 +46,7 @@ export function validatePolicy(value: unknown): PolicyResult {
   if (!Number.isInteger(value.schemaVersion)) return { status: "malformed" };
   if (value.schemaVersion !== 1) return { status: "unsupported-schema" };
   if ((Object.hasOwn(value, "use-orca-orchestration") && typeof value["use-orca-orchestration"] !== "boolean")
-    || !boundedInteger(value.maxConcurrentWorkers, 1, 3)
+    || !boundedInteger(value.maxConcurrentWorkers, 1, 16)
     || !boundedInteger(value.maxRetriesPerTask, 0, 2) || !hasKeys(value.coordinators, VENDORS)) return { status: "malformed" };
   const coordinators: Record<string, Coordinator> = {};
   for (const [vendor, entry] of Object.entries(value.coordinators)) {

@@ -749,8 +749,8 @@ test("integrations.orca: missing block, missing engine, bad bounds and unknown k
     const bad = loadText(BASELINE_TOON.replace('    engine: "1.4.224"\n', "").replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 17").replace("maxRetriesPerTask: 1", "maxRetriesPerTask: -1\n    bogus: 1"));
     const texts = bad.problems.map((p) => p.text).join("|");
     assert.match(texts, /integrations\.orca\.engine is required/);
-    assert.match(texts, /maxConcurrentWorkers must be between 1 and 3/);
-    assert.match(loadText(BASELINE_TOON.replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 4")).problems.map((p) => p.text).join("|"), /between 1 and 3/, "4 matches orca-policy and is refused");
+    assert.match(texts, /maxConcurrentWorkers must be between 1 and 16/);
+    assert.equal(loadText(BASELINE_TOON.replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 16")).problems.length, 0, "16 is accepted");
     assert.match(texts, /maxRetriesPerTask must be >= 0/);
     assert.match(texts, /unknown key "bogus" in integrations\.orca/);
 });

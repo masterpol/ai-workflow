@@ -43,7 +43,7 @@ top-level `engines` and `orchestration` sections (schemaVersion 1) is no longer 
 |---|---|
 | `schemaVersion` | Required integer `1` |
 | `use-orca-orchestration` | Optional boolean; missing means `false` |
-| `maxConcurrentWorkers` | Required integer from `1` to `3`; future dispatch ceiling |
+| `maxConcurrentWorkers` | Required integer from `1` to `16`; future dispatch ceiling |
 | `maxRetriesPerTask` | Required integer from `0` to `2`; future retry ceiling |
 | `coordinators` | Required object keyed only by `claude`, `codex`, or `opencode` |
 | Coordinator `workers` | Required array of at most two unique other vendors |

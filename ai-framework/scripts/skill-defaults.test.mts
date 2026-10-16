@@ -343,6 +343,8 @@ test("doctor and setup-validator report the live caveman state truthfully across
 
   // TOON first: the fixture's own ai-workflow.toon governs; "off" disables, an invalid file fails by name and never falls back.
   const toonFile = path.join(root, "ai-workflow.toon");
+  // ai-workflow.toon is gitignored: a clean checkout has none and a developer's local one may differ, so always seed from the shipped example.
+  fs.copyFileSync(path.join(root, "ai-framework/templates/ai-workflow.example.toon"), toonFile);
   const toonText = fs.readFileSync(toonFile, "utf8");
   fs.writeFileSync(toonFile, toonText.replace(/caveman: \S+/, "caveman: off"));
   assert.equal(state()!.status, "info");
