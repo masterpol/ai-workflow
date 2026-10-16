@@ -364,3 +364,9 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - `orca-start.mts` `lookupWorker` asks for `--limit 100`; the worker list is now over the 256 KiB output cap, so Orca-requested phases block with `worker-identity-unavailable`. Use a smaller page size.
 - Flaky only under full-suite load: skill-defaults "FIFO or oversize modes.json is skipped".
 - `pre-ship-verify.mts` fails in this repo (no package.json or Muro verifier); the real checks are the test suite and validators.
+
+### orca-engines-range leftovers
+- Link the migrator's `DEFAULT_ENGINE` to `DEFAULT_ENGINE_RANGE` (or test they match) so a floor bump cannot drift.
+- Decide whether `engineRange` should report invalid when a config file exists but fails to load, instead of using the default floor.
+- The `engine-range-invalid` branches in preflight, gate and start are unreachable through config; delete them or test them directly.
+- Optional doctor warning for a bare-version (exact pin) engine.
