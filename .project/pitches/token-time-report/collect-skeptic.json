@@ -1,0 +1,18 @@
+{
+  "attemptKey": "attempt:ttr-shape-skeptic-20261021",
+  "message": {
+    "id": "msg_d9019d01f376",
+    "run_id": "run_d3b6ac5bc706",
+    "delivery_contract": "current_delivery",
+    "from_handle": "term_58746404-37ba-45e8-8aa9-81fa5fc95d43",
+    "to_handle": "run:run_d3b6ac5bc706",
+    "subject": "skeptic critique written",
+    "body": "Read the skeptic role, pitch, and shaping evidence, and checked related knowledge issues and the metrics source exports. Wrote 3 findings (2 high, 1 medium): the lease directory-identity pin and reader-reuse extraction, untrusted labels as map keys with scrub bypass, and cap-fold mismatches between the two stores. Budget looks plausible but tight (9 files, possibly 10 if reader extraction is needed); no source changed.",
+    "type": "worker_done",
+    "priority": "normal",
+    "thread_id": null,
+    "payload": "{\"taskId\":\"task_3ea95554ee0c\",\"dispatchId\":\"ctx_daac41929990\",\"outcome\":\"succeeded\",\"filesModified\":[\".project/pitches/token-time-report/critique-skeptic.md\"],\"reportPath\":\".project/pitches/token-time-report/critique-skeptic.md\"}",
+    "created_at": "2026-10-21T23:37:07Z",
+    "delivered_at": null
+  }
+}

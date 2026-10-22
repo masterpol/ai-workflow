@@ -3,7 +3,7 @@ import { test } from "node:test";
 import type { TestContext } from "node:test";
 import { createNodeDeps } from "./node.mts";
 import { migrateInstanceEntries } from "./migrate.mts";
-import { createTestDeps } from "./test-helpers.mts";
+import { createTestDeps, urlPath } from "./test-helpers.mts";
 const testDeps = createTestDeps();
 const { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } = testDeps.fs;
 const tmpdir = (): string => testDeps.os.tmpdir();
@@ -240,4 +240,37 @@ test("a hook registered under a different matcher, or wrapped, still counts by s
   const after = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
   assert.equal(after.hooks.PreToolUse.length, 1, "the wrapped Skill hook is not duplicated");
   assert.deepEqual(after.hooks.UserPromptExpansion, [orcaGroup("Other"), orcaGroup("*")], "another matcher is a different registration");
+});
+
+test("propagates all capture groups once beside existing token and Orca groups, and preserves wrapped registrations", t => {
+  const { root, source, deps } = fixture(t);
+  const livePath = urlPath(new URL("../../../.claude/settings.json", import.meta.url));
+  const canonical = JSON.parse(readFileSync(livePath, "utf8"));
+  const isCapture = (group: { hooks: { command?: string }[] }): boolean => group.hooks.some(hook => hook.command?.includes("workflow-capture.mts"));
+  const old = structuredClone(canonical);
+  for (const event of Object.keys(old.hooks)) {
+    old.hooks[event] = old.hooks[event].filter((group: { hooks: { command?: string }[] }) => !isCapture(group));
+    if (old.hooks[event].length === 0) delete old.hooks[event];
+  }
+  write(source, ".claude/settings.json", JSON.stringify(canonical));
+  write(source, "ai-framework/hooks/scripts/workflow-capture.mts", "export {};\n");
+  write(root, ".claude/settings.json", JSON.stringify(old));
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), [{ path: ".claude/settings.json", status: "applied" }]);
+  const after = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+  let count = 0;
+  for (const [event, groups] of Object.entries(canonical.hooks) as [string, { hooks: { command?: string }[] }[]][]) {
+    const added = after.hooks[event].filter(isCapture), expected = groups.filter(isCapture);
+    assert.deepEqual(added, expected, event); count += added.length;
+    assert.deepEqual(after.hooks[event].filter((group: { hooks: { command?: string }[] }) => !isCapture(group)), old.hooks[event] ?? [], event);
+  }
+  assert.equal(count, 8);
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), []);
+  const wrapped = structuredClone(old), registration = structuredClone(canonical.hooks.UserPromptSubmit.find(isCapture));
+  registration.hooks[0].command = `wrapper -- ${registration.hooks[0].command}`;
+  wrapped.hooks.UserPromptSubmit = [registration];
+  write(root, ".claude/settings.json", JSON.stringify(wrapped));
+  migrateInstanceEntries(root, source, true, deps);
+  const migrated = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+  assert.deepEqual(migrated.hooks.UserPromptSubmit, [registration]);
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), []);
 });

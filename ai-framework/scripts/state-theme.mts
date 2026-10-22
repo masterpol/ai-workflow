@@ -53,10 +53,13 @@ const SKIP_DIRS = new Set(["node_modules", ".git", ".project", "dist", "build", 
 export const THEME_FILE = ".project/reports/theme.json";
 export const SETTINGS_FILE = ".project/reports/settings.json";
 
-// Documented fallback: a shadcn-style (zinc) light/dark pair. Every pair below is asserted >= 4.5:1 in tests.
+// Workflow default: neutral slate surface, a single blue accent hue, and a system font
+// stack. Status is communicated by structure, not color alone; only one accent hue is
+// provided so the report cannot rely on color-coded statuses. Every pair below is asserted
+// >= 4.5:1 in tests.
 export const FALLBACK: Record<Mode, ThemeValues> = {
-  light: { background: "#ffffff", foreground: "#09090b", primary: "#18181b", primaryForeground: "#fafafa", muted: "#f4f4f5", mutedForeground: "#52525b", border: "#d4d4d8", radius: "0.5rem", fontSans: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", fontMono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
-  dark: { background: "#09090b", foreground: "#fafafa", primary: "#fafafa", primaryForeground: "#18181b", muted: "#27272a", mutedForeground: "#a1a1aa", border: "#3f3f46", radius: "0.5rem", fontSans: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", fontMono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
+  light: { background: "#f8fafc", foreground: "#0f172a", primary: "#1d4ed8", primaryForeground: "#ffffff", muted: "#e2e8f0", mutedForeground: "#475569", border: "#cbd5e1", radius: "0.5rem", fontSans: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", fontMono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
+  dark: { background: "#0f172a", foreground: "#f8fafc", primary: "#60a5fa", primaryForeground: "#0f172a", muted: "#1e293b", mutedForeground: "#94a3b8", border: "#334155", radius: "0.5rem", fontSans: "system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif", fontMono: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
 };
 
 // The report's real text/background combinations. A theme is only used when all of these pass.
@@ -322,10 +325,26 @@ function assemble(mode: Mode, found: Record<string, Found>, fallbacks: Fallback[
   return { theme, provenance };
 }
 
-export function discoverTheme(root: string, options: { settings?: Settings } = {}, deps: RuntimeDeps = defaultDeps()): Theme {
+export function discoverTheme(root: string, options: { settings?: Settings; repoShape?: string } = {}, deps: RuntimeDeps = defaultDeps()): Theme {
   const { fs } = deps;
   // A raw ENOENT/EACCES message embeds the absolute path; keep only a fixed reason.
   try { root = fs.realpathSync(root); } catch { throw new Error("root does not exist or is not resolvable"); }
+  if (options.repoShape === "monorepo") {
+    const provenance = Object.fromEntries(Object.keys(FALLBACK.light).map((token) => [token, "fallback"]));
+    return {
+      schemaVersion: 1,
+      mode: "fallback",
+      themeMode: options.settings?.themeMode ?? "auto",
+      reason: "repoShape is monorepo; workflow default theme used",
+      light: { ...FALLBACK.light },
+      dark: { ...FALLBACK.dark },
+      provenance: { light: { ...provenance }, dark: { ...provenance } },
+      fallbacks: [],
+      rejected: [],
+      notes: [],
+      sources: [],
+    };
+  }
   const settings = options.settings || readSettings(root, deps);
   const fallbacks: Fallback[] = [];
   const forced = settings.themeMode === "fallback";

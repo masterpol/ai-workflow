@@ -2,13 +2,13 @@
 id: an-unbounded-mutation-run-hangs-on-a-mutant-that-removes-a-stall-guard
 type: issue
 created: 2026-10-19
-updated: 2026-10-19
+updated: 2026-10-21
 tags: [testing, mutation, hang, evidence]
 related: [mutation-script-killed-leaves-source-mutated, reviewer-reports-contradicted-by-measurement]
 source: toon-machine-data
 severity: low
 resolved: true
-confidence: low
+confidence: medium
 ---
 
 # Issue: a mutant that removes a loop's stall guard hangs an unbounded test run
@@ -24,3 +24,7 @@ Source was checked for leftover mutants (diff against the backup, clean suites).
 ## Prevention
 
 Every mutation run sets a per-test timeout and a wall-clock limit, and restores on exit. See `mutation-script-killed-leaves-source-mutated` for the restore side.
+
+## Recurrence: token-time-report (2026-10-21)
+
+The fresh coverage reviewer disabled the stalled-write refusal in a scratch-only copy. The write loop hung and was killed by a 15-second alarm, without modifying canonical source. This kills the mutant by bounded timeout, not an assertion failure; the record says so. The production guard and normal stalled-write test remain green. The repeated behavior raises confidence to medium and reinforces mandatory wall-clock bounds for mutation runs.

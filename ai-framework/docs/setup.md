@@ -11,7 +11,7 @@ each one detects `.project/` is missing and self-triggers `SETUP.md` on its own.
 doesn't auto-read either file, just ask it to *"read `SETUP.md` and set up the workflow."*
 
 **OpenCode model setup:** connect OpenCode Go before starting a routed workflow — every bundled
-OpenCode route uses it: `opencode-go/space-bunny` for short fast work, `opencode-go/minimax-m3`
+OpenCode route uses it: `opencode-go/minimax-m3.1-flash-free` for short fast work, `opencode-go/minimax-m3`
 for standard work and `opencode-go/kimi-k2.7-code` for deep work. Run `opencode debug config` to
 confirm that OpenCode resolves the configuration. For confidential work, switch the fast-route
 adapters to the standard route (see `ai-framework/integrations/harnesses.md`).

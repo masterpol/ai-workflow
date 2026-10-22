@@ -439,3 +439,95 @@ Items bundled:
 - Converter and writer: detect JSON loss the parser hides (integers beyond 2^53, duplicate keys), refuse hard links, keep file mode on replace, fsync the directory (low).
 - Run the 5 live-only golden cases in `.project/evals/datasets/toon-machine-data.json` once an eval harness exists (med).
 - The agent-load inventory method in `.project/analysis/2026-10-18-agent-load-inventory-analysis.md` (evidence by `file:line`) could become a small script if more files are proposed for conversion (low).
+
+## state-report-redesign leftovers (2026-10-19)
+- Update the `/state` skill and its mirrors: "theme is rediscovered from the project's own CSS" is stale for monorepos; the CLI preview already names the reason (med).
+- `state-pages.mts` `writeSetInner` runs `mkdirSync(recursive)` before its symlink check, so a symlinked `.project` leaves an empty `reports/` outside the project (low, pre-existing).
+- Ownership marker is matched with `includes` anywhere in a page, so a user file that quotes it is overwritten; `readSource` reads up to 1 MiB before the 64 KB slice for `package.json` (low, pre-existing).
+- Small duplication: `esc` in `state-charts.mts` and `state-render.mts`, three unavailable chips, `isFact` twice, unused `h.CSP` in `createStatePages` (low).
+- The structure page still renders `structure.tree` for a monorepo; decide whether "monorepo never lists the tree" should cover it (low).
+- View the redesigned report in a browser at 360px (sidebar height, chart fallback) and print (low, not done: static checks only).
+- The `old install upgrades with its own bundle-sync` test took 111 s and failed once in the full parallel run; passes alone (low, flaky under load; the retry passed in the full suite).
+
+## From token-attribution (2026-10-19)
+- Codex usage: parse the session log for `total_token_usage` (about 45 LOC); the on-disk shape is unconfirmed, and so is whether `UserPromptSubmit` and `SubagentStop` repeat one session id. Needs `.codex/hooks.json` plus `orca-start-codex-hook.test.mts` changes (med).
+- OpenCode child sessions: the plugin passes no parent session id, so child completions are `(unattributed)`; verify whether session-created events expose one (low-med).
+- Verify live: the Claude `Stop` payload carries `transcript_path`, and `SubagentStop` vs `PostToolUse(Agent)` order for foreground agents (low).
+- One pitch built across several git worktrees splits its metrics; a join or main-checkout resolution is not built (low).
+- `leastRecentPitch` sorts pitches without `at` by NaN; `resolveFlow` can overshoot the leaf cap by one `(other)/(other)` row; stored context labels are only checked to be strings (low).
+- Path-length cap and locked id-window filter have no distinguishing test (equivalent mutants) (low).
+- Cross-pitch ruling needed: `state-report-redesign` (after the token revision) vs `state-deep-evidence` (wants redesign S2 first); `state-deep-evidence` plan.md:27 is stale (resolver export exists) (med).
+- Brief workers with the data shape and pin the worktree base to HEAD; `ai-workflow.toon` is git-ignored so workers cannot run doctor-based checks (low).
+
+## From state-fragment-sanitizer (2026-10-20)
+- **`pre-ship-verify.mts` route for a package-less bundle** (med): the verifier selects its checks from a root `package.json` (or the Muro viewer verifier), and this bundle has neither, so `/ship` blocked on it on the first attempt. A durable route is needed: either a documented `verify:base`-style contract that does not require a `package.json`, or a bundle-local check manifest the verifier can read. The temporary `package.json` used at this ship is not a fix.
+- **Renderer/injector wiring** (med): `sanitizeFragment` and `checkCitations` are a library only. Nothing calls them yet; `state-ai-authoring` owns the injector that places sanitized markup into a page and the provenance/staleness label.
+- **Nine deferred dataset cases** (med): `.project/evals/datasets/state-ai-fragments.json` — 5 live-only (model, prompt-injection, snapshot) and 4 injector cases — are owned by `state-ai-authoring`; they are not enforced by any test today.
+- **Shared transcript-path rule** (low): the evidence checker classifies a transcript path locally. Fold the rule into the shared `safeEvidencePath` once `state-report-redesign` releases `state-render.mts`, so there is one authority for secret/transcript paths.
+- **`state-report-redesign` marker and token export** (low): the sanitizer's default allow-lists are the 7 color tokens and one marker class. The redesign pitch should export its class, token and marker lists and own the marker defs, so the integration point has real values to inject.
+
+## From workflow-usage-state (2026-10-20)
+- **`workflow-usage-capture` (A2) wires the hooks and calls the exported resolver** (med): this pitch is the state library only; nothing writes `session.started`, `agent.*` or phase events automatically. Shaping draft: `.project/pitches/workflow-usage-capture/shaping-draft.md`. `token-time-report` (part B) reads the state read-only and owns the time and flow tables.
+- **Runtime constants for an `O_APPEND` marker open** (low-med): add `O_WRONLY`, `O_APPEND` and `O_CREAT` to `FsConstants` in `runtime/types.mts` and `runtime/node.mts` (and the Bun adapter), then open `workflow-usage.dropped` with them plus `O_NOFOLLOW`. Closes the accepted symlink-planting and FIFO-swap windows (`deviations.md` S6).
+- **Full-suite `[dataset-mapping]` flake and `bun test ai-framework` stall** (med): 14 `state-fragment-dataset.test.mts` tests fail intermittently in the full Node suite ("a top-level test is not ok" in a child run); they pass alone and fail identically without this pitch. `bun test ai-framework` prints nothing and stalls. A stale `bun ../probe.mts` has run at 100% CPU since 11 Oct.
+- **`pre-ship-verify.mts` for a package-less bundle** (med, hit again): exits 1 with no project checks; `/ship` ran the real commands from `stack.md` instead.
+- **Audit tuning** (low): the test-coverage reviewer ran inside the code reviewer's canary scratch tree and reported the canary as its must-fix; give it its own tree. A reviewer wrote one output file inside the scratch audit directory (outside the repo, flagged in the record).
+- **Test hygiene** (low): the full-cap size test takes about 8 s (`scopeRow` leaf recount); the cut-back test spins instead of failing if its guard is removed; the older metrics tests still bind the real loopback port (flake 0/12).
+- **Step 3 hardening for small models, then re-run the OpenCode half of the live matrix** (med, from `state-ai-authoring`): path cheat sheet without `.value.`, links must be files, an absolute stop after two rejections; the live claim is `blocked` (51 of 72) until all vendors pass twice per case. Any skill wording change invalidates the earlier passes, so re-run the whole matrix.
+- **`uncited-claim` fixture and rubric** (med, from `state-ai-authoring`): the fixture's knowledge fact has no evidence path, so "every risk cites an evidence path" cannot pass; either give the fact evidence or relax the case.
+- **Fragment headings that repeat the label; long overview block** (low, from `state-ai-authoring` UX review): start fragments at h3; consider collapsing long bodies.
+- **Empty-slot byte-identity test and summary accuracy** (low): render both paths from one fixture inside a test (no stored golden hash); the `AI analysis:` line counts a cap-omitted slot as fresh.
+- **Close the by-path write/delete race in `fragments/`** (low): `process.chdir` into the checked directory in the CLI, or fd-relative file calls; `writeAtomic` is shared with `state.json`.
+- **`review-bench guard` skips `.project/evals/runs/`** (low): the snapshot exceeded its size limit once 72 run directories existed; the audit used an mtime sweep.
+- ~~`ai-workflow.toon` invalid mid-session~~ (resolved 2026-10-20 by the owner, `workers[2]: codex,claude`): the local git-ignored file was edited during `state-ai-authoring` and briefly failed `ORCHESTRATION-WORKERS-INCOMPLETE`; it was never a HEAD failure.
+- **`state-deep-evidence`**: add any new clock-derived snapshot path to `VOLATILE_PATHS` and `state-report.md`, and keep its dataset cases out of `state-ai-fragments.json` (22-case partition).
+- **Sanitizer wall-clock test fails under load** (med, root cause of the full-suite `[dataset-mapping]` flake; seen again in `state-ai-authoring`): `state-fragment.test.mts:255` "[reject-oversize-and-deep] 5 MB path d rejects as geometry…" asserts a time bound and took 1.24 s with six suites in parallel; the dataset test then reports 16 red lines (child exit 1, 346 of 347). Passes alone. Use a step-count or relative bound, or a generous ceiling.
+
+- **Orca startup identity lookup exceeds its own output cap** (med, observed 2026-10-20 during `workflow-usage-capture`): `lookupWorker` requests 100 fully projected worker rows; the local receipt was 268,003 bytes, above `MAX_OUTPUT_BYTES` (262,144). Startup returned `worker-identity-unavailable` despite a healthy runtime. Owner-requested `orchestration reset --tasks` after verifying 111 dispatches and 110 tasks were settled restored readiness. Use smaller paginated worker-list requests or a bounded identity projection, and add a regression over a large historical worker fleet. Preserve live/unknown worker ownership; cleanup must remain an explicit user action.
+
+
+## From workflow-usage-capture audit (2026-10-21)
+
+- **Workflow metrics documentation clarity** (low; owner: workflow metrics docs maintenance): remove the
+  ambiguity of the A1 core guide's planned hook table at workflow-metrics.md:125-128 now that the separate
+  capture adapter is wired. harnesses.md already describes the current events and unwired vendors.
+- **OpenCode token-plugin metadata retention** (low; owner: OpenCode token-plugin maintenance): the existing
+  V2 steps Map has no cap/TTL when a start never gets an end/failure. Verified present before capture at
+  868212b:129,147,169. Capture does not add entries to this Map. Add a bounded retention policy separately.
+- **Orca model-pin capability preflight** (med; owner: Orca adapter maintenance): this runtime pins OpenCode
+  models only for 1.18.30, 1.18.32 and 2.0.16; installed 2.1.1 is refused before worker creation. The library
+  reduces that structured preflight failure to launch-failed:unproven and claims unknown ownership. Preserve
+  a bounded safe error/capability receipt or probe before claiming, without weakening fail-closed liveness.
+  This audit recovered using runtime code-path/version proof and used configured Claude alternates; no
+  OpenCode version, credentials, global settings or app code was changed.
+
+
+## From state-deep-evidence ship (2026-10-21)
+
+- **state-monorepo-packages** (med): implement the deliberately cut S6 package map through bounded named manifest reads; preserve unavailable semantics until it exists.
+- **Structured audit counts** (med): define stable machine-readable audit-cycle/must-fix/revision records; current history parser correctly reports unavailable for unrecognized prose formats. Keep event-derived transitions separate.
+- **State metrics/tokens extraction** (low-med): split their cohesive reader/assembly functions out of state-snapshot.mts without duplicating token reads, scope resolution or usage semantics; snapshot exceeded its planned growth allowance.
+- **structure.tree label hardening** (med): drop or replace directory labels outside a conservative allow-list. Existing tree names are explicitly outside the deep-evidence injection case; do not claim full-snapshot injection coverage from that case.
+- **Deep-evidence live reliability and vendor rerun** (med): address Claude fact-path/no-fragment/semantic failures and rerun its 15-case matrix; rerun OpenCode when quota permits. Preserve the two 0.50 regressions and all not-run rows until fresh evidence replaces the claim. Coordinate with the existing Step 3 path-guidance followup; a skill change invalidates old authoring passes.
+
+Existing backlog owners for the package-less ship wrapper, review-bench guard snapshot cap, sanitizer timing under load and Step 3 path guidance remain authoritative; no duplicate entries were added. Any guard repair must also honor the separate secret-file exclusion issue. Source-review canaries were correctly caught and excluded from the live queue in this ship.
+
+
+## From test-execution-performance ship (2026-10-21)
+
+- **Idle-host test timing rerun** (med): rerun the five candidates (Node default / 4 workers / cache, Bun default / `--parallel=4`) on an idle host from a fixed snapshot; append rows to `pitches/test-execution-performance/measurements.md` and update `ai-framework/docs/testing.md`. Promote only on ≥20% median reduction with exit-0 parity.
+- **Bun full-suite timeouts** (med): `workflow-doctor` real-bundle-copy tests (two) and "every cap filled" size-bound test exceed Bun's 5 s default timeout; Bun default takes 2.7x Node. Decide whether to change the tests or document Bun as scoped-only. Never lengthen deadlines without a decision.
+- **run-tests signal handling** (low): forward SIGINT/SIGTERM to the child and report the killing signal; `--root` default is untested directly.
+- **Subprocess-matrix unit seams** (med): replace repeated CLI matrices (Codex start hook, 48 launches) with in-process cases while keeping executable-wiring smoke tests.
+- **Testing guide discoverability** (low): link `testing.md` from the README docs table (omitted to keep the 5-file budget).
+
+## From token-time-report — ship preparation (2026-10-21)
+
+- **TTR-A1 — review-bench trusted-root Git execution** (med): prevent project/local/global Git config and environment from executing fsmonitor/filter helpers when inspecting an untrusted tree; preserve a narrow trusted-root contract and add execution-spy regressions. Current usage is restricted to this trusted checkout.
+- **TTR-A2 — review-bench strict appetite counting** (med): reject non-finite/non-numeric --max, use NUL-delimited Git listings for non-ASCII filenames and preserve explicit bookkeeping filters. This pitch uses independent exact-file/numstat accounting.
+- **TTR-A3 — bounded review-tool input/path diagnostics** (low-med): fix in-root '..name' snapshot destinations, validate snapshot shape, map filesystem errors to fixed diagnostics and tighten citation/record parsing. Preserve outside-only snapshots, symlink/FIFO refusals and current caps.
+- **TTR-A4 — static flow-report usability polish** (low): consider Path-first/sticky row headers, descriptive single-row time totals, reduced duplicate title announcements and source-aware empty-state help; avoid implying browser geometry/contrast verification or weakening inert output.
+
+**Resolved in this implementation, pending final ship closure:** the existing review-bench snapshot-size mismatch and secret-name tree-walk omissions. Production guard now shares a 16MiB snapshot read/write bound and skips protected names before reads; Node/Bun 35-case regressions and canonical snapshot/check pass. Existing historical items remain above; current resolution cards are [[review-guard-snapshot-can-outgrow-its-reader]] and [[review-guard-hashes-ignored-secret-files]].
+
+The package-less pre-ship verifier and timing-under-load issues retain their existing backlog ownership. The mandatory wrapper failed again; the owner explicitly approved the documented direct-check gauntlet for this ship. No duplicate wrapper/timing pitch is added. Cooldown should review packet completeness, misnumbered citations and allocation-confounded mutation evidence; no rule change is auto-promoted.

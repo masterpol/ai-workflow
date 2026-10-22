@@ -18,6 +18,17 @@
             "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.mts\" --vendor claude --event skill-use --root \"$CLAUDE_PROJECT_DIR\""
           }
         ]
+      },
+      {
+        "matcher": "Skill",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
       }
     ],
     "SubagentStop": [
@@ -29,6 +40,17 @@
             "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.mts\" --vendor claude --event subagent-complete --root \"$CLAUDE_PROJECT_DIR\""
           }
         ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
       }
     ],
     "PreToolUse": [
@@ -55,6 +77,101 @@
           }
         ],
         "description": "Check Orca readiness before workflow phases; block when requested but unavailable"
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.mts\" --vendor claude --event phase-start --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 8
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.mts\" --vendor claude --event session-turn --root \"$CLAUDE_PROJECT_DIR\""
+          }
+        ]
+      },
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
+      }
+    ],
+    "SubagentStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts\" --vendor claude --root \"$CLAUDE_PROJECT_DIR\"",
+            "timeout": 5
+          }
+        ],
+        "description": "Record workflow activity metadata without prompt, response or transcript text"
       }
     ]
   }

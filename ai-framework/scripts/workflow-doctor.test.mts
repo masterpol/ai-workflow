@@ -590,7 +590,7 @@ test("project-owned model routing accepts a project's own routes and bundled rou
   // routing, a mirror whose `model:` does not match `models.opencode.standard.model` fails;
   // under `modelRouting: project` the same mirror passes (a project is allowed to ship its own
   // route) as long as the route is well-formed.
-  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: bundle\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: claude-haiku-5-5\n    standard:\n      model: claude-sonnet-5-5\n    deep:\n      model: claude-opus-5-5\n  opencode:\n    fast:\n      model: opencode-go/space-bunny\n    standard:\n      model: opencode-go/minimax-m3\n    deep:\n      model: opencode-go/kimi-k2.7-code\n  codex:\n    fast:\n      model: gpt-6-luna\n    standard:\n      model: gpt-6.1-sol\n    deep:\n      model: gpt-6-astra\n");
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: bundle\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: claude-haiku-5-5\n    standard:\n      model: claude-sonnet-5-5\n    deep:\n      model: claude-opus-5-5\n  opencode:\n    fast:\n      model: opencode-go/minimax-m3.1-flash-free\n    standard:\n      model: opencode-go/minimax-m3\n    deep:\n      model: opencode-go/kimi-k2.7-code\n  codex:\n    fast:\n      model: gpt-6-luna\n    standard:\n      model: gpt-6.1-sol\n    deep:\n      model: gpt-6-astra\n");
   const run = async (): Promise<Check[]> => {
     const capture = injected(root);
     await main(["--json"], capture.deps);
@@ -896,4 +896,82 @@ test("doctor requires the Claude Orca start hooks with the Node runner; a bun-wi
   delete missing.hooks.UserPromptExpansion;
   write(root, ".claude/settings.json", JSON.stringify(missing));
   assert.match((await wiring())!.detail, /UserPromptExpansion does not register orca-start-hook\.mts/);
+});
+
+interface CaptureGroup { matcher: string; hooks: { type: string; command: string; timeout?: number }[] }
+function captureSettings(): { hooks: Record<string, CaptureGroup[]> } {
+  return JSON.parse(fs.readFileSync(urlPath(new URL("../../.claude/settings.json", import.meta.url))));
+}
+async function captureWiring(root: string): Promise<Check> {
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const result = checks(capture.output).find((item) => item.name === "Claude capture wiring");
+  assert.ok(result);
+  return result;
+}
+
+test("doctor accepts all eight canonical capture registrations", async (t) => {
+  const root = fixture(t);
+  write(root, ".claude/settings.json", JSON.stringify(captureSettings()));
+  assert.equal((await captureWiring(root)).status, "pass");
+});
+
+const captureMiswirings: [string, (group: CaptureGroup) => void][] = [
+  ["echoed command", (group) => { group.hooks[0].command = "echo " + group.hooks[0].command; }],
+  ["Bun command", (group) => { group.hooks[0].command = 'bun "workflow-capture.mts"'; }],
+  ["missing timeout", (group) => { delete group.hooks[0].timeout; }],
+  ["long timeout", (group) => { group.hooks[0].timeout = 30; }],
+  ["shell suffix", (group) => { group.hooks[0].command += "; true"; }],
+  ["wrong type", (group) => { group.hooks[0].type = "prompt"; }],
+  ["wrong matcher", (group) => { group.matcher = "Skill"; }],
+];
+for (const [label, mutate] of captureMiswirings) {
+  test(`doctor rejects capture ${label} and names only its event`, async (t) => {
+    const root = fixture(t);
+    const settings = captureSettings();
+    const group = settings.hooks.Stop.find((entry) => entry.hooks.some((hook) => hook.command.includes("workflow-capture.mts")))!;
+    mutate(group);
+    write(root, ".claude/settings.json", JSON.stringify(settings));
+    const result = await captureWiring(root);
+    assert.equal(result.status, "fail");
+    assert.match(result.detail, /^Stop /);
+    assert.doesNotMatch(result.detail, /SessionStart|SessionEnd|Subagent|UserPrompt|PostToolUse|echo |; true/);
+  });
+}
+
+for (const duplicate of [true, false]) {
+  test(`doctor rejects ${duplicate ? "duplicate" : "missing"} capture registration`, async (t) => {
+    const root = fixture(t);
+    const settings = captureSettings();
+    const groups = settings.hooks.PostToolUse;
+    const index = groups.findIndex((entry) => entry.hooks.some((hook) => hook.command.includes("workflow-capture.mts")));
+    if (duplicate) groups.push(structuredClone(groups[index]));
+    else groups.splice(index, 1);
+    write(root, ".claude/settings.json", JSON.stringify(settings));
+    const result = await captureWiring(root);
+    assert.equal(result.status, "fail");
+    assert.equal(result.detail, "PostToolUse must register workflow-capture.mts exactly once");
+  });
+}
+
+test("doctor warns for an install with no capture registrations", async (t) => {
+  const root = fixture(t);
+  const settings = captureSettings();
+  for (const groups of Object.values(settings.hooks)) {
+    for (const group of groups) group.hooks = group.hooks.filter((hook) => !hook.command.includes("workflow-capture.mts"));
+  }
+  write(root, ".claude/settings.json", JSON.stringify(settings));
+  const result = await captureWiring(root);
+  assert.equal(result.status, "warn");
+  assert.equal(result.detail, "automatic workflow capture is not wired");
+});
+
+test("doctor rejects capture on an unexpected event without reflecting its name", async (t) => {
+  const root = fixture(t);
+  const settings = captureSettings();
+  settings.hooks["PRIVATE-EVENT-MARKER"] = structuredClone(settings.hooks.SessionStart);
+  write(root, ".claude/settings.json", JSON.stringify(settings));
+  const result = await captureWiring(root);
+  assert.equal(result.status, "fail");
+  assert.equal(result.detail, "unexpected event registers workflow-capture.mts");
 });

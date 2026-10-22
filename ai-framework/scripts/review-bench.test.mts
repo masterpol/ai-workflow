@@ -509,11 +509,35 @@ test("main: guard refuses a snapshot file inside the project, a symlinked target
   assert.equal(bench.main(["guard", "bogus", "--file", "/snap/s.json"], fake({}, gitScript(GUARD_GIT)).deps), 1);
 });
 
+test("guard round-trips snapshots above the report cap and still detects edits", () => {
+  const entries = Object.fromEntries(Array.from({ length: 2500 }, (_, i) => [`/proj/ai-framework/${i}-${"n".repeat(40)}.md`, "n"]));
+  const f = fake(entries, gitScript(GUARD_GIT));
+  bench.guard(FAKE_ROOT, "snapshot", "/snap/s.json", f.deps);
+  assert.ok((f.files.get("/snap/s.json") as string).length > 256 * 1024);
+  assert.equal((bench.guard(FAKE_ROOT, "check", "/snap/s.json", f.deps) as bench.GuardCheckResult).clean, true);
+  f.files.set(Object.keys(entries)[0], "edited");
+  assert.equal((bench.guard(FAKE_ROOT, "check", "/snap/s.json", f.deps) as bench.GuardCheckResult).clean, false);
+});
+
+test("guard never reads secret-shaped files", () => {
+  const secret = "/proj/.project/credentials.json", f = fake({ [secret]: "synthetic fixture", "/proj/.project/notes.md": "notes" }, gitScript(GUARD_GIT));
+  const read = f.deps.fs.readBytesSync;
+  f.deps.fs.readBytesSync = file => { assert.notEqual(file, secret); return read(file); };
+  bench.guard(FAKE_ROOT, "snapshot", "/snap/s.json", f.deps);
+  assert.deepEqual(Object.keys(JSON.parse(f.files.get("/snap/s.json") as string).tree), [".project/notes.md"]);
+});
+
+test("guard refuses an oversized snapshot before publishing it", () => {
+  const f = fake({}, gitScript({ ...GUARD_GIT, "status --porcelain=v1 -uall": "x".repeat(16 * 1024 * 1024) }));
+  assert.throws(() => bench.guard(FAKE_ROOT, "snapshot", "/snap/s.json", f.deps), /too large/);
+  assert.deepEqual(f.fsCalls, []);
+});
+
 test("main: guard check refuses a symlink, a FIFO and an oversize snapshot without reading them", () => {
   const f = fake({}, gitScript(GUARD_GIT));
   f.links.set("/snap/l.json", "/victim");
   f.fifos.add("/snap/f.json");
-  f.files.set("/snap/big.json", "x".repeat(300 * 1024));
+  f.files.set("/snap/big.json", "x".repeat(16 * 1024 * 1024 + 1));
   for (const [name, message] of [["l.json", /regular file/], ["f.json", /regular file/], ["big.json", /too large/]] as const) {
     f.err.length = 0;
     assert.equal(bench.main(["guard", "check", "--file", `/snap/${name}`], f.deps), 1, name);

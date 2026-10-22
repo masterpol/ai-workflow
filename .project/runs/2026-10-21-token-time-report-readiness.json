@@ -1,0 +1,84 @@
+{
+  "status": "ready to close; final ship/hold pending",
+  "version": "2.41.0",
+  "fallbackAuthorized": true,
+  "fullNode": {
+    "pass": 2472,
+    "fail": 0,
+    "skip": 3,
+    "exit": 0,
+    "runnerSeconds": 90.421
+  },
+  "scopedBun": {
+    "pass": 257,
+    "fail": 0,
+    "exit": 0,
+    "files": 6
+  },
+  "docsLinks": {
+    "pass": 17,
+    "fail": 0,
+    "exit": 0
+  },
+  "doctor": {
+    "exit": 0,
+    "checks": 757,
+    "existingWarning": "state-graph.test.mts imports node:fs/os/path directly"
+  },
+  "setupValidator": {
+    "exit": 0,
+    "checks": 23
+  },
+  "graph": {
+    "status": "CLEAN",
+    "entries": 119,
+    "links": 336
+  },
+  "diffCheck": "PASS",
+  "budget": {
+    "files": 13,
+    "changedLines": 1489,
+    "caps": [
+      15,
+      1500
+    ]
+  },
+  "knowledge": {
+    "newIssues": 2,
+    "newPatterns": 1,
+    "updatedCards": 6
+  },
+  "followupsAdded": 4,
+  "compactedStatusPreparedLines": 33,
+  "sourceAndReleaseHashes": {
+    "ai-framework/scripts/flow-join.mts": "e260428733adcbb214c2753725b96db55d592826e4de3a1245b28487bdb69149",
+    "ai-framework/scripts/flow-join.test.mts": "eb3f5f8281342cebd51779c44aaef8a728dabdc29864b2161f0fcbce6d4ae628",
+    "ai-framework/scripts/flow-render.mts": "8781e59b3fe094be1f71c6f227d8440df70dcf7415ee13f0435e9e719735f482",
+    "ai-framework/scripts/flow-render.test.mts": "43264ce93320730f34547f1c0a9d971622248e5b8cb11c0d68fd3c239175a967",
+    "ai-framework/scripts/flow-report.mts": "452f07f06a6d57b268b53afbf80ef7ac5f4d94219998f2ace8e691d370376bb1",
+    "ai-framework/scripts/flow-report.test.mts": "908fb93e9f9b46d7a04f6afd952368db777beaeeb32713bfdf7d4d5493bdf0fb",
+    "ai-framework/scripts/state-pages.mts": "adcb50917171fbc4fc1ac01965d08a0003dba004a3eb41dac869baec0f802d08",
+    "ai-framework/scripts/state-html.test.mts": "f539844e21b2d836cd7df8556acf20a1e130065ceacb79c607b804693214f872",
+    "ai-framework/scripts/review-bench.mts": "02a4a38ff2811ae851b2d3f3248f1b1e2a197516f99ec259d491ea8441b9fead",
+    "ai-framework/scripts/review-bench.test.mts": "0cbf0dd552002ebd9cb651beafee114e146b06e22365138d8de0736b02ed04a3",
+    "ai-framework/integrations/workflow-metrics.md": "dcb13ff9d2c8438df62dc7bf677f9fabbaf5d5f3caca2ad804241fbefe23bc0a",
+    "VERSION": "cf4e24156f2593439ad1fd6b7cc9c5b7f61ed4036d30a936b947968fa72c6eca",
+    "CHANGELOG.md": "278f7b47305ecd0ee16ffbd22b19632ac9b479189a949a9b553f750a3733fbce"
+  },
+  "archive": {
+    "archive": ".project/runs/2026-10-21-token-time-report-evidence.tar.gz",
+    "manifest": ".project/runs/2026-10-21-token-time-report-evidence.tar.gz.manifest.json",
+    "entries": 218,
+    "verified": true,
+    "bytes": 1357520
+  },
+  "closeoutLogs": {
+    "closeout-doc-links.log": "\u2714 slug follows GitHub rules (3.320667ms)\n\u2714 valid file and anchor links pass (3.053084ms)\n\u2714 broken file and anchor links are reported with line numbers (2.833459ms)\n\u2714 external URLs, fenced code and inline code are ignored (3.771458ms)\n\u2714 duplicate headings get numbered anchors (1.647958ms)\n\u2714 a malformed percent escape is reported, not thrown (0.483833ms)\n\u2714 symlinks are skipped, so loops terminate (0.432333ms)\n\u2714 an extremely long line is skipped quickly (1.504208ms)\n\u2714 CLI exits 1 on a broken link and 0 on a clean tree (760.338709ms)\n\u2714 --json reports checked and broken (105.26125ms)\n\u2714 checkLinks reads through the injected filesystem (0.990875ms)\n\u2714 checkLinks skips a symlinked directory and a symlinked file (0.288667ms)\n\u2714 main prints broken links and a summary, exits 1 (0.43175ms)\n\u2714 main exits 0 with only the summary on a clean tree (0.213042ms)\n\u2714 main --json prints the report as indented JSON (0.213417ms)\n\u2714 main exits 2 with usage text without inputs, and with not-found for missing inputs (0.188041ms)\n\u2714 the direct module keeps the synchronous checkLinks(targets) call that workflow-doctor makes (99.398958ms)\n\u2139 tests 17\n\u2139 suites 0\n\u2139 pass 17\n\u2139 fail 0\n\u2139 cancelled 0\n\u2139 skipped 0\n\u2139 todo 0\n\u2139 duration_ms 1117.251708\nrun-tests: partial (not full verification) files=1 runtime=node workers=default cache=off duration=1.158s exit=0\n",
+    "closeout-validator.log": "Setup validator: checking generated setup artifacts concurrently...\nPASS  Workflow config: ai-workflow.toon valid\nPASS  .cursor: 44 canonical skill/agent mirror file(s) present\nPASS  .project/context/product.md: present\nPASS  .project/context/architecture.md: present\nPASS  .project/context/stack.md: present\nPASS  AGENTS.md: present\nPASS  .project/status.md: present\nPASS  .project/pitches/_followups.md: present\nPASS  .project/pitches/_archive/.gitkeep: present\nPASS  .project/pitches/_parked/.gitkeep: present\nPASS  .project/done-work.md: present\nPASS  .project/context/product.md: contains generated project context\nPASS  .project/context/architecture.md: contains generated project context\nPASS  .project/context/stack.md: contains generated project context\nPASS  AGENTS.md: project specifics are filled\nPASS  AGENTS.md: carries the caveman response-style section\nPASS  CLAUDE.md: present\nPASS  .project/status.md: 34 lines within the 100-line limit\nINFO  .project/rules: 1 stack-specific companion rule(s) generated\nPASS  CLAUDE.md: full project mirror is present\nPASS  CLAUDE.md: carries the caveman response-style section\nPASS  Knowledge graph: graphify validated 119 entry(ies)\nPASS  Workflow doctor: portable workflow contracts passed\nPASS  TypeScript entries: 160 TypeScript file(s) parse\n\nSetup status: READY\nGenerated setup artifacts and portable workflow contracts passed.\nValidated 23 checks. Use --json for automation or --no-color for plain text.\n",
+    "closeout-graph-check.log": "Knowledge graph: 119 entries (16 decisions, 53 patterns, 2 entities, 48 issues), 336 links.\n\nGraph status: CLEAN\nDry run (check) \u2014 no files written.\n"
+  },
+  "closureCandidates": {
+    "status-after-ship.md": "7ccefe0bfb25b7a13823e5e4550d7aaa1714ea5615f135ccc76b2410cf4a0b95",
+    "SHIPPED-after-ship.md": "2dda5ae76d79bba13d50fb0f4d84472d38e8cb6bd7ba5c5da8dffddb7846b60f"
+  }
+}

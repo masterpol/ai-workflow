@@ -2,12 +2,12 @@
 id: guard-tests-can-fail-for-the-wrong-reason
 type: issue
 created: 2026-10-07
-updated: 2026-10-07
+updated: 2026-10-21
 tags: [testing, mutation, fixtures, filesystem]
 related: [prove-a-guard-test-with-an-in-memory-mutant, a-gate-must-not-audit-its-own-instrument]
 source: orca-vendor-foundation
 severity: medium
-confidence: low
+confidence: medium
 resolved: true
 ---
 
@@ -27,3 +27,7 @@ contract requires refusal before opening contents. These findings reinforce
 [[prove-a-guard-test-with-an-in-memory-mutant]]; mutation failures caused by absent fixtures
 are not counted as detected guards. Existing sandbox socket restrictions are environmental
 failures and likewise cannot establish a source regression.
+
+## Recurrence: token-time-report (2026-10-21)
+
+Guard-mutant rejection regexes could match scenario labels rather than the reason for failure. The regression now requires an actual success/publication outcome against the expected refusal. Separately, 1e12 reader-cap mutants failed through excessive allocations, not the desired input-size boundary. A finite cap change isolated the intended assertion; confounded failures were discarded. Both passing baselines and exact failed assertions are retained in audit evidence. This is a second independent context for the same failure mode, raising confidence to medium.

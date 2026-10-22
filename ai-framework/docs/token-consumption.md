@@ -15,19 +15,53 @@ After agent completion, the legacy collector updates these Git-ignored local fil
 - `.project/metrics/token-consumption.md` and `.project/metrics/token-consumption.html` are
   regenerated views for a quick report or browser dashboard. They open with a **Usage** summary
   (most used vendor and model, and the basis it was ranked on), followed by tables by vendor,
-  model, agent, reasoning effort, and skill.
+  model, agent, reasoning effort, and skill. **By Flow** groups completion counts, tokens and cost
+  by pitch, phase, scope and vendor; `Unattributed: X of Y` shows completions without a pitch
+  against all completions counted since flow tracking began.
 
 The by-model, by-agent, by-effort, and by-skill tables start counting when the snapshot moves to
 schema v2 (the report prints the date) and are not back-filled. A harness that does not report a
 field shows `Unreported`; a completion with no nonzero cost shows `Unpriced`. Only skill names are
-recorded, never a skill's arguments. Completion counts are per assistant message for OpenCode and
-per subagent run for Claude Code and Codex, so they are not comparable across vendors.
+recorded, never a skill's arguments. Completion counts are per assistant message for OpenCode,
+per subagent run and main-session turn for Claude Code, and per subagent run for Codex, so they
+are not comparable across vendors.
 
 OpenCode reports per-message token fields and actual cost. Claude Code reports a completion for
-every subagent and can supplement foreground agents with final-request usage, which is labelled
-partial. Codex records all subagent completions but its hook payload supplies no token or cost
-fields, so those values are reported as unavailable rather than zero. Cursor has no verified
-completion-hook payload and is not wired automatically.
+every subagent, reads transcript usage, and can supplement foreground agents with final-request
+usage, which is labelled partial. Codex records all subagent completions but its hook payload
+supplies no token or cost fields, so usage stays `Unavailable`. Claude cost stays `Unpriced`.
+Cursor has no verified completion-hook payload and is not wired automatically.
+
+**Token snapshot revision.** The collector writes token snapshot revision 3, adding `flows`
+(pitch/phase/scope totals), `transcripts` (read offsets and recent message ids), and `contexts`
+(session attribution). Older files migrate append-only: existing totals stay intact, new blocks
+start empty, and historical completions are not back-filled. A newer revision is refused and
+left unchanged. After upgrading, restart OpenCode or any process that already loaded the old
+collector. Until restarted, that process skips events with “newer than this collector understands”;
+nothing is corrupted.
+
+**Attribution.** The `UserPromptExpansion` phase-start hook and the existing skill-use path record
+the session's pitch, phase and scope; arguments are never stored. Only these phases are accepted:
+`shape`, `shape-lite`, `critique`, `plan`, `build`, `audit`, `ship`, `cooldown`, `fix`, `resume`,
+`switch`, and `checkpoint`. The first argument must name a real directory at
+`.project/pitches/<slug>/` (no symlink or escape outside the project) to identify a pitch.
+Scope tokens match `S<n>` with one to three digits; absent scopes show `(none)`.
+Contexts have a 6 hour sliding expiry, refreshed by phase starts; `checkpoint` refreshes the
+existing context. At most 32 sessions are retained. Missing, expired or invalid pitch attribution
+shows `(unattributed)`. Subagent hooks match their parent's context through the session id;
+their own skill calls cannot replace it. OpenCode child sessions are `(unattributed)`.
+
+**Claude transcript usage.** The reader extracts numeric usage (token counts), bounded message
+ids and validated model identifiers. No transcript text, prompts, tool input or transcript paths
+are stored or logged. Reads happen before the writer lease, with byte and time caps (8 MiB and
+1.5 seconds by default). Repeated lines for the same message id keep the last line; a message
+group that may still be growing is held for a later read. Offsets and recent ids commit atomically
+with totals, so replayed usage is not added again. Unreadable or unsafe transcript paths count
+the completion as unavailable. The `Stop` hook counts the main session's new usage once per turn;
+a repeated stop with no new usage adds no completion.
+
+**Worktree limit.** Each git worktree has its own `.project/metrics`, so a pitch built across
+worktrees is split across snapshots. Reports do not combine them.
 
 **One writer at a time.** Each writer (the hook CLI and the OpenCode plugin) holds a loopback
 socket on `127.0.0.1` for the whole read, write and report step. The port is derived from the

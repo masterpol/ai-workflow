@@ -2,7 +2,7 @@
 id: reversible-aggregates-store-their-routing
 type: pattern
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-10-19
 tags: [aggregation, reversal, schema-versioning, migration]
 related: [subprocess-revalidation-against-on-disk-code, dual-hash-tracking-for-transformed-content, async-agent-launch-hook-counted-as-completion]
 source: metrics-report-dimensions
@@ -53,3 +53,9 @@ migration); tests for migration from a v1 fixture, reversal after the cap moved,
 
 [[subprocess-revalidation-against-on-disk-code]] (schema-version migrations should be validated
 against the code on disk), [[dual-hash-tracking-for-transformed-content]].
+
+## Also applied: token-attribution flows (2026-10-19)
+
+The pitch/phase/scope `flows` aggregate stores `flow.applied` routing on each record after caps; an upgrade or
+replay copies the first routing, a record without it is skipped on reversal, and a cap fold goes to `(other)`
+only for rows no current/previous record routes to. See [[read-before-the-lease-commit-cursor-and-totals-together]].

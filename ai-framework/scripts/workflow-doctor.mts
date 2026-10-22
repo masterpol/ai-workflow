@@ -56,7 +56,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // Verify ids against your own installation with `opencode models | grep opencode-go` — the catalog
   // changes over time.
   const opencodeModels = {
-    fast: "opencode-go/space-bunny",
+    fast: "opencode-go/minimax-m3.1-flash-free",
     standard: "opencode-go/minimax-m3",
     deep: "opencode-go/kimi-k2.7-code",
   };
@@ -341,6 +341,51 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
     if (problems.length) { record("fail", name, problems.join("; ")); return; }
     record("pass", name, "PreToolUse (Skill) and UserPromptExpansion wired to orca-start-hook.mts with the Node runner and 8s timeout");
+  }
+
+  async function checkClaudeCaptureWiring() {
+    const name = "Claude capture wiring";
+    let parsed: unknown;
+    try { parsed = JSON.parse(await fsp.readFile(absolute(".claude/settings.json"))); } catch {
+      record("fail", name, ".claude/settings.json unreadable or invalid JSON");
+      return;
+    }
+    const hooks = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>).hooks : undefined;
+    const expected = 'AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/workflow-capture.mts" --vendor claude --root "$CLAUDE_PROJECT_DIR"';
+    const events = new Map<string, string>([
+      ["SessionStart", "*"], ["UserPromptSubmit", "*"], ["Stop", "*"], ["SessionEnd", "*"],
+      ["SubagentStart", "*"], ["SubagentStop", "*"], ["UserPromptExpansion", "*"], ["PostToolUse", "Skill"],
+    ]);
+    const entries: { event: string; matcher: unknown; hook: Record<string, unknown> }[] = [];
+    for (const [event, groups] of Object.entries(hooks && typeof hooks === "object" ? hooks : {})) {
+      if (!Array.isArray(groups)) continue;
+      for (const group of groups) {
+        if (!group || typeof group !== "object" || !Array.isArray(group.hooks)) continue;
+        for (const hook of group.hooks) {
+          if (hook && typeof hook === "object" && typeof hook.command === "string" && hook.command.includes("workflow-capture.mts")) {
+            entries.push({ event, matcher: group.matcher, hook });
+          }
+        }
+      }
+    }
+    if (!entries.length) {
+      record("warn", name, "automatic workflow capture is not wired");
+      return;
+    }
+    const problems: string[] = [];
+    for (const [event, matcher] of events) {
+      const registrations = entries.filter((entry) => entry.event === event);
+      if (registrations.length !== 1) {
+        problems.push(`${event} must register workflow-capture.mts exactly once`);
+        continue;
+      }
+      const entry = registrations[0];
+      if (entry.matcher !== matcher || entry.hook.type !== "command" || entry.hook.command !== expected || entry.hook.timeout !== 5) {
+        problems.push(`${event} must use the exact Node capture command, matcher ${JSON.stringify(matcher)}, and timeout 5`);
+      }
+    }
+    if (entries.some((entry) => !events.has(entry.event))) problems.push("unexpected event registers workflow-capture.mts");
+    record(problems.length ? "fail" : "pass", name, problems.length ? problems.join("; ") : "eight capture events wired exactly once with the Node runner and 5s timeout");
   }
 
   async function runProcess(command: string, args: string[], options: { timeout?: number } = {}): Promise<{ code?: number | null; stdout: string; stderr: string; error?: Error & { code?: string } }> {
@@ -971,6 +1016,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     // skill-defaults.mts here) — every other script this doctor knows about gets a syntax check.
     const scripts = [".claude/hooks/post-edit-check.mts", "ai-framework/hooks/scripts/pre-ship-verify.mts", "ai-framework/hooks/scripts/stuck-uphill-detector.mts", "ai-framework/hooks/scripts/token-consumption.mts", "ai-framework/hooks/scripts/token-consumption.test.mts", "ai-framework/hooks/scripts/token-report.mts", "ai-framework/hooks/scripts/token-report.test.mts", "ai-framework/hooks/scripts/opencode-plugin.test.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.test.mts", "ai-framework/scripts/graphify.mts", "ai-framework/scripts/workflow-doctor.mts", "ai-framework/scripts/setup-validator.mts", "ai-framework/scripts/entry-import.mts", "ai-framework/scripts/entry-import.test.mts", "ai-framework/scripts/add-skill.mts", "ai-framework/scripts/skill-registry.mts", "ai-framework/scripts/skill-source.mts", "ai-framework/scripts/skill-vendors.mts", "ai-framework/scripts/skill-sync.mts", "ai-framework/scripts/bundle-sync.mts", "ai-framework/scripts/skill-defaults.mts", "ai-framework/scripts/skill-compress-guard.mts", "ai-framework/scripts/browser-runtime.mts", "ai-framework/scripts/pitch-compress.mts", "ai-framework/scripts/pitch-archive.mts", "ai-framework/scripts/state-snapshot.mts", "ai-framework/scripts/state-theme.mts", "ai-framework/scripts/state-render.mts", "ai-framework/scripts/review-bench.mts"];
     scripts.push("ai-framework/scripts/docs-links.mts", "ai-framework/scripts/docs-links.test.mts");
+    scripts.push("ai-framework/hooks/scripts/workflow-capture.mts", "ai-framework/hooks/scripts/workflow-capture.test.mts");
     scripts.push("ai-framework/scripts/orca-policy.mts", "ai-framework/scripts/orca-preflight.mts");
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
     // Kept-complete list gains the config validity library (config-validate role) and the migrator (b1: unconditional).
@@ -1042,6 +1088,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkOrcaPolicy(),
       checkCodexStartupWiring(),
       checkClaudeStartupWiring(),
+      checkClaudeCaptureWiring(),
       checkToonMandatory(),
       checkGitignore(),
     ]);

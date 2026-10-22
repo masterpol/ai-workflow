@@ -1,6 +1,6 @@
 ---
 description: Smart test planning and writing. Reasons through the right test types before writing. Enforces behavior tests over render-only tests. Use during /build when a scope needs new tests.
-model: opencode-go/space-bunny
+model: opencode-go/minimax-m3.1-flash-free
 ---
 
 Load `.claude/skills/test-strategy/SKILL.md` and follow it exactly. Use the `fast` capability profile from `ai-framework/integrations/harnesses.md`. $ARGUMENTS

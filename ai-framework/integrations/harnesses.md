@@ -14,7 +14,7 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/space-bunny` for non-sensitive, bounded work | `gpt-6-luna` |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/minimax-m3.1-flash-free` for non-sensitive, bounded work | `gpt-6-luna` |
 | `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-6.1-sol` at medium or high effort |
 | `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-6-astra` at high or xhigh effort |
 
@@ -43,7 +43,7 @@ Phase skills state a profile, so another harness can make an equivalent selectio
 
 The included OpenCode routes are explicit and all run on OpenCode Go, so a single provider
 connection covers them (a route through an unconnected provider errors instead of falling back):
-fast roles use `opencode-go/space-bunny`, standard roles use `opencode-go/minimax-m3`, and deep
+fast roles use `opencode-go/minimax-m3.1-flash-free`, standard roles use `opencode-go/minimax-m3`, and deep
 roles (shape, architecture, planning, and the default `build` agent) use
 `opencode-go/kimi-k2.7-code`. `workflow-doctor` and `setup-validator` run on the standard route
 because diagnostics can expose broad project context. Before assuming a model id from this doc
@@ -157,6 +157,14 @@ the reserved names `__proto__`, `constructor`, and `prototype`, fold into `(othe
 cut at 80 characters. A v1 file migrates in place with its lifetime totals intact, but an older
 collector cannot read a v2 file and would start a blank snapshot, so update every checkout that
 shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.mts`.
+
+Automatic workflow activity capture uses `ai-framework/hooks/scripts/workflow-capture.mts` alongside the
+token collector. Claude captures session starts, prompt/Stop turns, session ends, subagent starts/stops,
+and phase starts from slash-command expansion or Skill tool use; OpenCode captures V2 step starts,
+ends and failures plus phase skill calls in V1/V2. It never reads prompt, response or transcript text.
+OpenCode wait is `Unavailable` when no verified user-turn boundary exists; V1 completions do not imply
+intervals. Codex and Cursor automatic workflow activity capture is not wired. Capture writes bounded
+metadata to `.project/metrics/workflow-usage.json`; token and capture collectors acquire their leases separately.
 
 ## Sub-agent Dispatch
 

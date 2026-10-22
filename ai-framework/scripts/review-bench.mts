@@ -19,6 +19,7 @@ import { createNodeDeps } from "./runtime/node.mts";
 
 const MAX_FILE_BYTES = 512 * 1024;
 const MAX_RECORD_BYTES = 256 * 1024;
+const MAX_SNAPSHOT_BYTES = 16 * 1024 * 1024;
 const WALK_CAP = 50000;
 const TEST_TIMEOUT_MS = 60000;
 const SECRET_NAME = /(^|\/)(\.env[^/]*|credentials[^/]*|settings\.local\.json|\.npmrc|\.netrc|id_(?:rsa|dsa|ecdsa|ed25519)[^/]*|[^/]*\.(?:pem|key|p12|pfx))$/i;
@@ -72,12 +73,12 @@ function realOrNearest(target: string, deps: RuntimeDeps): string {
 // For a file OUTSIDE the project (scratch manifest, guard snapshot, a reviewer's report): lstat,
 // refuse a symlink or non-regular file, cap size, then read. readGuarded gives these guarantees for
 // project-relative paths; this gives the same guarantees for the operator-supplied absolute ones.
-function readGuardedAbsolute(full: string, label: string, deps: RuntimeDeps): string {
+function readGuardedAbsolute(full: string, label: string, deps: RuntimeDeps, maxBytes = MAX_RECORD_BYTES): string {
   const { fs } = deps;
   let stat;
   try { stat = fs.lstatSync(full); } catch { return fail(`Cannot read ${label}`); }
   if (stat.isSymbolicLink() || !stat.isFile()) fail(`${label} must be a regular file, not a symlink`);
-  if (stat.size > MAX_RECORD_BYTES) fail(`${label} is too large`);
+  if (stat.size > maxBytes) fail(`${label} is too large`);
   try { return fs.readFileSync(full); } catch { return fail(`Cannot read ${label}`); }
 }
 // Refuses to write through an existing symlink or non-regular target; writes atomically via a temp
@@ -171,7 +172,7 @@ function walkTree(root: string, deps: RuntimeDeps): Record<string, string> {
   let visited = 0;
   const skip = (rel: string): boolean => GUARD_SKIP.some((entry) => rel === entry || rel.endsWith(`/${entry}`) || rel.startsWith(`${entry}/`));
   const visit = (rel: string): void => {
-    if (skip(rel)) return;
+    if (skip(rel) || SECRET_NAME.test(rel)) return;
     const full = path.join(root, rel);
     let stat;
     try { stat = fs.lstatSync(full); } catch { return; }
@@ -190,9 +191,13 @@ export function guard(root: string, action: string | undefined, file: string | u
   if (!file) fail("--file is required");
   const target = deps.path.resolve(file as string);
   if (inside(root, realOrNearest(target, deps), deps)) fail("the snapshot file must be outside the project");
-  if (action === "snapshot") { writeGuarded(target, `${JSON.stringify(state(root, deps))}\n`, deps); return { snapshot: target }; }
+  if (action === "snapshot") {
+    const snapshot = `${JSON.stringify(state(root, deps))}\n`;
+    if (new TextEncoder().encode(snapshot).length > MAX_SNAPSHOT_BYTES) fail("the snapshot file is too large");
+    writeGuarded(target, snapshot, deps); return { snapshot: target };
+  }
   if (action !== "check") fail("guard needs snapshot or check");
-  const before = parseJson(readGuardedAbsolute(target, "the snapshot file", deps), "snapshot file") as TreeState;
+  const before = parseJson(readGuardedAbsolute(target, "the snapshot file", deps, MAX_SNAPSHOT_BYTES), "snapshot file") as TreeState;
   const now = state(root, deps);
   const paths = new Set([...Object.keys(before.tree), ...Object.keys(now.tree)]);
   const changed = [...paths].filter((p) => before.tree[p] !== now.tree[p]).sort();

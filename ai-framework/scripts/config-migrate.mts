@@ -233,7 +233,7 @@ function buildModel(base: string, deps: RuntimeDeps): Built | { error: string } 
 export const DEFAULT_MODELS_TOON = [
   "models:",
   "  claude:", "    fast:", "      model: claude-haiku-5-5", "    standard:", "      model: claude-sonnet-5-5", "    deep:", "      model: claude-opus-5-5",
-  "  opencode:", "    fast:", "      model: opencode-go/space-bunny", "    standard:", "      model: opencode-go/minimax-m3", "    deep:", "      model: opencode-go/kimi-k2.7-code",
+  "  opencode:", "    fast:", "      model: opencode-go/minimax-m3.1-flash-free", "    standard:", "      model: opencode-go/minimax-m3", "    deep:", "      model: opencode-go/kimi-k2.7-code",
   "  codex:", "    fast:", "      model: gpt-6-luna", "      effort: high", "    standard:", "      model: gpt-6.1-sol", "      effort: high", "    deep:", "      model: gpt-6-astra", "      effort: xhigh",
 ].join("\n");
 

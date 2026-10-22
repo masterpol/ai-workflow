@@ -1,0 +1,24 @@
+{
+  "coordinator": "codex",
+  "vendor": "opencode",
+  "attemptId": "ttr-shape-appetite-20261021",
+  "timeoutMs": 120000,
+  "placement": {
+    "model": "opencode-go/minimax-m3.1-flash-free"
+  },
+  "scope": {
+    "id": "ttr-shape-appetite",
+    "target": ".project/pitches/token-time-report/pitch.md",
+    "change": "Read .claude/agents/appetite-auditor.md and perform its pre-bet critique. Read pitch.md and shaping-evidence.md. Return severity/type/source/suggestion findings. Focus on your role only. Write concise normal prose to .project/pitches/token-time-report/critique-appetite.md.",
+    "constraints": [
+      "You are an Orca worker, not a coordinator. Do not run phases or dispatch agents.",
+      "You are not alone in this checkout; do not revert others edits. Do not read secret files. No source changes.",
+      "Caveman full in chat only; normal prose in saved review. Inspect relevant source and knowledge for evidence."
+    ],
+    "ownership": "Only .project/pitches/token-time-report/critique-appetite.md; all other files read-only.",
+    "acceptance": ".project/pitches/token-time-report/critique-appetite.md exists with evidence-backed findings or explicit none, projected budget where relevant; submit authoritative worker_done.",
+    "authorizedPaths": [
+      ".project/pitches/token-time-report/critique-appetite.md"
+    ]
+  }
+}

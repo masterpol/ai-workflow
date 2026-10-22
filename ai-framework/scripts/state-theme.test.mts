@@ -62,10 +62,24 @@ function fake(files: Record<string, string>, links: Record<string, string> = {})
 
 const SHADCN = ":root{--background:0 0% 100%;--foreground:240 10% 3.9%;--primary:#18181b;--primary-foreground:#fafafa;--muted:240 4.8% 95.9%;--muted-foreground:240 3.8% 46.1%;--border:#e4e4e7;--radius:0.75rem}\n.dark{--background:240 10% 3.9%;--foreground:0 0% 98%;--primary:#fafafa;--primary-foreground:#18181b;--muted:240 3.7% 15.9%;--muted-foreground:240 5% 64.9%}\n";
 
-test("every fallback pair meets the 4.5:1 contrast floor", () => {
+test("every workflow default pair meets 4.5:1", () => {
   assert.equal(MIN_CONTRAST, 4.5);
   for (const mode of ["light", "dark"] as const) {
     for (const pair of PAIRS) assert.ok(ratioOf(FALLBACK[mode], pair) >= MIN_CONTRAST, `${mode} ${pair.join("/")}`);
+  }
+  // Guard proof: a low-contrast mutant is caught before it can become the default.
+  const saved = FALLBACK.light.background;
+  FALLBACK.light.background = "#777777";
+  try {
+    let caught = false;
+    try {
+      for (const pair of PAIRS) assert.ok(ratioOf(FALLBACK.light, pair) >= MIN_CONTRAST);
+    } catch {
+      caught = true;
+    }
+    assert.ok(caught, "a low-contrast mutant should fail the contrast floor");
+  } finally {
+    FALLBACK.light.background = saved;
   }
 });
 
@@ -107,7 +121,7 @@ test("contrastRatio and rgbOf match the WCAG definitions", () => {
 test("safeTheme drops non-grammar values and low-contrast modes back to the fallback", () => {
   const clean = safeTheme({
     light: { background: "#000000", foreground: "#010101", radius: "1rem", fontSans: "Inter, sans-serif", fontMono: "url(x)" },
-    dark: { background: "red", primary: "#FAFAFA" },
+    dark: { background: "red", primary: "#0f172a" },
   });
   assert.deepEqual(clean.light, FALLBACK.light, "background/foreground contrast is 1:1, so the whole mode falls back");
   assert.deepEqual(clean.dark, FALLBACK.dark);
@@ -154,6 +168,49 @@ test("discoverTheme falls back per group when the discovered pair fails contrast
   assert.ok(theme.fallbacks.some((x) => x.scope === "light.text" && /contrast .*:1 is below 4\.5:1/.test(x.reason)));
   assert.equal(theme.light.background, FALLBACK.light.background);
   assert.equal(theme.mode === "discovered", false);
+});
+
+test("only the exact string monorepo selects the default theme", () => {
+  for (const shape of ["mono", "monorepo2", "MONOREPO", "single", ""]) {
+    const f = fake({ [`${ROOT}/src/app.css`]: SHADCN });
+    const theme = discoverTheme(ROOT, { repoShape: shape }, f.deps);
+    assert.ok(theme.sources.length > 0, `css discovered for repoShape ${JSON.stringify(shape)}`);
+  }
+});
+
+test("monorepo never takes project tokens and never lists the tree", () => {
+  const f = fake({
+    [`${ROOT}/src/app.css`]: SHADCN,
+    [`${ROOT}/packages/x/style.css`]: ":root{--background:#ffffff;--foreground:#000000}\n",
+  });
+  let readdirCalls = 0;
+  let cssReads = 0;
+  const spied = {
+    ...f.deps,
+    fs: {
+      ...f.deps.fs,
+      readdirEntriesSync: (dir: string) => {
+        if (dir === ROOT || dir.startsWith(`${ROOT}/`)) readdirCalls++;
+        return f.deps.fs.readdirEntriesSync(dir);
+      },
+      readFileSync: (file: string) => {
+        if ((file === ROOT || file.startsWith(`${ROOT}/`)) && file.endsWith(".css")) cssReads++;
+        return f.deps.fs.readFileSync(file);
+      },
+    },
+  } as unknown as RuntimeDeps;
+  const theme = discoverTheme(ROOT, { repoShape: "monorepo" }, spied);
+  assert.equal(theme.mode, "fallback");
+  assert.equal(theme.reason, "repoShape is monorepo; workflow default theme used");
+  assert.deepEqual(theme.light, FALLBACK.light);
+  assert.deepEqual(theme.dark, FALLBACK.dark);
+  assert.deepEqual(theme.sources, []);
+  assert.equal(readdirCalls, 0, "monorepo must not list the project tree");
+  assert.equal(cssReads, 0, "monorepo must not read any stylesheet");
+
+  // Guard proof: any other repoShape still scans project CSS.
+  const normal = discoverTheme(ROOT, { repoShape: "polyrepo" }, f.deps);
+  assert.ok(normal.sources.length > 0, "non-monorepo repoShape should still collect project tokens");
 });
 
 test("discoverTheme skips symlinked stylesheets, node_modules and oversize files", () => {
