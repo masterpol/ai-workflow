@@ -416,6 +416,14 @@ After changing a data model (adding fields, renaming, migrating to a new structu
 
 Check your project's issue log for past occurrences of this class of bug.
 
+## Producer and Reader Share One Bound
+
+A guard, snapshot or record that one component writes and another reads must use a single shared
+size/count bound. Add a test that a produced artifact at the largest supported repository size is
+accepted by its own reader. Never drop inputs or misreport sizes to pass the reader; bound or
+stream both sides consistently. See
+`.project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md`.
+
 ## Code Organization Checklist
 
 Before committing, verify:

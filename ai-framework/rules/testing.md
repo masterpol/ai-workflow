@@ -71,6 +71,11 @@ entry under `.project/knowledge/` and supersedes ad-hoc handling.
   confirm the test fails for the right reason. A guard test that passes against a planted
   mutant has not earned its keep. See
   `.project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md`.
+- **Schema bumps move with their dependents.** Bumping a schema or config version constant
+  changes the emitter, the reader's refusal text/regex, any migrator and every fixture literal
+  in the same commit (`grep -rn "schemaVersion: <old>"`). Run the whole suite before marking the
+  scope done; a scope closed with a red suite hands the red to the next pitch. See
+  `.project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md`.
 - Only write inline mocks when the test needs custom behavior (specific return values, spy
   references).
 - When 2+ tests need the same mock, promote it to a shared factory.

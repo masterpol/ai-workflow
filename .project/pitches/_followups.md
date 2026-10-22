@@ -531,3 +531,8 @@ Existing backlog owners for the package-less ship wrapper, review-bench guard sn
 **Resolved in this implementation, pending final ship closure:** the existing review-bench snapshot-size mismatch and secret-name tree-walk omissions. Production guard now shares a 16MiB snapshot read/write bound and skips protected names before reads; Node/Bun 35-case regressions and canonical snapshot/check pass. Existing historical items remain above; current resolution cards are [[review-guard-snapshot-can-outgrow-its-reader]] and [[review-guard-hashes-ignored-secret-files]].
 
 The package-less pre-ship verifier and timing-under-load issues retain their existing backlog ownership. The mandatory wrapper failed again; the owner explicitly approved the documented direct-check gauntlet for this ship. No duplicate wrapper/timing pitch is added. Cooldown should review packet completeness, misnumbered citations and allocation-confounded mutation evidence; no rule change is auto-promoted.
+
+## Cooldown candidate pitches (2026-10-21, forced)
+
+- **Candidate pitch `package-less-ship-verification`** (med): bundles the package-less `pre-ship-verify.mts` followups above. The verifier selects checks from a root `package.json`, which this bundle lacks; it blocked `/ship` on 4+ ships and each needed an owner-approved direct-check gauntlet. Fix via a documented check contract or bundle-local manifest; no temporary `package.json`.
+- **Candidate pitch `orca-bounded-control-receipts`** (med): bundles Orca model-pin capability preflight, startup worker-list output overflow and guard reader bounds. Keep ownership fail-closed and cleanup explicitly authorized.

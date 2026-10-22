@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-deep-evidence",
+  "sourceRoot": ".project/pitches/state-deep-evidence",
+  "archivedAt": "2026-10-22T02:43:37.583Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "01a715f7deb33510345c4057b1d647fd4ea71f499fe992c1514d1bb5a7fd4d85",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "bc9ae348c78957893f1849562169546d32301805956498b80fe20814a5864bef",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "3abb959aec3ab9e2ca929f22ad4d15f953288343824655587119c57a0df7fbe6",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "070d8bbc937e639695bb3510e7f8d7dec73629d371f03067b6a048a02b911a92",
+      "mode": 420
+    },
+    "live-runs.md": {
+      "hash": "e45c8b0fe32bee269e16fdf1f736e00e0c066607a2ff3a79ae010f1ab2c19c30",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "8eb4074c81b0feac56bad4a73d184d0759480abfe27ad7296197c8883558d8ef",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "7a01c353463c6af22244ba148e660daf5cd3a8216005dca2bc8c8874991bdeb0",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "2d4241823ed19e1c7ad2a9af547e73929f03cd41a264d73f206e88fa0c5fc263",
+      "mode": 420
+    },
+    "ship-readiness.md": {
+      "hash": "3e515b763fe82bf8bdb53b4d802ad85d90cbe7634ba620367ef7a96e67efdf60",
+      "mode": 420
+    }
+  }
+}

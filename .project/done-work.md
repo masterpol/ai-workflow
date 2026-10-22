@@ -451,3 +451,71 @@ Audit cycle 1 (code, security, coverage, eval and cross-pitch, each on scratch f
 Retention note: the S3 review that the retry followup restarts from was moved before compaction to `.project/analysis/2026-10-18-instruction-compression-s3-review-analysis.md`. The baseline and S2/S3 review documents, the plan, impact and critique, the validation and evidence files and the rejected trial exist only in the recovery archive `.project/compaction/archives/instruction-compression-*` (restore with `pitch-archive.mts restore`); the frozen dataset stays at `.project/evals/datasets/instruction-compression.json`
 
 Lessons: [[a-compression-pilot-keeps-failed-candidates-and-defers]], [[mutation-script-killed-leaves-source-mutated]]. Ship-time log and hill: `.project/runs/2026-10-19-instruction-compression.md` and `.project/runs/2026-10-19-instruction-compression-hill.md`.
+
+## state-report-redesign — shipped 2026-10-19
+
+The `/state` HTML report was redesigned (bundle 2.33.0): a repo-shape detector (`structure.repoShape`, additive, `schemaVersion` stays 1) picks a slate/blue workflow theme, `state-design.mts` owns the stylesheet and shell, and pages carry SVG bar charts, headline cards and empty slots for later AI fragments. Pages stay inert: no script, external load, web font, `style=` or `url()` anywhere, asserted on all seven pages. Monorepos never scan. Token-share and folder-size charts were replaced by completions-by-vendor and subfolders-per-folder because the snapshot holds no token or size data.
+
+Lessons: [[counting-untrusted-labels-in-a-plain-object-inherits-prototype-keys]], [[an-audit-scratch-copy-must-run-its-own-suites]]. Contract: `ai-framework/integrations/state-report.md`. Leftovers (the `/state` skill's "theme rediscovered every run" text is stale for monorepos) are in `.project/pitches/_followups.md`.
+
+## test-execution-performance — shipped 2026-10-22
+
+A portable test command shipped as bundle 2.40.0: `node ai-framework/scripts/run-tests.mts` does deterministic full discovery (75 files), labelled partial runs, Node or Bun selection that reports the effective child runtime, bounded `--workers` (cap 64), Node-only `--cache`, `--coverage`, `--list` and exit-code propagation; unsupported settings are refused, not dropped. Guide: `ai-framework/docs/testing.md`.
+
+**No speed setting was promoted.** Measured full-suite medians (host contended, result unproven): Node 4 workers 24% slower, Node compile cache 8% faster, Bun `--parallel=4` 66% faster but Bun's own default fails two 5 s timeouts. Defaults are unchanged; an idle-host rerun is a followup. No-gos held: no assertion removal, skips, retries or shortened deadlines.
+
+Lessons: [[path-containment-compares-real-paths]], [[a-nested-node-test-child-inherits-the-parents-test-context]], [[runcli-replaces-proc-argv-with-the-arguments-only]]. Open followups (Bun timeouts, signal forwarding, subprocess-matrix seams) are in `.project/pitches/_followups.md`.
+
+## token-attribution — shipped 2026-10-19
+
+Token attribution shipped as bundle 2.34.0: usage is attributed to a pitch, phase and scope through a phase-start hook (`resolvePhaseContext`), flow rows with caps (50/25/600 leaves, 200 cursors, 32 contexts), transcript cursors and a `Stop` session-turn; the report gains By Flow and an Unattributed share. Metrics revision 3 migrates append-only with a directory-identity pin.
+
+Standing constraints: no transcript text, prompts, responses or tool arguments are stored (marker tests over every metrics file); no estimated tokens or cost (Claude cost stays `Unpriced`); the lease mechanism is unchanged and the collector always exits 0. Codex and OpenCode pairs were deferred by the owner; live `Stop` `transcript_path` and hook order are unverified.
+
+Lessons: [[read-before-the-lease-commit-cursor-and-totals-together]], [[a-workers-passing-tests-can-encode-the-wrong-data-shape]]. Contract: `ai-framework/docs/token-consumption.md`. Eight followups are in `.project/pitches/_followups.md`.
+
+## workflow-usage-state — shipped 2026-10-20
+
+Workflow usage state moved to schema 2 (bundle 2.36.0) and can answer how long a pitch, phase or scope took and how much was waiting: scope labels, a label-free activity key, oldest-start eviction, 6 h TTL, an interval engine (active union, wait minus active, four levels, 256-record clip), a pitch tree with LRU fold into `(other)`, and a drop marker (`recordDroppedCapture`) consumed under the next lease. v1→v2 migrates by append; the report never rewrites v1. Full-cap state is about 1 MB against a 4 MiB bound. It is a library: nothing wrote events until `workflow-usage-capture`, and time tables are `token-time-report`.
+
+Standing constraints: no prompts/responses/tool arguments/transcripts stored; no inferred `gate.decided`, `audit.finished` or `pitch.finished`; no back-filled durations; every collection has a cap and a test. Accepted: a residual symlink window on the marker (opened with flag `a`, not `O_NOFOLLOW`).
+
+Lessons: [[a-lease-refused-capture-leaves-a-bounded-marker-for-the-next-lease]], [[a-simulated-clock-ahead-of-undelivered-events-folds-them-away]], [[a-forced-fold-loop-spins-on-a-hand-edited-frontier]], [[an-unquoted-test-command-variable-fails-silently-under-zsh]]. Contract: `ai-framework/integrations/workflow-metrics.md`. Followups in `.project/pitches/_followups.md`.
+
+## state-fragment-sanitizer — shipped 2026-10-20
+
+The `/state` fragment sanitizer shipped as a library (bundle 2.35.0): it takes untrusted fragment text and returns re-emitted, allow-listed markup with its citations, or a rejection with a closed reason. A strict XML-subset parser, an element/attribute allow-list validator with canonical re-emit (byte-idempotent) and an evidence-path/number checker (`checkCitations`, a mandatory separate gate) make up 666 production lines. Fragment content never reaches an error text; the model's own claim of safety is never trusted; no runtime dependency was added (the hand-written allow-list is the sanitizer `rules/security.md` §4 asks for, an owner decision). It reads no files and writes nothing; wiring is `state-ai-authoring`.
+
+Lessons: [[a-caller-supplied-limits-object-can-defeat-a-hard-cap]], [[a-sparse-array-hole-skips-every-but-visits-for-of]], [[a-golden-dataset-case-counts-only-when-a-named-test-passes]], [[a-measured-redundant-layer-is-not-a-deleted-layer]], [[an-interactive-shell-prompt-can-consume-an-agent-launch-command]], [[node-strip-only-mode-rejects-constructor-parameter-properties]]. Contract: `ai-framework/integrations/state-report.md`. Followups (package-less ship verifier route, nine deferred dataset cases) are in `.project/pitches/_followups.md`. A separate 2.35.1 repointed the OpenCode Go `fast` route to `opencode-go/minimax-m3.1-flash-free`.
+
+## state-ai-authoring — shipped 2026-10-20
+
+`/state` can carry short analysis written by the authoring model (bundle 2.37.0). `state-fragment-inject.mts` hashes the snapshot (a staleness hint), stamps a draft only after sanitizer and citation checks pass, and the renderer shows stamped fragments on four pages inside an "AI analysis (proposed, not observed)" box with evidence, model id and a stale notice. Failures are closed per slot; a rejected draft is never repaired and a stale fragment is never shown as current. No script calls a model or the network; writes stay inside `.project/reports/fragments/`; the retry cap and draft-age check are workflow aids, not security boundaries.
+
+**The live claim is `blocked`:** 51 of 72 blind-graded runs pass (Claude Code 21/24, Codex 20/24, OpenCode 10/24); `uncited-claim` fails everywhere because the fixture's knowledge fact has no evidence path. Accepted: a same-user process can race one by-path write or delete in `fragments/`.
+
+Lessons: [[a-planted-canary-makes-a-reviewer-finding-checkable]], [[a-prose-example-in-a-model-instruction-is-followed-literally]], [[a-headless-cli-follows-pwd-not-the-process-cwd]]. Contract: `ai-framework/integrations/state-report.md`. Followups (small-model Step 3 hardening, fixture/rubric decision) are in `.project/pitches/_followups.md`.
+
+## workflow-usage-capture — shipped 2026-10-22
+
+Claude lifecycle hooks and OpenCode plugin events now feed metadata-only workflow usage capture through the existing state boundary (bundle 2.38.0). Eight capture-owned Claude hook groups are installed (shell p95 100 ms, coexistence skips 0/60), the CLI has a shared 3 s pre-acquisition budget and at most two writer attempts, doctor validates exact hook wiring, and OpenCode V2 step intervals and V1/V2 phase skills are captured after token writes settle. Schema 2 and the lease contract are unchanged; the A1 prerequisite repaired sentinel attribution, label inheritance and atomic phase replacement.
+
+Standing constraints: prompt, response and transcript content is never selected or stored; invocation arguments reach only the phase resolver. Unverified: OpenCode user-turn timing (wait is Unavailable) and live OpenCode V2 (fixture-verified only). Out of scope: Codex/Cursor automatic capture. `workflow-v3-rollout` must repeat its scratch-copy dry run before a real sync.
+
+Lessons: [[observational-hooks-check-budget-before-acquiring-a-lease]], [[native-capture-needs-state-boundary-attribution]], [[review-guard-snapshot-can-outgrow-its-reader]], [[package-less-bundle-ship-wrapper-cannot-select-checks]], [[orca-model-preflight-can-leave-unproven-ledger-ownership]]. Followups in `.project/pitches/_followups.md`.
+
+## state-deep-evidence — shipped 2026-10-22
+
+`/state` snapshots now include additive architecture, history, risks and tokens facts (bundle 2.39.0, `schemaVersion` stays 1): graph, history and manifest inputs are bounded and guarded, missing data is `unavailable`, never zero, entry-point paths must pass scrub equality, and unsupported token-schema values are never copied into rejection notes. Graph degree measures connectivity, not risk. No page rendering or skill behavior changed; no source-content scans, no project-script execution or network work by collectors. Monorepo packages stay unavailable (`state-monorepo-packages` deferred).
+
+Accepted by the owner with disclosure: the LOC amendment (1667 vs 1350) and the live-quality exceptions (Claude 25/34 pass with two 0.50 inherited-case regressions, Codex 34/34, OpenCode and Cursor not run), so there is no clean cross-vendor AI-quality claim. The pre-ship wrapper failed (no `package.json`) and a direct-check fallback was approved.
+
+Lessons: [[snapshot-metadata-bypassed-output-scrubbing]], [[review-guard-snapshot-can-outgrow-its-reader]], [[package-less-bundle-ship-wrapper-cannot-select-checks]]. Contract: `ai-framework/integrations/state-report.md`. Five followups in `.project/pitches/_followups.md`.
+
+## token-time-report — shipped 2026-10-22
+
+The joined token/time report shipped as bundle 2.41.0: `node ai-framework/scripts/flow-report.mts --root .` previews JSON (`--format markdown|html` for others); `--apply` publishes three fixed `.project/metrics/flow-report` files only when existing targets are owned, one file at a time (not atomic; generation IDs reveal mixed results). The joiner matches exact canonical pitch/phase/scope identities, keeps source-specific and one-sided rows, and shows token reporting coverage, interval-union timing, lower-bound wait, provisional activity and source windows. Missing coverage is never zero; no productivity, effort, cost or comparability estimate is fabricated. The `/state` metrics page links an existing report without generating it. Review-bench guard now shares a bounded 16 MiB snapshot limit and skips secret-shaped paths.
+
+Open limits: comparable-window ratios need separate capture work; the OS path-check-to-syscall race remains without anchored filesystem APIs; a substituted stage is preserved for operator recovery. Pre-ship wrapper failed (package-less bundle) and a direct-check gauntlet was approved.
+
+Lessons: [[join-metrics-by-exact-identity-and-disclose-evidence-windows]], [[history-projections-can-leak-hidden-values]], [[staging-substitution-can-redirect-cleanup]]. Contract: `ai-framework/integrations/workflow-metrics.md`. Followups TTR-A1–A4 are in `.project/pitches/_followups.md`.

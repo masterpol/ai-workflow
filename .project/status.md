@@ -29,5 +29,5 @@
 ## Followups backlog
 → `.project/pitches/_followups.md` (includes four token-time-report, five state-deep-evidence and five test-execution-performance followups; prior backlog retained)
 
-## /cooldown reviewed 2026-10-21 (3 ships since; next due after 2)
-Report: `runs/cooldown-2026-10-21.md`. Corrected the stale October 8 counter: nine completed pitches followed the preserved October 17 review. C4–C9 are pending recommendations; earlier C1–C3 and October 17 proposals remain unchanged. No promotions, archives, revivals or backlog bundles applied; individual approval required.
+## /cooldown reviewed 2026-10-21 (forced; 0 ships since; next due after 5)
+Forced report: `runs/cooldown-2026-10-21-forced.md` (promoted C5, C8 rules; closed C4, C9 as already codified; bundled C6, C7 as candidate pitches). Earlier: `runs/cooldown-2026-10-21.md`. Corrected the stale October 8 counter: nine completed pitches followed the preserved October 17 review. C4–C9 are pending recommendations; earlier C1–C3 and October 17 proposals remain unchanged. No promotions, archives, revivals or backlog bundles applied; individual approval required.
