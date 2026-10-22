@@ -205,6 +205,8 @@ function bundleDefaultMode(deps: RuntimeDeps): unknown {
 // pulling in skill-defaults' full module (its skill-registry dependency is unrelated to a
 // hook's own invocation shape); the bundle default is read from the same catalog JSON
 // skill-defaults uses, so the fallback value is never duplicated by hand.
+// modes.json legacy-window note (X8): this hook deliberately keeps the legacy .project/skills/modes.json read, not loadConfig,
+// for one minor version so attribution cannot disagree with a legacy-warning window in skill-defaults; revisit when that window closes.
 function currentCavemanMode(root: string, deps: RuntimeDeps): string | null {
   const { fs, path } = deps;
   try {

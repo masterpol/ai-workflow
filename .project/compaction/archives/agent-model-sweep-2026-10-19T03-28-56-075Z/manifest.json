@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "slug": "agent-model-sweep",
+  "sourceRoot": ".project/pitches/agent-model-sweep",
+  "archivedAt": "2026-10-19T03:28:56.076Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "53a1e601d89dcfd21dec551e449e14378f3c7e98b0c3ffdfdcbf872293ee9e64",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "9594de642014f1aca232a9d5a9030be6a48f8353a7ac484afd836bdfc2ad629d",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "74b97bc467dd776559c8f320910f12d0cd609ab47a56ba0a4bb98d283e3f47f7",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "1a4bdcfdb8db024d3e6169bea555d3feaef5c8d7531c0699cb7252a2273dded5",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "2514a774b3d422a8f49f67541e3367f4bf316a802af4158904c138c7b0399c47",
+      "mode": 420
+    }
+  }
+}

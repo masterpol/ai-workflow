@@ -1,17 +1,17 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, posix } from "node:path";
+import { createTestDeps, urlPath, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const { mkdtempSync, readFileSync, rmSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { dirname, join, posix } = testDeps.path;
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { buildEntry, bump, insertEntry, main } from "./changelog.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
-const here = dirname(fileURLToPath(import.meta.url));
+const here = dirname(urlPath(import.meta.url));
 const ROOT = "/proj";
 const NOW = Date.UTC(2026, 9, 7, 12);
 

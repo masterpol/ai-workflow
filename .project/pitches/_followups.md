@@ -317,7 +317,7 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Snapshot metadata walkers (state-snapshot.mts ~293) lack the ancestor-symlink containment the structure scan has; reuse `insideProject`.
 - `writeSet` creates the reports directory before validating its ancestors (F6); directory enumeration in the structure scan lists a whole directory before the visit cap applies (F9).
 - Orca: `collect` rejects a worker report whose files list names a path outside the project; read-only reviewers should report in the message body. Idle worker terminals need `worker-release` before the ledger can be settled.
-- `browser-runtime.test.mts` "CLI end to end" fails locally when `ai_workflow_env.json` selects `bun` (the test empties PATH); pin the runner in the child env. `token-consumption.test.mts` has one intermittent failure on a clean HEAD (passed in the final full Node run). See issue `a-local-workflow-env-file-changes-which-runner-path-tests-spawn`.
+- ~~`browser-runtime.test.mts` "CLI end to end" fails locally when `ai_workflow_env.json` selects `bun` (the test empties PATH); pin the runner in the child env.~~ (resolved 2026-10-17: the child runner is pinned to the host) `token-consumption.test.mts` has one intermittent failure on a clean HEAD (passed in the final full Node run). See issue `a-local-workflow-env-file-changes-which-runner-path-tests-spawn`.
 - Pitch `orca-auto-start-all-phases` is shaped (critique pending): start gate from `evaluateLaunch`, stop-and-ask, `orca=normal` per-call override.
 
 ## orca-auto-start-all-phases leftovers (audit cycles 1-2, 2026-10-08)
@@ -327,7 +327,7 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Orca coordinator-side `evaluateLaunch` still passes the full parent env to its probe child (existing launch gate; out of scope for this pitch).
 
 ## runner-aware-runtime-boundary-validator leftovers (2026-10-08)
-- Migrate the 43 test files that still import `node:fs/os/path/child_process/url/module/crypto/net` to `runtime/test-helpers` (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`); the doctor's Runtime boundary warning lists the count and the first files. The two Orca start test files are in that set.
+- ~~Migrate the 43 test files that still import `node:fs/os/path/child_process/url/module/crypto/net` to `runtime/test-helpers`~~ (resolved 2026-10-17: 49 files migrated, doctor Runtime boundary 0 test violations) (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`); the doctor's Runtime boundary warning lists the count and the first files. The two Orca start test files are in that set.
 - Remaining validator test gaps left as listed in `audit-cycle-2.md` S7 (root symlink, fstat size/type refusal, close error, default deps, doctor plain output / non-directory / exhausted cap).
 - A purely computed `import(x)` and an uncalled `require` are advisory only; consider promoting them if the 8 current computed imports are all reviewed and justified.
 - Cycle-2 final fixes were verified by coordinator-run probes and suites, not by a third independent review; revisit at the next cooldown or when the validator is next touched.
@@ -338,3 +338,104 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Verify Codex automatic UserPromptSubmit ready context and blocking behavior in a fresh session after `/hooks` trust review. Existing dispatch/collection/release proof does not prove host activation; never bypass trust to manufacture proof.
 - Decide whether to support non-Git hook bootstrap and stricter unsupported direct --root parsing. Current registration requires Git/checkout and blocks before the off check if root lookup fails; documented and tested.
 - Make coverage compatible with the existing exact child-environment assertion without weakening it. Keep Node/Bun regression results separate from instrumentation failures; investigate Bun1.4.2 coverage crash independently.
+
+## upstream-project-drift leftovers (2026-10-16)
+- RN's `next-pitch.mts` pitch numbering: decide whether it becomes a base feature (its own pitch) or stays RN-only (decision 14).
+- Runner-aware usage text and hook commands, so projects that run Bun stop hand-editing `node` into `bun` (RN did
+  this across docs and hooks). Belongs to `unified-toon-config` (decision 11).
+- Climbing: upgrade Orca to 1.4.224 or later before `workflow-v3-rollout` syncs it (decision 13).
+- Flaky tests that fail only under full-suite load, and pass when their file runs alone: "descendant ownership
+  after timeout/output" (runtime, node and bun), the orca-eval-grader mutation proof ("settle without evidence"),
+  diff-admit "a rename is annotated on the add…", reconcile "a diff that touches check definitions…".
+- Orca attempts dispatched under 2.22.x have no `authorizedPaths` and cannot be reconciled after 2.23.0. Decide
+  whether reconcile should accept a legacy attempt when a person confirms its file claims.
+- Codex workers stop at an interactive update prompt (seen with 0.162.1 → 0.163.0) and fail at `agent_readiness`.
+  Consider detecting this in the launch receipt and reporting it as its own reason.
+- The drift ledger read only `ai-framework/` and missed climbing's `.opencode/` fixes. Later drift passes should
+  also compare the vendor adapter directories.
+- OpenCode plugin hardening (U4) was not part of this pitch.
+
+## unified-toon-config leftovers (2026-10-16)
+- Parser: an unclosed quote is accepted as a string, and a comma inside quotes is read as an array (both fail closed). Also: inconsistent indentation is accepted silently; dead codes `inspectPathMissing`/`regexpBacktracking`; the `errorCode` helper is copied four times.
+- Migrator: `.gitignore` update has no re-check before its rename (lost update); classification of an unsupported file uses a regex over the message, a structured version field in `config.mts` would be sturdier (d51); no v1-to-v2 key conversion exists (`--force` replaces and keeps a backup).
+- `readLegacyFile` ancestor race is unproven; `maxRetriesPerTask` is unbounded in config but 0..2 in `orca-policy`.
+- TOON `skills.modes` has no per-phase slot, so a valid TOON ignores `modes.json` phases (d40). Move `readLegacyFile` into `config.mts`.
+- For orca-role-pools: `orca-policy` rejects more than 2 workers per coordinator and keeps only the first role target; the grader writes the legacy JSON policy. For orca-engines-range: `engine` is required, so "default when key absent" cannot apply. For upstream-project-drift: its X2 assumes `orca-policy.mts` is unchanged, and its `status.md` row is stale. For workflow-v3-rollout: README/SETUP are now flagged files and v1 TOON files are refused.
+- `orca-start.mts` `lookupWorker` asks for `--limit 100`; the worker list is now over the 256 KiB output cap, so Orca-requested phases block with `worker-identity-unavailable`. Use a smaller page size.
+- Flaky only under full-suite load: skill-defaults "FIFO or oversize modes.json is skipped".
+- `pre-ship-verify.mts` fails in this repo (no package.json or Muro verifier); the real checks are the test suite and validators.
+
+### orca-engines-range leftovers
+- Link the migrator's `DEFAULT_ENGINE` to `DEFAULT_ENGINE_RANGE` (or test they match) so a floor bump cannot drift.
+- Decide whether `engineRange` should report invalid when a config file exists but fails to load, instead of using the default floor.
+- The `engine-range-invalid` branches in preflight, gate and start are unreachable through config; delete them or test them directly.
+- Optional doctor warning for a bare-version (exact pin) engine.
+
+## orca-role-pools followups (shipped 2026-10-17, v2.27.0)
+
+- **Live concurrency spike** (S4 skipped): run 4 / 8 / 16 no-op `worker-start` workers against a supervised Orca and record the ceiling in `orca-vendors.md` before raising the default (3).
+- **Case-folded path overlap**: `authorizedPathsOverlap` is case-sensitive; on case-insensitive filesystems `Src/` and `src/` can both be live. Reject case variants in `validAuthorizedPaths` or compare case-folded. Integration (`orca-apply`) still refuses true overlap.
+- ~~**In-place v2→v3 config conversion**~~ (resolved 2026-10-17 by vendor-model-toon: `convertV2`): the reader's refusal text promises `config-migrate --apply` converts v2 files; today it needs `--force` and drops values. Owner: vendor-model-toon / workflow-v3-rollout (its `--apply` step will hit this).
+- **`runtime/upgrade.test.mts` (3 tests)**: the old-install fixture fails the agent-model-sweep doctor (Codex startup wiring, README links, mandatory `ai-workflow.toon`). Seed the fixture with the example toon / current bundle.
+- **Review prompt hashes**: record the SHA-256 of each reviewer prompt in `audit.md` (the contract asks for it; skipped this time).
+- **Vanishing local `ai-workflow.toon`**: it disappeared mid-audit with no known cause (gitignored, so nothing recovers it). Find the deleter; consider the doctor printing the recovery command.
+- **Holder-state test as a table**: iterate `STATES` against the `holds` predicate instead of a loop plus one case.
+- **workflow-v3-rollout planning inputs**: preflight now probes every pool member; release numbering with agent-model-sweep's 2.28.0.
+
+## agent-model-sweep-bet-3 (cooldown 2026-10-17, bundled from SHIPPED.md followups)
+
+Items bundled:
+- Remove `model:` from `.opencode/agents/*.md` (16), `.codex/agents/*.toml` (16), `.opencode/commands/*.md` (28).
+- Doctor relaxation: `checkAgent` under bundle routing no longer requires `^model: <toon id>$` in mirrors (per critique C12: split into 3a (doctor: presence→absence under bundle routing) + 3b (scripted sweep)).
+- New tests for the doctor relaxation (mutant tests for the `^model:` requirement removal).
+- Cursor regen: cursor-mirrors + manual copy of `report.differs` (the 16 `.cursor/agents/*.md` were already done in Bet 2; Bet 3 does not need to redo them).
+
+## mandatory-fixture-seeding (cooldown 2026-10-17, bundled)
+
+Items bundled:
+- `upgrade.test.mts` 3 failures (Codex startup wiring, README links, mandatory `ai-workflow.toon` — pre-existing Bet 1 fixture gap).
+- The "every test that creates a temp project from the bundle must seed the example toon" pattern (generalize from the skill-defaults/skill-vendors/orca-preflight fixes in Bet 1 and Bet 2).
+- `agent-frontmatter-invariant.test.mts` negative fixtures (T2: out-of-allowlist profile, missing profile, malformed frontmatter, has-model-line).
+
+## doc-sweep-stale-claims (cooldown 2026-10-17, bundled from agent-model-sweep Bet 2 audit should-fix)
+
+Items bundled:
+- `harnesses.md` OpenCode section still hardcodes model ids as authoritative (rows 17-19, 46-48).
+- `parseFrontmatter` untyped return (TS strict; add `tsconfig.json` with `strict:true`).
+- `new URL(...).pathname` portability (use `fileURLToPath` for Windows + macOS `/var` alias).
+- Hardcoded agent count `=== 16` (assert `> 0` instead).
+- Stale test titles referencing the removed fallback (rename to "reads profile: frontmatter (no legacy model: fallback)").
+
+## bundle-sync-stale-ledger (cooldown 2026-10-17, bundled)
+
+Items bundled:
+- Refresh the rows in `.project/analysis/2026-10-16-upstream-drift-ledger-analysis.md` (the drift ledger, moved out of the compacted `upstream-project-drift` pitch) for `extending.md`/`vendors.md` (rows 79, 81, 168 — marked `conflict` because the project-side version differs from the updated bundle).
+- Refresh row 270 (base-side `agent.build.model` description, now stale).
+- Verify the bundle-sync seed flow carries the v3 toon into a fresh project (the bet 1 mandatory-toon check depends on the toon being present).
+
+- ~~**upgrade.test.mts fails at HEAD (3 tests)**~~ (resolved 2026-10-17: the sync now adds missing workflow hook groups, the doctor and upgrade doc name `config-migrate --apply`, the simulation runs it): old-install fixture lacks `ai-workflow.toon` (doctor "mandatory" check fails) and Codex startup wiring is unregistered, so `workflow-doctor` exits 1. Found 2026-10-17 during vendor-model-toon completion; unrelated to its diff. Owner: workflow-v3-rollout / next cooldown.
+
+## workflow-v3-rollout readiness run (2026-10-17)
+- ~~`doctor.modelRouting` in `ai-workflow.toon` is inert~~ (resolved 2026-10-17: doctor reads the toon, reader validates, migrator carries the legacy value, default `bundle`): the doctor reads only the legacy `.project/workflow-doctor.json`, `config-migrate` always writes `project` (never reads the legacy file), and the reader accepts any string. Decide the default before retiring the legacy file. See `workflow-v3-rollout/readiness.md`.
+- ~~The doctor checks Codex Orca startup wiring~~ (resolved 2026-10-17: "Claude startup wiring" check added) (`AI_WORKFLOW_RUNNER=node node ...`) but not the Claude `PreToolUse`/`UserPromptExpansion` Orca hooks; RN's bun-wired Claude hooks pass silently.
+- `skill-vendors cursor-mirrors --apply` skips project-added agents (climbing `e2e-runner`, `tdd-guide`).
+- token-consumption tests flake ~1 in 12 isolated runs with "metrics lock is held by another writer" (the lock port is a hash of the directory mod 10000).
+- ~~Post-commit graph hook drops the knowledge overlay~~ (resolved 2026-10-17: `graphify.mts setup` installs overlay-aware hooks, replaces raw blocks; doctor warns while one remains).
+
+## fix-instruction-conflicts leftovers (2026-10-18)
+- Golden behavior cases for the workflow's own prompts (gates per appetite, Orca refusal stop, review summary/INCOMPLETE, AI-scope trigger outside `lib/ai/prompts/`, read-only reviewer, cycle caps, lite card). Owned by `instruction-compression`; required before its bet. The fix's eval review is recorded `not-completed` with the risk accepted by the owner.
+- Reviewer scratch copies must include every file a contract reads (`.agents/`, `SETUP.md`, hook modules, `skill-vendors.json`): the first code review and two suites came back incomplete only because the copy lacked them.
+
+## instruction-compression leftovers (2026-10-19)
+- **S3 ship wrapper retry** (med): deferred after final OpenCode scoring lost two satisfied review-nonsecurity-evidence criteria and returned two baseline zeros as null. Restart from `.project/analysis/2026-10-18-instruction-compression-s3-review-analysis.md` (what completed, the four criterion losses, the restore plan), not from the rejected draft. The rejected trial files and the other pitch records are in the recovery archive (`pitch-archive.mts restore instruction-compression`); the frozen dataset stays at `.project/evals/datasets/instruction-compression.json`.
+- Reviewer approval criteria conflict with incomplete-review handling (unchanged owner text); attribute before compressing further.
+- OpenCode native loading is unobservable (clipped terminal fallback, no read events); Codex and Cursor behavior unverified.
+- Remaining ~40 canonical wrappers and the repeated caveman/dispatch banners are not compressed; measured savings so far are source-word proxies only.
+- Mutation-proof scripts that edit source in place must restore on exit (trap) — see knowledge issue `mutation-script-killed-leaves-source-mutated`.
+
+## toon-machine-data leftovers (2026-10-19)
+- **toon-skill-registry** (med): (start from `.project/analysis/2026-10-18-agent-load-inventory-analysis.md`) `.project/skills/registry.json` is the one existing file agents open on every phase (the caveman banner says to check it). Six readers (`skill-registry`, `skill-sync`, `add-skill`, `state-snapshot`, `bundle-sync`, `browser-runtime`), five tests, `.gitignore` and the bundle-sync "never synced" rule change with it. Sequence after the banner rewrite in `instruction-compression`.
+- Wire `eval-runner` and other readers to `readData` so the rule's "every reader" is true; today only `data-file.mts` and the converter use it (low).
+- Converter and writer: detect JSON loss the parser hides (integers beyond 2^53, duplicate keys), refuse hard links, keep file mode on replace, fsync the directory (low).
+- Run the 5 live-only golden cases in `.project/evals/datasets/toon-machine-data.json` once an eval harness exists (med).
+- The agent-load inventory method in `.project/analysis/2026-10-18-agent-load-inventory-analysis.md` (evidence by `file:line`) could become a small script if more files are proposed for conversion (low).

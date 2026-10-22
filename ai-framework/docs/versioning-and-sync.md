@@ -55,6 +55,22 @@ Check that report and merge any remaining current commands, keeping the project'
 and entry-file relationship intact. A JavaScript launcher from an earlier version can no longer
 be used after its removal.
 
+The sync also adds the bundle's workflow hook groups that an older `.claude/settings.json` or
+`.codex/hooks.json` does not register yet (for example the Orca start hooks). It never changes or
+removes an existing entry; a hook that already runs the same workflow script under the same matcher,
+even wrapped or customized, counts as registered.
+
+`ai-workflow.toon` is instance data, so the sync never creates or edits it. Create or upgrade it
+after the sync, then check it:
+
+```sh
+node ai-framework/scripts/config-migrate.mts --dry-run --root .
+node ai-framework/scripts/config-migrate.mts --apply --root .
+```
+
+Without the file, `--apply` builds it from the legacy settings files (or defaults) and adds the
+default `models` block; a `schemaVersion: 2` file is converted in place.
+
 Run `node ai-framework/scripts/workflow-doctor.mts` and
 `node ai-framework/scripts/setup-validator.mts` after the update. Resolve any reported old
 paths or missing plugin files before relying on hooks. See the bundle-sync playbook for

@@ -12,7 +12,8 @@ import { runDirect } from "./runtime/cli.mts";
  *   update      graphify update <root>, then overlay the knowledge entries, rewrite .project/knowledge/index.md,
  *               and migrate away the legacy .project/knowledge/graph.json once the new graph covers it
  *   check       validate the knowledge entries only (duplicate ids, broken links, orphans); needs no uv, writes nothing
- *   setup       update + `graphify hook install` (rebuild the graph after every commit/checkout)
+ *   setup       update + install a post-commit/post-checkout block that reruns this script in the background, so
+ *               the rebuilt graph keeps the knowledge overlay (replaces a raw `graphify hook install` block)
  *   anything else (query, path, explain, god-nodes, affected, export, ...) is passed through to graphify
  *
  * Flags: --check (alias of `check`), --json (machine-readable report). `check` exits 1 on an error-level problem.
@@ -136,7 +137,7 @@ export function buildGraph(root: string, deps: RuntimeDeps): { graph: Graph; pro
   for (const typeDir of typeDirs) {
     const dir = path.join(knowledgeDir, typeDir);
     if (!fs.existsSync(dir)) continue;
-    const singular = typeDir.replace(/s$/, "");
+    const singular = typeDir === "entities" ? "entity" : typeDir.replace(/s$/, "");
 
     for (const name of fs.readdirSync(dir)) {
       if (!name.endsWith(".md")) continue;
@@ -397,7 +398,11 @@ export function overlayKnowledge(base: GraphifyGraph, graph: Graph): GraphifyGra
   for (const edge of graph.edges) {
     links.push({ source: idMap.get(edge.from)!, target: idMap.get(edge.to)!, relation: "related", confidence: "EXTRACTED", confidence_score: 1, source_file: graph.nodes.find((node) => node.id === edge.from)?.file, workflow_overlay: true });
   }
-  return { ...base, nodes, links, graph: { ...(base.graph ?? {}), workflow: { generated: graph.generated, stats: graph.stats, tagIndex: graph.tagIndex } } };
+  // Graphify extracts document structure only in its semantic pass, so a markdown link (for example from the generated
+  // index) to an entry added since then points at a page node that does not exist. Drop such edges.
+  const known = new Set(nodes.map((node) => node.id));
+  const connected = links.filter((link) => known.has(link.source) && known.has(link.target));
+  return { ...base, nodes, links: connected, graph: { ...(base.graph ?? {}), workflow: { generated: graph.generated, stats: graph.stats, tagIndex: graph.tagIndex } } };
 }
 
 /** True when every legacy node and edge exists in the freshly built graph, so the old file is redundant. */
@@ -441,6 +446,117 @@ export function ensureProjectFiles(root: string, deps: RuntimeDeps): string[] {
     done.push(".gitignore");
   }
   return done;
+}
+
+// ---- git hooks --------------------------------------------------------------------------------------------------
+
+export const HOOK_START = "# ai-workflow-graphify-start";
+export const HOOK_END = "# ai-workflow-graphify-end";
+/** Markers of the blocks `graphify hook install` writes: they rebuild graph.json without the knowledge overlay. */
+export const RAW_HOOK_START = "# graphify-hook-start";
+export const RAW_HOOK_END = "# graphify-hook-end";
+export const RAW_HOOK_MARKERS: ReadonlyArray<readonly [string, string]> = [
+  [RAW_HOOK_START, RAW_HOOK_END],
+  ["# graphify-checkout-hook-start", "# graphify-checkout-hook-end"],
+];
+export const HOOK_EVENTS = ["post-commit", "post-checkout"] as const;
+
+/** True when a hook still carries one of graphify's raw rebuild blocks. */
+export function hasRawHook(text: string): boolean {
+  return RAW_HOOK_MARKERS.some(([start, end]) => { const from = text.indexOf(start); return from !== -1 && text.indexOf(end, from) !== -1; });
+}
+
+/** POSIX sh block that rebuilds the graph in the background through this script, so the knowledge overlay is applied. */
+export function hookBlock(event: (typeof HOOK_EVENTS)[number]): string {
+  const trigger = event === "post-commit"
+    ? [
+      "  # Only graph outputs changed: nothing to rebuild (avoids a loop when graphify-out/ is tracked).",
+      "  changed=$(git diff-tree --no-commit-id --name-only -r --root HEAD 2>/dev/null)",
+      "  [ -n \"$(printf '%s\\n' \"$changed\" | grep -v '^graphify-out/' | grep -v '^$')\" ] || exit 0",
+    ]
+    : ["  # Branch checkouts only, not file checkouts.", "  [ \"${3:-0}\" = \"1\" ] || exit 0"];
+  return [
+    HOOK_START,
+    `# Rebuilds graphify-out/graph.json with the workflow's knowledge overlay after each ${event}.`,
+    "# Installed by: node ai-framework/scripts/graphify.mts setup",
+    "(",
+    "  [ \"${GRAPHIFY_SKIP_HOOK:-0}\" = \"1\" ] && exit 0",
+    "  git_dir=${GIT_DIR:-$(git rev-parse --git-dir 2>/dev/null)}",
+    "  [ -d \"$git_dir/rebase-merge\" ] && exit 0",
+    "  [ -d \"$git_dir/rebase-apply\" ] && exit 0",
+    "  [ -f \"$git_dir/MERGE_HEAD\" ] && exit 0",
+    "  [ -f \"$git_dir/CHERRY_PICK_HEAD\" ] && exit 0",
+    ...trigger,
+    "  root=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0",
+    "  [ -f \"$root/ai-framework/scripts/graphify.mts\" ] || exit 0",
+    "  log=${GRAPHIFY_REBUILD_LOG:-$HOME/.cache/graphify-rebuild.log}",
+    "  mkdir -p \"$(dirname \"$log\")\" 2>/dev/null",
+    "  cd \"$root\" || exit 0",
+    "  nohup node --experimental-strip-types --disable-warning=ExperimentalWarning ai-framework/scripts/graphify.mts update >>\"$log\" 2>&1 </dev/null &",
+    ")",
+    HOOK_END,
+  ].join("\n");
+}
+
+function replaceBlock(text: string, start: string, end: string, block: string): string | undefined {
+  const from = text.indexOf(start);
+  if (from === -1) return undefined;
+  const to = text.indexOf(end, from);
+  if (to === -1) return undefined;
+  return text.slice(0, from) + block + text.slice(to + end.length);
+}
+
+/** Where git reads hooks (honours core.hooksPath); undefined outside a git work tree. */
+export function hooksDir(root: string, deps: RuntimeDeps): string | undefined {
+  let result: ReturnType<RuntimeDeps["child"]["runSync"]>;
+  try { result = deps.child.runSync("git", ["rev-parse", "--git-path", "hooks"], { cwd: root, timeoutMs: 10000 }); } catch { return undefined; }
+  const dir = result.status === 0 ? result.stdout.trim() : "";
+  return dir ? deps.path.resolve(root, dir) : undefined;
+}
+
+/**
+ * Installs the overlay-aware rebuild block into post-commit and post-checkout. An existing workflow block is refreshed,
+ * a raw `graphify hook install` block is replaced in place, and any other hook content is kept. A hook that is a
+ * symlink or not a regular file is refused, never followed.
+ */
+export function installHooks(root: string, deps: RuntimeDeps): { installed: string[]; replacedRaw: string[] } | { error: string } {
+  const { fs, path } = deps;
+  const dir = hooksDir(root, deps);
+  if (!dir) return { error: "not a git work tree" };
+  const installed: string[] = [];
+  const replacedRaw: string[] = [];
+  fs.mkdirSync(dir, { recursive: true });
+  for (const event of HOOK_EVENTS) {
+    const file = path.join(dir, event);
+    const block = hookBlock(event);
+    let text: string | undefined;
+    try {
+      const stat = fs.lstatSync(file);
+      if (stat.isSymbolicLink() || !stat.isFile()) return { error: `${event} hook is not a regular file; install the block by hand` };
+      text = fs.readFileSync(file);
+    } catch (error) {
+      if ((error as { code?: string }).code !== "ENOENT") return { error: `${event} hook is unreadable` };
+    }
+    let next: string;
+    if (text === undefined) next = `#!/bin/sh\n${block}\n`;
+    else {
+      // The first raw block becomes the workflow block (keeping its position); any other raw block is removed.
+      let current = text;
+      let placed = current.includes(HOOK_START);
+      for (const [start, end] of RAW_HOOK_MARKERS) {
+        const swapped = replaceBlock(current, start, end, placed ? "" : block);
+        if (swapped === undefined) continue;
+        current = swapped.replace(/\n{3,}/g, "\n\n");
+        placed = true;
+        if (!replacedRaw.includes(event)) replacedRaw.push(event);
+      }
+      next = replaceBlock(current, HOOK_START, HOOK_END, block) ?? `${current}${current.endsWith("\n") ? "" : "\n"}${block}\n`;
+    }
+    if (next !== text) fs.writeFileSync(file, next);
+    fs.chmodSync(file, 0o755);
+    installed.push(event);
+  }
+  return { installed, replacedRaw };
 }
 
 /** CLI entry. Returns the exit code; all output goes through deps.io. */
@@ -506,8 +622,9 @@ export function main(argv: string[], deps: RuntimeDeps): number {
     else note += `; kept legacy ${LEGACY_GRAPH} (it has entries/links the current entries do not — review, then delete it by hand)`;
   }
   if (command === "setup") {
-    const hook = child.runSync(tool.command, [...tool.prefix, "hook", "install"], { cwd: root });
-    note += hook.status === 0 ? "; installed graphify git hooks (rebuild on commit/checkout)" : `; graphify hook install failed (exit ${hook.status})`;
+    const hooks = installHooks(root, deps);
+    note += "error" in hooks ? `; git hooks not installed (${hooks.error})`
+      : `; installed the workflow graph rebuild in ${hooks.installed.join(" and ")} hooks${hooks.replacedRaw.length ? ` (replaced the raw graphify block in ${hooks.replacedRaw.join(" and ")}, which skipped the knowledge overlay)` : ""}`;
   }
   report(graph, problems, io, json, wrote, `${note}.`);
   return 0;

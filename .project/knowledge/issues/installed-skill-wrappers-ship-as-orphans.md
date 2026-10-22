@@ -4,7 +4,7 @@ type: issue
 created: 2026-09-25
 updated: 2026-09-25
 tags: [bundle-sync, publishing, instance-data, migration]
-related: [caveman-mode-is-default-everywhere, a-gate-must-not-trust-its-own-author]
+related: [caveman-mode-is-default-everywhere, a-gate-must-not-trust-its-own-author, local-eval-data-is-gitignored]
 source: caveman-rollout
 severity: high
 resolved: true

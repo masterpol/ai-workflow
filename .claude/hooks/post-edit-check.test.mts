@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import nodePath from "node:path";
-import os from "node:os";
 import test from "node:test";
 
 import { check, main } from "./post-edit-check.mts";
 import { createNodeDeps } from "../../ai-framework/scripts/runtime/node.mts";
 import type { RuntimeDeps } from "../../ai-framework/scripts/runtime/types.mts";
+import { createTestDeps } from "../../ai-framework/scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const nodePath = testDeps.path;
 
 interface Fake { deps: RuntimeDeps; out: string[]; err: string[] }
 

@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+import { createTestDeps, execFileSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
@@ -21,7 +22,7 @@ const ENTRY = { path: "a.txt", kind: "modify" as const, mode: "100644" as const,
 
 function git(cwd: string, ...args: string[]): string {
   return execFileSync("git", ["-c", "user.name=t", "-c", "user.email=t@t", "-c", "commit.gpgsign=false", ...args], {
-    cwd, encoding: "utf8", env: { PATH: process.env.PATH, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null" },
+    cwd, encoding: "utf8", windowsHide: true, shell: false, timeout: 30000, env: { PATH: process.env.PATH, GIT_CONFIG_NOSYSTEM: "1", GIT_CONFIG_GLOBAL: "/dev/null" },
   });
 }
 const write = (file: string, text: string) => { fs.mkdirSync(path.dirname(file), { recursive: true }); fs.writeFileSync(file, text); };
@@ -425,6 +426,22 @@ test("cleanup resumes after a crash between steps", async (t: TestContext) => {
     assert.equal(verifyEvidence({ root: f.root, attemptKey: KEY, deps }).status, "missing");
     assert.equal(copy(f, { checks: "ok\n" }).status, "ok");
   }
+});
+
+test("unknown process cleanup prevents a cleanup decision or a worktree removal result", async (t: TestContext) => {
+  const { f } = proven(t);
+  const error = Object.assign(new Error("cleanup unknown"), { code: "EPROCESSCLEANUP", ownerPid: 4242 });
+  const unknown = spyDeps(async () => { throw error; });
+  await assert.rejects(decide(f, { deps: unknown.deps }), (caught: unknown) => caught === error);
+  assert.equal(unknown.calls.length, 1);
+  assert.equal(fs.existsSync(f.wt), true);
+  const decision = await decide(f);
+  assert.equal(decision.action, "remove");
+  const pendingRemoval = spyDeps(async (args, real) => { if (args.includes("remove")) throw error; return real(); });
+  await assert.rejects(performCleanup(decision, pendingRemoval.deps), (caught: unknown) => caught === error);
+  assert.equal(pendingRemoval.calls.filter((args) => args.includes("remove")).length, 1);
+  assert.equal(fs.existsSync(f.wt), true);
+  assert.equal(fs.existsSync(path.join(evidenceDir(f), "final.json")), false);
 });
 
 test("deadlines: under 1 ms refuses; timeouts and overflow come only from errorCode and are never retried", async (t: TestContext) => {

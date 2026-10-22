@@ -397,7 +397,7 @@ export function createPitchCompress(deps: RuntimeDeps, transactionApi: RegistryA
 
   function readShippedDate(root: string, slug: string): string {
     const shipped = readText(path.join(pitchDir(root, slug), "SHIPPED.md")) || "";
-    const match = shipped.match(/\*\*Shipped:\*\*\s*(\d{4}-\d{2}-\d{2})/);
+    const match = shipped.match(/Shipped\**:\**\s*(\d{4}-\d{2}-\d{2})/) || shipped.match(/^\**Date\**:\**\s*(\d{4}-\d{2}-\d{2})/m);
     return match ? match[1] : new Date(deps.clock.now()).toISOString().slice(0, 10);
   }
 

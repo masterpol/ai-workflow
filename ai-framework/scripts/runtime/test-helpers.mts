@@ -111,7 +111,22 @@ export function memoryFs(files: Record<string, string>, links: Record<string, st
       if (!map.has(file)) throw notFound(file);
       return new TextEncoder().encode(map.get(file) as string);
     },
-    writeFileSync: (file, data) => { map.set(file, typeof data === "string" ? data : new TextDecoder().decode(data)); },
+    writeFileSync: (file, data, options) => {
+      // Honour O_EXCL semantics ("wx") so lock and write-then-rename guards are observable in memory.
+      if (options?.flag === "wx" && (map.has(file) || linkSet.has(file))) {
+        throw Object.assign(new Error(`EEXIST ${file}`), { code: "EEXIST" });
+      }
+      map.set(file, typeof data === "string" ? data : new TextDecoder().decode(data));
+    },
+    renameSync: (from, to) => {
+      if (!map.has(from)) throw notFound(from);
+      map.set(to, map.get(from) as string);
+      map.delete(from);
+    },
+    unlinkSync: (file) => {
+      if (linkSet.delete(file)) { linkMap.delete(file); return; }
+      if (!map.delete(file)) throw notFound(file);
+    },
     existsSync: (file) => map.has(file) || isDir(file) || linkSet.has(file),
     statSync: stat,
     lstatSync: lstat,
@@ -141,6 +156,89 @@ export function memoryFs(files: Record<string, string>, links: Record<string, st
   };
 }
 
+/**
+ * Builds `ai-workflow.toon` text for tests. The default is the schemaVersion-3 baseline that
+ * `loadConfig` accepts with zero problems. `schemaVersion` replaces the version line; `extraLines`
+ * are appended at the root (use them to inject a mutation).
+ */
+export function toonFixtureText(options: { schemaVersion?: number | string; extraLines?: string[] } = {}): string {
+  const lines = [
+    `schemaVersion: ${options.schemaVersion ?? 3}`,
+    "runtime:",
+    "  runner: node",
+    "integrations:",
+    "  orca:",
+    "    engine: \"1.4.224\"",
+    "    enabled: false",
+    "    multiAgent: false",
+    "    maxConcurrentWorkers: 3",
+    "    maxRetriesPerTask: 1",
+    "doctor:",
+    "  modelRouting: project",
+    "skills:",
+    "  modes:",
+    "    caveman: full",
+    ...(options.extraLines ?? []),
+  ];
+  return lines.join("\n");
+}
+
+/**
+ * `ai-workflow.toon` text that expresses the same policy as `integrations/orca-vendors.example.json` (three
+ * coordinators, `maxConcurrentWorkers` 2, `maxRetriesPerTask` 1), with `enabled` / `multiAgent` set from `enabled`.
+ * Reader tests use it to prove the TOON branch and the legacy branch return identical policy decisions.
+ */
+export function orcaPolicyToonText(enabled = true): string {
+  return [
+    "schemaVersion: 3",
+    "runtime:",
+    "  runner: node",
+    "integrations:",
+    "  orca:",
+    "    engine: \">=1.4.224\"",
+    `    enabled: ${enabled}`,
+    `    multiAgent: ${enabled}`,
+    "    maxConcurrentWorkers: 2",
+    "    maxRetriesPerTask: 1",
+    "    coordinators:",
+    "      claude:",
+    "        workers[2]: codex,opencode",
+    "        roles:",
+    "          implementation[1]: codex",
+    "          review[1]: opencode",
+    "      codex:",
+    "        workers[2]: claude,opencode",
+    "        roles:",
+    "          implementation[1]: claude",
+    "          review[1]: opencode",
+    "      opencode:",
+    "        workers[2]: claude,codex",
+    "        roles:",
+    "          implementation[1]: claude",
+    "          review[1]: codex",
+    "doctor:",
+    "  modelRouting: project",
+    "skills:",
+    "  modes:",
+    "    caveman: full",
+    "",
+  ].join("\n");
+}
+
+/**
+ * TOON fixture writer on `memoryFs(files, links)`: places `text` at `<root>/<name>` (default
+ * `ai-workflow.toon`) in an in-memory tree and forwards `links` so symlink/alias layouts follow
+ * `existsSync`/`statSync`/`lstatSync` correctly. `extraFiles` are merged in unchanged.
+ */
+export function memoryToonFs(
+  root: string,
+  text: string,
+  options: { name?: string; links?: Record<string, string>; extraFiles?: Record<string, string> } = {},
+): Partial<FsDeps> {
+  const files = { ...(options.extraFiles ?? {}), [`${root}/${options.name ?? "ai-workflow.toon"}`]: text };
+  return memoryFs(files, options.links ?? {});
+}
+
 /** Returns a new RuntimeDeps with `stdout.write` / `stderr.write` captured into arrays on the returned object. `isTTY` is forced to `false` so results do not depend on the host terminal. */
 export interface CapturedDeps extends RuntimeDeps { out: string[]; err: string[] }
 export function captureIo(deps: RuntimeDeps): CapturedDeps {
@@ -167,4 +265,90 @@ export function captureIo(deps: RuntimeDeps): CapturedDeps {
  */
 export function runScript(deps: RuntimeDeps, script: string, args: string[] = [], options: SpawnOptions = {}): RunResult {
   return runWorkflowSync(deps, [script, ...args], options);
+}
+
+/** Filesystem path of a `file:` URL (e.g. `import.meta.url`): the test-side stand-in for `node:url`'s `fileURLToPath`. */
+export function urlPath(url: string | URL): string {
+  const parsed = new URL(String(url));
+  if (parsed.protocol !== "file:") throw new TypeError(`not a file URL: ${parsed.protocol}`);
+  const decoded = decodeURIComponent(parsed.pathname);
+  return /^\/[A-Za-z]:/.test(decoded) ? decoded.slice(1).replace(/\//g, "\\") : decoded;
+}
+
+/** `file:` URL href for an absolute path, percent-encoding `#`, `?`, `%` and spaces: the stand-in for `pathToFileURL(path).href`. */
+export function fileUrl(path: string): string {
+  const url = new URL("file:///");
+  url.pathname = path.replace(/\\/g, "/").replace(/%/g, "%25").replace(/#/g, "%23").replace(/\?/g, "%3F");
+  return url.href;
+}
+
+/** Every entry under `dir` (files, directories and links, not followed) as sorted relative paths: the stand-in for `readdirSync(dir, { recursive: true })`. */
+export function listTree(deps: RuntimeDeps, dir: string): string[] {
+  const out: string[] = [];
+  const visit = (relative: string): void => {
+    for (const entry of deps.fs.readdirEntriesSync(relative ? deps.path.join(dir, relative) : dir)) {
+      const child = relative ? `${relative}${deps.path.sep}${entry.name}` : entry.name;
+      out.push(child);
+      if (entry.isDirectory()) visit(child);
+    }
+  };
+  visit("");
+  return out.sort();
+}
+
+/**
+ * Recursively copies a file or directory (symlinks copied as links, file modes kept by `copyFileSync`): the
+ * stand-in for `cpSync(from, to, { recursive: true, filter })`. `filter` sees each source path, the root included.
+ */
+export function copyTree(deps: RuntimeDeps, from: string, to: string, filter: (source: string) => boolean = () => true): void {
+  if (!filter(from)) return;
+  const stat = deps.fs.lstatSync(from);
+  if (stat.isSymbolicLink()) { deps.fs.symlinkSync(deps.fs.readlinkSync(from), to); return; }
+  if (!stat.isDirectory()) { deps.fs.mkdirSync(deps.path.dirname(to), { recursive: true }); deps.fs.copyFileSync(from, to); return; }
+  deps.fs.mkdirSync(to, { recursive: true });
+  for (const name of deps.fs.readdirSync(from)) copyTree(deps, deps.path.join(from, name), deps.path.join(to, name), filter);
+}
+
+export { adapterNet, moduleRequire, spawnTestChild, stripTypes } from "./node.mts";
+
+/** The subset of Node's `spawnSync` options the tests use; anything else is refused rather than silently ignored. */
+export interface SpawnSyncLike {
+  cwd?: string; env?: Record<string, string | undefined>; input?: string; encoding?: "utf8" | "utf-8";
+  timeout?: number; maxBuffer?: number; killSignal?: string; shell?: boolean; windowsHide?: boolean;
+  stdio?: "pipe" | "ignore" | "inherit" | Array<"pipe" | "ignore" | "inherit">;
+}
+export interface SpawnSyncResult { status: number | null; signal: string | null; stdout: string; stderr: string; error?: NodeJS.ErrnoException }
+
+const sharedDeps = createTestDeps();
+
+/**
+ * `spawnSync`-shaped call over `deps.child.runSync` (text output only). Like Node, a launch failure or a timeout
+ * is returned as `error` (code ENOENT, ETIMEDOUT, ENOBUFS) instead of thrown.
+ */
+export function spawnSync(command: string, args: string[] = [], options: SpawnSyncLike = {}): SpawnSyncResult {
+  const known = new Set(["cwd", "env", "input", "encoding", "timeout", "maxBuffer", "killSignal", "shell", "windowsHide", "stdio"]);
+  const unknown = Object.keys(options).filter((key) => !known.has(key));
+  if (unknown.length) throw new TypeError(`spawnSync helper does not support: ${unknown.join(", ")}`);
+  if (options.encoding !== undefined && options.encoding !== "utf8" && options.encoding !== "utf-8") throw new TypeError("spawnSync helper returns text only");
+  // A mixed stdio array keeps pipes (output is captured); a uniform one maps to the runner's single value.
+  const stdio = Array.isArray(options.stdio) ? (options.stdio.every((mode) => mode === options.stdio![0]) ? options.stdio[0] : "pipe") : options.stdio;
+  try {
+    const result = sharedDeps.child.runSync(command, args, {
+      cwd: options.cwd, env: options.env, input: options.input, timeoutMs: options.timeout, maxBufferBytes: options.maxBuffer,
+      killSignal: options.killSignal, shell: options.shell, stdio,
+    });
+    const out: SpawnSyncResult = { status: result.status, signal: result.signal, stdout: result.stdout, stderr: result.stderr };
+    if (result.errorCode) out.error = Object.assign(new Error(`spawnSync ${command} ${result.errorCode}`), { code: result.errorCode });
+    return out;
+  } catch (error) {
+    return { status: null, signal: null, stdout: "", stderr: "", error: error as NodeJS.ErrnoException };
+  }
+}
+
+/** `execFileSync`-shaped call: returns stdout; throws (with `status`, `stdout`, `stderr`) on a launch failure or a non-zero exit. */
+export function execFileSync(command: string, args: string[] = [], options: SpawnSyncLike = {}): string {
+  const result = spawnSync(command, args, options);
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw Object.assign(new Error(`Command failed: ${command} ${args.join(" ")}\n${result.stderr}`), { status: result.status, signal: result.signal, stdout: result.stdout, stderr: result.stderr });
+  return result.stdout;
 }

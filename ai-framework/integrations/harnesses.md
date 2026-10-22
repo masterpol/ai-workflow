@@ -2,6 +2,12 @@
 
 The workflow has one portable core and three native adapters. `AGENTS.md` is the shared project contract; `ai-framework/workflow/` is the canonical phase specification; `.claude/agents/` contains the canonical role prompts.
 
+## Mandatory: project-root `ai-workflow.toon`
+
+A project-root `ai-workflow.toon` is **mandatory**. It holds the `models` block the workflow doctor uses to validate every agent and skill against the active capability profile. The doctor emits a top-level `ai-workflow.toon (mandatory)` failure if the file is absent, refused, or missing the `models` block. Copy `ai-framework/templates/ai-workflow.example.toon` to the project root and edit the `models` block for your project. The file is git-ignored (project-local). To migrate an older `schemaVersion: 2` file, run `node ai-framework/scripts/config-migrate.mts --apply --root .`.
+
+The example toon encodes exactly the model table below. Future bundle updates ship a new example and a new migrator default; the project's local `ai-workflow.toon` is untouched.
+
 ## Capability Profiles
 
 Select a model available in the active harness that meets the profile. Never substitute an unavailable provider or model just to match this table.
@@ -24,7 +30,12 @@ Escalate one profile only when the returned work is demonstrably incomplete or u
 
 ## Claude Code
 
-Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `model:` values in those role files are Claude-specific suggestions. Phase skills state a profile, so another harness can make an equivalent selection.
+Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The canonical
+agents declare their capability profile via a `profile:` frontmatter key (not a `model:`
+line). Claude Code does **not** read `ai-workflow.toon`; it resolves an omitted `model:`
+to the parent conversation's model (or the per-invocation `CLAUDE_CODE_SUBAGENT_MODEL`
+override). The toon's `models` block is read by the workflow doctor and by future dispatchers.
+Phase skills state a profile, so another harness can make an equivalent selection.
 
 ## OpenCode
 

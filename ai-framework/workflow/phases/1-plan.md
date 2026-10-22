@@ -29,10 +29,10 @@ If a candidate "scope" can't ship without another's commits, it's not a scope �
 
 ### 2. Define machine-checkable exit criteria per scope
 
-**Strict rule**: every scope requires ≥1 *machine-checkable* command (`<build-command>` exit 0, `grep -c …`, `test -f …`, etc.). Manual checks are smoke tests on top, not substitutes.
+**Strict rule**: every scope requires ≥1 *machine-checkable* command, selected from `.project/context/stack.md` and actual project configuration. Use the relevant build, content, link, hash or artifact check; do not assume a package manager, shell utility or application that is absent. Manual checks are smoke tests on top, not substitutes. Record a reason when a check does not apply. A missing prerequisite or failed check required by the scope is a failure, not a reason to skip it.
 
 Mandatory inclusions:
-- **Every UI scope**: `<build-command>` exit 0 (catches framework-specific build issues that a type-check pass alone misses)
+- **Every UI scope**: the actual build/artifact check for the changed surface passes (a type-check alone does not replace an existing required build). Documentation-only work uses content/link/integrity checks rather than a nonexistent application build.
 - **Every backend scope**: relevant test suite passes; no untyped/`any`-equivalent validators introduced
 - **Every AI-prompt scope**: golden eval case from pitch passes ≥ defined threshold; no regression > 0.3 on any criterion vs baseline
 
@@ -81,7 +81,7 @@ Create `hill.md` with all scopes at `uphill 0%`. Hill positions: `uphill 0%/25%/
 
 Before betting to `/build`:
 - Every scope has ≥1 machine-checkable exit criterion
-- Every UI scope's exit criteria includes `<build-command>` exit 0
+- Every UI scope includes its verified build/artifact check; non-applicable checks have a reason and available required checks are not omitted
 - Every AI-prompt scope's exit criteria includes the golden eval case
 - Subagent-dispatch decisions are made (yes/no per scope, with reasoning + dispatch model if yes)
 - Hill chart populated, all scopes at `uphill 0%`

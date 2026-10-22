@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import test from "node:test";
 import type { TestContext } from "node:test";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { canCompress, pythonAvailable } from "./skill-compress-guard.mts";
+import { createTestDeps } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 
 function write(root: string, name: string, value = "content"): void {
   const file = path.join(root, name);

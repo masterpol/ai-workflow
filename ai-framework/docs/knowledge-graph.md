@@ -25,8 +25,12 @@ non-zero exit on duplicate ids) after any other manual edit to a knowledge entry
 
 **Setup and updates.** `graphify.mts setup` (run by `/setup`, and named as a next step by `bundle-sync` when a project
 lacks the graph) creates `.graphifyignore` and a `.gitignore` block (commit `graph.json` and `GRAPH_REPORT.md`, keep
-the cache local), builds the graph, and installs graphify's post-commit/post-checkout git hooks so code changes keep
-it fresh. After `git pull`/merge run `graphify.mts update`. The first run in a project that still has the old
+the cache local), builds the graph, and installs post-commit/post-checkout git hooks that rerun `graphify.mts update`
+in the background, so code changes keep it fresh *with* the knowledge overlay. Graphify's own `graphify hook install`
+rebuilds `graph.json` without the overlay, which leaves the doctor's graph check failing after every commit; `setup`
+replaces such a block in place (other hook content is kept) and the doctor warns while one remains. The hooks honour
+`GRAPHIFY_SKIP_HOOK=1`, skip rebases, merges and cherry-picks, ignore commits that only touch `graphify-out/`, and log
+to `~/.cache/graphify-rebuild.log` (`GRAPHIFY_REBUILD_LOG` overrides). After `git pull`/merge run `graphify.mts update`. The first run in a project that still has the old
 `.project/knowledge/graph.json` migrates it: the file is deleted only when every old node and link exists in the new
 graph. `workflow-doctor` and `setup-validator` verify the graph, `.graphifyignore`, and that `uv` is available.
 

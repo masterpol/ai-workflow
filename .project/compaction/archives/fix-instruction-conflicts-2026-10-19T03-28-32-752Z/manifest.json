@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "slug": "fix-instruction-conflicts",
+  "sourceRoot": ".project/pitches/fix-instruction-conflicts",
+  "archivedAt": "2026-10-19T03:28:32.753Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "07741403893475dc2c8e7436994c69b79e2ad077c8e2ad21661497df5184657f",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "64c37908559a5afd22dba00e7e7d3a1b01baa27d2ea5900fe68163c98ad21c93",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "2a7b63b511942c07d35e4defaaf4beac9534f9235cb74ec4c21e401ae0ce39ec",
+      "mode": 420
+    },
+    "validation-2026-10-18.md": {
+      "hash": "be7ac1227202e52b0f8ee65c0e6978c60b54f6575bcf04b6624471c50a1ac378",
+      "mode": 420
+    }
+  }
+}

@@ -1,15 +1,17 @@
 import assert from "node:assert/strict";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
 import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
 import { WORKER_FLAG } from "./orca-launch-gate.mts";
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
-import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, markUnknownLiveness } from "./orca-dispatch.mts";
+import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, markUnknownLiveness, resolveAssignment } from "./orca-dispatch.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText, createTestDeps, fileUrl, spawnTestChild } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -33,7 +35,7 @@ function probe() {
     const values: Obj[] = [
       { name: "orca-cli", markdown: "worktree current; terminal" },
       { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
-      { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.223" } } },
+      { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.224" } } },
     ];
     return { status: 0, signal: null, stdout: JSON.stringify(values[state.calls++ % 3]), stderr: "" };
   };
@@ -62,7 +64,7 @@ function fakeOrca(behaviours: Behaviour[] = ["ok"]) {
   } } };
   return { state, deps };
 }
-const scope = { id: "s1", target: "b.mjs", change: "return b-done", constraints: "edit only b.mjs", ownership: "b.mjs", acceptance: "node prints b-done" };
+const scope = { id: "s1", target: "b.mjs", change: "return b-done", constraints: "edit only b.mjs", ownership: "b.mjs", authorizedPaths: ["b.mjs"], acceptance: "node prints b-done" };
 const base = (root: string, deps: RuntimeDeps, extra: Obj = {}) => ({
   root, coordinator: "claude", vendor: "codex", scope, attemptId: "a1", deadlineMs: 5000, deps, now: () => 1000,
   env: { PATH: "/usr/bin", ORCA_AGENT_SESSION_ID: "s1", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run: probe().run, platform: "darwin", present: () => true, ...extra,
@@ -185,16 +187,16 @@ test("a claim with no recorded launch (crash between claim and spawn) becomes un
   assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness");
 });
 
-test("an agent_readiness failure needs a person: blocked, recorded failed, not retryable, no retry loop", async (t: TestContext) => {
+test("an agent_readiness failure needs a person: blocked, ownership retained, not retryable, no retry loop", async (t: TestContext) => {
   const root = fixture(t);
   const orca = fakeOrca(["agent_readiness"]);
   const outcome = await dispatchScope(base(root, orca.deps));
   assert.deepEqual([outcome.route, outcome.reason, outcome.retryable], ["blocked", "launch-failed:agent_readiness", undefined]);
   assert.ok(outcome.humanAction);
-  assert.equal(stateOf(root, attemptKeyOf("a1")), "failed");
+  assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness");
   const bounded = await dispatchWithRetries({ ...retryBase(root, orca.deps), baseAttemptId: "b1", maxRetries: 3 });
-  assert.equal(bounded.route, "blocked");
-  assert.equal(orca.state.starts.length, 2, "one start for the new base attempt only; no loop after a human-needed failure");
+  assert.deepEqual([bounded.route, bounded.reason], ["resume", "task-already-owned"]);
+  assert.equal(orca.state.starts.length, 1, "a new attempt id cannot bypass unresolved residual ownership");
 });
 
 test("residual resources after a failed launch are reported and never retried", async (t: TestContext) => {
@@ -530,10 +532,10 @@ test("maxConcurrentWorkers from the policy caps running attempts across differen
   assert.ok(cap >= 1 && cap <= 3);
   const orca = fakeOrca();
   for (let index = 0; index < cap; index++) {
-    const out = await dispatchScope(base(root, orca.deps, { attemptId: `c${index}`, scope: { ...scope, id: `scope${index}` } }));
+    const out = await dispatchScope(base(root, orca.deps, { attemptId: `c${index}`, scope: { ...scope, id: `scope${index}`, authorizedPaths: [`c${index}.mjs`] } }));
     assert.equal(out.route, "launched", `attempt ${index}`);
   }
-  const over = await dispatchScope(base(root, orca.deps, { attemptId: "cx", scope: { ...scope, id: "scopex" } }));
+  const over = await dispatchScope(base(root, orca.deps, { attemptId: "cx", scope: { ...scope, id: "scopex", authorizedPaths: ["cx.mjs"] } }));
   assert.deepEqual([over.route, over.reason], ["normal", "max-concurrent-workers"]);
   assert.equal(orca.state.starts.length, cap);
   assert.equal(ledgerOf(root).read(attemptKeyOf("cx")).status, "missing");
@@ -572,4 +574,494 @@ test("without the multi-agent switch dispatch uses the normal workflow: no claim
     assert.equal(orca.state.starts.length, 0);
     assert.equal(fs.existsSync(path.join(root, ".project/metrics")), false);
   }
+});
+
+
+test("dispatch records explicit file authority and refuses missing or ambiguous paths without a claim", async (t) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  for (const authorizedPaths of [undefined, [], ["../b.mjs"], ["/b.mjs"], ["src\\b.mjs"], ["src/*"], ["src//"], ["."], ["src/../other/"]]) {
+    const outcome = await dispatchScope(base(root, orca.deps, { scope: { ...scope, authorizedPaths } }));
+    assert.deepEqual([outcome.route, outcome.reason], ["normal", "authorized-paths-invalid"]);
+  }
+  assert.equal(orca.state.starts.length, 0);
+  assert.equal(ledgerOf(root).list().entries.length, 0);
+  assert.equal((await dispatchScope(base(root, orca.deps))).route, "launched");
+  const read = ledgerOf(root).read(attemptKeyOf("a1"));
+  assert.deepEqual(read.status === "ok" && read.record.authorizedPaths, ["b.mjs"]);
+  assert.match(orca.state.starts[0].args[3], /Authorized paths/);
+});
+
+test("an unresolved mutation lock blocks with owner guidance and does not consume a retry or claim", async (t) => {
+  const root = fixture(t);
+  const directory = path.join(root, ".project/metrics/orca-ledger");
+  fs.mkdirSync(directory, { recursive: true });
+  const lock = path.join(directory, ".mutation-lock");
+  const metadata = JSON.stringify({ pid: 999999, token: "crash-evidence", createdAt: 1 });
+  fs.writeFileSync(lock, metadata);
+  const orca = fakeOrca();
+  const outcome = await dispatchWithRetries({ ...retryBase(root, orca.deps), baseAttemptId: "blocked", maxRetries: 3 });
+  assert.deepEqual([outcome.route, outcome.reason], ["blocked", "ledger-claim-busy"]);
+  assert.match(outcome.humanAction ?? "", /mutation-lock.*owner/);
+  assert.equal(orca.state.starts.length, 0);
+  assert.equal(ledgerOf(root).list().entries.length, 0);
+  assert.equal(fs.readFileSync(lock, "utf8"), metadata, "age and a seemingly dead PID never authorize stealing ownership");
+});
+
+/** Two real coordinator processes; the vendor and all runtime probes are fakes and create no worker processes. */
+test("concurrent coordinators cannot double-own a task or exceed the worker cap", { timeout: 20000 }, async (t) => {
+  const dispatchUrl = fileUrl(path.join(HERE, "orca-dispatch.mts"));
+  const depsUrl = fileUrl(path.join(HERE, "runtime/node.mts"));
+  for (const sameTask of [true, false]) {
+    const root = fixture(t);
+    const policyPath = path.join(root, ".project/orchestration.json");
+    const policy = JSON.parse(fs.readFileSync(policyPath, "utf8"));
+    policy.maxConcurrentWorkers = sameTask ? 2 : 1;
+    fs.writeFileSync(policyPath, JSON.stringify(policy));
+    fs.mkdirSync(path.join(root, ".project/metrics/orca-ledger"), { recursive: true });
+    const children: ReturnType<typeof spawn>[] = [];
+    const closed: Promise<void>[] = [];
+    try {
+      const jobs = ["first", "second"].map((id) => {
+        const code = [
+          'import fs from "node:fs"; import path from "node:path";',
+          'const { dispatchScope } = await import(' + JSON.stringify(dispatchUrl) + ');',
+          'const { createNodeDeps } = await import(' + JSON.stringify(depsUrl) + ');',
+          'const root = ' + JSON.stringify(root) + ', id = ' + JSON.stringify(id) + ';',
+          'const deps = createNodeDeps(); const base = deps.fs.readdirSync;',
+          // Hold the measured empty snapshot long enough for a competing unprotected coordinator to read it too.
+          // With the shared lock, only its owner reaches this barrier and the bounded wait expires harmlessly.
+          'deps.fs.readdirSync = (dir) => { const names = base(dir); if (dir.endsWith("orca-ledger")) {',
+          'fs.writeFileSync(path.join(root, "read-" + id), "ready"); const until = Date.now() + 400;',
+          'while (Date.now() < until && !(fs.existsSync(path.join(root,"read-first")) && fs.existsSync(path.join(root,"read-second")))) Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,10); } return names; };',
+          'deps.child.run = async () => ({ status:0, signal:null, stderr:"", stdout: JSON.stringify({ dispatchId: "ctx_"+id }) });',
+          'const receipts = [{name:"orca-cli",markdown:"worktree current; terminal"},{name:"orchestration",markdown:"worker-start; worker_done; orchestration check"},{ok:true,result:{target:{kind:"local"},runtime:{reachable:true,state:"ready",appVersion:"1.4.224"}}}]; let index=0;',
+          'const run = () => ({status:0,signal:null,stderr:"",stdout:JSON.stringify(receipts[index++ % 3])});',
+          'process.send("ready"); await new Promise(resolve => process.once("message", resolve));',
+          'const outcome = await dispatchScope({ root, coordinator:"claude", vendor:"codex", attemptId:id,',
+          'scope: {id:' + JSON.stringify(sameTask ? "same-task" : id) + ',target:"b.mjs",change:"edit b",constraints:"only b",ownership:"b.mjs",authorizedPaths:["b.mjs"],acceptance:"b passes"},',
+          'deadlineMs:5000,now:()=>1000,deps,env:{PATH:"/usr/bin",AI_WORKFLOW_ORCA_MULTI_AGENT:"true"},run,platform:"darwin",present:()=>true});',
+          'process.send({outcome}); process.disconnect();',
+        ].join("\n");
+        const child = spawnTestChild(process.execPath, ["--input-type=module", "-e", code], { shell: false, windowsHide: true, stdio: ["ignore", "pipe", "pipe", "ipc"] });
+        children.push(child);
+        let stderr = "";
+        child.stderr!.on("data", (chunk) => { stderr += String(chunk); });
+        const close = new Promise<void>((resolve) => child.once("close", () => resolve()));
+        closed.push(close);
+        let ready!: () => void;
+        const readyPromise = new Promise<void>((resolve) => { ready = resolve; });
+        const result = new Promise<Obj>((resolve, reject) => {
+          let outcome: Obj | undefined;
+          const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error("coordinator timeout")); }, 7000);
+          child.on("message", (message: unknown) => {
+            if (message === "ready") ready();
+            else if (message && typeof message === "object" && "outcome" in message) outcome = (message as { outcome: Obj }).outcome;
+          });
+          child.once("error", (error) => { clearTimeout(timer); reject(error); });
+          child.once("close", (status) => { clearTimeout(timer); if (status === 0 && outcome) resolve(outcome); else reject(new Error("coordinator failed: " + stderr)); });
+        });
+        // Attach immediately so a child that fails before readiness cannot become an unhandled rejection.
+        const readyOrError = Promise.race([readyPromise, result.then(() => { throw new Error("exited before ready"); })]);
+        return { child, ready: readyOrError, result };
+      });
+      await Promise.all(jobs.map((job) => job.ready));
+      for (const job of jobs) job.child.send("go");
+      const outcomes = await Promise.all(jobs.map((job) => job.result));
+      assert.equal(outcomes.filter((outcome) => outcome.route === "launched").length, 1, JSON.stringify(outcomes));
+      const entries = ledgerOf(root).list().entries;
+      assert.equal(entries.length, 1, "one durable reservation across both coordinator processes");
+      assert.equal(entries[0].result.status, "ok");
+    } finally {
+      for (const child of children) if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+      await Promise.all(closed);
+    }
+  }
+});
+
+
+test("cleanup-unconfirmed errors preserve the process owner and task reservation across a fresh attempt", async (t) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  let starts = 0;
+  orca.deps.child.run = async () => { starts++; throw Object.assign(new Error("child still owns pipes"), { code: "EPROCESSCLEANUP", ownerPid: 4242 }); };
+  const outcome = await dispatchScope(base(root, orca.deps));
+  assert.deepEqual([outcome.route, outcome.reason, outcome.ownerPid], ["blocked", "launch-cleanup-unconfirmed", 4242]);
+  const record = ledgerOf(root).read(attemptKeyOf("a1"));
+  assert.equal(record.status === "ok" && record.record.state, "unknown-liveness");
+  assert.equal(record.status === "ok" && record.record.processOwnerPid, 4242);
+  const again = await dispatchScope(base(root, orca.deps, { attemptId: "replacement" }));
+  assert.equal(again.reason, "task-already-owned");
+  assert.equal(starts, 1);
+});
+
+test("residual receipts keep ownership even when a caller creates a new attempt id", async (t) => {
+  for (const behaviour of ["residual", "stderr-residual", "agent_readiness"] as const) {
+    const root = fixture(t);
+    const orca = fakeOrca([behaviour]);
+    const first = await dispatchScope(base(root, orca.deps));
+    assert.equal(first.route, "blocked");
+    assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness");
+    const replacement = await dispatchScope(base(root, orca.deps, { attemptId: "new-id" }));
+    assert.deepEqual([replacement.route, replacement.reason], ["resume", "task-already-owned"]);
+    assert.equal(orca.state.starts.length, 1, behaviour);
+  }
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonFixture(t: TestContext, text: string, legacy = false): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-dispatch-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), text);
+  if (legacy) {
+    fs.mkdirSync(path.join(root, ".project"));
+    const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+    policy["use-orca-orchestration"] = true;
+    fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  }
+  return root;
+}
+
+test("loadConfig branch: a TOON-configured root launches exactly like the legacy-configured root", async (t: TestContext) => {
+  const legacyOrca = fakeOrca();
+  const legacy = await dispatchScope(base(fixture(t), legacyOrca.deps));
+  const toonOrca = fakeOrca();
+  const toonRoot = toonFixture(t, orcaPolicyToonText(true));
+  const viaToon = await dispatchScope(base(toonRoot, toonOrca.deps));
+  assert.deepEqual([viaToon.route, viaToon.dispatchId], [legacy.route, legacy.dispatchId]);
+  assert.equal(viaToon.route, "launched");
+  assert.equal(toonOrca.state.starts.length, legacyOrca.state.starts.length);
+  assert.equal(ledgerOf(toonRoot).read(attemptKeyOf("a1")).status, "ok");
+});
+
+test("loadConfig branch: a disabled or invalid ai-workflow.toon keeps the normal workflow with no spawn, even beside an enabled legacy file", async (t: TestContext) => {
+  for (const text of [orcaPolicyToonText(false), "schemaVersion: 99\n"]) {
+    const orca = fakeOrca();
+    const root = toonFixture(t, text, true);
+    const outcome = await dispatchScope(base(root, orca.deps));
+    assert.equal(outcome.route, "normal", JSON.stringify(text.slice(0, 20)));
+    assert.equal(orca.state.starts.length, 0);
+  }
+});
+
+// ---- role pools (orca-role-pools S6) ----
+
+/** Pool policy in `ai-workflow.toon` (it wins over the legacy JSON the fixture also writes). */
+function poolFixture(t: TestContext, options: { implementation: string[]; review: string[]; cap?: number }): string {
+  const root = fixture(t);
+  const workers = [...new Set([...options.implementation, ...options.review])];
+  const text = orcaPolicyToonText(true)
+    .replace("workers[2]: codex,opencode\n        roles:\n          implementation[1]: codex\n          review[1]: opencode\n",
+      `workers[${workers.length}]: ${workers.join(",")}\n        roles:\n          implementation[${options.implementation.length}]: ${options.implementation.join(",")}\n          review[${options.review.length}]: ${options.review.join(",")}\n`)
+    .replace("maxConcurrentWorkers: 2", `maxConcurrentWorkers: ${options.cap ?? 4}`);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), text);
+  return root;
+}
+const assigned = (root: string, deps: RuntimeDeps, scopeId: string, assign: Obj, extra: Obj = {}) => {
+  const { vendor: _vendor, ...rest } = base(root, deps, { scope: { ...scope, id: scopeId, authorizedPaths: [`${scopeId}.mjs`] }, attemptId: `${scopeId}-a`, ...extra });
+  return { ...rest, assign } as ReturnType<typeof base> & { assign: Obj };
+};
+const agentOf = (start: { args: string[] }): string => start.args[start.args.indexOf("--agent") + 1];
+const done = async (root: string, scopeId: string, dispatchId: string) => collectReport({ root, attemptKey: attemptKeyOf(`${scopeId}-a`), message: message(`m-${scopeId}`, dispatchId) });
+
+test("pools: exactly one of vendor and assign, validated before any side effect", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  const both = await dispatchScope({ ...base(root, orca.deps), assign: { role: "implementation", planIndex: 0 } } as never);
+  const neither = await dispatchScope({ ...assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }), assign: undefined } as never);
+  assert.deepEqual([both.reason, neither.reason], ["invalid-assignment", "invalid-assignment"]);
+  for (const assign of [{ role: "owner", planIndex: 0 }, { role: "implementation", planIndex: -1 }, { role: "implementation", planIndex: 1.5 }, { role: "review", planIndex: 0 },
+    { role: "implementation", planIndex: 0, reviewOf: "s1" }, { role: "implementation", planIndex: 0, skip: [1] }]) {
+    assert.equal((await dispatchScope(assigned(root, orca.deps, "s1", assign) as never)).reason, "invalid-assignment", JSON.stringify(assign));
+  }
+  assert.equal(orca.state.starts.length, 0);
+  assert.equal(fs.existsSync(path.join(root, ".project/metrics")), false);
+});
+
+test("pools: implementation scopes spread round-robin by plan position over the pool", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  for (const [index, id] of ["s1", "s2", "s3"].entries()) {
+    const out = await dispatchScope(assigned(root, orca.deps, id, { role: "implementation", planIndex: index }) as never);
+    assert.equal(out.route, "launched", JSON.stringify(out));
+  }
+  assert.deepEqual(orca.state.starts.map(agentOf), ["opencode", "codex", "opencode"]);
+});
+
+test("pools: a recorded owner is never reassigned, even when the skip list or plan position changes", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  assert.equal((await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never)).route, "launched");
+  const again = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 1, skip: ["opencode"] }, { attemptId: "s1-b" }) as never);
+  assert.deepEqual([again.route, again.reason], ["resume", "task-already-owned"]);
+  assert.deepEqual(orca.state.starts.map(agentOf), ["opencode"]);
+  const resolved = resolveAssignment({ root, coordinator: "claude", scopeId: "s1", assign: { role: "implementation", planIndex: 1, skip: ["opencode"] }, deps: nodeDeps });
+  assert.deepEqual(resolved, { vendor: "opencode" });
+});
+
+test("pools: a proven-clean failure rotates to the next member, through a fresh gate each time", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca(["plain-fail", "ok"]);
+  const spy = probe();
+  const outcome = await dispatchWithRetries({ ...retryBase(root, orca.deps), vendor: undefined, assign: { role: "implementation", planIndex: 0 }, baseAttemptId: "r1", maxRetries: 1, run: spy.run } as never);
+  assert.deepEqual([outcome.route, outcome.reason], ["launched", "launched"]);
+  assert.deepEqual(orca.state.starts.map(agentOf), ["opencode", "codex"]);
+  const single = probe();
+  await dispatchScope(base(fixture(t), fakeOrca().deps, { run: single.run }));
+  assert.equal(spy.state.calls, 2 * single.state.calls, "every attempt, including the rotated one, runs the full launch gate");
+  assert.deepEqual(["r1", "r1-r1"].map((id) => stateOf(root, attemptKeyOf(id))), ["failed", "launched"]);
+});
+
+test("pools: a gate denial for the next member stops the rotation (no spawn)", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca(["plain-fail"]);
+  const first = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never);
+  assert.deepEqual([first.route, first.retryable], ["blocked", true]);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(false));
+  const next = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }, { attemptId: "s1-r1" }) as never);
+  assert.deepEqual([next.route, next.reason], ["normal", "policy-disabled"]);
+  assert.equal(orca.state.starts.length, 1);
+});
+
+for (const behaviour of ["unreadable", "timeout", "signal", "residual", "agent_readiness", "bare-object", "overflow", "stderr-residual"] as const) {
+  test(`pools: ${behaviour} never rotates to another member (one attempt, one spawn)`, async (t: TestContext) => {
+    const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+    const orca = fakeOrca([behaviour, "ok"]);
+    const outcome = await dispatchWithRetries({ ...retryBase(root, orca.deps), vendor: undefined, assign: { role: "implementation", planIndex: 0 }, baseAttemptId: "u1", maxRetries: 2 } as never);
+    assert.notEqual(outcome.route, "launched");
+    assert.equal(orca.state.starts.length, 1);
+    const listed = ledgerOf(root).list();
+    assert.equal(listed.status === "ok" ? listed.entries.length : -1, 1);
+    assert.equal(stateOf(root, attemptKeyOf("u1")), "unknown-liveness");
+  });
+}
+
+test("pools: the policy retry cap ends the retry loop; a further dispatch finds every member tried and is blocked pool-exhausted", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca(["plain-fail"]);
+  const outcome = await dispatchWithRetries({ ...retryBase(root, orca.deps), vendor: undefined, assign: { role: "implementation", planIndex: 0 }, baseAttemptId: "x1", maxRetries: 2 } as never);
+  assert.equal(outcome.route, "blocked");
+  assert.deepEqual(orca.state.starts.map(agentOf), ["opencode", "codex"]);
+  assert.equal(outcome.reason, "launch-failed:retries-exhausted", "policy maxRetriesPerTask (1) stops the loop after two attempts");
+  const third = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }, { attemptId: "x1-r2" }) as never);
+  assert.deepEqual([third.route, third.reason], ["blocked", "pool-exhausted"]);
+  assert.ok(third.humanAction);
+  assert.equal(orca.state.starts.length, 2);
+});
+
+test("pools: a reviewer comes from the review pool and is never the scope's implementer", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex"], review: ["codex", "opencode"] });
+  const orca = fakeOrca();
+  const built = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never);
+  assert.equal(built.route, "launched");
+  const early = await dispatchScope(assigned(root, orca.deps, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }) as never);
+  assert.deepEqual([early.route, early.reason], ["blocked", "implementer-unknown"]);
+  assert.equal((await done(root, "s1", built.dispatchId as string)).accepted, true);
+  const review = await dispatchScope(assigned(root, orca.deps, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }) as never);
+  assert.equal(review.route, "launched");
+  assert.deepEqual(orca.state.starts.map(agentOf), ["codex", "opencode"]);
+});
+
+test("pools: a review pool with no member other than the implementer is blocked with a human action and no spawn", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  const built = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never);
+  await done(root, "s1", built.dispatchId as string);
+  const review = await dispatchScope(assigned(root, orca.deps, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }) as never);
+  assert.deepEqual([review.route, review.reason], ["blocked", "review-independence-unavailable"]);
+  assert.ok(review.humanAction);
+  assert.equal(orca.state.starts.length, 1);
+  assert.equal(stateOf(root, attemptKeyOf("r1-a")), "missing");
+});
+
+test("pools: a retry on a second member cannot be completed with the first member's dispatch id", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca(["ok", "ok"]);
+  const first = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never);
+  ledgerOf(root).update(attemptKeyOf("s1-a"), { state: "failed" });
+  const second = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }, { attemptId: "s1-r1" }) as never);
+  assert.equal(second.route, "launched");
+  assert.deepEqual(orca.state.starts.map(agentOf), ["opencode", "codex"]);
+  const stale = collectReport({ root, attemptKey: attemptKeyOf("s1-r1"), message: message("m-stale", first.dispatchId as string) });
+  assert.deepEqual([stale.accepted, stale.reason], [false, "dispatch-mismatch"]);
+});
+
+test("pools: capacity of 16 admits sixteen simultaneous scopes and refuses the seventeenth", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"], cap: 16 });
+  const orca = fakeOrca();
+  for (let index = 0; index < 16; index++) {
+    assert.equal((await dispatchScope(assigned(root, orca.deps, `p${index}`, { role: "implementation", planIndex: index }) as never)).route, "launched", `scope ${index}`);
+  }
+  const over = await dispatchScope(assigned(root, orca.deps, "p16", { role: "implementation", planIndex: 16 }) as never);
+  assert.deepEqual([over.route, over.reason], ["normal", "max-concurrent-workers"]);
+  assert.equal(orca.state.starts.length, 16);
+});
+
+test("pools: a live scope with overlapping authorized paths is refused before spawn; disjoint and completed ones are not", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  const withPaths = (id: string, authorizedPaths: string[], index: number) =>
+    assigned(root, orca.deps, id, { role: "implementation", planIndex: index }, { scope: { ...scope, id, authorizedPaths } }) as never;
+  const first = await dispatchScope(withPaths("o1", ["src/"], 0));
+  assert.equal(first.route, "launched");
+  const clash = await dispatchScope(withPaths("o2", ["src/a.mjs"], 1));
+  assert.deepEqual([clash.route, clash.reason], ["normal", "authorized-paths-overlap"]);
+  assert.equal(stateOf(root, attemptKeyOf("o2-a")), "missing");
+  assert.equal((await dispatchScope(withPaths("o3", ["docs/"], 1))).route, "launched");
+  assert.equal(orca.state.starts.length, 2);
+  await collectReport({ root, attemptKey: attemptKeyOf("o1-a"), message: message("m-o1", first.dispatchId as string) });
+  assert.equal((await dispatchScope(withPaths("o2", ["src/a.mjs"], 1))).route, "launched", "a completed attempt no longer blocks");
+});
+
+test("pools: the legacy single-string policy still assigns through its one-element pools", async (t: TestContext) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  const outcome = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 5 }) as never);
+  assert.equal(outcome.route, "launched");
+  assert.equal(agentOf(orca.state.starts[0]), (policyReport(root, "claude", nodeDeps) as { pools: { implementation: string[] } }).pools.implementation[0]);
+});
+
+test("pools: a failed attempt that was later settled is a tried vendor, not an owner, so rotation still moves on", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca(["plain-fail", "ok"]);
+  const first = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never);
+  assert.deepEqual([first.route, first.retryable], ["blocked", true]);
+  assert.equal(ledgerOf(root).update(attemptKeyOf("s1-a"), { state: "settled" }).status, "ok");
+  assert.deepEqual(resolveAssignment({ root, coordinator: "claude", scopeId: "s1", assign: { role: "implementation", planIndex: 0 }, deps: nodeDeps }), { vendor: "codex" });
+  const next = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }, { attemptId: "s1-r1" }) as never);
+  assert.equal(next.route, "launched");
+  assert.deepEqual(orca.state.starts.map(agentOf), ["opencode", "codex"]);
+});
+
+test("pools: a completed-then-settled attempt keeps its vendor (the report id marks it as having succeeded)", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode", "codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  const built = await dispatchScope(assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }) as never);
+  await done(root, "s1", built.dispatchId as string);
+  assert.equal(ledgerOf(root).update(attemptKeyOf("s1-a"), { state: "settled" }).status, "ok");
+  assert.deepEqual(resolveAssignment({ root, coordinator: "claude", scopeId: "s1", assign: { role: "implementation", planIndex: 1 }, deps: nodeDeps }), { vendor: "opencode" });
+});
+
+// ---- audit cycle 1: direct resolveAssignment coverage ----
+
+let seedClock = 1_000_000;
+/** Seeds one ledger attempt directly (bypassing dispatch) so history-dependent picks can be tested. */
+function seed(root: string, scopeId: string, attemptId: string, vendor: string, state: "claimed" | "launched" | "failed" | "completed" | "settled", extra: Obj = {}): void {
+  const ledger = ledgerOf(root);
+  const record = { attemptKey: attemptKeyOf(attemptId), taskKey: taskKeyOf(scopeId), vendor, state: "claimed" as const, createdAt: seedClock++, authorizedPaths: [`${attemptId}.mjs`], ...extra };
+  assert.equal(ledger.claim(record as never).outcome, "claimed");
+  const steps: Record<string, Obj[]> = { claimed: [], launched: [{ state: "launched", dispatchId: `d-${attemptId}` }], failed: [{ state: "failed" }],
+    completed: [{ state: "launched", dispatchId: `d-${attemptId}` }, { state: "completed", reportId: `r-${attemptId}` }],
+    settled: [{ state: "launched", dispatchId: `d-${attemptId}` }, { state: "completed", reportId: `r-${attemptId}` }, { state: "settled" }] };
+  for (const patch of steps[state]) assert.equal(ledger.update(record.attemptKey, patch as never).status, "ok");
+}
+const resolve = (root: string, scopeId: string, assign: Obj, coordinator = "claude") => resolveAssignment({ root, coordinator, scopeId, assign: assign as never, deps: nodeDeps });
+const threeWay = (t: TestContext) => poolFixture(t, { implementation: ["opencode", "claude", "codex"], review: ["codex", "claude", "opencode"] });
+
+test("pools: resolveAssignment rejects malformed shapes and ids without reading the ledger", (t: TestContext) => {
+  const root = threeWay(t);
+  for (const [scopeId, assign] of [["s1", { role: "implementation", planIndex: -1 }], ["s1", { role: "implementation", planIndex: 1.5 }], ["s1", { role: "review", planIndex: 0 }],
+    ["s1", { role: "review", planIndex: 0, reviewOf: "../x" }], ["s1", { role: "implementation", planIndex: 0, skip: [1] }], ["../x", { role: "implementation", planIndex: 0 }]] as const) {
+    assert.deepEqual(resolve(root, scopeId, assign), { outcome: { route: "normal", reason: "invalid-assignment" } }, JSON.stringify([scopeId, assign]));
+  }
+  assert.equal(fs.existsSync(path.join(root, ".project/metrics")), false);
+});
+
+test("pools: an unconfigured coordinator or role pool is role-pool-unconfigured", (t: TestContext) => {
+  const root = fixture(t);
+  const policyPath = path.join(root, ".project/orchestration.json");
+  const value = JSON.parse(fs.readFileSync(policyPath, "utf8")) as { coordinators: Obj };
+  delete value.coordinators.claude;
+  fs.writeFileSync(policyPath, JSON.stringify(value));
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }), { outcome: { route: "normal", reason: "role-pool-unconfigured" } });
+});
+
+test("pools: a corrupt ledger record blocks the assignment instead of being skipped", (t: TestContext) => {
+  const root = threeWay(t);
+  seed(root, "s9", "ok-1", "codex", "failed");
+  fs.writeFileSync(path.join(root, ".project/metrics/orca-ledger/attempt-bad.json"), "{not json");
+  const out = resolve(root, "s1", { role: "implementation", planIndex: 0 });
+  assert.ok("outcome" in out);
+  assert.deepEqual([out.outcome.route, out.outcome.reason], ["blocked", "ledger-corrupt"]);
+  assert.ok(out.outcome.humanAction);
+});
+
+test("pools: a refused (symlinked) ledger directory blocks the assignment", { skip: process.platform === "win32" }, (t: TestContext) => {
+  const root = threeWay(t);
+  fs.mkdirSync(path.join(root, ".project/metrics"), { recursive: true });
+  fs.mkdirSync(path.join(root, "elsewhere"));
+  fs.symlinkSync(path.join(root, "elsewhere"), path.join(root, ".project/metrics/orca-ledger"));
+  const out = resolve(root, "s1", { role: "implementation", planIndex: 0 });
+  assert.ok("outcome" in out);
+  assert.deepEqual([out.outcome.route, out.outcome.reason], ["blocked", "ledger-refused"]);
+});
+
+test("pools: rotation uses the whole failure history, not only the last attempt", (t: TestContext) => {
+  const root = threeWay(t);
+  seed(root, "s1", "h1", "claude", "failed");
+  seed(root, "s1", "h2", "opencode", "failed");
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }), { vendor: "codex" });
+});
+
+test("pools: skip removes members from the first pick, from rotation and from review", (t: TestContext) => {
+  const root = threeWay(t);
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0, skip: ["opencode"] }), { vendor: "claude" });
+  seed(root, "s2", "k1", "opencode", "failed");
+  assert.deepEqual(resolve(root, "s2", { role: "implementation", planIndex: 0, skip: ["claude"] }), { vendor: "codex" });
+  seed(root, "s3", "i1", "codex", "completed");
+  assert.deepEqual(resolve(root, "r3", { role: "review", planIndex: 0, reviewOf: "s3", skip: ["claude"] }), { vendor: "opencode" });
+});
+
+test("pools: a rotating reviewer still excludes the implementer", (t: TestContext) => {
+  const root = threeWay(t);
+  seed(root, "s1", "i1", "codex", "completed");
+  seed(root, "r1", "v1", "claude", "failed");
+  assert.deepEqual(resolve(root, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }), { vendor: "opencode" });
+  seed(root, "r1", "v2", "opencode", "failed");
+  const out = resolve(root, "r1", { role: "review", planIndex: 0, reviewOf: "s1" });
+  assert.ok("outcome" in out);
+  assert.deepEqual([out.outcome.route, out.outcome.reason], ["blocked", "pool-exhausted"]);
+});
+
+test("pools: the reviewed implementer is the latest completed or settled attempt of that exact task", (t: TestContext) => {
+  const root = threeWay(t);
+  seed(root, "other", "o1", "codex", "completed");
+  seed(root, "s1", "i1", "claude", "settled");
+  assert.deepEqual(resolve(root, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }), { vendor: "codex" });
+  const none = resolve(root, "r2", { role: "review", planIndex: 0, reviewOf: "missing" });
+  assert.ok("outcome" in none);
+  assert.deepEqual([none.outcome.route, none.outcome.reason], ["blocked", "implementer-unknown"]);
+  assert.match(String(none.outcome.humanAction), /completed attempt/);
+});
+
+test("pools: blocked outcomes carry a human action that names the next step", (t: TestContext) => {
+  const solo = poolFixture(t, { implementation: ["codex"], review: ["codex"] });
+  seed(solo, "s1", "i1", "codex", "completed");
+  const same = resolve(solo, "r1", { role: "review", planIndex: 0, reviewOf: "s1" });
+  assert.ok("outcome" in same);
+  assert.match(String(same.outcome.humanAction), /review pool/);
+  seed(solo, "s2", "f1", "codex", "failed");
+  const spent = resolve(solo, "s2", { role: "implementation", planIndex: 0 });
+  assert.ok("outcome" in spent);
+  assert.deepEqual([spent.outcome.reason, spent.outcome.route], ["pool-exhausted", "blocked"]);
+  assert.match(String(spent.outcome.humanAction), /tried or skipped/);
+});
+
+test("pools: the coordinator selects its own pool", (t: TestContext) => {
+  const root = threeWay(t);
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }, "codex"), { vendor: "claude" });
+  assert.deepEqual(resolve(root, "s1", { role: "review", planIndex: 0, reviewOf: "zz" }, "codex") as never, { outcome: { route: "blocked", reason: "implementer-unknown", humanAction: "the scope under review has no completed attempt; dispatch it and collect its report first" } } as never);
+});
+
+test("pools: every non-failed holder keeps its vendor, including unknown-liveness (two writers must never own one scope)", (t: TestContext) => {
+  for (const [state, setup] of [["claimed", (root: string) => seed(root, "s1", "a1", "claude", "claimed")], ["launched", (root: string) => seed(root, "s1", "a1", "claude", "launched")],
+    ["completed", (root: string) => seed(root, "s1", "a1", "claude", "completed")]] as const) {
+    const root = threeWay(t);
+    setup(root);
+    assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }), { vendor: "claude" }, state);
+  }
+  const root = threeWay(t);
+  seed(root, "s1", "a1", "claude", "launched");
+  assert.equal(ledgerOf(root).update(attemptKeyOf("a1"), { state: "unknown-liveness" }).status, "ok");
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }), { vendor: "claude" }, "unknown-liveness is preserved, never rotated");
 });

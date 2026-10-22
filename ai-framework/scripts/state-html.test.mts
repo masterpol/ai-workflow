@@ -1,10 +1,11 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { createTestDeps, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 
 import { buildSnapshot } from "./state-snapshot.mts";

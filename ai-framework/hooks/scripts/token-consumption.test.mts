@@ -1,14 +1,16 @@
 import { NODE_FLAGS } from "../../scripts/runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
+// Bun child processes can deadlock when requiring the same .mts file concurrently; use Node for the writer fixture.
+const CHILD_EXEC = process.versions.bun ? "node" : process.execPath;
+const CHILD_FLAGS = process.versions.bun ? NODE_FLAGS : RUNTIME_FLAGS;
 import assert from "node:assert/strict";
-import { spawn, spawnSync } from "node:child_process";
-import fs from "node:fs";
-import net from "node:net";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, fileUrl, urlPath, spawnTestChild, spawnSync, adapterNet as net } from "../../scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test, { after } from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
 
 import type { RuntimeDeps, WriteOptions } from "../../scripts/runtime/types.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
@@ -16,7 +18,7 @@ import { recordEvent, normalizedEvent, applyToSnapshot, blankSnapshot, main } fr
 import type { CollectorInput, CompletionRecord, Routing } from "./token-consumption.mts";
 import { endpointFor } from "./metrics-lock.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 // Snapshot JSON read back from disk is whatever JSON.parse returns (untyped in the TS lib); tests index into it
 // as the old tests did. No explicit escape-hatch type is written here.
 type Json = ReturnType<typeof JSON.parse>;
@@ -710,7 +712,7 @@ test("stored current and previous records with the wrong shape start a fresh sna
 });
 
 test("a file-system error reaches stderr as a code, never with the project path", async (t) => {
-  if (process.getuid && process.getuid() === 0) return;
+  if (process.platform === "win32" || (process.getuid && process.getuid() === 0)) { t.skip("requires POSIX directory permissions without root privileges"); return; }
   const root = metricsRoot(t);
   await recordEvent(event(), root);
   const directory = path.join(root, ".project/metrics");
@@ -743,7 +745,8 @@ test("a FIFO or oversize modes.json is skipped without blocking, and the mode si
   assert.equal(readSnap(bigRoot).current.mode, null, "an oversize modes.json is not read");
 });
 
-test("a snapshot whose dimension rows or stored routing are hostile is replaced, not left to fail every later event", async (t) => {
+// Six hostile snapshots each require three real collector processes; retain every case with an integration budget.
+test("a snapshot whose dimension rows or stored routing are hostile is replaced, not left to fail every later event", { timeout: 30000 }, async (t) => {
   const seeded = async (mutate: (snapshot: Json) => void): Promise<string> => {
     const root = metricsRoot(t);
     await recordEvent(event(), root);
@@ -840,10 +843,16 @@ test("a real-shaped snapshot from this collector validates and keeps its totals 
 // A lease or test server left open by a failed assertion must fail this file, not hang it (see metrics-lock.test.mts).
 // Node only: `node --test` runs each file in its own process, but `bun test <dir>` runs every file in ONE process,
 // where this timer would end the whole run (and its report) two seconds after this file finished.
-if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => { setTimeout(() => process.exit(), 2000).unref(); });
+if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => {
+  setTimeout(() => {
+    process.stderr.write("Test leaked a lease, server or child after cleanup\n");
+    process.exit(1);
+  }, 2000).unref();
+});
 
 // Each child waits at a barrier (one stdin line) so all of them contend at once, then records five
 // events of its own plus one event whose id every child shares.
+const WRITER_BARRIER_MS = typeof (globalThis as { Bun?: unknown }).Bun !== "undefined" ? 30000 : 5000;
 const WRITER = `
 const { recordEvent } = require(process.argv[1]);
 const [root, prefix] = [process.argv[2], process.argv[3]];
@@ -860,15 +869,16 @@ process.stdout.write("ready\\n");`;
 test("concurrent writer processes keep exact totals, and a shared event id is counted once", async (t) => {
   const root = metricsRoot(t);
   const writers = Array.from({ length: 6 }, (_, index) => {
-    const child = spawn(process.execPath, [...RUNTIME_FLAGS, "-e", WRITER, COLLECTOR, root, `w${index}`], { stdio: ["pipe", "pipe", "pipe"] });
+    // The writer imports the collector, which re-executes itself under the configured runner; pin it to the Node child.
+    const child = spawnTestChild(CHILD_EXEC, [...CHILD_FLAGS, "-e", WRITER, COLLECTOR, root, `w${index}`], { stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, AI_WORKFLOW_RUNNER: "node" } });
     let output = "";
     let errors = "";
     child.stdout.on("data", (chunk: Buffer) => { output += chunk; });
     child.stderr.on("data", (chunk: Buffer) => { errors += chunk; });
-    t.after(() => { if (child.exitCode == null) child.kill("SIGKILL"); });
+    t.after(() => { if (child.exitCode == null && child.signalCode == null) child.kill("SIGKILL"); });
     const exited = new Promise((resolve) => child.on("exit", resolve));
     const ready = new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("writer never reached the barrier")), 5000);
+      const timer = setTimeout(() => reject(new Error("writer never reached the barrier")), WRITER_BARRIER_MS);
       child.stdout.on("data", () => { if (output.includes("ready")) { clearTimeout(timer); resolve(); } });
     });
     return { child, exited, ready, result: () => ({ output, errors }) };
@@ -925,17 +935,25 @@ test("another program on the metrics endpoint makes recordEvent skip within its 
 });
 
 test("the lease is released even when recording throws, so the next event is not blocked", async (t) => {
-  if (process.getuid && process.getuid() === 0) { t.skip("root ignores directory permissions"); return; }
   const root = metricsRoot(t);
   await recordEvent(event(), root);
-  // A metrics directory that cannot be written makes the atomic write throw while the lease is held.
-  const metrics = path.join(root, ".project", "metrics");
-  fs.chmodSync(metrics, 0o500);
-  try {
-    await assert.rejects(() => recordEvent(event({ agent_id: "b" }), root), { code: "EACCES" });
-  } finally { fs.chmodSync(metrics, 0o700); }
+  const base = createNodeDeps();
+  let failures = 0;
+  const deps: RuntimeDeps = {
+    ...base,
+    fs: { ...base.fs, writeFileSync(file, data, options) {
+      if (String(file).includes("token-consumption.json.") && options?.flag === "wx") {
+        failures += 1;
+        throw Object.assign(new Error("injected write failure"), { code: "EACCES" });
+      }
+      return base.fs.writeFileSync(file, data, options);
+    } },
+  };
+  await assert.rejects(() => recordEvent(event({ agent_id: "b" }), root, {}, deps), { code: "EACCES" });
+  assert.equal(failures, 1, "the write failed after acquiring the lease");
   const next = await recordEvent(event({ agent_id: "c" }), root, { lock: { waitMs: 100 } });
   assert.equal(next.written, true, "a failure inside the lease did not leave it held");
+  assert.equal(readSnap(root).lifetime.agentCompletions, 2, "the failed event never changed the snapshot");
 });
 
 // ---- ts-runtime-injection: main(argv, deps) driven by injected deps (stdin, stderr, clock, crypto, pid, cwd) ----
@@ -1029,7 +1047,7 @@ const inBun = typeof (globalThis as { Bun?: unknown }).Bun !== "undefined";
 const ADAPTER = inBun ? "bun" : "node";
 async function adapterDeps(): Promise<RuntimeDeps> {
   if (!inBun) return createNodeDeps();
-  const url = pathToFileURL(path.join(here, "..", "..", "scripts", "runtime", "bun.mts")).href;
+  const url = fileUrl(path.join(here, "..", "..", "scripts", "runtime", "bun.mts"));
   const { createBunDeps } = (await import(url)) as { createBunDeps(): RuntimeDeps };
   return createBunDeps();
 }

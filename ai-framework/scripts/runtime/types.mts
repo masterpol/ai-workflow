@@ -60,12 +60,15 @@ export interface FsDeps {
   lstatSync(file: string): StatLike;
   fstatSync(fd: number): StatLike;
   symlinkSync(target: string, link: string): void;
+  /** Hard link; fails with EEXIST when `link` exists (used for no-overwrite moves). */
+  linkSync(existing: string, link: string): void;
   rmSync(file: string, options?: { recursive?: boolean; force?: boolean }): void;
   rmdirSync(dir: string): void;
   renameSync(from: string, to: string): void;
   unlinkSync(file: string): void;
   copyFileSync(from: string, to: string, mode?: number): void;
   chmodSync(file: string, mode: number): void;
+  utimesSync(file: string, atime: Date | number, mtime: Date | number): void;
   fchmodSync(fd: number, mode: number): void;
   openSync(file: string, flags: string | number, mode?: number): number;
   closeSync(fd: number): void;
@@ -120,6 +123,11 @@ export interface RunResult {
 export interface ChildDeps {
   runBytesSync(command: string, args: string[], options?: SpawnOptions): { status: number | null; signal: string | null; stdout: Uint8Array; stderr: Uint8Array };
   runSync(command: string, args: string[], options?: SpawnOptions): RunResult;
+  /** Hidden and awaited. Deadline/cap cleanup awaits real pipe closure. If cleanup cannot
+   * be confirmed, rejects EPROCESSCLEANUP with ownerPid; the PID remains observable via
+   * pendingChildPids() until close. Callers must treat this as unknown liveness, not a failed launch.
+   * POSIX descendants must remain in their process group; Windows tree cleanup requires
+   * the owning wrapper to remain alive. Detached/daemonized workers need an external supervisor. */
   run(command: string, args: string[], options?: SpawnOptions): Promise<RunResult>;
 }
 

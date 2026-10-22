@@ -1,14 +1,13 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
-import fs from "node:fs";
-import { createRequire } from "node:module";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, urlPath, execFileSync, spawnSync, moduleRequire } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
@@ -20,8 +19,8 @@ import * as skillVendors from "./skill-vendors.mts";
 import * as skillRegistry from "./skill-registry.mts";
 
 // The remaining siblings are CommonJS; the typed views below are the surface this test uses.
-const require = createRequire(import.meta.url);
-const here = path.dirname(fileURLToPath(import.meta.url));
+const require = moduleRequire(import.meta.url);
+const here = path.dirname(urlPath(import.meta.url));
 const { identity, frontmatter, safeRelative, inspectSource } = skillSource;
 const { discoverVendors, adapters } = skillVendors;
 const { context, digest, json, snapshot, readRegistry, transact, recover, resolveFile } = skillRegistry as RegistryApi;
@@ -153,7 +152,7 @@ function fixture(t: TestContext) {
 function files(root: string): Record<string, string> {
   const result: Record<string, string> = {};
   function walk(directory: string): void {
-    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    for (const entry of fs.readdirEntriesSync(directory)) {
       const full = path.join(directory, entry.name);
       if (entry.isDirectory()) walk(full);
       else result[path.relative(root, full)] = entry.isSymbolicLink() ? `link:${fs.readlinkSync(full)}` : fs.readFileSync(full).toString("base64");

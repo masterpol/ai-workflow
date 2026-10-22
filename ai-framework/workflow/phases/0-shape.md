@@ -53,6 +53,15 @@ Name 2-5 specific unknowns. Each gets one of three dispositions:
 
 Explicit exclusions. Forces honesty. Forces focus.
 
+### AI-prompt scope (definition)
+
+A scope is an **AI-prompt scope** when it changes how an AI model behaves in the product, wherever the files live:
+a prompt, system instruction or few-shot example; the model, its parameters or its fallback; the tools, schema or
+context given to a model; or the parsing, validation or use of model output at an LLM call site. Directory names are
+only examples (`lib/ai/prompts/` is one common layout); moving a prompt elsewhere does not change the classification.
+Every "AI-prompt scope" trigger in the phases, skills and agents (`/critique` auto-fire, the golden-eval hard gate,
+`eval-regression-projector`, `eval-runner`, `/shape-lite` escalation) uses this definition.
+
 ### 6. /critique (auto for big-batch + AI-prompt scopes)
 
 Parallel fan-out of perspective subagents that pre-mortem the pitch. **Advisory, not gating** — user can acknowledge findings and bet anyway with reason logged.
@@ -65,7 +74,9 @@ Parallel fan-out of perspective subagents that pre-mortem the pitch. **Advisory,
 | `cross-pitch-projector` | ≥2 active pitches | fast | Projects file-set overlap against other active pitches' planned work |
 | `eval-regression-projector` | AI-prompt scopes | standard | "What regression types is your golden case *not* checking?" |
 
-Skipped automatically for small-batch, bug-fix, hotfix.
+Within `/shape`, skip only for non-AI small-batch work; changes to AI behavior require critique regardless of appetite
+or file location. Bug-fix and hotfix bypass this pre-bet step under the overview's direct workflows, but their
+AI-prompt scopes still require the evaluation checks in `/audit`.
 
 Output: a "Critique findings" section appended to `pitch.md` with severity / type / suggested addition.
 

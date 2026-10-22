@@ -1,18 +1,18 @@
 import { NODE_FLAGS } from "../../scripts/runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, urlPath, spawnSync } from "../../scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { markdown, html, main } from "./token-report.mts";
 import { blankSnapshot, recordEvent } from "./token-consumption.mts";
 import type { Dimensions, Snapshot } from "./token-consumption.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 type Loose = Record<string, unknown>;
 // Fixtures deliberately put hostile or wrong-typed values where the snapshot type expects valid ones.
 const loose = (snapshot: Snapshot): Loose => snapshot as unknown as Loose;

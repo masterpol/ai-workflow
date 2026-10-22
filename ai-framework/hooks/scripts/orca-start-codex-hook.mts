@@ -5,7 +5,9 @@ import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 const PHASES = new Set(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
 const DEADLINE_MS = 5000;
 const DECISION_MS = 4000;
-const MAX_INPUT_BYTES = 64 * 1024;
+// Ordinary prompts can be large pastes; only a phase invocation's arguments are size-limited.
+const MAX_INPUT_BYTES = 4 * 1024 * 1024;
+const MAX_ARGS_BYTES = 64 * 1024;
 type ObjectValue = Record<string, unknown>;
 const object = (value: unknown): value is ObjectValue => value !== null && typeof value === "object" && !Array.isArray(value);
 const blockedLine = (reason: string): string => `Orca requested but not ready: ${reason}. Fix it, or re-invoke with orca=normal to run this phase without Orca.\n`;
@@ -26,6 +28,10 @@ function leadingPhase(prompt: string): { phase: string; argsText: string } | und
   return { phase: token[1], argsText: prompt.slice(token[0].length) };
 }
 
+// Config cutover (unified-toon-config c2.4): the opt-in switch is read through orcaMultiAgentEnabled -> loadConfigEnv ->
+// loadConfig, so a valid <root>/ai-workflow.toon wins and legacy ai_workflow_env.json is only a fallback while no TOON file
+// exists (migrate with ai-framework/scripts/config-migrate.mts). A present but invalid TOON file fails closed (switch off);
+// this hook never reads either file itself.
 /** Only opted-in Codex phase prompts load the start decision library. */
 export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   const given = rootArgument(argv);
@@ -46,6 +52,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     if (typeof value.prompt !== "string") return block("invalid-hook-input");
     const match = leadingPhase(value.prompt);
     if (!match) return 0;
+    if (new TextEncoder().encode(match.argsText).length > MAX_ARGS_BYTES) return block("invalid-hook-input");
     if (!given || !deps.path.isAbsolute(given)) return block("invalid-root");
     try { if (!deps.fs.statSync(given).isDirectory()) return block("invalid-root"); }
     catch { return block("invalid-root"); }

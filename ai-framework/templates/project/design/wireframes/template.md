@@ -2,8 +2,8 @@
 
 **Date**: YYYY-MM-DD
 **Feature**: [Feature name]
-**Design Plan**: `.project/design/plans/YYYY-MM-DD-feature-name.md`
-**Design System**: `.project/design/ux/design-system.md`
+**Pitch plan**: `.project/pitches/{slug}/plan.md`
+**Design reference**: [Path to the project's actual brand or design-system reference]
 
 ---
 
@@ -88,13 +88,15 @@ stateDiagram-v2
 
 ## Design Tokens Used
 
+Replace bracketed token names with the implementation's actual names. Reference values are not an implemented theme.
+
 | Token | Value | Usage |
 |-------|-------|-------|
-| `--primary` | Arka Red | CTA buttons, active states |
-| `--background` | cream-50 | Page background |
-| `--card` | white | Card surfaces |
-| `text-sm` | 14px | Labels, metadata |
-| `rounded-lg` | 8px | Card corners |
+| [Primary token] | [Approved brand value] | Primary actions and active states |
+| [Background token] | [Approved background value] | Page background |
+| [Surface token] | [Approved surface value] | Card surfaces |
+| [Text token] | [Size from the project's type scale] | Labels and metadata |
+| [Shape token] | [Radius from the project's design system] | Card corners |
 
 ---
 

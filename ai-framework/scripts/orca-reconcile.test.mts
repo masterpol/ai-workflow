@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+import { createTestDeps, fileUrl, spawnTestChild, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
@@ -22,7 +23,7 @@ const ENV = { PATH: process.env.PATH, [SWITCH]: "true", SECRET_TOKEN: "do-not-le
 const NODE = process.execPath;
 
 function git(cwd: string, ...args: string[]): string {
-  const result = spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1" } });
+  const result = spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", windowsHide: true, timeout: 30000, env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1" } });
   assert.equal(result.status, 0, `git ${args.join(" ")}: ${result.stderr}`);
   return result.stdout.trim();
 }
@@ -49,10 +50,12 @@ function worker(f: Fixture, name: string, edit: (dir: string) => void, commit = 
   if (commit) { git(dir, "add", "-A"); git(dir, "commit", "-q", "-m", name); }
   return { attemptKey: attemptKeyOf(name), worktree: { path: dir, baseline: f.baseline, allowedRoots: [f.workspace] } };
 }
-function complete(f: Fixture, attempt: ReconcileAttempt, state: "completed" | "launched" = "completed"): void {
+function complete(f: Fixture, attempt: ReconcileAttempt, state: "completed" | "launched" = "completed", authorizedPaths?: readonly string[]): void {
   const ledger = createLedger(f.root, deps);
   const name = attempt.attemptKey.slice("attempt:".length);
-  assert.equal(ledger.claim({ attemptKey: attempt.attemptKey, taskKey: taskKeyOf(`scope-${name}`), vendor: "codex", state: "claimed", createdAt: 1790000000000 }).outcome, "claimed");
+  // Existing fixtures approve their test-defined edit; boundary tests supply a narrower authority explicitly.
+  const approved = authorizedPaths ?? git(attempt.worktree.path, "diff", "--no-renames", "--name-only", "-z", f.baseline).split("\0").filter(Boolean);
+  assert.equal(ledger.claim({ authorizedPaths: approved, attemptKey: attempt.attemptKey, taskKey: taskKeyOf(`scope-${name}`), vendor: "codex", state: "claimed", createdAt: 1790000000000 }).outcome, "claimed");
   assert.equal(ledger.update(attempt.attemptKey, { state: "launched", dispatchId: `ctx_${name}` }).status, "ok");
   if (state === "completed") assert.equal(ledger.update(attempt.attemptKey, { state: "completed", reportId: `msg_${name}` }).status, "ok");
 }
@@ -74,7 +77,7 @@ const read = (dir: string, file: string): string => fs.readFileSync(path.join(di
 const snapshotTree = (dir: string): Record<string, string> => {
   const out: Record<string, string> = {};
   const walk = (current: string): void => {
-    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+    for (const entry of fs.readdirEntriesSync(current)) {
       if (entry.name === ".git") continue;
       const full = path.join(current, entry.name);
       if (entry.isDirectory()) walk(full);
@@ -481,13 +484,17 @@ test("a ledger that cannot be updated is reported instead of claiming the attemp
   const f = fixture(t);
   const w = worker(f, "w1", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "x\n"));
   complete(f, w);
+  // The integration lock lives in the ledger directory, so a directory chmod would block the lock before the update.
+  // Simulate a write failure on the ledger update temp file while leaving the lock path usable.
   const ledgerDir = path.join(f.root, ".project/metrics/orca-ledger");
-  if (process.getuid?.() === 0) return t.skip("root ignores directory modes");
-  fs.chmodSync(ledgerDir, 0o500);
-  try {
-    const outcome = await run(options(f, [w]));
-    assert.equal(outcome.attempts[w.attemptKey].reason, "ledger-update-failed");
-  } finally { fs.chmodSync(ledgerDir, 0o700); }
+  const brokenDeps = { ...deps, fs: { ...deps.fs, writeFileSync(file: string | number, data: string | Uint8Array, opts?: unknown) {
+    if (typeof file === "string" && file.startsWith(ledgerDir + path.sep) && path.basename(file).startsWith(".tmp-")) {
+      throw Object.assign(new Error("read-only ledger"), { code: "EACCES" });
+    }
+    return deps.fs.writeFileSync(file as never, data as never, opts as never);
+  } } };
+  const outcome = await run(options(f, [w], { deps: brokenDeps }));
+  assert.equal(outcome.attempts[w.attemptKey].reason, "ledger-update-failed");
   assert.equal(stateOf(f, w), "completed");
 });
 
@@ -671,4 +678,174 @@ test("an error during cleanup still tells the caller which attempts settled", as
   assert.equal(outcome.attempts[w1.attemptKey].state, "integrated");
   assert.equal(outcome.attempts[w2.attemptKey].state, "integrated", "w2 settled before its cleanup threw, and the result says so");
   assert.equal(stateOf(f, w2), "settled");
+});
+
+
+test("honest worker claims and generic human confirmation cannot widen approved file authority", async (t) => {
+  const f = fixture(t);
+  const w = worker(f, "wide", (dir) => {
+    fs.writeFileSync(path.join(dir, "a.txt"), "approved edit\n");
+    fs.writeFileSync(path.join(dir, "b.txt"), "unauthorized edit\n");
+  });
+  complete(f, w, "completed", ["a.txt"]);
+  const before = snapshotTree(f.root);
+  for (const humanConfirmed of [false, true]) {
+    const outcome = await run(options(f, [{ ...w, claims: ["a.txt", "b.txt"] }], { humanConfirmed }));
+    assert.deepEqual([outcome.status, outcome.attempts[w.attemptKey].reason], ["refused", "outside-authorized-paths"]);
+    assert.equal(outcome.baselineChecks, undefined, "scope is checked before even the baseline commands");
+    assert.deepEqual(snapshotTree(f.root), before, "no apply, snapshots, evidence or settlement for unauthorized files");
+  }
+  assert.equal(stateOf(f, w), "completed", "worker ownership is preserved for inspection");
+});
+
+test("renames require authority over both the source and destination before applying anything", async (t) => {
+  for (const authorizedPaths of [["a.txt"], ["renamed.txt"]]) {
+    const f = fixture(t);
+    const w = worker(f, "rename", (dir) => git(dir, "mv", "a.txt", "renamed.txt"));
+    complete(f, w, "completed", authorizedPaths);
+    const before = snapshotTree(f.root);
+    const outcome = await run(options(f, [{ ...w, claims: ["a.txt", "renamed.txt"] }], { humanConfirmed: true }));
+    assert.equal(outcome.attempts[w.attemptKey].reason, "outside-authorized-paths", authorizedPaths.join(","));
+    assert.deepEqual(snapshotTree(f.root), before);
+  }
+  const f = fixture(t);
+  const w = worker(f, "allowed", (dir) => git(dir, "mv", "a.txt", "renamed.txt"));
+  complete(f, w, "completed", ["a.txt", "renamed.txt"]);
+  assert.equal((await run(options(f, [w]))).status, "integrated");
+  assert.equal(read(f.root, "renamed.txt"), "a.txt baseline\n");
+  assert.equal(fs.existsSync(path.join(f.root, "a.txt")), false);
+});
+
+test("directory authority permits descendants but excludes a sibling with the same prefix", async (t) => {
+  for (const file of ["docs/nested/allowed.md", "docs-other/rejected.md"]) {
+    const f = fixture(t);
+    const w = worker(f, "directory", (dir) => {
+      fs.mkdirSync(path.dirname(path.join(dir, file)), { recursive: true });
+      fs.writeFileSync(path.join(dir, file), "content\n");
+    });
+    complete(f, w, "completed", ["docs/"]);
+    const outcome = await run(options(f, [w]));
+    assert.equal(outcome.status, file.startsWith("docs/") ? "integrated" : "refused");
+    if (!file.startsWith("docs/")) {
+      assert.equal(outcome.attempts[w.attemptKey].reason, "outside-authorized-paths");
+      assert.equal(fs.existsSync(path.join(f.root, file)), false);
+    }
+  }
+});
+
+test("legacy missing authority and malformed persisted authority fail closed without applying", async (t) => {
+  for (const authorizedPaths of [undefined, ["../"], []]) {
+    const f = fixture(t);
+    const w = worker(f, "legacy", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "change\n"));
+    complete(f, w, "completed", ["a.txt"]);
+    const file = path.join(f.root, ".project/metrics/orca-ledger/attempt-legacy.json");
+    const record = JSON.parse(fs.readFileSync(file, "utf8"));
+    if (authorizedPaths === undefined) delete record.authorizedPaths;
+    else record.authorizedPaths = authorizedPaths;
+    fs.writeFileSync(file, JSON.stringify(record));
+    const before = snapshotTree(f.root);
+    const outcome = await run(options(f, [w], { humanConfirmed: true }));
+    assert.equal(outcome.status, "refused");
+    if (authorizedPaths === undefined) assert.equal(outcome.attempts[w.attemptKey].reason, "authorized-paths-missing");
+    else assert.equal(outcome.reason, "ledger-corrupt");
+    assert.deepEqual(snapshotTree(f.root), before);
+  }
+});
+
+
+test("cleanup-unconfirmed checks preserve files and owner metadata without rollback, settlement or a second checker", async (t) => {
+  for (const phase of ["baseline", "post-apply", "resume"] as const) {
+    const f = fixture(t);
+    const w = worker(f, "cleanup", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "worker edit\n"));
+    complete(f, w, "completed", ["a.txt"]);
+    if (phase === "resume") fs.writeFileSync(path.join(f.root, "a.txt"), "worker edit\n");
+    let calls = 0;
+    const injected = { ...deps, child: { ...deps.child, run: async (command: string, args: string[], opts?: Parameters<typeof deps.child.run>[2]) => {
+      if (command === NODE && ++calls === (phase === "post-apply" ? 2 : 1)) {
+        throw Object.assign(new Error("unconfirmed checker"), { code: "EPROCESSCLEANUP", ownerPid: 4242 });
+      }
+      return deps.child.run(command, args, opts);
+    } } };
+    const outcome = await run(options(f, [w], { deps: injected }));
+    assert.deepEqual([outcome.status, outcome.reason, outcome.pendingProcessOwner], ["refused", "process-cleanup-unconfirmed", { pid: 4242, recorded: true }], phase);
+    assert.equal(read(f.root, "a.txt"), phase === "baseline" ? "a.txt baseline\n" : "worker edit\n", "rollback must not race an unconfirmed writer");
+    assert.equal(stateOf(f, w), "completed", "no settlement while a checker may still write");
+    assert.equal(verifyEvidence({ root: f.root, attemptKey: w.attemptKey, deps }).status, "missing");
+    let retried = 0;
+    const refusalOnly = { ...deps, child: { ...deps.child, run: async () => { retried++; throw new Error("must refuse before any Git or checker"); } } };
+    const again = await run(options(f, [w], { deps: refusalOnly, humanConfirmed: true }));
+    assert.equal(again.reason, "process-cleanup-unconfirmed");
+    assert.equal(again.pendingProcessOwner?.pid, 4242);
+    assert.equal(retried, 0, "a fresh coordinator honors persisted unresolved process ownership");
+  }
+});
+
+test("cleanup-unconfirmed admission preserves the owner and retained scratch paths", async (t) => {
+  const f = fixture(t);
+  const w = worker(f, "admit-cleanup", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "change\n"));
+  complete(f, w, "completed", ["a.txt"]);
+  const retained = path.join(f.workspace, "retained-admission-store");
+  const injected = { ...deps, child: { ...deps.child, run: async () => {
+    throw Object.assign(new Error("unconfirmed git"), { code: "EPROCESSCLEANUP", ownerPid: 4343, retainedPaths: [retained] });
+  } } };
+  const outcome = await run(options(f, [w], { deps: injected }));
+  assert.equal(outcome.reason, "process-cleanup-unconfirmed");
+  assert.deepEqual(outcome.pendingProcessOwner, { pid: 4343, recorded: true, retainedPaths: [retained] });
+  assert.equal(read(f.root, "a.txt"), "a.txt baseline\n");
+  assert.equal(stateOf(f, w), "completed");
+});
+
+
+test("two coordinator processes cannot integrate or settle while the first owns postchecks or rollback", { timeout: 90000 }, async (t) => {
+  for (const failsCheck of [false, true]) {
+    const f = fixture(t);
+    const w = worker(f, "exclusive", (dir) => fs.writeFileSync(path.join(dir, "a.txt"), "first coordinator edit\n"));
+    complete(f, w, "completed", ["a.txt"]);
+    const reconcileUrl = fileUrl(path.join(import.meta.dirname, "orca-reconcile.mts"));
+    const depsUrl = fileUrl(path.join(import.meta.dirname, "runtime/node.mts"));
+    const code = [
+      'const { reconcile } = await import(' + JSON.stringify(reconcileUrl) + ');',
+      'const { createNodeDeps } = await import(' + JSON.stringify(depsUrl) + ');',
+      'const deps = createNodeDeps(); const original = deps.child.run; let calls=0;',
+      'deps.child.run = async (command,args,options) => { if (command !== process.execPath) return original(command,args,options);',
+      'if (++calls === 1) return {status:0,signal:null,stdout:"",stderr:""};',
+      'process.send("postcheck"); await new Promise(resolve => process.once("message",resolve));',
+      'return {status:' + (failsCheck ? '1' : '0') + ',signal:null,stdout:"postcheck",stderr:""}; };',
+      'const outcome = await reconcile({root:' + JSON.stringify(f.root) + ',baseline:' + JSON.stringify(f.baseline) + ',attempts:' + JSON.stringify([w]) + ',',
+      'checks:{check:{command:process.execPath,args:["-e","process.exit(0)"]}},runChecks:["check"],env:{PATH:process.env.PATH,AI_WORKFLOW_ORCA_MULTI_AGENT:"true"},deps,deadlineMs:performance.now()+60000});',
+      'process.send({outcome}); process.disconnect();',
+    ].join("\n");
+    const child = spawnTestChild(process.execPath, ["--input-type=module", "-e", code], { shell: false, windowsHide: true, stdio: ["ignore", "pipe", "pipe", "ipc"] });
+    let stderr = "";
+    child.stderr!.on("data", (data) => { stderr += String(data); });
+    const closed = new Promise<void>((resolve) => child.once("close", () => resolve()));
+    let atPostcheck!: () => void;
+    const postcheck = new Promise<void>((resolve) => { atPostcheck = resolve; });
+    const finished = new Promise<import("./orca-reconcile.mts").ReconcileOutcome>((resolve, reject) => {
+      let outcome: import("./orca-reconcile.mts").ReconcileOutcome | undefined;
+      const timer = setTimeout(() => { child.kill("SIGKILL"); reject(new Error("coordinator timeout")); }, 60000);
+      child.on("message", (message: unknown) => {
+        if (message === "postcheck") atPostcheck();
+        else if (message && typeof message === "object" && "outcome" in message) outcome = (message as { outcome: typeof outcome }).outcome;
+      });
+      child.once("error", (error) => { clearTimeout(timer); reject(error); });
+      child.once("close", (status) => { clearTimeout(timer); if (status === 0 && outcome) resolve(outcome); else reject(new Error("coordinator failed: " + stderr)); });
+    });
+    try {
+      await Promise.race([postcheck, finished.then(() => { throw new Error("coordinator ended before postcheck"); })]);
+      assert.equal(read(f.root, "a.txt"), "first coordinator edit\n", "the first apply really occurred before the competing call");
+      const competing = await run(options(f, [w]));
+      assert.deepEqual([competing.status, competing.reason], ["refused", "integration-lock-busy"]);
+      assert.equal(stateOf(f, w), "completed", "the competing coordinator cannot prematurely settle another transaction");
+      child.send("continue");
+      const first = await finished;
+      assert.equal(first.status, failsCheck ? "rolled-back" : "integrated");
+      assert.equal(read(f.root, "a.txt"), failsCheck ? "a.txt baseline\n" : "first coordinator edit\n");
+      assert.equal(stateOf(f, w), failsCheck ? "completed" : "settled");
+      assert.equal(fs.existsSync(path.join(f.root, ".project/metrics/orca-ledger/.integration-lock")), false);
+    } finally {
+      if (child.exitCode === null && child.signalCode === null) child.kill("SIGKILL");
+      await closed;
+    }
+  }
 });

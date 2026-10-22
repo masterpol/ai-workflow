@@ -1,4 +1,5 @@
-import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
+import { nextMember, pickImplementer, pickReviewer } from "./orca-assign.mts";
+import { attemptKeyOf, createLedger, taskKeyOf, validAuthorizedPaths } from "./orca-ledger.mts";
 import type { Ledger, LedgerRecord } from "./orca-ledger.mts";
 import { evaluateLaunch, launchWorker, workerBrief } from "./orca-launch-gate.mts";
 import type { BriefSpec, LaunchOptions } from "./orca-launch-gate.mts";
@@ -25,13 +26,29 @@ import type { RuntimeDeps } from "./runtime/types.mts";
  */
 
 export type Route = "normal" | "launched" | "resume" | "blocked";
-export interface ScopeSpec extends BriefSpec { id: string }
+export interface ScopeSpec extends BriefSpec {
+  id: string;
+  /** Coordinator-approved exact files or directory prefixes ending `/`; never inferred from worker text. */
+  authorizedPaths: readonly string[];
+}
 export interface Placement { worktree?: string; repo?: string; name?: string; baseBranch?: string; setup?: string; model?: string; effort?: string }
+/** Pool assignment: the worker is chosen from the coordinator's role pool instead of named by the caller. */
+export interface Assignment {
+  role: "implementation" | "review";
+  /** Zero-based position of the scope in plan order; the only source of spread across the pool. */
+  planIndex: number;
+  /** For `review`: the scope id whose completed attempt is under review; its vendor is excluded. */
+  reviewOf?: string;
+  /** Pool members the caller found unusable (for example a failed preflight). */
+  skip?: readonly string[];
+}
 export interface DispatchOptions extends Omit<LaunchOptions, "vendor"> {
   /** The vendor running this task; selects the policy entry. */
   coordinator: string;
-  /** The alternate vendor that will do the work; must be one of the coordinator's configured workers. */
-  vendor: string;
+  /** The alternate vendor that will do the work; must be one of the coordinator's configured workers. Exactly one of `vendor` and `assign`. */
+  vendor?: string;
+  /** Choose the worker from the role pool (see `resolveAssignment`). Exactly one of `vendor` and `assign`. */
+  assign?: Assignment;
   scope: ScopeSpec;
   /** Distinguishes retries of the same scope. */
   attemptId: string;
@@ -41,7 +58,7 @@ export interface DispatchOptions extends Omit<LaunchOptions, "vendor"> {
   placement?: Placement;
 }
 export interface DispatchOutcome {
-  route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string;
+  route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string; ownerPid?: number;
 }
 
 const ID = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
@@ -52,7 +69,6 @@ const PLACEMENT_FLAGS: Readonly<Record<keyof Placement, string>> = Object.freeze
 /** Longest base attempt id that still leaves room for the `-r<n>` retry suffix inside the 64-character id grammar. */
 const MAX_BASE_ID = 60;
 const MAX_RETRIES = 5;
-const LIVE_STATES = ["claimed", "launched", "unknown-liveness", "completed"];
 let nodeDeps: RuntimeDeps | undefined;
 const defaultDeps = (): RuntimeDeps => (nodeDeps ??= createNodeDeps());
 
@@ -90,10 +106,61 @@ function dispatchIdOf(receipt: Record<string, unknown>): string | undefined {
   return undefined;
 }
 
+const REVIEW_STATES = ["completed", "settled"];
+const blockedAssignment = (reason: string, humanAction: string): DispatchOutcome => ({ route: "blocked", reason, humanAction });
+
+/**
+ * Picks the worker for an assignment from the ledger and the policy pools. Pure reads: no claim, no spawn.
+ * - A task that already has a live or completed attempt keeps that attempt's vendor (resume never reassigns).
+ * - A task whose earlier attempts all failed rotates to the next pool member (pool order, after the last one tried).
+ * - Otherwise the first attempt is the plan-order round-robin; a reviewer is never the scope's implementer.
+ */
+export function resolveAssignment(options: { root: string; coordinator: string; scopeId: string; assign: Assignment; deps?: RuntimeDeps }): { vendor: string } | { outcome: DispatchOutcome } {
+  const deps = options.deps ?? defaultDeps();
+  const { assign, scopeId } = options;
+  const shapeOk = obj(assign) === assign && (assign.role === "implementation" || assign.role === "review") && Number.isSafeInteger(assign.planIndex) && assign.planIndex >= 0
+    && (assign.skip === undefined || (Array.isArray(assign.skip) && assign.skip.every((member) => typeof member === "string")))
+    && (assign.role === "review" ? typeof assign.reviewOf === "string" && ID.test(assign.reviewOf) : assign.reviewOf === undefined);
+  if (!shapeOk || !ID.test(scopeId)) return { outcome: { route: "normal", reason: "invalid-assignment" } };
+  const policy = policyReport(options.root, options.coordinator, deps) as { pools?: unknown };
+  const pool = obj(policy.pools)[assign.role];
+  if (!Array.isArray(pool) || !pool.length || !pool.every((member) => typeof member === "string")) return { outcome: { route: "normal", reason: "role-pool-unconfigured" } };
+  const listed = createLedger(options.root, deps).list();
+  // No ledger directory yet is the first dispatch of the Run: an empty history, not an error. A refused one blocks.
+  if (listed.status === "refused") return { outcome: { route: "blocked", reason: "ledger-refused" } };
+  if (listed.entries.some(({ result }) => result.status !== "ok")) return { outcome: { route: "blocked", reason: "ledger-corrupt", humanAction: "inspect the unreadable ledger record before dispatching" } };
+  const records = listed.entries.flatMap(({ result }) => result.status === "ok" ? [result.record] : [])
+    .sort((a, b) => a.createdAt - b.createdAt || (a.attemptKey < b.attemptKey ? -1 : 1));
+  const attempts = records.filter((record) => record.taskKey === taskKeyOf(scopeId));
+  // Mirrors reserve()'s task-owned set, plus a settled attempt that was completed first (it keeps its report id). A failed attempt
+  // that was later settled has no report id: it is a tried vendor, not an owner, so rotation still moves past it.
+  const holds = (record: (typeof attempts)[number]): boolean => record.processOwnerPid !== undefined
+    || ["claimed", "launched", "unknown-liveness", "completed"].includes(record.state) || (record.state === "settled" && record.reportId !== undefined);
+  const owner = attempts.find(holds);
+  if (owner) return { vendor: owner.vendor };
+
+  let implementer: string | undefined;
+  if (assign.role === "review") {
+    const reviewed = records.filter((record) => record.taskKey === taskKeyOf(assign.reviewOf as string) && REVIEW_STATES.includes(record.state));
+    implementer = reviewed.length ? reviewed[reviewed.length - 1].vendor : undefined;
+  }
+  const failed = attempts.filter((record) => !holds(record)).map((record) => record.vendor);
+  const skip = [...(assign.skip ?? []), ...(implementer ? [implementer] : [])];
+  const pick = failed.length ? nextMember(pool, failed, skip)
+    : assign.role === "review" ? pickReviewer({ pool, planIndex: assign.planIndex, implementer, skip: assign.skip })
+      : pickImplementer({ pool, planIndex: assign.planIndex, skip: assign.skip });
+  if (pick.ok) return { vendor: pick.vendor };
+  if (pick.reason === "invalid-input") return { outcome: { route: "normal", reason: "invalid-assignment" } };
+  if (pick.reason === "review-independence-unavailable") return { outcome: blockedAssignment(pick.reason, "no review pool member differs from the implementer; ask the user to widen the review pool or accept a same-vendor review") };
+  if (pick.reason === "implementer-unknown") return { outcome: blockedAssignment(pick.reason, "the scope under review has no completed attempt; dispatch it and collect its report first") };
+  return { outcome: blockedAssignment(pick.reason === "exhausted" ? "pool-exhausted" : pick.reason, "every usable pool member has been tried or skipped; a person must decide the next step") };
+}
+
 export async function dispatchScope(options: DispatchOptions): Promise<DispatchOutcome> {
   const deps = options.deps ?? defaultDeps();
-  const { scope, vendor, coordinator } = options;
+  const { scope, coordinator } = options;
   if (!ID.test(scope?.id ?? "") || !ID.test(options.attemptId ?? "")) return { route: "normal", reason: "invalid-id" };
+  if ((options.vendor === undefined) === (options.assign === undefined)) return { route: "normal", reason: "invalid-assignment" };
   const attemptKey = attemptKeyOf(options.attemptId);
   if (!orcaMultiAgentEnabled(options.root, deps, options.env ?? deps.proc.env)) return { route: "normal", reason: "orca-multi-agent-disabled" };
   const flags = placementArgs(options.placement);
@@ -118,31 +185,33 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const gateOptions = { ...options, vendor: coordinator };
   const decision = evaluateLaunch(gateOptions);
   if (!decision.allowed) return { route: "normal", reason: decision.reason };
+  let vendor = options.vendor as string;
+  if (options.assign) {
+    // Resolved after the gate (no side effects before it) and before the claim; a recorded owner wins, so resume never reassigns.
+    const resolved = resolveAssignment({ root: options.root, coordinator, scopeId: scope.id, assign: options.assign, deps });
+    if ("outcome" in resolved) return resolved.outcome;
+    vendor = resolved.vendor;
+  }
   const policy = policyReport(options.root, coordinator, deps) as { workers?: unknown; maxConcurrentWorkers?: unknown };
   if (!Array.isArray(policy.workers) || !policy.workers.includes(vendor)) return { route: "normal", reason: "worker-not-configured" };
-  const brief = workerBrief(scope);
+  if (!validAuthorizedPaths(scope.authorizedPaths)) return { route: "normal", reason: "authorized-paths-invalid" };
+  const brief = workerBrief({ ...scope, ownership: [...(Array.isArray(scope.ownership) ? scope.ownership : [scope.ownership]),
+    `Authorized paths (exact files or directory prefixes): ${JSON.stringify(scope.authorizedPaths)}`] });
   if (!brief.ok) return { route: "normal", reason: brief.reason };
   if (options.launcher !== undefined && options.launcher !== decision.executable) return { route: "normal", reason: "launcher-refused" };
 
-  // One live attempt per task: another claimed, launched, unknown or completed attempt blocks a second worker.
+  // Task ownership, capacity and claim are one shared filesystem transaction across coordinator processes.
   const taskKey = taskKeyOf(scope.id);
-  const all = ledger.list();
-  if (all.status === "refused") return { route: "blocked", reason: "ledger-refused", attemptKey };
   const cap = typeof policy.maxConcurrentWorkers === "number" ? policy.maxConcurrentWorkers : 0;
-  let running = 0;
-  for (const entry of all.entries) {
-    if (entry.result.status !== "ok") return { route: "blocked", reason: `ledger-${entry.result.status}`, attemptKey };
-    if (["claimed", "launched", "unknown-liveness"].includes(entry.result.record.state)) running++;
-    if (entry.result.record.taskKey === taskKey && LIVE_STATES.includes(entry.result.record.state)) {
-      return { route: "resume", reason: "task-already-owned", attemptKey: entry.attemptKey, humanAction: "inspect the existing attempt before dispatching this task again" };
-    }
-  }
-
-  if (running >= cap) return { route: "normal", reason: "max-concurrent-workers" };
-
-  const claim = ledger.claim({ attemptKey, taskKey, vendor, state: "claimed", createdAt: Math.trunc(deps.clock.now()) });
+  const claim = ledger.reserve({ attemptKey, taskKey, vendor, state: "claimed", createdAt: Math.trunc(deps.clock.now()),
+    authorizedPaths: [...scope.authorizedPaths] }, cap);
   if (claim.outcome === "replayed") return resumeExisting(ledger, claim.record, attemptKey);
-  if (claim.outcome !== "claimed") return { route: "blocked", reason: `ledger-claim-${claim.outcome}`, attemptKey };
+  if (claim.outcome === "task-owned") return { route: "resume", reason: "task-already-owned", attemptKey: claim.record.attemptKey,
+    humanAction: "inspect the existing attempt before dispatching this task again" };
+  if (claim.outcome === "at-capacity") return { route: "normal", reason: "max-concurrent-workers" };
+  if (claim.outcome === "path-overlap") return { route: "normal", reason: "authorized-paths-overlap" };
+  if (claim.outcome !== "claimed") return { route: "blocked", reason: `ledger-claim-${claim.outcome}`, attemptKey,
+    ...(claim.outcome === "busy" ? { humanAction: "inspect .project/metrics/orca-ledger/.mutation-lock and its owner; retry only after the active mutation finishes, or reconcile a crashed owner before removing its lock" } : {}) };
 
   const args = ["orchestration", "worker-start", "--spec", brief.brief, "--agent", vendor, ...flags, "--json"];
   const launch = await launchWorker({ ...gateOptions, deps, command: options.launcher, args, workerContext: false });
@@ -157,6 +226,11 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
     }
     if (!recorded({ state: "launched", dispatchId })) return { route: "blocked", reason: "ledger-update-failed", attemptKey, dispatchId, humanAction: "a worker is running; repair the ledger record before anything else" };
     return { route: "launched", reason: "launched", attemptKey, dispatchId };
+  }
+  if (launch.reason === "launch-cleanup-unconfirmed") {
+    recorded({ state: "unknown-liveness", ...(launch.ownerPid ? { processOwnerPid: launch.ownerPid } : {}) });
+    return { route: "blocked", reason: launch.reason, attemptKey, ...(launch.ownerPid ? { ownerPid: launch.ownerPid } : {}),
+      humanAction: "inspect and reconcile the local process owner and its descendants before retrying or clearing its ledger ownership" };
   }
   // A timeout, overflow or signal exit means a worker may exist: ownership is preserved and the attempt is inspected, never repeated.
   const killed = launch.reason === "launch-failed" && (Boolean(launch.signal) || launch.status === null || launch.status === undefined);
@@ -174,8 +248,8 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const residual = receipts.some((receipt) => Array.isArray(receipt.residualResources) && receipt.residualResources.length > 0);
   const failedStage = receipts.map((receipt) => receipt.failedStage).find((stage): stage is string => typeof stage === "string");
   if (residual || failedStage) {
-    // Orca itself reports the dispatch failed, so the task is free; the person must clean up what it left behind.
-    recorded({ state: "failed" });
+    // A failed stage/residual receipt does not prove that every writer exited. Keep both the task and capacity.
+    recorded({ state: "unknown-liveness" });
     return { route: "blocked", reason: failedStage ? `launch-failed:${failedStage}` : "launch-failed:residual", attemptKey,
       humanAction: "a person must resolve the blocker (trust prompt, port, funds) and clean residual resources; no automatic retry" };
   }

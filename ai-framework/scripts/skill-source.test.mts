@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, posix } from "node:path";
+import { createTestDeps, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join, posix } = testDeps.path;
 import { test } from "node:test";
 
 import { frontmatter, identity, inspectSource, main, safeRelative } from "./skill-source.mts";

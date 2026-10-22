@@ -41,7 +41,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"ai-framework/hooks/scripts/stuck-uphill-detector.mts\""
+            "command": "node --experimental-strip-types --disable-warning=ExperimentalWarning \"$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/stuck-uphill-detector.mts\""
           }
         ],
         "description": "Scan active pitches' hill charts; warn about scopes stuck at the same uphill position across 3+ sessions"

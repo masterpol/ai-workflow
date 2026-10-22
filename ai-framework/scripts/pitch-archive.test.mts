@@ -1,14 +1,15 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
-import { createHash } from "node:crypto";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { execFileSync, spawnSync } from "node:child_process";
+import { createTestDeps, execFileSync, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { buildGraph, overlayKnowledge, renderIndex } from "./graphify.mts";
 import * as archiveModule from "./pitch-archive.mts";
 import * as compressModule from "./pitch-compress.mts";
 
@@ -28,9 +29,14 @@ function exists(root, name) { return fs.existsSync(path.join(root, name)); }
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pitch-archive-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  fs.mkdirSync(path.join(root, "ai-framework/scripts"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "graphify.mts"), path.join(root, "ai-framework/scripts/graphify.mts"));
   for (const dir of ["decisions", "patterns", "entities", "issues"]) fs.mkdirSync(path.join(root, `.project/knowledge/${dir}`), { recursive: true });
+  // Ledger validation reads real generated artifacts, including through its child process.
+  // Build only this fixture's knowledge overlay; no Graphify installation or external command is needed.
+  const deps = createNodeDeps();
+  const { graph, problems } = buildGraph(root, deps);
+  assert.deepEqual(problems, []);
+  write(root, "graphify-out/graph.json", JSON.stringify(overlayKnowledge({ nodes: [], links: [] }, graph)) + "\n");
+  write(root, ".project/knowledge/index.md", renderIndex(graph, root, deps));
   return root;
 }
 
@@ -331,7 +337,7 @@ test("verify rejects a manifest belonging to a different slug and one with an un
   const rewrite = (manifest) => {
     const raw = JSON.stringify(manifest, null, 2) + "\n";
     write(root, manifestFile, raw);
-    write(root, `.project/compaction/archives/${archiveDir}/ARCHIVE-CHECKSUM`, `sha256:${createHash("sha256").update(raw).digest("hex")}\n`);
+    write(root, `.project/compaction/archives/${archiveDir}/ARCHIVE-CHECKSUM`, `sha256:${testDeps.crypto.sha256Hex(raw)}\n`);
   };
   rewrite({ ...original, slug: "someone-else" });
   assert.match(verify(root, "manifest-guard").issues.join(";"), /manifest slug mismatch/);
@@ -638,5 +644,5 @@ test("injected clock and byte reader preserve binary content through archive and
   assert.equal(tools.verify(root, "binary-runtime").valid, true);
   fs.rmSync(path.join(root, dir), { recursive: true });
   tools.restore(root, "binary-runtime", { apply: true });
-  assert.deepEqual(fs.readFileSync(path.join(root, dir, "binary.bin")), bytes);
+  assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(root, dir, "binary.bin"))), bytes);
 });

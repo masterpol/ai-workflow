@@ -34,8 +34,20 @@ conventions, or `.project/knowledge/` for patterns already established in this c
 
 ### The Hard Line-Count Limit
 
-**A component/module file must not exceed your project's line-count limit for logic + markup
-(150 lines is a reasonable default). This is a hard limit, not a guideline.**
+**A component/module file must not exceed your project's line-count limit for logic + markup.
+This is a hard limit, not a guideline.** This section is the single owner of file-size limits; other rules and
+reviewer prompts point here instead of stating their own number.
+
+| What | Limit |
+|---|---|
+| The project's own limit (a `.project/rules/*.md` companion or `AGENTS.md` project specifics), when it names one | that limit wins |
+| Otherwise: a component (logic + markup) | 150 lines |
+| Otherwise: a library/utility module or backend handler | 80 lines |
+| A function | 50 lines (see `coding-standards.md`) |
+
+The only way past the limit is the documented **cohesive-unit exception** in `coding-standards.md` § "Cohesive module
+size exceptions" (cohesion evidence, recorded in the pitch's `plan.md` and `deviations.md`). Without that record, a
+file over the limit is a finding.
 
 When a file approaches this limit, stop and split before adding more code. The split is almost
 always obvious in hindsight:
@@ -72,7 +84,8 @@ names and sizes in `.project/knowledge/patterns/` so future sessions can reuse t
 ### Enforcement during `/build`
 
 Before a scope is marked `done`, check the line count on every file you wrote or grew
-significantly. Any file over the limit must be split as part of the same scope, not deferred.
+significantly. Any file over the limit in the table above must be split as part of the same scope, not deferred,
+unless it carries the recorded cohesive-unit exception.
 Do **not** wait for the user to request a refactor — splitting after the fact costs more tokens
 AND the original author has lost context that would have made the split obvious during the
 first pass.

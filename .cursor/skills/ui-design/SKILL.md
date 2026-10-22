@@ -46,9 +46,9 @@ Determine:
 - Which layer each belongs to (feature / shared / ui)
 - Rendering mode for each, if your framework distinguishes one (e.g. server vs client component)
 - Props interface for each (with types)
-- Estimated line count (must be ≤ 150 per component)
+- Estimated line count (must stay within the component limit in `ai-framework/rules/component-architecture.md` § "Component Size Rules": the project's own limit, else 150 lines)
 
-If a component would exceed 150 lines, split it now — not after building it.
+If a component would exceed that limit, split it now — not after building it — unless it carries the recorded cohesive-unit exception (`component-architecture.md`).
 
 ### 4. ASCII wireframe (for complex layouts)
 Draw a simple layout sketch:
@@ -81,7 +81,7 @@ For each component:
 List all new keys needed, one entry per supported locale's message catalog.
 
 ### 7. Self-validate each generated file
-Read each generated file against the rules and confirm: correct layer placement, no cross-feature imports, under 150 lines, no hardcoded strings, ARIA labels on interactive elements. Fix any issues flagged before presenting to user.
+Read each generated file against the rules and confirm: correct layer placement, no cross-feature imports, within the component size limit (or a recorded cohesive-unit exception), no hardcoded strings, ARIA labels on interactive elements. Fix any issues flagged before presenting to user.
 
 ### 8. Present for approval
 Show:

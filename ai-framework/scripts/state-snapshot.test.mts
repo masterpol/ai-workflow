@@ -1,10 +1,11 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { createTestDeps, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
@@ -309,6 +310,8 @@ test("caveman: reported as unconfigured when not installed; malformed modes.json
   try {
     assert.equal(snap(plain).skills.caveman.status, "unconfigured");
     assert.equal(snap(broken).skills.caveman.status, "unavailable");
+    const badToon = project({ "ai-workflow.toon": "schemaVersion: 1\nskills:\n  modes:\n    caveman: turbo\n", ".project/skills/modes.json": "{\"schemaVersion\":1}" });
+    try { assert.equal(snap(badToon).skills.caveman.status, "unavailable", "invalid TOON fails closed even with a valid legacy file"); } finally { cleanup(badToon); }
   } finally { cleanup(plain, broken); }
 });
 

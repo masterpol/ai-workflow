@@ -1,20 +1,19 @@
 // Live workflow code ships TypeScript entrypoints and imports commands without starting them.
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { existsSync, mkdtempSync, readFileSync, readdirSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, relative, sep } from "node:path";
+const testDeps = createTestDeps();
+const { existsSync, mkdtempSync, readFileSync, readdirEntriesSync, readdirSync, rmSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join, posix, relative, sep } = testDeps.path;
 import { test } from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
 import { NODE_FLAGS } from "./entry.mts";
-import { createTestDeps, memoryFs } from "./test-helpers.mts";
+import { createTestDeps, memoryFs, fileUrl, urlPath, spawnSync } from "./test-helpers.mts";
 import { validateRuntimeImports } from "./validate.mts";
 
-const root = fileURLToPath(new URL("../../..", import.meta.url));
+const root = urlPath(new URL("../../..", import.meta.url));
 const SKIP = new Set(["node_modules", ".git", "scratchpad"]);
 const ADAPTERS = new Set(["ai-framework/scripts/runtime/node.mts", "ai-framework/scripts/runtime/bun.mts", "ai-framework/scripts/runtime/cli.mts", "ai-framework/scripts/runtime/entry.mts"]);
 function walk(dir: string, out: string[] = []): string[] {
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+  for (const entry of readdirEntriesSync(dir)) {
     if (SKIP.has(entry.name)) continue;
     const full = join(dir, entry.name);
     if (entry.isDirectory()) walk(full, out);
@@ -52,11 +51,11 @@ test("guards every executable main with one direct-entry call", () => {
 test("imports all production TypeScript modules silently without running commands", (t) => {
   const cwd = mkdtempSync(join(tmpdir(), "workflow-quiet-import-"));
   t.after(() => rmSync(cwd, { recursive: true, force: true }));
-  const modules = sources.map((file) => pathToFileURL(join(root, file)).href);
+  const modules = sources.map((file) => fileUrl(join(root, file)));
   const code = `for (const url of ${JSON.stringify(modules)}) await import(url);`;
   const flags = process.versions.bun ? [] : NODE_FLAGS;
   const result = spawnSync(process.execPath, [...flags, "--input-type=module", "-e", code], {
-    cwd, encoding: "utf8", timeout: 20000, env: { ...process.env, AI_WORKFLOW_RUNNER: "deno" },
+    cwd, encoding: "utf8", timeout: 20000, windowsHide: true, shell: false, env: { ...process.env, AI_WORKFLOW_RUNNER: "deno" },
   });
   assert.deepEqual([result.status, result.stdout, result.stderr], [0, "", ""]);
   assert.deepEqual(readdirSync(cwd), [], "importing cannot create project state");
@@ -81,7 +80,8 @@ function plantedDeps(fixtureRoot: string, file: string, source: string) {
   const fake = memoryFs({ [`${fixtureRoot}/${file}`]: source });
   const handles = new Map<number, string>();
   let sequence = 10;
-  return { ...base, fs: { ...base.fs, ...fake,
+  // The planted tree is POSIX virtual data, independent of the host filesystem.
+  return { ...base, path: posix, fs: { ...base.fs, ...fake,
     openSync: (name: string) => { const fd = sequence++; handles.set(fd, name); return fd; },
     fstatSync: (fd: number) => fake.statSync!(handles.get(fd)!),
     readSync: (fd: number, bytes: Uint8Array, offset: number, length: number, position: number | null) => {

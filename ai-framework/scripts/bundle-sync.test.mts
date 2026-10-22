@@ -1,14 +1,14 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { execFileSync, spawnSync } from "node:child_process";
+import { createTestDeps, urlPath, listTree, copyTree, execFileSync, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const __dirname = path.dirname(urlPath(import.meta.url));
 
 const SCRIPT = path.join(__dirname, "bundle-sync.mts");
 const ADD_SKILL = path.join(__dirname, "add-skill.mts");
@@ -38,7 +38,7 @@ function seedCommon(root) {
     fs.mkdirSync(path.join(root, path.dirname(file)), { recursive: true });
     fs.copyFileSync(path.join(__dirname, path.basename(file)), path.join(root, file));
   }
-  fs.cpSync(path.join(__dirname, "runtime"), path.join(root, "ai-framework/scripts/runtime"), { recursive: true });
+  copyTree(testDeps, path.join(__dirname, "runtime"), path.join(root, "ai-framework/scripts/runtime"));
   for (const name of ["entry-import", "skill-defaults"]) {
     fs.copyFileSync(path.join(__dirname, `${name}.mts`), path.join(root, `ai-framework/scripts/${name}.mts`));
   }
@@ -93,10 +93,10 @@ function skillRepo(directory, name) {
 test("dry run changes nothing on the target and never imports source .project content", (t) => {
   const { source, target, baseRef } = fixture(t);
   write(source, ".project/pitches/should-not-import/pitch.md", "secret plan\n");
-  const before = fs.readdirSync(target, { recursive: true }).sort();
+  const before = listTree(testDeps, target);
   const result = runJson(target, ["--source", source, "--base-ref", baseRef]);
   assert.equal(result.summary.applied, false);
-  assert.deepEqual(fs.readdirSync(target, { recursive: true }).sort(), before);
+  assert.deepEqual(listTree(testDeps, target), before);
   assert.equal(exists(target, ".project/pitches/should-not-import"), false);
 });
 
@@ -215,6 +215,18 @@ test("flagged entry files are reported for manual review and never auto-applied"
   assert.equal(read(target, "AGENTS.md"), "target version\n");
 });
 
+test("SETUP.md and README.md are flagged for manual review when they differ, and never auto-applied", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  for (const name of ["SETUP.md", "README.md"]) {
+    write(target, name, "target version\n");
+    write(source, name, "source version\n");
+  }
+  commit(source, "change SETUP.md and README.md");
+  const result = runJson(target, ["--source", source, "--base-ref", baseRef, "--apply"]);
+  assert.deepEqual(result.flagged.map((entry) => entry.path).sort(), ["README.md", "SETUP.md"]);
+  for (const name of ["SETUP.md", "README.md"]) assert.equal(read(target, name), "target version\n");
+});
+
 test("a newly registered target vendor is reconciled for every installed skill in the same apply, with no second approval", (t) => {
   const { source, target, baseRef, directory } = fixture(t);
   installSkill(target, skillRepo(directory, "delta"), { skill: "example/repository/delta" });
@@ -257,6 +269,85 @@ test("instance caveman mode overrides in .project/skills/modes.json survive a sy
   commit(source, "upstream edit, unrelated to instance mode state");
   runJson(target, ["--source", source, "--base-ref", baseRef, "--apply", "--prune"]);
   assert.equal(read(target, ".project/skills/modes.json"), modes, "protected exactly like .project/skills/registry.json — .project/ is outside every SYNCED_DIRS entry");
+});
+
+// ai-workflow.toon is instance data (root file, outside every SYNCED_DIRS entry, not a FLAGGED_FILES entry).
+// `toonTouched` is the detector; the mutation test proves it bites by running a mutated copy of the script.
+const TOON = "ai-workflow.toon";
+function toonTouched(target, before, result) {
+  const reported = JSON.stringify(result).includes(TOON);
+  const bytes = exists(target, TOON) ? read(target, TOON) : null;
+  return reported || bytes !== before;
+}
+function mutatedScript(directory, replacement) {
+  const root = path.join(directory, `mutant-${replacement.name}`);
+  const dir = path.join(root, "ai-framework/scripts");
+  fs.mkdirSync(dir, { recursive: true });
+  copyTree(testDeps, path.join(__dirname, "../integrations"), path.join(root, "ai-framework/integrations"));
+  copyTree(testDeps, path.join(__dirname, "runtime"), path.join(dir, "runtime"));
+  for (const name of fs.readdirSync(__dirname)) if (name.endsWith(".mts") && !name.endsWith(".test.mts")) fs.copyFileSync(path.join(__dirname, name), path.join(dir, name));
+  const original = fs.readFileSync(SCRIPT, "utf8");
+  const mutated = original.replace(replacement.from, replacement.to);
+  assert.notEqual(mutated, original, `mutation ${replacement.name} must change the script`);
+  const file = path.join(dir, "bundle-sync.mts");
+  fs.writeFileSync(file, mutated);
+  return file;
+}
+function runWith(script, target, args) {
+  const result = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, ...args, "--json"], { cwd: target, encoding: "utf8" });
+  assert.equal(result.status, 0, result.stderr);
+  return JSON.parse(result.stdout);
+}
+
+test("ai-workflow.toon in the project root is instance data: never synced, flagged, overwritten or created, on every pass", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  const local = "schemaVersion: 1\nruntime:\n  runner: bun\n";
+  write(target, TOON, local);
+  write(source, TOON, "schemaVersion: 1\nruntime:\n  runner: node\n");
+  write(source, "ai-framework/rules/example.md", "rule v2\n");
+  commit(source, "upstream edit plus a source-side config file");
+  for (let pass = 0; pass < 2; pass++) {
+    const result = runJson(target, ["--source", source, "--base-ref", baseRef, "--apply", "--prune", "--overwrite-unverified"]);
+    assert.equal(toonTouched(target, local, result), false, `pass ${pass + 1}`);
+  }
+  assert.equal(read(target, "ai-framework/rules/example.md"), "rule v2\n", "the sync itself still ran");
+  const bare = fixture(t);
+  write(bare.source, TOON, "schemaVersion: 1\n");
+  commit(bare.source, "source-side config only");
+  runJson(bare.target, ["--source", bare.source, "--base-ref", bare.baseRef, "--apply", "--prune", "--overwrite-unverified"]);
+  assert.equal(exists(bare.target, TOON), false, "a target without a config never receives the source's");
+});
+
+test("simulated old-version sync: first sync with no base or marker, and a marker from an older bundle, leave the config alone", (t) => {
+  const { source, target } = fixture(t);
+  const local = "schemaVersion: 1\nruntime:\n  runner: bun\n";
+  write(target, TOON, local);
+  write(source, TOON, "schemaVersion: 1\n");
+  write(source, "ai-framework/rules/example.md", "rule v2\n");
+  commit(source, "upstream edit, no base known");
+  const first = runJson(target, ["--source", source, "--apply", "--prune", "--overwrite-unverified"]);
+  assert.equal(toonTouched(target, local, first), false, "no marker, no base");
+  write(target, ".project/.bundle-sync.json", JSON.stringify({ schemaVersion: 1, files: { "ai-framework/rules/example.md": "0".repeat(64) }, legacyField: "from an older bundle" }));
+  const second = runJson(target, ["--source", source, "--apply", "--prune", "--overwrite-unverified"]);
+  assert.equal(toonTouched(target, local, second), false, "older marker");
+  assert.equal(read(target, TOON), local);
+});
+
+test("mutation check: the config exclusion detector fails when the script is mutated to treat the TOON as a flagged or synced file", (t) => {
+  const { directory, source, target, baseRef } = fixture(t);
+  const local = "schemaVersion: 1\nruntime:\n  runner: bun\n";
+  write(target, TOON, local);
+  write(source, TOON, "schemaVersion: 1\n");
+  commit(source, "source-side config");
+  const args = ["--source", source, "--base-ref", baseRef];
+  assert.equal(toonTouched(target, local, runWith(SCRIPT, target, args)), false, "baseline: the real script never touches it");
+  const flagged = mutatedScript(directory, { name: "flagged", from: /FLAGGED_FILES: readonly string\[\] = \[/, to: `FLAGGED_FILES: readonly string[] = ["${TOON}", ` });
+  assert.equal(toonTouched(target, local, runWith(flagged, target, args)), true, "mutant: a flagged config is reported");
+  const synced = mutatedScript(directory, { name: "synced", from: /SYNCED_DIRS: readonly string\[\] = \[/, to: `SYNCED_DIRS: readonly string[] = ["${TOON}", ` });
+  const crashed = spawnSync(process.execPath, [...RUNTIME_FLAGS, synced, ...args, "--apply", "--overwrite-unverified", "--json"], { cwd: target, encoding: "utf8" });
+  const syncedResult = crashed.status === 0 ? JSON.parse(crashed.stdout) : { failed: crashed.stderr };
+  assert.ok(crashed.status !== 0 || toonTouched(target, local, syncedResult), "mutant: a synced config either breaks the sync or is reported/overwritten");
+  assert.match(crashed.stderr + JSON.stringify(syncedResult), /ai-workflow\.toon/, "the mutant is visibly about the config file");
 });
 
 test("report settings and generated reports in .project/reports survive every sync unchanged, and a new reports template is a named scaffold step", (t) => {

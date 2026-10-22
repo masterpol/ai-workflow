@@ -1,11 +1,10 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { collectReport, dispatchScope, dispatchWithRetries } from "./orca-dispatch.mts";
 import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
@@ -14,6 +13,7 @@ import { decideStart } from "./orca-start.mts";
 import type { CheckSpec } from "./orca-reconcile.mts";
 import { NODE_FLAGS } from "./runtime/entry.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText, createTestDeps, urlPath, listTree, spawnSync } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 // ORCA_RUN_UNDER_TEST lets a mutant copy of the CLI be exercised by the same assertions (mutant proofs).
@@ -81,21 +81,21 @@ function fixture(t: TestContext, enabled: string | null = "true"): Fixture {
 const probeSync: SyncHandler = (_command, args) => {
   const body = args.includes("orca-cli") ? { name: "orca-cli", markdown: "worktree current; terminal" }
     : args.includes("orchestration") ? { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" }
-      : { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.223" } } };
+      : { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.224" } } };
   return { status: 0, signal: null, stdout: JSON.stringify(body), stderr: "" };
 };
 let workers = 0;
 const startRun: RunHandler = () => { workers++; return { status: 0, signal: null, stderr: "", stdout: JSON.stringify({ result: { stage: "input_accepted", dispatch: { id: `ctx_${workers}` } } }) }; };
 const dispatching = (f: Fixture): Harness => { workers = 0; return harness(f.env, { runSync: probeSync, run: startRun }); };
 
-const scope = { id: "s1", target: "b.mjs", change: "return b-done", constraints: "edit only b.mjs", ownership: "b.mjs", acceptance: "node prints b-done" };
+const scope = { id: "s1", target: "b.mjs", change: "return b-done", constraints: "edit only b.mjs", ownership: "b.mjs", authorizedPaths: ["b.mjs"], acceptance: "node prints b-done" };
 const dispatchInput = (extra: Obj = {}): Obj => ({ coordinator: "claude", vendor: "codex", scope, attemptId: "a1", timeoutMs: 600000, ...extra });
 function writeInput(root: string, value: unknown, name = "input.json"): string {
   fs.writeFileSync(path.join(root, name), typeof value === "string" ? value : JSON.stringify(value));
   return name;
 }
-const walkTree = (dir: string): string[] => fs.readdirSync(dir, { recursive: true, withFileTypes: true })
-  .map((entry) => path.join(entry.parentPath, entry.name)).sort().map((file) => `${path.relative(dir, file)}:${fs.lstatSync(file).isFile() ? fs.readFileSync(file, "utf8") : "dir"}`);
+const walkTree = (dir: string): string[] => listTree(testDeps, dir)
+  .map((entry) => path.join(dir, entry)).map((file) => `${path.relative(dir, file)}:${fs.lstatSync(file).isFile() ? fs.readFileSync(file, "utf8") : "dir"}`);
 
 // ---- parity: the CLI prints what the library returns, no more, no less ----
 
@@ -158,6 +158,17 @@ test("dispatch parity: the CLI JSON equals dispatchScope for the same input, exi
   assert.deepEqual([again.code, again.json.route], [0, "resume"]);
 });
 
+test("dispatch preserves explicit file and directory authority independently of ownership prose", async (t: TestContext) => {
+  const f = fixture(t);
+  const authorizedPaths = ["b.mjs", "src/components/"];
+  writeInput(f.root, dispatchInput({ scope: { ...scope, ownership: "all files in the repository", authorizedPaths } }));
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], dispatching(f));
+  assert.equal(result.code, 0);
+  const read = createLedger(f.root, createNodeDeps()).read(attemptKeyOf("a1"));
+  assert.equal(read.status, "ok");
+  if (read.status === "ok") assert.deepEqual(read.record.authorizedPaths, authorizedPaths);
+});
+
 test("dispatch parity: a refusal from the library is exit 3 with the same outcome, and maxRetries selects dispatchWithRetries", async (t: TestContext) => {
   const a = fixture(t);
   const b = fixture(t);
@@ -200,7 +211,7 @@ test("collect parity: the CLI JSON equals collectReport, exit 0 when accepted an
 // ---- real git fixtures for reconcile ----
 
 function git(cwd: string, ...args: string[]): string {
-  const result = spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1" } });
+  const result = spawnSync("git", ["-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false", ...args], { cwd, encoding: "utf8", env: { ...process.env, GIT_CONFIG_NOSYSTEM: "1" }, windowsHide: true, shell: false, timeout: 30000 });
   assert.equal(result.status, 0, `git ${args.join(" ")}: ${result.stderr}`);
   return result.stdout.trim();
 }
@@ -225,7 +236,7 @@ function repo(t: TestContext, enabled: string | null = "true", complete = true):
   const attemptKey = attemptKeyOf("w1");
   if (complete) {
     const ledger = createLedger(root, createNodeDeps());
-    assert.equal(ledger.claim({ attemptKey, taskKey: taskKeyOf("scope-w1"), vendor: "codex", state: "claimed", createdAt: 1790000000000 }).outcome, "claimed");
+    assert.equal(ledger.claim({ attemptKey, taskKey: taskKeyOf("scope-w1"), authorizedPaths: ["a.txt"], vendor: "codex", state: "claimed", createdAt: 1790000000000 }).outcome, "claimed");
     assert.equal(ledger.update(attemptKey, { state: "launched", dispatchId: "ctx_w1" }).status, "ok");
     assert.equal(ledger.update(attemptKey, { state: "completed", reportId: "msg_w1" }).status, "ok");
   }
@@ -464,7 +475,7 @@ test("an unsafe --input is refused with exit 3 and no side effects", async (t: T
   fs.symlinkSync(path.join(f.root, "sub"), path.join(f.root, "sublink"));
   fs.mkdirSync(path.join(f.root, "dir.json"));
   fs.writeFileSync(path.join(f.root, "big.json"), `${" ".repeat(MAX_INPUT_BYTES + 1 - 2)}{}`);
-  const fifo = spawnSync("mkfifo", [path.join(f.root, "pipe.json")]);
+  const fifo = spawnSync("mkfifo", [path.join(f.root, "pipe.json")], { windowsHide: true, shell: false, timeout: 10000 });
   assert.equal(fifo.status, 0, "mkfifo");
   writeInput(f.root, "{not json", "bad.json");
   writeInput(f.root, "[]", "array.json");
@@ -523,10 +534,18 @@ test("input shapes are validated strictly and unknown keys are refused", async (
     ["timeout too large", dispatchInput({ timeoutMs: 30 * 60 * 1000 + 1 })],
     ["timeout missing", (() => { const v = dispatchInput(); delete v.timeoutMs; return v; })()],
     ["retries too high", dispatchInput({ maxRetries: 6 })],
+    ["vendor and assign together", dispatchInput({ assign: { role: "implementation", planIndex: 0 } })],
+    ["neither vendor nor assign", (() => { const v = dispatchInput(); delete v.vendor; return v; })()],
+    ...[{ role: "owner", planIndex: 0 }, { role: "implementation", planIndex: -1 }, { role: "implementation", planIndex: 1.5 }, { role: "implementation", planIndex: "0" }, { role: "review", planIndex: 0 },
+      { role: "implementation", planIndex: 0, reviewOf: "s1" }, { role: "implementation", planIndex: 0, skip: "codex" }, { role: "implementation", planIndex: 0, extra: 1 }].map((assign): [string, Obj] =>
+      [`invalid assign ${JSON.stringify(assign)}`, (() => { const v = dispatchInput({ assign }); delete v.vendor; return v; })()]),
     ["retries fraction", dispatchInput({ maxRetries: 0.5 })],
     ["placement value not text", dispatchInput({ placement: { name: 1 } })],
     ["placement as list", dispatchInput({ placement: ["--name"] })],
     ["constraints as number", dispatchInput({ scope: { ...scope, constraints: 3 } })],
+    ["missing authorized paths", dispatchInput({ scope: (({ authorizedPaths, ...brief }) => brief)(scope) })],
+    ...[null, "b.mjs", [], [1], ["../b.mjs"], ["/b.mjs"], ["C:/b.mjs"], ["src\\b.mjs"], ["src/**"], ["./b.mjs"], ["src/../b.mjs"], ["b.mjs", "b.mjs"]].map((authorizedPaths): [string, Obj] =>
+      [`invalid authorized paths ${JSON.stringify(authorizedPaths)}`, dispatchInput({ scope: { ...scope, authorizedPaths } })]),
   ];
   for (const [label, value] of bads) {
     writeInput(f.root, value);
@@ -572,10 +591,10 @@ test("an unexpected failure is exit 1 with a JSON error and one short stderr lin
 
 test("run directly, the file prints one JSON object and exits with the mapped code", (t: TestContext) => {
   const f = fixture(t, null);
-  const file = target.startsWith("file:") ? fileURLToPath(target) : path.resolve(HERE, target);
+  const file = target.startsWith("file:") ? urlPath(target) : path.resolve(HERE, target);
   const flags = process.versions.bun ? [] : NODE_FLAGS;
   const env = { PATH: process.env.PATH, HOME: process.env.HOME, AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
-  const run = (...args: string[]) => spawnSync(process.execPath, [...flags, file, ...args], { encoding: "utf8", env, timeout: 30000, cwd: f.root });
+  const run = (...args: string[]) => spawnSync(process.execPath, [...flags, file, ...args], { encoding: "utf8", env, timeout: 30000, cwd: f.root, windowsHide: true, shell: false });
   const usageRun = run("bogus");
   assert.deepEqual([usageRun.status, JSON.parse(usageRun.stdout)], [2, { error: "usage", reason: "unknown-command" }]);
   const off = run("status", "--root", f.root);
@@ -587,10 +606,10 @@ test("run directly, the file prints one JSON object and exits with the mapped co
   assert.equal(startOff.stdout.trim().split("\n").length, 1);
   assert.equal(startOff.stderr, "");
   const startOnEnv = { ...env, [SWITCH]: "true" };
-  const bypass = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "fix", "--args-text", "orca=normal fix the login bug"], { encoding: "utf8", env: startOnEnv, timeout: 30000, cwd: f.root });
+  const bypass = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "fix", "--args-text", "orca=normal fix the login bug"], { encoding: "utf8", env: startOnEnv, timeout: 30000, cwd: f.root, windowsHide: true, shell: false });
   assert.deepEqual([bypass.status, JSON.parse(bypass.stdout).state], [0, "bypassed"]);
   assert.equal(bypass.stdout.trim().split("\n").length, 1);
-  const blocked = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "shape", "--vendor", "claude"], { encoding: "utf8", env: { ...startOnEnv, PATH: f.bin }, timeout: 30000, cwd: f.root });
+  const blocked = spawnSync(process.execPath, [...flags, file, "start", "--root", f.root, "--phase", "shape", "--vendor", "claude"], { encoding: "utf8", env: { ...startOnEnv, PATH: f.bin }, timeout: 30000, cwd: f.root, windowsHide: true, shell: false });
   assert.deepEqual([blocked.status, JSON.parse(blocked.stdout).state], [4, "blocked"]);
 });
 
@@ -606,4 +625,115 @@ test("the CLI source imports no launch or path guard, repeats no switch check, a
   assert.equal(source.match(/runDirect\(import\.meta\.url, main\);/g)?.length, 1);
   const catalog: Readonly<Record<string, CheckSpec>> = checkCatalog(createNodeDeps());
   assert.ok(Object.isFrozen(catalog));
+});
+
+// ---- OpenCode: free the managed server port before the first OpenCode worker ----
+
+const SERVE_COMMAND = "/opt/homebrew/bin/opencode serve --service";
+function opencodeHarness(f: Fixture, listener?: { pid: number; port: number }): Harness & { killed: Array<[number, string | number]> } {
+  workers = 0;
+  const sync: SyncHandler = (command, args, options) => {
+    if (command === "lsof") return listener ? { status: 0, signal: null, stdout: `p${listener.pid}\nn127.0.0.1:${listener.port}\n`, stderr: "" } : { status: 1, signal: null, stdout: "", stderr: "" };
+    if (command === "ps") return { status: 0, signal: null, stdout: `${SERVE_COMMAND}\n`, stderr: "" };
+    if (command === "opencode") return { status: 0, signal: null, stdout: "", stderr: "" };
+    return probeSync(command, args, options);
+  };
+  const h = harness(f.env, { runSync: sync, run: startRun });
+  const killed: Array<[number, string | number]> = [];
+  h.deps.proc = { ...h.deps.proc, kill: (pid, signal) => { killed.push([pid, signal]); } };
+  return { ...h, killed };
+}
+const ran = (h: Harness, command: string): boolean => h.calls.runSync.some((call) => call[0] === command);
+const opencodeInput = (attemptId: string, id = attemptId): Obj => dispatchInput({ vendor: "opencode", attemptId, scope: { ...scope, id, authorizedPaths: [`${id}.mjs`] } });
+
+test("the first OpenCode dispatch checks the port, then launches; a live OpenCode attempt skips the check", async (t: TestContext) => {
+  const f = fixture(t);
+  writeInput(f.root, opencodeInput("oc1"));
+  const first = opencodeHarness(f);
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], first);
+  assert.deepEqual([result.code, result.json.route], [0, "launched"]);
+  assert.ok(ran(first, "lsof"), "the port was inspected before the first OpenCode worker");
+  assert.ok(!ran(first, "opencode"), "nothing listened, so the service was not stopped");
+  assert.deepEqual(first.killed, []);
+
+  writeInput(f.root, opencodeInput("oc2", "s2"));
+  const second = opencodeHarness(f, { pid: 4242, port: 49374 });
+  const next = await exec(["dispatch", "--root", f.root, "--input", "input.json"], second);
+  assert.deepEqual([next.code, next.json.route], [0, "launched"]);
+  assert.ok(!ran(second, "lsof"), "a live OpenCode attempt may own the server: no inspection");
+  assert.deepEqual(second.killed, []);
+});
+
+test("other vendors and a disabled switch never inspect OpenCode's port", async (t: TestContext) => {
+  const f = fixture(t);
+  writeInput(f.root, dispatchInput());
+  const codex = opencodeHarness(f, { pid: 4242, port: 49374 });
+  assert.equal((await exec(["dispatch", "--root", f.root, "--input", "input.json"], codex)).code, 0);
+  assert.ok(!ran(codex, "lsof"));
+  const off = fixture(t, null);
+  writeInput(off.root, opencodeInput("oc1"));
+  const h = opencodeHarness(off, { pid: 4242, port: 49374 });
+  assert.equal((await exec(["dispatch", "--root", off.root, "--input", "input.json"], h)).code, 3);
+  assert.ok(!ran(h, "lsof"));
+  assert.deepEqual(h.killed, []);
+});
+
+test("a stale opencode serve that survives stop and signals refuses the launch with opencode-port-held", async (t: TestContext) => {
+  const f = fixture(t);
+  writeInput(f.root, opencodeInput("oc1"));
+  const h = opencodeHarness(f, { pid: 4242, port: 49374 });
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], h);
+  assert.deepEqual([result.code, result.json.route, result.json.reason], [3, "blocked", "opencode-port-held"]);
+  assert.deepEqual(result.json.opencodePort, { status: "held", remaining: [{ pid: 4242, port: 49374 }] });
+  assert.ok(ran(h, "opencode"), "opencode service stop ran first");
+  assert.deepEqual(h.killed, [[4242, "SIGTERM"], [4242, "SIGKILL"]]);
+  assert.equal(h.calls.run.length, 0, "no worker was launched");
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+test("loadConfig branch: start and dispatch on a TOON-configured root equal the legacy-configured root", async (t: TestContext) => {
+  const legacy = fixture(t);
+  const toon = fixture(t);
+  fs.rmSync(path.join(toon.root, ".project/orchestration.json"));
+  fs.writeFileSync(path.join(toon.root, "ai-workflow.toon"), orcaPolicyToonText(true));
+  const args = (root: string) => ["start", "--root", root, "--phase", "build", "--vendor", "codex"];
+  const viaLegacy = await exec(args(legacy.root), harness(legacy.env));
+  const viaToon = await exec(args(toon.root), harness(toon.env));
+  assert.deepEqual([viaToon.code, viaToon.json], [viaLegacy.code, viaLegacy.json]);
+  const dispatchViaToon = await exec(["dispatch", "--root", toon.root, "--input", writeInput(toon.root, dispatchInput())], dispatching(toon));
+  const dispatchViaLegacy = await exec(["dispatch", "--root", legacy.root, "--input", writeInput(legacy.root, dispatchInput())], dispatching(legacy));
+  assert.deepEqual([dispatchViaToon.code, dispatchViaToon.json.route], [dispatchViaLegacy.code, dispatchViaLegacy.json.route]);
+  assert.equal(dispatchViaToon.json.route, "launched");
+});
+
+test("loadConfig branch: an invalid ai-workflow.toon refuses dispatch even when a valid legacy policy exists", async (t: TestContext) => {
+  const f = fixture(t);
+  fs.writeFileSync(path.join(f.root, "ai-workflow.toon"), "schemaVersion: 99\n");
+  const h = dispatching(f);
+  const result = await exec(["dispatch", "--root", f.root, "--input", writeInput(f.root, dispatchInput())], h);
+  assert.notEqual(result.json.route, "launched");
+  assert.equal(h.calls.run.length, 0, "no worker started");
+});
+
+test("pools: dispatch --input with assign picks the worker from the role pool and prints the library outcome", async (t: TestContext) => {
+  const f = fixture(t);
+  const input = dispatchInput({ assign: { role: "implementation", planIndex: 0 }, scope: { ...scope, id: "pa1", authorizedPaths: ["pa1.mjs"] } });
+  delete input.vendor;
+  writeInput(f.root, input);
+  const h = opencodeHarness(f);
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], h);
+  assert.deepEqual([result.code, result.json.route], [0, "launched"]);
+  const listed = createLedger(f.root, createNodeDeps()).list();
+  assert.ok(listed.status === "ok" && listed.entries.length === 1);
+});
+
+test("pools: an assigned dispatch whose role pool excludes opencode never inspects OpenCode's port", async (t: TestContext) => {
+  const f = fixture(t);
+  const input = dispatchInput({ assign: { role: "implementation", planIndex: 0 }, scope: { ...scope, id: "pc1", authorizedPaths: ["pc1.mjs"] } });
+  delete input.vendor;
+  writeInput(f.root, input);
+  const h = opencodeHarness(f, { pid: 4242, port: 49374 });
+  const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], h);
+  assert.deepEqual([result.code, result.json.route], [0, "launched"]);
+  assert.ok(!ran(h, "lsof"), "the implementation pool is [codex]; the held port is irrelevant");
 });

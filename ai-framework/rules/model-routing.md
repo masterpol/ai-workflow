@@ -72,6 +72,11 @@ route instead of the fast one for confidential source or data. There is no silen
 connect the required provider in OpenCode first, and let a missing configured model fail rather
 than downgrading a security or architecture task.
 
+The actual model identifiers live in the project-root `ai-workflow.toon` `models` block (see
+[Capability Profiles](../integrations/harnesses.md#capability-profiles)). The table above is
+the shipped default; the example toon encodes it. Update the toon to change routes, not the
+agent/command files.
+
 ---
 
 ## Phase-to-Model Mapping (new pipeline)

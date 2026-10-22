@@ -1,13 +1,13 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, urlPath, listTree, execFileSync, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
@@ -16,7 +16,7 @@ import { ownedPaths, discoverFormatter, formatFiles, reconcile, main } from "./s
 import type { FileValue, RegistryApi } from "./skill-sync.mts";
 import * as skillRegistry from "./skill-registry.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 const { context, snapshot } = skillRegistry as RegistryApi;
 
 const ID = "example/repository/sample";
@@ -136,7 +136,16 @@ test("prettier configured via package.json is also discovered", (t: TestContext)
 test("a configured formatter with no installed binary is treated as no formatter", (t: TestContext) => {
   const { root } = fixture(t);
   write(root, ".prettierrc.json", "{}\n");
-  assert.equal(discoverFormatter(root), null);
+  const base = createNodeDeps();
+  let probes = 0;
+  const deps: RuntimeDeps = { ...base, child: { ...base.child, runSync(command, args) {
+    assert.equal(command, "prettier");
+    assert.deepEqual(args, ["--version"]);
+    probes++;
+    throw Object.assign(new Error("fixture executable missing"), { code: "ENOENT" });
+  } } };
+  assert.equal(discoverFormatter(root, deps), null);
+  assert.equal(probes, 1, "the fixture checks the PATH fallback without consulting the host installation");
 });
 
 test("formatter failure throws and no bytes are queued for writing", (t: TestContext) => {
@@ -161,9 +170,9 @@ test("install records separate upstream and post-format hashes, and reinstalling
 test("a formatter failure during install leaves the target completely unwritten", (t: TestContext) => {
   const { root, options } = fixture(t, { formatter: true });
   installFakePrettier(root, "fail");
-  const before = fs.readdirSync(root, { recursive: true }).sort();
+  const before = listTree(testDeps, root);
   assert.throws(() => run(options), /Formatter failed/);
-  assert.deepEqual(fs.readdirSync(root, { recursive: true }).sort(), before);
+  assert.deepEqual(listTree(testDeps, root), before);
 });
 
 test("reconcile reports clean states without an installed registry, a pending transaction, or no .project", (t: TestContext) => {

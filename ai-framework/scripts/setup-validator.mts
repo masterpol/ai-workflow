@@ -5,10 +5,13 @@ import { runDirect } from "./runtime/cli.mts";
 
 import * as skillVendors from "./skill-vendors.mts";
 import * as entryImport from "./entry-import.mts";
+import { CONFIG_FILE, loadConfig } from "./runtime/config.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 type Status = "pass" | "info" | "warn" | "fail";
 interface CheckResult { status: Status; name: string; detail: string }
+interface CheckRun { code: number | null; stdout: string; stderr: string; signal: string | null; errorCode?: string }
+const safeCode = (value: unknown): string | undefined => typeof value === "string" && /^[A-Z][A-Z0-9_]{0,39}$/.test(value) ? value : undefined;
 interface CursorReport { created: string[]; differs: string[]; current: number }
 interface ClaudeEntry { kind: string; detail?: string; content: string }
 
@@ -53,11 +56,14 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
     return false;
   }
   // A spawn failure (missing binary) is reported like a non-zero exit, as before.
-  async function run(command: string, args: string[]): Promise<{ code: number | null; stdout: string; stderr: string }> {
+  async function run(command: string, args: string[]): Promise<CheckRun> {
     try {
       const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, { cwd: root, timeoutMs: 30000 }) : deps.child.run(command, args, { cwd: root, timeoutMs: 30000 }));
-      return { code: result.status, stdout: result.stdout, stderr: result.stderr };
-    } catch { return { code: null, stdout: "", stderr: "" }; }
+      return { code: result.status, stdout: result.stdout, stderr: result.stderr, signal: safeCode(result.signal) ?? null, ...(safeCode(result.errorCode) ? { errorCode: safeCode(result.errorCode)! } : {}) };
+    } catch (error: unknown) {
+      const code = typeof error === "object" && error !== null && "code" in error ? safeCode(error.code) : undefined;
+      return { code: null, stdout: "", stderr: "", signal: null, errorCode: code ?? "SPAWN_FAILED" };
+    }
   }
   const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
@@ -169,19 +175,48 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
     }
     if (files.length === 0) return;
     const bun = deps.runtime === "bun";
-    const outcomes = await Promise.all(files.map(async (file) => {
-      const args = bun ? ["build", "--no-bundle", file] : ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "-e", NODE_PARSE_SCRIPT, absolute(file)];
-      return { file, result: await run(deps.proc.execPath, args) };
+    // Bound process pressure; preserve discovery order without skipping or retrying failures.
+    const outcomes: { file: string; result: CheckRun }[] = new Array(files.length);
+    let next = 0;
+    await Promise.all(Array.from({ length: Math.min(4, files.length) }, async () => {
+      while (next < files.length) {
+        const index = next++;
+        const file = files[index];
+        const args = bun ? ["build", "--no-bundle", file] : ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "-e", NODE_PARSE_SCRIPT, absolute(file)];
+        outcomes[index] = { file, result: await run(deps.proc.execPath, args) };
+      }
     }));
     const unparsed = outcomes.filter((outcome) => !bun && outcome.result.code === 3);
     if (unparsed.length > 0) record("info", "TypeScript entries", `${unparsed.length} file(s) not parse-checked: this Node has no module.stripTypeScriptTypes`);
     const bad = outcomes.filter((outcome) => outcome.result.code !== 0 && !unparsed.includes(outcome));
     if (bad.length === 0) { record("pass", "TypeScript entries", `${files.length} TypeScript file(s) parse`); return; }
-    for (const { file, result } of bad) record("fail", file, `does not parse: ${result.stderr.trim().split("\n")[0] || "TypeScript check failed"}`);
+    for (const { file, result } of bad) {
+      const signal = result.signal ? `; signal ${result.signal}` : "";
+      const detail = result.errorCode === "ETIMEDOUT"
+        ? `parse check timed out (ETIMEDOUT${signal}; limit 30000ms)`
+        : result.errorCode ? `parse check could not run (${result.errorCode}${signal})`
+        : result.signal ? `parse check terminated (signal ${result.signal})`
+        : result.stderr.trim() ? `does not parse: ${result.stderr.trim().split("\n")[0]}`
+        : `parse check exited with code ${result.code}`;
+      record("fail", file, detail);
+    }
+  }
+  // Severity contract (consumers filter --json results[] by name + status, never by exit code):
+  // absent = info (not yet migrated), invalid or refused = fail, valid = pass.
+  async function checkWorkflowConfig(): Promise<void> {
+    const check = { name: "Workflow config" };
+    const result = loadConfig(root, deps);
+    if ("status" in result) {
+      if (result.status === "missing") record("info", check.name, `${CONFIG_FILE} absent; not yet migrated`);
+      else record("fail", check.name, `${CONFIG_FILE} refused (${result.code}): ${result.text}`);
+      return;
+    }
+    if (result.problems.length) { record("fail", check.name, `${CONFIG_FILE} invalid: ${result.problems.slice(0, 5).map((item) => `${item.code} ${item.text}`).join("; ")}`); return; }
+    record("pass", check.name, `${CONFIG_FILE} valid`);
   }
   async function validate(): Promise<void> {
     if (!(await exists(".project"))) { record("fail", ".project", "missing; setup has not completed"); return; }
-    await Promise.all([checkWorkflowDoctor(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors(), checkTypeScriptEntries()]);
+    await Promise.all([checkWorkflowDoctor(), checkWorkflowConfig(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors(), checkTypeScriptEntries()]);
   }
   return { results, json, paint, out, validate };
 }

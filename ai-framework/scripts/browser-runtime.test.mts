@@ -1,19 +1,19 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { delimiter, dirname, join } from "node:path";
+import { createTestDeps, urlPath, execFileSync, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const { chmodSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { delimiter, dirname, join } = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import * as addSkill from "./add-skill.mts";
 import { ENTRY_ID, cliStatus, main, overallStatus, report } from "./browser-runtime.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
-const here = dirname(fileURLToPath(import.meta.url));
+const here = dirname(urlPath(import.meta.url));
 const { run } = addSkill as { run(options: Record<string, unknown>): unknown };
 
 function write(root: string, name: string, value: string): void {
@@ -138,22 +138,24 @@ test("CLI end to end, including --json and plain text", (t) => {
   withCli(t, false);
   const { root } = fixture(t);
   const script = join(here, "browser-runtime.mts");
-  const jsonRun = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "report", "--root", root, "--json"], { encoding: "utf8", env: process.env });
+  // PATH is emptied, so pin the child to the runner already executing it; the checkout's ai-workflow.toon may name the other one.
+  const env = { ...process.env, AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
+  const jsonRun = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "report", "--root", root, "--json"], { encoding: "utf8", env });
   assert.equal(jsonRun.status, 0);
   const parsed = JSON.parse(jsonRun.stdout);
   assert.equal(parsed.id, ENTRY_ID);
   assert.equal(parsed.cli, "unavailable");
   assert.equal(parsed.status, "unsupported");
 
-  const plainRun = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "report", "--root", root], { encoding: "utf8", env: process.env });
+  const plainRun = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "report", "--root", root], { encoding: "utf8", env });
   assert.equal(plainRun.status, 0);
   assert.match(plainRun.stdout, /vercel-labs\/agent-browser\/agent-browser: unsupported/);
 
-  const bad = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "bogus"], { encoding: "utf8" });
+  const bad = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "bogus"], { encoding: "utf8", env });
   assert.equal(bad.status, 1);
   assert.match(bad.stderr, /Usage:/);
 
-  const badOption = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "report", "--nope"], { encoding: "utf8" });
+  const badOption = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "report", "--nope"], { encoding: "utf8", env });
   assert.equal(badOption.status, 1);
   assert.match(badOption.stderr, /Unknown option/);
 });

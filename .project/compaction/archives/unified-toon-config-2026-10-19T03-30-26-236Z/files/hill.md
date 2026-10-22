@@ -1,0 +1,46 @@
+---
+slug: unified-toon-config
+date: 2026-10-16
+phase: plan
+---
+
+# Hill: unified-toon-config
+
+> 13 scopes. Build order is mandated, not derived (a → c → b → d). Each scope moves
+> `uphill 0%/25%/75%` → `over-the-hill` → `downhill 25%/75%` → `done`. Update this file
+> per-scope; never per-task.
+
+| ID  | Title                                        | Position | Notes |
+|-----|----------------------------------------------|----------|-------|
+| a1  | `config.mts` primitives                       | over-the-hill | Consumer verification by a2 mutants: errorCodes.foo contracts asserted and passed; two a1 reader-context remaps applied. |
+| a2  | `config.test.mts` parser mutants              | done | 7 parser-guard mutants implemented; all exit criteria green; a1 contract verified. |
+| a3  | Writer/path mutants + alias + subprocess     | over-the-hill | 5 writer/path mutants (each proven to bite via manual source mutation), 4 alias tests, K2-3 subprocess, lock contention + stale recovery green; TOON fixture writer in `test-helpers.mts`. 9-site tempFixture audit carried to c1.2 (d10). |
+| c1.1| runtime/orca reader glue + grader rewire      | done | `loadConfigEnv` (env.mts) feeds select/entry; `readPolicy` TOON-first via shared `validatePolicy`; grader writes via `wxRename`; signatures frozen. c1.2 consumer tests prove both branches. Open: d12 readers (`skill-defaults`/`state-snapshot`), d14 resolved by c2.2. |
+| c1.2| Reader tests + grader no-race                 | done | 11 literal-grep files, grader no-race x2 (concurrent + both preamble branches), tempFixture `{ resolve: false }` audit (grader 6, orca-start 2). Drift d15-d17. |
+| c2.1| Doctor validators + setup-validator          | over-the-hill | Deps: a1 (parallel with c2.2 / c2.3 after c1.1) |
+| c2.2| Root docs rewrite                             | over-the-hill | Deps: a1 (parallel with c2.3) |
+| c2.3| Framework docs + build SKILL mirrors         | over-the-hill | Deps: a1 (parallel with c2.2) |
+| c2.4| Hooks cutover                                 | over-the-hill | Deps: c1.1 (parallel with c2.1/c2.2/c2.3 if file sets disjoint — verified) |
+| b1  | Migrator CLI prod                             | over-the-hill | Writer, dual-hash, 3-branch force, backups, lock, subprocess re-parse; no delete pass. Exit commands green; orca-policy parity before/after apply. Drift d30-d34. |
+| b2  | Migrator functional tests                     | over-the-hill | 12 b2 tests (force branches, dry-run, .rejected, unregistered/oversize refusals, dual-hash state, --json, conversion, .gitignore, CLI args). Drift d35-d37. |
+| b3  | Migrator guard proofs + Bun-adapter gate      | over-the-hill | 7 mutant suites (baseline+mutation), dual-hash, .rejected, lock contention/release/stale recovery, bundle-sync exclusion (mutation-checked + old-version), Bun-adapter writeFileSync gate (killed by a manual bun.mts override). 20/20 migrator mutants killed. |
+| d   | Legacy retirement                            | over-the-hill | Deps: all (no scope deletes a legacy file until d lands) |
+
+## State transitions
+
+| from → to         | Trigger                                       |
+|-------------------|-----------------------------------------------|
+| uphill 0% → 25%   | branch cut, deps known, contracts read        |
+| uphill 25% → 75%  | partial implementation, tests start passing   |
+| 75% → over-hill   | scope's producer-side invariants hold         |
+| over → downhill 75%| consumer verification (other scopes' deps)  |
+| downhill → done   | every machine-checkable exit criterion green |
+
+## Block / re-plan triggers
+
+- a1 blocked on branch-gate if `git status --porcelain` lists any of the 4 dirty files.
+- Any scope blocked on another scope that is NOT yet `over-the-hill` — escalate to /plan.
+- Diff criterion violation (X12): scope that edits a non-allowlisted `orca-*.mts` is blocked.
+- A-scope ordering violation (a2 starts before a1; a3 starts before a2; etc.) — blocked.
+- Cross-pitch hotspot edits (`orca-policy.mts`, `orca-launch-gate.mts`,
+  `orca-eval-grader.mts`, `build/SKILL.md`) outside the allowlisted change surface — blocked.

@@ -11,8 +11,10 @@ Pre-bet step inside `/shape`. See `ai-framework/workflow/phases/0-shape.md` acti
 
 ## When to use
 
-- Auto-fires inside `/shape` when appetite is `big-batch` OR pitch touches `lib/ai/prompts/`
-- Skipped for small-batch, bug-fix, hotfix
+- Auto-fires inside `/shape` when appetite is `big-batch` OR the pitch has an AI-prompt scope (changed model behavior wherever it lives, e.g. `lib/ai/prompts/`; definition in `ai-framework/workflow/phases/0-shape.md`)
+- Skipped for non-AI small-batch work inside `/shape`. Within `/shape`, an AI-prompt scope requires critique regardless of appetite.
+- Bug-fix and hotfix use the direct workflows in `ai-framework/workflow/overview.md` and skip this pre-bet step.
+  Their AI-prompt scopes still require the evaluation checks in `/audit`; skipping `/shape` does not waive those checks.
 
 ## Perspective subagents (parallel fan-out)
 

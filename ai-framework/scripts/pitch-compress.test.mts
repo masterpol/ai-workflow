@@ -1,13 +1,15 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { createTestDeps, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { buildGraph, overlayKnowledge, renderIndex } from "./graphify.mts";
 import * as compressModule from "./pitch-compress.mts";
 
 const { inventory, buildLedger, requiredSections, commitLedger, writeDoneWork, slugifyHeading, extractSection, createPitchCompress } = compressModule;
@@ -25,11 +27,14 @@ function exists(root, name) { return fs.existsSync(path.join(root, name)); }
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pitch-compress-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  // graphify.mts is dependency-free (fs/path only per its own header) — safe and fast to copy
-  // whole so commitLedger's real --check call has something real to run against.
-  fs.mkdirSync(path.join(root, "ai-framework/scripts"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "graphify.mts"), path.join(root, "ai-framework/scripts/graphify.mts"));
   for (const dir of ["decisions", "patterns", "entities", "issues", "templates"]) fs.mkdirSync(path.join(root, `.project/knowledge/${dir}`), { recursive: true });
+  // Ledger validation reads real generated artifacts, including through its child process.
+  // Build only this fixture's knowledge overlay; no Graphify installation or external command is needed.
+  const deps = createNodeDeps();
+  const { graph, problems } = buildGraph(root, deps);
+  assert.deepEqual(problems, []);
+  write(root, "graphify-out/graph.json", JSON.stringify(overlayKnowledge({ nodes: [], links: [] }, graph)) + "\n");
+  write(root, ".project/knowledge/index.md", renderIndex(graph, root, deps));
   return root;
 }
 
@@ -257,7 +262,7 @@ test("commit-ledger rejects a new knowledge entry that fails graphify's own vali
   write(root, ".project/knowledge/patterns/broken-dupe.md", "---\nid: broken\ntype: pattern\n---\n\nDuplicate id on purpose.\n");
   const required = buildLedger(root, "bad-knowledge").required;
   const mapping = { sections: required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" })) };
-  assert.throws(() => commitLedger(root, "bad-knowledge", mapping), /Knowledge graph invalid/);
+  assert.throws(() => commitLedger(root, "bad-knowledge", mapping), /Knowledge graph invalid: .*duplicate id "broken"/);
 });
 
 test("write-done-work is idempotent: a rerun for the same slug replaces only its own section", (t) => {
@@ -586,7 +591,7 @@ test("a failing graph check reports graphify's own problem list, not raw stderr 
   const sections = buildLedger(root, "graphfail").required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" }));
   let message = "";
   try { commitLedger(root, "graphfail", { sections }, {}); } catch (error) { message = error.message; }
-  assert.match(message, /^Knowledge graph invalid: /);
+  assert.match(message, /^Knowledge graph invalid: .*duplicate id "broken"/);
   assert.ok(!message.includes(root), "no absolute path from the child process");
 });
 
@@ -676,4 +681,18 @@ test("injected graph subprocess is bundle-owned and reports only the validated p
   assert.deepEqual(calls, [{ command: process.versions.bun ? "node" : deps.proc.execPath, args: ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", path.join(__dirname, "graphify.mts"), "--check", "--json"], options: { cwd: root, env: { AI_WORKFLOW_RUNNER: "node" } } }]);
   deps.child.runSync = () => ({ status: 1, signal: null, stdout: '{"problems":[{"message":"stale graph"}]}', stderr: "private child output" });
   assert.throws(() => tools.commitLedger(root, "runtime-graph", mapping), { message: "Knowledge graph invalid: stale graph" });
+});
+
+test("write-done-work reads the ship date from bold and plain `Shipped:` lines, and only falls back to today when there is none", (t) => {
+  const root = fixture(t);
+  const cases = [
+    ["bold", "**Shipped:** 2026-09-25", "2026-09-25"],
+    ["plain", "Bet: 2026-09-20  •  Shipped: 2026-09-26  •  Appetite: small-batch", "2026-09-26"],
+    ["colon-outside", "**Shipped**: 2026-09-27", "2026-09-27"],
+    ["date-line", "**Date**: 2026-09-28", "2026-09-28"],
+  ];
+  for (const [name, line] of cases) write(root, `.project/pitches/${name}/SHIPPED.md`, `# Shipped: ${name}\n${line}\n\n## Summary\n\nDone.\n`);
+  for (const [name] of cases) writeDoneWork(root, name, "Summary text.", { apply: true });
+  const done = read(root, ".project/done-work.md");
+  for (const [name, , expected] of cases) assert.match(done, new RegExp(`## ${name} — shipped ${expected}\\n`));
 });

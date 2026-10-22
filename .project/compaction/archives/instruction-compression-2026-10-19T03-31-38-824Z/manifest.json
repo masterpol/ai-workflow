@@ -1,0 +1,88 @@
+{
+  "schemaVersion": 1,
+  "slug": "instruction-compression",
+  "sourceRoot": ".project/pitches/instruction-compression",
+  "archivedAt": "2026-10-19T03:31:38.825Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "a8ee0cb40899949207a9d03963522391c3c8dea910fe9b2aefc482f52f37801d",
+      "mode": 420
+    },
+    "audit-evidence.md": {
+      "hash": "6e4d964e089dc0013f98076b44747ef4965330b85c58f070f0dc9e7083e0dc99",
+      "mode": 420
+    },
+    "baseline-review.md": {
+      "hash": "4a448bac06b432fcb2af10c32b8d3b109df0474d2eb24fde26597e0c5fe2bd62",
+      "mode": 420
+    },
+    "baseline-spike.md": {
+      "hash": "5d0b02f4736b3f4de2f2b0136b09fd9e881acc55d24ec83c4841bb8d5fc0d681",
+      "mode": 420
+    },
+    "build-completion.md": {
+      "hash": "584064947d1a7f226f70e8844920ec6d2634ce5f4b26898e9d496029e1bf3ae0",
+      "mode": 420
+    },
+    "build-evidence.md": {
+      "hash": "ae6a9004f982d406365cdd93c1453301a1561dca726fbf2d5b379a408448b7f7",
+      "mode": 420
+    },
+    "build-start.md": {
+      "hash": "86993a4798c5198111845741b754408921b4549649d8c6f547e366527ce6f6a2",
+      "mode": 420
+    },
+    "critique.md": {
+      "hash": "aba831f6d7991f583c13a4ff62efcc949a0e9187fe133188db405f954e103eb2",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "83c5ca1cf1dcf239b24ff2fc63bc2ae7d513c680399e9cf3ff03da1f37cd77c2",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "1f4a1a92362e57a02e30804f52b65efca3b5a72344e6fcc703e3ab30c9805895",
+      "mode": 420
+    },
+    "impact.md": {
+      "hash": "4969dc2f064bc62c9e20014149334a153a431988d00e7a47946e1e1f959e74df",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "cfd76b01f2c7d1b978610db0daaba396ac77a3c6d931edd0fc6cf15620f3cc3d",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "85a4c8e668b4c5b08fdc4ca20f466cdd1deac76ff245a630462a0483133f2176",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "f8e500a2f0671fd429504bae33f1e92fad9965dad9c8a8dc112433db83f2b523",
+      "mode": 420
+    },
+    "remaining-scopes.md": {
+      "hash": "d9b7b96c901c0c74fddd974a42cdbe89056bf15ecf6a1c46f572a90e4718a35c",
+      "mode": 420
+    },
+    "s3-review.md": {
+      "hash": "fc8c1ea7d27907db213186dbc67c10b47643666be3e0fb6b0de4eda697447d11",
+      "mode": 420
+    },
+    "shape-revision.md": {
+      "hash": "6ea9a92751db71ba9f50376ce7f7e1f81b40d9c64b1adbfddcd2536f47b123de",
+      "mode": 420
+    },
+    "ship-evidence.md": {
+      "hash": "33d9c5ec24f6283c6db1055b256f0d9f2557c7f034ae677ed8d2f663d4d82438",
+      "mode": 420
+    },
+    "upgrade-repair.md": {
+      "hash": "4f32067b500669f7e06d7a6330e9cb59d5a29b0da75f76ca7d7013c626394964",
+      "mode": 420
+    },
+    "validation.md": {
+      "hash": "ae51eade8326eb92895f5b96179e38a6db3345da3bd300953e40ce4d834631f5",
+      "mode": 420
+    }
+  }
+}

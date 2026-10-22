@@ -1,11 +1,12 @@
 import assert from "node:assert/strict";
-import { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
 import { test } from "node:test";
 
 import { captureIo, createTestDeps, memoryFs, runScript, tempFixture } from "./test-helpers.mts";
 import { createNodeDeps } from "./node.mts";
+const testDeps = createTestDeps();
+const { mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join } = testDeps.path;
 
 const deps = createTestDeps();
 
@@ -29,7 +30,7 @@ test("tempFixture creates a real temp directory and writes files, returning a re
   }
 });
 
-test("tempFixture honours the mode option", () => {
+test("tempFixture honours the mode option", { skip: process.platform === "win32" ? "POSIX executable permission bits are unavailable on Windows" : false }, () => {
   const root = tempFixture(deps, { "exec.sh": { content: "#!/bin/sh\n", mode: 0o755 } });
   try {
     const st = deps.fs.statSync(join(root, "exec.sh"));

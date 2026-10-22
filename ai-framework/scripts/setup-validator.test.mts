@@ -1,12 +1,12 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { mkdtempSync, realpathSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { createTestDeps, urlPath, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const { mkdtempSync, realpathSync, rmSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join } = testDeps.path;
 import { test } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { main } from "./setup-validator.mts";
 import type { ValidatorLibs } from "./setup-validator.mts";
@@ -56,7 +56,10 @@ function makeDeps(files: Record<string, string>, script: (call: Call) => RunResu
   const deps: RuntimeDeps = {
     runtime: "node",
     fs: {
-      readFileSync: unsupported, writeFileSync: unsupported, existsSync: unsupported, readdirSync: unsupported, mkdirSync: unsupported, realpathSync: unsupported, writeFile: unsupported,
+      readFileSync: unsupported, writeFileSync: unsupported, existsSync: unsupported, readdirSync: unsupported, mkdirSync: unsupported, writeFile: unsupported,
+      // The in-memory fs cannot inspect real paths: an absent path is ENOENT, a present one is an unsupported (refused) inspection.
+      realpathSync: (file) => { if (file === ROOT) return ROOT; throw Object.assign(new Error(`ENOENT ${file}`), { code: "ENOENT" }); },
+      lstatSync: (file) => { throw store.has(file) ? new Error("not inspectable in memory") : Object.assign(new Error(`ENOENT ${file}`), { code: "ENOENT" }); },
       readFile: async (file) => { const text = store.get(file); if (text === undefined) throw new Error(`ENOENT ${file}`); return text; },
       exists: async (file) => store.has(file),
       readdir: async (dir) => { const names = dirEntries(dir); if (!names) throw new Error(`ENOENT ${dir}`); return names; },
@@ -135,6 +138,16 @@ test("missing records fail with exit 1 and INCOMPLETE text", async () => {
   assert.ok(text.includes("FAIL  .project/done-work.md: missing\n"));
   assert.ok(text.includes("FAIL  .project/context/stack.md: appears to be an unfilled setup draft\n"));
   assert.ok(text.includes("\nSetup status: INCOMPLETE (2 issue(s))\nNext: re-run /setup"));
+});
+
+test("a long context file that still carries a setup placeholder is an unfilled draft", async () => {
+  for (const placeholder of ["_Detecting..._", "_Scanning project..._"]) {
+    const files = baseFiles();
+    files[".project/context/stack.md"] = `# Stack\n\nThis section is long enough to pass the length check on its own.\n\n${placeholder}\n`;
+    const { deps, out } = makeDeps(files, healthy);
+    assert.equal(await main(["--no-color"], deps, libs), 1, placeholder);
+    assert.ok(out.join("").includes("FAIL  .project/context/stack.md: appears to be an unfilled setup draft\n"), placeholder);
+  }
 });
 
 test("missing .project short-circuits to one failure", async () => {
@@ -243,14 +256,118 @@ test("unexpected errors exit 2 on stderr", async () => {
 });
 
 test("integration: the direct TypeScript command runs the validator in an empty project dir", () => {
-  const shim = fileURLToPath(new URL("./setup-validator.mts", import.meta.url));
+  const shim = urlPath(new URL("./setup-validator.mts", import.meta.url));
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "setup-validator-")));
   try {
-    const run = spawnSync(process.execPath, [...RUNTIME_FLAGS, shim, "--no-color"], { cwd: dir, encoding: "utf8", env: { ...process.env, NO_COLOR: "1" } });
+    const run = spawnSync(process.execPath, [...RUNTIME_FLAGS, shim, "--no-color"], { cwd: dir, encoding: "utf8", shell: false, windowsHide: true, timeout: 15000, env: { ...process.env, NO_COLOR: "1" } });
     assert.equal(run.stderr, "");
     assert.equal(run.status, 1);
     assert.ok(run.stdout.includes("FAIL  .project: missing; setup has not completed\n"));
     assert.ok(run.stdout.includes("Setup status: INCOMPLETE (1 issue(s))"));
     assert.match(run.stdout, /Validated 0 checks\./);
   } finally { rmSync(dir, { recursive: true, force: true }); }
+});
+
+
+test("parser probes are bounded and all settle exactly once before validation completes", async () => {
+  const files = baseFiles();
+  delete files["ai-framework/scripts/demo.mts"];
+  for (let index = 0; index < 12; index++) files["ai-framework/scripts/probe-" + index + ".mts"] = "export {};";
+  let active = 0;
+  let peak = 0;
+  const finished: string[] = [];
+  const run = makeDeps(files, async (call) => {
+    if (!call.args.includes("-e")) return healthy(call);
+    active++;
+    peak = Math.max(peak, active);
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    active--;
+    finished.push(call.args.at(-1)!);
+    return ok("");
+  });
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  assert.equal(active, 0);
+  assert.ok(peak >= 2 && peak <= 4);
+  assert.equal(finished.length, 12);
+  assert.equal(new Set(finished).size, 12);
+  assert.equal(run.calls.filter((call) => call.args.includes("-e")).length, 12);
+});
+
+test("parser process failures retain safe diagnostics rather than claiming syntax errors", async () => {
+  const cases: { result?: RunResult; error?: Error; expected: string }[] = [
+    { result: { status: null, signal: "SIGKILL", stdout: "", stderr: "", errorCode: "ETIMEDOUT" }, expected: "parse check timed out (ETIMEDOUT; signal SIGKILL; limit 30000ms)" },
+    { result: { status: null, signal: "SIGKILL", stdout: "", stderr: "" }, expected: "parse check terminated (signal SIGKILL)" },
+    { result: { status: 7, signal: null, stdout: "", stderr: "" }, expected: "parse check exited with code 7" },
+    { error: Object.assign(new Error("sensitive-marker"), { code: "EAGAIN" }), expected: "parse check could not run (EAGAIN)" },
+    { error: Object.assign(new Error("sensitive-marker"), { code: "secret: sensitive-marker" }), expected: "parse check could not run (SPAWN_FAILED)" },
+  ];
+  for (const entry of cases) {
+    const run = makeDeps(baseFiles(), (call) => {
+      if (!call.args.includes("-e")) return healthy(call);
+      if (entry.error) throw entry.error;
+      return entry.result!;
+    });
+    assert.equal(await main(["--no-color"], run.deps, libs), 1);
+    assert.ok(run.out.join("").includes(entry.expected));
+    assert.doesNotMatch(run.out.join("") + run.err.join(""), /sensitive-marker|does not parse/);
+  }
+});
+
+test("Node without stripTypeScriptTypes still reports its explicit unsupported boundary", async () => {
+  const run = makeDeps(baseFiles(), (call) => call.args.includes("-e") ? { status: 3, signal: null, stdout: "", stderr: "" } : healthy(call));
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  const report = JSON.parse(run.out.join("")) as Report;
+  assert.ok(report.results.some((result) => result.status === "info" && result.detail.includes("not parse-checked")));
+});
+
+test("Workflow config is info when ai-workflow.toon is absent, and never fails the run by itself", async () => {
+  const run = makeDeps(baseFiles(), healthy);
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  const report = JSON.parse(run.out.join("")) as Report;
+  const item = report.results.find((result) => result.name === "Workflow config");
+  assert.deepEqual([item?.status, /not yet migrated/.test(item?.detail ?? "")], ["info", true]);
+});
+
+test("Workflow config is fail (LEXER-SYMLINK) for a dangling symlink ai-workflow.toon, never absent", async () => {
+  // A dangling symlink does not "exist" for exists(), so the old pre-check reported it as absent.
+  const base = makeDeps(baseFiles(), healthy);
+  const target = `${ROOT}/ai-workflow.toon`;
+  const lstat = base.deps.fs.lstatSync;
+  const deps: RuntimeDeps = { ...base.deps, fs: { ...base.deps.fs, lstatSync: (file: string) => file === target ? ({ isSymbolicLink: () => true } as ReturnType<typeof lstat>) : lstat(file) } };
+  assert.equal(await main(["--json"], deps, libs), 1);
+  const item = (JSON.parse(base.out.join("")) as Report).results.find((result) => result.name === "Workflow config");
+  assert.equal(item?.status, "fail");
+  assert.match(item?.detail ?? "", /symlink/i);
+});
+
+test("Workflow config is fail when a present ai-workflow.toon is refused by the reader", async () => {
+  // The in-memory fs cannot inspect paths, so loadConfig refuses; refusal must be fail, never a silent pass.
+  const run = makeDeps({ ...baseFiles(), "ai-workflow.toon": "schemaVersion: 2\n" }, healthy);
+  assert.equal(await main(["--json"], run.deps, libs), 1);
+  const report = JSON.parse(run.out.join("")) as Report;
+  const item = report.results.find((result) => result.name === "Workflow config");
+  assert.deepEqual([item?.status, /refused/.test(item?.detail ?? "")], ["fail", true]);
+});
+
+test("Workflow config reports valid as pass and invalid as fail on a real project dir", async (t) => {
+  const { createNodeDeps } = await import("./runtime/node.mts");
+  const { mkdirSync, readFileSync, writeFileSync } = createTestDeps().fs;
+  const dir = mkdtempSync(join(tmpdir(), "setup-validator-config-"));
+  t.after(() => rmSync(dir, { recursive: true, force: true }));
+  mkdirSync(join(dir, ".project"));
+  const valid = readFileSync(urlPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
+  const cases: Array<[string, string, RegExp]> = [
+    [valid, "pass", /valid/],
+    [valid.replace("doctor:\n", "  nosuchtool:\n    a: 1\ndoctor:\n"), "fail", /unknown integration "nosuchtool"/],
+    ["schemaVersion: 3\n", "fail", /invalid|refused/],
+  ];
+  for (const [body, status, detail] of cases) {
+    writeFileSync(join(dir, "ai-workflow.toon"), body);
+    const base = createNodeDeps();
+    const out: string[] = [];
+    const deps: RuntimeDeps = { ...base, proc: { ...base.proc, cwd: () => dir, env: {} }, io: { ...base.io, stdout: { write: (text) => { out.push(text); } } } };
+    await main(["--json"], deps, libs);
+    const item = (JSON.parse(out.join("")) as Report).results.find((result) => result.name === "Workflow config");
+    assert.deepEqual([item?.status, detail.test(item?.detail ?? "")], [status, true], `${status}: ${item?.detail}`);
+  }
 });

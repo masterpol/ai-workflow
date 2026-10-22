@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import test from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
 import { nodeFs } from "../../scripts/runtime/node.mts";
+import { createTestDeps, fileUrl, urlPath } from "../../scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
+const here = path.dirname(urlPath(import.meta.url));
 
 type Event = Record<string, unknown>;
 type ToolHook = (input: Event, output?: Event) => Promise<void>;
@@ -17,7 +18,7 @@ interface PluginRun {
   v2?: { emit(event: Event): Promise<void>; toolHook(event: Event): Promise<void>; snapshot(): ReturnType<typeof JSON.parse>; waitForSnapshot(timeoutMs?: number): Promise<void>; root: string };
 }
 
-const pluginUrl = pathToFileURL(path.join(here, "..", "..", "..", ".opencode", "plugins", "token-consumption.ts")).href;
+const pluginUrl = fileUrl(path.join(here, "..", "..", "..", ".opencode", "plugins", "token-consumption.ts"));
 
 async function withPlugin(action: (run: PluginRun) => Promise<void>): Promise<void> {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "token-consumption-"));
@@ -307,7 +308,7 @@ test("V2: malformed events never throw out of the plugin", async () => {
 });
 
 test("the discovered TypeScript plugin imports the direct collector module", async () => {
-  const direct = (await import(pathToFileURL(path.join(here, "token-consumption.mts")).href)) as Record<string, unknown>;
+  const direct = (await import(fileUrl(path.join(here, "token-consumption.mts")))) as Record<string, unknown>;
   for (const name of ["recordEvent", "normalizedEvent", "applyToSnapshot", "blankSnapshot"]) {
     assert.equal(typeof direct[name], "function", name);
   }

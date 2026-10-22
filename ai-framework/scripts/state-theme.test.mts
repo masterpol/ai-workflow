@@ -1,11 +1,11 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join, posix } from "node:path";
+import { createTestDeps, moduleRequire } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { dirname, join, posix } = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { createRequire } from "node:module";
 
 import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
 import {
@@ -55,7 +55,7 @@ function fake(files: Record<string, string>, links: Record<string, string> = {})
       },
     },
     path: posix,
-    crypto: { sha256Hex: (data: string | Uint8Array) => createHash("sha256").update(data).digest("hex") },
+    crypto: { sha256Hex: (data: string | Uint8Array) => testDeps.crypto.sha256Hex(data) },
   } as unknown as RuntimeDeps;
   return { deps, files: map, links: linkMap };
 }
@@ -134,7 +134,7 @@ test("discoverTheme reads shadcn variables from project CSS and records provenan
   assert.equal(theme.dark.background, "#09090b");
   assert.equal(theme.provenance.light.background, "discovered");
   assert.equal(theme.provenance.light.fontSans, "fallback");
-  assert.deepEqual(theme.sources, [{ path: "src/app.css", sha256: createHash("sha256").update(SHADCN).digest("hex") }]);
+  assert.deepEqual(theme.sources, [{ path: "src/app.css", sha256: testDeps.crypto.sha256Hex(SHADCN) }]);
   assert.equal(theme.reason, null);
 });
 
@@ -228,7 +228,7 @@ function put(root: string, rel: string, text: string): void {
 test("the direct TypeScript command loads the same API for non-migrated callers (old signatures, default deps)", (t) => {
   const root = realProject(t);
   put(root, "src/app.css", SHADCN);
-  const shim = createRequire(import.meta.url)("./state-theme.mts") as typeof import("./state-theme.mts");
+  const shim = moduleRequire(import.meta.url)("./state-theme.mts") as typeof import("./state-theme.mts");
   assert.deepEqual(Object.keys(shim).sort(), ["FALLBACK", "MIN_CONTRAST", "PAIRS", "SETTINGS_FILE", "THEME_FILE", "contrastRatio", "declarations", "discoverTheme", "insideProject", "parseColor", "parseFontFamily", "parseLength", "ratioOf", "readSettings", "rgbOf", "safeTheme", "themeChanges"]);
   const theme = shim.discoverTheme(root);
   assert.equal(theme.mode, "partial");

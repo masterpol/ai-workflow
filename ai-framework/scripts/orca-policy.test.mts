@@ -1,16 +1,17 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
-import { pathToFileURL } from "node:url";
 
 import { MAX_POLICY_BYTES, POLICY_FILE, VENDORS, main, readPolicy, report, validatePolicy } from "./orca-policy.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText, toonFixtureText, createTestDeps, fileUrl, spawnSync } from "./runtime/test-helpers.mts";
+import { registerIntegrationValidator } from "./runtime/config.mts";
 import type { FsDeps, RuntimeDeps, StatLike } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -72,7 +73,7 @@ test("keeps missing and disabled configuration on the normal workflow", (t) => {
   assert.deepEqual(report(root, "claude"), {
     schemaVersion: 1, vendor: "claude", policyStatus: "disabled", eligible: false,
     reason: "policy-disabled", route: "normal", dispatchReady: false,
-    workers: [], roles: {}, maxConcurrentWorkers: 0, maxRetriesPerTask: 0,
+    workers: [], roles: {}, pools: {}, maxConcurrentWorkers: 0, maxRetriesPerTask: 0,
   });
   const omitted = policy();
   delete omitted["use-orca-orchestration"];
@@ -99,7 +100,7 @@ test("rejects malformed routing and bounds with exact fallback outcomes", async 
     ["flag null", (p) => { p["use-orca-orchestration"] = null; }],
     ["legacy mode rejected", (p) => { p.mode = "auto"; }],
     ["concurrency low", (p) => { p.maxConcurrentWorkers = 0; }],
-    ["concurrency high", (p) => { p.maxConcurrentWorkers = 4; }],
+    ["concurrency high", (p) => { p.maxConcurrentWorkers = 17; }],
     ["concurrency far above", (p) => { p.maxConcurrentWorkers = 30; }],
     ["concurrency string", (p) => { p.maxConcurrentWorkers = "2"; }],
     ["concurrency NaN", (p) => { p.maxConcurrentWorkers = null; }],
@@ -109,7 +110,7 @@ test("rejects malformed routing and bounds with exact fallback outcomes", async 
     ["retries fractional", (p) => { p.maxRetriesPerTask = 0.5; }],
     ["unknown field", (p) => { p.command = "SECRET_MARKER"; }],
     ["unknown coordinator", (p) => { p.coordinators.cursor = { workers: [], roles: {} }; }],
-    ["self worker", (p) => { p.coordinators.codex = { workers: ["codex"], roles: { implementation: "codex", review: "codex" } }; }],
+    ["legacy JSON pool array", (p) => { p.coordinators.codex.roles.implementation = ["claude", "opencode"]; }],
     ["duplicate worker", (p) => { p.coordinators.codex = { workers: ["claude", "claude"], roles: { implementation: "claude", review: "claude" } }; }],
     ["unknown worker", (p) => { p.coordinators.codex = { workers: ["cursor"], roles: { implementation: "cursor", review: "cursor" } }; }],
     ["too many workers", (p) => { p.coordinators.codex.workers = ["claude", "opencode", "claude"]; }],
@@ -226,7 +227,7 @@ test("refuses a FIFO substituted between inspection and opening without blocking
   const helperDir = fs.mkdtempSync(path.join(os.tmpdir(), "orca-policy-helper-"));
   t.after(() => fs.rmSync(helperDir, { recursive: true, force: true }));
   const helper = path.join(helperDir, "substitute.mts");
-  const url = (name: string): string => JSON.stringify(pathToFileURL(path.join(HERE, name)).href);
+  const url = (name: string): string => JSON.stringify(fileUrl(path.join(HERE, name)));
   fs.writeFileSync(helper, `import { execFileSync } from "node:child_process";
 import { unlinkSync } from "node:fs";
 import { join } from "node:path";
@@ -462,4 +463,146 @@ test("main returns 1 when writing the report fails", () => {
   mem.deps.io.stdout.write = () => { throw new Error("EPIPE"); };
   assert.equal(main(["report", "--root", "/proj", "--vendor", "codex"], mem.deps), 1);
   assert.equal(mem.err.join(""), "orca-policy: invalid invocation or internal failure\n");
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonRoot(t: TestContext, text: string, legacy?: unknown): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-policy-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), text);
+  if (legacy !== undefined) { fs.mkdirSync(path.join(root, ".project")); write(root, legacy); }
+  return root;
+}
+
+test("loadConfig branch: ai-workflow.toon yields the same readPolicy result and report as the legacy JSON for every vendor", (t) => {
+  for (const enabled of [true, false]) {
+    const legacy = fixture(t);
+    write(legacy, policy(enabled));
+    const toon = toonRoot(t, orcaPolicyToonText(enabled));
+    assert.deepEqual(readPolicy(toon), readPolicy(legacy), `enabled=${enabled}`);
+    for (const vendor of VENDORS) assert.deepEqual(report(toon, vendor), report(legacy, vendor), `${vendor} enabled=${enabled}`);
+  }
+});
+
+test("loadConfig branch: TOON wins over a disagreeing legacy file, and a missing TOON falls back to legacy", (t) => {
+  const both = toonRoot(t, orcaPolicyToonText(true), policy(false));
+  assert.equal(report(both, "codex").eligible, true, "TOON enabled beats legacy disabled");
+  const legacyOnly = fixture(t);
+  write(legacyOnly, policy(true));
+  assert.equal(report(legacyOnly, "codex").eligible, true, "no TOON: legacy is read");
+  assert.equal(readPolicy(fixture(t)).status, "missing", "neither file: missing");
+});
+
+test("loadConfig branch: an invalid, unsupported or symlinked ai-workflow.toon fails closed and never falls back to a valid legacy file", (t) => {
+  for (const text of ["schemaVersion: 99\n", "not toon at all\n  ::\n", ""]) {
+    const root = toonRoot(t, text, policy(true));
+    const result = readPolicy(root);
+    assert.match(result.status, /^(malformed|refused)$/, JSON.stringify(text));
+    assert.equal(report(root, "codex").eligible, false, JSON.stringify(text));
+  }
+  if (process.platform !== "win32") {
+    const root = toonRoot(t, orcaPolicyToonText(true), policy(true));
+    fs.renameSync(path.join(root, "ai-workflow.toon"), path.join(root, "real.toon"));
+    fs.symlinkSync(path.join(root, "real.toon"), path.join(root, "ai-workflow.toon"));
+    assert.equal(readPolicy(root).status, "refused");
+  }
+});
+
+test("loadConfig branch: a TOON policy keeps the 1..16 concurrency and legacy retry bounds and Record<string,string> roles", (t) => {
+  const over = toonRoot(t, orcaPolicyToonText(true).replace("maxConcurrentWorkers: 2", "maxConcurrentWorkers: 17"));
+  assert.equal(readPolicy(over).status, "malformed");
+  const ok = report(toonRoot(t, orcaPolicyToonText(true)), "claude");
+  assert.deepEqual(ok.roles, { implementation: "codex", review: "opencode" });
+  assert.deepEqual(ok.workers, ["codex", "opencode"]);
+});
+
+test("a throw while loading ai-workflow.toon never widens to the legacy orchestration.json (fail closed)", (t) => {
+  const root = fixture(t);
+  write(root, policy(true)); // a valid legacy policy that would be eligible
+  assert.equal(readPolicy(root).status, "valid", "legacy file alone is valid");
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), toonFixtureText().replace("doctor:", "  zz-throws:\n    a: 1\ndoctor:"));
+  registerIntegrationValidator("zz-throws", () => { throw new Error("validator exploded"); });
+  const result = readPolicy(root);
+  assert.notEqual(result.status, "valid", "a throwing loader is a refusal, not a fallback to the legacy file");
+  assert.notEqual(result.status, "missing");
+  // Stub deps whose loader cannot even start must also fail closed.
+  const base = createNodeDeps({});
+  const broken = { ...base, get fs(): never { throw new Error("fs unavailable"); } } as unknown as RuntimeDeps;
+  assert.notEqual(readPolicy(root, broken).status, "valid");
+});
+
+// ---- role pools (orca-role-pools S1) ----
+
+const poolToon = (roles: string[], workers = "claude,codex,opencode"): string => orcaPolicyToonText(true).replace(
+  /      codex:\n        workers\[2\]: claude,opencode\n        roles:\n          implementation\[1\]: claude\n          review\[1\]: opencode\n/,
+  `      codex:\n        workers[${workers.split(",").length}]: ${workers}\n        roles:\n${roles.map((line) => `          ${line}\n`).join("")}`);
+
+test("pools: a TOON role pool keeps every member and the first member stays in roles", (t) => {
+  const root = toonRoot(t, poolToon(["implementation[2]: opencode,claude", "review[2]: claude,opencode"]));
+  const result = report(root, "codex");
+  assert.equal(result.eligible, true);
+  assert.deepEqual(result.pools, { implementation: ["opencode", "claude"], review: ["claude", "opencode"] });
+  assert.deepEqual(result.roles, { implementation: "opencode", review: "claude" });
+  assert.deepEqual(result.workers, ["claude", "codex", "opencode"]);
+});
+
+test("pools: workers derived from the union of role pools are all reported, never truncated to the first target", (t) => {
+  const text = poolToon(["implementation[2]: claude,opencode", "review[1]: opencode"]).replace(/        workers\[\d\]: [^\n]*\n(?=        roles:\n          implementation\[2\])/, "");
+  const result = report(toonRoot(t, text), "codex");
+  assert.equal(result.eligible, true);
+  assert.deepEqual(result.workers, ["claude", "opencode"]);
+  assert.deepEqual((result.pools as Record<string, string[]>).implementation, ["claude", "opencode"]);
+});
+
+test("pools: a coordinator may appear in its own pool and the policy stays valid", (t) => {
+  const root = toonRoot(t, poolToon(["implementation[2]: codex,claude", "review[1]: opencode"]));
+  const result = report(root, "codex");
+  assert.equal(result.eligible, true);
+  assert.deepEqual((result.pools as Record<string, string[]>).implementation, ["codex", "claude"]);
+  assert.equal(readPolicy(root).status, "valid");
+});
+
+test("pools: a coordinator may list three workers (no two-worker cap)", (t) => {
+  const result = report(toonRoot(t, poolToon(["implementation[1]: claude", "review[1]: opencode"])), "codex");
+  assert.equal(result.eligible, true);
+  assert.equal((result.workers as string[]).length, 3);
+});
+
+test("pools: a duplicate member, an unknown vendor and a member outside the workers list are malformed", (t) => {
+  for (const [name, text] of [
+    ["duplicate member", poolToon(["implementation[2]: claude,claude", "review[1]: opencode"])],
+    ["unknown vendor", poolToon(["implementation[1]: cursor", "review[1]: opencode"], "claude,codex,opencode,cursor")],
+    ["outside workers", poolToon(["implementation[2]: claude,opencode", "review[1]: opencode"], "claude")],
+    ["unknown role", poolToon(["owner[1]: claude", "review[1]: opencode"])],
+  ] as const) assert.match(readPolicy(toonRoot(t, text)).status, /^(malformed|refused)$/, name);
+});
+
+test("pools: legacy orchestration.json reports one-element pools, accepts three workers, and still refuses pool arrays", (t) => {
+  const root = fixture(t);
+  const value = policy();
+  value.coordinators.codex = { workers: ["claude", "opencode"], roles: { implementation: "claude", review: "opencode" } };
+  write(root, value);
+  assert.deepEqual(report(root, "codex").pools, { implementation: ["claude"], review: ["opencode"] });
+  value.coordinators.codex = { workers: ["claude", "codex", "opencode"], roles: { implementation: "claude", review: "opencode" } };
+  write(root, value);
+  assert.equal(readPolicy(root).status, "valid");
+  assert.equal(validatePolicy(value, true).status, "valid");
+  value.coordinators.codex.roles.implementation = ["claude", "opencode"];
+  assert.equal(validatePolicy(value).status, "malformed");
+});
+
+test("pools: the 1..16 bound still holds with pools present", (t) => {
+  const roles = ["implementation[2]: claude,opencode", "review[1]: opencode"];
+  assert.equal(readPolicy(toonRoot(t, poolToon(roles).replace("maxConcurrentWorkers: 2", "maxConcurrentWorkers: 16"))).status, "valid");
+  assert.equal(readPolicy(toonRoot(t, poolToon(roles).replace("maxConcurrentWorkers: 2", "maxConcurrentWorkers: 17"))).status, "malformed");
+});
+
+test("pools: validatePolicy with pools rejects an empty pool, a duplicate member and a non-string member", () => {
+  const value = policy();
+  for (const roles of [{ implementation: [], review: "claude" }, { implementation: ["claude", "claude"], review: "claude" }, { implementation: ["claude", 3], review: "claude" }]) {
+    value.coordinators.codex = { workers: ["claude", "opencode"], roles };
+    assert.equal(validatePolicy(value, true).status, "malformed", JSON.stringify(roles));
+  }
+  value.coordinators.codex = { workers: ["claude", "opencode"], roles: { implementation: ["claude", "opencode"], review: "claude" } };
+  assert.equal(validatePolicy(value, true).status, "valid");
 });

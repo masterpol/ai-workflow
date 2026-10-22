@@ -41,3 +41,27 @@ test("sync and async workflow dispatch use the same selection and preserve spawn
   assert.deepEqual(calls[0], calls[1]);
   assert.deepEqual((calls[0] as unknown[])[2], options);
 });
+
+// ---- loadConfig reader branches: the entry runner comes from ai-workflow.toon, else the legacy file ----
+import { readRunner } from "./entry.mts";
+import { toonFixtureText } from "./test-helpers.mts";
+const testDeps = createTestDeps();
+const { mkdtempSync, rmSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join } = testDeps.path;
+
+test("loadConfig branch: readRunner takes the runner from ai-workflow.toon, falls back to the legacy file, and fails closed on invalid TOON", () => {
+  const root = mkdtempSync(join(tmpdir(), "entry-toon-"));
+  try {
+    const deps = createTestDeps({});
+    writeFileSync(join(root, "ai_workflow_env.json"), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    assert.equal(readRunner(root, {}, deps), "bun", "missing TOON: legacy file");
+    writeFileSync(join(root, "ai-workflow.toon"), toonFixtureText());
+    assert.equal(readRunner(root, {}, deps), "node", "valid TOON (runner node) beats legacy bun");
+    writeFileSync(join(root, "ai-workflow.toon"), toonFixtureText().replace("runner: node", "runner: bun"));
+    assert.equal(readRunner(root, {}, deps), "bun");
+    assert.equal(readRunner(root, { AI_WORKFLOW_RUNNER: "node" }, deps), "node", "process env wins");
+    writeFileSync(join(root, "ai-workflow.toon"), "schemaVersion: 99\n");
+    assert.equal(readRunner(root, {}, deps), "node", "invalid TOON never reads the legacy bun");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});

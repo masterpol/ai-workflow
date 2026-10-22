@@ -11,7 +11,8 @@ import { migrateInstanceEntries } from "./runtime/migrate.mts";
  * Only the bundle's canonical directories are compared (rules, workflow, templates,
  * integrations, scripts, hooks, canonical agents/skills, and their OpenCode/Codex/Cursor
  * mirrors). .project/, settings files, and credentials are never touched; AGENTS.md,
- * CLAUDE.md, opencode.json, and .codex/config.toml are only flagged for manual review.
+ * CLAUDE.md, SETUP.md, README.md, opencode.json, and .codex/config.toml are only flagged for
+ * manual review.
  *
  * Local customizations are protected by a three-way comparison against the bundle version
  * the project was last synced from ("base"): the hash manifest in .project/.bundle-sync.json,
@@ -80,7 +81,7 @@ export const SYNCED_DIRS: readonly string[] = [
 // target side so their files are reported as removed-in-source.
 export const RETIRED_DIRS: readonly string[] = ["ai-framework/contexts"];
 
-export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml"];
+export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml", "SETUP.md", "README.md"];
 
 const IGNORE_NAMES = new Set([".DS_Store"]);
 const MARKER = ".project/.bundle-sync.json";

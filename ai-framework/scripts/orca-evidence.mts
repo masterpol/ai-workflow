@@ -334,7 +334,11 @@ async function git(deps: RuntimeDeps, cwd: string, args: string[], deadlineMs: n
     if (result.errorCode === "ETIMEDOUT") return { ok: false, reason: "git-timeout" };
     if (result.errorCode) return { ok: false, reason: "git-output-overflow" };
     return { ok: true, status: result.status, stdout: result.stdout };
-  } catch { return { ok: false, reason: "git-error" }; }
+  } catch (error) {
+    // Do not let an unconfirmed child exit become a cleanup decision or final-state write.
+    if (errorCode(error) === "EPROCESSCLEANUP") throw error;
+    return { ok: false, reason: "git-error" };
+  }
 }
 
 const keep = (reason: string, leftover: string[] = []): CleanupDecision => ({ action: "keep", state: "integrated-uncleaned", leftover: leftover.slice(0, MAX_LEFTOVER), reason });

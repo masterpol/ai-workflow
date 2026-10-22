@@ -1,0 +1,208 @@
+{
+  "schemaVersion": 1,
+  "slug": "instruction-compression",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#final-verification",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#limits",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s1-investigation-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s1-proof-preparation-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#baseline-disposition-required-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#approved-amendment-applied-and-s1-exits-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#remaining-scope-proof-boundary-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s2-final-proof-and-budget-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#approved-final-delivery-revision-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-regression-coverage-and-cohesive-proof-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-opencode-readiness-and-completion-format-refusal-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#reporting-recovery-and-observation-limits-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#baseline-gate-rejected-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#matched-loading-fixture-adjustment-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#existing-companion-pointer-check-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-exit-evidence-and-lifecycle-close-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s2-session-observation-unavailable-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s2-exact-native-trace-recovered-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s2-candidate-rejected-required-owner-guard-clarified-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s2-corrected-candidate-complete-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s2-accepted-s3-baseline-captured-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s3-full-suite-failure-and-opencode-retry-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s3-rejected-after-final-opencode-scoring-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#approved-s3-deferral-and-fixture-repair-applied-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#approved-revision-verified-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#build-end-approved-actual-audit-started-2026-10-18",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-19T03:39:33.090Z"
+}

@@ -1,186 +1,252 @@
 #!/usr/bin/env node
 import { runDirect } from "../../scripts/runtime/cli.mts";
-/**
- * pre-ship-verify.mts — final verification gauntlet invoked by /ship.
- *
- * Reads the target project's package scripts and runs only checks that exist:
- * build · typecheck · lint · tests · i18n · diff-sanity.
- *
- * Invoked by the /ship skill (NOT a hooks.json hook).
- * Exit codes:
- *   0 — all required checks green
- *   1 — at least one required check failed
- *   2 — script error (uncaught exception)
- */
-
-import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
 
-export interface Check { name: string; cmd?: string; required: boolean }
-export interface CheckResult { name: string; ok: boolean; code?: number; required?: boolean }
-type Plain = Record<string, unknown>;
-type Outcome = { exit: number } | { value: unknown };
+import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 
-// execSync's default output cap; keeps "too much git output" a failed command as before.
-const EXEC_MAX_BUFFER = 1024 * 1024;
+/**
+ * pre-ship-verify.mts — final checks for this installation, invoked by /ship (not a hooks.json hook).
+ *
+ * Runs direct executables (never a shell) in the project root. With `verify:base` in package.json it runs that
+ * script, then the document, integrity and offline-viewer checks; otherwise it runs the recognised build,
+ * typecheck, lint, test and i18n scripts. A diff-sanity step blocks sensitive paths and debug logging in
+ * application source. Exit codes: 0 all required checks green, 1 a required check failed or the script failed.
+ */
+
+export interface Check {
+  name: string;
+  command: string;
+  args: string[];
+  required: boolean;
+  timeout?: number;
+}
+export interface CheckResult {
+  name: string;
+  ok: boolean;
+  code?: number;
+  required?: boolean;
+  skipped?: boolean;
+  errorCode?: string;
+  signal?: string;
+}
+interface Runner {
+  command: string;
+  prefix: string[];
+}
+type Plain = Record<string, unknown>;
+
+const DEFAULT_TIMEOUT_MS = 60_000;
+const VERIFY_BASE_TIMEOUT_MS = 1_200_000;
+const MAX_BUFFER_BYTES = 4 * 1024 * 1024;
+const PACKAGE_MANAGERS = ["npm", "pnpm", "yarn", "bun"];
+const CLI_BY_MANAGER: Record<string, string> = {
+  npm: "npm/bin/npm-cli.js",
+  pnpm: "pnpm/bin/pnpm.cjs",
+  yarn: "yarn/bin/yarn.js",
+};
+const VIEWER_VERIFIER = "tools/viewer/verify-all.ts";
 
 function asRecord(value: unknown): Plain {
-  return typeof value === "object" && value !== null ? (value as Plain) : {};
+  return typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Plain) : {};
 }
 
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function readPackage(deps: RuntimeDeps): Outcome {
-  const packagePath = deps.path.join(deps.proc.cwd(), "package.json");
-  if (!deps.fs.existsSync(packagePath)) return { value: null };
-  try {
-    return { value: JSON.parse(deps.fs.readFileSync(packagePath)) as unknown };
-  } catch (error) {
-    deps.io.stderr.write(`[pre-ship-verify] invalid package.json: ${errorMessage(error)}\n`);
-    return { exit: 2 };
-  }
+function readPackage(deps: RuntimeDeps): Plain | null {
+  const file = deps.path.join(deps.proc.cwd(), "package.json");
+  return deps.fs.existsSync(file) ? asRecord(JSON.parse(deps.fs.readFileSync(file)) as unknown) : null;
 }
 
-export function packageManager(pkg: unknown, deps: RuntimeDeps): string {
-  const declared = asRecord(pkg).packageManager;
-  if (declared) {
-    if (typeof declared !== "string") throw new TypeError("pkg.packageManager.split is not a function");
-    return declared.split("@")[0];
-  }
-  const cwd = deps.proc.cwd();
-  if (deps.fs.existsSync(deps.path.join(cwd, "pnpm-lock.yaml"))) return "pnpm";
-  if (deps.fs.existsSync(deps.path.join(cwd, "yarn.lock"))) return "yarn";
-  if (
-    deps.fs.existsSync(deps.path.join(cwd, "bun.lock")) ||
-    deps.fs.existsSync(deps.path.join(cwd, "bun.lockb"))
-  ) {
-    return "bun";
-  }
-  return "npm";
+/** Only this documented root template is allowed. Actual environment and personal configuration files stay blocked. */
+export function isSensitivePath(file: string): boolean {
+  if (file === ".env.example") return false;
+  return /(^|\/)(?:\.env(?:\.|$)|settings\.local\.json$|credentials\.json$|debug\.)/i.test(file);
 }
 
-export function buildChecks(pkg: unknown, deps: RuntimeDeps): Check[] {
-  if (!pkg) return [];
-  const checks: Check[] = [];
-  const scripts = asRecord(asRecord(pkg).scripts);
-  const manager = packageManager(pkg, deps);
-  const addAll = (names: string[], required: boolean): void => {
-    for (const name of names) {
-      if (scripts[name]) checks.push({ name, cmd: `${manager} run ${name}`, required });
+export function packageCommand(pkg: Plain, deps: RuntimeDeps): Runner {
+  const root = deps.proc.cwd();
+  const has = (name: string): boolean => deps.fs.existsSync(deps.path.join(root, name));
+  const raw = pkg.packageManager;
+  const declared = typeof raw === "string" ? raw.split("@")[0] : "";
+  // A declared but non-string or unknown packageManager is refused before it can become an executable name.
+  if (raw !== undefined && (typeof raw !== "string" || !declared || !PACKAGE_MANAGERS.includes(declared))) {
+    throw new Error(`Unsupported package manager: ${typeof raw === "string" ? declared : typeof raw}`);
+  }
+  const manager =
+    declared || (has("pnpm-lock.yaml") ? "pnpm" : has("yarn.lock") ? "yarn" : has("bun.lock") || has("bun.lockb") ? "bun" : "npm");
+  if (!PACKAGE_MANAGERS.includes(manager)) throw new Error(`Unsupported package manager: ${manager}`);
+  if (deps.proc.platform !== "win32" || manager === "bun") return { command: manager, prefix: [] };
+  // Windows .cmd wrappers require a shell. Use the installed JavaScript CLI instead.
+  const relativeCli = CLI_BY_MANAGER[manager] ?? "";
+  const candidates = [
+    deps.proc.env.WORKFLOW_PACKAGE_MANAGER_CLI,
+    deps.path.join(deps.path.dirname(deps.proc.execPath), "node_modules", relativeCli),
+    deps.path.join(root, "node_modules", relativeCli),
+  ].filter((file): file is string => typeof file === "string" && file.length > 0);
+  const cli = candidates.find((file) => deps.path.isAbsolute(file) && /\.[cm]?js$/i.test(file) && deps.fs.existsSync(file));
+  if (!cli) {
+    throw new Error(
+      `Cannot resolve ${manager}'s JavaScript CLI. Set WORKFLOW_PACKAGE_MANAGER_CLI to its installed absolute path; no shell or package installation is attempted.`,
+    );
+  }
+  return { command: deps.proc.execPath, prefix: [cli] };
+}
+
+function nodeCheck(deps: RuntimeDeps, name: string, args: string[]): Check {
+  return { name, command: deps.proc.execPath, args, required: true };
+}
+
+export function buildChecks(pkg: Plain | null, deps: RuntimeDeps): Check[] {
+  if (!pkg) {
+    if (!deps.fs.existsSync(deps.path.join(deps.proc.cwd(), VIEWER_VERIFIER))) {
+      throw new Error("No package.json or Muro document verifier found. Define project checks before shipping.");
     }
+    // Validate the current documents and self-contained HTML without relying on a previous user's absolute
+    // temporary extraction path. Do not regenerate HTML/ZIP.
+    return [
+      nodeCheck(deps, "workflow setup", [
+        "--experimental-strip-types",
+        "--disable-warning=ExperimentalWarning",
+        "ai-framework/scripts/setup-validator.mts",
+        "--json",
+      ]),
+      ...["documentos", "integridad"].map((phase) =>
+        nodeCheck(deps, `documentación: ${phase}`, ["--experimental-strip-types", VIEWER_VERIFIER, "--fase", phase]),
+      ),
+      nodeCheck(deps, "visor HTML sin conexión", ["--experimental-strip-types", "tools/viewer/verify-viewer.ts"]),
+    ];
+  }
+  const scripts = asRecord(pkg.scripts);
+  if (scripts["verify:base"]) {
+    const runner = packageCommand(pkg, deps);
+    return [
+      {
+        name: "verify:base",
+        command: runner.command,
+        args: [...runner.prefix, "run", "verify:base"],
+        required: true,
+        timeout: VERIFY_BASE_TIMEOUT_MS,
+      },
+      ...buildChecks(null, deps),
+    ];
+  }
+  const names: Array<{ name: string; required: boolean }> = [];
+  const addAll = (list: string[], required: boolean): void => {
+    for (const name of list) if (scripts[name]) names.push({ name, required });
   };
-
   addAll(["build", "build:web"], true);
   addAll(["typecheck", "typecheck:web", "typecheck:mobile"], true);
   addAll(["lint"], false);
   addAll(["test:ci", "test", "test:unit"], true);
   addAll(["i18n:check"], false);
-
-  if (checks.length === 0) {
-    checks.push({ name: "workflow checks", required: true });
-  }
-  return checks;
+  if (!names.length) throw new Error("package.json has no recognized checks. Define project checks before shipping.");
+  const runner = packageCommand(pkg, deps);
+  return names.map(({ name, required }) => ({
+    name,
+    required,
+    command: runner.command,
+    args: [...runner.prefix, "run", name],
+  }));
 }
 
-function run(check: Check, deps: RuntimeDeps): CheckResult {
-  if (!check.cmd) {
-    return { name: check.name, ok: false, code: 1, required: check.required };
+export async function runCheck(check: Check, deps: RuntimeDeps): Promise<CheckResult> {
+  deps.io.stdout.write(`[pre-ship-verify] running ${check.name}...\n`);
+  const result = await deps.child.run(check.command, check.args, {
+    cwd: deps.proc.cwd(),
+    env: { ...deps.proc.env, CI: "1" },
+    timeoutMs: check.timeout ?? DEFAULT_TIMEOUT_MS,
+    maxBufferBytes: MAX_BUFFER_BYTES,
+  });
+  if (result.stdout) deps.io.stdout.write(result.stdout);
+  if (result.status === 0 && result.signal === null && result.errorCode === undefined) {
+    return { name: check.name, ok: true, required: check.required };
   }
-  const result = deps.child.runSync(check.cmd, [], { shell: true, stdio: "inherit", env: { ...deps.proc.env, CI: "1" } });
-  if (result.status === 0 && result.signal === null) return { name: check.name, ok: true };
-  return { name: check.name, ok: false, code: result.status ?? 1, required: check.required };
+  if (result.stderr) deps.io.stderr.write(result.stderr);
+  return { name: check.name, ok: false, code: result.status === 0 ? 1 : result.status ?? 1, required: check.required,
+    ...(result.errorCode ? { errorCode: result.errorCode } : {}), ...(result.signal ? { signal: result.signal } : {}) };
 }
 
-function commandOutput(command: string, deps: RuntimeDeps): string {
+// Only bounded read-only Git listings use the synchronous adapter. It is not a
+// supervisor for commands that launch workers; all build/test wrappers use runCheck.
+// Disable the pager and filesystem-monitor hook so these listings stay leaf operations.
+function git(args: string[], deps: RuntimeDeps): { ok: boolean; stdout: string; stderr: string; missing: boolean } {
   try {
-    const result = deps.child.runSync(command, [], { shell: true, stdio: "pipe", maxBufferBytes: EXEC_MAX_BUFFER });
-    if (result.status !== 0 || result.signal !== null || result.errorCode !== undefined) return "";
-    return result.stdout;
-  } catch {
-    return "";
+    const result = deps.child.runSync("git", ["--no-pager", "-c", "core.fsmonitor=false", ...args], {
+      cwd: deps.proc.cwd(),
+      timeoutMs: DEFAULT_TIMEOUT_MS,
+      maxBufferBytes: MAX_BUFFER_BYTES,
+    });
+    return { ok: result.status === 0 && result.signal === null && result.errorCode === undefined, stdout: result.stdout, stderr: result.stderr, missing: false };
+  } catch (error) {
+    if (asRecord(error).code === "ENOENT") return { ok: false, stdout: "", stderr: errorMessage(error), missing: true };
+    throw error;
   }
-}
-
-function changedFiles(deps: RuntimeDeps): string[] {
-  const files = new Set<string>();
-  for (const command of [
-    "git diff --name-only",
-    "git diff --cached --name-only",
-    "git ls-files --others --exclude-standard",
-  ]) {
-    for (const file of commandOutput(command, deps).split("\n").filter(Boolean)) files.add(file);
-  }
-  return [...files];
 }
 
 function diffSanity(deps: RuntimeDeps): CheckResult {
-  try {
-    const files = changedFiles(deps);
-    const flagged = files.filter((file) => /(^|\/)\.env(?:\.|$)|(^|\/)debug\./i.test(file));
-    const hasHead = commandOutput("git rev-parse --verify HEAD", deps).trim().length > 0;
-    const added = hasHead ? commandOutput("git diff HEAD --unified=0", deps) : "";
-    const addedDebug = /^\+[^+].*\bconsole\.log\s*\(/m.test(added);
-    const addedSecret = /^\+[^+].*(?:sk-[A-Za-z0-9_-]{12,}|api[_-]?key\s*[:=])/im.test(added);
-    const untrackedDebug = files
-      .filter((file) => /\.(?:[cm]?[jt]sx?|vue|svelte)$/i.test(file))
-      .some((file) => {
-        try {
-          return /\bconsole\.log\s*\(/.test(deps.fs.readFileSync(file));
-        } catch {
-          return false;
-        }
-      });
-    if (flagged.length > 0 || addedDebug || addedSecret || untrackedDebug) {
-      const reasons = [
-        flagged.length > 0 ? `sensitive/debug files: ${flagged.join(", ")}` : "",
-        addedDebug || untrackedDebug ? "console.log in changed code" : "",
-        addedSecret ? "possible secret in changed code" : "",
-      ].filter(Boolean);
-      deps.io.stderr.write(`[pre-ship-verify] diff-sanity flagged: ${reasons.join("; ")}\n`);
-      return { name: "diff-sanity", ok: false, code: 1, required: true };
+  const top = git(["rev-parse", "--show-toplevel"], deps);
+  if (!top.ok) {
+    // An exported source folder may omit Git metadata; report that limitation.
+    if (top.missing || /not a git repository/i.test(top.stderr)) {
+      deps.io.stderr.write(
+        "[pre-ship-verify] SKIP diff-sanity: no Git repository or executable; no comparison with a previous revision is available.\n",
+      );
+      return { name: "diff-sanity", ok: true, skipped: true };
     }
-    return { name: "diff-sanity", ok: true };
-  } catch (error) {
-    const status = asRecord(error).status;
-    return { name: "diff-sanity", ok: false, code: typeof status === "number" ? status : 1, required: false };
+    throw new Error(`git rev-parse failed: ${top.stderr.trim()}`);
   }
+  const files = new Set<string>();
+  for (const args of [
+    ["diff", "--name-only", "-z"],
+    ["diff", "--cached", "--name-only", "-z"],
+    ["ls-files", "--others", "--exclude-standard", "-z"],
+  ]) {
+    const listing = git(args, deps);
+    if (!listing.ok) throw new Error(`git ${args[0]} failed: ${listing.stderr.trim()}`);
+    for (const file of listing.stdout.split("\0").filter(Boolean)) files.add(file);
+  }
+  const flagged = [...files].filter(isSensitivePath);
+  if (flagged.length) {
+    deps.io.stderr.write(`[pre-ship-verify] sensitive/debug paths changed: ${flagged.join(", ")}\n`);
+    return { name: "diff-sanity", ok: false, required: true };
+  }
+  // Runtime logs are legitimate in maintenance scripts. Restrict this production-code heuristic to application
+  // source, not the documentary tools or workflow examples.
+  const root = deps.proc.cwd();
+  const hasDebug = [...files]
+    .filter((file) => /^(?:apps|src|packages)\//.test(file) && /\.(?:[cm]?[jt]sx?|vue|svelte)$/i.test(file))
+    .some((file) => {
+      const absolute = deps.path.join(root, file);
+      return deps.fs.existsSync(absolute) && /\bconsole\.log\s*\(/.test(deps.fs.readFileSync(absolute));
+    });
+  if (hasDebug) deps.io.stderr.write("[pre-ship-verify] console.log in changed application code\n");
+  return { name: "diff-sanity", ok: !hasDebug, required: true };
 }
 
-export function main(_argv: string[] = [], deps: RuntimeDeps = createNodeDeps()): number {
-  const read = readPackage(deps);
-  if ("exit" in read) return read.exit;
-  const pkg = read.value;
-  const checks = buildChecks(pkg, deps);
-  if (!pkg) {
-    deps.io.stderr.write("[pre-ship-verify] no package.json; skipping stack checks\n");
-  }
-  const results: CheckResult[] = [];
-
-  for (const c of checks) {
-    deps.io.stdout.write(`[pre-ship-verify] running ${c.name}...\n`);
-    const r = run(c, deps);
-    results.push(r);
-    if (!r.ok && r.required) {
-      deps.io.stderr.write(`[pre-ship-verify] FAIL: ${r.name} (required, exit ${r.code})\n`);
-      return 1;
+export async function main(_argv: string[] = [], deps: RuntimeDeps = createNodeDeps()): Promise<number> {
+  try {
+    for (const check of buildChecks(readPackage(deps), deps)) {
+      const result = await runCheck(check, deps);
+      if (!result.ok && result.required) throw new Error(`${result.name} failed (${result.errorCode ?? result.signal ?? `exit ${result.code}`})`);
+      if (!result.ok) deps.io.stderr.write(`[pre-ship-verify] WARN ${result.name} failed (optional check)\n`);
     }
-    if (!r.ok) {
-      deps.io.stderr.write(
-        `[pre-ship-verify] WARN: ${r.name} skipped/failed (exit ${r.code}); not required\n`
-      );
+    const diff = diffSanity(deps);
+    if (!diff.ok) throw new Error("diff-sanity failed");
+    deps.io.stdout.write(
+      `[pre-ship-verify] required checks passed${diff.skipped ? "; Git diff comparison unavailable" : ""}\n`,
+    );
+    return 0;
+  } catch (error) {
+    const detail = asRecord(error);
+    if (detail.code === "EPROCESSCLEANUP") {
+      const owner = typeof detail.ownerPid === "number" && Number.isSafeInteger(detail.ownerPid) && detail.ownerPid > 0 ? `PID ${detail.ownerPid}` : "PID unavailable";
+      deps.io.stderr.write(`[pre-ship-verify] EPROCESSCLEANUP: ownership pending (${owner}); command termination is unconfirmed. Stop shipping and reconcile the owned process before retrying.\n`);
     }
-  }
-
-  results.push(diffSanity(deps));
-  const failedRequired = results.filter((r) => !r.ok && r.required);
-  if (failedRequired.length > 0) {
-    deps.io.stderr.write("[pre-ship-verify] FAILED — see logs above\n");
+    deps.io.stderr.write(`[pre-ship-verify] FAILED: ${errorMessage(error)}\n`);
     return 1;
   }
-  deps.io.stderr.write("[pre-ship-verify] all required checks green\n");
-  return 0;
 }
 
 runDirect(import.meta.url, main);

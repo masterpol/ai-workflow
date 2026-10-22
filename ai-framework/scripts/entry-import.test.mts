@@ -3,20 +3,19 @@ const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import test from "node:test";
 import type { TestContext } from "node:test";
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import { createRequire } from "node:module";
-import os from "node:os";
-import path from "node:path";
-import { spawnSync } from "node:child_process";
-import { fileURLToPath } from "node:url";
+import { createTestDeps, urlPath, moduleRequire, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 
 import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { effectiveEntryText, resolveClaudeEntry as resolveWithDeps } from "./entry-import.mts";
 
 // The old call form (no deps) is kept on purpose: it goes through the direct TypeScript command, as every unmigrated caller does.
-const require = createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = moduleRequire(import.meta.url);
+const __dirname = path.dirname(urlPath(import.meta.url));
 const { resolveClaudeEntry } = require("./entry-import.mts") as { resolveClaudeEntry(root: string, own: string): Promise<{ kind: string; content: string; detail: string }> };
 
 const AGENTS_OK = "# Agents\n\n## Project specifics\n\nReal content.\n\n## Response style (caveman mode)\n\nbrief\n";

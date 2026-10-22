@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "toon-machine-data",
+  "sourceRoot": ".project/pitches/toon-machine-data",
+  "archivedAt": "2026-10-19T03:29:51.997Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "c0eb86834b3069849beeec29be864bcc35ee8a8fb1180e9877fdd1c5ffb960ad",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "c4fe486a35e45adfad326ee4c53f526c753a58f04a18d4a67ec10de4e470a81d",
+      "mode": 420
+    },
+    "build-start.md": {
+      "hash": "645950c97623f2555d93245b16d0c0af7191b8d31e707f263a5d0d23108c38c4",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "9ed36a093981cfd84267ba1d2cb7efe432286bf02cfd3723adc168d82c125396",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "f4080f42543cff47f601d4c272ddbc497762e7461fbd621c3090de834ff33010",
+      "mode": 420
+    },
+    "inventory.md": {
+      "hash": "aa8ec91dd265796549876280970255101ceacdfb648490aa556e40614fb5444f",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "bfb509d9b06bcb44a635675fd1f730108bdf46f848ad5f99371cba98a3526b06",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "6f68a4a434ed545e1908f071c1ffa2df60b364956b54f92defff0d6387ddc20e",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "ff7362ac0bb4aa76221c7e60600f73103b6c5fc31b34eaaabc3d46593d6e465e",
+      "mode": 420
+    }
+  }
+}

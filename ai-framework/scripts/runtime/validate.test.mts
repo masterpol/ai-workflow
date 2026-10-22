@@ -1,16 +1,18 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { createTestDeps, memoryFs } from "./test-helpers.mts";
+import { createTestDeps, memoryFs, urlPath } from "./test-helpers.mts";
 import { createValidator, MAX_SOURCE_BYTES, UNPARSED_SUGGESTION, validateRuntimeImports } from "./validate.mts";
 import type { RuntimeDeps } from "./types.mts";
 import type { ValidateOptions } from "./validate.mts";
 
 const base = createTestDeps();
+const { posix } = base.path;
 function fixture(files: Record<string, string>, links: Record<string, string> = {}): RuntimeDeps {
   const fake = memoryFs(files, links);
   const handles = new Map<number, string>(); let sequence = 10;
   // Descriptor operations preserve the same bounded-read semantics as real FsDeps.
-  return { ...base, fs: { ...base.fs, ...fake,
+  // memoryFs stores POSIX paths; real scratch copies below retain native host paths.
+  return { ...base, path: posix, fs: { ...base.fs, ...fake,
     openSync: (file: string) => { const fd = sequence++; handles.set(fd, file); return fd; },
     fstatSync: (fd: number) => fake.statSync!(handles.get(fd)!),
     readSync: (fd: number, bytes: Uint8Array, offset: number, length: number, position: number | null) => {
@@ -138,7 +140,7 @@ const mutants = [
 ];
 for (const [label, before, after, name] of mutants) {
   test(`scratch mutant: removing ${label} turns its guard red`, () => {
-    const directory = base.path.dirname(decodeURIComponent(new URL(import.meta.url).pathname));
+    const directory = base.path.dirname(urlPath(import.meta.url));
     const scratch = base.fs.mkdtempSync(base.path.join(base.os.tmpdir(), "runtime-validator-mutant-"));
     try {
       const copied = new Set<string>();

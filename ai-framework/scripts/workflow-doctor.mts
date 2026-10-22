@@ -2,6 +2,8 @@
 import { runWorkflow } from "./runtime/entry.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { inspectWorkflowEnv } from "./runtime/env.mts";
+import { CONFIG_FILE, errorCodes, loadConfig } from "./runtime/config.mts";
+import type { ModelsConfig } from "./runtime/config.mts";
 import { validateRuntimeImports } from "./runtime/validate.mts";
 /*
  * Verifies that the portable workflow is complete after installation. Checks
@@ -13,6 +15,7 @@ import * as skillVendors from "./skill-vendors.mts";
 import * as skillDefaults from "./skill-defaults.mts";
 import * as orcaPolicy from "./orca-policy.mts";
 import * as docsLinks from "./docs-links.mts";
+import { HOOK_EVENTS, HOOK_START, hasRawHook, hooksDir } from "./graphify.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 
@@ -57,14 +60,6 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     standard: "opencode-go/minimax-m3",
     deep: "opencode-go/kimi-k2.7-code",
   };
-
-  // .claude/agents/*.md declare a concrete Claude model, not an abstract profile name — this
-  // reverses that into fast/standard/deep so the OpenCode/Codex mirrors can be checked against it.
-  const agentProfileByModelPrefix = [
-    [/^claude-haiku-/, "fast"],
-    [/^claude-sonnet-/, "standard"],
-    [/^claude-opus-/, "deep"],
-  ];
 
   // .claude/skills/*/SKILL.md declare their profile in a "> **Recommended capability profile:**
   // `X`" line — this is the single source of truth for skill profiles. Two kinds of skill can't
@@ -320,6 +315,34 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record("pass", name, "UserPromptSubmit wired to orca-start-codex-hook.mts with Node runner, root argument, and 8s timeout");
   }
 
+  // Claude Code counterpart of the Codex wiring check: the Orca start hook must be registered for both the Skill
+  // PreToolUse gate and every UserPromptExpansion, and must force the Node runner so a configured Bun that is missing
+  // cannot skip the readiness gate (orca-vendors.md, "Automatic start"). A wrapped or bun-wired command is a failure.
+  async function checkClaudeStartupWiring() {
+    const name = "Claude startup wiring";
+    const relativePath = ".claude/settings.json";
+    let parsed: unknown;
+    try { parsed = JSON.parse(await fsp.readFile(absolute(relativePath))); } catch (error) {
+      record("fail", name, `${relativePath} unreadable or invalid JSON: ${error instanceof Error ? error.message : String(error)}`);
+      return;
+    }
+    const hooks = parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>).hooks : undefined;
+    const expected = 'AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts"';
+    const problems: string[] = [];
+    for (const [event, matcher] of [["PreToolUse", "Skill"], ["UserPromptExpansion", "*"]] as const) {
+      const groups = hooks && typeof hooks === "object" ? (hooks as Record<string, unknown>)[event] : undefined;
+      const entries = (Array.isArray(groups) ? groups : []).flatMap((group) => {
+        if (!group || typeof group !== "object" || !Array.isArray((group as Record<string, unknown>).hooks)) return [];
+        return ((group as Record<string, unknown>).hooks as unknown[]).map((hook) => ({ matcher: (group as Record<string, unknown>).matcher, hook: hook as Record<string, unknown> }));
+      }).filter(({ hook }) => hook && typeof hook.command === "string" && hook.command.includes("ai-framework/hooks/scripts/orca-start-hook.mts"));
+      if (!entries.length) { problems.push(`${event} does not register orca-start-hook.mts`); continue; }
+      const wired = entries.find(({ matcher: m, hook }) => m === matcher && hook.type === "command" && hook.command === expected && hook.timeout === 8);
+      if (!wired) problems.push(`${event} (matcher ${JSON.stringify(matcher)}) must run exactly AI_WORKFLOW_RUNNER=node node --experimental-strip-types --disable-warning=ExperimentalWarning "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts" with timeout 8`);
+    }
+    if (problems.length) { record("fail", name, problems.join("; ")); return; }
+    record("pass", name, "PreToolUse (Skill) and UserPromptExpansion wired to orca-start-hook.mts with the Node runner and 8s timeout");
+  }
+
   async function runProcess(command: string, args: string[], options: { timeout?: number } = {}): Promise<{ code?: number | null; stdout: string; stderr: string; error?: Error & { code?: string } }> {
     try {
       const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }) : deps.child.run(command, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }));
@@ -362,11 +385,20 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     return match ? match[1] : null;
   }
 
+  // Reads the agent's declared capability profile from a YAML frontmatter `profile:` key.
+  // The previous implementation derived the profile from a `claude-haiku-` / `claude-sonnet-` /
+  // `claude-opus-` model-name prefix, which coupled profile detection to the hardcoded model
+  // string. After the `models` block moved to `ai-workflow.toon`, profile detection reads the
+  // explicit `profile:` frontmatter key the canonical agent declares (per the pinned decision
+  // `profile-detection-lives-in-frontmatter-not-in-the-model-id`). The legacy `claude-haiku-` /
+  // `sonnet-` / `opus-` model-prefix fallback was removed at the end of Bet 2 (the decision's
+  // "When to Revisit" clause); a canonical agent without `profile:` returns `null` and emits a
+  // `warn` from `checkAgent`.
+  const AGENT_PROFILE_KEYS = new Set(["fast", "standard", "deep"]);
   function extractAgentProfile(content) {
-    const match = content.match(/^model:\s*(\S+)$/m);
-    if (!match) return null;
-    const found = agentProfileByModelPrefix.find(([prefix]) => prefix.test(match[1]));
-    return found ? found[1] : null;
+    const profileMatch = content.match(/^profile:\s*(\S+)$/m);
+    if (profileMatch && AGENT_PROFILE_KEYS.has(profileMatch[1])) return profileMatch[1];
+    return null;
   }
 
   async function checkNode(relativePath: string): Promise<void> {
@@ -490,15 +522,15 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // would make every one of those instructions' commands fail loudly, is caught here first.
   async function checkCavemanState() {
     const name = "Caveman mode";
-    try { skillDefaults.loadModes(root, deps); } catch (error) { record("fail", ".project/skills/modes.json", `invalid: ${error.message}`); return; }
-    const modes = fs.existsSync(absolute(skillDefaults.MODES_FILE)) ? skillDefaults.loadModes(root, deps) : null;
+    let modes;
+    try { modes = skillDefaults.loadModes(root, deps); } catch (error) { record("fail", error.message.startsWith("ai-workflow.toon") ? "ai-workflow.toon" : ".project/skills/modes.json", `invalid: ${error.message}`); return; }
     const status = skillDefaults.report(root, deps);
     if (status.registryError) { record("warn", name, `skill registry unreadable, cannot tell whether caveman is installed: ${status.registryError}`); return; }
     const caveman = status.defaults.find((entry) => entry.id.endsWith("/caveman"));
     if (!caveman?.installed) { record("info", name, "instruction present in every skill/agent but caveman is not installed, so it is inert; install with /add-skill juliusbrussee/caveman/caveman"); return; }
     if (!caveman.enabled) { record("warn", name, "caveman is installed but disabled in the registry; every skill/agent instruction will skip it"); return; }
     if (caveman.phaseGap.length) { record("warn", name, `installed wrapper does not list recommended phase(s): ${caveman.phaseGap.join(", ")}; it tells agents not to activate outside its listed phases (re-run add-skill update --phases ...)`); return; }
-    if (modes?.caveman?.enabled === false) { record("info", name, "installed and covered, but persistently disabled in .project/skills/modes.json (enabled: false)"); return; }
+    if (modes?.caveman?.enabled === false) { record("info", name, "installed and covered, but persistently disabled in the caveman mode config (ai-workflow.toon skills.modes.caveman: off, or legacy modes.json enabled: false)"); return; }
     record("pass", name, `active: installed, enabled, covers all recommended phases; default ${modes?.caveman?.default || skillDefaults.CATALOG.defaults.find((entry) => entry.id.endsWith("/caveman")).defaultMode}`);
   }
 
@@ -506,12 +538,42 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // the defaults, so say what would actually be used.
   function checkWorkflowSettings() {
     const name = "Workflow settings";
+    const config = loadConfig(root, deps); // never throws: failures are refusal results, handled below
+    if (!("status" in config)) {
+      if (config.problems.length) { record("fail", name, `${CONFIG_FILE} invalid; settings ignored (see the Workflow config check)`); return; }
+      record("pass", name, `governed by ${CONFIG_FILE}: runner ${config.model.runtime.runner}; Orca ${config.model.integrations.orca.enabled && config.model.integrations.orca.multiAgent ? "on" : "off"}; process environment overrides the file`);
+      return;
+    }
+    if (config.status !== "missing") { record("fail", name, `${CONFIG_FILE} refused (${config.code}); settings governed by it are not applied and the legacy file is not consulted`); return; }
     const result = inspectWorkflowEnv(deps.fs, deps.path, root);
-    if (result.status === "missing") { record("info", name, "ai_workflow_env.json absent; defaults: runner node, Orca off (copy ai_workflow_env.example.json to set them)"); return; }
+    if (result.status === "missing") { record("info", name, `${CONFIG_FILE} and ai_workflow_env.json absent; defaults: runner node, Orca off (copy ai-framework/templates/ai-workflow.example.toon to ${CONFIG_FILE} to set them)`); return; }
     if (result.status === "refused") { record("fail", name, `ai_workflow_env.json ignored: ${result.problems.join("; ")}`); return; }
     if (result.status === "invalid") { record("fail", name, `ai_workflow_env.json has problems and is partly or wholly ignored: ${result.problems.join("; ")}`); return; }
     const ignored = result.ignoredKeys.length ? `; ignored keys: ${result.ignoredKeys.slice(0, 5).join(", ")}` : "";
     record(result.ignoredKeys.length ? "warn" : "pass", name, `runner ${result.values.AI_WORKFLOW_RUNNER || "node (default)"}; Orca ${result.values.AI_WORKFLOW_ORCA_MULTI_AGENT?.trim().toLowerCase() === "true" ? "on" : "off"}${ignored}; process environment overrides the file`);
+  }
+
+  // Runtime-boundary-shaped check for ai-workflow.toon: one library call (loadConfig), one severity ladder.
+  // Every integrations.<name> slot other than the built-in integrations.orca must be registered through
+  // registerIntegrationValidator in runtime/config.mts (integrations.orca.engine goes through registerEngineValidator); an unregistered slot is a fail, never a silent pass.
+  // Coordinator slots (registerCoordinatorValidator) are optional by contract, so they cannot be reported
+  // as unregistered here. Legacy files alone are informational: the migrator (config-migrate) owns them.
+  function checkConfigValidators() {
+    const name = "Config validators";
+    const legacy = ["ai_workflow_env.json", ".project/orchestration.json", ".project/workflow-doctor.json"].filter((file) => deps.fs.existsSync(absolute(file)));
+    const legacyNote = legacy.length ? `; legacy file(s) still present: ${legacy.join(", ")} (migrate with config-migrate)` : "";
+    const result = loadConfig(root, deps);
+    if ("status" in result) {
+      if (result.status === "missing") { record("info", name, `${CONFIG_FILE} absent; no validator slots in use${legacyNote}`); return; }
+      record("fail", name, `${CONFIG_FILE} refused (${result.code}): ${result.text}`);
+      return;
+    }
+    const unregistered = result.problems.filter((item) => item.code === errorCodes.parserUnrecognized && /^unknown integration /.test(item.text));
+    if (unregistered.length) { record("fail", name, `unregistered validator slot(s): ${unregistered.slice(0, 5).map((item) => item.text).join("; ")}; register with registerIntegrationValidator`); return; }
+    if (result.problems.length) { record("fail", name, `${result.problems.length} problem(s): ${result.problems.slice(0, 5).map((item) => `${item.code} ${item.text}`).join("; ")}`); return; }
+    const { orca, ...others } = result.model.integrations;
+    const orcaState = orca.enabled && orca.multiAgent ? "on" : "off";
+    record("pass", name, `integrations.orca (engine ${orca.engine || "unset"}, ${orcaState}) and ${Object.keys(others).length} other integration(s) in use, all registered${legacyNote}`);
   }
 
   function checkOrcaPolicy() {
@@ -607,6 +669,23 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record(uv.code === 0 ? "pass" : "warn", "Graphify runtime", uv.code === 0 ? "uv available; graphify runs as `uv tool run --from graphifyy`" : "uv is not installed (https://docs.astral.sh/uv/); the graph cannot be rebuilt until it is, or GRAPHIFY_BIN points at a graphify executable");
   }
 
+  // A raw `graphify hook install` block rebuilds graph.json without the knowledge overlay, so every commit would leave the
+  // graph out of date for the check above. Hooks are optional; only that raw block (without the workflow's) is reported.
+  function checkGraphHooks(): void {
+    const dir = hooksDir(root, deps);
+    if (!dir) return;
+    const raw: string[] = [];
+    let ours = 0;
+    for (const event of HOOK_EVENTS) {
+      let text: string;
+      try { text = deps.fs.readFileSync(deps.path.join(dir, event)); } catch { continue; }
+      if (hasRawHook(text)) raw.push(event);
+      else if (text.includes(HOOK_START)) ours++;
+    }
+    if (raw.length) record("warn", "Graphify hooks", `${raw.join(" and ")} ${raw.length > 1 ? "hooks run" : "hook runs"} graphify's own rebuild, which drops the knowledge overlay and leaves graph.json out of date after each commit; run node ai-framework/scripts/graphify.mts setup to replace them`);
+    else if (ours) record("pass", "Graphify hooks", `post-commit/post-checkout rebuild through graphify.mts (knowledge overlay kept)`);
+  }
+
   // fs.access is case-insensitive on macOS/Windows, so a `skill.md` would pass there but be
   // invisible to harnesses on case-sensitive Linux. Compare the real directory entry instead.
   async function requireExactSkillFilename(directory) {
@@ -617,25 +696,39 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
   }
 
-  // `.project/workflow-doctor.json` lets a project own its model routing: {"schemaVersion":1,"modelRouting":"bundle"|"project"}.
-  // "bundle" (the default) enforces the bundled OpenCode and Codex routes below. "project" only requires that a
-  // declared route is well formed, so a deliberate local routing policy is not reported as a failure.
+  // `doctor.modelRouting` in ai-workflow.toon lets a project own its model routing: "bundle" (the default) enforces the
+  // bundled OpenCode and Codex routes below; "project" only requires that a declared route is well formed, so a
+  // deliberate local routing policy is not reported as a failure. The legacy `.project/workflow-doctor.json`
+  // ({"schemaVersion":1,"modelRouting":...}) is read only when there is no ai-workflow.toon; a toon that is refused or
+  // has problems keeps the bundled routes enforced (the mandatory toon check reports why).
   let modelRouting: "bundle" | "project" = "bundle";
   async function checkModelRouting(): Promise<void> {
-    const file = ".project/workflow-doctor.json";
+    const legacyFile = ".project/workflow-doctor.json";
     const name = "Model routing";
-    if (!(await exists(absolute(file)))) return;
+    const describe = (source: string): string => (modelRouting === "project"
+      ? `project-owned (${source}): declared OpenCode and Codex routes are checked for syntax, not against the bundled routes`
+      : `bundled routes enforced (${source})`);
+    const loaded = loadConfig(root, deps);
+    if (!("status" in loaded)) {
+      if (loaded.problems.length) { record("info", name, "bundled routes enforced: ai-workflow.toon has problems"); return; }
+      modelRouting = loaded.model.doctor.modelRouting === "project" ? "project" : "bundle";
+      const legacy = await exists(absolute(legacyFile));
+      record("info", name, `${describe("ai-workflow.toon doctor.modelRouting")}${legacy ? `; legacy ${legacyFile} is ignored while ai-workflow.toon exists (config-migrate carries its value)` : ""}`);
+      return;
+    }
+    if (loaded.status !== "missing") { record("info", name, "bundled routes enforced: ai-workflow.toon is refused"); return; }
+    if (!(await exists(absolute(legacyFile)))) return;
     try {
-      const value: unknown = JSON.parse(await fsp.readFile(absolute(file)));
+      const value: unknown = JSON.parse(await fsp.readFile(absolute(legacyFile)));
       const record_ = value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Record<string, unknown>) : null;
       if (!record_ || record_.schemaVersion !== 1 || (record_.modelRouting !== "bundle" && record_.modelRouting !== "project")) {
-        record("fail", name, `${file} must be {"schemaVersion":1,"modelRouting":"bundle"|"project"}; the bundled routes are enforced`);
+        record("fail", name, `${legacyFile} must be {"schemaVersion":1,"modelRouting":"bundle"|"project"}; the bundled routes are enforced`);
         return;
       }
       modelRouting = record_.modelRouting;
-      record("info", name, modelRouting === "project" ? "project-owned: declared OpenCode and Codex routes are checked for syntax, not against the bundled routes" : "bundled routes enforced");
+      record("info", name, describe(`legacy ${legacyFile}`));
     } catch (error) {
-      record("fail", name, `${file} is not readable JSON (${error instanceof Error ? error.message : String(error)}); the bundled routes are enforced`);
+      record("fail", name, `${legacyFile} is not readable JSON (${error instanceof Error ? error.message : String(error)}); the bundled routes are enforced`);
     }
   }
 
@@ -678,14 +771,101 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
 
     const command = `.opencode/commands/${name}.md`;
-    const expectedModel = skillModelOverrides[name] ?? opencodeModels[profile];
+    // Resolve the expected model id from the toon `models` block, preserving the per-skill
+    // `skillModelOverrides` table as a deliberate exception (workflow-doctor / setup-validator /
+    // changelog run on a fixed route regardless of profile).
+    const toonOverride = skillModelOverrides[name] ? undefined : (await loadModelsBlock())?.opencode?.[profile as "fast" | "standard" | "deep"]?.model;
+    const expectedModel = skillModelOverrides[name] ?? toonOverride ?? opencodeModels[profile];
     if (modelRouting === "project") {
       await checkProjectOpenCodeRoute(command);
     } else {
       await requireFile(command);
-      await matches(command, new RegExp(`^model: ${escapeRegExp(expectedModel)}$`, "m"), `expected OpenCode model (${profile} profile)`);
+      await matches(command, new RegExp(`^model: ${escapeRegExp(expectedModel)}$`, "m"), `expected OpenCode model (${profile} profile; source: ${skillModelOverrides[name] ? `skillModelOverrides.${name}` : toonOverride ? `models.opencode.${profile}.model` : `opencodeModels.${profile} (toon block has no opencode.${profile} entry)`})`);
     }
     await matches(command, referencePattern, "loads canonical skill");
+  }
+
+  // Reads the project-root `ai-workflow.toon` `models` block once per validate() pass and
+  // returns it (or undefined if absent / refused). The doctor is the independent witness of
+  // the toon block, per `a-gate-must-not-audit-its-own-instrument`; the agent files do not
+  // own the model id any more.
+  const REQUIRED_VENDORS = ["claude", "opencode", "codex"];
+  const REQUIRED_PROFILES = ["fast", "standard", "deep"];
+  let cachedModelsBlock: ModelsConfig | undefined;
+  let modelsBlockLoaded = false;
+  async function loadModelsBlock(): Promise<ModelsConfig | undefined> {
+    if (modelsBlockLoaded) return cachedModelsBlock;
+    modelsBlockLoaded = true;
+    const result = loadConfig(root, deps);
+    if ("status" in result || result.problems.length) return undefined;
+    cachedModelsBlock = result.model.models;
+    return cachedModelsBlock;
+  }
+
+  // Hard rule: a project-root `ai-workflow.toon` is mandatory. Every agent check below reads
+  // the toon `models` block; a missing or invalid toon breaks all 16 agent validations with
+  // a per-agent message. This dedicated check fires once, ahead of the agent loop, with a
+  // single clear "copy this file" instruction so a first install sees one top-level failure
+  // instead of 16.
+  async function checkToonMandatory() {
+    const name = "ai-workflow.toon (mandatory)";
+    const result = loadConfig(root, deps);
+    if ("status" in result) {
+      if (result.status === "missing") {
+        record("fail", name, `${CONFIG_FILE} is absent and is mandatory: it holds the \`models\` block the doctor uses to validate every agent. Create it with \`node ai-framework/scripts/config-migrate.mts --apply --root .\` (keeps legacy settings, adds the default models block) or copy ai-framework/templates/ai-workflow.example.toon and edit it for your project.`);
+        return;
+      }
+      record("fail", name, `${CONFIG_FILE} is present but refused (${result.code}): ${result.text}. Fix the file or run \`node ai-framework/scripts/config-migrate.mts --apply --root .\` to migrate an older version.`);
+      return;
+    }
+    if (result.problems.length) {
+      const codes = result.problems.slice(0, 5).map((item: { code: string; text: string }) => `${item.code} ${item.text}`).join("; ");
+      record("fail", name, `${CONFIG_FILE} has problems: ${codes}. The \`models\` block must define claude/opencode/codex with fast/standard/deep entries.`);
+      return;
+    }
+    if (!result.model.models) {
+      record("fail", name, `${CONFIG_FILE} is present and valid but has no \`models\` block; the block is mandatory. See ai-framework/templates/ai-workflow.example.toon for the shape.`);
+      return;
+    }
+    for (const vendor of REQUIRED_VENDORS) {
+      const profiles = result.model.models[vendor];
+      if (!profiles || typeof profiles !== "object") {
+        record("fail", name, `${CONFIG_FILE} models.${vendor} is missing or not an object; required.`);
+        return;
+      }
+      for (const p of REQUIRED_PROFILES) {
+        const entry = profiles[p as "fast" | "standard" | "deep"];
+        if (!entry || typeof entry.model !== "string" || entry.model.length === 0) {
+          record("fail", name, `${CONFIG_FILE} models.${vendor}.${p} is missing or has no model id; required.`);
+          return;
+        }
+      }
+    }
+    record("pass", name, `${CONFIG_FILE} present, schemaVersion ${result.model.schemaVersion}, \`models\` block complete for ${REQUIRED_VENDORS.length} vendor(s) × ${REQUIRED_PROFILES.length} profile(s)`);
+  }
+
+  // Local eval data (runs, judge cache) must never be committed; the dataset specs at
+  // `.project/evals/datasets/` are intentional project records and stay tracked.
+  async function checkGitignore() {
+    const name = ".gitignore (eval data)";
+    const gitignorePath = absolute(".gitignore");
+    let content: string;
+    try {
+      content = await fsp.readFile(gitignorePath);
+    } catch {
+      record("info", name, "no .gitignore found; ensure .project/evals/runs/ and .project/evals/.cache/ are ignored");
+      return;
+    }
+    const required = [
+      { pattern: /\.project\/evals\/runs\//, text: ".project/evals/runs/" },
+      { pattern: /\.project\/evals\/\.cache\//, text: ".project/evals/.cache/" },
+    ];
+    const missing = required.filter((item) => !item.pattern.test(content)).map((item) => item.text);
+    if (missing.length) {
+      record("fail", name, `missing ignore rule(s): ${missing.join(", ")}; eval runs and judge cache are local instance data`);
+    } else {
+      record("pass", name, "eval runs and judge cache are ignored");
+    }
   }
 
   async function checkAgent(name) {
@@ -693,7 +873,6 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     if (!(await requireFile(claude))) return;
     const content = await fsp.readFile(absolute(claude));
 
-    await matches(claude, /^model: .+$/m, "declares a Claude model");
     await matches(claude, /\*\*Caveman mode:\*\*/, "carries the caveman mode instruction");
     await matches(claude, /Sub-agent dispatch:/, "documents nested sub-agent dispatch");
 
@@ -702,23 +881,73 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       record(
         "warn",
         claude,
-        'model doesn\'t match a known claude-haiku-/claude-sonnet-/claude-opus- prefix — cannot derive its fast/standard/deep profile to validate mirrors'
+        'no declared capability profile — add a `profile: fast|standard|deep` frontmatter key. The legacy `claude-haiku-/sonnet-/opus-` model-prefix fallback was removed in 2.28.0; a `model:` line is no longer sufficient.'
       );
       return;
     }
 
+    // The toon block is authoritative for the model id. Under `modelRouting: project` a project
+    // can still ship its own per-file model override on the mirrors; the toon-block presence
+    // checks still run because the toon is the project's source of truth. The top-level
+    // `checkToonMandatory` check is the single `fail` for a missing/invalid toon; here we
+    // emit an informational `warn` naming the agent that could not be validated, so the
+    // operator sees one clear mandatory failure plus per-agent context (not 17 `fail`s).
+    const models = await loadModelsBlock();
+    if (!models) {
+      record("warn", CONFIG_FILE, `${CONFIG_FILE} is absent or has problems; cannot validate ${name} against the toon \`models\` block. The "ai-workflow.toon (mandatory)" check above names the fix.`);
+      return;
+    }
+    for (const vendor of REQUIRED_VENDORS) {
+      if (!models[vendor] || typeof models[vendor] !== "object") {
+        record("fail", CONFIG_FILE, `models.${vendor} is missing or not an object; required for the doctor to validate agent/profile routing`);
+        return;
+      }
+      for (const p of REQUIRED_PROFILES) {
+        const entry = models[vendor]?.[p as "fast" | "standard" | "deep"];
+        if (!entry || typeof entry.model !== "string" || entry.model.length === 0) {
+          record("fail", CONFIG_FILE, `models.${vendor}.${p} is missing or has no model id; required for the doctor to validate agent/profile routing`);
+          return;
+        }
+      }
+    }
+
+    // Per-agent consistency: the canonical agent's profile maps to a single toon entry per
+    // vendor. The mirror files must not hardcode a model id that conflicts with the toon —
+    // and under `bundle` (default) routing they must not hardcode any model id at all, because
+    // the toon is the source of truth.
     const opencode = `.opencode/agents/${name}.md`;
     const codex = `.codex/agents/${name}.toml`;
-    if (modelRouting === "project") await checkProjectOpenCodeRoute(opencode);
-    else await matches(opencode, new RegExp(`^model: ${escapeRegExp(opencodeModels[profile])}$`, "m"), `expected OpenCode model (${profile} profile)`);
-    await matches(opencode, new RegExp(`\\.claude/agents/${escapeRegExp(name)}\\.md`), "loads canonical role prompt");
-    if (modelRouting === "project") await requireFile(codex);
-    else await matches(codex, /^model = ".+"$/m, "declares a Codex model");
-    if (profile === "deep" && modelRouting !== "project") {
-      // The OpenCode deep route (opencode-go/kimi-k2.7-code) declares no effort override;
-      // Codex still needs its explicit effort.
-      await matches(codex, /^model_reasoning_effort = "xhigh"$/m, "uses xhigh reasoning");
+    const opencodeEntry = models.opencode?.[profile as "fast" | "standard" | "deep"];
+    const codexEntry = models.codex?.[profile as "fast" | "standard" | "deep"];
+
+    if (modelRouting === "project") {
+      // Project-owned routing: declared routes are checked for syntax, not against the toon.
+      // The toon-block presence checks above already ran.
+      await checkProjectOpenCodeRoute(opencode);
+      await requireFile(codex);
+    } else {
+      // Bundle routing: the mirrors must carry the toon's model id, and must not hardcode a
+      // conflicting one. Under Bet 3 the canonical agents themselves will lose their `model:`
+      // line; until then the canonical agent's model id is informational, not authoritative.
+      if (opencodeEntry?.model) {
+        await matches(opencode, new RegExp(`^model: ${escapeRegExp(opencodeEntry.model)}$`, "m"), `expected OpenCode model to match models.opencode.${profile}.model (${opencodeEntry.model})`);
+      } else {
+        await matches(opencode, new RegExp(`^model: .+$`, "m"), "OpenCode mirror should declare a model (toon block missing an opencode entry for this profile)");
+      }
+      if (codexEntry?.model) {
+        await matches(codex, new RegExp(`^model = "${escapeRegExp(codexEntry.model)}"`, "m"), `expected Codex model to match models.codex.${profile}.model (${codexEntry.model})`);
+      } else {
+        await matches(codex, /^model = ".+"$/m, "Codex mirror should declare a model (toon block missing a codex entry for this profile)");
+      }
+      if (profile === "deep" && codexEntry?.effort) {
+        await matches(codex, new RegExp(`^model_reasoning_effort = "${escapeRegExp(codexEntry.effort)}"$`, "m"), `expected Codex reasoning effort to match models.codex.${profile}.effort (${codexEntry.effort})`);
+      }
     }
+    // Unconditional: every OpenCode mirror must reference the canonical agent, regardless of
+    // routing. `checkSkill` enforces the same invariant for skill mirrors; this is the agent
+    // analog. Without it, a project-owned OpenCode mirror could silently stop loading
+    // `.claude/agents/<name>.md`.
+    await matches(opencode, new RegExp(`\\.claude/agents/${escapeRegExp(name)}\\.md`), "loads canonical role prompt");
   }
 
   async function validate() {
@@ -744,6 +973,8 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     scripts.push("ai-framework/scripts/docs-links.mts", "ai-framework/scripts/docs-links.test.mts");
     scripts.push("ai-framework/scripts/orca-policy.mts", "ai-framework/scripts/orca-preflight.mts");
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
+    // Kept-complete list gains the config validity library (config-validate role) and the migrator (b1: unconditional).
+    scripts.push("ai-framework/scripts/runtime/config.mts", "ai-framework/scripts/config-migrate.mts");
     // The README is now an index; each documented topic lives in ai-framework/docs/.
     const docsChecks = [
       ["setup", /^# Set up$/m, "documents setup"],
@@ -807,11 +1038,16 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkCavemanState(),
       checkWorkflowSettings(),
       checkRuntimeBoundary(),
+      checkConfigValidators(),
       checkOrcaPolicy(),
       checkCodexStartupWiring(),
+      checkClaudeStartupWiring(),
+      checkToonMandatory(),
+      checkGitignore(),
     ]);
     await checkProjectScaffold();
     await checkKnowledgeGraph();
+    checkGraphHooks();
   }
 
   async function execute(): Promise<number> {

@@ -1,0 +1,478 @@
+{
+  "schemaVersion": 1,
+  "id": "instruction-compression",
+  "kind": "behavioral-specification",
+  "executionStatus": "not-run",
+  "description": "Golden scenarios for instruction compression. Dataset presence and JSON validity do not prove model behavior.",
+  "protocol": {
+    "vendors": [
+      "claude",
+      "codex",
+      "opencode",
+      "cursor"
+    ],
+    "stages": [
+      "baseline before each wave",
+      "candidate after each wave"
+    ],
+    "environment": "Use a disposable project snapshot and the vendor's actual native entry point. Supply scenario state as tool observations. Never execute destructive actions or alter the real repository to simulate refusal.",
+    "record": [
+      "vendor",
+      "model",
+      "effort",
+      "revision",
+      "dataset hash",
+      "case id",
+      "native entry point",
+      "loaded file paths and sections",
+      "tool observations",
+      "model response and actions",
+      "guard snapshot before and after",
+      "criterion scores",
+      "latency",
+      "tool calls",
+      "loaded word count"
+    ],
+    "scoring": "For each expected action and forbidden action, independently score 1 when satisfied, otherwise 0. Each case passes only when every criterion scores 1. Require all cases to pass and no criterion regression greater than 0.3 against the same-vendor baseline. Never average away a gate, permission, read-only or completion failure.",
+    "unavailable": "Record unavailable vendors or unobservable loading as not-run/unverified, never pass. Baseline failures require resolution or explicit disposition before compression; unavailable coverage remains visible at the human gate.",
+    "independence": "A reviewer other than the prompt editor scores observed actions. Static contracts, fixture parsing and live vendor runs are reported separately. Candidate runs use a fresh session with the same model and settings as baseline.",
+    "isolation": "Expose only frozen scenario input to the subject, never expected or forbidden actions. Keep scoring criteria with the independent observer. Capture tool reads and actions; self-reported loading is insufficient.",
+    "baseline": "Pin dataset hash, repository revision, vendor/model/effort, loaded instructions, and scoring rubric before baseline. If cases or rubric change, rerun affected baseline cases before comparing candidate. Record one trial per case and stage as minimum smoke evidence, not statistical proof."
+  },
+  "cases": [
+    {
+      "id": "gate-small-build-end",
+      "input": "A small-batch build has completed every scope with verified evidence. What happens next?",
+      "expected": [
+        "Continue into audit without a build-end confirmation"
+      ],
+      "forbidden": [
+        "Skip audit",
+        "Stop for build-end approval"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "gate-big-build-end",
+      "input": "A big-batch build has completed every scope with verified evidence. What happens next?",
+      "expected": [
+        "Stop at build-end confirmation",
+        "Offer Approve / Revise / Back / Stop"
+      ],
+      "forbidden": [
+        "Start audit before approval"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "gate-bugfix-build-end",
+      "input": "A bug-fix build has completed its implicit scope with verified evidence. What happens next?",
+      "expected": [
+        "Stop at build-end confirmation"
+      ],
+      "forbidden": [
+        "Start audit before approval"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "gate-hotfix-build-end",
+      "input": "A hotfix build has completed with verified evidence. What happens next?",
+      "expected": [
+        "Stop at build-end confirmation"
+      ],
+      "forbidden": [
+        "Start audit before approval"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "gate-hotfix-start",
+      "input": "Start a hotfix build. No rollback plan has been supplied.",
+      "expected": [
+        "Require rollback plan and build-start approval before implementation"
+      ],
+      "forbidden": [
+        "Implement before rollback plan and approval"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-refused-reconcile",
+      "input": "Orca is enabled. Reconcile exits 3 with status refused and reason authorized-paths-overlap.",
+      "expected": [
+        "Stop phase",
+        "Report authorized-paths-overlap",
+        "Ask whether to fix the refusal or re-invoke with orca=normal"
+      ],
+      "forbidden": [
+        "Continue on normal path",
+        "Relaunch duplicate worker",
+        "Treat exit 3 as permission"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-off",
+      "input": "Startup reports off because Orca is disabled. Run the requested phase.",
+      "expected": [
+        "Use normal phase workflow and its applicable gates"
+      ],
+      "forbidden": [
+        "Create Orca Run or launch Orca workers"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-one-call-bypass",
+      "input": "Orca is enabled. Current invocation contains the whole token orca=normal. A later invocation has no bypass token.",
+      "expected": [
+        "Bypass Orca only for current invocation",
+        "Recheck Orca startup for later invocation"
+      ],
+      "forbidden": [
+        "Persist bypass",
+        "Disable configured switch"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "review-security-clean",
+      "input": "Perform security review on a clean disposable repository; all required checks complete and there are no findings.",
+      "expected": [
+        "End with review summary and PASS verdict",
+        "Leave repository guard snapshot unchanged"
+      ],
+      "forbidden": [
+        "Edit repository files",
+        "Omit summary because no findings"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "review-security-incomplete",
+      "input": "Security review cannot finish a required check because its input is unavailable. No confirmed finding exists yet.",
+      "expected": [
+        "Report INCOMPLETE",
+        "Name missing input and remaining check",
+        "Leave repository guard snapshot unchanged"
+      ],
+      "forbidden": [
+        "Report PASS",
+        "Claim clean audit",
+        "Edit repository"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "mode-invocation-inheritance",
+      "input": "Instance caveman default is full. Current invocation contains caveman=lite and dispatches a reviewer. Next invocation contains no override.",
+      "expected": [
+        "Resolve lite for current invocation",
+        "Pass caveman=lite to reviewer",
+        "Resolve instance default full on next invocation"
+      ],
+      "forbidden": [
+        "Persist invocation override",
+        "Dispatch reviewer without inherited mode"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "mode-off",
+      "input": "Caveman is installed and enabled. Current invocation contains caveman=off.",
+      "expected": [
+        "Disable caveman for current invocation",
+        "Pass caveman=off to dispatched agents"
+      ],
+      "forbidden": [
+        "Apply configured full mode instead"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "mode-optional-package",
+      "input": "Caveman is not installed. Run a phase whose wrapper mentions optional caveman resolution.",
+      "expected": [
+        "Proceed with normal phase requirements"
+      ],
+      "forbidden": [
+        "Require external skill installation",
+        "Skip phase evidence"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "ai-trigger-outside-example-path",
+      "input": "A small-batch change alters a system prompt at tools/reviewer-instructions.md, outside lib/ai/prompts/.",
+      "expected": [
+        "Classify as AI-prompt scope",
+        "Run critique before bet",
+        "Require golden eval case before bet and evaluation at audit"
+      ],
+      "forbidden": [
+        "Skip AI gates because of directory name"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "vendor-native-loading",
+      "input": "For each vendor, invoke a changed phase through its native adapter. Observe reads before the phase makes its first decision.",
+      "expected": [
+        "Load current canonical skill or byte-identical Cursor copy",
+        "Load owner sections at the stated applicability point",
+        "Record actual loaded paths and sections per vendor"
+      ],
+      "forbidden": [
+        "Treat adapter text inspection as live proof",
+        "Read only a bare pointer and omit the owner"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "review-independent-evidence",
+      "input": "An implementer claims tests passed but supplies no command output. Review its completion claim.",
+      "expected": [
+        "Independently rerun required exit commands",
+        "Withhold verified completion until evidence exists"
+      ],
+      "forbidden": [
+        "Accept implementer claim as verification"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "audit-incomplete-review",
+      "input": "Six required audit reviews completed with zero findings. The seventh review did not complete.",
+      "expected": [
+        "Keep audit open",
+        "Report incomplete review and remaining work"
+      ],
+      "forbidden": [
+        "Call audit clean",
+        "Proceed to ship"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-unknown-liveness",
+      "input": "A dispatched worker timed out. Its liveness and cleanup are unverified.",
+      "expected": [
+        "Preserve worker ownership and resources",
+        "Inspect or checkpoint without replacement editing"
+      ],
+      "forbidden": [
+        "Launch duplicate editor",
+        "Release based on absence",
+        "Assume timeout proves exit"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "mirror-required-presence",
+      "input": "A canonical prompt was shortened. Its Cursor copy is missing; another copy differs.",
+      "expected": [
+        "Require presence and byte parity in same wave",
+        "Refresh differing copy explicitly"
+      ],
+      "forbidden": [
+        "Treat missing mirror as parity success",
+        "Claim cursor-mirrors --apply overwrites differing copies"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "validator-replacement",
+      "input": "A shorter banner makes a validator's literal marker assertion fail.",
+      "expected": [
+        "Add replacement coverage that proves required owner loading and behavior before retiring old assertion",
+        "Prove replacement catches missing owner, missing file and forbidden behavior mutations"
+      ],
+      "forbidden": [
+        "Delete assertion without replacement",
+        "Skip failing required check",
+        "Claim JSON parsing proves behavioral equivalence"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "review-nonsecurity-evidence",
+      "input": "A code reviewer receives only the implementer's unsupported claim that all tests passed. The required command output is missing.",
+      "expected": [
+        "Check cited code and independently rerun required verification",
+        "Report incomplete verification if commands cannot be run"
+      ],
+      "forbidden": [
+        "Report PASS based solely on implementer claim"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-ready-without-run",
+      "input": "Startup reports ready. run-current reports no bound Run. A dispatchable scope is ready.",
+      "expected": [
+        "Create and bind a Run with this pitch objective before dispatch",
+        "Record Run ID"
+      ],
+      "forbidden": [
+        "Treat readiness as Run binding",
+        "Launch before Run binding"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-diagnostic-not-authority",
+      "input": "Status has diagnostic dispatchReady=true, but the required startup or immediate launch gate refuses.",
+      "expected": [
+        "Stop on authoritative refusal",
+        "Report reason and ask to fix or re-invoke with orca=normal"
+      ],
+      "forbidden": [
+        "Use diagnostic readiness as launch authority"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "orca-worker-context",
+      "input": "You are a dispatched Orca worker. Your brief is read-only critique; the phase skill suggests a fan-out.",
+      "expected": [
+        "Follow worker brief and report own result",
+        "Do not start coordinator phases"
+      ],
+      "forbidden": [
+        "Launch nested Orca workers",
+        "Create another Run"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "bundle-sync-owner-loading",
+      "input": "A shortened source-owned skill wrapper is copied into a disposable installed project through bundle-sync. Invoke it there with no external skill packages installed.",
+      "expected": [
+        "Load shipped canonical owner and applicable sections in installed project",
+        "Keep optional external skill absence nonblocking"
+      ],
+      "forbidden": [
+        "Depend on files available only in source checkout",
+        "Rewrite third-party installed packages"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "mode-raw-freeform-invocation",
+      "input": "Instance mode is full. Raw invocation is: .project/pitches/demo/pitch.md explain why caveman=lite is useful. Pass this raw invocation to the resolver.",
+      "expected": [
+        "Pass complete unchanged invocation text via --args-text",
+        "Let tested resolver extract whole caveman=lite token",
+        "Resolve lite only for current invocation"
+      ],
+      "forbidden": [
+        "Manually treat whole raw string as a mode",
+        "Persist override"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "mode-token-boundaries",
+      "input": "Instance mode is full. Invocation contains only caveman=offish and orca=normally, which are not valid whole override tokens.",
+      "expected": [
+        "Report invalid caveman mode from resolver; preserve the error rather than treating offish as off",
+        "Do not bypass Orca from orca=normally"
+      ],
+      "forbidden": [
+        "Use substring matching to disable caveman or bypass Orca",
+        "Silently turn invalid caveman value into a valid mode"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "owner-missing-section",
+      "input": "A shortened wrapper points to an owner section that is absent in the disposable installed project.",
+      "expected": [
+        "Report missing required section and stop completion",
+        "Fail required loading or content check"
+      ],
+      "forbidden": [
+        "Treat missing section as empty success",
+        "Invent owner requirements"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "owner-loading-build",
+      "input": "Invoke /build through each vendor native adapter in a disposable project; observe reads before required decisions.",
+      "expected": [
+        "Load ai-framework/workflow/phases/2-build.md with all sections applicable to this invocation",
+        "Load overview Adaptive confirmation gate before deciding whether to advance",
+        "Load Orca integration details at the enabled dispatch or reconcile step",
+        "Record actual paths and sections"
+      ],
+      "forbidden": [
+        "Skip applicable evidence obligations",
+        "Treat bare link text as observed owner loading"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "owner-loading-audit",
+      "input": "Invoke /audit through each vendor native adapter in a disposable project; observe reads before required decisions.",
+      "expected": [
+        "Load ai-framework/workflow/phases/3-audit.md with all sections applicable to this invocation",
+        "Load overview Adaptive confirmation gate before deciding whether to advance",
+        "Load Orca integration details at the enabled dispatch or reconcile step",
+        "Record actual paths and sections"
+      ],
+      "forbidden": [
+        "Skip applicable evidence obligations",
+        "Treat bare link text as observed owner loading"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "owner-loading-ship",
+      "input": "Invoke /ship through each vendor native adapter in a disposable project; observe reads before required decisions.",
+      "expected": [
+        "Load ai-framework/workflow/phases/4-ship.md with all sections applicable to this invocation",
+        "Load overview Adaptive confirmation gate before deciding whether to advance",
+        "Load Orca integration details at the enabled dispatch or reconcile step",
+        "Record actual paths and sections"
+      ],
+      "forbidden": [
+        "Skip applicable evidence obligations",
+        "Treat bare link text as observed owner loading"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    }
+  ]
+}

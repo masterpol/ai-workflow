@@ -1,8 +1,9 @@
 # AGENTS.md
 
 > Cross-tool entry point for the AI development workflow installed from `ai-workflow-portable/`.
-> OpenCode, Codex, and Cursor read this file directly. Claude Code reads `CLAUDE.md` instead —
-> it is a required, full mirror of this file's content (not optional), kept in sync by `/setup`.
+> OpenCode, Codex, and Cursor read this file directly. Claude Code reads `CLAUDE.md` instead, which is
+> required: either a full mirror of this file's content kept in sync by `/setup`, or an existing one-line
+> `@AGENTS.md` import (Claude Code's native include; `setup-validator` accepts it when this file is complete).
 >
 > **On first setup:** if `.project/` does not exist yet, read `SETUP.md` and run the install
 > steps. Do this automatically as soon as it's detected — don't wait to be asked. After setup,
@@ -119,7 +120,8 @@ installed and enabled (`.project/skills/registry.json`), load it at the level
 `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase agent --args-text "<the user's message>"`
 returns, unless that is `off`. A `caveman=<lite|full|ultra|wenyan-lite|wenyan-full|wenyan-ultra|off>`
 token in a message overrides it for that message only; a persistent change is an explicit edit to
-`.project/skills/modes.json`. Skills, phase commands, and subagents apply the same resolution
+`skills.modes.caveman` in the project-root `ai-workflow.toon` (the legacy `.project/skills/modes.json` applies only
+when no `ai-workflow.toon` exists). Skills, phase commands, and subagents apply the same resolution
 themselves (`ai-framework/integrations/skill-defaults.md`). The skill's own Auto-Clarity and
 Boundaries rules still apply: security warnings, irreversible-action confirmations, and text
 persisted to project files stay normal prose.
@@ -159,8 +161,8 @@ Norandino, live in their own repositories (`../lasallenorandi`) and are not trac
   `--experimental-strip-types --disable-warning=ExperimentalWarning`. Tests run with
   `node --experimental-strip-types --disable-warning=ExperimentalWarning --test` or `bun test`.
 - `AI_WORKFLOW_RUNNER` selects Node (default) or Bun, and `AI_WORKFLOW_ORCA_MULTI_AGENT` turns Orca on, through the process
-  environment or the project-root `ai_workflow_env.json` (no secrets; agents may read it; process environment wins; `.env`
-  is never read). The OpenCode plugin is a direct `.ts` entry.
+  environment or the project-root `ai-workflow.toon` (no secrets; agents may read it; process environment wins; `.env`
+  is never read). A legacy `ai_workflow_env.json` is read only when `ai-workflow.toon` is absent. The OpenCode plugin is a direct `.ts` entry.
 - Supported hosts: Claude Code, OpenCode, Codex and Cursor.
 
 ### Project Records

@@ -1,14 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { fileURLToPath } from "node:url";
 
-import { extractWikiLinks, graphifyCommand, legacyCovered, main, overlayKnowledge, parseFrontmatter, buildGraph } from "./graphify.mts";
-import { createTestDeps, runScript, tempFixture } from "./runtime/test-helpers.mts";
+import { RAW_HOOK_END, RAW_HOOK_START, extractWikiLinks, hasRawHook, graphifyCommand, hookBlock, installHooks, legacyCovered, main, overlayKnowledge, parseFrontmatter, buildGraph } from "./graphify.mts";
+import { createTestDeps, runScript, tempFixture, urlPath } from "./runtime/test-helpers.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 const ROOT = "/proj";
 const KNOW = `${ROOT}/.project/knowledge`;
-const shim = fileURLToPath(new URL("./graphify.mts", import.meta.url));
+const shim = urlPath(new URL("./graphify.mts", import.meta.url));
 const deps = createTestDeps();
 
 interface Fake {
@@ -136,6 +135,19 @@ test("warnings only: broken link and orphan give exit 0 and OK WITH WARNINGS", (
   assert.match(text, /Graph status: OK WITH WARNINGS \(2\)\n/);
 });
 
+test("entity entries in entities/ match their folder; a mismatched type still warns", () => {
+  const f = fake({
+    [`${KNOW}/entities/acme.md`]: "---\nid: acme\ntype: entity\ntags: [t]\nrelated: [d]\n---\n# Acme\n",
+    [`${KNOW}/decisions/d.md`]: "---\nid: d\ntype: decision\ntags: [t]\nrelated: [acme]\n---\n# D\n",
+    [`${KNOW}/patterns/p.md`]: "---\nid: p\ntype: entity\ntags: [t]\nrelated: [d]\n---\n# P\n",
+  });
+  const code = main(["--check"], f.deps);
+  const text = f.out.join("");
+  assert.equal(code, 0);
+  assert.doesNotMatch(text, /entities\/acme\.md: frontmatter type/);
+  assert.match(text, /patterns\/p\.md: frontmatter type "entity" doesn't match its folder "patterns"/);
+});
+
 test("missing frontmatter id falls back to the filename with a warning", () => {
   const f = fake({ [`${KNOW}/issues/no-id.md`]: "---\ntags: [x]\n---\n# No id\n" });
   assert.equal(main(["--json", "--check"], f.deps), 0);
@@ -204,11 +216,11 @@ test("graphify failure and a missing uv are reported on stderr with exit 1", () 
   assert.match(broken.err.join(""), /`graphify update` failed \(exit 2\)\.\nboom/);
 });
 
-test("setup also installs the git hooks; other subcommands pass through to graphify", () => {
+test("setup installs the workflow's own hooks, never graphify's raw ones; other subcommands pass through to graphify", () => {
   const f = fake(cleanTree());
   assert.equal(main(["setup"], f.deps), 0);
-  assert.deepEqual(f.calls.at(-1)?.args, ["tool", "run", "--from", "graphifyy==0.9.80", "graphify", "hook", "install"]);
-  assert.match(f.out.join(""), /installed graphify git hooks/);
+  assert.equal(f.calls.some((call) => call.args.includes("hook")), false, "graphify hook install rebuilds without the knowledge overlay");
+  assert.match(f.out.join(""), /git hooks not installed \(not a git work tree\)/);
   const q = fake(cleanTree());
   assert.equal(main(["query", "gates"], q.deps), 0);
   assert.deepEqual(q.calls.at(-1)?.args, ["tool", "run", "--from", "graphifyy==0.9.80", "graphify", "query", "gates"]);
@@ -219,6 +231,13 @@ test("overlayKnowledge namespaces an entry id that collides with a graphify node
   const merged = overlayKnowledge({ nodes: [{ id: "a-pattern" }], links: [] }, graph);
   assert.ok(merged.nodes.some((n) => n.id === "knowledge:a-pattern" && n.entry_id === "a-pattern"));
   assert.ok(merged.links.every((l) => merged.nodes.some((n) => n.id === l.source) && merged.nodes.some((n) => n.id === l.target)));
+});
+
+test("overlayKnowledge drops graphify edges whose endpoint node does not exist", () => {
+  const { graph } = buildGraph(ROOT, fake(cleanTree()).deps);
+  const merged = overlayKnowledge({ nodes: [{ id: "page" }], links: [{ source: "page", target: "missing-page" }, { source: "page", target: "page" }] }, graph);
+  assert.ok(!merged.links.some((l) => l.target === "missing-page"));
+  assert.ok(merged.links.some((l) => l.source === "page" && l.target === "page"));
 });
 
 test("--json prints stats, problems, wrote flag and files", () => {
@@ -278,4 +297,91 @@ test("integration: the direct TypeScript command builds the overlay with a stub 
   } finally {
     deps.fs.rmSync(dir, { recursive: true, force: true });
   }
+});
+
+// ---- git hooks against real repositories ------------------------------------------------------------------------
+
+function repo(t: { after(fn: () => void): void }): string {
+  const root = tempFixture(deps, { ".project/knowledge/README.md": "# K\n" });
+  t.after(() => deps.fs.rmSync(root, { recursive: true, force: true }));
+  for (const args of [["init", "-q"], ["config", "user.email", "t@example.com"], ["config", "user.name", "t"], ["config", "commit.gpgsign", "false"]]) {
+    assert.equal(deps.child.runSync("git", args, { cwd: root }).status, 0);
+  }
+  return root;
+}
+const hookFile = (root: string, event: string): string => deps.path.join(root, ".git/hooks", event);
+
+test("installHooks writes both hooks, is idempotent, and replaces a raw graphify block while keeping other hook content", (t) => {
+  const root = repo(t);
+  const raw = `#!/bin/sh\necho keep-before\n${RAW_HOOK_START}\n( graphify raw rebuild )\n${RAW_HOOK_END}\necho keep-after\n`;
+  deps.fs.writeFileSync(hookFile(root, "post-commit"), raw);
+  const first = installHooks(root, deps);
+  assert.deepEqual(first, { installed: ["post-commit", "post-checkout"], replacedRaw: ["post-commit"] });
+  const commit = deps.fs.readFileSync(hookFile(root, "post-commit"));
+  assert.match(commit, /^#!\/bin\/sh\necho keep-before\n# ai-workflow-graphify-start\n/);
+  assert.match(commit, /# ai-workflow-graphify-end\necho keep-after\n$/);
+  assert.doesNotMatch(commit, /graphify raw rebuild|graphify-hook-start/);
+  assert.match(commit, /graphify\.mts update/);
+  assert.equal(deps.fs.readFileSync(hookFile(root, "post-checkout")), `#!/bin/sh\n${hookBlock("post-checkout")}\n`);
+  assert.equal(deps.fs.statSync(hookFile(root, "post-checkout")).mode & 0o111, 0o111);
+  assert.deepEqual(installHooks(root, deps), { installed: ["post-commit", "post-checkout"], replacedRaw: [] });
+  assert.equal(deps.fs.readFileSync(hookFile(root, "post-commit")), commit, "a second install changes nothing");
+});
+
+test("installHooks removes graphify's checkout block too, even beside an existing workflow block", (t) => {
+  const root = repo(t);
+  const text = `#!/bin/sh\n# graphify-checkout-hook-start\n( raw checkout rebuild )\n# graphify-checkout-hook-end\n${hookBlock("post-checkout")}\n`;
+  deps.fs.writeFileSync(hookFile(root, "post-checkout"), text);
+  const result = installHooks(root, deps);
+  assert.deepEqual(result, { installed: ["post-commit", "post-checkout"], replacedRaw: ["post-checkout"] });
+  const after = deps.fs.readFileSync(hookFile(root, "post-checkout"));
+  assert.doesNotMatch(after, /raw checkout rebuild|graphify-checkout-hook/);
+  assert.equal(after.split("# ai-workflow-graphify-start").length - 1, 1, "exactly one workflow block");
+  assert.equal(hasRawHook(after), false);
+});
+
+test("installHooks refuses a symlinked hook and reports a non-repository", (t) => {
+  const root = repo(t);
+  const outside = tempFixture(deps, { "target.sh": "#!/bin/sh\n" });
+  t.after(() => deps.fs.rmSync(outside, { recursive: true, force: true }));
+  deps.fs.symlinkSync(deps.path.join(outside, "target.sh"), hookFile(root, "post-commit"));
+  assert.match((installHooks(root, deps) as { error: string }).error, /post-commit hook is not a regular file/);
+  assert.equal(deps.fs.readFileSync(deps.path.join(outside, "target.sh")), "#!/bin/sh\n");
+  const plain = tempFixture(deps, {});
+  t.after(() => deps.fs.rmSync(plain, { recursive: true, force: true }));
+  assert.deepEqual(installHooks(plain, deps), { error: "not a git work tree" });
+});
+
+test("the installed post-commit hook reruns graphify.mts in the background, but not for a graph-only commit", { skip: process.platform === "win32", timeout: 30000 }, async (t) => {
+  const root = repo(t);
+  // Marker and log live outside the repository so they never become part of a commit.
+  const outside = tempFixture(deps, {});
+  t.after(() => deps.fs.rmSync(outside, { recursive: true, force: true }));
+  const marker = deps.path.join(outside, "rebuilt.txt");
+  // A stand-in for the real script: records each background run.
+  deps.fs.mkdirSync(deps.path.join(root, "ai-framework/scripts"), { recursive: true });
+  deps.fs.writeFileSync(deps.path.join(root, "ai-framework/scripts/graphify.mts"), `import { appendFileSync } from "node:fs";\nappendFileSync(${JSON.stringify(marker)}, process.argv.slice(2).join(" ") + "\\n");\n`);
+  assert.ok(!("error" in installHooks(root, deps)));
+  const env = { ...deps.proc.env, GRAPHIFY_REBUILD_LOG: deps.path.join(outside, "hook.log") };
+  const commit = (file: string): void => {
+    deps.fs.mkdirSync(deps.path.dirname(deps.path.join(root, file)), { recursive: true });
+    deps.fs.writeFileSync(deps.path.join(root, file), `${file}\n`);
+    assert.equal(deps.child.runSync("git", ["add", "-A"], { cwd: root, env }).status, 0);
+    assert.equal(deps.child.runSync("git", ["commit", "-q", "-m", file], { cwd: root, env }).status, 0);
+  };
+  const runs = async (count: number): Promise<number> => {
+    for (let i = 0; i < 100; i++) {
+      const seen = deps.fs.existsSync(marker) ? deps.fs.readFileSync(marker).split("\n").filter(Boolean).length : 0;
+      if (seen >= count) return seen;
+      await deps.clock.sleep(100);
+    }
+    return deps.fs.existsSync(marker) ? deps.fs.readFileSync(marker).split("\n").filter(Boolean).length : 0;
+  };
+  commit("src/a.ts");
+  assert.equal(await runs(1), 1, "a code commit triggers one background rebuild");
+  assert.equal(deps.fs.readFileSync(marker), "update\n");
+  deps.fs.rmSync(marker);
+  commit("graphify-out/graph.json");
+  await deps.clock.sleep(1500);
+  assert.equal(deps.fs.existsSync(marker), false, "a commit of graph outputs only does not rebuild");
 });

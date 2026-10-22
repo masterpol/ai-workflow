@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-role-pools",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#verify",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#upgrade-note",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d1-2026-10-16-s0-baseline-repair-added-not-in-plan",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d2-2026-10-16-pools-hold-distinct-vendor-names-so-a-pool-has-at-most-3-members",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d3-2026-10-16-configmts-unchanged",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d4-2026-10-16-example-toon-edit-landed-inside-agent-model-sweeps-commit-0c2bb35",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d5-2026-10-16-s4-live-spike-skipped",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d6-2026-10-16-opencodecommandsbuildmd-and-codex-need-no-edit",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d7-2026-10-16-review-independence-rule-and-pool-size",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d8-2026-10-16-release-bumped-in-s7-not-at-ship",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d9-2026-10-16-existing-tests-changed-for-the-overlap-guard",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#incident-2026-10-16-full-suite-not-green-at-head-before-any-role-pools-edit",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#incident-2026-10-16-concurrent-session-in-the-same-checkout",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-evidence-policy-carries-pools",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s2-evidence-start-reads-pools",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s5s7-evidence",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-19T03:29:30.820Z"
+}

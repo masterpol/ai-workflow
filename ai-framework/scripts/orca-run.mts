@@ -1,10 +1,12 @@
 import { runDirect } from "./runtime/cli.mts";
 import { NODE_FLAGS } from "./runtime/entry.mts";
 import { collectReport, dispatchScope, dispatchWithRetries } from "./orca-dispatch.mts";
-import type { DispatchOptions, Placement, ScopeSpec } from "./orca-dispatch.mts";
+import type { Assignment, DispatchOptions, Placement, ScopeSpec } from "./orca-dispatch.mts";
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
+import { createLedger, validAuthorizedPaths } from "./orca-ledger.mts";
+import { freeOpencodePort } from "./opencode-service.mts";
 import { decideStart } from "./orca-start.mts";
 import type { CheckSpec, ReconcileAttempt } from "./orca-reconcile.mts";
 import { createNodeDeps } from "./runtime/node.mts";
@@ -221,10 +223,22 @@ const optionalBool = (value: unknown, what: string): boolean | undefined => {
 };
 
 function dispatchInput(input: Json): { base: Omit<DispatchOptions, "attemptId" | "root" | "deps">; attemptId: string; timeoutMs: number; maxRetries?: number } {
-  const value = exactKeys(input, ["coordinator", "vendor", "scope", "attemptId", "timeoutMs"], ["placement", "maxRetries"], "dispatch");
-  const scope = exactKeys(value.scope, ["id", "target", "change", "constraints", "ownership", "acceptance"], [], "scope");
+  const value = exactKeys(input, ["coordinator", "scope", "attemptId", "timeoutMs"], ["vendor", "assign", "placement", "maxRetries"], "dispatch");
+  if ((value.vendor === undefined) === (value.assign === undefined)) throw bad("dispatch");
+  let assign: Assignment | undefined;
+  if (value.assign !== undefined) {
+    const raw = exactKeys(value.assign, ["role", "planIndex"], ["reviewOf", "skip"], "assign");
+    if (raw.role !== "implementation" && raw.role !== "review") throw bad("assign");
+    if (typeof raw.planIndex !== "number" || !Number.isSafeInteger(raw.planIndex) || raw.planIndex < 0) throw bad("assign");
+    if ((raw.role === "review") !== (raw.reviewOf !== undefined)) throw bad("assign");
+    assign = { role: raw.role, planIndex: raw.planIndex, ...(raw.reviewOf !== undefined ? { reviewOf: text(raw.reviewOf, "assign") } : {}),
+      ...(raw.skip !== undefined ? { skip: textList(raw.skip, "assign") } : {}) };
+  }
+  const scope = exactKeys(value.scope, ["id", "target", "change", "constraints", "ownership", "acceptance", "authorizedPaths"], [], "scope");
+  if (!validAuthorizedPaths(scope.authorizedPaths)) throw bad("authorizedPaths");
   const spec: ScopeSpec = { id: text(scope.id, "scope"), target: text(scope.target, "scope"), change: text(scope.change, "scope"),
-    constraints: textOrList(scope.constraints, "scope"), ownership: textOrList(scope.ownership, "scope"), acceptance: text(scope.acceptance, "scope") };
+    constraints: textOrList(scope.constraints, "scope"), ownership: textOrList(scope.ownership, "scope"), acceptance: text(scope.acceptance, "scope"),
+    authorizedPaths: [...scope.authorizedPaths] };
   let placement: Placement | undefined;
   if (value.placement !== undefined) {
     if (!isPlain(value.placement) || !Object.values(value.placement).every((item) => typeof item === "string")) throw bad("placement");
@@ -235,7 +249,7 @@ function dispatchInput(input: Json): { base: Omit<DispatchOptions, "attemptId" |
     if (typeof value.maxRetries !== "number" || !Number.isInteger(value.maxRetries) || value.maxRetries < 0 || value.maxRetries > 5) throw bad("maxRetries");
     maxRetries = value.maxRetries;
   }
-  return { base: { coordinator: text(value.coordinator, "coordinator"), vendor: text(value.vendor, "vendor"), scope: spec, deadlineMs: 0, ...(placement ? { placement } : {}) },
+  return { base: { coordinator: text(value.coordinator, "coordinator"), ...(assign ? { assign } : { vendor: text(value.vendor, "vendor") }), scope: spec, deadlineMs: 0, ...(placement ? { placement } : {}) },
     attemptId: text(value.attemptId, "attemptId"), timeoutMs: timeoutOf(value.timeoutMs), ...(maxRetries !== undefined ? { maxRetries } : {}) };
 }
 
@@ -284,6 +298,27 @@ function status(root: string, parsed: Parsed, deps: RuntimeDeps): Json {
     }])) };
 }
 
+const LIVE_STATES = ["claimed", "launched", "unknown-liveness"];
+/**
+ * Free OpenCode's managed server port before the first OpenCode worker: a stale `opencode serve --service` from an
+ * earlier session makes a new worker fail at agent readiness. Runs only for vendor `opencode`, with the switch on,
+ * an eligible policy naming that worker, and no OpenCode attempt that may still own the server. An unreadable
+ * ledger slot counts as such an attempt, so nothing is signalled. Returns a refusal when the port stays held.
+ */
+async function prepareOpencode(root: string, coordinator: string, vendor: string, deps: RuntimeDeps): Promise<Json | undefined> {
+  if (vendor !== "opencode" || !orcaMultiAgentEnabled(root, deps)) return undefined;
+  const policy = policyReport(root, coordinator, deps) as Json & { eligible?: boolean; workers?: string[] };
+  if (policy.eligible !== true || !Array.isArray(policy.workers) || !policy.workers.includes("opencode")) return undefined;
+  const listed = createLedger(root, deps).list();
+  if (listed.status === "refused") return undefined;
+  if (listed.entries.some(({ result }) => result.status !== "ok"
+    || (result.record.vendor === "opencode" && LIVE_STATES.includes(result.record.state)))) return undefined;
+  const port = await freeOpencodePort(deps);
+  if (port.status !== "held" && port.status !== "foreign") return undefined;
+  return { route: "blocked", reason: "opencode-port-held", humanAction: "stop the program holding OpenCode's service port, then dispatch again",
+    opencodePort: { status: port.status, remaining: port.remaining.map((item) => ({ pid: item.pid, port: item.port })) } };
+}
+
 async function execute(parsed: Parsed, deps: RuntimeDeps): Promise<{ output: Json; exit: number }> {
   const root = resolveRoot(parsed.root, deps);
   if (parsed.command === "start") {
@@ -301,6 +336,11 @@ async function execute(parsed: Parsed, deps: RuntimeDeps): Promise<{ output: Jso
   if (parsed.command === "dispatch") {
     const { base, attemptId, timeoutMs, maxRetries } = dispatchInput(input);
     const options = { ...base, root, deps, deadlineMs: deadlineFor(timeoutMs) };
+    // With a pool assignment the worker is not known until the ledger is read; free OpenCode's port only when that role's pool can pick it.
+    const pools = policyReport(root, base.coordinator, deps).pools;
+    const pool = base.assign && isPlain(pools) ? pools[base.assign.role] : undefined;
+    const refused = await prepareOpencode(root, base.coordinator, base.vendor ?? (Array.isArray(pool) && pool.includes("opencode") ? "opencode" : ""), deps);
+    if (refused) return { output: refused, exit: exitCodeFor(parsed.command, refused) };
     output = { ...(maxRetries !== undefined ? await dispatchWithRetries({ ...options, baseAttemptId: attemptId, maxRetries }) : await dispatchScope({ ...options, attemptId })) };
   } else if (parsed.command === "collect") {
     const { attemptKey, message } = collectInput(input);

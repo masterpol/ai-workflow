@@ -3,7 +3,9 @@
 **Date**: YYYY-MM-DD
 **Feature**: [Feature being deployed]
 **Risk Level**: LOW | MEDIUM | HIGH
-**Author**: [Name]
+**Responsible role**: [Role]
+**Deployment authorization**: [Scope and source]
+**Observation period**: [Period justified by the affected behavior]
 
 ---
 
@@ -24,19 +26,19 @@
 
 ## Rollback Triggers
 
-Initiate rollback if ANY of these occur within 30 minutes of deployment:
-- [ ] Error rate on affected endpoints exceeds 5%
+Define measurable triggers before deployment. Replace these examples with thresholds justified by the scope:
+- [ ] Error rate on affected endpoints exceeds [threshold] during [interval]
 - [ ] User-facing functionality is broken (manual check)
 - [ ] Console errors related to the new feature
 - [ ] Data integrity issues detected
-- [ ] Performance degradation > 2x on affected queries
+- [ ] Performance on affected queries exceeds [latency or degradation threshold]
 
 ## Rollback Steps
 
 ### If feature-flagged:
 1. Set `ENABLE_[FEATURE]` to `false` in environment
 2. Verify feature is disabled
-3. No code rollback needed — investigate at leisure
+3. Verify the flag stops the affected behavior and assess any data or background work requiring recovery
 
 ### If schema change involved:
 1. **Check**: Is the schema change backward-compatible?
@@ -47,18 +49,18 @@ Initiate rollback if ANY of these occur within 30 minutes of deployment:
 1. `git revert [commit-hash]` (do NOT force-push)
 2. Deploy the revert commit
 3. Verify affected pages/endpoints work
-4. Notify team in Slack
+4. Use the agreed communication channel when notification is authorized
 
 ### Schema rollback (backend):
 1. **WARNING**: Some backend schema changes (e.g. adding required fields) are NOT safely reversible
-2. If new fields are optional: safe to revert code (fields ignored)
-3. If new tables: safe to revert code (tables stay empty, can clean up later)
-4. If fields changed from optional to required: CANNOT revert without data migration
+2. Inspect compatibility with the previous application version, existing records, constraints, and writes made after deployment
+3. Preserve new data; added tables or optional fields are not by themselves proof that rollback is safe
+4. Document the required forward fix, backward migration, or recovery procedure before running it
 
 ## Post-Rollback
 
 - [ ] Create incident report
-- [ ] Capture the lesson in the pitch's `log.md` so `/ship` or `/cooldown` extracts it
+- [ ] Record the incident for per-pitch extraction during `/ship` and recurring review during `/cooldown`
 - [ ] Update knowledge/issues/ with root cause
 - [ ] Schedule fix with proper testing
 
@@ -66,13 +68,13 @@ Initiate rollback if ANY of these occur within 30 minutes of deployment:
 
 | Audience | Channel | Message |
 |----------|---------|---------|
-| Team | Slack | "Rolling back [feature] due to [reason]. Investigating." |
+| Team | [Agreed channel] | "Rolling back [feature] due to [reason]. Investigating." |
 | Users | (if visible) | [Status page update or in-app notice] |
 
 ---
 
 ## Notes
 
-- Rollback window: 30 minutes from deployment
-- After 30 minutes with no issues: rollback plan is retired
-- Keep this document until the feature is stable for 1 week
+- Retain this plan with the deployment record.
+- Define when observation can end and who confirms stability.
+- A quiet initial window does not establish that delayed jobs, billing, or migrations are safe.

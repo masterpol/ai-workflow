@@ -12,7 +12,7 @@ description: Scan project and generate context docs (product, architecture, stac
 You are running the **SETUP** phase. This command scans the current project and generates (or updates) the framework's project-specific documents.
 
 ## Your Goal
-Read the project's source files to understand what exists, generate the context documents and `AGENTS.md` project specifics, then present findings for confirmation before writing. `CLAUDE.md` is **required**, not optional: Claude Code auto-loads it every session, so it must end this phase as a full, self-contained mirror of `AGENTS.md` (not the bootstrap stub the bundle ships in Step 1 of `SETUP.md`, and not a bare pointer) — that is what lets the workflow make the best use of itself.
+Read the project's source files to understand what exists, generate the context documents and `AGENTS.md` project specifics, then present findings for confirmation before writing. `CLAUDE.md` is **required**, not optional: Claude Code auto-loads it every session, so it must end this phase as either a full, self-contained mirror of `AGENTS.md` or an existing valid one-line `@AGENTS.md` import (keep a valid import as it is; never replace it with a mirror) (not the bootstrap stub the bundle ships in Step 1 of `SETUP.md`, and not a bare pointer) — that is what lets the workflow make the best use of itself.
 
 ## Update Status (Before Starting)
 
@@ -133,8 +133,9 @@ Extend the existing cross-harness entry file with:
 - Project essentials (package manager, locale, deployment, etc.)
 
 ### `CLAUDE.md` (required project root mirror)
-Replace the bootstrap stub (or bare pointer, if one exists from an older run) with a full,
-self-contained mirror: the pipeline table, subagent index, rules index, harness/model routing
+If `CLAUDE.md` is already a valid `@AGENTS.md` import (sibling regular file, accepted by `setup-validator`), keep it
+unchanged and update only `AGENTS.md`. Otherwise replace the bootstrap stub (or a bare text pointer from an older run)
+with a full, self-contained mirror: the pipeline table, subagent index, rules index, harness/model routing
 pointer, the confirmation-gate rule, guardrails, and this project's specifics from the scan —
 everything `AGENTS.md` has, restated so Claude Code never needs a hop to `AGENTS.md` for phase-1
 context. Keep the two in sync; if a future edit changes one, note in the summary that the other
@@ -223,7 +224,7 @@ Before writing any files, present a summary:
 
 ### Files to Generate
 1. AGENTS.md project specifics (project root)
-2. CLAUDE.md full mirror (project root, required)
+2. CLAUDE.md (project root, required): a full mirror, or keep an existing valid `@AGENTS.md` import unchanged
 3. .project/context/product.md
 4. .project/context/architecture.md
 5. .project/context/stack.md
@@ -265,7 +266,8 @@ Graphify runs through `uv`: check `uv --version` first. If uv is missing, tell t
 (https://docs.astral.sh/uv/) — do not install it yourself — and continue with
 `node ai-framework/scripts/graphify.mts --check` only. Otherwise run
 `node ai-framework/scripts/graphify.mts setup` from the project root. It needs no separate approval for the
-derived files, but it also installs graphify's git hooks (post-commit/post-checkout rebuild), so state that
+derived files, but it also installs post-commit/post-checkout git hooks that rebuild the graph through
+`graphify.mts` in the background (replacing a raw `graphify hook install` block), so state that
 in the Step 5 approval. On a project that already has `.project/knowledge/graph.json` (older bundle), the same
 command migrates it into `graphify-out/graph.json` and removes the legacy file once it is covered. It builds:
 - `graphify-out/graph.json` — the project graph (code, docs and the `.project/knowledge/{decisions,patterns,entities,issues}/`

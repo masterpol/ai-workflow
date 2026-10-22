@@ -31,7 +31,7 @@ Not for: AI-prompt scopes, security-path changes, or anything the escalation tes
 2. **Knowledge gate, graph-only.** Look up `graphify-out/graph.json` (`tagIndex`, `related` edges; rebuild with `node ai-framework/scripts/graphify.mts` if missing or stale). Read at most 3 matched entries plus any matching `ai-framework/rules/` or `.project/rules/*.md` file. Surface 1-3 hits inline. No bulk reads.
 3. **Escalation test (mechanical, before framing or any pitch or knowledge write; re-run after every Revise or Back).** Stop lite, say which trigger fired, and hand to full `/shape` if ANY holds:
    - projected >2 files or >100 LOC;
-   - touches prompt files, `lib/ai/prompts/`, or any LLM call site, however the project lays them out (the golden-eval hard gate lives in `/shape`);
+   - is an AI-prompt scope: changes model behavior (prompt files, model/parameters, tools or context given to a model, model output handling, or any LLM call site), however the project lays them out, e.g. `lib/ai/prompts/` (definition in `ai-framework/workflow/phases/0-shape.md`; the golden-eval hard gate lives in `/shape`);
    - touches a path covered by `ai-framework/rules/security.md`;
    - the projected file set overlaps another active pitch's `plan.md` or `pitch.md` files.
 

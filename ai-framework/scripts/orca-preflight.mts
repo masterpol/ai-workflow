@@ -1,13 +1,42 @@
+import { loadConfig } from "./runtime/config.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { report as policyReport } from "./orca-policy.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
+import { parseRange, parseVersion, satisfies } from "./runtime/semver-range.mts";
+import type { ParsedRange } from "./runtime/semver-range.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 export const MAX_OUTPUT_BYTES = 256 * 1024;
 export const CALL_TIMEOUT_MS = 5000;
 export const TOTAL_TIMEOUT_MS = 20000;
-export const SUPPORTED_VERSION = "1.4.223";
+/** Minimum supported Orca runtime; any later x.y.z release is accepted. */
+export const SUPPORTED_VERSION = "1.4.224";
+/** Range used when `integrations.orca.engine` is absent or empty: the floor above and any later release. */
+export const DEFAULT_ENGINE_RANGE = `>=${SUPPORTED_VERSION}`;
+const DEFAULT_RANGE = (parseRange(DEFAULT_ENGINE_RANGE) as { ok: true; range: ParsedRange }).range;
+export type EngineRange = { text: string; range: ParsedRange } | { invalid: true; text: string };
+
+/**
+ * The accepted Orca versions for `root`: `integrations.orca.engine` from ai-workflow.toon, else the default floor.
+ * An engine value that does not parse is `invalid`, never a silent fallback. A missing or refused config keeps the
+ * default; the policy read reports config problems separately.
+ */
+export function engineRange(root: string, deps: RuntimeDeps = defaultDeps()): EngineRange {
+  let text = "";
+  try {
+    const loaded = loadConfig(root, deps);
+    if (!("status" in loaded)) text = loaded.model.integrations.orca.engine.trim();
+  } catch { /* An unreadable config keeps the default floor. */ }
+  if (!text) return { text: DEFAULT_ENGINE_RANGE, range: DEFAULT_RANGE };
+  const parsed = parseRange(text);
+  return parsed.ok ? { text, range: parsed.range } : { invalid: true, text };
+}
+
+/** True for a strict `x.y.z` version (no leading zeros, at most six digits per part) inside `range` (default: SUPPORTED_VERSION or later). */
+export function isSupportedVersion(version: unknown, range: ParsedRange = DEFAULT_RANGE): version is string {
+  return satisfies(version, range);
+}
 const CALLS = Object.freeze({
   cliGuide: ["skills", "get", "orca-cli", "--json"],
   orchestrationGuide: ["skills", "get", "orchestration", "--json"],
@@ -69,19 +98,14 @@ export function executablePresent(command: string, env: Env, platform: string, d
   return false;
 }
 
-/**
- * Default probe runner over deps.child.runSync. The shared adapter has no maxBuffer, killSignal or error
- * code, so a timeout is recognised by a killed child (status null, signal set) after the full timeout, and
- * oversized output is caught by the byte checks in readReceipt.
- */
+/** Keep the probe budget and failure codes intact across the runtime adapter. */
 function defaultRun(deps: RuntimeDeps): Run {
   return (command, args, options) => {
-    const started = deps.clock.perfNowMs();
-    const result = deps.child.runSync(command, args, { cwd: options.cwd, env: options.env, timeoutMs: options.timeout });
-    if (result.status === null && result.signal && deps.clock.perfNowMs() - started >= options.timeout) {
-      return { ...result, error: { code: "ETIMEDOUT" } };
-    }
-    return result;
+    const result = deps.child.runSync(command, args, {
+      cwd: options.cwd, env: options.env, shell: options.shell, encoding: options.encoding,
+      timeoutMs: options.timeout, maxBufferBytes: options.maxBuffer, killSignal: options.killSignal,
+    });
+    return result.errorCode ? { ...result, error: { code: result.errorCode } } : result;
   };
 }
 
@@ -109,9 +133,9 @@ function verifyGuide(value: unknown, name: string, markers: string[]): boolean {
     && markers.every((marker) => (guide.markdown as string).includes(marker));
 }
 
-interface Inspection { reason: string; session?: string; capabilities?: string; version?: string }
+interface Inspection { reason: string; session?: string; capabilities?: string; version?: string; found?: string }
 
-function inspectRuntime(command: string, context: Context): Inspection {
+function inspectRuntime(command: string, context: Context, range: ParsedRange): Inspection {
   const cli = readReceipt(command, CALLS.cliGuide, context);
   if (cli.reason) return { reason: cli.reason };
   if (!verifyGuide(cli.value, "orca-cli", ["worktree current", "terminal"])) return { reason: "cli-guide-unsupported" };
@@ -127,13 +151,16 @@ function inspectRuntime(command: string, context: Context): Inspection {
   } | null | undefined;
   if (!result || result.target?.kind !== "local") return { reason: "runtime-unverified" };
   if (result.runtime?.reachable !== true || result.runtime.state !== "ready") return { reason: "runtime-unreachable" };
-  if (result.runtime.appVersion !== SUPPORTED_VERSION) return { reason: "runtime-version-unsupported" };
+  if (!isSupportedVersion(result.runtime.appVersion, range)) {
+    // Only a strict x.y.z is echoed; anything else the runtime reports stays out of diagnostics.
+    return { reason: "runtime-version-unsupported", ...(parseVersion(result.runtime.appVersion) ? { found: result.runtime.appVersion as string } : {}) };
+  }
   if (result.caller?.live !== true || typeof result.caller.orcaSessionId !== "string"
     || !context.env.ORCA_AGENT_SESSION_ID || result.caller.orcaSessionId !== context.env.ORCA_AGENT_SESSION_ID) return { reason: "caller-unverified" };
   // The pinned status contract does not advertise an enabled orchestration field or validate
   // all worker capabilities. A matching live caller is evidence, never launch authority.
   return { reason: "orchestration-unverified", session: "verified", capabilities: "documented",
-    version: SUPPORTED_VERSION };
+    version: result.runtime.appVersion };
 }
 
 export function report(root: string, vendor: string, options: ReportOptions = {}, deps: RuntimeDeps = defaultDeps()): Json {
@@ -159,8 +186,10 @@ export function report(root: string, vendor: string, options: ReportOptions = {}
   const now = options.now || (() => deps.clock.perfNowMs());
   const context: Context = { root: deps.fs.realpathSync(root), env: { ...env, PATH: absolutePathEntries(env, deps).join(deps.path.delimiter) },
     run: options.run || defaultRun(deps), now, started: now() };
-  const runtime = inspectRuntime(command, context);
-  return { ...result, reason: runtime.reason, runtime: runtime.session ? "reachable" : "unverified",
+  const engine = engineRange(root, deps);
+  if ("invalid" in engine) return { ...result, reason: "engine-range-invalid" };
+  const runtime = inspectRuntime(command, context, engine.range);
+  return { ...result, reason: runtime.reason, engine: engine.text, ...(runtime.found ? { foundVersion: runtime.found } : {}), runtime: runtime.session ? "reachable" : "unverified",
     session: runtime.session || "unverified", capabilities: runtime.capabilities || "unverified",
     ...(runtime.version ? { runtimeVersion: runtime.version } : {}) };
 }

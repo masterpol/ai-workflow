@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "unified-toon-config",
+  "sourceRoot": ".project/pitches/unified-toon-config",
+  "archivedAt": "2026-10-19T03:30:26.237Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "6f28382fd56af77260b117da4463c3b74beb70515ba1f8f03f151ea531fcb45a",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "bab00815eb36e03df81b468bbb8f2543855471f9cd162849a7faf8f22ae6109a",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "eefa7c3191f893adc9fd35cb83b6f92c00978f38d3e4c4fe9f7e72b335be93b9",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "e86263c8e0bd6cb0732d29671e83c307dc1dd34486f2cd71a12a099ba2579154",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "8f618a8f47d451055d45320f2dc00b609a2f7a0597fcd0012f7ab211affc442b",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "bb0d2f6f16fae995544101df16526b5e62b442ff61afb9e0567102d948163174",
+      "mode": 420
+    }
+  }
+}

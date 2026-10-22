@@ -72,6 +72,60 @@ function migrateHooks(value: unknown, sourceRoot: string, deps: RuntimeDeps): { 
   return { changed, manual };
 }
 
+const WORKFLOW_HOOK = /ai-framework\/hooks\/scripts\/([\w-]+)\.mts\b/g;
+const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === "object" && !Array.isArray(value);
+
+/** Workflow hook scripts a hook group runs, by file stem (`orca-start-hook`), read from its command strings. */
+function groupScripts(group: unknown): Set<string> {
+  const names = new Set<string>();
+  const visit = (item: unknown): void => {
+    if (Array.isArray(item)) { item.forEach(visit); return; }
+    if (!isRecord(item)) return;
+    if (typeof item.command === "string") for (const match of item.command.matchAll(WORKFLOW_HOOK)) names.add(match[1]);
+    Object.values(item).forEach(visit);
+  };
+  visit(group);
+  return names;
+}
+
+/**
+ * Adds the bundle's workflow hook groups that the instance file does not register yet (an older install has no
+ * Orca start hooks, for example). A group counts as present when any instance group of the same event and matcher
+ * already runs one of its workflow scripts, so a customized or wrapped command is never duplicated. Existing
+ * entries are never changed or removed; groups that run no workflow script are not copied.
+ */
+function addMissingHooks(instance: Record<string, unknown>, source: unknown): boolean {
+  if (!isRecord(source) || !isRecord(source.hooks)) return false;
+  if (instance.hooks === undefined) instance.hooks = {};
+  if (!isRecord(instance.hooks)) throw new Error("invalid hook configuration");
+  const hooks = instance.hooks;
+  let changed = false;
+  for (const [event, groups] of Object.entries(source.hooks)) {
+    if (!Array.isArray(groups)) continue;
+    if (hooks[event] !== undefined && !Array.isArray(hooks[event])) throw new Error("invalid hook configuration");
+    const present = (hooks[event] ?? []) as unknown[];
+    for (const group of groups) {
+      const scripts = groupScripts(group);
+      if (!scripts.size) continue;
+      const matcher = isRecord(group) ? group.matcher : undefined;
+      const registered = present.some((existing) => (isRecord(existing) ? existing.matcher : undefined) === matcher && [...groupScripts(existing)].some((name) => scripts.has(name)));
+      if (registered) continue;
+      hooks[event] = [...present, structuredClone(group)];
+      present.push(group);
+      changed = true;
+    }
+  }
+  return changed;
+}
+
+/** The bundle's own copy of an instance hook file; absent means nothing to add. */
+function sourceHooks(source: string, relative: string, deps: RuntimeDeps): unknown {
+  let file: string;
+  try { file = regular(source, relative, deps); }
+  catch (error) { if (error && typeof error === "object" && "code" in error && error.code === "ENOENT") return undefined; throw error; }
+  return JSON.parse(deps.fs.readFileSync(file));
+}
+
 /** Return paths/statuses only: settings content and command values never enter sync output. */
 export function migrateInstanceEntries(root: string, sourceRoot: string, apply: boolean, deps: RuntimeDeps): EntryMigration[] {
   const project = deps.fs.realpathSync(root);
@@ -94,7 +148,8 @@ export function migrateInstanceEntries(root: string, sourceRoot: string, apply: 
         if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("invalid hook configuration");
         const migration = migrateHooks((parsed as Record<string, unknown>).hooks, source, deps);
         if (migration.manual) result.push({ path: relative, status: "manual", reason: "custom hook command or missing replacement; merge that hook manually" });
-        if (!migration.changed) continue;
+        const added = addMissingHooks(parsed as Record<string, unknown>, sourceHooks(source, relative, deps));
+        if (!migration.changed && !added) continue;
         after = `${JSON.stringify(parsed, null, 2)}\n`;
       } else after = replace(before, source, deps);
       if (after !== before) changes.push({ path: relative, status: "ready", before, after, mode: deps.fs.statSync(file).mode & 0o777 });

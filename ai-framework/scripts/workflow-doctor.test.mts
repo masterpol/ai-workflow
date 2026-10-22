@@ -1,21 +1,25 @@
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
-import { createTestDeps } from "./runtime/test-helpers.mts";
+import { createTestDeps, urlPath } from "./runtime/test-helpers.mts";
 import { main } from "./workflow-doctor.mts";
+import { hookBlock } from "./graphify.mts";
+import { toonFixtureText } from "./runtime/test-helpers.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import type { TestContext } from "node:test";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 
 interface Check { status: string; name: string; detail: string }
 function fixture(t: TestContext): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "workflow-doctor-injection-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   fs.mkdirSync(path.join(root, "ai-framework/templates/project"), { recursive: true });
+  write(root, ".gitignore", ".project/metrics/\n.project/evals/runs/\n.project/evals/.cache/\n");
   return root;
 }
 function write(root: string, name: string, content: string): void {
@@ -38,6 +42,33 @@ function injected(root: string): { deps: RuntimeDeps; output: string[]; errors: 
   };
   return { deps, output, errors, calls };
 }
+/** Supply names NTFS cannot create while exercising the real scanner, descriptor reader, and sanitizer. */
+function injectBoundaryFile(deps: RuntimeDeps, root: string, name: string, content: string, symbolicLink = false): { reads: () => number } {
+  const directory = path.join(root, "ai-framework"), file = path.join(directory, name);
+  const backing = path.join(root, "outside", "virtual-source.mts");
+  write(root, "outside/virtual-source.mts", content);
+  const readdir = deps.fs.readdirEntriesSync, lstat = deps.fs.lstatSync;
+  const open = deps.fs.openSync, read = deps.fs.readSync, close = deps.fs.closeSync, exists = deps.fs.existsSync;
+  const base = lstat(backing), descriptors = new Set<number>();
+  let reads = 0;
+  const flags = { isDirectory: () => false, isFile: () => !symbolicLink, isSymbolicLink: () => symbolicLink };
+  deps.fs.readdirEntriesSync = dir => dir === directory
+    ? [...readdir(dir), { name, ...flags }] : readdir(dir);
+  deps.fs.lstatSync = candidate => candidate === file ? { ...base, ...flags } : lstat(candidate);
+  deps.fs.existsSync = candidate => candidate === file || exists(candidate);
+  deps.fs.openSync = (candidate, openFlags, mode) => {
+    const fd = open(candidate === file ? backing : candidate, openFlags, mode);
+    if (candidate === file) descriptors.add(fd);
+    return fd;
+  };
+  deps.fs.readSync = (fd, buffer, offset, length, position) => {
+    if (descriptors.has(fd)) reads++;
+    return read(fd, buffer, offset, length, position);
+  };
+  deps.fs.closeSync = fd => { descriptors.delete(fd); close(fd); };
+  return { reads: () => reads };
+}
+
 function checks(output: string[]): Check[] { return JSON.parse(output.join("")).results as Check[]; }
 
 test("runtime boundary rejects production imports with file, line and dependency guidance", async (t) => {
@@ -91,7 +122,7 @@ for (const [label, before, after, guard] of [
 ]) {
   test(`scratch mutant proves ${label} guard`, () => {
     const deps = createTestDeps();
-    const project = deps.path.resolve(decodeURIComponent(new URL("../..", import.meta.url).pathname));
+    const project = urlPath(new URL("../..", import.meta.url));
     const scratch = deps.fs.realpathSync(deps.fs.mkdtempSync(deps.path.join(deps.os.tmpdir(), "runtime-boundary-mutant-")));
     try {
       const copied = new Set<string>();
@@ -184,7 +215,7 @@ test("doctor checks TypeScript syntax with Bun instead of skipping it", { skip: 
 test("doctor reports what ai_workflow_env.json would set and flags a file that would be ignored", async (t) => {
   const root = fixture(t);
   const cases: Array<[string | null, string, RegExp]> = [
-    [null, "info", /absent; defaults: runner node, Orca off/],
+    [null, "info", /absent; defaults: runner node, Orca off \(copy ai-framework\/templates\/ai-workflow\.example\.toon/],
     [JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }), "pass", /runner bun; Orca on/],
     [JSON.stringify({ AI_WORKFLOW_RUNNER: "bun", OPENAI_API_KEY: "x" }), "warn", /ignored keys: OPENAI_API_KEY/],
     [JSON.stringify({ AI_WORKFLOW_RUNNER: "deno" }), "fail", /must be "node" or "bun"/],
@@ -204,6 +235,28 @@ test("doctor reports what ai_workflow_env.json would set and flags a file that w
   }
 });
 
+test("doctor Workflow settings: a present ai-workflow.toon governs (TOON values, no legacy advice); a refused one fails", async (t) => {
+  const root = fixture(t);
+  write(root, "ai_workflow_env.json", JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" })); // must not be consulted
+  write(root, "ai-workflow.toon", toonFixtureText());
+  let capture = injected(root);
+  await main(["--json"], capture.deps);
+  let item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+  assert.deepEqual([item?.status, /governed by ai-workflow\.toon: runner node; Orca off/.test(item?.detail ?? "")], ["pass", true], item?.detail);
+  write(root, "ai-workflow.toon", toonFixtureText().replace("runner: node", "runner: bun"));
+  capture = injected(root);
+  await main(["--json"], capture.deps);
+  item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+  assert.match(item?.detail ?? "", /runner bun/);
+  fs.rmSync(path.join(root, "ai-workflow.toon"));
+  fs.symlinkSync(path.join(root, "nowhere"), path.join(root, "ai-workflow.toon"));
+  capture = injected(root);
+  await main(["--json"], capture.deps);
+  item = checks(capture.output).find((entry) => entry.name === "Workflow settings");
+  assert.equal(item?.status, "fail");
+  assert.doesNotMatch(item?.detail ?? "", /ai_workflow_env\.example\.json/);
+});
+
 test("fix restores missing scaffold files while retaining existing instance data", async (t) => {
   const root = fixture(t);
   write(root, "ai-framework/templates/project/context/product.md", "template\n");
@@ -221,11 +274,22 @@ test("fix refuses a scaffold repair through a symbolic-link ancestor", async (t)
   write(root, "ai-framework/templates/project/rules/README.md", "new rules\n");
   fs.mkdirSync(path.join(root,".project"));
   fs.mkdirSync(path.join(root,"outside"));
-  fs.symlinkSync(path.join(root,"outside"),path.join(root,".project/rules"));
+  fs.symlinkSync(path.join(root,"outside"),path.join(root,".project/rules"), process.platform === "win32" ? "junction" : "dir");
   const capture = injected(root);
   await main(["--json", "--fix"], capture.deps);
   assert.equal(fs.existsSync(path.join(root,"outside/README.md")),false);
   assert.ok(checks(capture.output).some((item) => item.status === "fail" && /symbolic links/.test(item.detail)));
+});
+
+test("doctor flags a .gitignore that misses eval runs or cache", async (t) => {
+  const root = fixture(t);
+  write(root, ".gitignore", ".project/metrics/\n");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const item = checks(capture.output).find((entry) => entry.name === ".gitignore (eval data)");
+  assert.equal(item?.status, "fail");
+  assert.match(item?.detail ?? "", /\.project\/evals\/runs\//);
+  assert.match(item?.detail ?? "", /\.project\/evals\/\.cache\//);
 });
 
 test("runtime boundary fails unparsed production but warns for unparsed tests", async (t) => {
@@ -253,12 +317,14 @@ test("runtime boundary anchors test classification", async (t) => {
 });
 test("runtime boundary sanitizes printed control characters", async (t) => {
   const root = fixture(t);
-  write(root, "ai-framework/forged\n\x1b[32mPASS.mts", "import 'node:fs';");
   const capture = injected(root);
+  const source = injectBoundaryFile(capture.deps, root, "forged\n\x1b[32mPASS.mts", "import 'node:fs';");
   await main(["--json"], capture.deps);
   const detail = checks(capture.output).filter(item => item.name === "Runtime boundary").map(item => item.detail).join("");
   assert.doesNotMatch(detail, /[\x00-\x1f\x7f-\x9f]/);
   assert.match(detail, /forged\[32mPASS/);
+  assert.match(detail, /imports node:fs; use deps\.fs/);
+  assert.ok(source.reads() > 0, "the scanner must inspect the virtual source");
 });
 test("runtime boundary enforces depth cap", async (t) => {
   const root = fixture(t);
@@ -286,7 +352,7 @@ test("runtime boundary enforces visited cap", async (t) => {
 test("runtime boundary refuses directory symlinks", async (t) => {
   const root = fixture(t);
   write(root, "outside/hidden.mts", "import 'node:fs';");
-  fs.symlinkSync(path.join(root, "outside"), path.join(root, ".opencode"));
+  fs.symlinkSync(path.join(root, "outside"), path.join(root, ".opencode"), process.platform === "win32" ? "junction" : "dir");
   const capture = injected(root);
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some(item => item.name === "Runtime boundary" && item.status === "fail" && /\.opencode:1 directory symlink refused/.test(item.detail)));
@@ -294,10 +360,14 @@ test("runtime boundary refuses directory symlinks", async (t) => {
 test("runtime boundary refuses child symlinks", async (t) => {
   const root = fixture(t);
   write(root, "outside/hidden.mts", "export const ok = 1;");
-  fs.symlinkSync(path.join(root, "outside/hidden.mts"), path.join(root, "ai-framework/link.mts"));
   const capture = injected(root);
+  // File symlinks require elevated privilege or Developer Mode on Windows.
+  const source = process.platform === "win32"
+    ? injectBoundaryFile(capture.deps, root, "link.mts", "export const ok = 1;", true) : undefined;
+  if (!source) fs.symlinkSync(path.join(root, "outside/hidden.mts"), path.join(root, "ai-framework/link.mts"), "file");
   await main(["--json"], capture.deps);
   assert.ok(checks(capture.output).some(item => item.name === "Runtime boundary" && item.status === "fail" && /link.mts:1 child symlink refused/.test(item.detail)));
+  if (source) assert.equal(source.reads(), 0, "a refused symbolic link must never be read");
 });
 test("runtime boundary filters source extensions", async (t) => {
   const root = fixture(t);
@@ -318,13 +388,15 @@ test("runtime boundary fails unreadable production paths", async (t) => {
 test("S5 strips bidi and controls in JSON and plain output", async (t) => {
   const root = fixture(t);
   const controls = "\u0001\u007f\u0085\u200e\u200f\u202a\u202b\u202c\u202d\u202e\u2066\u2067\u2068\u2069";
-  write(root, "ai-framework/forged" + controls + ".mts", "import 'node:fs';");
   for (const args of [["--json"], ["--no-color"]]) {
     const capture = injected(root);
+    const source = injectBoundaryFile(capture.deps, root, "forged" + controls + ".mts", "import 'node:fs';");
     await main(args, capture.deps);
     const text = args.includes("--json") ? checks(capture.output).map(c => c.detail).join("") : capture.output.join("");
     assert.doesNotMatch(text, /[\u0000-\u0009\u000b-\u001f\u007f-\u009f\u200e\u200f\u202a-\u202e\u2066-\u2069]/);
     assert.match(text, /forged\.mts/);
+    assert.match(text, /imports node:fs; use deps\.fs/);
+    assert.ok(source.reads() > 0, "the scanner must inspect the virtual source");
   }
 });
 test("S7 boundary ignores non-directory scan roots", async (t) => {
@@ -511,9 +583,14 @@ test("doctor passes the installed guarded Codex registration", async (t) => {
 
 test("project-owned model routing accepts a project's own routes and bundled routing stays the default", async (t) => {
   const root = fixture(t);
-  write(root, ".claude/agents/probe.md", "---\nname: probe\nmodel: claude-sonnet-5-5\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
+  write(root, ".claude/agents/probe.md", "---\nname: probe\nmodel: claude-sonnet-5-5\nprofile: standard\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
   write(root, ".opencode/agents/probe.md", "---\nmodel: openai/gpt-5.6-terra\n---\nLoad .claude/agents/probe.md\n");
   write(root, ".codex/agents/probe.toml", 'name = "probe"\n');
+  // The doctor now reads the project-root `ai-workflow.toon` `models` block. Under bundled
+  // routing, a mirror whose `model:` does not match `models.opencode.standard.model` fails;
+  // under `modelRouting: project` the same mirror passes (a project is allowed to ship its own
+  // route) as long as the route is well-formed.
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: bundle\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: claude-haiku-5-5\n    standard:\n      model: claude-sonnet-5-5\n    deep:\n      model: claude-opus-5-5\n  opencode:\n    fast:\n      model: opencode-go/space-bunny\n    standard:\n      model: opencode-go/minimax-m3\n    deep:\n      model: opencode-go/kimi-k2.7-code\n  codex:\n    fast:\n      model: gpt-6-luna\n    standard:\n      model: gpt-6.1-sol\n    deep:\n      model: gpt-6-astra\n");
   const run = async (): Promise<Check[]> => {
     const capture = injected(root);
     await main(["--json"], capture.deps);
@@ -522,25 +599,301 @@ test("project-owned model routing accepts a project's own routes and bundled rou
   const route = (items: Check[]): Check | undefined => items.find((item) => item.name === ".opencode/agents/probe.md" && /model/.test(item.detail));
   const codex = (items: Check[]): Check | undefined => items.find((item) => item.name === ".codex/agents/probe.toml" && /Codex model/.test(item.detail));
 
-  let items = await run();
-  assert.equal(route(items)?.status, "fail", "the bundled route is enforced by default");
-  assert.equal(codex(items)?.status, "fail");
-  assert.equal(items.find((item) => item.name === "Model routing"), undefined);
+  const toonText = fs.readFileSync(path.join(root, "ai-workflow.toon"));
+  const routingIn = (value: string) => write(root, "ai-workflow.toon", toonText.replace("modelRouting: bundle", `modelRouting: ${value}`));
+  const routing = (items: Check[]): Check | undefined => items.find((item) => item.name === "Model routing");
 
+  let items = await run();
+  assert.equal(route(items)?.status, "fail", "doctor.modelRouting: bundle enforces the bundled route");
+  assert.equal(codex(items)?.status, "fail");
+  assert.match(routing(items)!.detail, /bundled routes enforced \(ai-workflow\.toon doctor\.modelRouting\)/);
+
+  // ai-workflow.toon decides: a legacy file saying "project" is ignored (and named) while the toon exists.
   write(root, ".project/workflow-doctor.json", JSON.stringify({ schemaVersion: 1, modelRouting: "project" }));
+  items = await run();
+  assert.equal(route(items)?.status, "fail", "the toon's bundle routing wins over the legacy file");
+  assert.match(routing(items)!.detail, /legacy \.project\/workflow-doctor\.json is ignored while ai-workflow\.toon exists/);
+  fs.rmSync(path.join(root, ".project/workflow-doctor.json"));
+
+  routingIn("project");
   items = await run();
   assert.equal(route(items)?.status, "pass", "a well-formed project route is accepted");
   assert.equal(codex(items), undefined, "a missing Codex model inherits the harness configuration");
-  assert.equal(items.find((item) => item.name === "Model routing")?.status, "info");
+  assert.equal(routing(items)?.status, "info");
+  assert.match(routing(items)!.detail, /project-owned \(ai-workflow\.toon doctor\.modelRouting\)/);
 
   write(root, ".opencode/agents/probe.md", "---\nmodel: not a route\n---\nLoad .claude/agents/probe.md\n");
   assert.equal(route(await run())?.status, "fail", "a malformed route still fails in project mode");
+  write(root, ".opencode/agents/probe.md", "---\nmodel: openai/gpt-5.6-terra\n---\nLoad .claude/agents/probe.md\n");
 
+  // An invalid value is a toon problem, and the bundled routes stay enforced.
+  routingIn("other");
+  items = await run();
+  assert.equal(items.find((item) => item.name === "ai-workflow.toon (mandatory)")?.status, "fail");
+  assert.match(routing(items)!.detail, /bundled routes enforced: ai-workflow\.toon has problems/);
+  assert.notEqual(route(items)?.status, "pass", "an invalid toon never accepts a project route");
+
+  // Without a toon the legacy file is the fallback, still validated.
+  fs.rmSync(path.join(root, "ai-workflow.toon"));
+  write(root, ".project/workflow-doctor.json", JSON.stringify({ schemaVersion: 1, modelRouting: "project" }));
+  assert.match(routing(await run())!.detail, /project-owned \(legacy \.project\/workflow-doctor\.json\)/);
   for (const body of ["not json", JSON.stringify({ schemaVersion: 2, modelRouting: "project" }), JSON.stringify({ schemaVersion: 1, modelRouting: "other" })]) {
     write(root, ".project/workflow-doctor.json", body);
-    write(root, ".opencode/agents/probe.md", "---\nmodel: openai/gpt-5.6-terra\n---\nLoad .claude/agents/probe.md\n");
-    items = await run();
-    assert.equal(items.find((item) => item.name === "Model routing")?.status, "fail", body);
-    assert.equal(route(items)?.status, "fail", `${body}: invalid config falls back to the bundled routes`);
+    assert.equal(routing(await run())?.status, "fail", body);
   }
+});
+
+test("doctor Config validators check: absent is info, valid passes, unregistered slot and invalid TOON fail", async (t) => {
+  const root = fixture(t);
+  const example = fs.readFileSync(urlPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
+  const cases: Array<[string | null, string, RegExp]> = [
+    [null, "info", /absent; no validator slots in use/],
+    [example, "pass", /integrations\.orca \(engine >=1\.4\.224, on\) and 0 other integration\(s\) in use, all registered/],
+    [example.replace("doctor:\n", "  nosuchtool:\n    a: 1\ndoctor:\n"), "fail", /unregistered validator slot\(s\): unknown integration "nosuchtool"/],
+    [example.replace("    engine: \">=1.4.224\"\n", ""), "fail", /integrations\.orca\.engine is required/],
+    [example.replace(">=1.4.224", ">=1.4.224 <1.6.0 || ^2.0.0"), "pass", /engine >=1\.4\.224 <1\.6\.0 \|\| \^2\.0\.0, on/],
+    [example.replace(">=1.4.224", "^^1.4"), "fail", /integrations\.orca\.engine is not a valid version range: .* at position \d+/],
+    [example.replace(">=1.4.224", "1.5.0-beta.1"), "fail", /prerelease and build metadata are not supported at position 5/],
+    ["schemaVersion: 3\n", "fail", /problem|refused/],
+  ];
+  for (const [body, status, detail] of cases) {
+    fs.rmSync(path.join(root, "ai-workflow.toon"), { force: true });
+    if (body !== null) write(root, "ai-workflow.toon", body);
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    const item = checks(capture.output).find((entry) => entry.name === "Config validators");
+    assert.ok(item, String(body));
+    assert.deepEqual([item.status, detail.test(item.detail)], [status, true], `${status}: ${item.detail}`);
+  }
+});
+
+test("doctor Config validators check mentions leftover legacy files without failing", async (t) => {
+  const root = fixture(t);
+  write(root, "ai_workflow_env.json", "{}");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const item = checks(capture.output).find((entry) => entry.name === "Config validators");
+  assert.deepEqual([item?.status, /legacy file\(s\) still present: ai_workflow_env\.json/.test(item?.detail ?? "")], ["info", true]);
+});
+
+test("doctor syntax-checks runtime/config.mts and always lists config-migrate.mts (b1: unconditional)", async (t) => {
+  const root = fixture(t);
+  write(root, "ai-framework/scripts/runtime/config.mts", "export const a: number = 1;\n");
+  // The parse runs for real on the host runner (Node's strip-types parse, or Bun's parser under Bun).
+  const real = (capture: ReturnType<typeof injected>) => {
+    const host = createTestDeps();
+    capture.deps.runtime = host.runtime;
+    capture.deps.proc = { ...capture.deps.proc, execPath: host.proc.execPath };
+    capture.deps.child.run = async (command, args, options) => args.some((arg) => /\/(config|config-migrate)\.mts$/.test(arg)) ? host.child.run(command, args, options) : { status: 0, signal: null, stdout: "", stderr: "" };
+    return capture;
+  };
+  let capture = real(injected(root));
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/runtime/config.mts" && item.status === "pass"));
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/config-migrate.mts" && item.status === "fail"), "listed even when absent, and absence fails");
+  write(root, "ai-framework/scripts/config-migrate.mts", "export const a: number = ;\n");
+  capture = real(injected(root));
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/config-migrate.mts" && item.status === "fail"));
+});
+
+test("doctor: a project-root ai-workflow.toon is mandatory — fails on absence with a copy-this-file message", async (t) => {
+  const root = fixture(t);
+  // No toon at the root.
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const mandatory = items.find((item) => item.name === "ai-workflow.toon (mandatory)");
+  assert.ok(mandatory, "expected a 'ai-workflow.toon (mandatory)' check to be emitted");
+  assert.equal(mandatory!.status, "fail");
+  assert.match(mandatory!.detail, /absent and is mandatory/);
+  assert.match(mandatory!.detail, /config-migrate\.mts --apply --root \./);
+  assert.match(mandatory!.detail, /copy ai-framework\/templates\/ai-workflow\.example\.toon/);
+});
+
+test("doctor: mandatory toon check passes when a valid v3 toon with full models block is present", async (t) => {
+  const root = fixture(t);
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const mandatory = items.find((item) => item.name === "ai-workflow.toon (mandatory)");
+  assert.equal(mandatory?.status, "pass", `expected pass; got ${mandatory?.status} — ${mandatory?.detail}`);
+  assert.match(mandatory!.detail, /models.* block complete for 3 vendor/);
+});
+
+test("doctor: mandatory toon check fails when the models block is missing a vendor", async (t) => {
+  const root = fixture(t);
+  // Missing `opencode:` entirely.
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const mandatory = items.find((item) => item.name === "ai-workflow.toon (mandatory)");
+  assert.equal(mandatory?.status, "fail");
+  assert.match(mandatory!.detail, /models\.opencode is missing or not an object/);
+});
+
+// --- checkToonMandatory mutant coverage (cycle 1 audit must-fix) ---
+
+test("doctor: mandatory toon check fails when a vendor is missing a required profile", async (t) => {
+  const root = fixture(t);
+  // codex: only fast/standard, no deep.
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const mandatory = items.find((item) => item.name === "ai-workflow.toon (mandatory)");
+  assert.equal(mandatory?.status, "fail");
+  assert.match(mandatory!.detail, /models\.codex\.deep is (required|missing or has no model id)/);
+});
+
+test("doctor: mandatory toon check fails when the toon has parse problems (unknown profile)", async (t) => {
+  const root = fixture(t);
+  // opencode.deep: profile key "turbo" is not in the allowlist → validateModels pushes a problem.
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    turbo:\n      model: d\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const mandatory = items.find((item) => item.name === "ai-workflow.toon (mandatory)");
+  assert.equal(mandatory?.status, "fail");
+  assert.match(mandatory!.detail, /has problems/);
+});
+
+test("doctor: mandatory toon check fails loudly when the toon is refused (e.g. symlinked)", async (t) => {
+  const root = fixture(t);
+  // Make the toon path a symlink to a missing target so `inspectPath` refuses it.
+  const real = path.join(root, "outside.json");
+  fs.writeFileSync(real, "{}");
+  try { fs.unlinkSync(path.join(root, "ai-workflow.toon")); } catch { /* may not exist */ }
+  fs.symlinkSync(real, path.join(root, "ai-workflow.toon"));
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const mandatory = items.find((item) => item.name === "ai-workflow.toon (mandatory)");
+  assert.equal(mandatory?.status, "fail");
+  assert.match(mandatory!.detail, /present but refused/);
+});
+
+// --- extractAgentProfile mutant coverage (cycle 1 audit must-fix) ---
+
+test("doctor: extractAgentProfile reads profile: frontmatter; legacy model: prefix is a fallback", async (t) => {
+  const root = fixture(t);
+  // profile: deep, no model: line → deep.
+  write(root, ".claude/agents/probe.md", "---\nname: probe\nprofile: deep\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
+  // Seed a v3 toon so the mandatory check passes and the agent check runs.
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  // Mirror files matching the toon.
+  write(root, ".opencode/agents/probe.md", "---\nmodel: c\n---\nLoad .claude/agents/probe.md\n");
+  write(root, ".codex/agents/probe.toml", "name = \"probe\"\nmodel = \"c\"\nmodel_reasoning_effort = \"high\"\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  // No "no declared capability profile" warning for probe.
+  assert.equal(items.find((item) => item.name === ".claude/agents/probe.md" && /no declared capability profile/.test(item.detail)), undefined);
+});
+
+test("doctor: extractAgentProfile no longer falls back to legacy claude-* model prefix (removed in Bet 2)", async (t) => {
+  const root = fixture(t);
+  // model: claude-opus-5-5 (legacy) without profile: → warn (the legacy fallback is removed per
+  // the pinned decision `profile-detection-lives-in-frontmatter-not-in-the-model-id`).
+  write(root, ".claude/agents/probe.md", "---\nname: probe\nmodel: claude-opus-5-5\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  write(root, ".opencode/agents/probe.md", "---\nmodel: c\n---\nLoad .claude/agents/probe.md\n");
+  write(root, ".codex/agents/probe.toml", "name = \"probe\"\nmodel = \"c\"\nmodel_reasoning_effort = \"high\"\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const warn = items.find((item) => item.name === ".claude/agents/probe.md" && item.status === "warn");
+  assert.ok(warn, "expected a warn for a canonical agent with no profile: (legacy fallback is removed)");
+  assert.match(warn!.detail, /no declared capability profile/);
+  // The cycle-1 patch pins the message to name the 2.28.0 fallback removal. A revert to the
+  // pre-patch wording (which still includes "no declared capability profile") would keep the
+  // assertion above green, so this second assertion pins the new wording.
+  assert.match(warn!.detail, /legacy .* fallback was removed in 2\.28\.0/);
+});
+
+test("doctor: extractAgentProfile warns when neither profile: nor a legacy model prefix is present", async (t) => {
+  const root = fixture(t);
+  // No profile, no model with a known prefix → warn.
+  write(root, ".claude/agents/probe.md", "---\nname: probe\ntools: [\"Read\"]\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const warn = items.find((item) => item.name === ".claude/agents/probe.md" && item.status === "warn");
+  assert.ok(warn, "expected a warn for an agent with no profile and no legacy model prefix");
+  assert.match(warn!.detail, /no declared capability profile/);
+  // Same cycle-1 patch pin: the message must mention the 2.28.0 fallback removal.
+  assert.match(warn!.detail, /legacy .* fallback was removed in 2\.28\.0/);
+});
+
+test("doctor: a canonical agent whose profile: value is outside {fast,standard,deep} warns and names the allowed set", async (t) => {
+  const root = fixture(t);
+  // profile: turbo (out of allowlist) → extractAgentProfile returns null → warn.
+  write(root, ".claude/agents/probe.md", "---\nname: probe\nprofile: turbo\n---\n**Caveman mode:** x\nSub-agent dispatch: y\n");
+  write(root, "ai-workflow.toon", "schemaVersion: 3\nruntime:\n  runner: node\nintegrations:\n  orca:\n    engine: \">=1.4.224\"\n    enabled: false\n    multiAgent: false\n    maxConcurrentWorkers: 3\n    maxRetriesPerTask: 1\ndoctor:\n  modelRouting: project\nskills:\n  modes:\n    caveman: full\nmodels:\n  claude:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  opencode:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n  codex:\n    fast:\n      model: a\n    standard:\n      model: b\n    deep:\n      model: c\n");
+  const items = checks((await (async () => { const capture = injected(root); await main(["--json"], capture.deps); return capture.output; })()));
+  const warn = items.find((item) => item.name === ".claude/agents/probe.md" && item.status === "warn");
+  assert.ok(warn, "expected a warn for a canonical agent with an out-of-allowlist profile");
+  assert.match(warn!.detail, /no declared capability profile/);
+});
+
+test("doctor: opencode.json top-level model: is set and agent.build.model override is absent (S3 Bet 2 contract)", async (t) => {
+  // The doctor does not directly read .opencode/opencode.json (OpenCode does at runtime), but
+  // a regression in the toon / opencode.json contract would silently drift the primary-agent
+  // route. This test pins the contract: parse both files, assert the cross-reference.
+  const { fs, path } = createTestDeps();
+  const root = urlPath(new URL("../..", import.meta.url));
+  // This pins the bundle repo's own files; an installed project owns its opencode.json (bundle-sync only flags it).
+  if (!fs.existsSync(path.join(root, "VERSION"))) { t.skip("bundle-repo contract; opencode.json is project-owned in an install"); return; }
+  const opencodePath = path.join(root, ".opencode", "opencode.json");
+  const toonPath = path.join(root, "ai-workflow.toon");
+  if (!fs.existsSync(toonPath)) return; // gitignored, absent in clean checkout
+  const opencodeRaw = fs.readFileSync(opencodePath, "utf8");
+  const opencode = JSON.parse(opencodeRaw);
+  assert.ok(typeof opencode.model === "string" && opencode.model.length > 0, "opencode.json must have a top-level model: key");
+  assert.equal(opencode.agent?.build?.model, undefined, "opencode.json must not have an agent.build.model override (removed in 2.28.0)");
+  // The top-level model: must equal models.opencode.deep.model from the toon. Use a direct
+  // line-by-line parser: find the `opencode:` line at indent-2 (the models block), then
+  // walk forward to find `deep:` at indent-4, then `model:` at indent-6.
+  const toonRaw = fs.readFileSync(toonPath, "utf8").split("\n");
+  const opencodeLine = toonRaw.findIndex((l) => /^  opencode:\s*$/.test(l));
+  assert.ok(opencodeLine > 0, "could not find `  opencode:` in the toon's models: block");
+  const deepLine = toonRaw.findIndex((l, i) => i > opencodeLine && /^    deep:\s*$/.test(l));
+  assert.ok(deepLine > opencodeLine, "could not find `    deep:` under opencode:");
+  const modelLine = toonRaw[deepLine + 1];
+  assert.ok(modelLine && /^      model:\s*(\S+)/.test(modelLine), "could not find `      model:` under opencode.deep:");
+  const deepModel = modelLine.match(/^      model:\s*(\S+)/)[1];
+  assert.equal(opencode.model, deepModel, "opencode.json top-level model: must equal models.opencode.deep.model");
+});
+
+test("doctor warns about graphify's raw git hooks and passes the workflow's overlay-aware ones", async (t) => {
+  const root = fixture(t);
+  write(root, ".project/knowledge/README.md", "# Knowledge\n");
+  assert.equal(createTestDeps().child.runSync("git", ["init", "-q"], { cwd: root }).status, 0);
+  const hookCheck = async (): Promise<Check | undefined> => {
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    return checks(capture.output).find((item) => item.name === "Graphify hooks");
+  };
+  assert.equal(await hookCheck(), undefined, "no hooks installed: nothing to report");
+  write(root, ".git/hooks/post-checkout", "#!/bin/sh\n# graphify-checkout-hook-start\n( raw )\n# graphify-checkout-hook-end\n");
+  const raw = await hookCheck();
+  assert.equal(raw?.status, "warn");
+  assert.match(raw!.detail, /post-checkout hook runs graphify's own rebuild.*graphify\.mts setup/);
+  write(root, ".git/hooks/post-checkout", `#!/bin/sh\n${hookBlock("post-checkout")}\n`);
+  assert.equal((await hookCheck())?.status, "pass");
+});
+
+test("doctor requires the Claude Orca start hooks with the Node runner; a bun-wired or missing hook fails", async (t) => {
+  const root = fixture(t);
+  const canonical = JSON.parse(fs.readFileSync(urlPath(new URL("../../.claude/settings.json", import.meta.url))));
+  const wiring = async (): Promise<Check | undefined> => {
+    const capture = injected(root);
+    await main(["--json"], capture.deps);
+    return checks(capture.output).find((item) => item.name === "Claude startup wiring");
+  };
+  write(root, ".claude/settings.json", JSON.stringify(canonical));
+  assert.equal((await wiring())?.status, "pass");
+
+  const bun = structuredClone(canonical);
+  bun.hooks.PreToolUse[0].hooks[0].command = 'bun "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts"';
+  write(root, ".claude/settings.json", JSON.stringify(bun));
+  const bunCheck = await wiring();
+  assert.equal(bunCheck?.status, "fail");
+  assert.match(bunCheck!.detail, /PreToolUse \(matcher "Skill"\) must run exactly AI_WORKFLOW_RUNNER=node node/);
+  assert.doesNotMatch(bunCheck!.detail, /UserPromptExpansion/, "only the miswired event is named");
+
+  const slow = structuredClone(canonical);
+  slow.hooks.UserPromptExpansion[0].hooks[0].timeout = 30;
+  write(root, ".claude/settings.json", JSON.stringify(slow));
+  assert.match((await wiring())!.detail, /UserPromptExpansion .* with timeout 8/);
+
+  const missing = structuredClone(canonical);
+  delete missing.hooks.UserPromptExpansion;
+  write(root, ".claude/settings.json", JSON.stringify(missing));
+  assert.match((await wiring())!.detail, /UserPromptExpansion does not register orca-start-hook\.mts/);
 });
