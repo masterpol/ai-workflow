@@ -1,7 +1,7 @@
 # Graph Report - ai-workflow-portable  (2026-10-23)
 
 ## Corpus Check
-- 702 files · ~766,001 words
+- 702 files · ~766,052 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 29 file(s) not represented in the graph (top: .toml 17, (none) 9, .toon 3)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `606f9ef5`
+- Built from commit: `2f7fece4`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1810,7 +1810,7 @@ Nodes (7): Bounds and failures, Hook-to-event mapping (planned), Joined token/ti
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `RuntimeDeps` connect `RuntimeDeps` to `skill-registry.mts`, `orca-evidence.mts`, `orca-dispatch.mts`, `token-consumption.mts`, `pitch-archive.mts`, `.project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md`, `workflow-metrics-report.mts`, `state-theme.mts`, `orca-reconcile.test.mts`, `review-bench.mts`, `token-consumption.test.mts`, `graphify.mts`, `config-migrate.mts`, `workflow-metrics-state.mts`, `state-html.test.mts`, `skill-vendors.test.mts`, `orca-diff-admit.mts`, `state-history.mts`, `orca-launch-gate.mts`, `orca-dispatch.test.mts`, `state-graph.mts`, `skill-sync.test.mts`, `skill-defaults.test.mts`, `workflow-metrics-state.test.mts`, `legacy-upgrade.test.mts`, `flow-join.mts`, `orca-eval-grader.mts`, `flow-report.mts`, `orca-preflight.mts`, `add-skill.test.mts`, `config-migrate.test.mts`, `orca-run.mts`, `graphify-relations.mts`, `state-render.mts`, `skill-registry.test.mts`, `workflow-doctor.mts`, `state-snapshot.mts`, `metrics-lock.mts`, `orca-reconcile.mts`, `post-edit-check.mts`, `orca-launch-gate.test.mts`, `config.mts`, `ledger-schema.mts`, `skill-vendors.mts`, `orca-start.test.mts`, `outcome-record.mts`, `node.mts`, `changelog.mts`, `orca-ledger.mts`, `pre-ship-verify.mts`, `types.mts`, `orca-run.test.mts`, `data-file.mts`, `skill-sync.mts`, `state-structure.mts`, `orca-policy.mts`, `review-bench.test.mts`, `test-helpers.mts`, `createTestDeps`, `add-skill.mts`, `ref_node_assert`, `legacy-upgrade.mts`, `state-fragment-inject.mts`, `setup-validator.test.mts`, `Source-review supplement: state-ai-authoring`, `orcaMultiAgentEnabled`, `transcript-usage.mts`, `orca-apply.test.mts`, `skill-compress-guard.test.mts`, `orca-start.mts`, `bundle-sync.mts`, `runDirect`, `Entity: Graphify (knowledge-graph front end)`, `config.test.mts`, `workflow-capture.mts`, `pitch-compress.mts`, `orca-diff-admit.test.mts`, `createNodeDeps`, `consolidation-migrate.mts`, `docs-links.mts`, `orca-apply.mts`?**
-  _High betweenness centrality (0.124) - this node is a cross-community bridge._
+  _High betweenness centrality (0.122) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `RuntimeDeps` (e.g. with `Event contract` and `Boundary validator`) actually correct?**
   _`RuntimeDeps` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `TsDiagnostic`, `Plain`, `testDeps` to the rest of the system?**
@@ -1818,7 +1818,7 @@ _Questions this graph is uniquely positioned to answer:_
 - **Should `orca-evidence.mts` be split into smaller, more focused modules?**
   _Cohesion score 0.08244680851063829 - nodes in this community are weakly interconnected._
 - **Why does `createNodeDeps()` connect `createNodeDeps` to `RuntimeDeps`, `skill-registry.mts`, `orca-dispatch.mts`, `orca-diff-admit.test.mts`, `pre-ship-verify.mts`, `token-consumption.mts`, `docs-links.mts`, `pitch-archive.mts`, `orca-run.test.mts`, `types.mts`, `data-file.mts`, `orca-reconcile.test.mts`, `skill-sync.mts`, `orca-policy.mts`, `state-structure.mts`, `state-theme.mts`, `review-bench.test.mts`, `test-helpers.mts`, `review-bench.mts`, `token-consumption.test.mts`, `add-skill.mts`, `createTestDeps`, `ref_node_assert`, `state-html.test.mts`, `skill-vendors.test.mts`, `orca-launch-gate.mts`, `orca-dispatch.test.mts`, `skill-sync.test.mts`, `skill-defaults.test.mts`, `state-fragment-inject.mts`, `setup-validator.test.mts`, `orca-eval-grader.mts`, `pitch-compress.test.mts`, `orca-preflight.mts`, `add-skill.test.mts`, `orca-run.mts`, `state-render.mts`, `skill-registry.test.mts`, `orca-apply.test.mts`, `workflow-doctor.mts`, `state-snapshot.mts`, `metrics-lock.mts`, `skill-compress-guard.test.mts`, `orca-reconcile.mts`, `post-edit-check.mts`, `orca-start.mts`, `orca-launch-gate.test.mts`, `config.mts`, `skill-vendors.mts`, `node.mts`, `workflow-capture.mts`, `pitch-compress.mts`, `orca-ledger.mts`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **Are the 2 inferred relationships involving `createNodeDeps()` (e.g. with `readStdin()` and `Build decisions and deviations`) actually correct?**
   _`createNodeDeps()` has 2 INFERRED edges - model-reasoned connections that need verification._
 - **Should `orca-dispatch.mts` be split into smaller, more focused modules?**
