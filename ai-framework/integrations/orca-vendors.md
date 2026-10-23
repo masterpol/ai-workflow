@@ -1,9 +1,10 @@
 # Optional Orca vendor policy
 
-Orca orchestration is opt-in. The optional local policy is `.project/orchestration.json`;
-the bundle does not create it during setup or doctor repair. Start from
-[orca-vendors.example.json](orca-vendors.example.json), which sets
-`"use-orca-orchestration": false`. Keep this instance file out of version control.
+Orca orchestration is opt-in. The optional local policy is the `integrations.orca` block (schemaVersion 3) of the
+project-root `ai-workflow.toon`; the bundle does not create it during setup or doctor repair. Start from the
+`integrations.orca` block of [ai-workflow.example.toon](../templates/ai-workflow.example.toon), which sets
+`enabled: false`. Keep this instance file out of version control. A project that still has the
+older `.project/orchestration.json` is migrated by `node ai-framework/scripts/config-migrate.mts`.
 
 The policy and preflight commands below are read-only diagnostics: every result uses the normal workflow
 and reports `dispatchReady: false`. Launching is a separate opt-in library, described under
@@ -14,27 +15,45 @@ not part of it. Quality, latency, and cost improvements require measurements; sp
 
 Orca is used only when `AI_WORKFLOW_ORCA_MULTI_AGENT` is exactly `true` (case-insensitive, surrounding spaces ignored).
 Unset, empty, `false`, `1`, `yes` or anything else keeps the normal workflow. Set it in the process environment or in the
-project-root `ai_workflow_env.json` as `"AI_WORKFLOW_ORCA_MULTI_AGENT": true` (the environment wins; the file is read from
+project-root `ai-workflow.toon` as `integrations.orca.multiAgent: true` (the environment wins; the file is read from
 the trusted root only, a symlink leaving the root is ignored, and `.env` is never read). With the switch off the launch gate returns `orca-multi-agent-disabled` first, before reading the policy,
 probing Orca or spawning anything; `dispatchScope` and `dispatchWithRetries` return the normal workflow without a claim;
 `orca-preflight --probe` does not contact Orca. The static policy and presence diagnostics still work. The switch is
 necessary but not sufficient: dispatch also needs an opted-in policy and a supported Orca runtime.
 
-## Policy contract
+## `integrations.orca` in `ai-workflow.toon` (schemaVersion 3)
+
+Orca settings live in one block of the project-root `ai-workflow.toon` (`schemaVersion: 3`):
+`integrations.orca` with `engine` (required string, the Orca engine version), `enabled`, `multiAgent`,
+`maxConcurrentWorkers`, `maxRetriesPerTask` and `coordinators.<vendor>.{workers, roles}`. The layout with flat
+top-level `engines` and `orchestration` sections (schemaVersion 1) is no longer loaded. `config-migrate.mts` does not convert such a file in place: with `--force` it replaces the unsupported v1 file with one built from the legacy JSON files (`ai_workflow_env.json`, `.project/orchestration.json`) or the defaults, and keeps a backup of the original. Re-apply any v1 values by hand using the table below.
+
+A role target is a single worker name or a **pool**: `roles.<role>[N]: a,b,c`, 1..N distinct vendor names (so at most 3, one per supported vendor). `workers` is optional; when omitted it is the union of every role pool, and when present it must contain every pool member. A coordinator may list itself as a worker or pool member: the worker is a separate `--worker-context` process, and the launch gate still decides on the coordinator's identity, so self-membership grants no authority. There is no two-worker limit. The policy report exposes `pools` (the full ordered pool per role) next to `roles` (the first member of each pool, kept for older consumers). The legacy `.project/orchestration.json` keeps single-string roles. `orca-start` probes every distinct pool member.
+
+| Previous key (schemaVersion 1 / legacy file) | Now |
+|---|---|
+| `engines.orca` | `integrations.orca.engine` |
+| `orchestration.enabled` / `use-orca-orchestration` | `integrations.orca.enabled` |
+| `orchestration.multiAgent` / `AI_WORKFLOW_ORCA_MULTI_AGENT` | `integrations.orca.multiAgent` |
+| `orchestration.maxConcurrentWorkers` | `integrations.orca.maxConcurrentWorkers` |
+| `orchestration.maxRetriesPerTask` | `integrations.orca.maxRetriesPerTask` |
+| `orchestration.coordinators.<vendor>` | `integrations.orca.coordinators.<vendor>` |
+
+## Policy contract (legacy `.project/orchestration.json`)
 
 | Field | Contract |
 |---|---|
 | `schemaVersion` | Required integer `1` |
 | `use-orca-orchestration` | Optional boolean; missing means `false` |
-| `maxConcurrentWorkers` | Required integer from `1` to `3`; future dispatch ceiling |
+| `maxConcurrentWorkers` | Required integer from `1` to `16`; future dispatch ceiling |
 | `maxRetriesPerTask` | Required integer from `0` to `2`; future retry ceiling |
 | `coordinators` | Required object keyed only by `claude`, `codex`, or `opencode` |
-| Coordinator `workers` | Required array of at most two unique other vendors |
+| Coordinator `workers` | Required array of unique vendors (the coordinator itself is allowed) |
 | Coordinator `roles` | Required object; optional `implementation` and `review` routes must name a configured worker |
 
 The vendor supplied to the report selects its coordinator entry; the configuration does
 not replace the vendor executing the task. An absent coordinator or empty worker list
-keeps the normal workflow. Unknown fields, self/duplicate workers, unknown vendors or roles,
+keeps the normal workflow. Unknown fields, duplicate workers, unknown vendors or roles,
 invalid bounds, and nonboolean flags are rejected. There are no model overrides in this schema.
 
 The reader accepts only a regular local file, at most 64 KiB, below the project root.
@@ -71,7 +90,15 @@ The selected launcher is never replaced after failure. Selection precedence is a
 is set, then `orca`. On Linux outside an identified Orca session, use `orca-ide` to avoid
 selecting the unrelated screen reader. Unsupported selection keeps the normal workflow.
 
-Runtime diagnostics conservatively target the inspected Orca 1.4.223 contract (first verified against 1.4.222). Guide
+Runtime diagnostics accept the Orca versions named by `integrations.orca.engine` in `ai-workflow.toon` (default `>=1.4.224`, the floor
+`SUPPORTED_VERSION` in `orca-preflight.mts`; contract inspected at 1.4.223, first verified against 1.4.222). The value is an npm-style range
+subset: an exact version (`1.4.224`), `^`, `~`, `>`, `>=`, `<`, `<=`, partials and wildcards (`1.4`, `1.x`, `*`), a space for AND,
+`||` for OR, and a hyphen range (`1.4.223 - 1.5.0`). Prerelease and build tags, leading zeros, parts over six digits, a space between an
+operator and its version, and ranges over 256 characters are rejected; `runtime/semver-range.mts` is the parser. A bare version is an
+exact pin, so `1.4.224` refuses 1.4.225. An invalid range is a config problem (doctor "Config validators" fails and the policy is
+malformed), never a silent fallback to the default. The reported Orca version must be a strict `x.y.z`; a refusal names the range and the
+found version. Guide
+Guide
 markers establish documented capabilities only. A reachable local runtime, matching version,
 and live caller session matching `ORCA_AGENT_SESSION_ID` provide limited session evidence;
 they do not prove an enabled orchestration feature, authenticated vendors, or safe dispatch.
@@ -129,7 +156,7 @@ The decision calls `evaluateLaunch` with the coordinator vendor. It then checks 
 named by that coordinator's policy roles belong to its worker list and have executables in
 the worker environment. Worker-side `orca` must resolve to the same executable the gate
 probed, and `orca status --json` in that environment must report a local, ready, reachable
-runtime at the supported version. Neither `status.dispatchReady` nor `ORCA_AGENT_SESSION_ID`
+runtime at a supported version (1.4.224 or later). Neither `status.dispatchReady` nor `ORCA_AGENT_SESSION_ID`
 is the start decision's authority. Executable presence does not verify vendor authentication.
 
 ```sh
@@ -159,7 +186,10 @@ Automatic start is proven live for Claude Code only. The Codex adapter is descri
 its host activation requires separate proof. OpenCode and Cursor adapters and start blocks
 in each phase skill remain later pitches. Startup hook commands force
 `AI_WORKFLOW_RUNNER=node` before invoking Node, so a configured Bun runner that is missing
-cannot bypass readiness checks. This environment assignment prefix requires a POSIX shell;
+cannot bypass readiness checks. `workflow-doctor` fails a wiring that drifts from this: "Claude startup wiring" checks
+the `PreToolUse` (`Skill`) and `UserPromptExpansion` entries in `.claude/settings.json`, and "Codex startup wiring" the
+`UserPromptSubmit` entry in `.codex/hooks.json` (exact Node command, 8-second timeout). A bun-wired or wrapped command is
+a failure even when it works, because a missing Bun would skip the gate. This environment assignment prefix requires a POSIX shell;
 it is not valid in Windows cmd. Workers share the coordinator checkout;
 automatic start provides no checkout isolation.
 
@@ -228,15 +258,37 @@ versions. The separate host hook case remains unverified until a trusted fresh i
 is observed. Existing projects receive entry-file changes through manual bundle-sync review;
 sync does not automatically replace their `AGENTS.md`/`CLAUDE.md`.
 
+## OpenCode port before the first OpenCode worker
+
+OpenCode V2 runs a managed background server (`opencode serve --service`) on a fixed loopback port. A server left
+running by an earlier session holds that port, and a new OpenCode worker then fails at `agent_readiness` while it
+tries to start its own server (`Managed service port … is already in use`). Observed with OpenCode 2.0.29 here and
+in another project on 2026-10-15.
+
+`node ai-framework/scripts/opencode-service.mts free [--json]` frees it:
+
+1. List loopback TCP listeners with `lsof`, and read the service port from OpenCode's `service.json`
+   (`$XDG_STATE_HOME` or `~/.local/state`). No listener: nothing else happens.
+2. Run `opencode service stop`. This also removes `service.json`, so the next steps don't rely on it.
+3. Send SIGTERM, then SIGKILL, to any listener whose command is still `opencode … serve`. The OpenCode TUI and
+   every other program are never signalled.
+4. Re-check. Status `free` (exit 0), `held` or `foreign` (another program on the service port; exit 1),
+   `unverified` (no `lsof`; exit 1) or `unsupported` (Windows; exit 0, no action).
+
+`orca-run.mts dispatch` with `vendor: "opencode"` runs it before launching, but only when no other OpenCode
+attempt in the ledger is `claimed`, `launched` or `unknown-liveness`. Later workers share the server that the
+first worker starts, so a live worker's server is never ended. A `held` or `foreign` result refuses the launch
+with `opencode-port-held`; `unverified` and `unsupported` let it continue.
+
 ## Dispatch core (opt-in, library only)
 
 `orca-dispatch.mts` sends one scope to one alternate vendor through `orca orchestration worker-start`.
 It is a library for the build phase, not a command, and stays inert unless the policy opts in.
 
 - **Roles**: the `coordinator` is the vendor running the task and selects the policy entry; the worker (`vendor`) must be
-  one of that coordinator's configured workers. A coordinator is never launched as its own worker.
+  one of that coordinator's configured workers. A coordinator may be its own worker: that launches a separate worker process of the same vendor under `--worker-context`, never the coordinator itself.
 - **Launch gate** (`orca-launch-gate.mts`): re-reads the policy and re-probes the runtime immediately before every
-  launch; allowed only for an eligible policy and the exact supported Orca version. It spawns exactly the executable the
+  launch; allowed only for an eligible policy and an Orca version inside `integrations.orca.engine` (`isSupportedVersion`; default `>=1.4.224`). It spawns exactly the executable the
   probe selected (`ORCA_CLI_COMMAND`, `orca-dev` or `orca`); a different `launcher` is refused. An external coordinator
   has no `caller.orcaSessionId`, so the gate does not require it. A worker (the `--worker-context` flag, or a worker env
   marker, which is unverified) is always denied. The child environment is an allowlist with absolute PATH entries only.
@@ -253,6 +305,20 @@ It is a library for the build phase, not a command, and stays inert unless the p
   of the caller's value, the policy's `maxRetriesPerTask` and 5, each retry with a new attempt id.
   The policy's `maxConcurrentWorkers` caps the attempts that are claimed, launched or of unknown liveness; a further
   dispatch returns the normal workflow.
+- **Assignment** (`assign`, `orca-assign.mts`): instead of a caller-named `vendor`, a dispatch may pass `assign: { role, planIndex, reviewOf?, skip? }`;
+  exactly one of the two is required, else `invalid-assignment` before any side effect. The worker comes from the coordinator's role pool
+  (`pools` in the policy report): `implementation` is round-robin by plan position over the pool minus `skip`; `review` is the same over the
+  pool minus `skip` and minus the vendor recorded for the completed attempt of `reviewOf`. Resume never reassigns: a task with a live, completed
+  or settled attempt keeps that attempt's vendor. After a task's attempts all failed cleanly, the next attempt takes the next pool member
+  (pool order, circular, once around), through the full launch gate; a lap with no member left is `blocked: pool-exhausted`. Unknown liveness,
+  unproven failures, timeouts and signal exits are never rotated. A review pool with no member other than the implementer is
+  `blocked: review-independence-unavailable` with a `humanAction` (stop and ask); a review of a scope with no completed attempt is
+  `blocked: implementer-unknown`. No ledger field was added: the recorded `vendor` and `taskKey` carry the assignment.
+- **Overlap guard**: `reserve` refuses (`authorized-paths-overlap`, route `normal`) a scope whose `authorizedPaths` overlap a *live*
+  (claimed, launched or unknown-liveness) attempt of another task. Completed attempts do not block, so a reviewer may name the same files;
+  `orca-apply` still refuses true overlap at integration. Dispatch only scopes the plan marks parallel-safe.
+- **Concurrency**: `maxConcurrentWorkers` (1..16) caps live attempts across all pools. Orca 1.4.227 documents no terminal cap; behavior
+  above 3 live workers is unverified (spike skipped), so the shipped default stays 3.
 - **Mail**: only a `worker_done` whose dispatch id matches the ledger completes an attempt; ids, payloads and file lists
   are parsed against a grammar (file lists may not name `.git` or `.project`), text is stripped of control and bidi
   characters, and a report that contradicts the recorded outcome is refused. A settled attempt accepts only a replay of its own completion report.
@@ -317,10 +383,23 @@ switch is off, a repeated attempt id returns the same refusal a first attempt wo
 
 | Exit | Meaning |
 |---|---|
-| 0 | launched, resumed, accepted or integrated |
-| 3 | normal workflow or refused with no side effects (switch off, ineligible, a guard refused) |
+| 0 | launched, resumed, accepted or integrated; for `start`: `off`, `bypassed`, `worker` or `ready` |
+| 4 | `start` only: `blocked` (Orca requested but not ready) |
+| 3 | not launched / not accepted / not integrated: the normal route (switch off, ineligible, concurrency cap), a refused dispatch, a rejected collection, or a refused or rolled-back reconcile |
 | 2 | usage error |
 | 1 | internal error |
+
+**Exit code 3 alone never authorizes the normal path.** It is shared by the normal route and every refusal, so decide
+from the structured outcome and the configured mode, never from the code:
+
+- Switch off (`AI_WORKFLOW_ORCA_MULTI_AGENT` not exactly `true`): the phase never runs these commands; the normal workflow
+  applies with no Orca side effects. `start` reports `off`.
+- `bypassed`: only the invocation that carried the whole token `orca=normal` runs normally.
+- `worker`: follow the worker brief; never coordinate.
+- `ready`: permits coordinator preparation only; readiness is not launch authority.
+- Switch on and a command returns anything other than its success outcome (exit 1, 2, 3 or 4, or a `start` line
+  "Orca requested but not ready"): stop and ask. Report the exact reason and ask whether to fix it or re-invoke the
+  phase with `orca=normal`. Never continue on the single-agent path silently while Orca is requested.
 
 **Phase wiring.** `/build` (dispatch, collect), `/audit` and `/ship` (reconcile) carry one removable opt-in block each,
 off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true`. Worker text is data and never chooses commands, paths, vendors or approvals;

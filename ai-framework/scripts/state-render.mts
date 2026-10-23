@@ -8,10 +8,12 @@ import { runDirect } from "./runtime/cli.mts";
  * See ai-framework/integrations/state-report.md.
  */
 import { createNodeDeps } from "./runtime/node.mts";
-import { createStatePages, GENERATOR_MARKER, PAGE_BYTE_CAP } from "./state-pages.mts";
+import { createStatePages, PAGE_BYTE_CAP } from "./state-pages.mts";
+import { createStateDesign, SLOT_NAMES } from "./state-design.mts";
+import { createStateInject } from "./state-fragment-inject.mts";
 import { isSecretName } from "./state-structure.mts";
 import { createStateSnapshot, StateError, DEPTH_PLACEHOLDER } from "./state-snapshot.mts";
-import { discoverTheme, themeChanges, safeTheme, THEME_FILE } from "./state-theme.mts";
+import { discoverTheme, themeChanges, THEME_FILE } from "./state-theme.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import type { StateSnapshot } from "./state-snapshot.mts";
@@ -19,7 +21,7 @@ import type { Theme } from "./state-theme.mts";
 
 let nodeDeps: RuntimeDeps | undefined;
 function defaultDeps(): RuntimeDeps { return (nodeDeps ??= createNodeDeps()); }
-export interface RenderOptions { root?: string; name?: string; apply?: boolean; json?: boolean; cap?: number }
+export interface RenderOptions { root?: string; name?: string; apply?: boolean; json?: boolean; cap?: number; strictFragments?: boolean }
 /** Keep evidence validation and report writes on the same injected runtime as the snapshot. */
 function bindStateRender(deps: RuntimeDeps) {
 const { fs, path } = deps;
@@ -141,41 +143,10 @@ function themeSection(theme: Theme) {
   return scroll("How this report was styled", `<table><caption>How this report was styled</caption><thead><tr><th scope="col">Item</th><th scope="col">Detail</th></tr></thead><tbody>${rows.map(([label, detail]) => `<tr><th scope="row">${esc(label)}</th><td>${value(detail)}</td></tr>`).join("")}</tbody></table>`);
 }
 
-const pages = createStatePages(deps, { esc, scalar, safeEvidencePath, row, table, scroll, section, list, badge, boundedText, evidence, value, stylesheet: (t: Theme) => stylesheet(t), CSP, pitchTable: (r, s, l) => pitchTable(r, s, l), projectRows: (r, s) => projectRows(r, s) });
+const design = createStateDesign({ esc, CSP });
+const stylesheet = design.stylesheet;
+const pages = createStatePages(deps, { esc, scalar, safeEvidencePath, row, table, scroll, section, list, badge, boundedText, evidence, value, design, CSP, pitchTable: (r, s, l) => pitchTable(r, s, l), projectRows: (r, s) => projectRows(r, s) });
 const legend = () => `<dl class="legend">${[["observed", "read directly from the cited file"], ["proposed", "the source states a direction, not a decision"], ["unconfigured", "undecided or not set up yet"], ["stale", "observed but older than it should be; the note says why"], ["unavailable", "could not be read; the note says why, nothing is guessed"]].map(([status, meaning]) => `<dt>${badge(status)}</dt><dd>${esc(meaning)}</dd>`).join("")}</dl>`;
-
-const vars = (t: Theme["light"]): string => `--bg:${t.background};--fg:${t.foreground};--primary:${t.primary};--primary-fg:${t.primaryForeground};--muted:${t.muted};--muted-fg:${t.mutedForeground};--border:${t.border};--radius:${t.radius};`;
-function stylesheet(theme: Theme) {
-  const safe = safeTheme(theme);
-  return `:root{color-scheme:light dark;${vars(safe.light)}--sans:${safe.light.fontSans};--mono:${safe.light.fontMono};}
-@media (prefers-color-scheme:dark){:root{${vars(safe.dark)}--sans:${safe.dark.fontSans};--mono:${safe.dark.fontMono};}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--sans);line-height:1.5}
-header,main,nav{max-width:72rem;margin:0 auto;padding:1rem}
-header{border-bottom:1px solid var(--border)}
-h1{margin:.2rem 0;font-size:1.6rem}h2{margin:2rem 0 .5rem;font-size:1.2rem}
-a{color:var(--primary)}
-a:focus-visible,.scroll:focus-visible{outline:3px solid var(--primary);outline-offset:2px}
-.skip{position:absolute;left:-999px}.skip:focus{left:1rem;top:1rem;background:var(--primary);color:var(--primary-fg);padding:.4rem .8rem;border-radius:var(--radius)}
-nav ul{display:flex;flex-wrap:wrap;gap:.5rem 1rem;padding:0;margin:0;list-style:none}
-.scroll{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius)}
-table{width:100%;border-collapse:collapse;font-size:.92rem}
-caption{text-align:left;padding:.5rem .7rem;color:var(--muted-fg)}
-th,td{padding:.5rem .7rem;text-align:left;vertical-align:top;border-top:1px solid var(--border)}
-thead th{background:var(--muted);color:var(--fg)}
-tbody th{font-weight:600}
-.sub,.none{color:var(--muted-fg);font-weight:400}
-td,th,a,code{overflow-wrap:anywhere}
-code{font-family:var(--mono);font-size:.85em}
-dl{margin:0}dt{font-weight:600}dd{margin:0 0 .3rem 1rem}ul{margin:0;padding-left:1.1rem}
-.legend{display:grid;grid-template-columns:max-content 1fr;gap:.4rem 1rem;align-items:center}.legend dd{margin:0}
-.status{display:inline-block;padding:0 .5rem;border:1px solid var(--border);border-radius:999px;background:var(--muted);color:var(--fg);font-size:.8rem;font-weight:600;white-space:nowrap}
-.status-unavailable,.status-stale,.status-unconfigured,.status-proposed,.status-unknown{border:2px dashed var(--fg)}
-.summary{font-weight:600}
-@media (max-width:640px){header,main,nav{padding:.75rem}table{font-size:.85rem}.legend{grid-template-columns:1fr}.scroll tbody th{position:sticky;left:0;background:var(--bg)}}
-@media print{h2{break-after:avoid}:root{--bg:#fff;--fg:#000;--primary:#000;--primary-fg:#fff;--muted:#eee;--muted-fg:#333;--border:#999}nav,.skip{display:none}.scroll{overflow:visible;border:0}tr{break-inside:avoid}a{color:#000;text-decoration:underline}}
-`;
-}
 
 function renderHtml(snapshot: StateSnapshot, theme: Theme, options: RenderOptions = {}) {
   const root = options.root ? fs.realpathSync(options.root) : null;
@@ -194,31 +165,15 @@ function renderHtml(snapshot: StateSnapshot, theme: Theme, options: RenderOption
   for (const [, fact] of facts(snapshot)) counts[STATUSES.has(fact.status) ? fact.status : "unknown"] = (counts[STATUSES.has(fact.status) ? fact.status : "unknown"] || 0) + 1;
   const summary = ["observed", "proposed", "stale", "unavailable", "unconfigured", "unknown"].filter((status) => counts[status]).map((status) => `${counts[status]} ${status}`).join(", ");
   const generated = boundedText(snapshot.generatedAt) || "unknown time";
-  const html = `<!doctype html>
-${GENERATOR_MARKER}
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="${CSP}">
-<title>State report — ${esc(name)}</title>
-<style>
-${stylesheet(theme)}</style>
-</head>
-<body>
-<a class="skip" href="#main">Skip to content</a>
-<header><h1>State report — ${esc(name)}</h1><p>Generated ${esc(generated)}. ${esc(snapshot.authority || "")}</p><p class="summary">${esc(summary || "No facts")} — the legend below explains each status.</p></header>
-<nav aria-label="Page sections"><ul>${[["legend", "Legend"], ...sections, ["theme", "Styling"]].map(([id, title]) => `<li><a href="#${id}">${esc(title)}</a></li>`).join("")}</ul></nav>
-<main id="main">
+  const nav = `<nav aria-label="Page sections"><ul>${[["legend", "Legend"], ...sections, ["theme", "Styling"]].map(([id, title]) => `<li><a href="#${id}">${esc(title)}</a></li>`).join("")}</ul></nav>`;
+  const main = `${nav}
 ${section("legend", "Legend", legend())}
 ${sections.map(([id, title, body]) => section(id, title, body)).join("\n")}
-${section("theme", "Styling", themeSection(theme))}
-</main>
-</body>
-</html>
-`;
+${section("theme", "Styling", themeSection(theme))}`;
+  const context = { name, generated, theme, version: boundedText(workflow.installedVersion?.value), heading: "State report", summary: `${summary || "No facts"} — the legend below explains each status. ${boundedText(snapshot.authority)}`.trim() };
+  const html = design.shell("state", main, context);
   if (new TextEncoder().encode(html).byteLength <= (options.cap ?? PAGE_BYTE_CAP)) return html;
-  return pages.shell("index", section("omitted", "Full report", `<p class="none">Page omitted: exceeds size cap.</p>`), { name, generated, theme });
+  return design.shell("state", section("omitted", "Full report", `<p class="none">Page omitted: exceeds size cap.</p>`), context);
 }
 
 function loadSnapshot(root: string) {
@@ -235,15 +190,21 @@ function render(root: string, options: RenderOptions = {}) {
   // A raw ENOENT/EACCES message embeds the absolute path; keep only a fixed reason.
   try { root = fs.realpathSync(root); } catch { throw new StateError("--root does not exist or is not resolvable"); }
   const snapshot = loadSnapshot(root);
-  const theme = discoverTheme(root, deps);
+  // Only the exact string "monorepo" selects the workflow default theme; anything else, including a hostile value, is "single".
+  const shapeFact = (snapshot.structure as { repoShape?: { value?: unknown } } | undefined)?.repoShape;
+  const repoShape = shapeFact && typeof shapeFact === "object" && shapeFact.value === "monorepo" ? "monorepo" : "single";
+  const theme = discoverTheme(root, { repoShape }, deps);
   const changes = themeChanges(root, theme, deps);
   const html = renderHtml(snapshot, theme, { root, cap: options.cap });
   const name = projectName(snapshot, undefined);
-  const files = { "state.html": html, ...pages.renderPages(snapshot, theme, { root, name, cap: options.cap }) };
+  // Fragments go only into the six pages, never state.html. A directory that is absent renders byte-identical to a report without them.
+  const inject = createStateInject(deps), loaded = inject.load(root, snapshot, { strict: options.strictFragments === true }), summary = inject.summarize(loaded);
+  const fill = (omit: boolean) => Object.fromEntries(SLOT_NAMES.map((slot) => [slot, inject.container(slot, omit && loaded[slot].shown ? { ...loaded[slot], shown: false, reason: "omitted: page size cap" } : loaded[slot], { esc, evidence: (items: string[]) => evidence(root, items) })]));
+  const files = { "state.html": html, ...pages.renderPages(snapshot, theme, { root, name, cap: options.cap, fragments: { full: fill(false), omitted: fill(true) } }) };
   const size = (text: string) => new TextEncoder().encode(text).byteLength;
-  const result = { skipped: [] as string[], html: { path: HTML_FILE, bytes: size(html), changed: null }, pages: Object.entries(files).map(([file, text]) => ({ path: `${REPORTS_DIR}/${file}`, bytes: size(text), changed: null })), theme: { path: THEME_FILE, mode: theme.mode, sources: theme.sources.length, changes: changes.changed, fallbacks: theme.fallbacks.length } };
+  const result = { skipped: [] as string[], html: { path: HTML_FILE, bytes: size(html), changed: null }, pages: Object.entries(files).map(([file, text]) => ({ path: `${REPORTS_DIR}/${file}`, bytes: size(text), changed: null })), theme: { path: THEME_FILE, mode: theme.mode, repoShape, sources: theme.sources.length, changes: changes.changed, fallbacks: theme.fallbacks.length }, fragments: summary.slots, fragmentsSummary: summary.line };
   if (options.apply) {
-    const themeText = `${JSON.stringify(theme, null, 2)}\n`;
+    const themeText = `${JSON.stringify({ ...theme, repoShape }, null, 2)}\n`;
     const { changed, skipped } = pages.writeSet(root, REPORTS_DIR, files, (file) => readSource(root, file).text);
     result.skipped = skipped;
     result.html.changed = changed.includes("state.html");
@@ -259,13 +220,14 @@ function cli(argv: string[]) {
     const arg = argv[index];
     if (arg === "--apply") options.apply = true;
     else if (arg === "--json") options.json = true;
+    else if (arg === "--strict-fragments") options.strictFragments = true;
     else if (arg === "--root" && argv[index + 1] !== undefined) options.root = argv[++index];
     else throw new StateError("Unknown option");
   }
   const result = render(options.root, options);
   if (options.json) return JSON.stringify(result, null, 2);
   const { html, theme } = result;
-  return printable(`theme: ${theme.mode} (${theme.sources} source file(s), ${theme.fallbacks} fallback(s))${theme.changes.length ? `; changed: ${theme.changes.join(", ")}` : ""}`) + `\n${options.apply ? `${html.changed ? "wrote" : "unchanged"} ${html.path}; ${result.pages.filter((p) => p.changed).length} of ${result.pages.length} report page(s) written` : `preview only (${html.bytes} bytes, ${result.pages.length} pages; pass --apply to write ${REPORTS_DIR}/)`}` + (result.skipped.length ? `\nskipped user-owned page(s): ${result.skipped.join(", ")}` : "");
+  return printable(`theme: ${theme.repoShape === "monorepo" ? "workflow default (monorepo, project CSS not scanned)" : theme.mode} (${theme.sources} source file(s), ${theme.fallbacks} fallback(s))${theme.changes.length ? `; changed: ${theme.changes.join(", ")}` : ""}`) + `\n${options.apply ? `${html.changed ? "wrote" : "unchanged"} ${html.path}; ${result.pages.filter((p) => p.changed).length} of ${result.pages.length} report page(s) written` : `preview only (${html.bytes} bytes, ${result.pages.length} pages; pass --apply to write ${REPORTS_DIR}/)`}` + (result.skipped.length ? `\nskipped user-owned page(s): ${result.skipped.join(", ")}` : "") + `\n${result.fragmentsSummary}`;
 }
 
 

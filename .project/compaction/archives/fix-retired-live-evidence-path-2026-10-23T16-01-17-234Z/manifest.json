@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "fix-retired-live-evidence-path",
+  "sourceRoot": ".project/pitches/fix-retired-live-evidence-path",
+  "archivedAt": "2026-10-23T16:01:17.235Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "7a9ba4e0510454d535c87a5350870c218a4da98570c9cda1b49377058b1c41c7",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "130f5bf0ebcc3dc7597a00935452c9232793e84b78750c657e430e3720c13fc5",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "449f83b7469507799a7586eb54e9ff6b6c6c7cfbb9e11be4206a7b24e0bd5079",
+      "mode": 420
+    },
+    "audit-records/cycle2-coverage.md": {
+      "hash": "ead1c233b0f5c8cc5d4bf89545f4d1fd6b8aeca79f6a22605f644a25d44c01a7",
+      "mode": 420
+    },
+    "audit-records/cycle2-coverage.prompt.md": {
+      "hash": "393c6dab9498a41ebd9521d952c0ce857986d496a3a057e36722d3f831b2a862",
+      "mode": 420
+    },
+    "live-runs.candidate.md": {
+      "hash": "868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "6a61c528919a983287b20208cbb23e02e70a265b68eb92889202881f7ff79fe2",
+      "mode": 420
+    },
+    "repair.patch": {
+      "hash": "4aa0fab0be974fe6139aae6642172096803636d5afeae1e0af7362ed0c3b92cf",
+      "mode": 420
+    },
+    "ship-approved.toon": {
+      "hash": "78b963544fc7d014bb4c1f20c13ecc11bc60f4e67c838cf40757666ce8de7f7c",
+      "mode": 420
+    },
+    "ship-proposal-evidence.toon": {
+      "hash": "a898707011b11b9040bb6d58e43e51ab35ce34731200210f61666723f45735b3",
+      "mode": 420
+    },
+    "ship-proposal.md": {
+      "hash": "76c161eec910d7f4f7e3058236ab1907ded3b1d3d0f936dfa8e302b24ab44475",
+      "mode": 420
+    },
+    "source-proof.toon": {
+      "hash": "38ead5dcdf39d369ce237443e8aae327cd4b514eda4f4100d0a17ed63def4704",
+      "mode": 420
+    }
+  }
+}

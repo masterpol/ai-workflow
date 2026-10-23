@@ -1,12 +1,14 @@
 import assert from "node:assert/strict";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText, createTestDeps } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 
 // ORCA_GATE_UNDER_TEST lets a mutant copy of the gate be exercised by the same assertions (mutant proofs).
 const gate = await import(process.env.ORCA_GATE_UNDER_TEST ?? "./orca-launch-gate.mts") as typeof import("./orca-launch-gate.mts");
@@ -29,7 +31,7 @@ function setPolicy(root: string, enabled: boolean): void {
   policy["use-orca-orchestration"] = enabled;
   fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
 }
-function receipts(version = "1.4.223", caller = true): Obj[] {
+function receipts(version = "1.4.224", caller = true): Obj[] {
   return [
     { name: "orca-cli", markdown: "worktree current; terminal" },
     { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
@@ -38,7 +40,7 @@ function receipts(version = "1.4.223", caller = true): Obj[] {
   ];
 }
 /** Probe runner that serves 3 receipts per evaluation and counts every call. */
-function prober(version: () => string = () => "1.4.223", caller = true) {
+function prober(version: () => string = () => "1.4.224", caller = true) {
   const state = { calls: 0 };
   const run = () => {
     const values = receipts(version(), caller);
@@ -63,7 +65,7 @@ test("allows a launch only on eligible policy plus a fresh probe of the supporte
 
 test("does not require caller.orcaSessionId for an external coordinator outside an Orca terminal", (t: TestContext) => {
   const root = fixture(t);
-  const p = prober(() => "1.4.223", false);
+  const p = prober(() => "1.4.224", false);
   const decision = evaluateLaunch({ ...common, root, env: { PATH: "/usr/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run: p.run });
   assert.equal(decision.allowed, true);
 });
@@ -84,21 +86,24 @@ test("re-reads policy and re-probes on every call: a flip between two calls refu
 
 test("version drift between two calls refuses the second and the probe really ran again", (t: TestContext) => {
   const root = fixture(t);
-  let version = "1.4.223";
+  let version = "1.4.224";
   const p = prober(() => version);
   assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run }).allowed, true);
-  version = "1.5.0";
+  version = "1.4.223";
   const second = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run });
   assert.equal(second.allowed, false);
   assert.equal(second.reason, "runtime-version-unsupported");
   assert.equal(p.state.calls, 6);
-  version = "1.4.223";
+  version = "1.4.224";
   assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run }).allowed, true);
+  version = "1.4.227";
+  const later = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run });
+  assert.deepEqual([later.allowed, later.runtimeVersion], [true, "1.4.227"]);
 });
 
 test("version drift also refuses an external coordinator that has no caller block", (t: TestContext) => {
   const root = fixture(t);
-  const p = prober(() => "9.9.9", false);
+  const p = prober(() => "1.4.223", false);
   assert.equal(evaluateLaunch({ ...common, root, env: { PATH: "/usr/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run: p.run }).allowed, false);
 });
 
@@ -151,7 +156,7 @@ const ok: RunResult = { status: 0, signal: null, stdout: "{}", stderr: "" };
 
 test("launchWorker passes an allowlisted env and a floored timeout, and re-probes every call", async (t: TestContext) => {
   const root = fixture(t);
-  let version = "1.4.223";
+  let version = "1.4.224";
   const p = prober(() => version);
   const seen: SpawnOptions[] = [];
   const deps = childDeps((_c, _a, options) => { seen.push(options); return ok; });
@@ -163,7 +168,7 @@ test("launchWorker passes an allowlisted env and a floored timeout, and re-probe
   assert.equal(seen[0].timeoutMs, 3);
   assert.equal(seen[0].env?.GITHUB_TOKEN, undefined);
   assert.equal(seen[0].env?.PATH, "/usr/bin");
-  version = "2.0.0";
+  version = "1.4.223";
   const second = await launchWorker(request);
   assert.deepEqual([second.launched, second.reason], [false, "runtime-version-unsupported"]);
   assert.equal(seen.length, 1, "no child spawned after version drift");
@@ -302,3 +307,71 @@ test("the switch is read from the project-root ai_workflow_env.json, never .env,
   assert.equal(evaluateLaunch({ ...untouchedProbe(root), env: { PATH: "/usr/bin" } }).reason, "orca-multi-agent-disabled");
 });
 function untouchedProbe(root: string) { return { root, vendor: "codex", deps: nodeDeps, run: refused("run"), present: refused("present") }; }
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonRoot(t: TestContext, enabled = true, legacy = false): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-gate-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(enabled));
+  if (legacy) { fs.mkdirSync(path.join(root, ".project")); setPolicy(root, true); }
+  return root;
+}
+
+test("loadConfig branch: ai-workflow.toon and the legacy policy file give identical launch decisions", (t: TestContext) => {
+  for (const enabled of [true, false]) {
+    const viaLegacy = evaluateLaunch({ ...common, root: fixture(t, enabled), env: SAFE_ENV, run: prober().run });
+    const viaToon = evaluateLaunch({ ...common, root: toonRoot(t, enabled), env: SAFE_ENV, run: prober().run });
+    assert.deepEqual(viaToon, viaLegacy, `enabled=${enabled}`);
+    assert.equal(viaToon.allowed, enabled);
+  }
+});
+
+test("loadConfig branch: a present but invalid ai-workflow.toon refuses the launch and never falls back to a valid legacy file", (t: TestContext) => {
+  const root = toonRoot(t, true, true);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), "schemaVersion: 99\n");
+  const p = prober();
+  const decision = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: p.run });
+  assert.equal(decision.allowed, false);
+  assert.equal(p.state.calls, 0, "no probe ran");
+  assert.equal(evaluateLaunch({ ...common, root: toonRoot(t, true, true), env: SAFE_ENV, run: prober().run }).allowed, true, "valid TOON wins over legacy");
+});
+
+// ---- integrations.orca.engine range ----
+function engineRoot(t: TestContext, engine: string): string {
+  const root = toonRoot(t);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(true).replace('engine: ">=1.4.224"', `engine: "${engine}"`));
+  return root;
+}
+
+test("engine range: the configured range decides, and a denial names the range and the found version", (t: TestContext) => {
+  const ranged = engineRoot(t, ">=1.4.224 <1.6.0");
+  assert.equal(evaluateLaunch({ ...common, root: ranged, env: SAFE_ENV, run: prober(() => "1.5.9").run }).allowed, true);
+  const above = evaluateLaunch({ ...common, root: ranged, env: SAFE_ENV, run: prober(() => "1.6.0").run });
+  assert.deepEqual([above.allowed, above.reason, above.engine, above.foundVersion], [false, "runtime-version-unsupported", ">=1.4.224 <1.6.0", "1.6.0"]);
+  const exact = evaluateLaunch({ ...common, root: engineRoot(t, "1.4.224"), env: SAFE_ENV, run: prober(() => "1.4.227").run });
+  assert.deepEqual([exact.allowed, exact.reason], [false, "runtime-version-unsupported"]);
+  assert.equal(evaluateLaunch({ ...common, root: engineRoot(t, "^1.4.223 || ^2.0.0"), env: SAFE_ENV, run: prober(() => "2.3.0").run }).allowed, true);
+});
+
+test("engine range: an absent range keeps the SUPPORTED_VERSION floor", (t: TestContext) => {
+  const root = fixture(t);
+  assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: prober(() => "1.4.223").run }).reason, "runtime-version-unsupported");
+  assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: prober(() => "1.9.0").run }).allowed, true);
+});
+
+test("engine range: an invalid range fails closed before any probe (config validation rejects it first) and never falls back to the default", (t: TestContext) => {
+  for (const engine of ["^^1", "1.5.0-beta.1", ">= 1.4.224", "latest"]) {
+    const p = prober();
+    const decision = evaluateLaunch({ ...common, root: engineRoot(t, engine), env: SAFE_ENV, run: p.run });
+    assert.deepEqual([decision.allowed, decision.reason, p.state.calls], [false, "policy-malformed", 0], engine);
+  }
+});
+
+test("engine range: a hostile runtime version is refused and never echoed into the decision", (t: TestContext) => {
+  const root = engineRoot(t, ">=1.4.224");
+  for (const hostile of [`\u001b[31mFAKE\nline2${"A".repeat(5000)}`, "1.5.0-beta.1", "undefined", "01.4.224"]) {
+    const decision = evaluateLaunch({ ...common, root, env: SAFE_ENV, run: prober(() => hostile).run });
+    assert.deepEqual([decision.allowed, decision.reason, decision.foundVersion], [false, "runtime-version-unsupported", undefined], JSON.stringify(hostile.slice(0, 20)));
+    assert.ok(!JSON.stringify(decision).includes("FAKE"));
+  }
+});

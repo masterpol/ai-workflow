@@ -1,6 +1,6 @@
 import { runDirect } from "../../scripts/runtime/cli.mts";
 /*
- * Renders a schema v2 token-consumption snapshot as Markdown and as a static HTML page.
+ * Renders a token-consumption snapshot (any token snapshot revision) as Markdown and as a static HTML page.
  * Pure functions: no file access, no side effects. Every name in a snapshot came from a hook
  * payload, so it is escaped for its output format and never split: the renderer always
  * iterates vendor, then name.
@@ -8,8 +8,11 @@ import { runDirect } from "../../scripts/runtime/cli.mts";
 
 const UNREPORTED = "(unreported)";
 const OTHER = "(other)";
+const UNATTRIBUTED = "(unattributed)";
+const NO_SCOPE = "(none)";
 const UNITS = new Map([["opencode", "assistant messages"], ["claude", "subagent runs"], ["codex", "subagent runs"]]);
 const NO_DATA = "No data yet";
+const MAX_FLOW_ROWS = 600;
 
 type Plain = Record<string, unknown>;
 type RowField = "completions" | "reportedUsageCount" | "unavailableCount" | "tokens" | "costUsd" | "pricedCount" | "uses";
@@ -30,6 +33,10 @@ interface CleanRecord {
   mode: string | null;
 }
 
+interface CleanFlowPitch { at: string | null; phases: Record<string, CleanFlowPhase> }
+interface CleanFlowPhase { scopes: Record<string, Record<string, Row>> }
+interface CleanFlows { since: string | null; pitches: Record<string, CleanFlowPitch> }
+
 interface CleanSnapshot {
   updatedAt: string | null;
   current: CleanRecord | null;
@@ -43,6 +50,7 @@ interface CleanSnapshot {
     vendors: Record<string, VendorTotals>;
   };
   dimensions: { since: string | null; models: Dimension; agents: Dimension; efforts: Dimension; skills: Dimension };
+  flows?: CleanFlows;
 }
 
 interface Table { headers: string[]; textColumns: number; rows: string[][] }
@@ -154,6 +162,64 @@ function skillTable(byVendor: unknown): Table {
   return { headers: ["Vendor", "Skill", "Uses"], textColumns: 2, rows };
 }
 
+interface FlowEntry { pitch: string; phase: string; scope: string; vendor: string; row: Partial<Row> }
+
+function flowEntries(flows: CleanFlows): FlowEntry[] {
+  const rows: FlowEntry[] = [];
+  for (const [pitch, byPitch] of entries(flows.pitches)) {
+    for (const [phase, byPhase] of entries(byPitch.phases)) {
+      for (const [scope, byVendor] of entries(byPhase.scopes)) {
+        for (const [vendor, row] of entries(byVendor)) rows.push({ pitch, phase, scope, vendor, row });
+      }
+    }
+  }
+  return rows;
+}
+
+function flowTable(flows: CleanFlows): Table {
+  const sorted = flowEntries(flows)
+    .sort((left, right) =>
+      count(right.row.completions) - count(left.row.completions) ||
+      left.pitch.localeCompare(right.pitch) ||
+      left.phase.localeCompare(right.phase) ||
+      left.scope.localeCompare(right.scope) ||
+      left.vendor.localeCompare(right.vendor))
+    .slice(0, MAX_FLOW_ROWS);
+  const rows = sorted.map(({ pitch, phase, scope, vendor, row }) => [
+    displayName(pitch),
+    displayName(phase),
+    displayName(scope),
+    vendor,
+    formatNumber(count(row.completions)),
+    hasTokens(row) ? formatNumber(count(row.tokens)) : "Unavailable",
+    costCell(row),
+  ]);
+  return { headers: ["Pitch", "Phase", "Scope", "Vendor", "Completions", "Tokens", "Cost"], textColumns: 4, rows };
+}
+
+function flowTotals(flows: CleanFlows): { completions: number; unattributed: number } {
+  let completions = 0;
+  let unattributed = 0;
+  for (const [pitch, byPitch] of entries(flows.pitches)) {
+    for (const [phase, byPhase] of entries(byPitch.phases)) {
+      for (const [scope, byVendor] of entries(byPhase.scopes)) {
+        for (const [vendor, row] of entries(byVendor)) {
+          const value = count(row.completions);
+          completions += value;
+          if (pitch === UNATTRIBUTED) unattributed += value;
+        }
+      }
+    }
+  }
+  return { completions, unattributed };
+}
+
+function unattributedLine(flows: CleanFlows): string {
+  const { completions, unattributed } = flowTotals(flows);
+  if (completions === 0) return `Unattributed: ${NO_DATA}`;
+  return `Unattributed: ${unattributed} of ${completions} completions since ${flows.since || "unknown"}`;
+}
+
 // Rank by reported tokens among entries that reported usage; a missing total is not zero. Only when
 // no entry reports tokens does the ranking fall back to completions, and the basis says so.
 function rank(candidates: RankEntry[]): Ranked {
@@ -227,6 +293,7 @@ function usageLines(snapshot: CleanSnapshot): string[] {
     `Most used vendor: ${topVendor.top ? entryText(topVendor.top) : NO_DATA}`,
     `Most used model: ${topModel.top ? entryText(topModel.top) : NO_DATA}`,
   ];
+  if (snapshot.flows) lines.push(unattributedLine(snapshot.flows));
   if (!topVendor.top) {
     lines.push("Ranking basis: no completions recorded yet.");
     return lines;
@@ -277,6 +344,7 @@ const MODE = /^[a-z][a-z-]{0,23}$/;
 const AVAILABILITY = new Set(["reported", "partial", "unavailable"]);
 const plain = (value: unknown): Plain => (value !== null && typeof value === "object" && !Array.isArray(value) ? (value as Plain) : {});
 const label = (value: unknown, fallback: string = OTHER): string => (value === UNREPORTED || value === OTHER ? value : typeof value === "string" && SAFE_LABEL.test(value) ? value : fallback);
+const flowLabel = (value: unknown, fallback: string = OTHER): string => (value === UNATTRIBUTED || value === NO_SCOPE || value === UNREPORTED || value === OTHER ? value : typeof value === "string" && SAFE_LABEL.test(value) ? value : fallback);
 const numberOrNull = (value: unknown): number | null => (typeof value === "number" && Number.isFinite(value) ? value : null);
 const date = (value: unknown): string | null => (typeof value === "string" && DATE.test(value) ? value : null);
 
@@ -310,6 +378,27 @@ function cleanDimension(byVendor: unknown): Dimension {
   return cleaned;
 }
 
+function cleanFlows(input: unknown): CleanFlows {
+  const source = plain(input);
+  const cleaned: CleanFlows = { since: date(source.since), pitches: Object.create(null) };
+  for (const [pitch, byPitch] of entries(source.pitches)) {
+    const pitchSource = plain(byPitch);
+    // Names that clean to the same label are merged, never overwritten: a hostile name must not erase another row.
+    const pitchCleaned = (cleaned.pitches[flowLabel(pitch)] ||= { at: date(pitchSource.at), phases: Object.create(null) });
+    for (const [phase, byPhase] of entries(pitchSource.phases)) {
+      const phaseCleaned = (pitchCleaned.phases[flowLabel(phase)] ||= { scopes: Object.create(null) });
+      for (const [scope, byVendor] of entries(plain(byPhase).scopes)) {
+        const scopeCleaned = (phaseCleaned.scopes[flowLabel(scope)] ||= Object.create(null) as Record<string, Row>);
+        for (const [vendor, row] of entries(byVendor)) {
+          const merged = (scopeCleaned[label(vendor, "unknown")] ||= Object.fromEntries(ROW_FIELDS.map((field) => [field, 0])) as Row);
+          for (const field of ROW_FIELDS) merged[field] += count(plain(row)[field]);
+        }
+      }
+    }
+  }
+  return cleaned;
+}
+
 function cleanSnapshot(snapshot: unknown): CleanSnapshot {
   const source = plain(snapshot);
   const lifetime = plain(source.lifetime);
@@ -333,6 +422,7 @@ function cleanSnapshot(snapshot: unknown): CleanSnapshot {
       vendors,
     },
     dimensions: { since: date(dimensions.since), models: cleanDimension(dimensions.models), agents: cleanDimension(dimensions.agents), efforts: cleanDimension(dimensions.efforts), skills: cleanDimension(dimensions.skills) },
+    ...(source.flows !== undefined ? { flows: cleanFlows(source.flows) } : {}),
   };
 }
 
@@ -346,6 +436,7 @@ export function markdown(input: unknown): string {
     .map(([vendor, values]) => `| ${mdCell(vendor)} | ${values.completions} | ${values.reportedUsageCount} | ${values.unavailableCount} | ${formatCost(values.reportedCostUsd)} |`)
     .join("\n") || "| None | 0 | 0 | 0 | $0.000000 |";
   const dimensionSections = views(snapshot).map(({ title, table }) => `## ${title}\n\n${markdownTable(table)}`).join("\n\n");
+  const flowSection = snapshot.flows ? `## By Flow\n\n${markdownTable(flowTable(snapshot.flows))}` : "";
   return `# Agent Token Consumption
 
 Updated: ${snapshot.updatedAt || "Never"}
@@ -388,7 +479,7 @@ ${vendors}
 
 ${mdCell(sinceLine(snapshot))} ${COST_NOTE}
 
-${dimensionSections}
+${dimensionSections}${flowSection ? "\n\n" + flowSection : ""}
 `;
 }
 
@@ -409,6 +500,7 @@ export function html(input: unknown): string {
     .join("") || "<tr><td>None</td><td>0</td><td>0</td><td>0</td><td>$0.000000</td></tr>";
   const usage = usageLines(snapshot).map((line) => `<p>${escapeHtml(line)}</p>`).join("");
   const dimensionSections = views(snapshot).map(({ title, table }) => `<section><h2>${escapeHtml(title)}</h2>${htmlTable(table)}</section>`).join("\n");
+  const flowSection = snapshot.flows ? `<section><h2>By Flow</h2>${htmlTable(flowTable(snapshot.flows))}</section>` : "";
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -435,7 +527,7 @@ export function html(input: unknown): string {
 <section><h2>Lifetime</h2><table><thead><tr><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Reported tokens</th><th>Actual cost</th></tr></thead><tbody><tr><td>${snapshot.lifetime.agentCompletions}</td><td>${snapshot.lifetime.reportedUsageCount}</td><td>${snapshot.lifetime.unavailableCount}</td><td>${formatNumber(snapshot.lifetime.tokens.total)}</td><td>${formatCost(snapshot.lifetime.reportedCostUsd)}</td></tr></tbody></table></section>
 <section><h2>By Vendor</h2><table><thead><tr><th>Vendor</th><th>Completions</th><th>Usage reported</th><th>Usage unavailable</th><th>Actual cost</th></tr></thead><tbody>${vendorRows}</tbody></table></section>
 <p>${escapeHtml(sinceLine(snapshot))} ${escapeHtml(COST_NOTE)}</p>
-${dimensionSections}
+${dimensionSections}${flowSection ? "\n" + flowSection : ""}
 </main></body></html>
 `;
 }

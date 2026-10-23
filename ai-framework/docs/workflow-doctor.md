@@ -10,7 +10,7 @@ load the canonical file (or, for a script-backed skill like `workflow-doctor` it
 it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
 scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
 It also requires the caveman-mode instruction in every canonical skill, agent, and (in this bundle)
-both entry files, validates `.project/skills/modes.json`, and reports the live state — active, inert
+both entry files, validates the caveman mode config (`ai-workflow.toon` `skills.modes`, or legacy `.project/skills/modes.json` when that file is absent), checks the project-root `ai-workflow.toon` when present (see `Workflow config`), and reports the live state — active, inert
 (skill not installed), disabled, or under-covering the workflow — so "carries the instruction" is
 never mistaken for "is on".
 Checks run concurrently and print color-coded progress as each completes. Skills installed with
@@ -32,17 +32,24 @@ or the knowledge graph — nothing needs manual registration for the doctor to p
 ## Project-owned model routing
 
 By default the doctor enforces the bundled OpenCode routes and the Codex model and effort for each
-profile. A project that deliberately routes its own models can say so in `.project/workflow-doctor.json`:
+profile. A project that deliberately routes its own models says so in `ai-workflow.toon`:
 
-```json
-{ "schemaVersion": 1, "modelRouting": "project" }
+```toon
+doctor:
+  modelRouting: project
 ```
 
-With `"project"`, an OpenCode `model:` line is only required to be a well-formed `provider/model` id
+With `project`, an OpenCode `model:` line is only required to be a well-formed `provider/model` id
 (a missing line inherits the harness configuration), and a Codex adapter is not required to declare a
-model or `xhigh` effort. Everything else is still checked. `"bundle"` (also the default when the file is
-absent) keeps the full check. A malformed file is reported as a failure and the bundled routes stay
-enforced. The file is instance data: bundle syncs never write or overwrite it.
+model or `xhigh` effort. Everything else is still checked. `bundle` (the shipped example's value) keeps
+the full check. Any other value is a config problem, and the bundled routes stay enforced; so do they
+when the toon is refused or has problems. The `Model routing` line in the report names where the value
+came from.
+
+The older `.project/workflow-doctor.json` (`{ "schemaVersion": 1, "modelRouting": "project" }`) is read
+only when there is no `ai-workflow.toon`; while a toon exists it is ignored and named in the report.
+`config-migrate` carries its value into the toon (and backs the file up); without it, the migrator writes
+`bundle`. Both files are instance data: bundle syncs never write or overwrite them.
 
 ---
 

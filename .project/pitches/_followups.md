@@ -317,7 +317,7 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Snapshot metadata walkers (state-snapshot.mts ~293) lack the ancestor-symlink containment the structure scan has; reuse `insideProject`.
 - `writeSet` creates the reports directory before validating its ancestors (F6); directory enumeration in the structure scan lists a whole directory before the visit cap applies (F9).
 - Orca: `collect` rejects a worker report whose files list names a path outside the project; read-only reviewers should report in the message body. Idle worker terminals need `worker-release` before the ledger can be settled.
-- `browser-runtime.test.mts` "CLI end to end" fails locally when `ai_workflow_env.json` selects `bun` (the test empties PATH); pin the runner in the child env. `token-consumption.test.mts` has one intermittent failure on a clean HEAD (passed in the final full Node run). See issue `a-local-workflow-env-file-changes-which-runner-path-tests-spawn`.
+- ~~`browser-runtime.test.mts` "CLI end to end" fails locally when `ai_workflow_env.json` selects `bun` (the test empties PATH); pin the runner in the child env.~~ (resolved 2026-10-17: the child runner is pinned to the host) `token-consumption.test.mts` has one intermittent failure on a clean HEAD (passed in the final full Node run). See issue `a-local-workflow-env-file-changes-which-runner-path-tests-spawn`.
 - Pitch `orca-auto-start-all-phases` is shaped (critique pending): start gate from `evaluateLaunch`, stop-and-ask, `orca=normal` per-call override.
 
 ## orca-auto-start-all-phases leftovers (audit cycles 1-2, 2026-10-08)
@@ -327,7 +327,7 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Orca coordinator-side `evaluateLaunch` still passes the full parent env to its probe child (existing launch gate; out of scope for this pitch).
 
 ## runner-aware-runtime-boundary-validator leftovers (2026-10-08)
-- Migrate the 43 test files that still import `node:fs/os/path/child_process/url/module/crypto/net` to `runtime/test-helpers` (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`); the doctor's Runtime boundary warning lists the count and the first files. The two Orca start test files are in that set.
+- ~~Migrate the 43 test files that still import `node:fs/os/path/child_process/url/module/crypto/net` to `runtime/test-helpers`~~ (resolved 2026-10-17: 49 files migrated, doctor Runtime boundary 0 test violations) (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`); the doctor's Runtime boundary warning lists the count and the first files. The two Orca start test files are in that set.
 - Remaining validator test gaps left as listed in `audit-cycle-2.md` S7 (root symlink, fstat size/type refusal, close error, default deps, doctor plain output / non-directory / exhausted cap).
 - A purely computed `import(x)` and an uncalled `require` are advisory only; consider promoting them if the 8 current computed imports are all reviewed and justified.
 - Cycle-2 final fixes were verified by coordinator-run probes and suites, not by a third independent review; revisit at the next cooldown or when the validator is next touched.
@@ -338,3 +338,237 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - Verify Codex automatic UserPromptSubmit ready context and blocking behavior in a fresh session after `/hooks` trust review. Existing dispatch/collection/release proof does not prove host activation; never bypass trust to manufacture proof.
 - Decide whether to support non-Git hook bootstrap and stricter unsupported direct --root parsing. Current registration requires Git/checkout and blocks before the off check if root lookup fails; documented and tested.
 - Make coverage compatible with the existing exact child-environment assertion without weakening it. Keep Node/Bun regression results separate from instrumentation failures; investigate Bun1.4.2 coverage crash independently.
+
+## upstream-project-drift leftovers (2026-10-16)
+- RN's `next-pitch.mts` pitch numbering: decide whether it becomes a base feature (its own pitch) or stays RN-only (decision 14).
+- Runner-aware usage text and hook commands, so projects that run Bun stop hand-editing `node` into `bun` (RN did
+  this across docs and hooks). Belongs to `unified-toon-config` (decision 11).
+- Climbing: upgrade Orca to 1.4.224 or later before `workflow-v3-rollout` syncs it (decision 13).
+- Flaky tests that fail only under full-suite load, and pass when their file runs alone: "descendant ownership
+  after timeout/output" (runtime, node and bun), the orca-eval-grader mutation proof ("settle without evidence"),
+  diff-admit "a rename is annotated on the add…", reconcile "a diff that touches check definitions…".
+- Orca attempts dispatched under 2.22.x have no `authorizedPaths` and cannot be reconciled after 2.23.0. Decide
+  whether reconcile should accept a legacy attempt when a person confirms its file claims.
+- Codex workers stop at an interactive update prompt (seen with 0.162.1 → 0.163.0) and fail at `agent_readiness`.
+  Consider detecting this in the launch receipt and reporting it as its own reason.
+- The drift ledger read only `ai-framework/` and missed climbing's `.opencode/` fixes. Later drift passes should
+  also compare the vendor adapter directories.
+- OpenCode plugin hardening (U4) was not part of this pitch.
+
+## unified-toon-config leftovers (2026-10-16)
+- Parser: an unclosed quote is accepted as a string, and a comma inside quotes is read as an array (both fail closed). Also: inconsistent indentation is accepted silently; dead codes `inspectPathMissing`/`regexpBacktracking`; the `errorCode` helper is copied four times.
+- Migrator: `.gitignore` update has no re-check before its rename (lost update); classification of an unsupported file uses a regex over the message, a structured version field in `config.mts` would be sturdier (d51); no v1-to-v2 key conversion exists (`--force` replaces and keeps a backup).
+- `readLegacyFile` ancestor race is unproven; `maxRetriesPerTask` is unbounded in config but 0..2 in `orca-policy`.
+- TOON `skills.modes` has no per-phase slot, so a valid TOON ignores `modes.json` phases (d40). Move `readLegacyFile` into `config.mts`.
+- For orca-role-pools: `orca-policy` rejects more than 2 workers per coordinator and keeps only the first role target; the grader writes the legacy JSON policy. For orca-engines-range: `engine` is required, so "default when key absent" cannot apply. For upstream-project-drift: its X2 assumes `orca-policy.mts` is unchanged, and its `status.md` row is stale. For workflow-v3-rollout: README/SETUP are now flagged files and v1 TOON files are refused.
+- `orca-start.mts` `lookupWorker` asks for `--limit 100`; the worker list is now over the 256 KiB output cap, so Orca-requested phases block with `worker-identity-unavailable`. Use a smaller page size.
+- Flaky only under full-suite load: skill-defaults "FIFO or oversize modes.json is skipped".
+- `pre-ship-verify.mts` fails in this repo (no package.json or Muro verifier); the real checks are the test suite and validators.
+
+### orca-engines-range leftovers
+- Link the migrator's `DEFAULT_ENGINE` to `DEFAULT_ENGINE_RANGE` (or test they match) so a floor bump cannot drift.
+- Decide whether `engineRange` should report invalid when a config file exists but fails to load, instead of using the default floor.
+- The `engine-range-invalid` branches in preflight, gate and start are unreachable through config; delete them or test them directly.
+- Optional doctor warning for a bare-version (exact pin) engine.
+
+## orca-role-pools followups (shipped 2026-10-17, v2.27.0)
+
+- **Live concurrency spike** (S4 skipped): run 4 / 8 / 16 no-op `worker-start` workers against a supervised Orca and record the ceiling in `orca-vendors.md` before raising the default (3).
+- **Case-folded path overlap**: `authorizedPathsOverlap` is case-sensitive; on case-insensitive filesystems `Src/` and `src/` can both be live. Reject case variants in `validAuthorizedPaths` or compare case-folded. Integration (`orca-apply`) still refuses true overlap.
+- ~~**In-place v2→v3 config conversion**~~ (resolved 2026-10-17 by vendor-model-toon: `convertV2`): the reader's refusal text promises `config-migrate --apply` converts v2 files; today it needs `--force` and drops values. Owner: vendor-model-toon / workflow-v3-rollout (its `--apply` step will hit this).
+- **`runtime/upgrade.test.mts` (3 tests)**: the old-install fixture fails the agent-model-sweep doctor (Codex startup wiring, README links, mandatory `ai-workflow.toon`). Seed the fixture with the example toon / current bundle.
+- **Review prompt hashes**: record the SHA-256 of each reviewer prompt in `audit.md` (the contract asks for it; skipped this time).
+- **Vanishing local `ai-workflow.toon`**: it disappeared mid-audit with no known cause (gitignored, so nothing recovers it). Find the deleter; consider the doctor printing the recovery command.
+- **Holder-state test as a table**: iterate `STATES` against the `holds` predicate instead of a loop plus one case.
+- **workflow-v3-rollout planning inputs**: preflight now probes every pool member; release numbering with agent-model-sweep's 2.28.0.
+
+## agent-model-sweep-bet-3 (cooldown 2026-10-17, bundled from SHIPPED.md followups) — **approved as a candidate pitch 2026-10-22**
+
+Items bundled:
+- Remove `model:` from `.opencode/agents/*.md` (16), `.codex/agents/*.toml` (16), `.opencode/commands/*.md` (28).
+- Doctor relaxation: `checkAgent` under bundle routing no longer requires `^model: <toon id>$` in mirrors (per critique C12: split into 3a (doctor: presence→absence under bundle routing) + 3b (scripted sweep)).
+- New tests for the doctor relaxation (mutant tests for the `^model:` requirement removal).
+- Cursor regen: cursor-mirrors + manual copy of `report.differs` (the 16 `.cursor/agents/*.md` were already done in Bet 2; Bet 3 does not need to redo them).
+
+## mandatory-fixture-seeding (cooldown 2026-10-17, bundled) — **approved as a candidate pitch 2026-10-22**
+
+Items bundled:
+- `upgrade.test.mts` 3 failures (Codex startup wiring, README links, mandatory `ai-workflow.toon` — pre-existing Bet 1 fixture gap).
+- The "every test that creates a temp project from the bundle must seed the example toon" pattern (generalize from the skill-defaults/skill-vendors/orca-preflight fixes in Bet 1 and Bet 2).
+- `agent-frontmatter-invariant.test.mts` negative fixtures (T2: out-of-allowlist profile, missing profile, malformed frontmatter, has-model-line).
+
+## doc-sweep-stale-claims (cooldown 2026-10-17, bundled from agent-model-sweep Bet 2 audit should-fix) — **approved as a candidate pitch 2026-10-22**
+
+Items bundled:
+- `harnesses.md` OpenCode section still hardcodes model ids as authoritative (rows 17-19, 46-48).
+- `parseFrontmatter` untyped return (TS strict; add `tsconfig.json` with `strict:true`).
+- `new URL(...).pathname` portability (use `fileURLToPath` for Windows + macOS `/var` alias).
+- Hardcoded agent count `=== 16` (assert `> 0` instead).
+- Stale test titles referencing the removed fallback (rename to "reads profile: frontmatter (no legacy model: fallback)").
+
+## bundle-sync-stale-ledger (cooldown 2026-10-17, bundled) — **approved as a candidate pitch 2026-10-22**
+
+Items bundled:
+- Refresh the rows in `.project/analysis/2026-10-16-upstream-drift-ledger-analysis.md` (the drift ledger, moved out of the compacted `upstream-project-drift` pitch) for `extending.md`/`vendors.md` (rows 79, 81, 168 — marked `conflict` because the project-side version differs from the updated bundle).
+- Refresh row 270 (base-side `agent.build.model` description, now stale).
+- Verify the bundle-sync seed flow carries the v3 toon into a fresh project (the bet 1 mandatory-toon check depends on the toon being present). **2026-10-22: also proven for the new consolidation files by `connected-memory-consolidation` P2d-S3 (fresh-install case); the rest of this bundle stays its own pitch.**
+
+- ~~**upgrade.test.mts fails at HEAD (3 tests)**~~ (resolved 2026-10-17: the sync now adds missing workflow hook groups, the doctor and upgrade doc name `config-migrate --apply`, the simulation runs it): old-install fixture lacks `ai-workflow.toon` (doctor "mandatory" check fails) and Codex startup wiring is unregistered, so `workflow-doctor` exits 1. Found 2026-10-17 during vendor-model-toon completion; unrelated to its diff. Owner: workflow-v3-rollout / next cooldown.
+
+## workflow-v3-rollout readiness run (2026-10-17)
+- ~~`doctor.modelRouting` in `ai-workflow.toon` is inert~~ (resolved 2026-10-17: doctor reads the toon, reader validates, migrator carries the legacy value, default `bundle`): the doctor reads only the legacy `.project/workflow-doctor.json`, `config-migrate` always writes `project` (never reads the legacy file), and the reader accepts any string. Decide the default before retiring the legacy file. See `workflow-v3-rollout/readiness.md`.
+- ~~The doctor checks Codex Orca startup wiring~~ (resolved 2026-10-17: "Claude startup wiring" check added) (`AI_WORKFLOW_RUNNER=node node ...`) but not the Claude `PreToolUse`/`UserPromptExpansion` Orca hooks; RN's bun-wired Claude hooks pass silently.
+- `skill-vendors cursor-mirrors --apply` skips project-added agents (climbing `e2e-runner`, `tdd-guide`).
+- token-consumption tests flake ~1 in 12 isolated runs with "metrics lock is held by another writer" (the lock port is a hash of the directory mod 10000).
+- ~~Post-commit graph hook drops the knowledge overlay~~ (resolved 2026-10-17: `graphify.mts setup` installs overlay-aware hooks, replaces raw blocks; doctor warns while one remains).
+
+## fix-instruction-conflicts leftovers (2026-10-18)
+- Golden behavior cases for the workflow's own prompts (gates per appetite, Orca refusal stop, review summary/INCOMPLETE, AI-scope trigger outside `lib/ai/prompts/`, read-only reviewer, cycle caps, lite card). Owned by `instruction-compression`; required before its bet. The fix's eval review is recorded `not-completed` with the risk accepted by the owner.
+- Reviewer scratch copies must include every file a contract reads (`.agents/`, `SETUP.md`, hook modules, `skill-vendors.json`): the first code review and two suites came back incomplete only because the copy lacked them.
+
+## instruction-compression leftovers (2026-10-19)
+- **S3 ship wrapper retry** (med): deferred after final OpenCode scoring lost two satisfied review-nonsecurity-evidence criteria and returned two baseline zeros as null. Restart from `.project/analysis/2026-10-18-instruction-compression-s3-review-analysis.md` (what completed, the four criterion losses, the restore plan), not from the rejected draft. The rejected trial files and the other pitch records are in the recovery archive (`pitch-archive.mts restore instruction-compression`); the frozen dataset stays at `.project/evals/datasets/instruction-compression.json`.
+- Reviewer approval criteria conflict with incomplete-review handling (unchanged owner text); attribute before compressing further.
+- OpenCode native loading is unobservable (clipped terminal fallback, no read events); Codex and Cursor behavior unverified.
+- Remaining ~40 canonical wrappers and the repeated caveman/dispatch banners are not compressed; measured savings so far are source-word proxies only.
+- Mutation-proof scripts that edit source in place must restore on exit (trap) — see knowledge issue `mutation-script-killed-leaves-source-mutated`.
+
+## toon-machine-data leftovers (2026-10-19)
+- **toon-skill-registry** (med): (start from `.project/analysis/2026-10-18-agent-load-inventory-analysis.md`) `.project/skills/registry.json` is the one existing file agents open on every phase (the caveman banner says to check it). Six readers (`skill-registry`, `skill-sync`, `add-skill`, `state-snapshot`, `bundle-sync`, `browser-runtime`), five tests, `.gitignore` and the bundle-sync "never synced" rule change with it. Sequence after the banner rewrite in `instruction-compression`.
+- Wire `eval-runner` and other readers to `readData` so the rule's "every reader" is true; today only `data-file.mts` and the converter use it (low).
+- Converter and writer: detect JSON loss the parser hides (integers beyond 2^53, duplicate keys), refuse hard links, keep file mode on replace, fsync the directory (low).
+- Run the 5 live-only golden cases in `.project/evals/datasets/toon-machine-data.json` once an eval harness exists (med).
+- The agent-load inventory method in `.project/analysis/2026-10-18-agent-load-inventory-analysis.md` (evidence by `file:line`) could become a small script if more files are proposed for conversion (low).
+
+## state-report-redesign leftovers (2026-10-19)
+- Update the `/state` skill and its mirrors: "theme is rediscovered from the project's own CSS" is stale for monorepos; the CLI preview already names the reason (med).
+- `state-pages.mts` `writeSetInner` runs `mkdirSync(recursive)` before its symlink check, so a symlinked `.project` leaves an empty `reports/` outside the project (low, pre-existing).
+- Ownership marker is matched with `includes` anywhere in a page, so a user file that quotes it is overwritten; `readSource` reads up to 1 MiB before the 64 KB slice for `package.json` (low, pre-existing).
+- Small duplication: `esc` in `state-charts.mts` and `state-render.mts`, three unavailable chips, `isFact` twice, unused `h.CSP` in `createStatePages` (low).
+- The structure page still renders `structure.tree` for a monorepo; decide whether "monorepo never lists the tree" should cover it (low).
+- View the redesigned report in a browser at 360px (sidebar height, chart fallback) and print (low, not done: static checks only).
+- The `old install upgrades with its own bundle-sync` test took 111 s and failed once in the full parallel run; passes alone (low, flaky under load; the retry passed in the full suite).
+
+## From token-attribution (2026-10-19)
+- Codex usage: parse the session log for `total_token_usage` (about 45 LOC); the on-disk shape is unconfirmed, and so is whether `UserPromptSubmit` and `SubagentStop` repeat one session id. Needs `.codex/hooks.json` plus `orca-start-codex-hook.test.mts` changes (med).
+- OpenCode child sessions: the plugin passes no parent session id, so child completions are `(unattributed)`; verify whether session-created events expose one (low-med).
+- Verify live: the Claude `Stop` payload carries `transcript_path`, and `SubagentStop` vs `PostToolUse(Agent)` order for foreground agents (low).
+- One pitch built across several git worktrees splits its metrics; a join or main-checkout resolution is not built (low).
+- `leastRecentPitch` sorts pitches without `at` by NaN; `resolveFlow` can overshoot the leaf cap by one `(other)/(other)` row; stored context labels are only checked to be strings (low).
+- Path-length cap and locked id-window filter have no distinguishing test (equivalent mutants) (low).
+- Cross-pitch ruling needed: `state-report-redesign` (after the token revision) vs `state-deep-evidence` (wants redesign S2 first); `state-deep-evidence` plan.md:27 is stale (resolver export exists) (med).
+- Brief workers with the data shape and pin the worktree base to HEAD; `ai-workflow.toon` is git-ignored so workers cannot run doctor-based checks (low).
+
+## From state-fragment-sanitizer (2026-10-20)
+- **`pre-ship-verify.mts` route for a package-less bundle** (med): the verifier selects its checks from a root `package.json` (or the Muro viewer verifier), and this bundle has neither, so `/ship` blocked on it on the first attempt. A durable route is needed: either a documented `verify:base`-style contract that does not require a `package.json`, or a bundle-local check manifest the verifier can read. The temporary `package.json` used at this ship is not a fix.
+- **Renderer/injector wiring** (med): `sanitizeFragment` and `checkCitations` are a library only. Nothing calls them yet; `state-ai-authoring` owns the injector that places sanitized markup into a page and the provenance/staleness label.
+- **Nine deferred dataset cases** (med): `.project/evals/datasets/state-ai-fragments.json` — 5 live-only (model, prompt-injection, snapshot) and 4 injector cases — are owned by `state-ai-authoring`; they are not enforced by any test today.
+- **Shared transcript-path rule** (low): the evidence checker classifies a transcript path locally. Fold the rule into the shared `safeEvidencePath` once `state-report-redesign` releases `state-render.mts`, so there is one authority for secret/transcript paths.
+- **`state-report-redesign` marker and token export** (low): the sanitizer's default allow-lists are the 7 color tokens and one marker class. The redesign pitch should export its class, token and marker lists and own the marker defs, so the integration point has real values to inject.
+
+## From workflow-usage-state (2026-10-20)
+- **`workflow-usage-capture` (A2) wires the hooks and calls the exported resolver** (med): this pitch is the state library only; nothing writes `session.started`, `agent.*` or phase events automatically. Shaping draft: `.project/pitches/workflow-usage-capture/shaping-draft.md`. `token-time-report` (part B) reads the state read-only and owns the time and flow tables.
+- **Runtime constants for an `O_APPEND` marker open** (low-med): add `O_WRONLY`, `O_APPEND` and `O_CREAT` to `FsConstants` in `runtime/types.mts` and `runtime/node.mts` (and the Bun adapter), then open `workflow-usage.dropped` with them plus `O_NOFOLLOW`. Closes the accepted symlink-planting and FIFO-swap windows (`deviations.md` S6).
+- **Full-suite `[dataset-mapping]` flake and `bun test ai-framework` stall** (med): 14 `state-fragment-dataset.test.mts` tests fail intermittently in the full Node suite ("a top-level test is not ok" in a child run); they pass alone and fail identically without this pitch. `bun test ai-framework` prints nothing and stalls. A stale `bun ../probe.mts` has run at 100% CPU since 11 Oct.
+- **`pre-ship-verify.mts` for a package-less bundle** (med, hit again): exits 1 with no project checks; `/ship` ran the real commands from `stack.md` instead.
+- **Audit tuning** (low): the test-coverage reviewer ran inside the code reviewer's canary scratch tree and reported the canary as its must-fix; give it its own tree. A reviewer wrote one output file inside the scratch audit directory (outside the repo, flagged in the record).
+- **Test hygiene** (low): the full-cap size test takes about 8 s (`scopeRow` leaf recount); the cut-back test spins instead of failing if its guard is removed; the older metrics tests still bind the real loopback port (flake 0/12).
+- **Step 3 hardening for small models, then re-run the OpenCode half of the live matrix** (med, from `state-ai-authoring`): path cheat sheet without `.value.`, links must be files, an absolute stop after two rejections; the live claim is `blocked` (51 of 72) until all vendors pass twice per case. Any skill wording change invalidates the earlier passes, so re-run the whole matrix.
+- **`uncited-claim` fixture and rubric** (med, from `state-ai-authoring`): the fixture's knowledge fact has no evidence path, so "every risk cites an evidence path" cannot pass; either give the fact evidence or relax the case.
+- **Fragment headings that repeat the label; long overview block** (low, from `state-ai-authoring` UX review): start fragments at h3; consider collapsing long bodies.
+- **Empty-slot byte-identity test and summary accuracy** (low): render both paths from one fixture inside a test (no stored golden hash); the `AI analysis:` line counts a cap-omitted slot as fresh.
+- **Close the by-path write/delete race in `fragments/`** (low): `process.chdir` into the checked directory in the CLI, or fd-relative file calls; `writeAtomic` is shared with `state.json`.
+- **`review-bench guard` skips `.project/evals/runs/`** (low): the snapshot exceeded its size limit once 72 run directories existed; the audit used an mtime sweep.
+- ~~`ai-workflow.toon` invalid mid-session~~ (resolved 2026-10-20 by the owner, `workers[2]: codex,claude`): the local git-ignored file was edited during `state-ai-authoring` and briefly failed `ORCHESTRATION-WORKERS-INCOMPLETE`; it was never a HEAD failure.
+- **`state-deep-evidence`**: add any new clock-derived snapshot path to `VOLATILE_PATHS` and `state-report.md`, and keep its dataset cases out of `state-ai-fragments.json` (22-case partition).
+- **Sanitizer wall-clock test fails under load** (med, root cause of the full-suite `[dataset-mapping]` flake; seen again in `state-ai-authoring`): `state-fragment.test.mts:255` "[reject-oversize-and-deep] 5 MB path d rejects as geometry…" asserts a time bound and took 1.24 s with six suites in parallel; the dataset test then reports 16 red lines (child exit 1, 346 of 347). Passes alone. Use a step-count or relative bound, or a generous ceiling.
+
+- **Orca startup identity lookup exceeds its own output cap** (med, observed 2026-10-20 during `workflow-usage-capture`): `lookupWorker` requests 100 fully projected worker rows; the local receipt was 268,003 bytes, above `MAX_OUTPUT_BYTES` (262,144). Startup returned `worker-identity-unavailable` despite a healthy runtime. Owner-requested `orchestration reset --tasks` after verifying 111 dispatches and 110 tasks were settled restored readiness. Use smaller paginated worker-list requests or a bounded identity projection, and add a regression over a large historical worker fleet. Preserve live/unknown worker ownership; cleanup must remain an explicit user action.
+
+
+## From workflow-usage-capture audit (2026-10-21)
+
+- **Workflow metrics documentation clarity** (low; owner: workflow metrics docs maintenance): remove the
+  ambiguity of the A1 core guide's planned hook table at workflow-metrics.md:125-128 now that the separate
+  capture adapter is wired. harnesses.md already describes the current events and unwired vendors.
+- **OpenCode token-plugin metadata retention** (low; owner: OpenCode token-plugin maintenance): the existing
+  V2 steps Map has no cap/TTL when a start never gets an end/failure. Verified present before capture at
+  868212b:129,147,169. Capture does not add entries to this Map. Add a bounded retention policy separately.
+- **Orca model-pin capability preflight** (med; owner: Orca adapter maintenance): this runtime pins OpenCode
+  models only for 1.18.30, 1.18.32 and 2.0.16; installed 2.1.1 is refused before worker creation. The library
+  reduces that structured preflight failure to launch-failed:unproven and claims unknown ownership. Preserve
+  a bounded safe error/capability receipt or probe before claiming, without weakening fail-closed liveness.
+  This audit recovered using runtime code-path/version proof and used configured Claude alternates; no
+  OpenCode version, credentials, global settings or app code was changed.
+
+
+## From state-deep-evidence ship (2026-10-21)
+
+- **state-monorepo-packages** (med): implement the deliberately cut S6 package map through bounded named manifest reads; preserve unavailable semantics until it exists.
+- **Structured audit counts** (med): define stable machine-readable audit-cycle/must-fix/revision records; current history parser correctly reports unavailable for unrecognized prose formats. Keep event-derived transitions separate.
+- **State metrics/tokens extraction** (low-med): split their cohesive reader/assembly functions out of state-snapshot.mts without duplicating token reads, scope resolution or usage semantics; snapshot exceeded its planned growth allowance.
+- **structure.tree label hardening** (med): drop or replace directory labels outside a conservative allow-list. Existing tree names are explicitly outside the deep-evidence injection case; do not claim full-snapshot injection coverage from that case.
+- **Deep-evidence live reliability and vendor rerun** (med): address Claude fact-path/no-fragment/semantic failures and rerun its 15-case matrix; rerun OpenCode when quota permits. Preserve the two 0.50 regressions and all not-run rows until fresh evidence replaces the claim. Coordinate with the existing Step 3 path-guidance followup; a skill change invalidates old authoring passes.
+
+Existing backlog owners for the package-less ship wrapper, review-bench guard snapshot cap, sanitizer timing under load and Step 3 path guidance remain authoritative; no duplicate entries were added. Any guard repair must also honor the separate secret-file exclusion issue. Source-review canaries were correctly caught and excluded from the live queue in this ship.
+
+
+## From test-execution-performance ship (2026-10-21)
+
+- **Idle-host test timing rerun** (med): rerun the five candidates (Node default / 4 workers / cache, Bun default / `--parallel=4`) on an idle host from a fixed snapshot; append rows to `pitches/test-execution-performance/measurements.md` and update `ai-framework/docs/testing.md`. Promote only on ≥20% median reduction with exit-0 parity.
+- **Bun full-suite timeouts** (med): `workflow-doctor` real-bundle-copy tests (two) and "every cap filled" size-bound test exceed Bun's 5 s default timeout; Bun default takes 2.7x Node. Decide whether to change the tests or document Bun as scoped-only. Never lengthen deadlines without a decision.
+- **run-tests signal handling** (low): forward SIGINT/SIGTERM to the child and report the killing signal; `--root` default is untested directly.
+- **Subprocess-matrix unit seams** (med): replace repeated CLI matrices (Codex start hook, 48 launches) with in-process cases while keeping executable-wiring smoke tests.
+- **Testing guide discoverability** (low): link `testing.md` from the README docs table (omitted to keep the 5-file budget).
+
+## From token-time-report — ship preparation (2026-10-21)
+
+- **TTR-A1 — review-bench trusted-root Git execution** (med): prevent project/local/global Git config and environment from executing fsmonitor/filter helpers when inspecting an untrusted tree; preserve a narrow trusted-root contract and add execution-spy regressions. Current usage is restricted to this trusted checkout.
+- **TTR-A2 — review-bench strict appetite counting** (med): reject non-finite/non-numeric --max, use NUL-delimited Git listings for non-ASCII filenames and preserve explicit bookkeeping filters. This pitch uses independent exact-file/numstat accounting.
+- **TTR-A3 — bounded review-tool input/path diagnostics** (low-med): fix in-root '..name' snapshot destinations, validate snapshot shape, map filesystem errors to fixed diagnostics and tighten citation/record parsing. Preserve outside-only snapshots, symlink/FIFO refusals and current caps.
+- **TTR-A4 — static flow-report usability polish** (low): consider Path-first/sticky row headers, descriptive single-row time totals, reduced duplicate title announcements and source-aware empty-state help; avoid implying browser geometry/contrast verification or weakening inert output.
+
+**Resolved in this implementation, pending final ship closure:** the existing review-bench snapshot-size mismatch and secret-name tree-walk omissions. Production guard now shares a 16MiB snapshot read/write bound and skips protected names before reads; Node/Bun 35-case regressions and canonical snapshot/check pass. Existing historical items remain above; current resolution cards are [[review-guard-snapshot-can-outgrow-its-reader]] and [[review-guard-hashes-ignored-secret-files]].
+
+The package-less pre-ship verifier and timing-under-load issues retain their existing backlog ownership. The mandatory wrapper failed again; the owner explicitly approved the documented direct-check gauntlet for this ship. No duplicate wrapper/timing pitch is added. Cooldown should review packet completeness, misnumbered citations and allocation-confounded mutation evidence; no rule change is auto-promoted.
+
+## Cooldown candidate pitches (2026-10-21, forced)
+
+- **Pitch `package-less-ship-verification`** (med; moved to [pitches/package-less-ship-verification/pitch.md](package-less-ship-verification/pitch.md) 2026-10-22): bundles the package-less `pre-ship-verify.mts` followups above. The verifier selects checks from a root `package.json`, which this bundle lacks; it blocked `/ship` on 4+ ships and each needed an owner-approved direct-check gauntlet. Fix via a documented check contract or bundle-local manifest; no temporary `package.json`.
+- **Pitch `orca-bounded-control-receipts`** (med; moved to `pitches/orca-bounded-control-receipts/pitch.md` 2026-10-22; guard-reader-bounds half already fixed): bundles Orca model-pin capability preflight, startup worker-list output overflow and guard reader bounds. Keep ownership fail-closed and cleanup explicitly authorized.
+
+## codex-trusted-hook-smoke (cooldown 2026-10-08 C2, approved 2026-10-22 as a candidate pitch)
+
+Not shaped or bet. Needs a human at a fresh Codex host.
+- Verify the current `UserPromptSubmit` definition through `/hooks` and observe a ready context, a blocked phase, worker suppression and budgets.
+- No trust bypass and no global config edits; hook trust is an explicit owner action.
+
+## workflow-coverage-instrumentation (cooldown 2026-10-08 C3, approved 2026-10-22 as a candidate pitch)
+
+Not shaped or bet. Source followup is at the "coverage" entry above (line ~340).
+- Make coverage compatible with the exact child-environment assertion without weakening it.
+- Keep Node/Bun regression results separate from instrumentation failures; investigate the Bun 1.4.2 coverage crash on its own.
+- Keep the ordinary runtime regression commands.
+
+## connected-memory-consolidation ship verification (2026-10-22)
+
+- **Stale live-evidence test blocks shipping** (high): `state-fragment-dataset.test.mts:435` reads the removed `.project/pitches/state-ai-authoring/live-runs.md` and fails with `ENOENT`. Full Node suite: 2,614 passed, one failed, three skipped. This is distinct from the older load-dependent dataset/sanitizer flake. Repair the evidence ownership through a separate fix/shape entry without fabricating live results, skipping validation or routinely reading recovery archives. Audit is at its three-cycle cap; ship remains blocked. Evidence: `runs/2026-10-22-connected-memory-consolidation-ship-verification.md`.
+
+**Resolved 2026-10-23:** the separately approved `fix-retired-live-evidence-path` ship published the exact original matrix under durable ownership and changed the test path. The final parent regression passed 54/54, independent child tests passed 347/347, and the supported full Node suite passed. Historical `Claim: blocked` is preserved. Receipt: `runs/2026-10-23-fix-retired-live-evidence-path.md`. The diagnostics/timing followups remain separate.
+
+
+## fix-retired-live-evidence-path — 2026-10-23
+
+- **FRLE-D1 — bounded child-failure diagnostics** (med): state-fragment-dataset.test.mts:108/208 reduces a failing child to aggregate counts and stderr while TAP detail is on stdout. Preserve bounded failing child names/TAP diagnostics without weakening assertions, changing timing/security limits or echoing unbounded child output. Cycle2 observed child346/347 then16 dependent parent failures; exact cause unconfirmed. Subsequent independent sequential347/347 and54/54 passed. Existing sanitizer timing-under-load backlog remains the timing owner.
+
+## connected-memory-consolidation — ship preparation (2026-10-23)
+
+- **CMC-A1 — grammar-pin decision adoption** (low): evaluate indexing/adopting the two historical `.project/decisions/` TOON grammar pins under the single ADR home. P2a used the explicit R4 fallback; neither document was rewritten or silently adopted.
+- **CMC-A2 — fail-fast FIFO guard control** (med): make the setup-validator FIFO guard mutation produce a bounded assertion failure instead of hanging the guard test. Keep production refusal and security limits unchanged.
+- **CMC-G1 — workflow relation completeness** (low): assess sparse role/rule declarations and currently undeclared writes for plan/ship/cooldown against their actual playbooks. Do not invent relations to improve counts; P1 ships only observed declarations and bounded references.
+
+The pre-existing state-history archive fallback remains owned by un-bet P2b, under the explicit closing exception. P2b/P3a/P3b and downstream rollout are not implemented or authorized by these four ship proposals. Cooldown should review repeated source/instance boundary and independent gate evidence lessons; no rule promotion is applied here.
+
+## review-bench-hardening (cooldown 2026-10-23, forced; promoted to a pitch draft)
+
+Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles the review-bench followups: TTR-A1 (trusted-root Git execution: fsmonitor/filter helpers), TTR-A2 (strict appetite counting, NUL-delimited listings), TTR-A3 (bounded input/path diagnostics, in-root `..name` snapshot destinations) and the 2026-09-27 question whether convention-based read-only is enough or the tool needs real process isolation (decide in shaping; the tool is internal developer tooling run on a trusted checkout).

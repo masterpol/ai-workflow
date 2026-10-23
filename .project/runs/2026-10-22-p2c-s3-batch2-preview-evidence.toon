@@ -1,0 +1,74 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[5]: opencode-handoff,orca-vendor-orchestration,orca-vendor-dispatch,orca-vendor-reconcile,ts-runtime-injection
+sourceBytes: 185845
+sourceFiles: 42
+requiredSections: 30
+retainedSections: 28
+otherFilesAccounted: 42
+retainedOtherFiles: 38
+omissions:
+  process-noise: 4
+  superseded: 2
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[5]:
+  -
+    slug: opencode-handoff
+    payloadHash: "sha256:46a3d141f3f341caed28d2225263c2a7221dba4a393631b2309e0fd9962c22c9"
+    supplementHash: "sha256:41947be50cfa64dc271e5249a7304abf0e3ff45b9b2251f434059aabbd0570b5"
+    sourceProof:
+      archiveDirectory: opencode-handoff-2026-10-09T14-29-23-592Z
+      manifestHash: "sha256:067b2e9bb9ba5b2b485d96682b567bbc0d98b27357146358c0d34eebfaa7bd32"
+      sourceBytes: 3469
+      verifiedFiles: 2
+    recordBytes: 963
+  -
+    slug: orca-vendor-orchestration
+    payloadHash: "sha256:b671c0195858dd70683a0700df17000ad701f959e29d12817304092db5bcdf2e"
+    supplementHash: "sha256:ba13cbff547c7358bf4328c4d955fcebee93b07675ad978749f5470683e85672"
+    sourceProof:
+      archiveDirectory: orca-vendor-orchestration-2026-10-08T16-26-37-615Z
+      manifestHash: "sha256:12ad2ecbbc3f55910b590d65abc4d0a41ca27da6b8bcf286a255787bc4979a9a"
+      sourceBytes: 22898
+      verifiedFiles: 6
+    recordBytes: 1215
+  -
+    slug: orca-vendor-dispatch
+    payloadHash: "sha256:a83a083e3cf45e838e4446ba85c46cb9b55f0a463513ea7b77eea06e1109271e"
+    supplementHash: "sha256:d0dc16b2744c67d50408615c7ba150fcc1898a02190055f7fb63d47498c2bafc"
+    sourceProof:
+      archiveDirectory: orca-vendor-dispatch-2026-10-08T16-26-37-156Z
+      manifestHash: "sha256:fb9d818e38ee22e219325b3b85489168f3bc64636cc4acd35bf8924c0189ca81"
+      sourceBytes: 32973
+      verifiedFiles: 7
+    recordBytes: 1077
+  -
+    slug: orca-vendor-reconcile
+    payloadHash: "sha256:8a131e033df4ad983cd12704c7d34f3f229d289fd58d9ac7f81bef29d602ed4f"
+    supplementHash: "sha256:ccf76e832077236d7d2ec40d6a64a4175dce429326ec41bc4605dbf2b7075f3b"
+    sourceProof:
+      archiveDirectory: orca-vendor-reconcile-2026-10-08T16-26-37-800Z
+      manifestHash: "sha256:06aa4e0e05806430fc342fbc7b8b42f1974d13b4f9215c701f145cb23ab35ea7"
+      sourceBytes: 27928
+      verifiedFiles: 6
+    recordBytes: 1207
+  -
+    slug: ts-runtime-injection
+    payloadHash: "sha256:b44174ee3154c833b1752fe0fc750f1e63e94c49871ce5f73cb703c7df6950de"
+    supplementHash: "sha256:43cea03a0fe93ec19ba3fcf4c78dc028de6e6bf38c4e7a6b46e417ac2177231f"
+    sourceProof:
+      archiveDirectory: ts-runtime-injection-2026-10-08T16-26-38-596Z
+      manifestHash: "sha256:3788b2121d9136951c7c0a52cf52689383a8b936983637f1a5e05f91c41aa71a"
+      sourceBytes: 98577
+      verifiedFiles: 21
+    recordBytes: 1258
+validation: "{\"slug\":\"opencode-handoff\",\"coverage\":0.8571428571428571,\"sections\":7,\"otherFiles\":2,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":963,\"recordCap\":3000,\"supplementBytes\":1698,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-vendor-orchestration\",\"coverage\":1,\"sections\":2,\"otherFiles\":6,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":1215,\"recordCap\":3000,\"supplementBytes\":6239,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-vendor-dispatch\",\"coverage\":1,\"sections\":7,\"otherFiles\":7,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":1077,\"recordCap\":3000,\"supplementBytes\":5543,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-vendor-reconcile\",\"coverage\":0.8571428571428571,\"sections\":7,\"otherFiles\":6,\"omissions\":{\"process-noise\":2},\"acceptedGaps\":[],\"recordBytes\":1207,\"recordCap\":3000,\"supplementBytes\":4499,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"ts-runtime-injection\",\"coverage\":1,\"sections\":7,\"otherFiles\":21,\"omissions\":{\"process-noise\":1,\"superseded\":2},\"acceptedGaps\":[],\"recordBytes\":1258,\"recordCap\":3000,\"supplementBytes\":7328,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"projectedKnowledgeEntries\":45,\"sourceArchivesReopened\":false}"
+rehearsal: "opencode-handoff: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\norca-vendor-orchestration: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\norca-vendor-dispatch: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\norca-vendor-reconcile: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nts-runtime-injection: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nRehearsal: 5 generated index rows, 5 upgraded slugs; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 43
+  partial: 0
+  upgraded: 3
+  compacted: 46
+sourceArchivesReopenedForRehearsal: false

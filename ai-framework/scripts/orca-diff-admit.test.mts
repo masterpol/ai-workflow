@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { createHash, randomBytes } from "node:crypto";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+import { createTestDeps, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
@@ -26,7 +26,7 @@ const SETUP_ENV = {
 
 /** Setup-only git (the test harness, not the code under test). Throws on failure. */
 function git(cwd: string, args: string[], input?: string | Buffer): string {
-  const result = spawnSync("git", args, { cwd, env: SETUP_ENV, input, encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
+  const result = spawnSync("git", args, { cwd, env: SETUP_ENV, input, encoding: "utf8", maxBuffer: 256 * 1024 * 1024, windowsHide: true, shell: false, timeout: 30000 });
   if (result.status !== 0) throw new Error(`git ${args.join(" ")} failed: ${result.stderr}`);
   return result.stdout;
 }
@@ -67,7 +67,7 @@ function snapshot(root: string): Map<string, string> {
       const key = path.relative(root, full);
       if (stat.isSymbolicLink()) out.set(key, `link:${fs.readlinkSync(full)}`);
       else if (stat.isDirectory()) { out.set(key, `dir:${stat.mode}`); walk(full); }
-      else out.set(key, `file:${stat.mode}:${createHash("sha256").update(fs.readFileSync(full)).digest("hex")}`);
+      else out.set(key, `file:${stat.mode}:${testDeps.crypto.sha256Hex(fs.readBytesSync(full))}`);
     }
   };
   walk(root);
@@ -133,7 +133,7 @@ test("reports committed, staged, unstaged, untracked and deleted changes; a lyin
   assert.equal(entries["a.txt"].binary, false);
   const verify = applyToBaseline(f, result.patch);
   for (const name of ["a.txt", "lib/b.txt", "staged.txt", "untracked.txt"]) {
-    assert.deepEqual(fs.readFileSync(path.join(verify, name)), fs.readFileSync(path.join(f.wt, name)), name);
+    assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(verify, name))), Buffer.from(fs.readBytesSync(path.join(f.wt, name))), name);
   }
   assert.equal(fs.existsSync(path.join(verify, "gone.txt")), false);
 });
@@ -146,7 +146,7 @@ test("an unchanged worker is admitted with no entries and an empty patch", async
 
 test("binary content round-trips byte for byte through the patch", async (t: TestContext) => {
   const f = fixture(t);
-  const bytes = Buffer.concat([Buffer.from([0, 255, 254, 0, 10, 13, 0x80]), randomBytes(4096)]);
+  const bytes = Buffer.concat([Buffer.from([0, 255, 254, 0, 10, 13, 0x80]), testDeps.crypto.randomBytes(4096)]);
   fs.writeFileSync(path.join(f.wt, "blob.bin"), bytes);
   const result = admitted(await admitChecked(f));
   const entry = byPath(result.entries)["blob.bin"];
@@ -154,7 +154,7 @@ test("binary content round-trips byte for byte through the patch", async (t: Tes
   assert.equal(entry.size, bytes.length);
   assert.match(result.patch, /GIT binary patch/);
   const verify = applyToBaseline(f, result.patch);
-  assert.deepEqual(fs.readFileSync(path.join(verify, "blob.bin")), bytes);
+  assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(verify, "blob.bin"))), bytes);
 });
 
 test("non-UTF-8 text round-trips: the patch is re-emitted as binary hunks instead of being mangled", async (t: TestContext) => {
@@ -164,7 +164,44 @@ test("non-UTF-8 text round-trips: the patch is re-emitted as binary hunks instea
   const result = admitted(await admitChecked(f));
   assert.ok(!result.patch.includes("\ufffd"), "no replacement characters in the patch");
   const verify = applyToBaseline(f, result.patch);
-  assert.deepEqual(fs.readFileSync(path.join(verify, "a.txt")), latin1);
+  assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(verify, "a.txt"))), latin1);
+});
+
+test("non-UTF-8 fallback works without attr-source and isolates worker worktree attributes", async (t: TestContext) => {
+  const f = fixture(t);
+  const latin1 = Buffer.from("caf\xe9 cr\xe8me\n", "latin1");
+  fs.writeFileSync(path.join(f.wt, "a.txt"), latin1);
+  fs.writeFileSync(path.join(f.wt, "lib/b.txt"), latin1);
+  fs.writeFileSync(path.join(f.wt, ".gitattributes"), "* diff\n");
+  fs.writeFileSync(path.join(f.wt, "lib/.gitattributes"), "*.txt diff\n");
+  fs.rmSync(path.join(f.wt, "gone.txt"));
+  const workerBefore = snapshot(f.wt);
+  const originalGitDir = git(f.wt, ["rev-parse", "--absolute-git-dir"]).trim();
+  const fallback: SpawnOptions[] = [];
+  const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child, runSync: (command, args, options = {}) => {
+    // Git 2.39 rejects the newer global option. Exercise compatibility even when the installed Git is newer.
+    if (args.some((arg) => arg.startsWith("--attr-source="))) return { status: 129, signal: null, stdout: "", stderr: "unknown option: attr-source" };
+    if (options.env?.GIT_WORK_TREE) {
+      fallback.push(options);
+      assert.equal(options.cwd, options.env.GIT_WORK_TREE);
+      assert.equal(options.env.GIT_DIR, originalGitDir, "preserve the linked-worktree Git directory");
+      assert.deepEqual(fs.readdirSync(options.env.GIT_WORK_TREE), [".gitattributes"]);
+      assert.equal(fs.readFileSync(path.join(options.env.GIT_WORK_TREE, ".gitattributes"), "utf8"), "* -diff\n");
+      assert.equal(path.dirname(String(options.env.GIT_INDEX_FILE)), path.dirname(options.env.GIT_WORK_TREE));
+      assert.ok(options.env.GIT_OBJECT_DIRECTORY && options.env.GIT_ALTERNATE_OBJECT_DIRECTORIES);
+    }
+    return nodeDeps.child.runSync(command, args, options);
+  } } };
+  const result = admitted(await admitChecked(f, { deps }));
+  assert.equal(fallback.length, 1);
+  assert.match(result.patch, /GIT binary patch/);
+  assert.ok(!result.patch.includes("\ufffd"));
+  assert.deepEqual(snapshot(f.wt), workerBefore, "worker attributes, index and checkout are untouched");
+  assert.equal(fs.existsSync(String(fallback[0].env?.GIT_WORK_TREE)), false, "temporary attributes are removed");
+  const verify = applyToBaseline(f, result.patch);
+  assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(verify, "a.txt"))), latin1);
+  assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(verify, "lib/b.txt"))), latin1);
+  assert.equal(fs.existsSync(path.join(verify, "gone.txt")), false);
 });
 
 test("names with leading/trailing spaces and shell characters are hashed under their own name and round-trip", async (t: TestContext) => {
@@ -175,7 +212,7 @@ test("names with leading/trailing spaces and shell characters are hashed under t
   const result = admitted(await admitChecked(f));
   assert.deepEqual(result.entries.map((entry) => entry.path).sort(), [...names, "a.txt"].sort());
   const verify = applyToBaseline(f, result.patch);
-  for (const name of [...names, "a.txt"]) assert.deepEqual(fs.readFileSync(path.join(verify, name)), fs.readFileSync(path.join(f.wt, name)), JSON.stringify(name));
+  for (const name of [...names, "a.txt"]) assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(verify, name))), Buffer.from(fs.readBytesSync(path.join(f.wt, name))), JSON.stringify(name));
 });
 
 test("non-UTF-8 text forced to text by the worker's info/attributes is refused, not mangled", async (t: TestContext) => {
@@ -306,13 +343,13 @@ test("rejects a gitlink in the index and an untracked nested repository", async 
 test("rejects a FIFO at a tracked path; an untracked FIFO is invisible to git and never part of the change", async (t: TestContext) => {
   const f = fixture(t);
   fs.rmSync(path.join(f.wt, "a.txt"));
-  const made = spawnSync("mkfifo", [path.join(f.wt, "a.txt")]);
+  const made = spawnSync("mkfifo", [path.join(f.wt, "a.txt")], { windowsHide: true, shell: false, timeout: 10000 });
   if (made.status !== 0) { t.skip("mkfifo unavailable"); return; }
   const result = await admitChecked(f);
   rejected(result, "non-regular");
   assert.equal(result.status === "rejected" && result.path, "a.txt");
   const g = fixture(t);
-  spawnSync("mkfifo", [path.join(g.wt, "pipe")]);
+  spawnSync("mkfifo", [path.join(g.wt, "pipe")], { windowsHide: true, shell: false, timeout: 10000 });
   assert.deepEqual(admitted(await admitChecked(g)).entries, []);
 });
 
@@ -498,7 +535,7 @@ test("every git call is hardened: -c settings first, allow-listed env, cwd at th
     assert.equal(call.options.cwd, fs.realpathSync(f.wt), label);
     assert.ok(Number.isInteger(call.options.timeoutMs) && (call.options.timeoutMs as number) >= 1 && (call.options.timeoutMs as number) <= 30_000, label);
     assert.ok((call.options.maxBufferBytes ?? 0) > 0, label);
-    const sub = call.args[GIT_HARDENING.length + (call.args[GIT_HARDENING.length]?.startsWith("--attr-source=") ? 1 : 0)];
+    const sub = call.args[GIT_HARDENING.length];
     if (sub === "diff") {
       for (const flag of ["--no-ext-diff", "--no-textconv"]) assert.ok(call.args.includes(flag), `${label}: ${flag}`);
       assert.equal(call.args[call.args.length - 1], "--", `${label}: -- ends the revision list`);
@@ -549,7 +586,7 @@ test("a file changed between lstat and hashing is refused", async (t: TestContex
 test("nothing is written to the worker repository and the scratch directory is removed", async (t: TestContext) => {
   const f = fixture(t);
   fs.writeFileSync(path.join(f.wt, "a.txt"), "changed\n");
-  fs.writeFileSync(path.join(f.wt, "new.bin"), randomBytes(512));
+  fs.writeFileSync(path.join(f.wt, "new.bin"), testDeps.crypto.randomBytes(512));
   const worker = snapshot(f.wt);
   const { calls, deps } = recording();
   admitted(await admitChecked(f, { deps }));
@@ -559,8 +596,56 @@ test("nothing is written to the worker repository and the scratch directory is r
   assert.equal(fs.existsSync(path.dirname(String(scratch))), false, "scratch directory removed");
 });
 
+test("unknown process cleanup preserves admission scratch and the original tracked owner", async (t: TestContext) => {
+  const f = fixture(t);
+  fs.writeFileSync(path.join(f.wt, "a.txt"), "changed\n");
+  const error = Object.assign(new Error("cleanup unknown"), { code: "EPROCESSCLEANUP", ownerPid: 4242, retainedPaths: [] as string[] });
+  let scratch: string | undefined;
+  let count = 0;
+  const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child, run: async (command, args, options) => {
+    if (args.includes("hash-object")) {
+      count++;
+      scratch = path.dirname(String(options?.env?.GIT_INDEX_FILE));
+      throw error;
+    }
+    return nodeDeps.child.run(command, args, options);
+  } } };
+  try {
+    await assert.rejects(admitDiff({ worktree: f.wt, baseline: f.baseline, deps }), (caught: unknown) => caught === error);
+    assert.equal(count, 1, "no retry after an unconfirmed cleanup");
+    assert.ok(scratch);
+    assert.equal(fs.existsSync(scratch), true, "the child may still use the object/index store");
+    assert.deepEqual(error.retainedPaths, [scratch]);
+  } finally {
+    // The dependency is a fake; no real child owns this isolated fixture directory.
+    if (scratch) fs.rmSync(scratch, { recursive: true, force: true });
+  }
+});
+
+test("a Windows drive worktree uses one native alternate object path", { skip: process.platform !== "win32" }, async (t: TestContext) => {
+  const f = fixture(t);
+  assert.match(f.wt, /^[A-Za-z]:/);
+  fs.writeFileSync(path.join(f.wt, "a.txt"), "changed\n");
+  const { calls, deps } = recording();
+  const result = admitted(await admitChecked(f, { deps }));
+  assert.ok(result.entries.some((entry) => entry.path === "a.txt"));
+  const alternatives = calls.map((call) => call.options.env?.GIT_ALTERNATE_OBJECT_DIRECTORIES).filter((value): value is string => typeof value === "string");
+  assert.ok(alternatives.length > 0);
+  for (const value of alternatives) {
+    assert.equal(value, path.join(f.coord, ".git", "objects"));
+    assert.equal(value.includes(path.delimiter), false);
+  }
+});
+
 test("a thrown dependency error fails closed as admit-error", async (t: TestContext) => {
   const f = fixture(t);
   const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child, run: async () => { throw new Error("spawn boom"); } } };
   rejected(await admitChecked(f, { deps }), "admit-error");
+});
+
+test("loadConfig branch: validatePath treats ai-workflow.toon like the legacy config files, and still rejects local data and traversal", () => {
+  for (const name of ["ai-workflow.toon", "ai_workflow_env.json", ".project/orchestration.json"]) assert.equal(validatePath(name), undefined, name);
+  assert.equal(validatePath(".project/metrics/orca-ledger/x.json"), "path-local-data");
+  assert.equal(validatePath("../ai-workflow.toon"), "path-dotdot");
+  assert.equal(validatePath("/ai-workflow.toon"), "path-absolute");
 });

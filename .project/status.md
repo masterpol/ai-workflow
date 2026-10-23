@@ -5,21 +5,22 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-_none_
+| workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
+| package-less-ship-verification | draft | shape | small-batch | 2026-10-22 |
+| orca-bounded-control-receipts | draft | shape | small-batch | 2026-10-22 |
+| review-bench-hardening | draft | shape | small-batch | 2026-10-23 |
 
 ## Parked pitches
-| Pitch | Parked | Reason |
-|-------|--------|--------|
-| restore-vendor-adapters | 2026-10-08 | Premise invalidated by critique: vendor adapters are already present and pass validators. |
+_None. `restore-vendor-adapters` was removed 2026-10-22 (premise invalidated 2026-10-08; its `_parked/` directory no longer exists)._
 
 ## Recent ships (last 5)
 | Pitch | Shipped | Notes |
 |-------|---------|-------|
-| codex-orca-coordinator-parity | 2026-10-08 | v2.22.0; Codex startup hook, explicit startup/Run binding, doctor wiring; Node169pass/1skip, Bun170pass; host activation unverified. See `runs/2026-10-08-codex-orca-coordinator-parity.md`. |
-| opencode-handoff | 2026-10-08 | Created `.project/context/opencode-handoff.md` documenting OpenCode's Orca adapter state, missing `.opencode/`/`.agents/`/`.codex/` directories, live probe result (`caller-unverified`), and verification commands. Small-batch lite; no code changes. See `.project/pitches/opencode-handoff/SHIPPED.md`. |
-| runner-aware-runtime-boundary-validator | 2026-10-08 | `validateRuntimeImports` (`runtime/validate.mts`), a workflow-doctor `Runtime boundary` check (production and unparsed sources fail, 43 test files warn as one line) and a stricter invariants test; v2.21.0; Node 1238/1239, Bun 1229/1230; audit 2 cycles via Codex/OpenCode workers, 9 valid-JS evasions closed. See `runs/2026-10-08-runner-aware-runtime-boundary-validator.md`. |
-| orca-auto-start-all-phases | 2026-10-08 | Orca decision runs automatically on the 12 workflow phases when the switch is true (`decideStart`, `orca-run start`, Claude hook on `PreToolUse(Skill)` + `UserPromptExpansion`); blocked means stop and ask, `orca=normal` bypasses one call; v2.20.0; Node 1148/1149, Bun 1139/1140; audit 2 cycles, built and audited through real Codex/OpenCode workers. See `runs/2026-10-08-orca-auto-start-all-phases.md`. |
-| state-multipage-report | 2026-10-08 | Multipage `/state` report (index, structure, skills, metrics, knowledge, pitches): project-type folder diagram with decisions, base vs project skills, links to graph and metrics; v2.19.1; Node 1094/1095, Bun 1085/1086; audit 3 cycles (2 via real Orca workers). See `runs/2026-10-08-state-multipage-report.md`. |
+| connected-memory-consolidation | 2026-10-23 | v2.42.0-2.49.0; four tracks shipped under separate receipts (P1 process graph, P2a v2 schemas, P2d installed sync, P2c legacy upgrade): 20/20 scopes, all 46 legacy pitches upgraded to v2 outcomes with v1 siblings and archives preserved; Node 2709 pass / 0 fail / 3 skips; owner-approved exceptions: TTR 9.74% retained bytes, state-history fallback deferred to P2b; P2a overrun and author-run final evidence disclosed; cooldown due. See `records/shipped/connected-memory-consolidation.md` and `records/consolidation/rollup.md`. |
+| fix-retired-live-evidence-path | 2026-10-23 | Exact original matrix retained at durable path; one regression path fixed; 54/54 and independent child347/347; full Node2709 pass/0 fail/3 skips; historical claim remains blocked; FRLE-D1 diagnostics deferred. See `runs/2026-10-23-fix-retired-live-evidence-path.md`. |
+| token-time-report | 2026-10-21 | v2.41.0; JSON/Markdown/HTML token + stored-union time joins by exact pitch/phase/scope; guarded owned publication and state link; review guard caps/secret exclusion; Node 2472 pass / 3 skips, scoped Bun 257; direct verifier route owner-approved. See `pitches/token-time-report/SHIPPED.md`. |
+| test-execution-performance | 2026-10-21 | v2.40.0; `run-tests.mts` portable test command (full/partial, Node/Bun, bounded workers); no speed setting promoted (unproven on a contended host; Node workers no-go, Bun fails 5 s timeouts); Node 2428 pass / 3 skips, Bun command test 11 pass; audit 2 cycles; owner approved package-less verifier fallback. See `pitches/test-execution-performance/SHIPPED.md`. |
+| state-deep-evidence | 2026-10-21 | v2.39.0; bounded architecture/history/risks/tokens facts; Node 2398 pass / 3 skips, scoped Bun 140 pass; owner accepted LOC/live-quality exceptions and direct-check verifier fallback. See `pitches/state-deep-evidence/SHIPPED.md`. |
 
 ## Open rabbit holes across active pitches
 - Legacy source access, content and media totals, and school-site ownership.
@@ -27,7 +28,7 @@ _none_
 - Canonical paths and redirect treatment for current school domains.
 
 ## Followups backlog
-→ `.project/pitches/_followups.md` (includes four Orca foundation followups; prior history retained)
+→ `.project/pitches/_followups.md` (includes four token-time-report, five state-deep-evidence and five test-execution-performance followups; prior backlog retained)
 
-## /cooldown due in: 5 ships
-Last review2026-10-08: `runs/cooldown-2026-10-08-codex-orca-coordinator-parity.md`. Prior same-date reports and pending proposals remain intact. New proposals:C1 guard secret exclusion,C2 trusted Codex hook smoke,C3 coverage instrumentation. No proposal applied; individual approval required.
+## /cooldown reviewed 2026-10-21 (forced; 5 ships since; due now, no decision pre-approved; consolidation shipped)
+Forced report: `runs/cooldown-2026-10-21-forced.md` (promoted C5, C8 rules; closed C4, C9 as already codified; bundled C6, C7 as candidate pitches). Earlier: `runs/cooldown-2026-10-21.md`. Corrected the stale October 8 counter: nine completed pitches followed the preserved October 17 review. C4–C9 decided; C1–C3 and the October 17 candidates approved 2026-10-22 (C1 closed as already implemented; C2, C3 and the 10-17 bundles are candidate pitches; C6, C7 are pitch drafts). No promotions, archives, revivals or backlog bundles applied; individual approval required.

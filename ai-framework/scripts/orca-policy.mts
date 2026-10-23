@@ -1,4 +1,6 @@
 import { runDirect } from "./runtime/cli.mts";
+import { loadConfig } from "./runtime/config.mts";
+import type { ConfigModel } from "./runtime/config.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
 
@@ -8,7 +10,8 @@ export const VENDORS: readonly string[] = Object.freeze(["claude", "codex", "ope
 
 type Json = Record<string, unknown>;
 type Status = "missing" | "refused" | "malformed" | "unsupported-schema" | "disabled" | "valid";
-interface Coordinator { workers: string[]; roles: Record<string, string> }
+/** `roles` keeps the first member of each pool for back-compat consumers; `pools` is the full ordered pool per role. */
+interface Coordinator { workers: string[]; roles: Record<string, string>; pools: Record<string, string[]> }
 interface Policy {
   schemaVersion: 1;
   "use-orca-orchestration": boolean;
@@ -29,26 +32,46 @@ const hasKeys = (value: unknown, allowed: readonly string[]): value is Json => i
 const boundedInteger = (value: unknown, min: number, max: number): value is number => Number.isInteger(value) && (value as number) >= min && (value as number) <= max;
 const errorCode = (error: unknown): unknown => (error !== null && typeof error === "object" ? (error as { code?: unknown }).code : undefined);
 
-function validateCoordinator(vendor: string, value: unknown): Coordinator | null {
-  if (!hasKeys(value, ["workers", "roles"]) || !Array.isArray(value.workers) || value.workers.length > 2) return null;
-  const workers = value.workers as unknown[];
-  if (workers.some((worker) => !VENDORS.includes(worker as string) || worker === vendor)
-    || new Set(workers).size !== workers.length) return null;
-  if (!hasKeys(value.roles, ["implementation", "review"])
-    || Object.values(value.roles).some((worker) => !workers.includes(worker))) return null;
-  return { workers: [...(workers as string[])], roles: Object.fromEntries(Object.entries(value.roles)) as Record<string, string> };
+const ROLES: readonly string[] = ["implementation", "review"];
+
+/** A role target: one worker name (legacy) or, when pools are allowed, 1..N distinct worker names. */
+function rolePool(value: unknown, allowPools: boolean): string[] | null {
+  if (typeof value === "string") return [value];
+  if (!allowPools || !Array.isArray(value) || value.length === 0 || value.some((member) => typeof member !== "string")) return null;
+  return new Set(value).size === value.length ? [...(value as string[])] : null;
 }
 
-export function validatePolicy(value: unknown): PolicyResult {
+/**
+ * A pool member may be the coordinator's own vendor: the worker is a separate `--worker-context` process, and the launch
+ * gate still decides on the coordinator's identity, so self-membership grants no authority. Pools hold distinct vendor names.
+ */
+function validateCoordinator(value: unknown, allowPools: boolean): Coordinator | null {
+  if (!hasKeys(value, ["workers", "roles"]) || !Array.isArray(value.workers)) return null;
+  const workers = value.workers as unknown[];
+  if (workers.some((worker) => !VENDORS.includes(worker as string)) || new Set(workers).size !== workers.length) return null;
+  if (!hasKeys(value.roles, ROLES)) return null;
+  const roles: Record<string, string> = {};
+  const pools: Record<string, string[]> = {};
+  for (const [role, target] of Object.entries(value.roles)) {
+    const pool = rolePool(target, allowPools);
+    if (!pool || pool.some((member) => !workers.includes(member))) return null;
+    roles[role] = pool[0];
+    pools[role] = pool;
+  }
+  return { workers: [...(workers as string[])], roles, pools };
+}
+
+/** `allowPools` is true only for the TOON source; the legacy `.project/orchestration.json` keeps single-string roles. */
+export function validatePolicy(value: unknown, allowPools = false): PolicyResult {
   if (!hasKeys(value, ["schemaVersion", "use-orca-orchestration", "maxConcurrentWorkers", "maxRetriesPerTask", "coordinators"])) return { status: "malformed" };
   if (!Number.isInteger(value.schemaVersion)) return { status: "malformed" };
   if (value.schemaVersion !== 1) return { status: "unsupported-schema" };
   if ((Object.hasOwn(value, "use-orca-orchestration") && typeof value["use-orca-orchestration"] !== "boolean")
-    || !boundedInteger(value.maxConcurrentWorkers, 1, 3)
+    || !boundedInteger(value.maxConcurrentWorkers, 1, 16)
     || !boundedInteger(value.maxRetriesPerTask, 0, 2) || !hasKeys(value.coordinators, VENDORS)) return { status: "malformed" };
   const coordinators: Record<string, Coordinator> = {};
   for (const [vendor, entry] of Object.entries(value.coordinators)) {
-    const normalized = validateCoordinator(vendor, entry);
+    const normalized = validateCoordinator(entry, allowPools);
     if (!normalized) return { status: "malformed" };
     coordinators[vendor] = normalized;
   }
@@ -98,7 +121,31 @@ function readBoundedFile(location: Location, deps: RuntimeDeps): Refusal | { tex
   } finally { if (descriptor !== undefined) fs.closeSync(descriptor); }
 }
 
+/** Maps the TOON integrations.orca section onto the frozen legacy shape so both sources share one validation path. */
+function policyFromConfig(model: ConfigModel): PolicyResult {
+  const orchestration = model.integrations.orca;
+  const coordinators: Json = {};
+  for (const [vendor, entry] of Object.entries(orchestration.coordinators ?? {})) {
+    const roles: Record<string, string | string[]> = {};
+    const pool: string[] = [];
+    for (const [role, target] of Object.entries(entry.roles ?? {})) {
+      const list = Array.isArray(target) ? target : [target];
+      roles[role] = list;
+      for (const worker of list) if (!pool.includes(worker)) pool.push(worker);
+    }
+    const workers = entry.workers ? [...entry.workers] : pool;
+    coordinators[vendor] = { workers, roles };
+  }
+  return validatePolicy({ schemaVersion: 1, "use-orca-orchestration": orchestration.enabled,
+    maxConcurrentWorkers: orchestration.maxConcurrentWorkers, maxRetriesPerTask: orchestration.maxRetriesPerTask, coordinators }, true);
+}
+
 export function readPolicy(root: string, deps: RuntimeDeps = defaultDeps()): PolicyResult | Refusal {
+  // `ai-workflow.toon` wins when present; only a missing file falls back to the legacy JSON. `loadConfig` never throws
+  // (every I/O, parse and validator failure becomes a refusal/problem result), so a refusal never widens to the legacy file.
+  const config = loadConfig(root, deps);
+  if (!("status" in config)) return config.problems.length ? { status: "malformed" } : policyFromConfig(config.model);
+  if (config.status !== "missing") return { status: "refused" };
   let location: Location | Refusal;
   try { location = inspectPath(root, deps); }
   catch (error) { return { status: errorCode(error) === "ENOENT" ? "missing" : "refused" }; }
@@ -122,6 +169,7 @@ export function report(root: string, vendor: string, deps: RuntimeDeps = default
     : !selected ? "coordinator-unconfigured" : !selected.workers.length ? "no-workers" : "policy-eligible";
   return { schemaVersion: 1, vendor, policyStatus: result.status, eligible, reason, route: "normal",
     dispatchReady: false, workers: eligible ? selected?.workers : [], roles: eligible ? selected?.roles : {},
+    pools: eligible ? selected?.pools : {},
     maxConcurrentWorkers: eligible ? result.policy?.maxConcurrentWorkers : 0,
     maxRetriesPerTask: eligible ? result.policy?.maxRetriesPerTask : 0 };
 }

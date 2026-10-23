@@ -1,22 +1,22 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import fs from "node:fs";
-import { createRequire } from "node:module";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, urlPath, copyTree, spawnSync, moduleRequire } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { effectiveEntryText } from "./entry-import.mts";
 import { CATALOG, MODES, PHASES, main, resolveMode, report, loadModes, extractInvocationArg } from "./skill-defaults.mts";
 import type { CatalogEntry } from "./skill-defaults.mts";
 
-const require = createRequire(import.meta.url);
-const here = path.dirname(fileURLToPath(import.meta.url));
+const require = moduleRequire(import.meta.url);
+const here = path.dirname(urlPath(import.meta.url));
 interface Check { name: string; status: string; detail: string }
 interface Checks { failures: number; results: Check[] }
 const parseChecks = (stdout: string): Checks => JSON.parse(stdout) as Checks;
@@ -116,7 +116,7 @@ test("a symlinked modes.json is refused, whether the leaf or an ancestor directo
   write(outside, "modes.json", JSON.stringify({ schemaVersion: 1, caveman: { default: "full" } }));
   fs.mkdirSync(path.join(root, ".project/skills"), { recursive: true });
   fs.symlinkSync(path.join(outside, "modes.json"), path.join(root, ".project/skills/modes.json"));
-  assert.throws(() => resolveMode(root, { phase: "build" }), /outside the project root/i);
+  assert.throws(() => resolveMode(root, { phase: "build" }), /symlink/i);
 
   const root2 = fixture(t);
   const outside2 = fixture(t);
@@ -124,6 +124,21 @@ test("a symlinked modes.json is refused, whether the leaf or an ancestor directo
   fs.mkdirSync(path.join(root2, ".project"), { recursive: true });
   fs.symlinkSync(outside2, path.join(root2, ".project/skills"));
   assert.throws(() => resolveMode(root2, { phase: "build" }), /outside the project root/i, "a symlinked ancestor directory must be caught too, not just the leaf file");
+});
+
+test("ai-workflow.toon skills.modes wins over modes.json; present-but-invalid TOON fails closed with no legacy fallback", (t: TestContext) => {
+  const example = fs.readFileSync(path.join(path.dirname(urlPath(import.meta.url)), "../templates/ai-workflow.example.toon"), "utf8");
+  const toon = (caveman: string) => example.replace(/caveman: \w[\w-]*/, `caveman: ${caveman}`);
+  const root = fixture(t);
+  write(root, ".project/skills/modes.json", JSON.stringify({ schemaVersion: 1, caveman: { default: "lite", phases: { build: "ultra" } } }));
+  assert.equal(resolveMode(root, { phase: "build" }), "ultra", "no TOON: legacy file is used");
+  write(root, "ai-workflow.toon", toon("wenyan-lite"));
+  assert.equal(resolveMode(root, { phase: "build" }), "wenyan-lite", "valid TOON wins, legacy phase override ignored");
+  write(root, "ai-workflow.toon", toon("off"));
+  assert.equal(resolveMode(root, { phase: "audit" }), "off");
+  assert.equal(loadModes(root)?.caveman?.enabled, false);
+  write(root, "ai-workflow.toon", toon("turbo"));
+  assert.throws(() => resolveMode(root, { phase: "build" }), /ai-workflow\.toon/, "invalid TOON must not fall back to modes.json");
 });
 
 test("report distinguishes not-installed, installed+enabled, and installed+disabled without throwing", (t: TestContext) => {
@@ -195,8 +210,12 @@ test("workflow-doctor exits 0 on a real bundle copy, and fails loudly on a malfo
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "skill-defaults-doctor-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");
-  const skip = new Set([".git", "node_modules", "metrics", ".DS_Store", ".env"]);
-  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source: string) => !skip.has(path.basename(source)) });
+  const skip = new Set([".git", "node_modules", "metrics", ".DS_Store", ".env", "ai-workflow.toon"]);
+  copyTree(testDeps, BUNDLE, root, (source: string) => !skip.has(path.basename(source)));
+  // Seed a v3 `ai-workflow.toon` from the shipped example: the doctor's new contract requires
+  // the toon `models` block to validate every agent. Without a toon, a clean install reports
+  // 16 `fail` lines (one per agent). The shipped example is the canonical baseline.
+  fs.copyFileSync(path.join(root, "ai-framework/templates/ai-workflow.example.toon"), path.join(root, "ai-workflow.toon"));
   // Keep .project/skills (registry + packages) together with the wrapper files it owns: excluding
   // it would leave an installed skill's wrappers orphaned, which the doctor rightly rejects — a
   // failure that only appears once a skill is actually installed in the repo running this test.
@@ -248,7 +267,8 @@ test("every canonical skill and agent carries exactly one caveman instruction na
   }
 });
 
-test("the exact command each skill and agent instruction names runs successfully as written", (t: TestContext) => {
+// This integration test launches two CLIs per canonical prompt; Bun's five-second default is too short.
+test("the exact command each skill and agent instruction names runs successfully as written", { timeout: 30000 }, (t: TestContext) => {
   const root = fixture(t);
   write(root, ".project/skills/modes.json", JSON.stringify({ schemaVersion: 1, caveman: { default: "ultra", phases: { agent: "lite", utility: "wenyan-lite" } } }));
   const expectedByScope: Record<string, string> = { agent: "lite", utility: "wenyan-lite", build: "ultra" };
@@ -260,6 +280,7 @@ test("the exact command each skill and agent instruction names runs successfully
     assert.equal(plain.status, 0, `${file}: ${plain.stderr}`);
     assert.equal(plain.stdout.trim(), expectedByScope[phase] || "ultra", `${file} (${phase}) must resolve through the instance override/default chain`);
     const withArg = spawnSync(process.execPath, [...RUNTIME_FLAGS, script, "resolve-mode", "--phase", phase, "--args-text", "caveman=off do the thing", "--root", root], { encoding: "utf8" });
+    assert.equal(withArg.status, 0, `${file}: ${withArg.stderr}`);
     assert.equal(withArg.stdout.trim(), "off", `${file}: an invocation-scoped caveman=off must win`);
   }
 });
@@ -281,21 +302,27 @@ test("every vendor mirror of a skill or agent either points at the canonical fil
   }
 });
 
-test("both cross-vendor entry files carry the same working caveman instruction for the main session agent", () => {
-  const section = (file: string) => fs.readFileSync(path.join(BUNDLE, file), "utf8").match(/## Response style \(caveman mode\)\n[\s\S]*?(?=\n## )/)?.[0];
-  const agents = section("AGENTS.md");
+test("both cross-vendor entry files resolve to the same working caveman instruction", async () => {
+  const section = (text: string) => text.match(/## Response style \(caveman mode\)\n[\s\S]*?(?=\n## |$)/)?.[0];
+  const agents = section(fs.readFileSync(path.join(BUNDLE, "AGENTS.md"), "utf8"));
   assert.ok(agents, "AGENTS.md needs the Response style section");
-  assert.equal(section("CLAUDE.md"), agents, "CLAUDE.md is a required full mirror of AGENTS.md — the section must be identical");
-  const phase = agents!.match(/resolve-mode --phase ([a-z]+)/)![1];
+  // The shared resolver accepts only the regular sibling AGENTS.md, rejects
+  // outside/symlinked targets and never recursively follows another import.
+  const claude = await effectiveEntryText(BUNDLE, "CLAUDE.md");
+  assert.notEqual(claude.kind, "invalid", claude.detail);
+  assert.equal(section(claude.content), agents, "the effective CLAUDE.md instructions match AGENTS.md");
+  const phase = agents.match(/resolve-mode --phase ([a-z]+)/)![1];
   assert.ok(PHASES.has(phase), `entry files name --phase ${phase}, which resolve-mode would reject`);
-  assert.match(agents!, /caveman=<lite\|full\|ultra\|wenyan-lite\|wenyan-full\|wenyan-ultra\|off>/);
+  assert.match(agents, /caveman=<lite\|full\|ultra\|wenyan-lite\|wenyan-full\|wenyan-ultra\|off>/);
 });
 
-test("doctor and setup-validator report the live caveman state truthfully across every state it can be in", (t: TestContext) => {
+// The doctor checks the AGENTS.md/CLAUDE.md caveman section only inside the portable bundle's own repo (SETUP.md present).
+const IN_BUNDLE_REPO = fs.existsSync(path.join(BUNDLE, "SETUP.md"));
+test("doctor and setup-validator report the live caveman state truthfully across every state it can be in", { timeout: 30000 }, (t: TestContext) => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "caveman-state-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");
-  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source: string) => !new Set([".git", "node_modules", "metrics", ".DS_Store", ".env"]).has(path.basename(source)) });
+  copyTree(testDeps, BUNDLE, root, (source: string) => !new Set([".git", "node_modules", "metrics", ".DS_Store", "credentials.json", "settings.local.json", "ai-workflow.toon"]).has(path.basename(source)) && !/^\.env(?:\.|$)/.test(path.basename(source)));
   // Pin this fixture to its actual host; the restricted PATH contains only that executable.
   const env = { ...process.env, PATH: path.dirname(process.execPath), NO_COLOR: "1", AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" };
   const node = (script: string, ...args: string[]) => spawnSync(process.execPath, [...RUNTIME_FLAGS, path.join(root, "ai-framework/scripts", script), ...args], { cwd: root, encoding: "utf8", env });
@@ -306,8 +333,31 @@ test("doctor and setup-validator report the live caveman state truthfully across
   const addSkill = (...args: string[]) => { const result = installer(...args, "--root", root, "--scope", "project", "--apply"); assert.equal(result.status, 0, result.stderr); };
   const id = "juliusbrussee/caveman/caveman";
 
+  // The source bundle fixture no longer ships with caveman pre-installed, so seed it before
+  // exercising the state transitions the test was written to cover.
+  const repo = path.join(directory, "upstream");
+  fs.mkdirSync(path.join(repo, "skills/caveman"), { recursive: true });
+  fs.writeFileSync(path.join(repo, "skills/caveman/SKILL.md"), "---\nname: caveman\ndescription: Fixture caveman\n---\nBody.\n");
+  const git = (...args: string[]) => spawnSync("git", ["-c", "core.hooksPath=/dev/null", "-C", repo, ...args], { encoding: "utf8", env: { ...process.env, GIT_AUTHOR_NAME: "f", GIT_AUTHOR_EMAIL: "f@x.test", GIT_COMMITTER_NAME: "f", GIT_COMMITTER_EMAIL: "f@x.test" } });
+  git("init", "-b", "main"); git("add", "."); git("commit", "-m", "fixture");
+  const initial = installer("install", id, "--root", root, "--repo", repo, "--scope", "project", "--phases", "shape,critique,plan,build,audit,ship,cooldown,manual", "--apply");
+  assert.equal(initial.status, 0, initial.stderr);
+
   assert.match(state()!.detail, /^active: installed, enabled, covers all recommended phases; default full/);
   assert.equal(state()!.status, "pass");
+
+  // TOON first: the fixture's own ai-workflow.toon governs; "off" disables, an invalid file fails by name and never falls back.
+  const toonFile = path.join(root, "ai-workflow.toon");
+  // ai-workflow.toon is gitignored: a clean checkout has none and a developer's local one may differ, so always seed from the shipped example.
+  fs.copyFileSync(path.join(root, "ai-framework/templates/ai-workflow.example.toon"), toonFile);
+  const toonText = fs.readFileSync(toonFile, "utf8");
+  fs.writeFileSync(toonFile, toonText.replace(/caveman: \S+/, "caveman: off"));
+  assert.equal(state()!.status, "info");
+  assert.match(state()!.detail, /persistently disabled/);
+  fs.writeFileSync(toonFile, toonText.replace(/caveman: \S+/, "caveman: turbo"));
+  const brokenToon = doctor();
+  assert.match(brokenToon.results.find((item: Check) => item.name === "ai-workflow.toon" && /^invalid:/.test(item.detail))?.detail ?? "", /^invalid: ai-workflow\.toon/);
+  fs.rmSync(toonFile);
 
   const modes = path.join(root, ".project/skills/modes.json");
   fs.writeFileSync(modes, JSON.stringify({ schemaVersion: 1, caveman: { enabled: false } }));
@@ -329,11 +379,6 @@ test("doctor and setup-validator report the live caveman state truthfully across
   assert.equal(state()!.status, "info");
   assert.match(state()!.detail, /not installed, so it is inert/, "carrying the instruction must never be mistaken for being active");
 
-  const repo = path.join(directory, "upstream");
-  fs.mkdirSync(path.join(repo, "skills/caveman"), { recursive: true });
-  fs.writeFileSync(path.join(repo, "skills/caveman/SKILL.md"), "---\nname: caveman\ndescription: Fixture caveman\n---\nBody.\n");
-  const git = (...args: string[]) => spawnSync("git", ["-c", "core.hooksPath=/dev/null", "-C", repo, ...args], { encoding: "utf8", env: { ...process.env, GIT_AUTHOR_NAME: "f", GIT_AUTHOR_EMAIL: "f@x.test", GIT_COMMITTER_NAME: "f", GIT_COMMITTER_EMAIL: "f@x.test" } });
-  git("init", "-b", "main"); git("add", "."); git("commit", "-m", "fixture");
   const install = installer("install", id, "--root", root, "--repo", repo, "--scope", "project", "--phases", "build", "--apply");
   assert.equal(install.status, 0, install.stderr);
   assert.equal(state()!.status, "warn");
@@ -342,9 +387,13 @@ test("doctor and setup-validator report the live caveman state truthfully across
   const agents = fs.readFileSync(path.join(root, "AGENTS.md"), "utf8");
   fs.writeFileSync(path.join(root, "AGENTS.md"), agents.replace(/## Response style \(caveman mode\)[\s\S]*?(?=\n## )/, ""));
   const missing = doctor();
-  assert.equal(missing.results.find((item: Check) => item.name === "AGENTS.md" && item.detail === "carries the caveman response-style section")!.status, "fail");
+  const section = missing.results.find((item: Check) => item.name === "AGENTS.md" && item.detail === "carries the caveman response-style section");
+  if (IN_BUNDLE_REPO) assert.equal(section!.status, "fail");
+  else assert.equal(section, undefined, "an installed project's doctor does not police the bundle's own AGENTS.md section");
   const validator = parseChecks(node("setup-validator.mts", "--json").stdout);
-  assert.equal(validator.results.find((item: Check) => item.name === "AGENTS.md" && /caveman/.test(item.detail))!.status, "warn", "in a target project this is a warning, not a failure");
+  const targetCheck = validator.results.find((item: Check) => item.name === "AGENTS.md" && /caveman/.test(item.detail));
+  assert.ok(targetCheck, "installed-project validator must report the missing instruction");
+  assert.equal(targetCheck.status, "warn", "in a target project this is a warning, not a failure");
 });
 
 test("the token report shows the caveman mode column, and labels it Unavailable rather than inventing one", async () => {
@@ -382,6 +431,7 @@ function fake(files: Record<string, string>, options: { cwd?: string; status?: n
   const err: string[] = [];
   const spawned: string[][] = [];
   const base = createNodeDeps({});
+  const cursors = new Map<number, number>();
   const deps: RuntimeDeps = {
     ...base,
     fs: {
@@ -389,6 +439,21 @@ function fake(files: Record<string, string>, options: { cwd?: string; status?: n
       existsSync: (file) => Object.hasOwn(files, file),
       readFileSync: (file) => { if (!Object.hasOwn(files, file)) throw new Error(`ENOENT: ${file}`); return files[file]; },
       realpathSync: (file) => file,
+      lstatSync: (file) => {
+        if (!Object.hasOwn(files, file)) throw Object.assign(new Error(`ENOENT: ${file}`), { code: "ENOENT" });
+        return { isSymbolicLink: () => false, isFile: () => true, size: files[file].length, dev: 1, ino: Object.keys(files).indexOf(file) + 1 } as ReturnType<RuntimeDeps["fs"]["lstatSync"]>;
+      },
+      openSync: (file) => { const index = Object.keys(files).indexOf(file); if (index < 0) throw new Error(`ENOENT: ${file}`); return 100 + index; },
+      fstatSync: (fd) => ({ isFile: () => true, size: files[Object.keys(files)[fd - 100]].length, dev: 1, ino: fd - 99 }) as ReturnType<RuntimeDeps["fs"]["fstatSync"]>,
+      readSync: (fd, buffer, offset, length, position) => {
+        const bytes = new TextEncoder().encode(files[Object.keys(files)[fd - 100]]);
+        const start = position ?? cursors.get(fd) ?? 0;
+        const count = Math.max(0, Math.min(length, bytes.length - start));
+        cursors.set(fd, start + count);
+        buffer.set(bytes.subarray(start, start + count), offset);
+        return count;
+      },
+      closeSync: () => undefined,
     },
     child: {
       runSync: (command, args) => { spawned.push([command, ...args]); return { status: options.status ?? 0, signal: null, stdout: "", stderr: "" }; },

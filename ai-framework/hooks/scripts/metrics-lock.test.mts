@@ -1,22 +1,21 @@
 import { NODE_FLAGS } from "../../scripts/runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawn, spawnSync } from "node:child_process";
 import type { ChildProcessWithoutNullStreams } from "node:child_process";
-import fs from "node:fs";
-import net from "node:net";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, fileUrl, urlPath, spawnTestChild, spawnSync, adapterNet as net } from "../../scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test, { after } from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
 
 import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
 import { acquire, withLease, endpointFor, main } from "./metrics-lock.mts";
 import type { Acquired, LockOptions } from "./metrics-lock.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 const LOCK_MODULE = path.join(here, "metrics-lock.mts");
 const BARRIER_MS = 5000; // every wait on a child is bounded; elapsed time is never used as race evidence
 
@@ -25,7 +24,12 @@ const BARRIER_MS = 5000; // every wait on a child is bounded; elapsed time is ne
 // failure is reported instead of hanging the run. A passing run exits long before the timer fires.
 // Node only: `node --test` runs each file in its own process, but `bun test <dir>` runs every file in ONE process,
 // where this timer would end the whole run (and its report) two seconds after this file finished.
-if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => { setTimeout(() => process.exit(), 2000).unref(); });
+if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => {
+  setTimeout(() => {
+    process.stderr.write("Test leaked a lease, server or child after cleanup\n");
+    process.exit(1);
+  }, 2000).unref();
+});
 
 // Asserts that no lease was granted; a lease granted by mistake is released first, so the
 // assertion failure is reported instead of leaving a server open.
@@ -77,7 +81,7 @@ function watch(t: TestContext, child: ChildProcessWithoutNullStreams): Holder {
 }
 
 function startHolder(t: TestContext, dir: string): Holder {
-  return watch(t, spawn(process.execPath, [...RUNTIME_FLAGS, "-e", HOLDER, LOCK_MODULE, dir], { stdio: ["pipe", "pipe", "pipe"] }));
+  return watch(t, spawnTestChild(process.execPath, [...RUNTIME_FLAGS, "-e", HOLDER, LOCK_MODULE, dir], { stdio: ["pipe", "pipe", "pipe"] }));
 }
 
 // The kernel's own report that the process is stopped; a signal having been sent is not enough.
@@ -251,7 +255,7 @@ const runtimeDir = path.join(here, "..", "..", "scripts", "runtime");
 /** The adapter of the runtime running this file: Bun deps under `bun test`, Node deps under `node --test`. */
 async function adapterDeps(): Promise<RuntimeDeps> {
   if (!inBun) return createNodeDeps();
-  const { createBunDeps } = (await import(pathToFileURL(path.join(runtimeDir, "bun.mts")).href)) as { createBunDeps(): RuntimeDeps };
+  const { createBunDeps } = (await import(fileUrl(path.join(runtimeDir, "bun.mts")))) as { createBunDeps(): RuntimeDeps };
   return createBunDeps();
 }
 const ADAPTER = inBun ? "bun" : "node";
@@ -278,11 +282,11 @@ function startAdapterHolder(t: TestContext, runtime: "node" | "bun", dir: string
   const env = {
     ...process.env,
     G9_DIR: dir,
-    G9_LOCK_URL: pathToFileURL(path.join(here, "metrics-lock.mts")).href,
-    G9_NODE_URL: pathToFileURL(path.join(runtimeDir, "node.mts")).href,
-    G9_BUN_URL: pathToFileURL(path.join(runtimeDir, "bun.mts")).href,
+    G9_LOCK_URL: fileUrl(path.join(here, "metrics-lock.mts")),
+    G9_NODE_URL: fileUrl(path.join(runtimeDir, "node.mts")),
+    G9_BUN_URL: fileUrl(path.join(runtimeDir, "bun.mts")),
   };
-  return watch(t, spawn(command, ["-e", ADAPTER_HOLDER], { stdio: ["pipe", "pipe", "pipe"], env }));
+  return watch(t, spawnTestChild(command, ["-e", ADAPTER_HOLDER], { stdio: ["pipe", "pipe", "pipe"], env }));
 }
 
 test(`lease parity (${ADAPTER} adapter): a second acquirer is refused while the first holds, and acquires after release`, async (t) => {

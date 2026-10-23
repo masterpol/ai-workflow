@@ -1,0 +1,387 @@
+{
+  "schemaVersion": 2,
+  "slug": "state-fragment-sanitizer",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#what-shipped",
+      "helps": "Scopes S1 to S8 with who built each, test counts and mutant ranges.",
+      "bodyHash": "sha256:55fef3c464c071f447405fc78cfcbc8873ee43348bbc140ddede38848358e04b"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#standing-constraints",
+      "helps": "No-go evidence and the 800-line parser estimate that did not hold.",
+      "bodyHash": "sha256:3b5d5ec9d42653fff421633e3045519abe05f33c7ec2e275039f090e7b8ce8d4"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#scope-and-contract",
+      "helps": "Holes resolved at plan and during build, and the new open boundaries.",
+      "bodyHash": "sha256:6c2baeca2507904f9b55335b3f128fed3b892cc74172e2249df3bdc1387d7406"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "Three cycles, the A7 Proxy-limits defect and reviewer escalation.",
+      "bodyHash": "sha256:df76be6cac9804880d14a09ce0df9674b61a848721608da7f97958768ae4b020"
+    },
+    {
+      "source": "SHIPPED.md#evidence",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "Final 531 and 2190 counts, 51 killed mutants and redundant M51, budgets and checks.",
+      "bodyHash": "sha256:62c67f0168cc549a17185d27d7a0fd3e9fec41c59c12de9ea10d90df6638a837"
+    },
+    {
+      "source": "SHIPPED.md#verification-route",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "The package-less pre-ship-verify temporary package.json route.",
+      "bodyHash": "sha256:513e858f1320a12c4c3f647cff38b5b9fcdc0bd5d5fbf8486f0a830341a4a03e"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#limits-and-open-items",
+      "helps": "The five followups and where they live now.",
+      "bodyHash": "sha256:1588aa7d1ae10a0e2656eba2966cb32c170e0862a9635d69072f5124bf5a21bd"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#what-shipped",
+      "helps": "The state-report.md contract and the 2.35.1 OpenCode fast repoint.",
+      "bodyHash": "sha256:4a5f9dafbeecf329be7b11242cdd527f5189b5a027afd0da5937f5969c6fd432"
+    },
+    {
+      "source": "SHIPPED.md#orca",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "worker-identity-unavailable at ship and no dispatch needed.",
+      "bodyHash": "sha256:f4e70413dce0ddaf27d19703a5d767d89818de4a8a0892ae2708d51ad0f16501"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#standing-constraints",
+      "helps": "Five no-gos.",
+      "bodyHash": "sha256:f8ca5c7379e9ecb93e5ca6cf92fc1ee3359370950ba5190722360688c22156c0"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#scope-and-contract",
+      "helps": "Resolved, risk-owned and no-go items.",
+      "bodyHash": "sha256:401384cbd0c3428c4ea7b0e6a007c91e2e6e423a65116d73e4dc579603236c62"
+    },
+    {
+      "source": "deviations.md#2026-10-19-s2s4-dispatch-and-child-worktree-hygiene",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "Vendor placement limits and the graph-artifact restore.",
+      "bodyHash": "sha256:8a20270649d1c166f35b2dbdf58c0e2a6927ad3827972770cb8c2f9441e7b186"
+    },
+    {
+      "source": "deviations.md#2026-10-19-s3-theme-drift-assertion",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#design-decisions",
+      "helps": "The drift test compares seven color keys only.",
+      "bodyHash": "sha256:385846e6cd0acfe4716a436d5864be5d0e0c83feb5702e289d999ff227e82a64"
+    },
+    {
+      "source": "deviations.md#s3-execution-after-orca-failure",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "The orca=normal bypass and canonical output re-parsed under caps.",
+      "bodyHash": "sha256:86a762f1ffa568f186d54f39c7798dfe4b619a5024e9d0965527b6bac8649eb1"
+    },
+    {
+      "source": "deviations.md#s5-sequencing-and-evidence-corrections-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "M50 to M52 deferral and the TAP skipped field.",
+      "bodyHash": "sha256:a68132f2f734c0d5dc78bc5e3aac894248181362d8d51e0178b0ab5ee71e0ff0"
+    },
+    {
+      "source": "deviations.md#s6-formatter-proof-anchors-and-measured-redundancy-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "The M50 anchor and M51 measured redundant at 7,507 and 2,250.",
+      "bodyHash": "sha256:ac2d96cc4928aa0a41ce92d682a3dc464a748d41b20dfa7f3484acc1ea151a47"
+    },
+    {
+      "source": "deviations.md#s7-actual-tap-guard-and-test-budget-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "The M52 anchor and the test file at 330 against 319 lines.",
+      "bodyHash": "sha256:f5c8136d991d4f01369de398114975c0207e580d1f3de22662946d52649ed6d4"
+    },
+    {
+      "source": "deviations.md#s8-documentation-size-and-final-checks-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "Docs at 92 against 40 lines and a single version bump.",
+      "bodyHash": "sha256:92c257abe77e1ffa7e786fafcc049333bd2ca8815bafe000cd3e66031e33b468"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-bounded-data-snapshots-and-content-model-fixes-2026-10-20",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "Cycle-1 fixes and acknowledged limits.",
+      "bodyHash": "sha256:3bade43fbcd2744b1c2ff4171a0a2260b8785be17b94fc2c6107d1c9960f71d3"
+    },
+    {
+      "source": "deviations.md#audit-cycle-3-limits-snapshot-final-completion-2026-10-20",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "The resolveLimits snapshot fix and the final 531 tests.",
+      "bodyHash": "sha256:df97d758caaf82708fb57f54e24c965755a7327b8f39e2e86cca4b2a9391083b"
+    },
+    {
+      "source": "log.md#2026-10-19-s2s4-wave-started",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:4b3fca8dcbb4d91541e052142d023e344c2e41d8def8baa3034cee4606a0c8fc"
+    },
+    {
+      "source": "log.md#s4-incident-sparse-citation-arrays",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "Sparse array root cause and fix.",
+      "bodyHash": "sha256:459cea05b61927d18e5e79a2de4b494bfb11e4abdcc5804ebd504a47e5a704b6"
+    },
+    {
+      "source": "log.md#s4-collection-and-diff-hygiene",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:76424a77232746282c3c16070caa393313a6aa1d9d1bb511f8a590279be486e8"
+    },
+    {
+      "source": "log.md#s2s4-scope-completion-coordinator-evidence-2026-10-19",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "309 tests, 45 parser rows, 15 evidence mutants, coverage and budgets.",
+      "bodyHash": "sha256:9a8057b1f53f39c8199efed7347da53289d2ac1926c76bd2b55347ccebf54e03"
+    },
+    {
+      "source": "log.md#s3-incident-orca-worker-launch-refused-2026-10-19",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "A shell update prompt consumed the launch command.",
+      "bodyHash": "sha256:e63a634a9937da710cb49f8c49799a85cdf63fda7f6ea11f763cc3961bf5dfb3"
+    },
+    {
+      "source": "log.md#s3-retry-incident-same-shell-startup-blocker-2026-10-19",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "The retry repeats the failure; cleanup and liveness proof.",
+      "bodyHash": "sha256:133e55ffe30b8eb190caf03abe3204b71a6f0c229ae7d4245e47eb1fee0cd5b9"
+    },
+    {
+      "source": "log.md#s3-recovery-explicit-normal-workflow",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "The owner chose orca=normal for S3.",
+      "bodyHash": "sha256:ffee2e02d11e79674ed49a956dbee0717f7643fc9e1053a2cd87497b4b893e6c"
+    },
+    {
+      "source": "log.md#s3-incident-node-strip-only-syntax",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "A parameter property rejected by strip-only mode.",
+      "bodyHash": "sha256:40867e68c2da1300ce1c1f55ae1c63e69fc347a340f86fb3d7dbc941d75aed2c"
+    },
+    {
+      "source": "log.md#s3-scope-completion-coordinator-evidence-2026-10-19",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "113 and 8 tests, mutants M22 to M34 plus 3, coverage and 605 of 800 lines.",
+      "bodyHash": "sha256:08ea50e4f6a5fa7bf72f3509190c2261ff00812b392de51fb68e1b606f880b65"
+    },
+    {
+      "source": "log.md#s5-orca-execution-and-scope-completion-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "224 and 449 tests, 213 named cases, fuzz and the retained terminal.",
+      "bodyHash": "sha256:518f1908bf9c3ae9d1a2046a870b9cf15f627ec1e44ab76c5a17c296304a0162"
+    },
+    {
+      "source": "log.md#s6-bounded-rejection-formatter-orca-completion-2026-10-20",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#design-decisions",
+      "helps": "The message grammar, the no-echo contract and 460 tests.",
+      "bodyHash": "sha256:6a090d21790870490bdb25025564ccf6bfa2dce39d11946cc4e1c798607657e9"
+    },
+    {
+      "source": "log.md#s7-golden-dataset-mapping-orca-completion-2026-10-20",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#design-decisions",
+      "helps": "The 22-case partition of 13 and 9, TAP enforcement and 49 and 270 tests.",
+      "bodyHash": "sha256:25f3dabf9f1d737290972d4e093661e095cda137f977fce6731d30dc9c6ad94b"
+    },
+    {
+      "source": "log.md#s8-documentation-version-log-final-build-checks-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "519 tests, the doc prose incidents and the 2.35.0 bump.",
+      "bodyHash": "sha256:6281a3defe2ae70fd5de1e78c2bdeb3be8fd3bf72f2dacf1e7075ab69e99f028"
+    },
+    {
+      "source": "log.md#build-end-roll-up-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "638 of 800 lines and the open boundaries at build end.",
+      "bodyHash": "sha256:ddf27f5f80114937938a91348a4e47f5ca7dbfbd8d4850954e10a53ceac7fbed"
+    },
+    {
+      "source": "log.md#audit-progress-and-stop-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "The cycle 2 stop rule on Orca exit 1 to 4.",
+      "bodyHash": "sha256:6352733f02e9a5fb11d851ba0a96bc7a985bae43d74b9e8d0ac3fd7b94d4a7a9"
+    },
+    {
+      "source": "log.md#audit-completed-after-orca-resumption-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "Cycle 3 clean with 531 tests and 666 of 800 lines.",
+      "bodyHash": "sha256:45e16f05889d42555c18463e373db105c412980d1349aab9b3b80df693a52f55"
+    },
+    {
+      "source": "log.md#ship-verification-blocked-2026-10-20",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "The first ship attempt was blocked and no SHIPPED record was made.",
+      "bodyHash": "sha256:11cdc427683dbf4f1b68644f75388de02803071b4d4c7714cc45905456175ea9"
+    },
+    {
+      "source": "log.md#ship-2026-10-20",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history",
+      "helps": "The ship gauntlet, the 2.35.1 repoint, cooldown flags and outputs.",
+      "bodyHash": "sha256:a2fa572d12dcce445be8e95dd8995c2b21216b1ad185d9f8383ba6113c02146e"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:cbf13fce16f844dd1ec8d49269ad8a9ea7fe4d46e98c342947945e0b91b88473",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#what-shipped",
+      "helps": "Preserves the reconciliation, evidence and limits across the supplement."
+    },
+    {
+      "path": "audit-cycle1.md",
+      "hash": "sha256:02b01dd8d255028dcf07322297e54015f3b1abe7b5216591dc7f382c21941105",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "Preserves cycle 1 canary results, should-fixes A1 to A6 and acknowledged limits."
+    },
+    {
+      "path": "audit-cycle2.md",
+      "hash": "sha256:047b2e34b81fb42ec4d62d8a43ac0c94304dcb1d26c358bb8df574eefe64f020",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "Preserves the A7 finding and the Orca stop in cycle 2."
+    },
+    {
+      "path": "audit-cycle3.md",
+      "hash": "sha256:db7de008fcb50c35cf49b6a06d2805cc8909f5c88e016bb3d8e6c1194ea2b753",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#audit-triage",
+      "helps": "Preserves the clean cycle 3, the A7 fix and the reviewer escalation."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:3defddeac8ed1ac1ee48db3295b5c3342d15bbbe8487e49ff8a858fa4b566772",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "Preserves the build, design and verification deviations across the supplement sections."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:70d1aaf560d04d4df75dcf1a05793d176c8936d7df530b447bb156181b2b97b2",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:105fb6e7ddbd0e15fde29c347cd38c1aa2523cbdc87a59279f1c6b35519cfa1f",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#build-history",
+      "helps": "Preserves the build, incident and ship history; two sections are recorded as omitted."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:66efc66851c19e58a795885d5e50865e3d98a2274c63ae9156f96014e57f18a7",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#scope-and-contract",
+      "helps": "Preserves the problem, owner decision, split, critique and bet."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:45450c190c36460eed0be8fb9d0d9f8c1998e4dd2408baac7b53d537c6a60cf8",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#scope-and-contract",
+      "helps": "Preserves grounding, the scope table, risks R1 to R16 and the test strategy."
+    },
+    {
+      "path": "spike-s1.md",
+      "hash": "sha256:fc5a551f3a9324e8ac6521a505df207a2117ea57123819ebfd34d8ed41455be2",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-fragment-sanitizer.md#design-decisions",
+      "helps": "Preserves the caps, decisions D1 to D10, the mutation ledger and the prototype timings."
+    }
+  ],
+  "coverage": 0.9473684210526315,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:12:18.678Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:beecd845f9e94208040a75776d770a3caee00fa738b52a66404e6e9ee63c672b",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
+}

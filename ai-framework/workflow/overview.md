@@ -16,9 +16,9 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 | 0 | **/shape** | Frame problem, set appetite, name rabbit holes, write no-gos | Knowledge gate (mandatory first) + breadboard + bet/re-shape/pass |
 | — | **/critique** | Pre-bet red-team (auto for big-batch + AI) | 5 perspective subagents fan out: knowledge-historian, skeptic, appetite-auditor, cross-pitch-projector, eval-regression-projector |
 | 1 | **/plan** | Decompose into independent scopes with machine-checkable exits | Parallel-dispatch plan + hill chart initialized |
-| 2 | **/build** | Execute scopes, hill-tracked, parallel where flagged | Verification-before-completion enforced — `/hill {scope} done` requires evidence |
+| 2 | **/build** | Execute scopes, hill-tracked, parallel where flagged | Verification-before-completion enforced; marking a scope done in `hill.md` requires evidence |
 | 3 | **/audit** | Parallel fan-out of review/security/test/ux/i18n/eval/cross-pitch | Cycle ≤3; must-fix tier blocks /ship |
-| 4 | **/ship** | Reconcile pitch ↔ implementation, extract knowledge, compact status | Final /verify mandatory; status capped at ≤100 lines |
+| 4 | **/ship** | Reconcile pitch ↔ implementation, extract knowledge, compact status | Final verification mandatory; status capped at ≤100 lines |
 | 5 | **/cooldown** | Promote issue → pattern → rule; prune stale; triage backlog | Every 5 ships; per-item approval |
 
 ## Workflow variants
@@ -32,7 +32,7 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 ```
 /shape → bet → /plan (1-screen mini) → /build (auto-advance) → /audit (auto-flow if clean) → /ship
 ```
-`/critique` skipped; per-scope confirmation skipped.
+`/critique` is skipped only for non-AI small-batch work; AI-prompt scopes still require critique. Per-scope confirmation is skipped.
 
 ### Lite shape (small task or user rejection)
 ```
@@ -55,12 +55,19 @@ One audit cycle only; anything beyond it is deferred to a follow-up. Rollback pl
 
 ## Adaptive confirmation gate
 
+This table is the single owner of gate applicability; phase specs and skills point at their rows instead of keeping
+their own tables.
+
+An audit is clean only when all required reviews are complete and there are zero must-fix findings. An incomplete
+review keeps the audit open even when it reports no findings; follow "Incomplete reviews" in `phases/3-audit.md`.
+
 | Phase | small-batch | big-batch | bug-fix | hotfix |
 |-------|-------------|-----------|---------|--------|
 | /shape (bet) | gated | gated | n/a | n/a |
 | /plan | gated (light) | gated (full) | n/a | n/a |
 | /build start | auto | gated | gated | gated + rollback |
 | /build per scope | auto | gated (evidence) | n/a | n/a |
+| /build end | auto (flows into /audit) | gated | gated | gated |
 | /audit end | auto if zero must-fix | gated | auto if clean | gated (residual risk) |
 | /ship | gated (brief) | gated (full) | gated | gated |
 
@@ -159,3 +166,17 @@ See `workflow/phases/`:
 - `3-audit.md`
 - `4-ship.md`
 - `5-cooldown.md`
+
+The portable bundle contains the current phase documents. Older phase names may appear in historical records, but no `workflow/phases/_legacy/` directory is included. Use the current pipeline for active work.
+
+Hill updates and final verification are activities inside `/build` and `/ship`; they do not require separate `/hill` or `/verify` commands. Supporting skills such as `/impact`, `/ui-design`, and `/test-strategy` contribute to those phases without adding new pipeline stages.
+
+## Process relations in the graph
+
+The pipeline above is also in the knowledge graph, so an agent entering a phase can ask what that phase depends on instead of searching for it.
+`ai-framework/workflow/relations.toon` declares, for each skill and agent, its `phase-doc`, the agents it `dispatches` and the rules it `reads`
+(or a `standalone` reason). A project's own skills, agents and rules go in `.project/relations.toon`, which a bundle sync never writes.
+Vendor adapters (`.opencode`, `.codex`, `.cursor`, `.agents`) are linked to their canonical `.claude` file with `mirrors`, and path mentions between docs
+become `references` edges (a file named by more than 20 others is boilerplate and gets none). `node ai-framework/scripts/graphify.mts explain .claude/skills/audit/SKILL.md`
+lists a phase's doc, roles and gating rules in one hop; `node ai-framework/scripts/graphify-relations.mts --check` (also part of `graphify.mts --check`) fails when a skill or agent
+has no entry, a target is missing, or an adapter has no canonical file.

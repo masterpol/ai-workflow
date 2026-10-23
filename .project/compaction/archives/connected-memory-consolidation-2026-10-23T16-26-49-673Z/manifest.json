@@ -1,0 +1,976 @@
+{
+  "schemaVersion": 1,
+  "slug": "connected-memory-consolidation",
+  "sourceRoot": ".project/pitches/connected-memory-consolidation",
+  "archivedAt": "2026-10-23T16:26:49.682Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "84deb9bdc7250745669925d9a3110dbc183c839fdef149401e7deee162694ccb",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "76ff37bf363b9acf5e2aae6be764b05513f312e64e2ff8bfa706bd4558d20ba3",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "fed05592d6efe36907f6b88df196ecd38ce308f9c5ddca5b7eef1737663be9f1",
+      "mode": 420
+    },
+    "audit-cycle-3.md": {
+      "hash": "44f245b05fcee43021a195db7f7a90281718abb573982cbdc3c3ecb9d0d6136f",
+      "mode": 420
+    },
+    "audit-p2d-p2c-cycle-1.md": {
+      "hash": "c23d2bf3f396a23d90ae51e5822f1f7973f505ffae31bdeeeafee9af1c676be9",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/actual-ownership.toon": {
+      "hash": "a7130f27a376a8f9532d44a25811f769faf9514c05e11eb7405e283662271087",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/baseline-provenance.toon": {
+      "hash": "5911db27877c305566952e95d4415ca570951526fc2997281577251ec9805325",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/completion-code.md": {
+      "hash": "bc3f770784b83013363c63109a1a18fdc5b444de7d3b4f41388188c03422bc2a",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/completion-code.prompt.md": {
+      "hash": "8d69e308f52a827addac8fee51da2b5211f5f437bd5eb16f4ef09e2e603d6cfc",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/completion-coverage.md": {
+      "hash": "1a491cd4684e7394b61374b93ded5b41332c413344541eb8b51341de3a1c1f16",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/completion-coverage.prompt.md": {
+      "hash": "6ced5302f80a690bd2472f94fe947345bf8a278a47e1f70dcbbd4e5e88ee4799",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/completion-security.md": {
+      "hash": "aba0827ca5aacefa7b4e72ed320565deb9e9417ad950a6171e53fd3bf144d136",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/completion-security.prompt.md": {
+      "hash": "384d9046b1442561c1704a4cc8d89303b16ff1e1d47f591fb747cc0a18e460a8",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/cross-complete.md": {
+      "hash": "5ee54b7e3c3ffb99e5b985fba5136e3afa8e033053a1788a188910e355af682d",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/cross-complete.prompt.md": {
+      "hash": "fe6cee17816b9a61d17f125ca85750c701bffd2c7aaf109fbee602399b4c7630",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/cross.md": {
+      "hash": "d5440d3d0272ce62b8b25e46e9ac126922d7b0c13fd3656223f52c6092da7a87",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/cross.prompt.md": {
+      "hash": "ac1d348c3f94705c408293c475c11dc80d93c9687267cafe9a22d262a36cb32b",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/guard-and-source-witness.toon": {
+      "hash": "feb37aba5cf28868f1ee4d2884762c46417abcff6f08c8d75a10ae04cad49d74",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/initial-code.md": {
+      "hash": "3df85ca2b20f42df70e7f197cd482fa3c9f4b75ecf8889db0e82dda874abedf5",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/initial-code.prompt.md": {
+      "hash": "c6915e2a28fbf3a8e3be7c0bc0e7e5d3587fd8a18ca3711e3bb1682839e6a684",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/initial-coverage.md": {
+      "hash": "9415948ec39a3fa5bbb0a67309285d133fc6f0faa41a72d28dfc3f57302acc08",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/initial-coverage.prompt.md": {
+      "hash": "d20df12e082a0791639abaa1be710f9158aaba0da37c4209db9e6fde5e476718",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/initial-security.md": {
+      "hash": "3f8339e063c7ada9556e4c609067ff917903cad2f864518d4adb2d2212f6b9c6",
+      "mode": 420
+    },
+    "audit-records/2026-10-23-p2d-p2c-repair/initial-security.prompt.md": {
+      "hash": "76274c1ae4e641795b89b9a84b55ea6b7a40e9ad7a5ded229726311bc61fbfc6",
+      "mode": 420
+    },
+    "audit-records/cycle1-code-graph.md": {
+      "hash": "b4a1d8f58b8d8910c540714bfe49712d4a6de6aa1cbcb8bdb3935cd0f85247d7",
+      "mode": 420
+    },
+    "audit-records/cycle1-code-schemas.md": {
+      "hash": "30aebadb27283e6ce084bc52c9bf7f88b3f51416fe8db1c91e92ee3e630c921f",
+      "mode": 420
+    },
+    "audit-records/cycle1-cross-pitch.md": {
+      "hash": "e6172327dbf524ac22999555dd764d43eec99c070c83196386864bb9ff33701c",
+      "mode": 420
+    },
+    "audit-records/cycle1-security-resumed.md": {
+      "hash": "df35f38ea20b8650756a9dcdb586fec1219ae8c644a3a58e8e2d7c706ad07a5e",
+      "mode": 420
+    },
+    "audit-records/cycle1-security-retry.md": {
+      "hash": "0670fac65a4478371fa0afea5b9710d8c2559433fd39948e5219fbffa38fd9cc",
+      "mode": 420
+    },
+    "audit-records/cycle1-test-coverage.md": {
+      "hash": "5f6518b288472015a971b6a59ff3df0ced61dd6f803f8588135a19e36bb228e7",
+      "mode": 420
+    },
+    "audit-records/cycle2-security.md": {
+      "hash": "887e27339b1b1ef2e70bb717f31f4d49a8fc7069a4bad8272eb36d68435703fa",
+      "mode": 420
+    },
+    "audit-records/cycle3-security.md": {
+      "hash": "ffa8cc4f062e26e1ecd66508f491b18bb31e5263e0502eb188081bd0a9cf58ea",
+      "mode": 420
+    },
+    "baseline.mts": {
+      "hash": "420d11ef306a9e1038e31a07835a3b70fa4910668c5ce23b7a7ca8f004fc4393",
+      "mode": 420
+    },
+    "campaign/agent-model-sweep.approved.toon": {
+      "hash": "ef030d5fbe07725df8af651f844050aa2cc97ee2019148c65b647b4dfa688005",
+      "mode": 420
+    },
+    "campaign/agent-model-sweep.draft.toon": {
+      "hash": "2199daefbd53866e97b124f165862090a6cfe7e9ecd587ac13c11cf637bf700f",
+      "mode": 420
+    },
+    "campaign/agent-model-sweep.proposed.toon": {
+      "hash": "07b903c103abc7d7f2ab3c047983bbc4ab676979ba8d2edbba2bf47425f284b6",
+      "mode": 420
+    },
+    "campaign/agent-model-sweep.supplement.md": {
+      "hash": "8718af0ae23363533544608dbccc23dfc93678a48c1fde2e500ff1c320d7f00e",
+      "mode": 420
+    },
+    "campaign/bundle-sync-marker-fix.approved.toon": {
+      "hash": "1ec20e617d2fb8d7d0d795445903b24ada1aa7a87484afc4cd0c2066dbb14b8e",
+      "mode": 420
+    },
+    "campaign/bundle-sync-marker-fix.draft.toon": {
+      "hash": "5b7eb9f33d1adf5cc2cf7c3efc9b37ebffe8636149dfa4be35d2afb592bb84bf",
+      "mode": 420
+    },
+    "campaign/bundle-sync-marker-fix.proposed.toon": {
+      "hash": "9c95facc8b881ca63a89de11f36a9be0ba91ac6cac9079bfdfee659fcc2eff2f",
+      "mode": 420
+    },
+    "campaign/bundle-sync-marker-fix.supplement.md": {
+      "hash": "181e3eb4c7de2710dc2c97b59a01860a33a27c14751e91c22d55929083b9b6de",
+      "mode": 420
+    },
+    "campaign/codex-orca-coordinator-parity.approved.toon": {
+      "hash": "39b42821b28266f15dbbf986d6b166cfe56a15d54b179d7adbc36810d6d550a6",
+      "mode": 420
+    },
+    "campaign/codex-orca-coordinator-parity.draft.toon": {
+      "hash": "4f02e10a60ea9488d7a445bb7ec065d40c9b80940a7979d5768cf1fe5132de9a",
+      "mode": 420
+    },
+    "campaign/codex-orca-coordinator-parity.proposed.toon": {
+      "hash": "f452cc4378fc26f37abeec4e283b422fb52a1c0b80c51856353b6a729bb74e12",
+      "mode": 420
+    },
+    "campaign/codex-orca-coordinator-parity.supplement.md": {
+      "hash": "ddec0fa289bb96213842755449ee63afa7bfa976decca27f67769de001595ee4",
+      "mode": 420
+    },
+    "campaign/collector-robustness.approved.toon": {
+      "hash": "0e7d71ebc8b9ba4d0f47425ab18e5a79c66d9e97df7dbb6e2a591828f85f9247",
+      "mode": 420
+    },
+    "campaign/collector-robustness.draft.toon": {
+      "hash": "5ee514bb23b5f40ef7c665e339eeaf2feb20b17e1aeb4553ba92b432bf15b829",
+      "mode": 420
+    },
+    "campaign/collector-robustness.proposed.toon": {
+      "hash": "877ff439ff65e3463db2e872bffef280bf5387c1b30a43555f2fa536f2826410",
+      "mode": 420
+    },
+    "campaign/collector-robustness.supplement.md": {
+      "hash": "0ddcbde2663e8e3e934f02add64482c451d6fb9742617066b944664609a930e1",
+      "mode": 420
+    },
+    "campaign/fix-instruction-conflicts.approved.toon": {
+      "hash": "8e722ee2e8c1e08bdada90db90310cc860c34e7744a5847c2475d6216d9c041a",
+      "mode": 420
+    },
+    "campaign/fix-instruction-conflicts.draft.toon": {
+      "hash": "5dd61e209f64e56dbe848c697465faebb6e1a8fac7fdf67e64540ba6a95af68e",
+      "mode": 420
+    },
+    "campaign/fix-instruction-conflicts.proposed.toon": {
+      "hash": "74416a3beca969805e713e4afb1da4045bcfa5445ba350e3c219b52b03d22848",
+      "mode": 420
+    },
+    "campaign/fix-instruction-conflicts.supplement.md": {
+      "hash": "a27883dd9f88f401b585085d214941037accabf2b7742062f10c00b8aecc2946",
+      "mode": 420
+    },
+    "campaign/fix-orca-dispatch-resume-gate.approved.toon": {
+      "hash": "c46a347c2b4eaae097b1f8cbf827127081b31fa054ca72d1065c03cbdf3daf1c",
+      "mode": 420
+    },
+    "campaign/fix-orca-dispatch-resume-gate.draft.toon": {
+      "hash": "755bfdbe5211ab8e3fa1c84a6756fc8053d9dd5a8a2b473e9cc8b1aeffad72da",
+      "mode": 420
+    },
+    "campaign/fix-orca-dispatch-resume-gate.proposed.toon": {
+      "hash": "3bd43d69d3a405e2dd98eb65ba014c6cabde2f67121dd03f2ecc940518d4af41",
+      "mode": 420
+    },
+    "campaign/fix-orca-dispatch-resume-gate.supplement.md": {
+      "hash": "98452a6c274bb6a1db8ebd3a433c49cdbfcb3e6a5e90c06e3fe404e8da2c7157",
+      "mode": 420
+    },
+    "campaign/fix-workflow-runner-env.approved.toon": {
+      "hash": "d7d182bd51aefac05b9f891fd08b0f8ccb49c2cd71cc3190ba18ebda2da4bef8",
+      "mode": 420
+    },
+    "campaign/fix-workflow-runner-env.draft.toon": {
+      "hash": "a7f9abf91a3831ff6f3895f450886068c56245ce4b6d6c3c163924e7214a7094",
+      "mode": 420
+    },
+    "campaign/fix-workflow-runner-env.proposed.toon": {
+      "hash": "be7895fc9f163b795e1ffed4ff77c2afcde0a764555b6280d5e68a3e9edd3d2f",
+      "mode": 420
+    },
+    "campaign/fix-workflow-runner-env.supplement.md": {
+      "hash": "c0e63fcd27afc5ec3651b3a16fa34e3c8ceced716737e96f5201c80ec2b8bd1e",
+      "mode": 420
+    },
+    "campaign/independent-rereview-catch-up.approved.toon": {
+      "hash": "886f75df45a9b14eb2f0d4136eacc7e1c13a511f3aecf0940880ff3bc82a6634",
+      "mode": 420
+    },
+    "campaign/independent-rereview-catch-up.draft.toon": {
+      "hash": "d1492589dfad0ce4943db838a0b746fa51e38a129065efc1683a2f1a0a8ff8a2",
+      "mode": 420
+    },
+    "campaign/independent-rereview-catch-up.proposed.toon": {
+      "hash": "c5a5cb10b8484008976bd348e6829346ee1715d2e738204b29d74ff1a5ee258d",
+      "mode": 420
+    },
+    "campaign/independent-rereview-catch-up.supplement.md": {
+      "hash": "ecb325bf16891664381108d7a2bcace7c656947a8439becbfbe4f6adf9ed2a13",
+      "mode": 420
+    },
+    "campaign/instruction-compression.approved.toon": {
+      "hash": "634c5e180de2ba700e87238d3b5e5277b13109c60dc3b93b4fbd02321c93ea2a",
+      "mode": 420
+    },
+    "campaign/instruction-compression.draft.toon": {
+      "hash": "da871c1499dc7e13db29f0bfca29098949fafeefa7ad3edc24db9aac1555b607",
+      "mode": 420
+    },
+    "campaign/instruction-compression.proposed.toon": {
+      "hash": "eaeb8b2c50e5a14f2986e20753e2d32570bfd1d021987b9b7e0409db8cd43c7c",
+      "mode": 420
+    },
+    "campaign/instruction-compression.supplement.md": {
+      "hash": "4e782ce3cffdb5d35bf854b08041a819d68ab78783158de4fde49e7a97e897ac",
+      "mode": 420
+    },
+    "campaign/metrics-report-dimensions.approved.toon": {
+      "hash": "827cebfc48e20ec3822dea6ee3558be1e3840bbc91a295c780a3ecd77d8d64ff",
+      "mode": 420
+    },
+    "campaign/metrics-report-dimensions.draft.toon": {
+      "hash": "19a8cf2b6cef3af3d6d92230fcfdfd860c1eab04a00c75c1466257cdf5ade7c2",
+      "mode": 420
+    },
+    "campaign/metrics-report-dimensions.proposed.toon": {
+      "hash": "51d9d21da9bb0b5c02261305bc933a51e960acb60d5365a1462e7a8bbe63665d",
+      "mode": 420
+    },
+    "campaign/metrics-report-dimensions.supplement.md": {
+      "hash": "ab3ef0e3261beaa185f3b1ddef76d53671ef8fffe77de8a4b4fb22ed4aad2b71",
+      "mode": 420
+    },
+    "campaign/native-safety-feasibility.approved.toon": {
+      "hash": "61613739b0c61fcada8cebcfa932592a099d6670ddfb330c70b72c169040c26f",
+      "mode": 420
+    },
+    "campaign/native-safety-feasibility.draft.toon": {
+      "hash": "9d26ef08ecf11e1d0198a274e4c42a084a38ea51d9733f88b709883c1b9b0ccc",
+      "mode": 420
+    },
+    "campaign/native-safety-feasibility.proposed.toon": {
+      "hash": "17e08ca3430cda3d5189026782785c39648667ee967c267c0cb9ec1ebe870824",
+      "mode": 420
+    },
+    "campaign/native-safety-feasibility.supplement.md": {
+      "hash": "707b5bf69c1534b14cd6df35abfd147320282def4f9556b90a6edc75b9fe69e1",
+      "mode": 420
+    },
+    "campaign/opencode-handoff.approved.toon": {
+      "hash": "d9f0e653c93accafc6cafe8db111893d6afb3d3d9f856f98ab9ff21031fd8b82",
+      "mode": 420
+    },
+    "campaign/opencode-handoff.draft.toon": {
+      "hash": "567701878784ce51c5a2945db3357da648e1dabeef034d5a87bd6ac201a76cee",
+      "mode": 420
+    },
+    "campaign/opencode-handoff.proposed.toon": {
+      "hash": "8deca141e0f81c67df3afd6d318ca12684f5dc9410659132c1f55f9d89d68652",
+      "mode": 420
+    },
+    "campaign/opencode-handoff.supplement.md": {
+      "hash": "41947be50cfa64dc271e5249a7304abf0e3ff45b9b2251f434059aabbd0570b5",
+      "mode": 420
+    },
+    "campaign/orca-auto-start-all-phases.approved.toon": {
+      "hash": "15b0e440dc0e6cb26c620b06db962865a0c4883ce595f541d8f8a2eb82c4ff7d",
+      "mode": 420
+    },
+    "campaign/orca-auto-start-all-phases.draft.toon": {
+      "hash": "64ee56c380ae7d66cde157d8a33941e127787a575635f31141c2a978447ce0f8",
+      "mode": 420
+    },
+    "campaign/orca-auto-start-all-phases.proposed.toon": {
+      "hash": "be43fe2f7fde02c0d41b921197aea029363839aa1bdbaef5811bcd5eb1e4fed9",
+      "mode": 420
+    },
+    "campaign/orca-auto-start-all-phases.supplement.md": {
+      "hash": "ba53d7e5f622ea8912cb7406c155ce022065133da58c605ca700e4cc265c40c3",
+      "mode": 420
+    },
+    "campaign/orca-engines-range.approved.toon": {
+      "hash": "9ece7a7203d4d5511fcb61760434213e78a53225037ea434bfa0f042a76362f4",
+      "mode": 420
+    },
+    "campaign/orca-engines-range.draft.toon": {
+      "hash": "f0a13b0eba66c5aa6cd80c7cb0071f557b6a49d88f25067079908d4218b76071",
+      "mode": 420
+    },
+    "campaign/orca-engines-range.proposed.toon": {
+      "hash": "a2344a7e0e291046a5a2513ad66692d32b67e2869f10b4f8bb7a68db6a478783",
+      "mode": 420
+    },
+    "campaign/orca-engines-range.supplement.md": {
+      "hash": "330dbd2c9f038fe6a2ec9774e2b57e17ea6c33a9e01eace43605fd2651b6cee8",
+      "mode": 420
+    },
+    "campaign/orca-role-pools.approved.toon": {
+      "hash": "d3092a32fbcd55f9f2e9242466c2d08e753e899fe5201cd4dfcd67bc40bbe18c",
+      "mode": 420
+    },
+    "campaign/orca-role-pools.draft.toon": {
+      "hash": "528d5d8daeb911ba60ab0a8ccd7c012ac053b875035d42eef5d8624df676bfd9",
+      "mode": 420
+    },
+    "campaign/orca-role-pools.proposed.toon": {
+      "hash": "48cf0545799ca016a54d466cc4e442859a579e8d655ddcdcff96322339ec6469",
+      "mode": 420
+    },
+    "campaign/orca-role-pools.supplement.md": {
+      "hash": "9ce929eaae69830c9063ad4fef3837c09e7d9649b1441c0cef02256a1a6a2102",
+      "mode": 420
+    },
+    "campaign/orca-vendor-dispatch.approved.toon": {
+      "hash": "410f6d42446a7f9a8416fdefa177d923be81a5395a535dfb8362cec3eef95129",
+      "mode": 420
+    },
+    "campaign/orca-vendor-dispatch.draft.toon": {
+      "hash": "a58bfbc3ef43de428dc193442de4d7f15c7a05cae5c44a1ac8851a98295752f9",
+      "mode": 420
+    },
+    "campaign/orca-vendor-dispatch.proposed.toon": {
+      "hash": "664eea981212e73e7da8c8c7ccbbb06d1fb0ffa818179639f9ff38f878eef070",
+      "mode": 420
+    },
+    "campaign/orca-vendor-dispatch.supplement.md": {
+      "hash": "d0dc16b2744c67d50408615c7ba150fcc1898a02190055f7fb63d47498c2bafc",
+      "mode": 420
+    },
+    "campaign/orca-vendor-foundation.approved.toon": {
+      "hash": "107e85c30af7989eb928722b1d0378fb0f4fbb2a45b24f85e769f55c07114bcf",
+      "mode": 420
+    },
+    "campaign/orca-vendor-foundation.draft.toon": {
+      "hash": "a7f70d5e1c361d05736395c5b286048a3bccf7cdbdc7b9f4e0dc9b57bef26d6b",
+      "mode": 420
+    },
+    "campaign/orca-vendor-foundation.proposed.toon": {
+      "hash": "31505171411b83407ae1806e8ad8237bbbacd218ae644cd4b0ef517f494e30af",
+      "mode": 420
+    },
+    "campaign/orca-vendor-foundation.supplement.md": {
+      "hash": "f149a4368ad3c4c0a4aee43e603d3c7c2998772948cb26e90018792085f7d4a5",
+      "mode": 420
+    },
+    "campaign/orca-vendor-orchestration.approved.toon": {
+      "hash": "748ebffd30385834d5f3cdecd51c27cfbbad2061d5978447d5c9eac21967ea4c",
+      "mode": 420
+    },
+    "campaign/orca-vendor-orchestration.draft.toon": {
+      "hash": "fa3dbd58e5edf9a28933f3de26a85074d4fdba35e28a4780cd54f66e94e76e72",
+      "mode": 420
+    },
+    "campaign/orca-vendor-orchestration.proposed.toon": {
+      "hash": "d62da6a0db8eb7b407ddf3feca7a55b30ad43b9cb842eb91af2526be76e93b22",
+      "mode": 420
+    },
+    "campaign/orca-vendor-orchestration.supplement.md": {
+      "hash": "ba13cbff547c7358bf4328c4d955fcebee93b07675ad978749f5470683e85672",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile-integration.approved.toon": {
+      "hash": "ee1c971f50e3bd6793a17b9345bfbad15c8cbbe2eaa558fab38f3bbd7f294ad9",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile-integration.draft.toon": {
+      "hash": "d9d64a6c1f531ffd5b30298f71559ed3aff4b972bd1143b32d98706b0f538e19",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile-integration.proposed.toon": {
+      "hash": "d0c99fd3885d4b98794c7cd5a0b73ed8b002707f3272da303e9bd11305aedbbb",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile-integration.supplement.md": {
+      "hash": "99f409a51267c7f233361b9e94709053fdcfe6c612b6ff6a375f658bea669dcd",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile.approved.toon": {
+      "hash": "67d529c9836b634d712cf8b7a4dca0f1b96ccd2cf0c66d4f92c1ab49c0e6bc63",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile.draft.toon": {
+      "hash": "a76ad322362e97950ce461c194280e50384e287d64dc1478cb6fcd676f127c2c",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile.proposed.toon": {
+      "hash": "642561fc3e16e8247b1061e0e56643bded842fb59e5fb4a2f0e65ecc974c5991",
+      "mode": 420
+    },
+    "campaign/orca-vendor-reconcile.supplement.md": {
+      "hash": "ccf76e832077236d7d2ec40d6a64a4175dce429326ec41bc4605dbf2b7075f3b",
+      "mode": 420
+    },
+    "campaign/orkflow-usage-capture.supplement.md": {
+      "hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "mode": 420
+    },
+    "campaign/path-safety-hardening.approved.toon": {
+      "hash": "621efd0f6ce69b38e3d7aac0639ebc3dabff928ef2cde0105782f047d9c6cc68",
+      "mode": 420
+    },
+    "campaign/path-safety-hardening.draft.toon": {
+      "hash": "e1d14be9ac6afffc448ff5e8cdc9b07202a6552b4c127b2906016f45576d8468",
+      "mode": 420
+    },
+    "campaign/path-safety-hardening.proposed.toon": {
+      "hash": "d80f2c60f2fae53ba82dfec7d10ada6ac69d5ffd22db211ca903766de2d36598",
+      "mode": 420
+    },
+    "campaign/path-safety-hardening.supplement.md": {
+      "hash": "e17e0cffbbeab9d037b8f7caef21dec2e8aed696e0d769cabd3f7433b6214bef",
+      "mode": 420
+    },
+    "campaign/pitch-compaction.approved.toon": {
+      "hash": "baa15165ddd9c174f480b261cfc89ce18a6620d4389491ea49d280b311ea6ce7",
+      "mode": 420
+    },
+    "campaign/pitch-compaction.draft.toon": {
+      "hash": "766baeccda1a8a4b01dfb43725699c7e4a371a2932ed96479cb6e38d47b9b81a",
+      "mode": 420
+    },
+    "campaign/pitch-compaction.proposed.toon": {
+      "hash": "44d9870a3ac19ba56b4e2f85bba90e97ce4cfcf39360ae88d645928efb73499f",
+      "mode": 420
+    },
+    "campaign/pitch-compaction.supplement.md": {
+      "hash": "a77145166e5525ca25267499120b158b221910b4d4ca0e6479a58f5badbfbbba",
+      "mode": 420
+    },
+    "campaign/portable-skill-defaults.approved.toon": {
+      "hash": "345b70f49f354f451d0bb32a2fd8223170e1a81b0b3132b37cddb044390f776c",
+      "mode": 420
+    },
+    "campaign/portable-skill-defaults.draft.toon": {
+      "hash": "0792cfeb638cb53f5734731da92f8dc977d209b3c4aa00d4680991f7373d1654",
+      "mode": 420
+    },
+    "campaign/portable-skill-defaults.proposed.toon": {
+      "hash": "720b99463aaa9d5e4189dfdc8cf24ae1546c71bf03a289c21ff7b334ef660e22",
+      "mode": 420
+    },
+    "campaign/portable-skill-defaults.supplement.md": {
+      "hash": "a71045fe2ffd75f08f61353e2198afa498555db1e773cb4fa33eaecdd5bb18e2",
+      "mode": 420
+    },
+    "campaign/portable-skill-installation.approved.toon": {
+      "hash": "983a05b6683e0f5a4998552056c5dec6bd364523bd9f098f2e20ff1d3f97eb5c",
+      "mode": 420
+    },
+    "campaign/portable-skill-installation.draft.toon": {
+      "hash": "85e27a61de0a64dcce82c4626a3b5cf8dbca0b7468db1191373f80f55333c830",
+      "mode": 420
+    },
+    "campaign/portable-skill-installation.proposed.toon": {
+      "hash": "955795f466c6bbfc3f4302decaa13b4a6b723484b591e1b6cae4b5eb4fe61118",
+      "mode": 420
+    },
+    "campaign/portable-skill-installation.supplement.md": {
+      "hash": "8f2b80b30a8277d14c32d0076768e66d63315799e5b46a6edd4ec6f0ea4037bc",
+      "mode": 420
+    },
+    "campaign/project-state-report.approved.toon": {
+      "hash": "6aa5ec7043051421ec5d0869854de9c62171d4dbd5af60bd52186c875aa142d3",
+      "mode": 420
+    },
+    "campaign/project-state-report.draft.toon": {
+      "hash": "4d6f996ce669d193690aed8788820e095982b1c7936dfc0b2140def3f2213bd0",
+      "mode": 420
+    },
+    "campaign/project-state-report.proposed.toon": {
+      "hash": "309eeccb1992270cb4e6e3a63939411f2cc0bd46bdd9a04833a815f6daa1801e",
+      "mode": 420
+    },
+    "campaign/project-state-report.supplement.md": {
+      "hash": "992568e1a2748ce2e536d5ea891998eff2403f718e7e09c4488b136ef6c4d10b",
+      "mode": 420
+    },
+    "campaign/readme-split.approved.toon": {
+      "hash": "03c1446cedb941e4f499bae2d3d8ba20bfe049b1e9e35cdc854a6e848a51a5d9",
+      "mode": 420
+    },
+    "campaign/readme-split.draft.toon": {
+      "hash": "dee9be9a1c5f7cdc58dc5b7319d66f3f903ccccfa9cbaf679ab1b77d84df93c4",
+      "mode": 420
+    },
+    "campaign/readme-split.proposed.toon": {
+      "hash": "396c7499df4ad5dbe0e34ed045b2aa9f83f8b098e0536df9f9bbdf2563eba82b",
+      "mode": 420
+    },
+    "campaign/readme-split.supplement.md": {
+      "hash": "66e3a09dec506d8638f6065dfc214d177f7776d291d1a59b40c76559172b2239",
+      "mode": 420
+    },
+    "campaign/runner-aware-runtime-boundary-validator.approved.toon": {
+      "hash": "ba85b5e79ddf142355529e045673a000715626bdbd71e2598cd4edca27f3c059",
+      "mode": 420
+    },
+    "campaign/runner-aware-runtime-boundary-validator.draft.toon": {
+      "hash": "6d86cf0cdaeda4cd6cc5895f61b465c9e859e682d52fe92f1f7233e6f2aea79d",
+      "mode": 420
+    },
+    "campaign/runner-aware-runtime-boundary-validator.proposed.toon": {
+      "hash": "2437b7e857268be06c409f2241cf5965c318b163745741614c9a859dde1fd79f",
+      "mode": 420
+    },
+    "campaign/runner-aware-runtime-boundary-validator.supplement.md": {
+      "hash": "b175ae15ae7ee7218253e442aab048089dcf2a87c779bbe96d0104a98473ff40",
+      "mode": 420
+    },
+    "campaign/runtime-test-helpers.approved.toon": {
+      "hash": "71aad0e71e1c0fbd682f364b49d3136252697dacc9f9697930071a5bce9f651a",
+      "mode": 420
+    },
+    "campaign/runtime-test-helpers.draft.toon": {
+      "hash": "7100a5ce5cde85a72a897d0a94c08ce945f624583fe370aace2059456ded2076",
+      "mode": 420
+    },
+    "campaign/runtime-test-helpers.proposed.toon": {
+      "hash": "75d9db350d79880a14a28c80de55740f39d81fe0a64bbd2f536bf24537d15657",
+      "mode": 420
+    },
+    "campaign/runtime-test-helpers.supplement.md": {
+      "hash": "0a265229eeb7ab41914fcfe03d10c63ffad8978846516d22c2b17691f059a451",
+      "mode": 420
+    },
+    "campaign/shape-lite.approved.toon": {
+      "hash": "9ef9ed9d283b0981ada3af8601a5593f27a6fc8a21c49160fd6fe8feb66e26cb",
+      "mode": 420
+    },
+    "campaign/shape-lite.draft.toon": {
+      "hash": "586f15baf2d6a72dcddd38a210cb8b8815a75949a23ca4c0de7fe6a0f4ba4fa6",
+      "mode": 420
+    },
+    "campaign/shape-lite.proposed.toon": {
+      "hash": "a4e7bad682ae64fcc05d9ce95932cb3d7cfd1496efccc30c543ef7bc2ca093be",
+      "mode": 420
+    },
+    "campaign/shape-lite.supplement.md": {
+      "hash": "51c99006365a6c72d1a738af827c1a4833baacfa2b613678729c318086c6147e",
+      "mode": 420
+    },
+    "campaign/state-ai-authoring.approved.toon": {
+      "hash": "f97b598dc20b99dea5f0b55e6c07aa3b5caebd153809f0a8b7bb3d07e9835529",
+      "mode": 420
+    },
+    "campaign/state-ai-authoring.draft.toon": {
+      "hash": "ada7dd7ee60369f781b251f3b3dd30811f5a0e4c580be80c549887a61863589c",
+      "mode": 420
+    },
+    "campaign/state-ai-authoring.proposed.toon": {
+      "hash": "de7270d442201ff5fdd5a47562d87be35df07ea20796c76375a6dc6036bcf6aa",
+      "mode": 420
+    },
+    "campaign/state-ai-authoring.supplement.md": {
+      "hash": "c7d373adb8de2ed95e80caa1bd6c7831bed17430e9a8411f6db072f1645acad6",
+      "mode": 420
+    },
+    "campaign/state-deep-evidence.approved.toon": {
+      "hash": "149b7f14f23953703d22820e8cd1206eb54d81e4d10d3a9e5e92c4e0b1dea5e0",
+      "mode": 420
+    },
+    "campaign/state-deep-evidence.draft.toon": {
+      "hash": "7fbafc5f0a04859672def9bc426e5d019d3e0d4a0c660747f9da9822e91ca870",
+      "mode": 420
+    },
+    "campaign/state-deep-evidence.proposed.toon": {
+      "hash": "ff29ca3c082b97617a29132f0ff631dcdb37f40d75a4beb6c2bb75fe28b8fde7",
+      "mode": 420
+    },
+    "campaign/state-deep-evidence.supplement.md": {
+      "hash": "248a7960b56d1d132db5147fb193c067c21e908ea05b371f0177302e47a64ee9",
+      "mode": 420
+    },
+    "campaign/state-fragment-sanitizer.approved.toon": {
+      "hash": "d90ad3e12f94801c8b81aef5ecf2679054ffead643b5009a42f321c2e57c8d6f",
+      "mode": 420
+    },
+    "campaign/state-fragment-sanitizer.draft.toon": {
+      "hash": "ed8396f4cada4e335aac1a8587e22e66f796a54af1c3e88a6df3f09c81b3ccd6",
+      "mode": 420
+    },
+    "campaign/state-fragment-sanitizer.proposed.toon": {
+      "hash": "d46479a5b98f99aca07cc2131a6572d745c8e9b703bb1274a9bccefe014d1b91",
+      "mode": 420
+    },
+    "campaign/state-fragment-sanitizer.supplement.md": {
+      "hash": "483b3cc807f39ef51637632cbbaaf8cf07435a77d700dcf711e8176b8c9f9c1b",
+      "mode": 420
+    },
+    "campaign/state-multipage-report.approved.toon": {
+      "hash": "1e588d026389a774876cdf22544eb8a0a12235aa776e8dff41cca56cc6679ef7",
+      "mode": 420
+    },
+    "campaign/state-multipage-report.draft.toon": {
+      "hash": "7d989d64b6da0eca68585a54e4c3bf4bc0e78a0920b35abe37316ba5a45153af",
+      "mode": 420
+    },
+    "campaign/state-multipage-report.proposed.toon": {
+      "hash": "599e4561331140e097cba62fc085456c035aa54f1fa50af30af96d9beae75673",
+      "mode": 420
+    },
+    "campaign/state-multipage-report.supplement.md": {
+      "hash": "dd0ddb9daa6633657f6359d8ef173d9ce40eb1cf6d34f59c3ac97a2942b4bda6",
+      "mode": 420
+    },
+    "campaign/state-quoted-fonts.approved.toon": {
+      "hash": "0c883072ca3735ec684b1f10e75fb45a4fbe465bb71063583a7ba6db701a3246",
+      "mode": 420
+    },
+    "campaign/state-quoted-fonts.draft.toon": {
+      "hash": "b493eafff9014452398a2eed10a7c8156903a1ab74f7f08c28027e160edb871a",
+      "mode": 420
+    },
+    "campaign/state-quoted-fonts.proposed.toon": {
+      "hash": "4bbdb885371eba04c0616d376e6ba78288a7fbbf6c92a9150caee1573cee2523",
+      "mode": 420
+    },
+    "campaign/state-quoted-fonts.supplement.md": {
+      "hash": "8223f1334df7be02a8b3754c497b8ae97611b4170d89927553ad7f30e1ddad7b",
+      "mode": 420
+    },
+    "campaign/state-report-redesign.approved.toon": {
+      "hash": "d0a794b181c60d1d08f639c5c1d550489a5f049cb98862b80730a94d8a0d0c96",
+      "mode": 420
+    },
+    "campaign/state-report-redesign.draft.toon": {
+      "hash": "35955749bcbdf423d4596a994aa19f5dc2497446a0f94adf00deafb2422f60fb",
+      "mode": 420
+    },
+    "campaign/state-report-redesign.proposed.toon": {
+      "hash": "a696e9f5463c52d626109b16a0a5593d2c6151c74ab86c564a87b35d351832b3",
+      "mode": 420
+    },
+    "campaign/state-report-redesign.supplement.md": {
+      "hash": "55979bfad72c0968f282a9fea318a3e7239a8360a33a788316fee84ac2a1f52d",
+      "mode": 420
+    },
+    "campaign/test-execution-performance.approved.toon": {
+      "hash": "66f0ec49a90b7bb137cdaf790a1bd379524fc90723217c306862158b4b46c3df",
+      "mode": 420
+    },
+    "campaign/test-execution-performance.draft.toon": {
+      "hash": "ce290e34d3f4209772b269064fbac8ea41039cf368319fb59a1bc490eeca34f5",
+      "mode": 420
+    },
+    "campaign/test-execution-performance.proposed.toon": {
+      "hash": "f5c5614cb94108e48b8b513f87dda79a3a08358d23217e96cbb286c6083a6a85",
+      "mode": 420
+    },
+    "campaign/test-execution-performance.supplement.md": {
+      "hash": "051a5ba6e3e4ab02675200b0e68fc1396b4bb8d0bd344b92fc203ed4a40352ff",
+      "mode": 420
+    },
+    "campaign/token-attribution.approved.toon": {
+      "hash": "fe17a45cda5edbd2da54998dba0d9f62bcd72b8be1b2c462000189fd1a4881c6",
+      "mode": 420
+    },
+    "campaign/token-attribution.draft.toon": {
+      "hash": "33dc28fa0dc8b1b75b4b24136f6bf0ff9c454fbf90b347b8f795a20ff85c8b81",
+      "mode": 420
+    },
+    "campaign/token-attribution.proposed.toon": {
+      "hash": "28b895e68050712f2ab5860f9def99d3b6c3722663145ce8183d3b8e831e1318",
+      "mode": 420
+    },
+    "campaign/token-attribution.supplement.md": {
+      "hash": "1e614d71441175c9a6b9bcdad3065f801f8c96ffc183e5d5075f892d3a161354",
+      "mode": 420
+    },
+    "campaign/token-time-report.approved.toon": {
+      "hash": "417fb13b883b90eef17bab01d6586ca274703ded6593a5726d76e01c79d2b351",
+      "mode": 420
+    },
+    "campaign/token-time-report.draft.toon": {
+      "hash": "496a9b5755b40be5bb35d343dc9120a76af7f31917c06164d31762ca69b2dab9",
+      "mode": 420
+    },
+    "campaign/token-time-report.proposed.toon": {
+      "hash": "280c3e3449bf20efaadb5b0200114c3c05f4d88d4c7e50b09052044d1eba4f1c",
+      "mode": 420
+    },
+    "campaign/token-time-report.supplement.md": {
+      "hash": "2bbf573b4dd7d76a4a35538c9c980e6992964e9f14702d912e2f21d12766b734",
+      "mode": 420
+    },
+    "campaign/toon-machine-data.approved.toon": {
+      "hash": "5d025d6a55767a770b8cd4d76b129c4a52694a91bae9f8f8c59faf24c73aaf4f",
+      "mode": 420
+    },
+    "campaign/toon-machine-data.draft.toon": {
+      "hash": "56f566afbf1da7c3d33b0299e7aa45ca516c9bb497e4ea1dc91d0d552bd68d8d",
+      "mode": 420
+    },
+    "campaign/toon-machine-data.proposed.toon": {
+      "hash": "c0d8fea526d243b1df1cc1c4ffd232ddfeeee77324063349639e6c921cefbe03",
+      "mode": 420
+    },
+    "campaign/toon-machine-data.supplement.md": {
+      "hash": "35f00e8f1128a215782a0d3b10a97e457e2b6a9edd5ef81346a09307cc6a0750",
+      "mode": 420
+    },
+    "campaign/ts-runtime-injection.approved.toon": {
+      "hash": "cc237166f94be94c1eced36f8b9d44cf78f0cba15f135782165d59821e44f02c",
+      "mode": 420
+    },
+    "campaign/ts-runtime-injection.draft.toon": {
+      "hash": "793682451e65d29611c19f1decc20c63fa8a3bd2e1322d1bffafeed68bfb7a3a",
+      "mode": 420
+    },
+    "campaign/ts-runtime-injection.proposed.toon": {
+      "hash": "4dd4a1a3bd460d641613297988816e5dc80f1287d5a93db297826ad711ae37d9",
+      "mode": 420
+    },
+    "campaign/ts-runtime-injection.supplement.md": {
+      "hash": "43cea03a0fe93ec19ba3fcf4c78dc028de6e6bf38c4e7a6b46e417ac2177231f",
+      "mode": 420
+    },
+    "campaign/unified-toon-config.approved.toon": {
+      "hash": "51d890b5b8780ea512a3fdb00a765e262af8572c954d86439e97b9b04911ea17",
+      "mode": 420
+    },
+    "campaign/unified-toon-config.draft.toon": {
+      "hash": "12b69e61d198c57466f330c03629e814ca3d96308636c794e0b89d9f50e0b8aa",
+      "mode": 420
+    },
+    "campaign/unified-toon-config.proposed.toon": {
+      "hash": "9db385d266251637f405ff4f846ad3232be00d82d6dfee35ae68bedf45e54671",
+      "mode": 420
+    },
+    "campaign/unified-toon-config.supplement.md": {
+      "hash": "9d9af4bd8490674c78de800376673f435801a2769c9e9fdbfd46e44df2819cfd",
+      "mode": 420
+    },
+    "campaign/upstream-project-drift.approved.toon": {
+      "hash": "be0db4d93b9a888b1e96015b2086ff3d382a4611edaf0f7700314ed4a43b1f3b",
+      "mode": 420
+    },
+    "campaign/upstream-project-drift.draft.toon": {
+      "hash": "5fb5fda56ab0ffb2ae0d63d0b84eb6e198e6275b66e52894ec7ba6b2072e8785",
+      "mode": 420
+    },
+    "campaign/upstream-project-drift.proposed.toon": {
+      "hash": "9652e24fbd6eee4abe751955c3fb34e7560265a51970a9636ca5490e3ba5bd65",
+      "mode": 420
+    },
+    "campaign/upstream-project-drift.supplement.md": {
+      "hash": "91578593398fa96587540f7473e0e79b642a4254ec55df26207771b76c0f1472",
+      "mode": 420
+    },
+    "campaign/vendor-model-toon.approved.toon": {
+      "hash": "8921ebb84b1122f4124c98c565437d2a53f3f98bd886649dc475e88b9be88c5e",
+      "mode": 420
+    },
+    "campaign/vendor-model-toon.draft.toon": {
+      "hash": "4efeff55cf184d1f063b428cfdf4fc096a63ee0ca57b033f9443df7e773cf055",
+      "mode": 420
+    },
+    "campaign/vendor-model-toon.proposed.toon": {
+      "hash": "d950bc1bd2a2552c28c63784784e7dc794aac81f35f4ec8d26c4326eadde7cc0",
+      "mode": 420
+    },
+    "campaign/vendor-model-toon.supplement.md": {
+      "hash": "cbb2c816ac30c669da4934c08f94f62e34ba784718be4302c8b0dd953364b38f",
+      "mode": 420
+    },
+    "campaign/workflow-usage-capture.approved.toon": {
+      "hash": "7a0ae558fd077b253a49ff4efc814fb59bb393688be00afe00310a182529d74c",
+      "mode": 420
+    },
+    "campaign/workflow-usage-capture.draft.toon": {
+      "hash": "fd9d1fb10999be4cc6078e614adc8b1ebecf4f8d1965da5d5754fd6ace964b56",
+      "mode": 420
+    },
+    "campaign/workflow-usage-capture.proposed.toon": {
+      "hash": "a29ca7482d1e949e7f36d5839ad5f3d13a85d4659d128afb2c2ae8367f343d55",
+      "mode": 420
+    },
+    "campaign/workflow-usage-capture.supplement.md": {
+      "hash": "cc6832db83122141cfe3cbb061b1ab169b868a3b9be3b0149d5aeb9ea5c0c5eb",
+      "mode": 420
+    },
+    "campaign/workflow-usage-metrics.approved.toon": {
+      "hash": "3c687f56ee92483c198e9ae02a0bec07ea797bb0876ea0c5cd2c8072fac541cf",
+      "mode": 420
+    },
+    "campaign/workflow-usage-metrics.draft.toon": {
+      "hash": "e67f4970d280b97f860d1f56d2ae79222855b9d41118dd3e90e7d416600817eb",
+      "mode": 420
+    },
+    "campaign/workflow-usage-metrics.proposed.toon": {
+      "hash": "91e5254b8aa73f3aa29308c3aeec18ab63a0bba2fc57a11db4aaeb8f11c2728c",
+      "mode": 420
+    },
+    "campaign/workflow-usage-metrics.supplement.md": {
+      "hash": "7d8e65b462a6e4b7f0e0748cc0b81c169c3f16fca47a18f96c8b140b05cbd38d",
+      "mode": 420
+    },
+    "campaign/workflow-usage-state.approved.toon": {
+      "hash": "b975fdf0216aba67fe0bfc03be435f00fe3c94e02aa4397946608b21754d3eef",
+      "mode": 420
+    },
+    "campaign/workflow-usage-state.draft.toon": {
+      "hash": "014d0e911be582374b35c9fece77cf6162d9b301cd845f27b99e75372395d872",
+      "mode": 420
+    },
+    "campaign/workflow-usage-state.proposed.toon": {
+      "hash": "279fd65c308fc865dd188b0c47c2fb31e8abc93e4ed2df876d17c07a344d545f",
+      "mode": 420
+    },
+    "campaign/workflow-usage-state.supplement.md": {
+      "hash": "8bf5a20df3de0887419373ca174b0903a1cb0f77dc866a7317a54b9433d037ec",
+      "mode": 420
+    },
+    "closing-exceptions.approved.toon": {
+      "hash": "aaa288e412348c12222072613543c0a606645618335a87a3d347a0a393a5d92a",
+      "mode": 420
+    },
+    "closing-exceptions.md": {
+      "hash": "37a08721e7f1c81c6ca0b0e464492ebc14837074cb0c83255cb1624e7680ab59",
+      "mode": 420
+    },
+    "closing-exceptions.proposed.toon": {
+      "hash": "47899e67fa4805f5f53c992c96e23ab795d8062eca9dc2f8b61acf0bbf6aa92a",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "b37e078c68496b77876dcdea95d716fea2df6be976a3b208601ef3638d53f34a",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "2f0b56e371666d6bce5c4809e6fe393c0da50d83a95290e4c9eb6e3285208e73",
+      "mode": 420
+    },
+    "knowledge-extraction.md": {
+      "hash": "e0d985a86ba19ae5ac43420df17de26ab7451533007566ccef14163337372990",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "b0452c508905a73e80e16ea0eeabac1cf96c1d32b7d1e6e6c775048c127de2a5",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "4db6a8d025bf101b8b6a91a1371a2997788ed7f9e3cf5b3b8d14f9405cac0e46",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "259de12cf95ab9c0ad68c518824338610375a21e3c1451e5e06ddda0c3d0509f",
+      "mode": 420
+    },
+    "precision.mts": {
+      "hash": "91d0010b281f520575fe647739ac489970b205e2d15c72c34b994e5b73604fcb",
+      "mode": 420
+    },
+    "remaining-work.md": {
+      "hash": "42d502209a7442c1f8d8b8e021c0e6adc4ce7ea0193f136c565b0de0edfa97aa",
+      "mode": 420
+    },
+    "shaping-evidence.md": {
+      "hash": "ae7171a6cd9133a8c01182f6ea5a78ba9bfe59cd057c5791d1c67c2fdae05d82",
+      "mode": 420
+    },
+    "ships/p1.SHIPPED.md": {
+      "hash": "0658d37859d94c938ffb5e9ec4237b2fe1181cb6431566c65a20035a8b09f288",
+      "mode": 420
+    },
+    "ships/p1.approved.toon": {
+      "hash": "7e0e177e7aac5a39a7428d256012d95e69c25706eb6d89cb2634cb7ccf040dd9",
+      "mode": 420
+    },
+    "ships/p1.proposed.md": {
+      "hash": "102d99e5231e732abab4fdfd20f61755692e73c6f90f5f3cbc475750fb34a05d",
+      "mode": 420
+    },
+    "ships/p2a.SHIPPED.md": {
+      "hash": "69feedd7c89e8cbbc0012b263d1db4c73c6780eda5c56f33d9717b7048d470c5",
+      "mode": 420
+    },
+    "ships/p2a.approved.toon": {
+      "hash": "915c4c220ec564d8b67118eda2b5150cba6176d3ed0057f051d6eb0b4d3bc364",
+      "mode": 420
+    },
+    "ships/p2a.proposed.md": {
+      "hash": "84277ec6a545590e4a785aef8e5425e1acfb5ecd1ab55fa986019070f61b3a02",
+      "mode": 420
+    },
+    "ships/p2c.SHIPPED.md": {
+      "hash": "6e680fb73a618b7393eb3bf6f62ddeef6143acee601a692e6da509d9b33a3762",
+      "mode": 420
+    },
+    "ships/p2c.approved.toon": {
+      "hash": "11a1cdf3e156728128c88c94d06d9f862d7cae9d5f7eb36913849d6131cc0a69",
+      "mode": 420
+    },
+    "ships/p2c.proposed.md": {
+      "hash": "01023861e631103c4c9b2e8445f33699531f9484ba9bb893a80e543687bd9fe2",
+      "mode": 420
+    },
+    "ships/p2d.SHIPPED.md": {
+      "hash": "a1a7058d5cbde53f908df4f440c33834b37d54413c030976bec1b43dbaf5c0d0",
+      "mode": 420
+    },
+    "ships/p2d.approved.toon": {
+      "hash": "7f6eade0ab7e9b5dffe38bdace5c2c1ed14fc0747ad443af1c78bc9628a6cdf1",
+      "mode": 420
+    },
+    "ships/p2d.proposed.md": {
+      "hash": "2e7b794a8deaf2f82eebf8ca2439875f2d9336bfb3911ace0071826e36ee31da",
+      "mode": 420
+    }
+  }
+}

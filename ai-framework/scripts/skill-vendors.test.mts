@@ -1,22 +1,21 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { execFileSync, spawnSync } from "node:child_process";
-import fs from "node:fs";
-import { createRequire } from "node:module";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, urlPath, copyTree, execFileSync, spawnSync, moduleRequire } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { main, discoverVendors as discoverWithDeps } from "./skill-vendors.mts";
 
 // The old CommonJS call forms are kept on purpose: these suites go through the direct TypeScript commands, as every unmigrated caller does.
-const require = createRequire(import.meta.url);
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const require = moduleRequire(import.meta.url);
+const __dirname = path.dirname(urlPath(import.meta.url));
 interface Vendor { id: string; project: string }
 interface Report { managed: Set<string>; results: { status: string; name: string; detail: string }[] }
 interface MirrorReport { created: string[]; differs: string[]; current: number; applied: boolean }
@@ -76,7 +75,15 @@ test("every bundled vendor entry point exposes add-skill from one canonical play
     assert.equal(text.match(/^description: (.+)$/m)![1], description, mirror);
     assert.match(text, /Load `\.claude\/skills\/add-skill\/SKILL\.md` and follow it exactly/);
   }
-  assert.match(read(BUNDLE, ".opencode/commands/add-skill.md"), /^model: opencode-go\/minimax-m3$/m);
+  // This project's OpenCode route is configured separately from Claude/Codex.
+  // Keep the adapter aligned with its documented standard profile, never an upstream account's model.
+  const standard = read(BUNDLE, "ai-framework/integrations/harnesses.md").split("\n")
+    .find((line) => line.startsWith("| `standard`"));
+  assert.ok(standard, "the project documents its standard capability route");
+  const documented = standard.split("|")[4]?.match(/`([^`]+)`/)?.[1];
+  assert.ok(documented, "the OpenCode column names the configured standard model");
+  const configured = read(BUNDLE, ".opencode/commands/add-skill.md").match(/^model: (.+)$/m)?.[1];
+  assert.equal(configured, documented, "add-skill follows the project's documented OpenCode standard route");
   assert.match(read(BUNDLE, ".agents/skills/add-skill/SKILL.md"), /^name: add-skill$/m);
   for (const command of canonical.match(/node ai-framework\/scripts\/[a-z-]+\.mts/g)!) assert.ok(fs.existsSync(path.join(BUNDLE, command.split(" ")[1])), command);
 });
@@ -209,8 +216,11 @@ test("workflow doctor and setup validator accept a registry-managed skill in a r
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), "skill-bundle-"));
   t.after(() => fs.rmSync(directory, { recursive: true, force: true }));
   const root = path.join(directory, "project");
-  const skip = new Set([".git", "node_modules", "metrics", ".DS_Store", ".env"]);
-  fs.cpSync(BUNDLE, root, { recursive: true, filter: (source) => !skip.has(path.basename(source)) });
+  const skip = new Set([".git", "node_modules", "metrics", ".DS_Store", ".env", "ai-workflow.toon"]);
+  copyTree(testDeps, BUNDLE, root, (source) => !skip.has(path.basename(source)));
+  // Seed a v3 `ai-workflow.toon` from the shipped example: the doctor's new mandatory contract
+  // requires the toon `models` block to validate every agent.
+  fs.copyFileSync(path.join(root, "ai-framework/templates/ai-workflow.example.toon"), path.join(root, "ai-workflow.toon"));
   // Keep .project/skills (registry + packages) together with the wrapper files it owns: excluding
   // it would leave an installed skill's wrappers orphaned, which the doctor rightly rejects — a
   // failure that only appears once a skill is actually installed in the repo running this test.

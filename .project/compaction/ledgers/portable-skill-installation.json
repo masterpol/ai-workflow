@@ -1,124 +1,244 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "portable-skill-installation",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves SHIPPED.md#scope-reconciliation with historical context and evidence limits.",
+      "bodyHash": "sha256:8c65d0331f1f5abf560800bb556d9df40f62e7f6b35db6c35fc036447bb6a22f"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves SHIPPED.md#no-gos-honored with historical context and evidence limits.",
+      "bodyHash": "sha256:6d020900655d50c97069f305f38dd09cd9c206bd5b66ab63f684b0ef685b7497"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions",
+      "helps": "Preserves SHIPPED.md#rabbit-holes-resolved-as-committed with historical context and evidence limits.",
+      "bodyHash": "sha256:66a8115f0511a256d4fcdbfacfc02df4665f91ff102720a5cebc84d2a6f146d1"
     },
     {
       "source": "SHIPPED.md#audit-findings-final-disposition",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence",
+      "helps": "Preserves SHIPPED.md#audit-findings-final-disposition with historical context and evidence limits.",
+      "bodyHash": "sha256:6e8079385d64d86665550a3b3b72687445f9a7a9b992a14ddbf5cfff6b10f22f"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/index.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions",
+      "helps": "Preserves SHIPPED.md#knowledge-extracted with historical context and evidence limits.",
+      "bodyHash": "sha256:d51a091cb7359071a18bac940be99ac8d88c772070d54a181e002eb2bac35821"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#followups-and-release-history",
+      "helps": "Preserves SHIPPED.md#followups-generated with historical context and evidence limits.",
+      "bodyHash": "sha256:c6f01b8d776d552fdea153eb336c76daeaa314cc139e1a0384a8c74fc5edbd50"
     },
     {
       "source": "SHIPPED.md#what-downstream-pitches-can-now-build-on",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#vendor-parity-and-activation",
+      "helps": "Preserves SHIPPED.md#what-downstream-pitches-can-now-build-on with historical context and evidence limits.",
+      "bodyHash": "sha256:9f4b50668aa32c1cd11badff6e5ced5ec5bbc6863be365d18ecae30ef45209d8"
     },
     {
       "source": "SHIPPED.md#version",
-      "status": "extracted",
-      "destination": "CHANGELOG.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#followups-and-release-history",
+      "helps": "Preserves SHIPPED.md#version with historical context and evidence limits.",
+      "bodyHash": "sha256:c6547ab587020ce9917ee5145d44e2b6d3b6417e94071db39d62e9b453b2dea0"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves pitch.md#no-gos with historical context and evidence limits.",
+      "bodyHash": "sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions",
+      "helps": "Preserves pitch.md#rabbit-holes with historical context and evidence limits.",
+      "bodyHash": "sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md",
-      "reason": "TOCTOU deferral is in _followups.md; the formatter --config finding is this pattern (with a regression test); the YAML fix lives in add-skill.test.js"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence",
+      "helps": "Preserves audit-cycle-1.md with historical context and evidence limits.",
+      "bodyHash": "sha256:e76169521f1bb75238680e2b51e3528b75c417402a5da1823902ff85cded37ac"
     },
     {
       "source": "deviations.md#s1-2026-09-24",
-      "status": "extracted",
-      "destination": "ai-framework/integrations/skills.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves deviations.md#s1-2026-09-24 with historical context and evidence limits.",
+      "bodyHash": "sha256:c187e393d59d36216e78896ccc42a55213781862ec5f5194b9701e0738ae88bc"
     },
     {
       "source": "deviations.md#s2-2026-09-24",
-      "status": "extracted",
-      "destination": "ai-framework/integrations/skills.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#vendor-parity-and-activation",
+      "helps": "Preserves deviations.md#s2-2026-09-24 with historical context and evidence limits.",
+      "bodyHash": "sha256:c5f0ee0a49a5332a906f7fbe03b9111e074f5f31cb7f64c518c08831d3e1fe24"
     },
     {
       "source": "deviations.md#s3-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/subprocess-revalidation-against-on-disk-code.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions",
+      "helps": "Preserves deviations.md#s3-2026-09-25 with historical context and evidence limits.",
+      "bodyHash": "sha256:344240fd5e3c5001964dd278eb322aaf2080f71c22e0208f38abe4c6f2bb7e14"
     },
     {
       "source": "deviations.md#audit-cycle-1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence",
+      "helps": "Preserves deviations.md#audit-cycle-1-2026-09-25 with historical context and evidence limits.",
+      "bodyHash": "sha256:39d8b9ecf11ec9d2805e1efdcd6a809e7b134c2fbc7f2428800eb0f43169ca27"
     },
     {
       "source": "log.md#s1-initial-tests-2026-09-24",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents",
+      "helps": "Preserves log.md#s1-initial-tests-2026-09-24 with historical context and evidence limits.",
+      "bodyHash": "sha256:f5a94884c93730fb6a1d19bccda6461ae2a53d2d3f3a543cbe4eaea08a5e75bc"
     },
     {
       "source": "log.md#s1-live-upstream-probe-2026-09-24",
-      "status": "extracted",
-      "destination": ".claude/skills/add-skill/SKILL.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents",
+      "helps": "Preserves log.md#s1-live-upstream-probe-2026-09-24 with historical context and evidence limits.",
+      "bodyHash": "sha256:910e59c970116f8e8926aff14bed893442683e4f6d23620529cd1f2d8d39cc49"
     },
     {
       "source": "log.md#s3-observation-2026-09-25-not-fixed-out-of-scope",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#followups-and-release-history",
+      "helps": "Preserves log.md#s3-observation-2026-09-25-not-fixed-out-of-scope with historical context and evidence limits.",
+      "bodyHash": "sha256:6113cd438ee6c007f478d7a443cf7bd6232e790f896506ab058e9c8b406d5e55"
     },
     {
       "source": "log.md#audit-cycle-1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence",
+      "helps": "Preserves log.md#audit-cycle-1-2026-09-25 with historical context and evidence limits.",
+      "bodyHash": "sha256:ee529495206162cda27fd943a6e32d1901d16dfb2713e547c807c8ce07e853b6"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves substantive SHIPPED.md contracts, evidence and limits.",
+      "hash": "sha256:4957a2bd99b2c5a3cfee86962dd2c9151e5637e3ea25a68b30191db8e153dbfc"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions",
+      "helps": "Preserves substantive deviations.md contracts, evidence and limits.",
+      "hash": "sha256:51fb4166d3d8aa31da44db38d052310709e1e8a4c4bb0df29b40ff72b724d91e"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:9cb00d4be709d0bcd2582233154cc92f1498cc62d4dfbc3e24827eef3690035a"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-09-25-portable-skill-installation.md",
+      "helps": "The tracked run is byte-identical to the fully read cached log.",
+      "hash": "sha256:33439c07298a2bb76cc342ea78e7f1a3bde679f897e2a3122b210d572f63f4df"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves substantive pitch.md contracts, evidence and limits.",
+      "hash": "sha256:eb54cb755e3ae78276fabe7051338b59128ae759bc0e0de138c46622b2aae252"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves substantive plan.md contracts, evidence and limits.",
+      "hash": "sha256:aa82c681d8543e296621dd709d8b6272d10c3e31bbe05d5429009c8ec355f791"
+    },
+    {
+      "path": "registry-installer.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership",
+      "helps": "Preserves substantive registry-installer.md contracts, evidence and limits.",
+      "hash": "sha256:bb57d3091605c8837cc056f54dd6d7ecacbdbe87a343577119e9aeb2dd5313a9"
+    },
+    {
+      "path": "s1-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents",
+      "helps": "Preserves substantive s1-evidence.md contracts, evidence and limits.",
+      "hash": "sha256:90d8ef45c0345c9eca4fd6ffeb08739ea855e75e9b4551a7c248f834e1dd81c7"
+    },
+    {
+      "path": "s2-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents",
+      "helps": "Preserves substantive s2-evidence.md contracts, evidence and limits.",
+      "hash": "sha256:990c270b32709bc1bacec8546412c489514b641be1c9dc53aa2252e745765e48"
+    },
+    {
+      "path": "s3-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents",
+      "helps": "Preserves substantive s3-evidence.md contracts, evidence and limits.",
+      "hash": "sha256:3de285c78c8cbb0336164c23e5aef857778512166bd1e8ebad60e4977d354e25"
+    },
+    {
+      "path": "skill-portability.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-installation.md#vendor-parity-and-activation",
+      "helps": "Preserves substantive skill-portability.md contracts, evidence and limits.",
+      "hash": "sha256:b37a9b37f21bbba397c7aa5daf0f8e95b27e2cdc684812c03a6bb9d8f60a22aa"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-09-25T13:27:02.379Z"
+  "committedAt": "2026-10-23T14:23:19.467Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:79d76edead951b7d99af3009380ac185e7f8826a5afaa461b92be972519be793",
+    "introducingCommit": "ea82bcee68b70bb0b4f2938268c9c796425ccff0"
+  }
 }

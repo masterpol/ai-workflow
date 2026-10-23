@@ -1,0 +1,35 @@
+@toon-data 1
+slug: readme-split
+draft: true
+state: needs-decision
+ledgerHash: "sha256:579fc605e4075a880e07809e75e605dd0ef3afec2614ffe2d0ad76091a119fd8"
+bindings:
+  ".project/records/pitch-compression/readme-split.md": "sha256:105adc6ec38fb6fe0c16bf2e32786cd2d08f1dbd0ac5906894be9815594fa5b7"
+legacyEntryHash: "sha256:d0b9f5b76efaf9d2765a764e960ff19d73a07958e0c3f1c151454606d3ea8afc"
+mapping:
+  schemaVersion: 2
+  sections[8]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/readme-split.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/readme-split.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/readme-split.md#section-3-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#followups",null,null,".project/records/pitch-compression/readme-split.md#section-4-shippedmdfollowups",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/readme-split.md#section-5-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/readme-split.md#section-6-pitchmdrabbit-holes",null,null
+    "log.md#2026-10-07",null,null,".project/records/pitch-compression/readme-split.md#section-7-logmd2026-10-07",null,null
+    "log.md#audit-cycle-1",null,null,".project/records/pitch-compression/readme-split.md#section-8-logmdaudit-cycle-1",null,null
+  otherFiles[0]:
+judgments[8]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-3-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-4-shippedmdfollowups",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-5-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-6-pitchmdrabbit-holes",Preserved in the compact record section.,false
+  "log.md#2026-10-07",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-7-logmd2026-10-07",Preserved in the compact record section.,false
+  "log.md#audit-cycle-1",needs-decision,extracted,".project/records/pitch-compression/readme-split.md#section-8-logmdaudit-cycle-1",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: readme-split\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# readme-split\n\nThe README links to workflow documentation under the bundle-owned directory.\nThe documentation and link-checker links below describe the current structure.\nHistorical verification and acknowledged limitations remain in the compact record.\n\n- outcome: A short README links to portable workflow documentation checked by the bundle.\n- docs: [documentation](README.md)\n- decisions: [decision](.project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md)\n- knowledge: none\n- code: [implementation](ai-framework/scripts/docs-links.mts)\n- verification: [historical closure](.project/records/pitch-compression/readme-split.md)\n- followups: [historical followups](.project/records/pitch-compression/readme-split.md)\n- archive: [compact record](.project/records/pitch-compression/readme-split.md)\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#readme-split","sha256:d0b9f5b76efaf9d2765a764e960ff19d73a07958e0c3f1c151454606d3ea8afc","## readme-split — shipped 2026-10-08\n\nThe 438-line README was split into 64 lines plus eleven docs in `ai-framework/docs/` (bundle-owned, no root `docs/` collision), with a dependency-free link checker `docs-links`, doctor `docsChecks`, bundle-sync coverage and updated references (v2.11.0). 514 tests pass; audit 0 must-fix, 6 should-fix fixed.\n\nNo prose rewrites; reviewers were not canary-tested. See [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].\n",false
+  ".project/records/pitch-compression/readme-split.md","sha256:105adc6ec38fb6fe0c16bf2e32786cd2d08f1dbd0ac5906894be9815594fa5b7","# Compaction record: readme-split\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].\n\n## Section 1: SHIPPED.md#final-verification\n\n514 tests pass, 0 fail, 0 skipped over the scripts and hook script suites. workflow-doctor, setup-validator and graphify --check exit 0; changelog check shows 2.11.0; docs-links over README, ai-framework/docs and SETUP.md: 13 files, 0 broken. `git diff --check` clean, no secrets or debug code. No build/typecheck/lint/i18n commands exist.\n\n## Section 2: SHIPPED.md#reconciliation\n\nS1 link checker `docs-links` (10 tests: 6 built, 4 added after audit). S2 eleven docs in `ai-framework/docs/` with no lost lines except 4 intentional link rewrites. S3 README cut from 438 to 64 lines with 0 `](#` anchors. S4 tooling: doctor `docsChecks` plus a README-links-every-doc check, `ai-framework/docs` added to `SYNCED_DIRS`, a new bundle-sync test and a negative check in a scratch copy. S5 references updated in the bundle-sync and changelog skills (.claude, .cursor), the SETUP.md tree and architecture.md. Release 2.11.0. Rabbit holes resolved: the `docs/` name collision (use `ai-framework/docs/`), the doctor retarget and inbound references, the bundle-sync allowlist.\n\n## Section 3: SHIPPED.md#no-gos-honored\n\nNo prose rewrites beyond headings, link fixes and three dropped 'below's; no historical records touched; no dependencies; no root `docs/` folder.\n\n## Section 4: SHIPPED.md#followups\n\nThe doctor has no dedicated test; the link checker ignores reference-style links, HTML anchors and setext headings. One missed reference was found and fixed during ship (the changelog skill cited the README's 'How to improve this flow' in both mirrors). Provenance gap: audit reviewers were not canary-tested (`independent: no`).\n\n## Section 5: pitch.md#no-gos\n\nNo content rewrites beyond move plus link an",true
+unavailable[0]:

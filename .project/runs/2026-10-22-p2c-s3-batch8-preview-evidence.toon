@@ -1,0 +1,103 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[5]: state-ai-authoring,state-deep-evidence,state-fragment-sanitizer,state-report-redesign,test-execution-performance
+sourceBytes: 550949
+sourceFiles: 47
+requiredSections: 116
+retainedSections: 112
+otherFilesAccounted: 47
+retainedOtherFiles: 45
+omissions[6]: "state-deep-evidence/deviations.md#open-for-s5: superseded","state-fragment-sanitizer/log.md#2026-10-19-s2s4-wave-started: process-noise","state-fragment-sanitizer/log.md#s4-collection-and-diff-hygiene: process-noise","state-fragment-sanitizer/hill.md: process-noise","test-execution-performance/SHIPPED.md#doc-updates: process-noise","test-execution-performance/plan.md: process-noise"
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[5]:
+  -
+    slug: state-ai-authoring
+    payloadHash: "sha256:2238c27d43ffb6ae388ba72477464ecdc44a8fce4d88cbcd42c99540c5dbfdaf"
+    supplementHash: "sha256:c7d373adb8de2ed95e80caa1bd6c7831bed17430e9a8411f6db072f1645acad6"
+    sourceProof:
+      archiveDirectory: state-ai-authoring-2026-10-22T02-43-36-385Z
+      manifestHash: "sha256:2fb226323c9b52d4e6fb8b504f6ebf561b03e20eeed3f92397f000d32d05c65a"
+      sourceBytes: 152350
+      verifiedFiles: 7
+    recordBytes: 2027
+    destinationDrift:
+      path: ".project/pitches/_followups.md"
+      introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 476-483, are unchanged (lines 443-523 hash equal)."
+  -
+    slug: state-deep-evidence
+    payloadHash: "sha256:3e501bec14dde11ae4ecf89860cea7d0e1849cb7e67d9b4234f4e4c78fc7ba14"
+    supplementHash: "sha256:248a7960b56d1d132db5147fb193c067c21e908ea05b371f0177302e47a64ee9"
+    sourceProof:
+      archiveDirectory: state-deep-evidence-2026-10-22T02-43-37-580Z
+      manifestHash: "sha256:f118683adc795b49d739131d386b14eef7aff9719a4233142728bb6d2d365181"
+      sourceBytes: 153319
+      verifiedFiles: 9
+    recordBytes: 1894
+    destinationDrift:
+      path: ".project/pitches/_followups.md"
+      introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 505-515, are unchanged (lines 443-523 hash equal)."
+  -
+    slug: state-fragment-sanitizer
+    payloadHash: "sha256:beecd845f9e94208040a75776d770a3caee00fa738b52a66404e6e9ee63c672b"
+    supplementHash: "sha256:483b3cc807f39ef51637632cbbaaf8cf07435a77d700dcf711e8176b8c9f9c1b"
+    sourceProof:
+      archiveDirectory: state-fragment-sanitizer-2026-10-22T02-43-35-769Z
+      manifestHash: "sha256:b78e4e2d3c1cebfd3fbac2e4e4538ffef9491882b12bb928976dea1654cefd72"
+      sourceBytes: 157321
+      verifiedFiles: 10
+    recordBytes: 1885
+    destinationDrift:
+      path: ".project/pitches/_followups.md"
+      introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 462-468, are unchanged (lines 443-523 hash equal)."
+  -
+    slug: state-report-redesign
+    payloadHash: "sha256:d3cb2de72b1d6c4249143c00a7cd7e6d1a390c56da462052f54b82365800dbaa"
+    supplementHash: "sha256:55979bfad72c0968f282a9fea318a3e7239a8360a33a788316fee84ac2a1f52d"
+    sourceProof:
+      archiveDirectory: state-report-redesign-2026-10-22T02-43-20-872Z
+      manifestHash: "sha256:aebd977224c12f2ecd187437a39243ccc18def4dd5b920fa32cab339a3f4ca87"
+      sourceBytes: 52999
+      verifiedFiles: 12
+    recordBytes: 1822
+    destinationDrift:
+      path: ".project/pitches/_followups.md"
+      introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 443-451, are unchanged (lines 443-523 hash equal)."
+  -
+    slug: test-execution-performance
+    payloadHash: "sha256:15105273c14134145ac7b4dc46645d944468b62dbb5eb90ee5f0bbb53b00f7ab"
+    supplementHash: "sha256:051a5ba6e3e4ab02675200b0e68fc1396b4bb8d0bd344b92fc203ed4a40352ff"
+    sourceProof:
+      archiveDirectory: test-execution-performance-2026-10-22T02-43-33-896Z
+      manifestHash: "sha256:a3dc964c379451513d9dd0f96f47a223db9d1e6458777f481a9086f3e7515277"
+      sourceBytes: 34960
+      verifiedFiles: 9
+    recordBytes: 1784
+    destinationDrift:
+      path: ".project/pitches/_followups.md"
+      introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 516-523, are unchanged (lines 443-523 hash equal)."
+validation: "{\"slug\":\"state-ai-authoring\",\"coverage\":1,\"sections\":27,\"otherFiles\":7,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":2027,\"recordCap\":3000,\"supplementBytes\":23181,\"destinationDriftAcceptances\":1,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"state-deep-evidence\",\"coverage\":0.96875,\"sections\":32,\"otherFiles\":9,\"omissions\":{\"superseded\":1},\"acceptedGaps\":[],\"recordBytes\":1894,\"recordCap\":3000,\"supplementBytes\":21917,\"destinationDriftAcceptances\":1,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"state-fragment-sanitizer\",\"coverage\":0.9473684210526315,\"sections\":38,\"otherFiles\":10,\"omissions\":{\"process-noise\":3},\"acceptedGaps\":[],\"recordBytes\":1885,\"recordCap\":3000,\"supplementBytes\":27492,\"destinationDriftAcceptances\":1,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"state-report-redesign\",\"coverage\":1,\"sections\":8,\"otherFiles\":12,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":1822,\"recordCap\":3000,\"supplementBytes\":11708,\"destinationDriftAcceptances\":1,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"test-execution-performance\",\"coverage\":0.9090909090909091,\"sections\":11,\"otherFiles\":9,\"omissions\":{\"process-noise\":2},\"acceptedGaps\":[],\"recordBytes\":1784,\"recordCap\":3000,\"supplementBytes\":6546,\"destinationDriftAcceptances\":1,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"newKnowledgeEntries\":0,\"sourceArchivesReopened\":false}"
+rehearsal: "state-ai-authoring: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 18 neighbouring done-work entries byte-identical\nstate-deep-evidence: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 18 neighbouring done-work entries byte-identical\nstate-fragment-sanitizer: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 18 neighbouring done-work entries byte-identical\nstate-report-redesign: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 18 neighbouring done-work entries byte-identical\ntest-execution-performance: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 18 neighbouring done-work entries byte-identical\nRehearsal: 5 generated index rows, 5 upgraded slugs, retired narratives absent, neighbouring done-work entries byte-identical; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 19
+  partial: 0
+  upgraded: 27
+  total: 46
+sourceArchivesReopenedForRehearsal: false
+ownerDecision: state-ai-authoring live-runs.md is read by state-fragment-dataset.test.mts and fails ENOENT today; apply does not change it

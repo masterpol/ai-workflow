@@ -1,0 +1,61 @@
+@toon-data 1
+slug: unified-toon-config
+draft: true
+state: needs-decision
+ledgerHash: "sha256:9b51a3f59a44c5c6c3c07440563ba5c0997009df4348bc8114921adc69c84d35"
+bindings:
+legacyEntryHash: "sha256:fabf47add794c650d2769e2f7107773c296b5d86e94e2acb858c3b9160784c38"
+mapping:
+  schemaVersion: 2
+  sections[22]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#verify",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "log.md#2026-10-16-branch-gate-resolution-a1-pre-flight",null,null,null,null,null
+    "log.md#2026-10-16-a1-build-complete",null,null,null,null,null
+    "log.md#2026-10-16-a1-build-evidence",null,null,null,null,null
+    "log.md#2026-10-16-a2-build-complete",null,null,null,null,null
+    "log.md#2026-10-16---a3-build-complete",null,null,null,null,null
+    "log.md#2026-10-16---c11-build-complete",null,null,null,null,null
+    "log.md#2026-10-16---c12-build-complete",null,null,null,null,null
+    "log.md#c21-c24-parallel-build-4-subagents-shared-tree-uncommitted-at-record-time",null,null,null,null,null
+    "log.md#2026-10-16---b1-build-complete",null,null,null,null,null
+    "log.md#2026-10-16---b2-b3-build-complete-one-pass",null,null,null,null,null
+    "log.md#b2b3-and-d-parts-abc-parallel",null,null,null,null,null
+    "log.md#integrationsorca-reshape-schemaversion-2-phases-1-2a-2c",null,null,null,null,null
+    "log.md#audit-cycle-1-2026-10-16-orcanormal-head-b8aee99",null,null,null,null,null
+    "log.md#audit-cycle-2-2026-10-16-orcanormal-reviewed-head-fee770a",null,null,null,null,null
+  otherFiles[0]:
+judgments[22]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verify",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-branch-gate-resolution-a1-pre-flight",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-a1-build-complete",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-a1-build-evidence",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-a2-build-complete",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16---a3-build-complete",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16---c11-build-complete",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16---c12-build-complete",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#c21-c24-parallel-build-4-subagents-shared-tree-uncommitted-at-record-time",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16---b1-build-complete",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16---b2-b3-build-complete-one-pass",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#b2b3-and-d-parts-abc-parallel",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#integrationsorca-reshape-schemaversion-2-phases-1-2a-2c",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#audit-cycle-1-2026-10-16-orcanormal-head-b8aee99",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#audit-cycle-2-2026-10-16-orcanormal-reviewed-head-fee770a",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: unified-toon-config\nshipped: 2026-10-16\nschemaVersion: 1\ndraft: true\n---\n# unified-toon-config\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#unified-toon-config","sha256:fabf47add794c650d2769e2f7107773c296b5d86e94e2acb858c3b9160784c38","## unified-toon-config — shipped 2026-10-16\n\nAll workflow configuration moved into one root `ai-workflow.toon` (v2.25.0, big-batch, 2026-10-16; schemaVersion 2 after an unplanned owner redesign that nested Orca under `integrations.orca` with per-coordinator `workers`). Scopes: a1 `runtime/config.mts` primitives (a strict in-repo TOON subset parser with line and column errors, `inspectPath`, `readBoundedFile`, `wxRename`, `oexLock`, `loadConfig`, `errorCodes`, and named registrar slots for integration, engine and coordinator validators), plus the pinned grammar decision `.project/decisions/toon-subset-grammar.md`, the example toon and the relocated env example; a2 seven parser-guard mutants asserting on literal `errorCodes.*` (prototype pollution, within-role duplicate, unrecognised key, EACCES, 64 KiB oversize, symlinked leaf, quoted-comma regexp backtracking); a3 five writer and path mutants, alias tests, lock tests, subprocess revalidation and the TOON fixture writer in `test-helpers.mts`; c1.1 and c1.2 readers on `loadConfig` (`env.mts` `loadConfigEnv`, `select.mts`, `entry.mts`, `orca-policy.mts` TOON-first through `policyFromConfig` into the shared `validatePolicy`, grader writes through `wxRename`), eleven reader-test files and no-race grader tests; c2.1–c2.4 the doctor \"Config validators\" check, the setup-validator \"Workflow config\" check, README/AGENTS/CLAUDE rewrites (identical), six framework docs and the build skill mirrors, hook cutover notes; b1–b3 `config-migrate.mts` (dry-run and `--apply`, three `--force` branches, dual-hash tracking, `.rejected` move-aside, legacy files never deleted; 50+ tests on Node and Bun, 20 mutants killed) and bundle-sync \"toon is never synced\" checks; d the legacy window note, the modes cutover (`loadModes` toon-first), orphaned docs and flags; reshape to `integrations.orca` and schemaVersion 2. Version 2.24.0 landed in c2.2 and 2.25.0 at ship.\n\nNo-gos held: legacy files are never deleted by the migrator; no `flock` (an O_EX",true
+unavailable[1]: ".project/records/pitch-compression/unified-toon-config.md"

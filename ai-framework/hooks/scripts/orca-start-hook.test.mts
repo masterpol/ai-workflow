@@ -1,12 +1,12 @@
 import assert from "node:assert/strict";
-import { spawn, spawnSync } from "node:child_process";
-import { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join, resolve } from "node:path";
+const testDeps = createTestDeps();
+const { chmodSync, copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join, resolve } = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 import { main } from "./orca-start-hook.mts";
-import { captureIo, createTestDeps } from "../../scripts/runtime/test-helpers.mts";
+import { captureIo, createTestDeps, spawnTestChild, spawnSync } from "../../scripts/runtime/test-helpers.mts";
 
 const script = join(import.meta.dirname, "orca-start-hook.mts");
 const repo = resolve(import.meta.dirname, "../../..");
@@ -28,7 +28,7 @@ const args = process.argv.slice(2);
 let value;
 if (args[0] === 'orchestration') value = {ok:true,result:{workers:${JSON.stringify([{ agentTerminalHandle: "worker", dispatchStatus: "running" }])},page:{hasMore:false}}};
 else if (args[0] === 'skills') value = args[2] === 'orca-cli' ? {name:'orca-cli',markdown:'worktree current terminal'} : {name:'orchestration',markdown:'worker-start worker_done orchestration check'};
-else value = {ok:true,result:{target:{kind:'local'},runtime:{reachable:true,state:'ready',appVersion:'1.4.223'}}};
+else value = {ok:true,result:{target:{kind:'local'},runtime:{reachable:true,state:'ready',appVersion:'1.4.224'}}};
 console.log(JSON.stringify(value));
 `;
   for (const name of ["orca", "codex", "opencode"]) {
@@ -111,7 +111,8 @@ test("Claude subagent helper calls pass through silently before the decision lib
     silent(f.run({ ...skill("audit", "orca=normal"), agent_id, agent_type: "code-reviewer" }, { PATH: "" }));
 });
 
-test("every phase returns ready context for the observed Skill payload", (t) => {
+// Twelve complete hook invocations exceed Bun's default five-second integration budget under load.
+test("every phase returns ready context for the observed Skill payload", { timeout: 30000 }, (t) => {
   const f = fixture(t);
   for (const phase of ["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"])
     context(f.run(skill(phase)), "PreToolUse", "Orca: ready (coordinator claude, workers codex, opencode)");
@@ -153,10 +154,18 @@ test("on rejects malformed and oversized stdin with a fixed reason", (t) => {
   }
 });
 
+test("large unrelated skill arguments pass silently; phase arguments over 64 KiB block", (t) => {
+  const f = fixture(t);
+  silent(f.run(skill("frontend-design", "x".repeat(1024 * 1024))));
+  const tooBig = f.run(skill("build", "x".repeat(64 * 1024 + 1)));
+  assert.equal(tooBig.status, 2);
+  assert.match(tooBig.stderr, /invalid-hook-input/);
+});
+
 test("script-owned 5000 ms deadline blocks stdin that never finishes", { timeout: 10_000 }, async (t) => {
   const f = fixture(t);
   const started = performance.now();
-  const child = spawn(node, [...flags, script], { cwd: f.root, env: f.env, stdio: "pipe" });
+  const child = spawnTestChild(node, [...flags, script], { cwd: f.root, env: f.env, stdio: "pipe" });
   t.after(() => child.kill("SIGKILL"));
   let stdout = ""; let stderr = "";
   child.stdout.setEncoding("utf8"); child.stderr.setEncoding("utf8");
@@ -199,8 +208,19 @@ test("both hook configurations use the verified events and eight-second timeout"
 // Direct script invocations still support the configured Bun re-exec.
 test("configured Bun runs the real hook entry with the same decision outputs", (t) => {
   const f = fixture(t);
-  const bun = process.versions.bun ? process.execPath : spawnSync("bun", ["-e", "console.log(process.execPath)"], { encoding: "utf8" }).stdout.trim();
-  assert.ok(bun, "Bun is required for dual-runner verification");
+  const probe = process.versions.bun ? null : spawnSync("bun", ["-e", "console.log(process.execPath)"], {
+    encoding: "utf8", windowsHide: true, shell: false, timeout: 5000,
+  });
+  if ((probe?.error as NodeJS.ErrnoException | undefined)?.code === "ENOENT") {
+    t.skip("Bun is not installed; dual-runner execution remains unverified");
+    return;
+  }
+  if (probe) {
+    assert.equal(probe.error, undefined, "the installed Bun probe must finish successfully");
+    assert.equal(probe.status, 0, String(probe.stderr));
+  }
+  const bun = process.versions.bun ? process.execPath : String(probe?.stdout ?? "").trim();
+  assert.ok(bun, "an available Bun probe must identify its executable");
   const path = join(f.root, "bin");
   symlinkSync(bun, join(path, "bun"));
   context(f.run(skill(), { AI_WORKFLOW_RUNNER: "bun" }), "PreToolUse", "Orca: ready (coordinator claude, workers codex, opencode)");

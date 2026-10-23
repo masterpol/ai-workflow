@@ -1,0 +1,83 @@
+@toon-data 1
+slug: instruction-compression
+draft: true
+state: needs-decision
+ledgerHash: "sha256:039b3b2eb51351171e179134f9b1b1a79acc24b954cb0593827efd8baa331017"
+bindings:
+legacyEntryHash: "sha256:9e13916cded7ea616e9b8643ab9d679e46a0107109942b7ba554d4b552a50978"
+mapping:
+  schemaVersion: 2
+  sections[33]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#final-verification",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#limits",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#s1-investigation-2026-10-18",null,null,null,null,null
+    "deviations.md#s1-proof-preparation-2026-10-18",null,null,null,null,null
+    "deviations.md#baseline-disposition-required-2026-10-18",null,null,null,null,null
+    "deviations.md#approved-amendment-applied-and-s1-exits-2026-10-18",null,null,null,null,null
+    "deviations.md#remaining-scope-proof-boundary-2026-10-18",null,null,null,null,null
+    "deviations.md#s2-final-proof-and-budget-2026-10-18",null,null,null,null,null
+    "deviations.md#approved-final-delivery-revision-2026-10-18",null,null,null,null,null
+    "deviations.md#audit-cycle-1-regression-coverage-and-cohesive-proof-2026-10-18",null,null,null,null,null
+    "log.md#s1-opencode-readiness-and-completion-format-refusal-2026-10-18",null,null,null,null,null
+    "log.md#reporting-recovery-and-observation-limits-2026-10-18",null,null,null,null,null
+    "log.md#baseline-gate-rejected-2026-10-18",null,null,null,null,null
+    "log.md#matched-loading-fixture-adjustment-2026-10-18",null,null,null,null,null
+    "log.md#existing-companion-pointer-check-2026-10-18",null,null,null,null,null
+    "log.md#s1-exit-evidence-and-lifecycle-close-2026-10-18",null,null,null,null,null
+    "log.md#s2-session-observation-unavailable-2026-10-18",null,null,null,null,null
+    "log.md#s2-exact-native-trace-recovered-2026-10-18",null,null,null,null,null
+    "log.md#s2-candidate-rejected-required-owner-guard-clarified-2026-10-18",null,null,null,null,null
+    "log.md#s2-corrected-candidate-complete-2026-10-18",null,null,null,null,null
+    "log.md#s2-accepted-s3-baseline-captured-2026-10-18",null,null,null,null,null
+    "log.md#s3-full-suite-failure-and-opencode-retry-2026-10-18",null,null,null,null,null
+    "log.md#s3-rejected-after-final-opencode-scoring-2026-10-18",null,null,null,null,null
+    "log.md#approved-s3-deferral-and-fixture-repair-applied-2026-10-18",null,null,null,null,null
+    "log.md#approved-revision-verified-2026-10-18",null,null,null,null,null
+    "log.md#build-end-approved-actual-audit-started-2026-10-18",null,null,null,null,null
+  otherFiles[0]:
+judgments[33]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#limits",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#s1-investigation-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#s1-proof-preparation-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#baseline-disposition-required-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#approved-amendment-applied-and-s1-exits-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#remaining-scope-proof-boundary-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#s2-final-proof-and-budget-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#approved-final-delivery-revision-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#audit-cycle-1-regression-coverage-and-cohesive-proof-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s1-opencode-readiness-and-completion-format-refusal-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#reporting-recovery-and-observation-limits-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#baseline-gate-rejected-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#matched-loading-fixture-adjustment-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#existing-companion-pointer-check-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s1-exit-evidence-and-lifecycle-close-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s2-session-observation-unavailable-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s2-exact-native-trace-recovered-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s2-candidate-rejected-required-owner-guard-clarified-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s2-corrected-candidate-complete-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s2-accepted-s3-baseline-captured-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s3-full-suite-failure-and-opencode-retry-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s3-rejected-after-final-opencode-scoring-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#approved-s3-deferral-and-fixture-repair-applied-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#approved-revision-verified-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#build-end-approved-actual-audit-started-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: instruction-compression\nshipped: 2026-10-19\nschemaVersion: 1\ndraft: true\n---\n# instruction-compression\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#instruction-compression","sha256:9e13916cded7ea616e9b8643ab9d679e46a0107109942b7ba554d4b552a50978","## instruction-compression — shipped 2026-10-19\n\nA bounded pilot of shortening the workflow's own phase wrappers while keeping the same required decisions and evidence (versions 2.31.5–2.31.8, 2026-10-17 to 2026-10-19, big-batch, 1,308 of 1,500 changed lines across 11 paths). S1 build wrapper 1314 → 489 words behind a frozen 31-case golden dataset (`.project/evals/datasets/instruction-compression.json`), a validator, an owner-loading test (`instruction-loading.test.mts`) and 14 cross-file contracts in `workflow-contracts.test.mts`; unique remaining obligations moved into the build phase owner, the short `.project/rules` companion pointer was kept because workflow-doctor still requires it. S2 audit wrapper 941 → 468 words: the first 445-word candidate was rejected (an OpenCode hotfix-approval omission and fail-open handling of a missing required owner) and retained; a required-owner guard was added (missing required owner files or sections means stop and report, optional companions may be absent); result Claude 116/4/4 and OpenCode 86/16/22 satisfied/failed/unverified with no new loss. S3 ship wrapper deferred: final OpenCode scoring lost two satisfied review-nonsecurity-evidence criteria and returned two baseline zeros as null, the evidence checker rejected all four, and the four files were restored to pre-S3 bytes by hash while the failed evidence was retained. R1 a six-line merge in `runtime/upgrade.test.mts` models the documented post-sync ignore merge so historical-install fixtures pass the new eval-data ignore guard without weakening the doctor. Shared caveman and dispatch banners (about 5,100 words across 44 files) were not compressed.\n\nNo-gos held: no dataset, frozen baseline vector or threshold changed, known baseline failures stay failed (never relabelled null), no score or prompt tuned to force green, rejected candidates retained, no new gate, skipped reviewer or weakened evidence, no promised percentage without a before/after measurement, no validator ass",true
+unavailable[1]: ".project/records/pitch-compression/instruction-compression.md"

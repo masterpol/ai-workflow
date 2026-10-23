@@ -1,0 +1,27 @@
+# Source-review supplement: orca-vendor-dispatch
+
+Prepared 2026-10-22 from verified original recovery sources. This supplements the unchanged [compact record](../pitch-compression/orca-vendor-dispatch.md). The results below describe the 2026-10-08 releases 2.14.0 and 2.14.1; they are not newly executed tests.
+
+## Scope and source discrepancies
+
+Dispatch shipped claim-before-launch ownership, set-once dispatch IDs, one live attempt per task, positive-proof retries and attempt-specific worker_done completion. Reconciliation, dirty-work preservation, evidence copying, conflict recovery and the executable grader belonged to later reconcile/integration work. Workers could neither dispatch nested workers nor ship.
+
+The S0 plan required launch, peer messaging, completion, settlement and isolation for every vendor, otherwise stop and return to shaping. The user instead accepted partial evidence and authorized continuation. Orca 1.4.222 used the app-bundled launcher after approval because the other launcher failed. Claude launch, completion, settlement and isolation were observed in an external fixture. Codex stopped at workspace trust; after user trust, retry accepted input but lacked funds for completion. OpenCode hit a service-port conflict; after user-authorized stale-service shutdown, retry accepted input but likewise lacked funds. Peer messaging, rate limits and restart replay were not observed. Planned/fake-runtime cases do not prove these live behaviors.
+
+The pitch cap was 15 files and 1,500 LOC; the approved plan estimated 14 files and about 1,590 LOC including tests. The compact record's claim that appetite was held is not established by that source. Its rate-limit wording does not establish live evidence either. These discrepancies remain explicit rather than rewriting the historical record.
+
+## Runtime receipts and ownership
+
+Nonzero launch receipts carried failedStage, effects and residualResources; worktrees and terminals could remain after failure. Completion payloads carried taskId, dispatchId, outcome (succeeded or failed) and filesModified. Launch acknowledgment was not completion. Check repeated deliveries until acknowledgment. Worker projections exposed stage, outcome, liveness and next action; missing_status could leave failed launches unverifiable. Releasing a succeeded worker returned retained/user-takeover with no process action, not proof of removal. Retry reused the worktree with a fresh dispatch ID and agent terminal. Residual fixture resources remained under user ownership; subsequent cleanup was not established.
+
+External coordinators lacked caller.orcaSessionId. Particular refusal reasons were accepted only because preflight ordering already established version/readiness, guarded by version-drift tests. A broad ORCA_* recursion block was abandoned because it would deny legitimate coordinators. Replacement guessed environment markers were explicitly unverified; later identification evidence superseded those guesses. Historical switch precedence through an environment file is superseded by current trusted configuration, which never reads .env. The source found kimi-k2.7-code references rather than kimi-k3, but provider-catalog existence remained unverified because the model-list command produced no output.
+
+The [current Orca contract](../../../ai-framework/integrations/orca-vendors.md), [launch gate](../../../ai-framework/scripts/orca-launch-gate.mts), [dispatch core](../../../ai-framework/scripts/orca-dispatch.mts) and [ownership ledger](../../../ai-framework/scripts/orca-ledger.mts) own current behavior: pinned executable, fresh pair authority, bounded briefs and untrusted completion grammar, protected paths, prefixed keys, guarded outcomes, positive clean-failure retry proof and resume without relaunch. Injected asynchronous runtime calls preserve typed errors and bounded deadlines, including Bun timer cleanup. Historical cursor mirrors matched the canonical build skill while other vendors used loaders.
+
+## Audit and historical limits
+
+Cycle 1 used independent security, code and coverage reviewers with caught canaries and scratch-copy guard evidence; cross-pitch, UX, i18n and eval were inapplicable. Four security must-fixes and three code highs were repaired. Cycle 2 security passed; code's unreadable failure-receipt must-fix was repaired. Later should-fixes received no third independent review. The related retry pattern's “three audit rounds” wording does not establish a third review against the source's two cycles plus later fixes.
+
+Historical open limits included whole-process-group termination, a gate-level pair check, an unproven compare-before-rename guard test, ledger listing/pruning, a corrupt record blocking unrelated dispatch, Bun grace-path partial-output loss, absent-launcher errors classified as unknown liveness, guessed worker markers and missing live vendor/peer evidence. The mutation check did not prove the compare-before-rename guard. The log said the lost-update window narrowed but remained unlocked. Current locking and process-runner changes do not retrospectively remove these historical qualifications.
+
+An earlier broad Node run failed the Claude skill-use timing assertion under load; three isolated reruns passed 63/63 without deeper isolation. Final ship evidence was Node 846/846 and Bun 817 passing with zero failures. The final counts do not erase the earlier flake. Intermediate hill positions, scratch paths, terminal/Run identifiers and pending gate notation add no further shipped behavior.

@@ -1,0 +1,73 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[5]: agent-model-sweep,fix-instruction-conflicts,orca-engines-range,path-safety-hardening,shape-lite
+sourceBytes: 149200
+sourceFiles: 43
+requiredSections: 45
+retainedSections: 45
+otherFilesAccounted: 42
+retainedOtherFiles: 33
+omissions:
+  process-noise: 9
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[5]:
+  -
+    slug: agent-model-sweep
+    payloadHash: "sha256:eec6cf97fdf42a63f901f3a60841fafea6476373427a3567c8a61c6e15f1c7f9"
+    supplementHash: "sha256:8718af0ae23363533544608dbccc23dfc93678a48c1fde2e500ff1c320d7f00e"
+    sourceProof:
+      archiveDirectory: agent-model-sweep-2026-10-19T03-28-56-075Z
+      manifestHash: "sha256:af30854bdd1ad8ba1dfa4eae5fd3909eebde0eeda634cd7fdeecbae5d4e932bb"
+      sourceBytes: 47592
+      verifiedFiles: 5
+    recordBytes: 1493
+  -
+    slug: fix-instruction-conflicts
+    payloadHash: "sha256:98357ab7e6d63ce75f0f3fcbaa391453fe66b02f494d177b57c731fe18f826f2"
+    supplementHash: "sha256:a27883dd9f88f401b585085d214941037accabf2b7742062f10c00b8aecc2946"
+    sourceProof:
+      archiveDirectory: fix-instruction-conflicts-2026-10-19T03-28-32-752Z
+      manifestHash: "sha256:156481ea5939d2835c429bf16aa36cf562324aea4297ceb3f236b61a3f9ecc27"
+      sourceBytes: 23025
+      verifiedFiles: 4
+    recordBytes: 1583
+  -
+    slug: orca-engines-range
+    payloadHash: "sha256:399a4880361106d882ab8e4264840731884c6a81b39e603e858083c080485b4c"
+    supplementHash: "sha256:330dbd2c9f038fe6a2ec9774e2b57e17ea6c33a9e01eace43605fd2651b6cee8"
+    sourceProof:
+      archiveDirectory: orca-engines-range-2026-10-19T03-27-47-851Z
+      manifestHash: "sha256:2299d86d8fb52b9ceac81e7cd0a77017788a2aa826fff56fe778f3cf378d6471"
+      sourceBytes: 16786
+      verifiedFiles: 6
+    recordBytes: 1381
+  -
+    slug: path-safety-hardening
+    payloadHash: "sha256:051af5667d65344bb27f7dbcc01cc156e31503cde40f8d5d8acdf7e95f114c7a"
+    supplementHash: "sha256:e17e0cffbbeab9d037b8f7caef21dec2e8aed696e0d769cabd3f7433b6214bef"
+    sourceProof:
+      archiveDirectory: path-safety-hardening-2026-10-07T23-01-44-040Z
+      manifestHash: "sha256:9eb53dede0c07f67b081268fa529f8a692bcac204bd89ff98f6e2830f788b3bb"
+      sourceBytes: 45216
+      verifiedFiles: 22
+    recordBytes: 1534
+  -
+    slug: shape-lite
+    payloadHash: "sha256:0e6d115f6bb45ff423df9d933c73b8484abefc2979334d87e2d8fe7025aad34e"
+    supplementHash: "sha256:51c99006365a6c72d1a738af827c1a4833baacfa2b613678729c318086c6147e"
+    sourceProof:
+      archiveDirectory: shape-lite-2026-10-07T22-59-19-005Z
+      manifestHash: "sha256:5905786d01fef1a2f5bf15b054bf54b964154549596e635bc0885d94f5cb34f6"
+      sourceBytes: 16581
+      verifiedFiles: 6
+    recordBytes: 1363
+validation: "{\"slug\":\"agent-model-sweep\",\"coverage\":1,\"sections\":14,\"otherFiles\":5,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1493,\"recordCap\":3000,\"supplementBytes\":13221,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"fix-instruction-conflicts\",\"coverage\":1,\"sections\":8,\"otherFiles\":4,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":1583,\"recordCap\":3000,\"supplementBytes\":10887,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-engines-range\",\"coverage\":1,\"sections\":9,\"otherFiles\":6,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1381,\"recordCap\":3000,\"supplementBytes\":7599,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"path-safety-hardening\",\"coverage\":1,\"sections\":12,\"otherFiles\":21,\"omissions\":{\"process-noise\":6},\"acceptedGaps\":[],\"recordBytes\":1534,\"recordCap\":3000,\"supplementBytes\":9743,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"shape-lite\",\"coverage\":1,\"sections\":2,\"otherFiles\":6,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1363,\"recordCap\":3000,\"supplementBytes\":6992,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"newKnowledgeEntries\":0,\"sourceArchivesReopened\":false}"
+rehearsal: "agent-model-sweep: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nfix-instruction-conflicts: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\norca-engines-range: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\npath-safety-hardening: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nshape-lite: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nRehearsal: 5 generated index rows, 5 upgraded slugs, retired narratives absent; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 31
+  partial: 0
+  upgraded: 15
+  total: 46
+sourceArchivesReopenedForRehearsal: false

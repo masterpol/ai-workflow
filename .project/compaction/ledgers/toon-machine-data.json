@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 2,
+  "slug": "toon-machine-data",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#what-shipped",
+      "helps": "Per-scope outcomes S0 to S6 with S5 dropped, test counts 30, 27 and 21, and releases 2.32.0 then 2.32.1.",
+      "bodyHash": "sha256:47a92ada2b3928e4ae65f246aaf2b5cf2c34c93cc41dc65d09afaaecc94f177f"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#scope-and-limits",
+      "helps": "Nothing converted, no skill or agent edited, named proxies, and the shared-file overlap with instruction-compression.",
+      "bodyHash": "sha256:1aeb9e042f9cb55469217acf0def11840cfc7caa1974d5e83e8b421a854fd266"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#lessons-and-rabbit-holes",
+      "helps": "Which files count, TOON does not always save, parser safety, plus races and depth mismatch found in audit.",
+      "bodyHash": "sha256:0ef5b61da087195b5e87498873cec577daea014881aadce6d9d9399045f4c1fe"
+    },
+    {
+      "source": "SHIPPED.md#result-against-the-original-ask",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#what-shipped",
+      "helps": "Honest outcome: tooling and rule shipped, no existing file converted, TOON beat pretty JSON and was mixed against minified.",
+      "bodyHash": "sha256:e71e2c73bce6b0fe0bd690ace45a5eb1b5281f2c62f91d02ee040c7eae86900c"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#followups",
+      "helps": "The four open followups including toon-skill-registry and the five unrun live-only golden cases.",
+      "bodyHash": "sha256:a7aad34e9a4c96c7fb31b999271e99d4a0313a202fffe4112529838245233741"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#scope-and-limits",
+      "helps": "Six prohibitions bounding the pitch: host-native files, unmeasured claims, prose rewrites, full TOON spec, secrets.",
+      "bodyHash": "sha256:e1046a9f89896fbd213cd7667cb2e635629e4298738f737107b2db510907b1b4"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#lessons-and-rabbit-holes",
+      "helps": "Resolved, pushed-to-plan and pushed-to-no-go dispositions with owners.",
+      "bodyHash": "sha256:23cb2cc5065a3693879f97cb64bbeda6620d62fa1e0b06416bb0e930fd5bf3a8"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:8011db9aa4e2fe91a44c59d94805617039833592c355eb94f234443840450a66",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#what-shipped",
+      "helps": "Preserves scope table, result against the ask and followups across the supplement sections."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:49cf07179fb53bdb4bd4a2b49998c47100a31d53ea20ef30fe83756f17b68cf1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#audit-and-review-chronology",
+      "helps": "Preserves must-fix M1 to M3, should-fix, cycle 2 C1 to C5, acknowledged A1 to A6, eval gate, canaries and the mutation hang incident."
+    },
+    {
+      "path": "build-start.md",
+      "hash": "sha256:5ac0e396809ccd48c253656bb0c1fd9883051849667c99193b4cb651c3bc280c",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:82c242695b435a2b27f8ca6ad36f5a4c9ec39c5291bb694ff9889531d244cdc4",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#build-decisions-and-deviations",
+      "helps": "Preserves the eight recorded plan-versus-reality deviations and their decisions."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:242653c58711ef421982d553e52aed19deb6f436cff4f815e5d202a5068288b2",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "inventory.md",
+      "hash": "sha256:5d4a9a59019a12b775edf216db6bb892d8ee18fe2d50c9e2a768a08dbb68f34c",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#inventory-and-no-go-decision",
+      "helps": "Preserves the agent-load method, the 14 candidate verdicts, the NO-GO decision and its consequences."
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:0e042766624ace6cbdce54586fbc241ab6f7887290e1a5a87609fe6a13964758",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#build-decisions-and-deviations",
+      "helps": "Preserves approval mode, the proxy finding, the node:util boundary refusal, suite counts and the 37-minute hang."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:54ad8e84e622a2a50a6bd87d37ecd635aef2d257262d2fdddb9ec18f5d782182",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#scope-and-limits",
+      "helps": "Preserves the problem, scope test, critique findings and the Bet-over-Re-shape decision."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:feeabc515e276d0c7bb1afb753723bd4cac896fbd6f5ae8bda1049c8e1281251",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/toon-machine-data.md#build-decisions-and-deviations",
+      "helps": "Preserves scope sequencing, file cap, sequencing gate, exit criteria highlights and risks."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-22T23:33:32.360Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:cd461a08dc215b908a02987bdfaf68be68b3a1604bdc8ff21f3f2a3afc9b6740",
+    "introducingCommit": "fc7d686ccab4849f255e09ccf2e6fdbc17082f54"
+  }
+}

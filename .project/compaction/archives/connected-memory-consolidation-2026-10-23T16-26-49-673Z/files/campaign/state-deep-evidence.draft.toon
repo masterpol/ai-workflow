@@ -1,0 +1,82 @@
+@toon-data 1
+slug: state-deep-evidence
+draft: true
+state: needs-decision
+ledgerHash: "sha256:187f531c8a2eb0c2e0f7d9ae8691b48c6837593942d02170c412c4bb75354ae2"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:1e7e7c189fce8012bce8e6329ebe2366a5131533b5610ce3d57163020d5cc4eb"
+mapping:
+  schemaVersion: 2
+  sections[32]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#result",null,null,null,null,null
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#verification",null,null,null,null,null
+    "SHIPPED.md#audit-and-accepted-exceptions",null,null,null,null,null
+    "SHIPPED.md#no-gos-and-rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#knowledge-and-followups",null,null,null,null,null
+    "SHIPPED.md#closure",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#cohesive-unit-exceptions-coding-standardsmd",null,null,null,null,null
+    "deviations.md#s1-deviations-worker-reported-parent-verified-exits",null,null,null,null,null
+    "deviations.md#s2-deviations",null,null,null,null,null
+    "deviations.md#open-for-s5",null,null,null,null,null
+    "deviations.md#s4s5-deviations",null,null,null,null,null
+    "deviations.md#s7-deviations",null,null,null,null,null
+    "deviations.md#s8-deviations",null,null,null,null,null
+    "deviations.md#audit-deviations-and-dispositions-2026-10-21",null,null,null,null,null
+    "deviations.md#owner-approved-closure-2026-10-21",null,null,null,null,null
+    "log.md#2026-10-21-build-entry-gate",null,null,null,null,null
+    "log.md#2026-10-21-s1-module-key-spike",null,null,null,null,null
+    "log.md#2026-10-21-s3-done-inline",null,null,null,null,null
+    "log.md#2026-10-21-wave-a-merged-s1-s2",null,null,null,null,null
+    "log.md#2026-10-21-s4-done-inline",null,null,null,null,null
+    "log.md#2026-10-21-s5-done-inline",null,null,null,null,null
+    "log.md#2026-10-21-s6-cut-s7-done-inline-not-dispatched-the-edits-and-gates-were-already-in-context",null,null,null,null,null
+    "log.md#2026-10-21-s8-live-re-run-owner-approved-the-full-matrix",null,null,null,null,null
+    "log.md#2026-10-21-audit-cycle-1-started-paused-usage-limit",null,null,null,null,null
+    "log.md#2026-10-21-audit-resumed-via-codex-dispatch-refused",null,null,null,null,null
+    "log.md#2026-10-21-audit-completed-through-cycle-2-ship-blocked",null,null,null,null,null
+    "log.md#2026-10-21-audit-approved-ship-wrapper-failed-audit-cycle-3",null,null,null,null,null
+    "log.md#2026-10-21-shipped-locally-v2390",null,null,null,null,null
+    "log.md#final-closure-checks-2026-10-21",null,null,null,null,null
+  otherFiles[0]:
+judgments[32]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#result",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#verification",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#audit-and-accepted-exceptions",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-and-rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#knowledge-and-followups",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#closure",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#cohesive-unit-exceptions-coding-standardsmd",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s1-deviations-worker-reported-parent-verified-exits",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s2-deviations",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#open-for-s5",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s4s5-deviations",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s7-deviations",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s8-deviations",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-deviations-and-dispositions-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#owner-approved-closure-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "log.md#2026-10-21-build-entry-gate",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-s1-module-key-spike",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-s3-done-inline",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-wave-a-merged-s1-s2",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-s4-done-inline",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-s5-done-inline",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-s6-cut-s7-done-inline-not-dispatched-the-edits-and-gates-were-already-in-context",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-s8-live-re-run-owner-approved-the-full-matrix",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-audit-cycle-1-started-paused-usage-limit",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-audit-resumed-via-codex-dispatch-refused",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-audit-completed-through-cycle-2-ship-blocked",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-audit-approved-ship-wrapper-failed-audit-cycle-3",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-21-shipped-locally-v2390",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#final-closure-checks-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: state-deep-evidence\nshipped: 2026-10-22\nschemaVersion: 1\ndraft: true\n---\n# state-deep-evidence\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#state-deep-evidence","sha256:1e7e7c189fce8012bce8e6329ebe2366a5131533b5610ce3d57163020d5cc4eb","## state-deep-evidence — shipped 2026-10-22\n\n`/state` snapshots now include additive architecture, history, risks and tokens facts (bundle 2.39.0, `schemaVersion` stays 1): graph, history and manifest inputs are bounded and guarded, missing data is `unavailable`, never zero, entry-point paths must pass scrub equality, and unsupported token-schema values are never copied into rejection notes. Graph degree measures connectivity, not risk. No page rendering or skill behavior changed; no source-content scans, no project-script execution or network work by collectors. Monorepo packages stay unavailable (`state-monorepo-packages` deferred).\n\nAccepted by the owner with disclosure: the LOC amendment (1667 vs 1350) and the live-quality exceptions (Claude 25/34 pass with two 0.50 inherited-case regressions, Codex 34/34, OpenCode and Cursor not run), so there is no clean cross-vendor AI-quality claim. The pre-ship wrapper failed (no `package.json`) and a direct-check fallback was approved.\n\nLessons: [[snapshot-metadata-bypassed-output-scrubbing]], [[review-guard-snapshot-can-outgrow-its-reader]], [[package-less-bundle-ship-wrapper-cannot-select-checks]]. Contract: `ai-framework/integrations/state-report.md`. Five followups in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/state-deep-evidence.md"

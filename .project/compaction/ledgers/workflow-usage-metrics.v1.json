@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "slug": "workflow-usage-metrics",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-1-shippedmdscopes",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-2-shippedmdverification",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-3-shippedmdno-gos-honored",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-and-deviations",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-4-shippedmdrabbit-holes-and-deviations",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-followups",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-5-shippedmdknowledge-and-followups",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-6-pitchmdno-gos",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-7-pitchmdrabbit-holes",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d1-explicit-runner-for-compatibility-verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-8-deviationsmdd1-explicit-runner-for-compatibility-verification",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d2-explicit-successful-pitch-counter",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-9-deviationsmdd2-explicit-successful-pitch-counter",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d3-audit-hardening-and-path-check-boundary",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-10-deviationsmdd3-audit-hardening-and-path-check-boundary",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d4-coupled-modules-and-explicit-schema-validation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-11-deviationsmdd4-coupled-modules-and-explicit-schema-validation",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#2026-10-08-s1-start",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-12-logmd2026-10-08-s1-start",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s1-verification-attempt-1",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-13-logmds1-verification-attempt-1",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s1-compatibility-run",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-14-logmds1-compatibility-run",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s1-exit-evidence-complete",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-15-logmds1-exit-evidence-complete",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s2-start-approved",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-16-logmds2-start-approved",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s2-exit-evidence-complete",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-17-logmds2-exit-evidence-complete",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#runtime-test-helper-integration-user-requested",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-18-logmdruntime-test-helper-integration-user-requested",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s3-start-approved",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-19-logmds3-start-approved",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s3-exit-evidence-complete",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-20-logmds3-exit-evidence-complete",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#audit-approved-three-cycles-complete",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-21-logmdaudit-approved-three-cycles-complete",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#ship-approved-and-closed-2026-10-08",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-22-logmdship-approved-and-closed-2026-10-08",
+      "reason": "Preserved in the compact record section."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T16:25:54.829Z"
+}

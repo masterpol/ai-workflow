@@ -23,7 +23,7 @@ Phase 0 of the new pipeline. See `ai-framework/workflow/phases/0-shape.md` for f
 3. **Breadboard** — places + affordances + connections. Fat-marker only. No wireframes.
 4. **Address rabbit holes** — name 2-5 unknowns; each gets resolved-here / pushed-to-plan / pushed-to-no-go.
 5. **Write no-gos** — explicit exclusions.
-6. **Run /critique** automatically if appetite is `big-batch` or scope touches `lib/ai/prompts/` (uses `/critique` skill).
+6. **Run /critique** automatically if appetite is `big-batch` or the pitch has an AI-prompt scope (defined by changed AI behavior, not by directory — see "AI-prompt scope (definition)" in `ai-framework/workflow/phases/0-shape.md`; uses `/critique` skill).
 7. **Bet decision** — Bet (→ /plan) / Re-shape / Pass (→ `_parked/`).
 
 ## Output
@@ -32,7 +32,7 @@ Phase 0 of the new pipeline. See `ai-framework/workflow/phases/0-shape.md` for f
 
 ## AI-prompt scopes (extra discipline)
 
-Pitches touching `lib/ai/prompts/` or LLM call sites must include ≥1 golden eval case at `.project/evals/datasets/` before bet. Hard gate.
+A pitch with an AI-prompt scope (any change to model behavior — prompts, model/parameters, tools or context given to a model, or handling of model output — wherever it lives, e.g. `lib/ai/prompts/`) must include ≥1 golden eval case at `.project/evals/datasets/` before bet. Hard gate. Definition: "AI-prompt scope (definition)" in `ai-framework/workflow/phases/0-shape.md`.
 
 ## Confirmation gate
 

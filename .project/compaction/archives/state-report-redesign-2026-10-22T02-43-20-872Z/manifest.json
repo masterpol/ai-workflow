@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-report-redesign",
+  "sourceRoot": ".project/pitches/state-report-redesign",
+  "archivedAt": "2026-10-22T02:43:20.877Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "d756ede2a567c05086ca57507dcbe0f9f16b8759145dc7c535902a3411a4f68b",
+      "mode": 420
+    },
+    "audit-records/code.md": {
+      "hash": "735cf16e6bc24ca07622bccad262508f34a0dd171636aad3f4aee4df0a4421c5",
+      "mode": 420
+    },
+    "audit-records/cross.md": {
+      "hash": "df58c271f072e32e07207518bd52ffcb1f43e4d63749b7c2b421930fb958ef33",
+      "mode": 420
+    },
+    "audit-records/sec2.md": {
+      "hash": "9d75ad64e7e3c7292a541ba485d8dd4282d73ccc547c44487d0cb931f465b1e4",
+      "mode": 420
+    },
+    "audit-records/security.md": {
+      "hash": "b495cb8051c7fa20cbce8fbdc4e01be04c258fd070ad8c18278fdccb21ed8ab2",
+      "mode": 420
+    },
+    "audit-records/tests.md": {
+      "hash": "55c00b865e12d839212374cd90a2754e03fa436b21f1d51f5409cdad6dd3b95e",
+      "mode": 420
+    },
+    "audit-records/tests2.md": {
+      "hash": "a387a44da721ad2b72edfd84893d4eea79e5ae9f72cc017ce105437d8210b517",
+      "mode": 420
+    },
+    "audit-records/ux.md": {
+      "hash": "e32ae36a8dd13a66d358a498ac9aa49b659e7017993be9bd6df9e53fe45ce9d8",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "3bac0b5071c9fcd544d3af98456385e92baba84c3838d3fd7e1edb5e41c0ab69",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "0fb213f36827d196279e1d4ef355a2249bdf5c79a3334fb67a7eb5c0b5483373",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "c28e89a4d0ff6aa15e5c4e2aba7cc88509708dff9895fa1f2d2bbe9ebaaffa8d",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "3a660c563a30c4130a9173764fa16806a9c80c329bd2d25352f951153aadc832",
+      "mode": 420
+    }
+  }
+}

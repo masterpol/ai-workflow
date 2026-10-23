@@ -20,7 +20,7 @@ const args = process.argv.slice(2);
 let value;
 if (args[0] === 'orchestration') value = {ok:true,result:{workers:[{agentTerminalHandle:'worker',dispatchStatus:'running'}],page:{hasMore:false}}};
 else if (args[0] === 'skills') value = args[2] === 'orca-cli' ? {name:'orca-cli',markdown:'worktree current terminal'} : {name:'orchestration',markdown:'worker-start worker_done orchestration check'};
-else value = {ok:true,result:{target:{kind:'local'},runtime:{reachable:true,state:'ready',appVersion:'1.4.223'}}};
+else value = {ok:true,result:{target:{kind:'local'},runtime:{reachable:true,state:'ready',appVersion:'1.4.224'}}};
 console.log(JSON.stringify(value));
 `;
 
@@ -68,7 +68,8 @@ test("off exits silently before parsing input, probing, or checking the root", a
   assert.deepEqual(touched, []); assert.deepEqual(spy.out, []); assert.deepEqual(spy.err, []);
 });
 
-test("every phase accepts a leading slash or dollar name and reports the Codex coordinator", (t) => {
+// Both invocation forms for every phase launch real hook processes; use an explicit integration budget.
+test("every phase accepts a leading slash or dollar name and reports the Codex coordinator", { timeout: 30000 }, (t) => {
   const f = fixture(t);
   for (const phase of PHASES) for (const sigil of ["/", "$"]) {
     context(f.run(prompt(`${sigil}${phase}`)), READY);
@@ -132,12 +133,12 @@ test("malformed, oversized, and mistyped input block with a fixed reason", (t) =
   for (const input of inputs) blocked(f.run(input), "invalid-hook-input");
 });
 
-test("input accepts exactly 64 KiB and rejects one byte more", (t) => {
+test("phase arguments accept exactly 64 KiB and reject one byte more; large ordinary prompts pass silently", (t) => {
   const f = fixture(t);
-  const input = JSON.stringify(prompt("/plan"));
-  const padding = 64 * 1024 - new TextEncoder().encode(input).length;
-  context(f.run(input + " ".repeat(padding)), READY);
-  blocked(f.run(input + " ".repeat(padding + 1)), "invalid-hook-input");
+  const args = (bytes: number) => ` ${"a".repeat(bytes - 1)}`;
+  context(f.run(prompt(`/plan${args(64 * 1024)}`)), READY);
+  blocked(f.run(prompt(`/plan${args(64 * 1024 + 1)}`)), "invalid-hook-input");
+  silent(f.run(prompt(`please summarise this log: ${"x".repeat(1024 * 1024)}`)));
 });
 
 test("post-probe elapsed guard rejects a late ready result and catches its removal", (t) => {

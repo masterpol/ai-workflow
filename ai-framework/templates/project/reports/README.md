@@ -18,6 +18,7 @@ reports/
 ├── knowledge.html  # /state: knowledge counts, links to the knowledge graph
 ├── pitches.html    # /state: active, shipped and compacted pitches
 ├── theme.json      # /state: theme used and the SHA-256 of each stylesheet it came from
+├── fragments/      # /state: optional AI analysis: <slot>.draft, <slot>.fragment (written by stamp), .round.json
 └── settings.json   # optional, yours: { "schemaVersion": 1, "themeMode": "auto" | "fallback" }
 ```
 

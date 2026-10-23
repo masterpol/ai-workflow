@@ -1,0 +1,27 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[2]: instruction-compression,unified-toon-config
+pitches[2]:
+  -
+    slug: instruction-compression
+    status: upgraded
+    outcomeBytes: 1920
+    v1Hash: "sha256:039b3b2eb51351171e179134f9b1b1a79acc24b954cb0593827efd8baa331017"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: unified-toon-config
+    status: upgraded
+    outcomeBytes: 1844
+    v1Hash: "sha256:9b51a3f59a44c5c6c3c07440563ba5c0997009df4348bc8114921adc69c84d35"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+counts:
+  legacy: 19
+  partial: 0
+  upgraded: 27

@@ -1,0 +1,35 @@
+@toon-data 1
+slug: orca-vendor-reconcile-integration
+draft: true
+state: needs-decision
+ledgerHash: "sha256:3b1362f84dc669f5b6530e9535db7a1935a6cb59de5afcb458f26c78a3d02bfd"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-reconcile-integration.md": "sha256:a35fb24c2b9006a184f229dbb2889d49f3baa38a90c583bf443d8c474c773b19"
+legacyEntryHash: "sha256:db692cf20b0d42116cbd9eb9ca5ccd532d75655d347eb1942b6c0dbe8ffedf3e"
+mapping:
+  schemaVersion: 2
+  sections[8]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#audit",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-3-shippedmdaudit",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-4-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#followups",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-5-shippedmdfollowups",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-6-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-7-pitchmdrabbit-holes",null,null
+    "deviations.md#audit-cycle-1-2026-10-08",null,null,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-8-deviationsmdaudit-cycle-1-2026-10-08",null,null
+  otherFiles[0]:
+judgments[8]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-3-shippedmdaudit",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-4-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-5-shippedmdfollowups",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-6-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-7-pitchmdrabbit-holes",Preserved in the compact record section.,false
+  "deviations.md#audit-cycle-1-2026-10-08",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-8-deviationsmdaudit-cycle-1-2026-10-08",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-vendor-reconcile-integration\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# orca-vendor-reconcile-integration\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-vendor-reconcile-integration","sha256:db692cf20b0d42116cbd9eb9ca5ccd532d75655d347eb1942b6c0dbe8ffedf3e","## orca-vendor-reconcile-integration — shipped 2026-10-08\n\nOrca integration (v2.17.0) added the thin `orca-run.mts` CLI (status, dispatch, collect, reconcile; fixed check catalog; guards stay in the libraries), the executable `orca-eval-grader.mts` (7 executed cases, 1 parse-only, 3 live-only, never merged), and inert opt-in wiring in build, audit and ship. One independent audit cycle with 0 must-fix. Live smoke: Claude only; Codex, OpenCode and peer messaging not-run.\n\nLessons: [[a-thin-cli-keeps-every-guard-in-the-library]], [[a-grader-reports-executed-and-unexecuted-cases-separately]].\n\n",false
+  ".project/records/pitch-compression/orca-vendor-reconcile-integration.md","sha256:a35fb24c2b9006a184f229dbb2889d49f3baa38a90c583bf443d8c474c773b19","# Compaction record: orca-vendor-reconcile-integration\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[a-thin-cli-keeps-every-guard-in-the-library]], [[a-grader-reports-executed-and-unexecuted-cases-separately]].\n\n## Section 1: SHIPPED.md#final-verification\n\nNode 1045 pass / 0 fail / 1 skipped; Bun 1017 pass / 0 fail on a clean run (earlier Bun runs right after the Node suite showed 1 and 4 unidentified failures that did not reproduce). A clean `git archive` export showed 1 failure, the caveman-install test that also fails at HEAD. workflow-doctor and setup-validator READY, graphify CLEAN, 0 broken links. No build/typecheck/lint/i18n commands exist in this repo.\n\n## Section 2: SHIPPED.md#reconciliation\n\nI1 thin CLI `orca-run.mts` (17 tests; parity with the libraries, fixed check catalog, bounded no-symlink input). I2 executable grader `orca-eval-grader.mts` (7 executed cases pass, 1 parse-only, 3 live-only not-run; mutants red; no combined count). I3 opt-in blocks in build, audit, ship and the two phase docs, Cursor mirrors byte-equal. I4 docs, dataset fixes (stale `dispatchBetReady`, hostile-summary case), v2.17.0. Live smoke: Claude observed; Codex, OpenCode and peer messaging not-run.\n\n## Section 3: SHIPPED.md#audit\n\nOne cycle with independent code and security reviewers (canary caught), 0 must-fix. One should-fix: the grader's dataset reader was hardened (component walk, O_NOFOLLOW, dev/ino check, bounded read) with a test. The test-coverage check was author-run, not independent.\n\n## Section 4: SHIPPED.md#no-gos-honored\n\nNo command text from agents, no gate auto-advance, no guard repeated in the CLI, no live proof claimed for Codex or OpenCode.\n\n## Section 5: SHIPPED.md#followups\n\nRun live smoke for Codex, OpenCode and peer messaging; decide whether the library should refuse an integration with no checks; trace whether the CLI's verbatim outcome can carry la",true
+unavailable[0]:

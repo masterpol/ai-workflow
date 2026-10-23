@@ -1,18 +1,17 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+import { createTestDeps, urlPath, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath } from "node:url";
 
 import * as bench from "./review-bench.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 const SCRIPT = path.join(here, "review-bench.mts");
 const SOURCE = path.join(here, "review-bench.mts");
 
@@ -69,7 +68,7 @@ test("the manifest lives beside the scratch tree, and nothing inside the tree na
   const result = prep(root);
   t.after(() => { fs.rmSync(result.scratch, { recursive: true, force: true }); fs.rmSync(result.manifest, { force: true }); });
   assert.equal(path.dirname(result.manifest), path.dirname(result.scratch));
-  const walk = (dir: string): string[] => fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]));
+  const walk = (dir: string): string[] => fs.readdirEntriesSync(dir).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]));
   for (const file of walk(result.scratch)) assert.ok(!/canary|manifest/i.test(fs.readFileSync(file, "utf8")), file);
   assert.ok(!JSON.stringify(result).includes("x >= 0"), "the CLI output does not reveal the planted edit");
 });
@@ -424,7 +423,7 @@ function fake(files: Record<string, string>, child: (command: string, args: stri
       runSync(command: string, args: string[], options?: SpawnOptions): RunResult { spawned.push({ command, args, options }); return child(command, args); },
     },
     crypto: {
-      sha256Hex: (data: string | Uint8Array) => createHash("sha256").update(data).digest("hex"),
+      sha256Hex: (data: string | Uint8Array) => testDeps.crypto.sha256Hex(data),
       randomBytes: () => Uint8Array.from([0xde, 0xad, 0xbe, 0xef, 0x01, 0x02]),
     },
     os: { tmpdir: () => "/tmpfake" },
@@ -483,7 +482,7 @@ test("main: guard snapshot writes atomically (temp file opened wx, then rename) 
   assert.deepEqual(JSON.parse(f.out.join("")), { snapshot: "/snap/s.json" });
   const temp = "/snap/s.json.tmp-4242-deadbeef0102";
   assert.deepEqual(f.fsCalls, [`write ${temp} flag=wx`, `rename ${temp} -> /snap/s.json`, `rm ${temp}`]);
-  assert.equal(JSON.parse(f.files.get("/snap/s.json") as string).tree[".project/notes.md"], createHash("sha256").update("n").digest("hex"));
+  assert.equal(JSON.parse(f.files.get("/snap/s.json") as string).tree[".project/notes.md"], testDeps.crypto.sha256Hex("n"));
 });
 
 test("main: guard check is clean on a no-op, and exit 1 listing the path when a watched file changes", () => {
@@ -510,11 +509,35 @@ test("main: guard refuses a snapshot file inside the project, a symlinked target
   assert.equal(bench.main(["guard", "bogus", "--file", "/snap/s.json"], fake({}, gitScript(GUARD_GIT)).deps), 1);
 });
 
+test("guard round-trips snapshots above the report cap and still detects edits", () => {
+  const entries = Object.fromEntries(Array.from({ length: 2500 }, (_, i) => [`/proj/ai-framework/${i}-${"n".repeat(40)}.md`, "n"]));
+  const f = fake(entries, gitScript(GUARD_GIT));
+  bench.guard(FAKE_ROOT, "snapshot", "/snap/s.json", f.deps);
+  assert.ok((f.files.get("/snap/s.json") as string).length > 256 * 1024);
+  assert.equal((bench.guard(FAKE_ROOT, "check", "/snap/s.json", f.deps) as bench.GuardCheckResult).clean, true);
+  f.files.set(Object.keys(entries)[0], "edited");
+  assert.equal((bench.guard(FAKE_ROOT, "check", "/snap/s.json", f.deps) as bench.GuardCheckResult).clean, false);
+});
+
+test("guard never reads secret-shaped files", () => {
+  const secret = "/proj/.project/credentials.json", f = fake({ [secret]: "synthetic fixture", "/proj/.project/notes.md": "notes" }, gitScript(GUARD_GIT));
+  const read = f.deps.fs.readBytesSync;
+  f.deps.fs.readBytesSync = file => { assert.notEqual(file, secret); return read(file); };
+  bench.guard(FAKE_ROOT, "snapshot", "/snap/s.json", f.deps);
+  assert.deepEqual(Object.keys(JSON.parse(f.files.get("/snap/s.json") as string).tree), [".project/notes.md"]);
+});
+
+test("guard refuses an oversized snapshot before publishing it", () => {
+  const f = fake({}, gitScript({ ...GUARD_GIT, "status --porcelain=v1 -uall": "x".repeat(16 * 1024 * 1024) }));
+  assert.throws(() => bench.guard(FAKE_ROOT, "snapshot", "/snap/s.json", f.deps), /too large/);
+  assert.deepEqual(f.fsCalls, []);
+});
+
 test("main: guard check refuses a symlink, a FIFO and an oversize snapshot without reading them", () => {
   const f = fake({}, gitScript(GUARD_GIT));
   f.links.set("/snap/l.json", "/victim");
   f.fifos.add("/snap/f.json");
-  f.files.set("/snap/big.json", "x".repeat(300 * 1024));
+  f.files.set("/snap/big.json", "x".repeat(16 * 1024 * 1024 + 1));
   for (const [name, message] of [["l.json", /regular file/], ["f.json", /regular file/], ["big.json", /too large/]] as const) {
     f.err.length = 0;
     assert.equal(bench.main(["guard", "check", "--file", `/snap/${name}`], f.deps), 1, name);

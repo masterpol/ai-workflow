@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-engines-range",
+  "sourceRoot": ".project/pitches/orca-engines-range",
+  "archivedAt": "2026-10-19T03:27:47.852Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "7f0cc9d35319f242bf736a8ffb33eee20a8c2561aacd7de2cb10a22ab971f1e7",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "232d3fd02b15768b97bdc329a0668a758f7969fa45f3dfb968fdbd13445ec864",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "5797e4dc3e9db6492b295ad6e32031e351b2a71ac27cf2f87e9ca6be60c5e404",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "708e89eb56acdb3c2c25c8c7d52ba5bc4c1e504922df3a3d349391c0d36c1429",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "ba82304e8587eb55487ddfd080e31dab4a82cbe2a6dae69f954cf9c83f4918d0",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "e0948e30d3274b07254e4fcb5fe58a779b9d939ff5bd3daa76585b0f88ddfb10",
+      "mode": 420
+    }
+  }
+}

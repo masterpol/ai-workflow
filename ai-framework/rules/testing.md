@@ -71,6 +71,11 @@ entry under `.project/knowledge/` and supersedes ad-hoc handling.
   confirm the test fails for the right reason. A guard test that passes against a planted
   mutant has not earned its keep. See
   `.project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md`.
+- **Schema bumps move with their dependents.** Bumping a schema or config version constant
+  changes the emitter, the reader's refusal text/regex, any migrator and every fixture literal
+  in the same commit (`grep -rn "schemaVersion: <old>"`). Run the whole suite before marking the
+  scope done; a scope closed with a red suite hands the red to the next pitch. See
+  `.project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md`.
 - Only write inline mocks when the test needs custom behavior (specific return values, spy
   references).
 - When 2+ tests need the same mock, promote it to a shared factory.
@@ -78,6 +83,32 @@ entry under `.project/knowledge/` and supersedes ad-hoc handling.
   `eslint-plugin-react-hooks`), never name a mock variable `useXxx` — it will pattern-match as a
   hook call and produce lint/build failures that don't show up when just running tests. Use
   `xxxMock` or `mockedXxx` instead.
+
+## Verification Discipline: a green build is evidence of nothing specific
+
+A passing build, a passing typecheck, or a passing lint each proves only what that specific tool
+checks — never assume any of them incidentally validates something they don't actually inspect.
+This shows up repeatedly, in different forms, in the same family of mistake:
+
+- A build tool that transpiles but doesn't type-check will happily emit working output from code
+  with real type errors in it.
+- A mock/alias substitution mechanism (a module alias, a dependency-injection override, an
+  environment-based swap) can be misconfigured in a way that's invisible to a build — the build
+  still succeeds, it just bundles or calls the *real* implementation instead of your mock, with no
+  error at any stage.
+- A merge/override utility for build config (aliases, environment, plugin lists) can silently keep
+  a pre-existing entry ahead of one you just added, regardless of the declared order in your own
+  override — reviewing your own source's ordering proves nothing about the tool's actual resolved
+  order.
+
+**When you add or change a mock, alias, or build-config override meant to redirect one
+implementation to another, verify with evidence that the redirection actually took effect at
+runtime — not just that the build exited 0.** Concretely: add a temporary, unique marker (a string
+literal, a distinguishing log line) inside the mock/override, rebuild, and grep the actual output
+artifact (bundle, compiled file) for that marker AND for a signature unique to the real
+implementation you meant to replace (an import name, a distinctive symbol). Remove the marker once
+confirmed. A clean build or a passing type check is necessary but never sufficient evidence for
+this class of change.
 
 ## Coverage Targets (starting point — adjust per project)
 

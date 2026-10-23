@@ -1,118 +1,200 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "state-multipage-report",
   "sections": [
     {
       "source": "SHIPPED.md#pitch-implementation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/runs/2026-10-08-state-multipage-report.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:7904cd061454f1a9f75cfc993a6916d948036dc03311cd678cef3933bbf91852"
     },
     {
       "source": "SHIPPED.md#scopes",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/runs/2026-10-08-state-multipage-report.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:c4255fd0331481973dcbfcd75d3ee4dfa7c1f7ff402c534203afaed1e4200818"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "rule",
+      "disposition": "merged",
       "destination": ".project/runs/2026-10-08-state-multipage-report.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:48fa77741343ffb27aa692fbe59e1899fca35aaca8f27ee9bfa80d7d6912153c"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:4432f47cb8f4e4f8fc6ac05de7604fec8c9bbe08f3b19f888cba4a708e4d0888"
     },
     {
       "source": "SHIPPED.md#deviations-see-deviationsmd",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:623b57899ed19229a25720699a147f91d86c02dddbff81ea5fcfc01ba61632f6"
     },
     {
       "source": "SHIPPED.md#verification-at-ship",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/a-local-workflow-env-file-changes-which-runner-path-tests-spawn.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:5afda76ba288845f1c183619d17c7c154ca278600e4937fdd477a50abc0ec5c2"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:67a2c785d37a170e11bd2c5092d3235fff092b26cd4963dcce11acf05fa28d8c"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "helps": "Retains the byte-identical final ship account, including implementation, verification and historical limits.",
+      "bodyHash": "sha256:7b4920ddfe92d857af56ce4817970f5d37d9d5518efa36c9b12315dfe376e3b6"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#pitch-decisions-and-constraints",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:d496447326be0833c71398818596c26fa6b581c38fe163f1a6dbc5bf4409aeb1"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#pitch-decisions-and-constraints",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:2c0f584abcea9c47698856bb580d16b817936e1536d63ee252ef9dc631f1db3a"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#audit-cycle-1",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:cdf9aaaa5ecd3f4259ff800e219d1433acb7973ff5353c87e7f505ae738b8407"
     },
     {
       "source": "audit-cycle-2.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/orca-workers-differ-from-the-coordinator-environment.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#audit-cycle-2",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:3fea18841e6654c8b36a43591373c9de939e45bec4032f8cfc9e8fc25d19981a"
     },
     {
       "source": "audit-cycle-3.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#audit-cycle-3",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:2bb40dbfbb1985b41d856a1ff9356a6eb1db7db8b51ddab548f77f2a37367362"
     },
     {
       "source": "deviations.md#2026-10-08-s0-orca-policy-valid-dispatch-not-ready",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:6c5a03f6dea84bf25fc3bf5614c6bbeafb62b7b8846250dda2e205fd6bcadefa"
     },
     {
       "source": "deviations.md#2026-10-08-s1-touched-state-themetestmts-1-line",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:c750fda982fc3e4629d9df3ed8215c8e5edf06d48f836208651080ce0ab9d9c4"
     },
     {
       "source": "deviations.md#2026-10-08-stale-state-stage-blocks---apply",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:be7d8ebe2bebb170d1bfee1ec1ed04652d23bbc50d352cd274d0fb0712786908"
     },
     {
       "source": "deviations.md#2026-10-08-correction-to-the-s0-entry",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:4a567300eae30c402fb94a07b26473581e84aaaad18fe96432b926117929a171"
     },
     {
       "source": "deviations.md#2026-10-08-second-correction-to-the-s0-entry-supersedes-the-one-above",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence",
+      "helps": "Preserves the full source account with historical corrections, evidence limits and deferred decisions.",
+      "bodyHash": "sha256:05f11f13801d98423a6f52a599048f8e3500b25b7dc653f02fa49d68d53d5d84"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:edeefd914634c521c5fa75480119013d8eb70153825681926b49d6abc9a16c25"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence",
+      "helps": "Retains the complete source body and distinguishes original assumptions from final behavior.",
+      "hash": "sha256:e67ad71ca8da0a645b2f3cc1b82754f550eed85a6881adb0b4cb43b445f3d152"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:d41dad550addbb1056efa9056e5b66a8a64e2308e101b3209d9303d7f678c3e9"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#build-incidents-and-live-proof",
+      "helps": "Retains the complete source body and distinguishes original assumptions from final behavior.",
+      "hash": "sha256:ab24fb66f0a736bd03d47d6b070d611f8be6ad2066bc04e77b7bd8bd92528dbc"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#pitch-decisions-and-constraints",
+      "helps": "Retains the complete source body and distinguishes original assumptions from final behavior.",
+      "hash": "sha256:2ffd1caf11b22288952667e3d257424a7f8bb009202d887dbd48e1ebd3451050"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-multipage-report.md#plan-contract-and-verification-design",
+      "helps": "Retains the complete source body and distinguishes original assumptions from final behavior.",
+      "hash": "sha256:012431973f2a64d5271f3819a2cbefe25a7d2fc459f426122bd70973ac8e700f"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T20:43:32.633Z"
+  "committedAt": "2026-10-23T00:55:25.637Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:0006172faad5b52c32b673d850fa46d04471f04ab907a89e66d442d7f4685926",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

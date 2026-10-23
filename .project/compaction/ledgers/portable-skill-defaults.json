@@ -1,106 +1,227 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "portable-skill-defaults",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#verification-and-staged-counts",
+      "helps": "Preserves delivered D1–D3 boundaries and final versus scope-local test/coverage evidence.",
+      "bodyHash": "sha256:c4b94fec512c27f0368afb9d6512d91a9c542feff6949679dd1638ce6cc00675"
     },
     {
       "source": "SHIPPED.md#grounding-decision-that-shaped-the-build",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#grounding-decisions",
+      "helps": "Preserves read-only upstream inspection and decision to avoid private stats-hook coupling.",
+      "bodyHash": "sha256:ed7d6ca71876a5b82497098b5aa050b3bac761af3bf8e4d1dbcc769f33fdd7c2"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Retains proposal-only defaults, local overrides, historical protection and no-savings boundaries.",
+      "bodyHash": "sha256:82159999a959a12dc4609e13d57dabb0521a31cd9c50a5b4127deec28203c572"
     },
     {
       "source": "SHIPPED.md#audit-findings-final-disposition",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#audit-findings-and-closure",
+      "helps": "Preserves reproduced bypasses, missing doctor proof, fixes and audit closure limits.",
+      "bodyHash": "sha256:e75084ed7fec8bc06412f25a2b37930e9b4281062ed26317045b8be312055aa0"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/index.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#knowledge-release-and-downstream-limits",
+      "helps": "Retains protected-path learning and original graph counts independently of generated index drift.",
+      "bodyHash": "sha256:1a2816a21ac5393fe808bef8cc7ccb9ef9fbd3e2f971ff52d8f55d065f17485e"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#knowledge-release-and-downstream-limits",
+      "helps": "Records no new defaults followups and separates earlier installer-owned items.",
+      "bodyHash": "sha256:cc07b572b0b0668c883ac8d51a6dfdb7ab83c6e911de0b5febff3a193e96bf55"
     },
     {
       "source": "SHIPPED.md#what-downstream-pitches-can-now-build-on",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#knowledge-release-and-downstream-limits",
+      "helps": "Retains dependency ordering and conflict review of compaction/state assumptions.",
+      "bodyHash": "sha256:8a61d9176a731af6c3ce74f7397267f03d79e0ba417d908400c30110d317419d"
     },
     {
       "source": "SHIPPED.md#version",
-      "status": "extracted",
-      "destination": "CHANGELOG.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#knowledge-release-and-downstream-limits",
+      "helps": "Distinguishes unbumped ship record from later 2.5.0 bundling and available verification gates.",
+      "bodyHash": "sha256:8895f52e869ee2e5a7c326b57e0732f7373d876971b76262bb0ba215e0900945"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Preserves no application decisions, silent overrides, deletion, invented savings or secret reports.",
+      "bodyHash": "sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Preserves local-instance boundary and planner/implementer responsibilities.",
+      "bodyHash": "sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#audit-findings-and-closure",
+      "helps": "Retains all five findings, reproduction claims, actual fixes and evidence-granularity discrepancy.",
+      "bodyHash": "sha256:c45033d846738891153a7ec614f75b3516a2f0b06c407d6a3bd6ba5c47928f0e"
     },
     {
       "source": "deviations.md#d1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#d1-mode-and-catalog-behavior",
+      "helps": "Preserves opportunistic doctor syntax-list completion while already editing the owned file.",
+      "bodyHash": "sha256:be3a8777d7dee6b77ac03701abe1353b20a77e77debb1206ae9e1024af72f755"
     },
     {
       "source": "deviations.md#d2-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#d2-attribution-and-compression-guard",
+      "helps": "Records absence of phase context on token events and distinct empty-target refusal.",
+      "bodyHash": "sha256:703db6f35b472ae1400d5443867a5b08c89e84fd2f3ac147d6aca702f6960fe6"
     },
     {
       "source": "deviations.md#d3-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#d3-browser-readiness",
+      "helps": "Retains global single-entry runtime report narrowing and coordinator doctor integration.",
+      "bodyHash": "sha256:2b37b102c42756377ba10a234139876407494f17493bb70e3e39c6c82793acc0"
     },
     {
       "source": "deviations.md#audit-cycle-1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#audit-findings-and-closure",
+      "helps": "Preserves realpath/case-fold/root-confinement fixes and automated doctor/timeout additions.",
+      "bodyHash": "sha256:727659d0b3d16a67278ed70b8c1d405d8be899a93ed9a397578c3006f2689147"
     },
     {
       "source": "log.md#audit-cycle-1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#verification-and-staged-counts",
+      "helps": "Retains parallel role review, five fixes and 39-to-44 test progression.",
+      "bodyHash": "sha256:3dab79800563eddbc67d90917639566c4658fcaa7e83b720a32d073265363337"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#knowledge-release-and-downstream-limits",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:17adba9878198a5d0c46efbe00d2cfbb6d9463c4974c4375935883e2c0d3cdee"
+    },
+    {
+      "path": "browser-runtime.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:4fde74769b9aee25fb43e3d2f9845ec2dd223fa8210f2e4d7c6647b963ac876b"
+    },
+    {
+      "path": "caveman-metrics-compression.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:f86cbc9a9ab54cd9470524dc502f29f8fa0537be1de09e1aa30c318bea8c916f"
+    },
+    {
+      "path": "caveman-modes.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:e2258b5edfe6d0caa644378891b29a2fb07e07f90a30b4d6b01d735b1f47daa8"
+    },
+    {
+      "path": "d1-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#d1-mode-and-catalog-behavior",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:e35569d80d7e80c1b6872115111c4fae76a2d70f1730c2e9989fcfc64cd8a8fa"
+    },
+    {
+      "path": "d2-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#d2-attribution-and-compression-guard",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:f3eb78fbce1224d6a2419917f5828c3b448c0524e4a2583769ac05d7a8b2b773"
+    },
+    {
+      "path": "d3-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#d3-browser-readiness",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:c68831653bf7d87144f258e01c26878648a514c14d4bc8fa9cb2fb17e6aacb86"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#audit-findings-and-closure",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:e5e48743635e45c5c660c8631ae84b70cab9296e63c89232a8b9da3e1246f94f"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:5ba6c44dd85b95e0f929639a5bb666be8ec75249c408a311c1b10f3795c9103c"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#audit-findings-and-closure",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:bc8c919f7e4190f318310c254359a8d03018a857eae6a048195a9e6a4b59808b"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#scope-and-constraints",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:d46c4d7795e6147afec4a12f15546e1ecd796c59bc23f5e6ec22dcd48fea72d4"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/portable-skill-defaults.md#grounding-decisions",
+      "helps": "Preserves this source’s approved contract, unique behavior, verification and historical limits.",
+      "hash": "sha256:3c0e98b3025db1eab06111e5675755ac4b9b532d0a168e9f9d54dc1d9c594425"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-09-25T13:39:03.807Z"
+  "committedAt": "2026-10-23T14:23:10.282Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:cbb4218cfc5311436573eebf8a4679e0fa649eda03d72f32746f22112bbc1498",
+    "introducingCommit": "ea82bcee68b70bb0b4f2938268c9c796425ccff0"
+  }
 }

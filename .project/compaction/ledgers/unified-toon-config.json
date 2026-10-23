@@ -1,0 +1,234 @@
+{
+  "schemaVersion": 2,
+  "slug": "unified-toon-config",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#what-shipped",
+      "helps": "Per-scope outcomes a1 to d plus the unplanned schemaVersion 2 reshape (d42).",
+      "bodyHash": "sha256:fd41334d5ec138a5c1d03a43481da116393f2abd4b782220431865ef0800f236"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#standing-constraints",
+      "helps": "Migrator never deletes legacy files, no flock, no backtracking regex (ReDoS fixed), and the owner-approved 1..16 worker bound deviation.",
+      "bodyHash": "sha256:dd3f5c3ec2f1d8d2141b3fe50950197124ab2684999b68647db8804f4387c110"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#limits-and-open-items",
+      "helps": "Resolved rabbit holes in brief and the new Orca worker-list over 256 KiB blocker that forced orca=normal.",
+      "bodyHash": "sha256:4f54e3c69b57989cc89be493f9133f5d30353bdc297075cb0d32aa74eb725230"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#audit",
+      "helps": "Two cycles, orca=normal, independent: no without canary; cycle 1 ReDoS must-fix + 15 should-fix, cycle 2 raw-value-echo must-fix + 7 should-fix.",
+      "bodyHash": "sha256:b27b001cfe1759e22ed23e3770c6d1b4ae5f752afc094333cd011bc5fef8c58d"
+    },
+    {
+      "source": "SHIPPED.md#verify",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#verification-history",
+      "helps": "Final Node 1494/1492/0/2, Bun 143/143, validator READY, doctor 1 existing warning, graph clean, pre-ship-verify not applicable.",
+      "bodyHash": "sha256:a076d5f1938d199eb05105cd5cd6a626915cac2aa16deb35191d6447c4388913"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#limits-and-open-items",
+      "helps": "Points to the live backlog section \"unified-toon-config leftovers\".",
+      "bodyHash": "sha256:245f2b8bfea06afc9554fadceaf91b6f191164e0f281142cb58a47fb5a49903e"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#standing-constraints",
+      "helps": "TOON only, no secrets or .env reads, no auto-migration on read, standing tooling no-gos.",
+      "bodyHash": "sha256:e584ddbb0a58683d66fb74311e1a62b17bbcae92f6927da16422c16c2d8f46ee"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#design-and-rabbit-holes",
+      "helps": "Primitive designs, parser subset, seam freezes, migrator force branches, mandatory a-c-b-d order, 13-scope table and pushed no-gos.",
+      "bodyHash": "sha256:b77f771ec0a50883dc73c99546c3eda6b59d06841325ddcf129787bf06733362"
+    },
+    {
+      "source": "log.md#2026-10-16-branch-gate-resolution-a1-pre-flight",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Missing 2.23.0 tag patched with a local tag at 58cfd7f; branch base and the local-tag risk for rollout.",
+      "bodyHash": "sha256:1fd9544201da27aec88ee7fed2b176bd39ac41a72a7e894a7f19c091ad569fe2"
+    },
+    {
+      "source": "log.md#2026-10-16-a1-build-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "a1 file list, exit evidence and first four drift rows.",
+      "bodyHash": "sha256:a5ee5fdd601cc4394c9197c84d18e3848e4ec8660443ebf8ea6e5a58d304bea1"
+    },
+    {
+      "source": "log.md#2026-10-16-a1-build-evidence",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Coordinator re-verification of a1 exits independent of the subagent report; export and diff evidence.",
+      "bodyHash": "sha256:33179ee9581cd179589f80de61e370d1100b0db5998df829ad81a2e9d6045a6b"
+    },
+    {
+      "source": "log.md#2026-10-16-a2-build-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "The seven parser-guard mutants actually shipped and the two producer contract fixes they exposed (d5, d6).",
+      "bodyHash": "sha256:0dbe0b753162449b91f174e6aa0ec4f926995c8b725e82d12c047bcaf260093e"
+    },
+    {
+      "source": "log.md#2026-10-16---a3-build-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Writer/path mutants, memoryFs wx/rename support, and the masked open-pin mutant needing an isolating case.",
+      "bodyHash": "sha256:17c56ddb2a2ddbbf150ed57a142f37e47361fabebf017e40eee8d7818a4a830a"
+    },
+    {
+      "source": "log.md#2026-10-16---c11-build-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Reader glue files, grader wxRename rewire, the accidental stash pop, and the README-link failure carried to c2.2.",
+      "bodyHash": "sha256:9718e7ee2686248dc65fef02c1c6d8e70cda6c4d80b359127cb4f57c76e7d01d"
+    },
+    {
+      "source": "log.md#2026-10-16---c12-build-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Test-only reader coverage, grader no-race tests over both preamble branches, 839-test run.",
+      "bodyHash": "sha256:49151bd67b9a123311398aeec91b49ea690c76967b2a9098eb7e02d14c208a21"
+    },
+    {
+      "source": "log.md#c21-c24-parallel-build-4-subagents-shared-tree-uncommitted-at-record-time",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Four parallel subagents on one tree, coordinator re-run, VERSION 2.24.0, d25/d26 assigned to scope d.",
+      "bodyHash": "sha256:f0cbcb58014cf16594a1f007eb995095d3ef584a25ac19ef4f0b4ce3befa0177"
+    },
+    {
+      "source": "log.md#2026-10-16---b1-build-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Migrator dry-run/apply/force/.rejected evidence and legacy-vs-TOON orca-policy parity.",
+      "bodyHash": "sha256:c79365b2393c382f212375dea804dbb601cbb8457f030a77a831d4e238e07fa7"
+    },
+    {
+      "source": "log.md#2026-10-16---b2-b3-build-complete-one-pass",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Migrator tests 9 to 50 on Node and Bun, 20 manual mutants killed, bundle-sync mutation check.",
+      "bodyHash": "sha256:21e58877c3f26407cf092a9adc97c9692ba8f210c91b5ed9252fd5d56c34f569"
+    },
+    {
+      "source": "log.md#b2b3-and-d-parts-abc-parallel",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Commit ac4a31a, scope d parts A/B/C and the 1450-test run.",
+      "bodyHash": "sha256:f48db033722e2b1b8e97be22360c12c1b7d7216a266a83bfb35bacc12f7d4223"
+    },
+    {
+      "source": "log.md#integrationsorca-reshape-schemaversion-2-phases-1-2a-2c",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#schema-v2-reshape",
+      "helps": "Reshape run counts (1456) and d42-d45 drift with d44 open at that point.",
+      "bodyHash": "sha256:960e235126136bac49a20834fc27826ecc89487685e12a29b6c50b13638c30d4"
+    },
+    {
+      "source": "log.md#audit-cycle-1-2026-10-16-orcanormal-head-b8aee99",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#audit",
+      "helps": "Reviewer set and models, read-only guard, PoC timings before and after fixes, 1489-test run.",
+      "bodyHash": "sha256:68b1f5874d60f7d72f2bc5ea156ea0fd483b2050e61599af590e3a1400327a29"
+    },
+    {
+      "source": "log.md#audit-cycle-2-2026-10-16-orcanormal-reviewed-head-fee770a",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#audit",
+      "helps": "Fresh reviewers, rate-limit resumes, escape-byte must-fix verified, 1494-test run.",
+      "bodyHash": "sha256:3d1607cb943c96975e23782af50b15cf4af736055c3c180222d29d08c5529b63"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:3738d9ddcaf6161ecd28d0d68bfe8dc249d69322532c15b34b24b67165e4a539",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#what-shipped",
+      "helps": "Preserves the scope table, no-gos, audit and verify summaries."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:30175f69ba1c4089ac7d41ef5a045c3b2caeb5f4c0375e8eb7590cfba927bbc9",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#delivered-behavior",
+      "helps": "Preserves deviations d1 to d55 across delivered behavior, the reshape, audit, limits and contradictions."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:fc46387f1876136109c019e2d04fe94afc88f18c0640aa2decc3377b7e9c5c67",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-16-unified-toon-config-hill.md",
+      "helps": "Byte-identical copy of the scope positions; final positions and the log disagree, recorded under historical contradictions."
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:659177e010cee94becbfb4c8896c1a8853bb55b39617e320d9434efcf679762d",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#build-chronology",
+      "helps": "Preserves the build, reshape and audit chronology; a byte-identical copy is kept in the run record."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:b3b9fdab0187256f30da522e0a0899d4db90fb8869387033623637332f965a18",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#problem-and-owner-decisions",
+      "helps": "Preserves the problem, owner decisions, knowledge consulted, critique passes 1 to 3 and the bet."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:607becae5ee313ec4b3361a8808dd2607965a27e255e6bb26352f4fa66d8852b",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/unified-toon-config.md#plan",
+      "helps": "Preserves the 13 scopes, hard rules, exit criteria, inherited risks and the dispatch profile."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-22T23:50:00.572Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:6af8de5437a044a56d4a8f4d1ac82a5ed2cd5c9dc27df9b69d0a4122224a96aa",
+    "introducingCommit": "fc7d686ccab4849f255e09ccf2e6fdbc17082f54"
+  }
+}

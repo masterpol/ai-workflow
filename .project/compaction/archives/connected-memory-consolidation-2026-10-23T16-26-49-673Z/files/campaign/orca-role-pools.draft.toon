@@ -1,0 +1,65 @@
+@toon-data 1
+slug: orca-role-pools
+draft: true
+state: needs-decision
+ledgerHash: "sha256:e68222c8ad3e71298725ed9194732363dadf7b332c9912837477e844c1e9a5c1"
+bindings:
+  ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md": "sha256:13cc84d4cfd74ec1273c3e8a3b8fc4b814911888a51884766388d95b814ebb0a"
+legacyEntryHash: "sha256:70f7c3bfda5cb40eca0c9765d155cb3067e6abeb19a81275c86fd605ab3d47d6"
+mapping:
+  schemaVersion: 2
+  sections[23]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#verify",null,null,null,null,null
+    "SHIPPED.md#upgrade-note",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#d1-2026-10-16-s0-baseline-repair-added-not-in-plan",null,null,null,null,null
+    "deviations.md#d2-2026-10-16-pools-hold-distinct-vendor-names-so-a-pool-has-at-most-3-members",null,null,null,null,null
+    "deviations.md#d3-2026-10-16-configmts-unchanged",null,null,null,null,null
+    "deviations.md#d4-2026-10-16-example-toon-edit-landed-inside-agent-model-sweeps-commit-0c2bb35",null,null,null,null,null
+    "deviations.md#d5-2026-10-16-s4-live-spike-skipped",null,null,null,null,null
+    "deviations.md#d6-2026-10-16-opencodecommandsbuildmd-and-codex-need-no-edit",null,null,null,null,null
+    "deviations.md#d7-2026-10-16-review-independence-rule-and-pool-size",null,null,null,null,null
+    "deviations.md#d8-2026-10-16-release-bumped-in-s7-not-at-ship",null,null,null,null,null
+    "deviations.md#d9-2026-10-16-existing-tests-changed-for-the-overlap-guard",null,null,null,null,null
+    "log.md#incident-2026-10-16-full-suite-not-green-at-head-before-any-role-pools-edit",null,null,".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md",null,null
+    "log.md#incident-2026-10-16-concurrent-session-in-the-same-checkout",null,null,null,null,null
+    "log.md#s1-evidence-policy-carries-pools",null,null,null,null,null
+    "log.md#s2-evidence-start-reads-pools",null,null,null,null,null
+    "log.md#s5s7-evidence",null,null,null,null,null
+  otherFiles[0]:
+judgments[23]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verify",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#upgrade-note",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d1-2026-10-16-s0-baseline-repair-added-not-in-plan",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d2-2026-10-16-pools-hold-distinct-vendor-names-so-a-pool-has-at-most-3-members",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d3-2026-10-16-configmts-unchanged",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d4-2026-10-16-example-toon-edit-landed-inside-agent-model-sweeps-commit-0c2bb35",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d5-2026-10-16-s4-live-spike-skipped",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d6-2026-10-16-opencodecommandsbuildmd-and-codex-need-no-edit",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d7-2026-10-16-review-independence-rule-and-pool-size",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d8-2026-10-16-release-bumped-in-s7-not-at-ship",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d9-2026-10-16-existing-tests-changed-for-the-overlap-guard",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#incident-2026-10-16-full-suite-not-green-at-head-before-any-role-pools-edit",needs-decision,extracted,".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md","",false
+  "log.md#incident-2026-10-16-concurrent-session-in-the-same-checkout",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s1-evidence-policy-carries-pools",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s2-evidence-start-reads-pools",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#s5s7-evidence",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-role-pools\nshipped: 2026-10-17\nschemaVersion: 1\ndraft: true\n---\n# orca-role-pools\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-role-pools","sha256:70f7c3bfda5cb40eca0c9765d155cb3067e6abeb19a81275c86fd605ab3d47d6","## orca-role-pools — shipped 2026-10-17\n\n`roles.<role>` became pools of up to three distinct vendors and dispatch can pick the member per scope (v2.27.0, big-batch, one release by owner decision). S0 repaired a red baseline (98 stale v2 tests: `config-migrate` emitted schemaVersion 2). S1 the policy keeps every pool member, drops the two-worker cap, allows a coordinator to list itself and reports `pools` next to `roles`. S2 `orca-start` probes every distinct pool member in pool order and fails if an executable is missing. S3 config already rejected empty and duplicate pools, so only pin tests, an example pool and `orca-vendors.md` were added. S4 the live concurrency spike was skipped (needs funded, supervised workers): the default stays 3, the ceiling 16, \"unverified above 3 live workers\" is documented. S5 a pure `orca-assign.mts` (round-robin by plan position, reviewer != implementer, circular rotation; determinism x1000, 16-member spread, resume stability, in-memory mutants). S6 `assign` flows through `dispatchScope`, `dispatchWithRetries` and `orca-run` (`resolveAssignment`), and ledger `reserve` refuses a scope whose `authorizedPaths` overlap a live attempt of another scope (`authorized-paths-overlap`); the ledger schema is unchanged. S7 grader cap parameter, build skill and its Cursor mirror, dispatch docs, 2.27.0. Upgrade note: a role can be a pool (`implementation[2]: a,b`), callers may pass `assign` instead of `vendor`, parallel scopes need disjoint paths, and `orca-start` now fails on a missing pool executable.\n\nNo-gos held: concurrency stays bounded (16), launch authority unchanged (the gate decides on the coordinator identity before and after assignment), swarm behavior and fan-out review not built (review keeps split semantics). Rabbit holes resolved: the policy silently truncated pools (fixed first); round-robin vs retry and resume (pure function, the recorded owner wins and is never reassigned); no ledger schema change (`vendor` and `taskKey` carry it)",true
+  ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md","sha256:13cc84d4cfd74ec1273c3e8a3b8fc4b814911888a51884766388d95b814ebb0a","---\nid: a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version\ntype: issue\ncreated: 2026-10-17\nupdated: 2026-10-17\ntags: [schema, migration, testing, config, release]\nrelated: [test-skip-is-a-follow-up-not-a-finish, a-pitch-can-pass-its-own-tests-and-break-on-the-real-file, prove-a-guard-test-with-an-in-memory-mutant]\nsource: orca-role-pools\nseverity: medium\nresolved: true\n---\n# Issue: bumping `ai-workflow.toon` to schemaVersion 3 left `config-migrate` writing 2 and 98 tests red at HEAD\n\n## Summary\n\n`vendor-model-toon` S1 moved the reader to schemaVersion 3 and committed with its own log saying the ripple was open. `config-migrate.mts` still emitted `schemaVersion: 2` and matched `only 2 is supported`, and `config.test.mts` / `config-migrate.test.mts` hard-coded 2. The next pitch inherited a suite that could not go green, and a migrator that produced a file its own reader refused.\n\n## Fix\n\nEmit 3, match `only 3`, update the fixture literals (D1 in `orca-role-pools/deviations.md`). Still open: a v2 file cannot be converted in place (the reader's refusal text promises `--apply` does it; today it needs `--force` and drops the values).\n\n## How to avoid\n\nBump the version constant, the emitter, the refusal regex and every fixture literal in one commit (`grep -rn \"schemaVersion: <old>\"`), and run the whole suite before calling the scope done. A scope marked done with an open red suite hands the red to the next pitch.\n",false
+unavailable[1]: ".project/records/pitch-compression/orca-role-pools.md"

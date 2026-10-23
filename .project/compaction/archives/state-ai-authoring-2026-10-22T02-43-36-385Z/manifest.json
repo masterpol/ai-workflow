@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-ai-authoring",
+  "sourceRoot": ".project/pitches/state-ai-authoring",
+  "archivedAt": "2026-10-22T02:43:36.387Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "7bcf6bf3ed14f1119df44d7b0454e60df70262cba43f4a61d1ac49e49eb67279",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "291af37ae0e031d7803d8387dd57670d5cee7c5f69c7061c0d0e33c5998e3d57",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "d625971e40172caceb32900a2a9215f325780e022e742505ecf98524bd30f49b",
+      "mode": 420
+    },
+    "live-runs.md": {
+      "hash": "868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "693abc46d78411d700341f347c32ee7ad873cb5b2ec73e9e6a18b8d668ae1b0e",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "681e1c7377010f629f3449ff49544cc945e4eed2c40a34f4ab36d8d7255fa062",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "e057f4a4356b2831e945bcc7c83f334f34b457f609990508cb8f9ab8229d8a55",
+      "mode": 420
+    }
+  }
+}

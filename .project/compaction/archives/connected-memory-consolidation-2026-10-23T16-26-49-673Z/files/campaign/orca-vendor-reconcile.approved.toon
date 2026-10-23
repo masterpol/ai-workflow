@@ -1,0 +1,94 @@
+@toon-data 1
+ledgerHash: "sha256:d7660d2ab260fd05d03b646ec427f8bf83ef77889de6a9f916cc6fbda95ae73b"
+legacyEntryHash: "sha256:9062d89dd85d5a1ec373316a8c2e460844396d554b7d9ad41c89b54aedb665b3"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-reconcile.md": "sha256:b8743db573ee0e696f2e54afa76698dd566eab836f9925b312077b7504039325"
+  ".project/records/legacy-upgrades/orca-vendor-reconcile.md": "sha256:ccf76e832077236d7d2ec40d6a64a4175dce429326ec41bc4605dbf2b7075f3b"
+mapping:
+  schemaVersion: 2
+  sections[7]:
+    -
+      source: "SHIPPED.md#final-verification"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile.md#section-1-shippedmdfinal-verification"
+      helps: Retains historical final verification and library opt-in boundary.
+      bodyHash: "sha256:a4c0b19f8861440bcadfa01a30c98789a20db365e2f5b4c73d8120db6797f97e"
+    -
+      source: "SHIPPED.md#reconciliation"
+      class: behavior
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile.md#section-2-shippedmdreconciliation"
+      helps: Preserves core modules and release ownership; supplement retains later count chronology.
+      bodyHash: "sha256:a80b3b19e712e7df2c5391f59c01e4e53aa521aebdee014994a87b049af40c88"
+    -
+      source: "SHIPPED.md#audit"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile.md#review-and-commit-provenance"
+      helps: "Preserves audit chronology, incident safeguards and limits on later independent review."
+      bodyHash: "sha256:1b6c28122e33aaa242a8cf9213f6ecd06f9f8ff86fa7b116203c9aa563114030"
+    -
+      source: "SHIPPED.md#no-gos-honored"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile.md#section-4-shippedmdno-gos-honored"
+      helps: Retains prohibited automation and integration ownership.
+      bodyHash: "sha256:b838e7bfe50329aadb261a6813f47f504dec5ccd7045e1ffe232fa91c079e086"
+    -
+      source: "SHIPPED.md#followups"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:9327a3c9dec2c7085e37855d82f21dd2659af6604c980fba089ecf964d5910b5"
+    -
+      source: "pitch.md#no-gos"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile.md#section-4-shippedmdno-gos-honored"
+      helps: Retains the standing no-gos through the shared closure statement.
+      bodyHash: "sha256:f642eb2aa05536ccbf083c1b0d6a381b1736a1d0bac6af0b7db841b9569beacc"
+    -
+      source: "pitch.md#rabbit-holes"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile.md#section-7-pitchmdrabbit-holes"
+      helps: "Preserves baseline attribution, safe evidence, settlement and coordinator verification."
+      bodyHash: "sha256:06f8bbc1f0c668d69b0c632d2e46ede48089840970a220b5d9181b1c6cde3af7"
+  otherFiles[6]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:eb837372cb25688bfb76b3f6e25f7fe603ee2d7dd00072f94576cef3f5c5d673"
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile.md"
+      helps: "Preserves historical closure, core outputs, test results and boundaries."
+    -
+      path: deviations.md
+      hash: "sha256:faaf1eeff2a9ac009fd5a02083ff8eaa9895a287931883b5976520cc7af10acb"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile.md"
+      helps: Preserves accepted overrun and exact scratch-Git safety response.
+    -
+      path: hill.md
+      hash: "sha256:f4dfa363b6f5c4acff42a72f20de1aa9ed0e4ab0b818d214ab45d996b1d3d8e0"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:74ab9fc3968d89cc834c60df369db5af8bef7904e45b4bfb21c6b0db243a5532"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile.md"
+      helps: "Retains assurance limits, clean-export incident and later review/count chronology."
+    -
+      path: pitch.md
+      hash: "sha256:da384c5f36c7771ef6403c4f7ebd438652aa166b6b3c384b84dc85b71799ae46"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile.md"
+      helps: "Retains approved core scope, independent verification and live-versus-simulated evidence boundaries."
+    -
+      path: plan.md
+      hash: "sha256:efc2fddc9de0aae55f91a384aaf50eb7fa0422ae98320fa33ae1a94d624b0b45"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile.md"
+      helps: Preserves combined-wave decision and implemented safety contracts through linked current guidance.
+outcomeRecord: "---\nslug: orca-vendor-reconcile\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# orca-vendor-reconcile\n\nReconciliation admits and checks worker changes before integration.\nEvidence and cleanup decisions remain bound to the integrated patch.\nHistorical review chronology and assurance limits remain separately recorded.\n\n- outcome: Guarded reconciliation preserves user changes and patch-bound settlement evidence.\n- docs: [current Orca contract](ai-framework/integrations/orca-vendors.md#reconcile-core-opt-in-library-only)\n- decisions: [approved scope](.project/records/legacy-upgrades/orca-vendor-reconcile.md#scope-and-build-decisions)\n- knowledge: [patch-bound settlement](.project/knowledge/patterns/settle-only-with-proof-bound-to-this-patch.md)\n- code: [reconcile core](ai-framework/scripts/orca-reconcile.mts)\n- verification: [historical closure](.project/records/pitch-compression/orca-vendor-reconcile.md)\n- followups: [assurance limits](.project/records/legacy-upgrades/orca-vendor-reconcile.md#historical-assurance-and-limitations)\n- archive: [compact record](.project/records/pitch-compression/orca-vendor-reconcile.md), [source supplement](.project/records/legacy-upgrades/orca-vendor-reconcile.md)\n"

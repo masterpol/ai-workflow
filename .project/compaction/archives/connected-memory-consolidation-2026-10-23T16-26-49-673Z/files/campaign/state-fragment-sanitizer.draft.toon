@@ -1,0 +1,94 @@
+@toon-data 1
+slug: state-fragment-sanitizer
+draft: true
+state: needs-decision
+ledgerHash: "sha256:45babba17765fe77455932978917909d79e10cb23aed884faf25d86d6cc99acf"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:2465760444a7a573f411910fec6386232d1c9a92ccea357484a709094757515a"
+mapping:
+  schemaVersion: 2
+  sections[38]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#evidence",null,null,null,null,null
+    "SHIPPED.md#verification-route",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "SHIPPED.md#doc-updates",null,null,null,null,null
+    "SHIPPED.md#orca",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#2026-10-19-s2s4-dispatch-and-child-worktree-hygiene",null,null,null,null,null
+    "deviations.md#2026-10-19-s3-theme-drift-assertion",null,null,null,null,null
+    "deviations.md#s3-execution-after-orca-failure",null,null,null,null,null
+    "deviations.md#s5-sequencing-and-evidence-corrections-2026-10-20",null,null,null,null,null
+    "deviations.md#s6-formatter-proof-anchors-and-measured-redundancy-2026-10-20",null,null,null,null,null
+    "deviations.md#s7-actual-tap-guard-and-test-budget-2026-10-20",null,null,null,null,null
+    "deviations.md#s8-documentation-size-and-final-checks-2026-10-20",null,null,null,null,null
+    "deviations.md#audit-cycle-1-bounded-data-snapshots-and-content-model-fixes-2026-10-20",null,null,null,null,null
+    "deviations.md#audit-cycle-3-limits-snapshot-final-completion-2026-10-20",null,null,null,null,null
+    "log.md#2026-10-19-s2s4-wave-started",null,null,null,null,null
+    "log.md#s4-incident-sparse-citation-arrays",null,null,null,null,null
+    "log.md#s4-collection-and-diff-hygiene",null,null,null,null,null
+    "log.md#s2s4-scope-completion-coordinator-evidence-2026-10-19",null,null,null,null,null
+    "log.md#s3-incident-orca-worker-launch-refused-2026-10-19",null,null,null,null,null
+    "log.md#s3-retry-incident-same-shell-startup-blocker-2026-10-19",null,null,null,null,null
+    "log.md#s3-recovery-explicit-normal-workflow",null,null,null,null,null
+    "log.md#s3-incident-node-strip-only-syntax",null,null,null,null,null
+    "log.md#s3-scope-completion-coordinator-evidence-2026-10-19",null,null,null,null,null
+    "log.md#s5-orca-execution-and-scope-completion-2026-10-20",null,null,null,null,null
+    "log.md#s6-bounded-rejection-formatter-orca-completion-2026-10-20",null,null,null,null,null
+    "log.md#s7-golden-dataset-mapping-orca-completion-2026-10-20",null,null,null,null,null
+    "log.md#s8-documentation-version-log-final-build-checks-2026-10-20",null,null,null,null,null
+    "log.md#build-end-roll-up-2026-10-20",null,null,null,null,null
+    "log.md#audit-progress-and-stop-2026-10-20",null,null,null,null,null
+    "log.md#audit-completed-after-orca-resumption-2026-10-20",null,null,null,null,null
+    "log.md#ship-verification-blocked-2026-10-20",null,null,null,null,null
+    "log.md#ship-2026-10-20",null,null,null,null,null
+  otherFiles[0]:
+judgments[38]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#evidence",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#verification-route",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#doc-updates",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#orca",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#2026-10-19-s2s4-dispatch-and-child-worktree-hygiene",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-19-s3-theme-drift-assertion",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s3-execution-after-orca-failure",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s5-sequencing-and-evidence-corrections-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s6-formatter-proof-anchors-and-measured-redundancy-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s7-actual-tap-guard-and-test-budget-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s8-documentation-size-and-final-checks-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-cycle-1-bounded-data-snapshots-and-content-model-fixes-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-cycle-3-limits-snapshot-final-completion-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "log.md#2026-10-19-s2s4-wave-started",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s4-incident-sparse-citation-arrays",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s4-collection-and-diff-hygiene",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s2s4-scope-completion-coordinator-evidence-2026-10-19",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-incident-orca-worker-launch-refused-2026-10-19",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-retry-incident-same-shell-startup-blocker-2026-10-19",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-recovery-explicit-normal-workflow",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-incident-node-strip-only-syntax",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-scope-completion-coordinator-evidence-2026-10-19",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s5-orca-execution-and-scope-completion-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s6-bounded-rejection-formatter-orca-completion-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s7-golden-dataset-mapping-orca-completion-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s8-documentation-version-log-final-build-checks-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#build-end-roll-up-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-progress-and-stop-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-completed-after-orca-resumption-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#ship-verification-blocked-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#ship-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: state-fragment-sanitizer\nshipped: 2026-10-20\nschemaVersion: 1\ndraft: true\n---\n# state-fragment-sanitizer\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#state-fragment-sanitizer","sha256:2465760444a7a573f411910fec6386232d1c9a92ccea357484a709094757515a","## state-fragment-sanitizer — shipped 2026-10-20\n\nThe `/state` fragment sanitizer shipped as a library (bundle 2.35.0): it takes untrusted fragment text and returns re-emitted, allow-listed markup with its citations, or a rejection with a closed reason. A strict XML-subset parser, an element/attribute allow-list validator with canonical re-emit (byte-idempotent) and an evidence-path/number checker (`checkCitations`, a mandatory separate gate) make up 666 production lines. Fragment content never reaches an error text; the model's own claim of safety is never trusted; no runtime dependency was added (the hand-written allow-list is the sanitizer `rules/security.md` §4 asks for, an owner decision). It reads no files and writes nothing; wiring is `state-ai-authoring`.\n\nLessons: [[a-caller-supplied-limits-object-can-defeat-a-hard-cap]], [[a-sparse-array-hole-skips-every-but-visits-for-of]], [[a-golden-dataset-case-counts-only-when-a-named-test-passes]], [[a-measured-redundant-layer-is-not-a-deleted-layer]], [[an-interactive-shell-prompt-can-consume-an-agent-launch-command]], [[node-strip-only-mode-rejects-constructor-parameter-properties]]. Contract: `ai-framework/integrations/state-report.md`. Followups (package-less ship verifier route, nine deferred dataset cases) are in `.project/pitches/_followups.md`. A separate 2.35.1 repointed the OpenCode Go `fast` route to `opencode-go/minimax-m3.1-flash-free`.\n",false
+unavailable[1]: ".project/records/pitch-compression/state-fragment-sanitizer.md"

@@ -1,0 +1,115 @@
+{"slug":"bundle-sync-marker-fix","reason":"Owner approved 2026-10-22 source review for bundle-sync-marker-fix, fix-workflow-runner-env and readme-split; original-body provenance and coverage judgment only","date":"2026-10-22T17:33:55.458Z"}
+{"slug":"fix-workflow-runner-env","reason":"Owner approved 2026-10-22 source review for bundle-sync-marker-fix, fix-workflow-runner-env and readme-split; original-body provenance and coverage judgment only","date":"2026-10-22T17:33:55.475Z"}
+{"slug":"readme-split","reason":"Owner approved 2026-10-22 source review for bundle-sync-marker-fix, fix-workflow-runner-env and readme-split; original-body provenance and coverage judgment only","date":"2026-10-22T17:33:55.507Z"}
+{"slug":"bundle-sync-marker-fix","reason":"Owner approved batch-1 apply and immutable-archive verification for bundle-sync-marker-fix; capture baseline before apply","date":"2026-10-22T17:52:58.520Z"}
+{"slug":"bundle-sync-marker-fix","reason":"Owner approved exact batch-1 payload, supplement and required verification reads for bundle-sync-marker-fix","date":"2026-10-22T17:52:58.673Z"}
+{"slug":"fix-workflow-runner-env","reason":"Owner approved batch-1 apply and immutable-archive verification for fix-workflow-runner-env; capture baseline before apply","date":"2026-10-22T17:53:06.496Z"}
+{"slug":"fix-workflow-runner-env","reason":"Owner approved exact batch-1 payload, supplement and required verification reads for fix-workflow-runner-env","date":"2026-10-22T17:53:06.660Z"}
+{"slug":"readme-split","reason":"Owner approved batch-1 apply and immutable-archive verification for readme-split; capture baseline before apply","date":"2026-10-22T17:53:14.151Z"}
+{"slug":"readme-split","reason":"Owner approved exact batch-1 payload, supplement and required verification reads for readme-split","date":"2026-10-22T17:53:14.300Z"}
+{"slug":"opencode-handoff","reason":"Owner approved batch-2 source review and archive verification for opencode-handoff; original-body provenance and coverage judgment only","date":"2026-10-22T18:15:18.032Z"}
+{"slug":"orca-vendor-orchestration","reason":"Owner approved batch-2 source review and archive verification for orca-vendor-orchestration; original-body provenance and coverage judgment only","date":"2026-10-22T18:15:18.049Z"}
+{"slug":"orca-vendor-dispatch","reason":"Owner approved batch-2 source review and archive verification for orca-vendor-dispatch; original-body provenance and coverage judgment only","date":"2026-10-22T18:15:18.056Z"}
+{"slug":"orca-vendor-reconcile","reason":"Owner approved batch-2 source review and archive verification for orca-vendor-reconcile; original-body provenance and coverage judgment only","date":"2026-10-22T18:15:18.074Z"}
+{"slug":"ts-runtime-injection","reason":"Owner approved batch-2 source review and archive verification for ts-runtime-injection; original-body provenance and coverage judgment only","date":"2026-10-22T18:15:18.087Z"}
+{"slug":"opencode-handoff","reason":"Owner approved batch-2 apply and immutable-archive verification for opencode-handoff; capture baseline before apply","date":"2026-10-22T18:31:37.133Z"}
+{"slug":"opencode-handoff","reason":"Owner approved exact batch-2 payload, supplement and required verification reads for opencode-handoff","date":"2026-10-22T18:31:37.275Z"}
+{"slug":"orca-vendor-orchestration","reason":"Owner approved batch-2 apply and immutable-archive verification for orca-vendor-orchestration; capture baseline before apply","date":"2026-10-22T18:31:44.866Z"}
+{"slug":"orca-vendor-orchestration","reason":"Owner approved exact batch-2 payload, supplement and required verification reads for orca-vendor-orchestration","date":"2026-10-22T18:31:45.011Z"}
+{"slug":"orca-vendor-dispatch","reason":"Owner approved batch-2 apply and immutable-archive verification for orca-vendor-dispatch; capture baseline before apply","date":"2026-10-22T18:31:52.607Z"}
+{"slug":"orca-vendor-dispatch","reason":"Owner approved exact batch-2 payload, supplement and required verification reads for orca-vendor-dispatch","date":"2026-10-22T18:31:52.763Z"}
+{"slug":"orca-vendor-reconcile","reason":"Owner approved batch-2 apply and immutable-archive verification for orca-vendor-reconcile; capture baseline before apply","date":"2026-10-22T18:32:00.345Z"}
+{"slug":"orca-vendor-reconcile","reason":"Owner approved exact batch-2 payload, supplement and required verification reads for orca-vendor-reconcile","date":"2026-10-22T18:32:00.493Z"}
+{"slug":"ts-runtime-injection","reason":"Owner approved batch-2 apply and immutable-archive verification for ts-runtime-injection; capture baseline before apply","date":"2026-10-22T18:32:08.163Z"}
+{"slug":"ts-runtime-injection","reason":"Owner approved exact batch-2 payload, supplement and required verification reads for ts-runtime-injection","date":"2026-10-22T18:32:08.327Z"}
+{"slug":"independent-rereview-catch-up","reason":"Owner approved batch-3 source review and full archive verification for independent-rereview-catch-up; original-body provenance and coverage judgments only","date":"2026-10-22T18:35:30.282Z"}
+{"slug":"native-safety-feasibility","reason":"Owner approved batch-3 source review and full archive verification for native-safety-feasibility; original-body provenance and coverage judgments only","date":"2026-10-22T18:35:30.327Z"}
+{"slug":"orca-vendor-foundation","reason":"Owner approved batch-3 source review and full archive verification for orca-vendor-foundation; original-body provenance and coverage judgments only","date":"2026-10-22T18:35:30.358Z"}
+{"slug":"orca-vendor-reconcile-integration","reason":"Owner approved batch-3 source review and full archive verification for orca-vendor-reconcile-integration; original-body provenance and coverage judgments only","date":"2026-10-22T18:35:30.381Z"}
+{"slug":"runtime-test-helpers","reason":"Owner approved batch-3 source review and full archive verification for runtime-test-helpers; original-body provenance and coverage judgments only","date":"2026-10-22T18:35:30.392Z"}
+{"slug":"independent-rereview-catch-up","reason":"Owner approved P2c-S3 batch-3 exact preview 2026-10-22: apply independent-rereview-catch-up","date":"2026-10-22T18:53:42.301Z"}
+{"slug":"native-safety-feasibility","reason":"Owner approved P2c-S3 batch-3 exact preview 2026-10-22: apply native-safety-feasibility","date":"2026-10-22T18:53:50.393Z"}
+{"slug":"orca-vendor-foundation","reason":"Owner approved P2c-S3 batch-3 exact preview 2026-10-22: apply orca-vendor-foundation","date":"2026-10-22T18:53:58.158Z"}
+{"slug":"orca-vendor-reconcile-integration","reason":"Owner approved P2c-S3 batch-3 exact preview 2026-10-22: apply orca-vendor-reconcile-integration","date":"2026-10-22T18:54:05.876Z"}
+{"slug":"runtime-test-helpers","reason":"Owner approved P2c-S3 batch-3 exact preview 2026-10-22: apply runtime-test-helpers","date":"2026-10-22T18:54:13.661Z"}
+{"slug":"state-quoted-fonts","reason":"Owner approved P2c-S3 batch-4 source review 2026-10-22: state-quoted-fonts","date":"2026-10-22T19:00:05.938Z"}
+{"slug":"workflow-usage-metrics","reason":"Owner approved P2c-S3 batch-4 source review 2026-10-22: workflow-usage-metrics","date":"2026-10-22T19:00:06.061Z"}
+{"slug":"state-quoted-fonts","reason":"Owner approved P2c-S3 batch-4 exact preview 2026-10-22: apply state-quoted-fonts","date":"2026-10-22T19:08:28.161Z"}
+{"slug":"workflow-usage-metrics","reason":"Owner approved P2c-S3 batch-4 exact preview 2026-10-22: apply workflow-usage-metrics","date":"2026-10-22T19:08:36.045Z"}
+{"slug":"agent-model-sweep","reason":"Owner approved P2c-S3 batch-5 source review 2026-10-22: agent-model-sweep","date":"2026-10-22T19:12:50.486Z"}
+{"slug":"fix-instruction-conflicts","reason":"Owner approved P2c-S3 batch-5 source review 2026-10-22: fix-instruction-conflicts","date":"2026-10-22T19:12:50.584Z"}
+{"slug":"orca-engines-range","reason":"Owner approved P2c-S3 batch-5 source review 2026-10-22: orca-engines-range","date":"2026-10-22T19:12:50.677Z"}
+{"slug":"path-safety-hardening","reason":"Owner approved P2c-S3 batch-5 source review 2026-10-22: path-safety-hardening","date":"2026-10-22T19:12:50.771Z"}
+{"slug":"shape-lite","reason":"Owner approved P2c-S3 batch-5 source review 2026-10-22: shape-lite","date":"2026-10-22T19:12:50.873Z"}
+{"slug":"agent-model-sweep","reason":"Owner approved P2c-S3 batch-5 exact preview 2026-10-22: apply agent-model-sweep","date":"2026-10-22T19:25:36.772Z"}
+{"slug":"fix-instruction-conflicts","reason":"Owner approved P2c-S3 batch-5 exact preview 2026-10-22: apply fix-instruction-conflicts (resume after retirement fix 2.48.1)","date":"2026-10-22T19:28:15.121Z"}
+{"slug":"orca-engines-range","reason":"Owner approved P2c-S3 batch-5 exact preview 2026-10-22: apply orca-engines-range (resume after retirement fix 2.48.1)","date":"2026-10-22T19:28:23.541Z"}
+{"slug":"path-safety-hardening","reason":"Owner approved P2c-S3 batch-5 exact preview 2026-10-22: apply path-safety-hardening (resume after retirement fix 2.48.1)","date":"2026-10-22T19:28:31.770Z"}
+{"slug":"shape-lite","reason":"Owner approved P2c-S3 batch-5 exact preview 2026-10-22: apply shape-lite (resume after retirement fix 2.48.1)","date":"2026-10-22T19:28:39.925Z"}
+{"slug":"toon-machine-data","reason":"Owner approved P2c-S3 batch-6 source review 2026-10-22: toon-machine-data","date":"2026-10-22T19:30:23.264Z"}
+{"slug":"vendor-model-toon","reason":"Owner approved P2c-S3 batch-6 source review 2026-10-22: vendor-model-toon","date":"2026-10-22T19:30:23.364Z"}
+{"slug":"workflow-usage-capture","reason":"Owner approved P2c-S3 batch-6 source review 2026-10-22: workflow-usage-capture","date":"2026-10-22T19:30:23.455Z"}
+{"slug":"orca-role-pools","reason":"Owner approved P2c-S3 batch-6 source review 2026-10-22: orca-role-pools","date":"2026-10-22T19:30:23.569Z"}
+{"slug":"upstream-project-drift","reason":"Owner approved P2c-S3 batch-6 source review 2026-10-22: upstream-project-drift","date":"2026-10-22T19:30:23.662Z"}
+{"slug":"toon-machine-data","reason":"Owner approved P2c-S3 batch-6 exact preview 2026-10-22: apply toon-machine-data","date":"2026-10-22T23:33:32.202Z"}
+{"slug":"vendor-model-toon","reason":"Owner approved P2c-S3 batch-6 exact preview 2026-10-22: apply vendor-model-toon","date":"2026-10-22T23:33:41.010Z"}
+{"slug":"workflow-usage-capture","reason":"Owner approved P2c-S3 batch-6 exact preview 2026-10-22: apply workflow-usage-capture","date":"2026-10-22T23:33:49.472Z"}
+{"slug":"orca-role-pools","reason":"Owner approved P2c-S3 batch-6 exact preview 2026-10-22: apply orca-role-pools","date":"2026-10-22T23:33:57.954Z"}
+{"slug":"upstream-project-drift","reason":"Owner approved P2c-S3 batch-6 exact preview 2026-10-22: apply upstream-project-drift","date":"2026-10-22T23:34:06.402Z"}
+{"slug":"instruction-compression","reason":"Owner approved P2c-S3 batch-7 source review 2026-10-22: instruction-compression","date":"2026-10-22T23:36:29.062Z"}
+{"slug":"unified-toon-config","reason":"Owner approved P2c-S3 batch-7 source review 2026-10-22: unified-toon-config","date":"2026-10-22T23:36:29.159Z"}
+{"slug":"instruction-compression","reason":"Owner approved P2c-S3 batch-7 exact preview 2026-10-22: apply instruction-compression","date":"2026-10-22T23:49:51.684Z"}
+{"slug":"unified-toon-config","reason":"Owner approved P2c-S3 batch-7 exact preview 2026-10-22: apply unified-toon-config","date":"2026-10-22T23:50:00.420Z"}
+{"slug":"state-ai-authoring","reason":"Owner directed continuation P2c-S3 batch-8 source review 2026-10-22: state-ai-authoring","date":"2026-10-22T23:55:18.815Z"}
+{"slug":"state-deep-evidence","reason":"Owner directed continuation P2c-S3 batch-8 source review 2026-10-22: state-deep-evidence","date":"2026-10-22T23:55:18.911Z"}
+{"slug":"state-fragment-sanitizer","reason":"Owner directed continuation P2c-S3 batch-8 source review 2026-10-22: state-fragment-sanitizer","date":"2026-10-22T23:55:19.004Z"}
+{"slug":"state-report-redesign","reason":"Owner directed continuation P2c-S3 batch-8 source review 2026-10-22: state-report-redesign","date":"2026-10-22T23:55:19.104Z"}
+{"slug":"test-execution-performance","reason":"Owner directed continuation P2c-S3 batch-8 source review 2026-10-22: test-execution-performance","date":"2026-10-22T23:55:19.199Z"}
+{"slug":"state-ai-authoring","reason":"Owner approved P2c-S3 batch-8 exact preview 2026-10-22: apply state-ai-authoring with reviewed _followups.md drift","date":"2026-10-23T00:12:00.666Z"}
+{"slug":"state-deep-evidence","reason":"Owner approved P2c-S3 batch-8 exact preview 2026-10-22: apply state-deep-evidence with reviewed _followups.md drift","date":"2026-10-23T00:12:09.546Z"}
+{"slug":"state-fragment-sanitizer","reason":"Owner approved P2c-S3 batch-8 exact preview 2026-10-22: apply state-fragment-sanitizer with reviewed _followups.md drift","date":"2026-10-23T00:12:18.521Z"}
+{"slug":"state-report-redesign","reason":"Owner approved P2c-S3 batch-8 exact preview 2026-10-22: apply state-report-redesign with reviewed _followups.md drift","date":"2026-10-23T00:12:27.046Z"}
+{"slug":"test-execution-performance","reason":"Owner approved P2c-S3 batch-8 exact preview 2026-10-22: apply test-execution-performance with reviewed _followups.md drift","date":"2026-10-23T00:12:35.486Z"}
+{"slug":"token-attribution","reason":"Owner directed P2c-S3/S4/S5 to 100%, batch-9 source review 2026-10-22: token-attribution","date":"2026-10-23T00:15:02.793Z"}
+{"slug":"workflow-usage-state","reason":"Owner directed P2c-S3/S4/S5 to 100%, batch-9 source review 2026-10-22: workflow-usage-state","date":"2026-10-23T00:15:02.894Z"}
+{"slug":"token-time-report","reason":"Owner directed P2c-S3/S4/S5 to 100%, batch-9 source review 2026-10-22: token-time-report","date":"2026-10-23T00:15:02.996Z"}
+{"slug":"orca-auto-start-all-phases","reason":"Owner directed P2c-S3/S4/S5 to 100%, batch-9 source review 2026-10-22: orca-auto-start-all-phases","date":"2026-10-23T00:15:03.094Z"}
+{"slug":"runner-aware-runtime-boundary-validator","reason":"Owner directed P2c-S3/S4/S5 to 100%, batch-9 source review 2026-10-22: runner-aware-runtime-boundary-validator","date":"2026-10-23T00:15:03.192Z"}
+{"slug":"orca-auto-start-all-phases","reason":"Owner approved exact batch-9 preview; apply and verify orca-auto-start-all-phases original source evidence","date":"2026-10-23T00:38:28.769Z"}
+{"slug":"runner-aware-runtime-boundary-validator","reason":"Owner approved exact batch-9 preview; apply and verify runner-aware-runtime-boundary-validator original source evidence","date":"2026-10-23T00:38:54.498Z"}
+{"slug":"token-attribution","reason":"Owner approved exact batch-9 preview; apply and verify token-attribution original source evidence","date":"2026-10-23T00:39:36.112Z"}
+{"slug":"token-time-report","reason":"Owner approved exact batch-9 preview; apply and verify token-time-report original source evidence","date":"2026-10-23T00:39:44.870Z"}
+{"slug":"workflow-usage-state","reason":"Owner approved exact batch-9 preview; apply and verify workflow-usage-state original source evidence","date":"2026-10-23T00:39:53.733Z"}
+{"slug":"orca-auto-start-all-phases","reason":"Owner-approved batch-9 final verification for orca-auto-start-all-phases; verify original source/archive without applying again","date":"2026-10-23T00:40:55.354Z"}
+{"slug":"runner-aware-runtime-boundary-validator","reason":"Owner-approved batch-9 final verification for runner-aware-runtime-boundary-validator; verify original source/archive without applying again","date":"2026-10-23T00:40:55.639Z"}
+{"slug":"token-attribution","reason":"Owner-approved batch-9 final verification for token-attribution; verify original source/archive without applying again","date":"2026-10-23T00:40:55.873Z"}
+{"slug":"token-time-report","reason":"Owner-approved batch-9 final verification for token-time-report; verify original source/archive without applying again","date":"2026-10-23T00:40:56.119Z"}
+{"slug":"workflow-usage-state","reason":"Owner-approved batch-9 final verification for workflow-usage-state; verify original source/archive without applying again","date":"2026-10-23T00:40:56.379Z"}
+{"slug":"codex-orca-coordinator-parity","reason":"Owner approved batch-10 source review by name; verify/read full original evidence for codex-orca-coordinator-parity","date":"2026-10-23T00:42:53.832Z"}
+{"slug":"state-multipage-report","reason":"Owner approved batch-10 source review by name; verify/read full original evidence for state-multipage-report","date":"2026-10-23T00:42:53.845Z"}
+{"slug":"collector-robustness","reason":"Owner approved batch-10 source review by name; verify/read full original evidence for collector-robustness","date":"2026-10-23T00:42:53.863Z"}
+{"slug":"fix-orca-dispatch-resume-gate","reason":"Owner approved batch-10 source review by name; verify/read full original evidence for fix-orca-dispatch-resume-gate","date":"2026-10-23T00:42:53.882Z"}
+{"slug":"metrics-report-dimensions","reason":"Owner approved batch-10 source review by name; verify/read full original evidence for metrics-report-dimensions","date":"2026-10-23T00:42:53.891Z"}
+{"slug":"codex-orca-coordinator-parity","reason":"Owner approved exact batch-10 preview; apply and verify codex-orca-coordinator-parity original evidence","date":"2026-10-23T00:55:16.348Z"}
+{"slug":"state-multipage-report","reason":"Owner approved exact batch-10 preview; apply and verify state-multipage-report original evidence","date":"2026-10-23T00:55:25.477Z"}
+{"slug":"collector-robustness","reason":"Owner approved exact batch-10 preview; apply and verify collector-robustness original evidence","date":"2026-10-23T00:55:34.266Z"}
+{"slug":"fix-orca-dispatch-resume-gate","reason":"Owner approved exact batch-10 preview; apply and verify fix-orca-dispatch-resume-gate original evidence","date":"2026-10-23T00:55:43.204Z"}
+{"slug":"metrics-report-dimensions","reason":"Owner approved exact batch-10 preview; apply and verify metrics-report-dimensions original evidence","date":"2026-10-23T00:55:52.124Z"}
+{"slug":"codex-orca-coordinator-parity","reason":"Owner-approved batch-10 final source/archive verification for codex-orca-coordinator-parity; no repeat apply","date":"2026-10-23T00:56:42.085Z"}
+{"slug":"state-multipage-report","reason":"Owner-approved batch-10 final source/archive verification for state-multipage-report; no repeat apply","date":"2026-10-23T00:56:42.418Z"}
+{"slug":"collector-robustness","reason":"Owner-approved batch-10 final source/archive verification for collector-robustness; no repeat apply","date":"2026-10-23T00:56:42.672Z"}
+{"slug":"fix-orca-dispatch-resume-gate","reason":"Owner-approved batch-10 final source/archive verification for fix-orca-dispatch-resume-gate; no repeat apply","date":"2026-10-23T00:56:42.968Z"}
+{"slug":"metrics-report-dimensions","reason":"Owner-approved batch-10 final source/archive verification for metrics-report-dimensions; no repeat apply","date":"2026-10-23T00:56:43.253Z"}
+{"slug":"pitch-compaction","reason":"Owner approved final four batch-11 source reviews; verify/read complete original evidence for pitch-compaction","date":"2026-10-23T00:56:43.650Z"}
+{"slug":"portable-skill-defaults","reason":"Owner approved final four batch-11 source reviews; verify/read complete original evidence for portable-skill-defaults","date":"2026-10-23T00:56:43.664Z"}
+{"slug":"portable-skill-installation","reason":"Owner approved final four batch-11 source reviews; verify/read complete original evidence for portable-skill-installation","date":"2026-10-23T00:56:43.674Z"}
+{"slug":"project-state-report","reason":"Owner approved final four batch-11 source reviews; verify/read complete original evidence for project-state-report","date":"2026-10-23T00:56:43.683Z"}
+{"slug":"pitch-compaction","reason":"Owner approved exact batch-11 preview; apply and verify pitch-compaction original evidence","date":"2026-10-23T14:21:22.791Z"}
+{"slug":"pitch-compaction","reason":"Owner approved exact batch-11 preview; apply and verify pitch-compaction original evidence","date":"2026-10-23T14:23:00.774Z"}
+{"slug":"portable-skill-defaults","reason":"Owner approved exact batch-11 preview; apply and verify portable-skill-defaults original evidence","date":"2026-10-23T14:23:10.060Z"}
+{"slug":"portable-skill-installation","reason":"Owner approved exact batch-11 preview; apply and verify portable-skill-installation original evidence","date":"2026-10-23T14:23:19.238Z"}
+{"slug":"project-state-report","reason":"Owner approved exact batch-11 preview; apply and verify project-state-report original evidence","date":"2026-10-23T14:23:28.286Z"}
+{"slug":"pitch-compaction","reason":"Owner approved batch-11 exact payload; final apply/replay verification for pitch-compaction","date":"2026-10-23T14:28:38.202Z"}
+{"slug":"portable-skill-defaults","reason":"Owner approved batch-11 exact payload; final apply/replay verification for portable-skill-defaults","date":"2026-10-23T14:28:38.542Z"}
+{"slug":"portable-skill-installation","reason":"Owner approved batch-11 exact payload; final apply/replay verification for portable-skill-installation","date":"2026-10-23T14:28:38.896Z"}
+{"slug":"project-state-report","reason":"Owner approved batch-11 exact payload; final apply/replay verification for project-state-report","date":"2026-10-23T14:28:39.319Z"}

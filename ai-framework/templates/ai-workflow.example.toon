@@ -1,0 +1,59 @@
+schemaVersion: 3
+runtime:
+  runner: node
+integrations:
+  orca:
+    engine: ">=1.4.224"
+    enabled: true
+    multiAgent: true
+    maxConcurrentWorkers: 3
+    maxRetriesPerTask: 1
+    coordinators:
+      claude:
+        workers[2]: codex,opencode
+        roles:
+          implementation[2]: opencode,codex
+          review[2]: codex,opencode
+      codex:
+        workers[2]: claude,opencode
+        roles:
+          implementation[1]: claude
+          review[1]: opencode
+      opencode:
+        workers[2]: claude,codex
+        roles:
+          implementation[1]: claude
+          review[1]: codex
+doctor:
+  modelRouting: bundle
+skills:
+  modes:
+    caveman: full
+models:
+  claude:
+    fast:
+      model: claude-haiku-5-5
+    standard:
+      model: claude-sonnet-5-5
+      effort: medium
+    deep:
+      model: claude-opus-5-5
+      effort: high
+  opencode:
+    fast:
+      model: opencode-go/minimax-m3.1-flash-free
+    standard:
+      model: opencode-go/minimax-m3
+    deep:
+      model: opencode-go/kimi-k2.7-code
+      effort: xhigh
+  codex:
+    fast:
+      model: gpt-6-luna
+      effort: high
+    standard:
+      model: gpt-6.1-sol
+      effort: high
+    deep:
+      model: gpt-6-astra
+      effort: xhigh

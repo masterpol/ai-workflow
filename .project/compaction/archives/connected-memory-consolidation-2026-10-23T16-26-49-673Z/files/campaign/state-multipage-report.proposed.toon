@@ -1,0 +1,87 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: state-multipage-report
+sourceProof:
+  archiveDirectory: state-multipage-report-2026-10-08T20-43-32-789Z
+  manifestHash: "sha256:a902cf65c83c21dd138e0233c3f3df2cefd2c225e789adb1b68edc6d556e893b"
+  sourceBytes: 39615
+  verifiedFiles: 9
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/state-multipage-report.supplement.md"
+  destination: ".project/records/legacy-upgrades/state-multipage-report.md"
+  hash: "sha256:dd0ddb9daa6633657f6359d8ef173d9ce40eb1cf6d34f59c3ac97a2942b4bda6"
+payload:
+  ledgerHash: "sha256:78fbfbb31d2302a4fe32cf52f28730314277a6c07d8d6eb8ea1517f009069951"
+  legacyEntryHash: "sha256:64a65641575fa8a3976a85ecf37a70a3789d2f6ba54d7894445d8633c45c7da9"
+  bindings:
+    ".project/runs/2026-10-08-state-multipage-report.md": "sha256:8de00ca0d6c28822c30d88ac1e0b7561e2364b284dfca10a693d68c1af2b09de"
+    ".project/knowledge/decisions/project-state-report-design.md": "sha256:6a83f90465ff66d827e32505b92bc8504b7e9b43a6c68db2916e4a8cce8587b2"
+    ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md": "sha256:6cce8120f6c58b61931af791b040f96972916d8b9882e002a67fd0bab3e219f6"
+    ".project/knowledge/issues/a-local-workflow-env-file-changes-which-runner-path-tests-spawn.md": "sha256:07b072e32f0566dd8bb9939b8a7334f06e588d99adf4bbcce5d5a0d0c21f38ce"
+    ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md": "sha256:f4096b7894053ecf0c29695784b264b31a1e6f5776f4f91941312b6e03946854"
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    ".project/knowledge/issues/orca-workers-differ-from-the-coordinator-environment.md": "sha256:90b856466e32d2ead470bbf140654aa41c3c6a1e1f19b7d097958d3871ec5cf1"
+    ".project/records/legacy-upgrades/state-multipage-report.md": "sha256:dd0ddb9daa6633657f6359d8ef173d9ce40eb1cf6d34f59c3ac97a2942b4bda6"
+  mapping:
+    schemaVersion: 2
+    sections[18]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#pitch-implementation",behavior,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:7904cd061454f1a9f75cfc993a6916d948036dc03311cd678cef3933bbf91852"
+      "SHIPPED.md#scopes",know-how,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:c4255fd0331481973dcbfcd75d3ee4dfa7c1f7ff402c534203afaed1e4200818"
+      "SHIPPED.md#no-gos-honored",rule,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:48fa77741343ffb27aa692fbe59e1899fca35aaca8f27ee9bfa80d7d6912153c"
+      "SHIPPED.md#rabbit-holes",limit,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:4432f47cb8f4e4f8fc6ac05de7604fec8c9bbe08f3b19f888cba4a708e4d0888"
+      "SHIPPED.md#deviations-see-deviationsmd",decision,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:623b57899ed19229a25720699a147f91d86c02dddbff81ea5fcfc01ba61632f6"
+      "SHIPPED.md#verification-at-ship",know-how,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:5afda76ba288845f1c183619d17c7c154ca278600e4937fdd477a50abc0ec5c2"
+      "SHIPPED.md#knowledge-extracted",know-how,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:67a2c785d37a170e11bd2c5092d3235fff092b26cd4963dcce11acf05fa28d8c"
+      "SHIPPED.md#followups",know-how,merged,".project/runs/2026-10-08-state-multipage-report.md","Retains the byte-identical final ship account, including implementation, verification and historical limits.","sha256:7b4920ddfe92d857af56ce4817970f5d37d9d5518efa36c9b12315dfe376e3b6"
+      "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/state-multipage-report.md#pitch-decisions-and-constraints","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:d496447326be0833c71398818596c26fa6b581c38fe163f1a6dbc5bf4409aeb1"
+      "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/state-multipage-report.md#pitch-decisions-and-constraints","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:2c0f584abcea9c47698856bb580d16b817936e1536d63ee252ef9dc631f1db3a"
+      audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/state-multipage-report.md#audit-cycle-1","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:cdf9aaaa5ecd3f4259ff800e219d1433acb7973ff5353c87e7f505ae738b8407"
+      audit-cycle-2.md,know-how,merged,".project/records/legacy-upgrades/state-multipage-report.md#audit-cycle-2","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:3fea18841e6654c8b36a43591373c9de939e45bec4032f8cfc9e8fc25d19981a"
+      audit-cycle-3.md,know-how,merged,".project/records/legacy-upgrades/state-multipage-report.md#audit-cycle-3","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:2bb40dbfbb1985b41d856a1ff9356a6eb1db7db8b51ddab548f77f2a37367362"
+      "deviations.md#2026-10-08-s0-orca-policy-valid-dispatch-not-ready",decision,merged,".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:6c5a03f6dea84bf25fc3bf5614c6bbeafb62b7b8846250dda2e205fd6bcadefa"
+      "deviations.md#2026-10-08-s1-touched-state-themetestmts-1-line",decision,merged,".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:c750fda982fc3e4629d9df3ed8215c8e5edf06d48f836208651080ce0ab9d9c4"
+      "deviations.md#2026-10-08-stale-state-stage-blocks---apply",limit,merged,".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:be7d8ebe2bebb170d1bfee1ec1ed04652d23bbc50d352cd274d0fb0712786908"
+      "deviations.md#2026-10-08-correction-to-the-s0-entry",decision,merged,".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:4a567300eae30c402fb94a07b26473581e84aaaad18fe96432b926117929a171"
+      "deviations.md#2026-10-08-second-correction-to-the-s0-entry-supersedes-the-one-above",decision,merged,".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence","Preserves the full source account with historical corrections, evidence limits and deferred decisions.","sha256:05f11f13801d98423a6f52a599048f8e3500b25b7dc653f02fa49d68d53d5d84"
+    otherFiles[6]:
+      -
+        path: SHIPPED.md
+        disposition: omitted
+        reason: superseded
+        hash: "sha256:edeefd914634c521c5fa75480119013d8eb70153825681926b49d6abc9a16c25"
+      -
+        path: deviations.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-multipage-report.md#deviations-and-correction-sequence"
+        helps: Retains the complete source body and distinguishes original assumptions from final behavior.
+        hash: "sha256:e67ad71ca8da0a645b2f3cc1b82754f550eed85a6881adb0b4cb43b445f3d152"
+      -
+        path: hill.md
+        disposition: omitted
+        reason: process-noise
+        hash: "sha256:d41dad550addbb1056efa9056e5b66a8a64e2308e101b3209d9303d7f678c3e9"
+      -
+        path: log.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-multipage-report.md#build-incidents-and-live-proof"
+        helps: Retains the complete source body and distinguishes original assumptions from final behavior.
+        hash: "sha256:ab24fb66f0a736bd03d47d6b070d611f8be6ad2066bc04e77b7bd8bd92528dbc"
+      -
+        path: pitch.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-multipage-report.md#pitch-decisions-and-constraints"
+        helps: Retains the complete source body and distinguishes original assumptions from final behavior.
+        hash: "sha256:2ffd1caf11b22288952667e3d257424a7f8bb009202d887dbd48e1ebd3451050"
+      -
+        path: plan.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-multipage-report.md#plan-contract-and-verification-design"
+        helps: Retains the complete source body and distinguishes original assumptions from final behavior.
+        hash: "sha256:012431973f2a64d5271f3819a2cbefe25a7d2fc459f426122bd70973ac8e700f"
+  outcomeRecord: "---\nslug: state-multipage-report\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# state-multipage-report\n\nState reporting splits into bounded linked static pages with guarded publication and documented migration limits.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: State reporting splits into bounded linked static pages with guarded publication and documented migration limits.\n- docs: [source supplement](.project/records/legacy-upgrades/state-multipage-report.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/state-multipage-report.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/state-multipage-report.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/state-multipage-report.md)\n- followups: [retained limits](.project/records/legacy-upgrades/state-multipage-report.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/state-multipage-report.md)\n"
+  acceptDestinationDrift:
+    ".project/pitches/_followups.md":
+      committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Against pitch ship commit 1db913a2bc2a7fbcd97c358984916ee21097422d, +218/-2 lines reflect later additions and resolutions; this pitch runner item is struck through as resolved 2026-10-17, other own bullets persist. Retain original deferral and later resolution as history."

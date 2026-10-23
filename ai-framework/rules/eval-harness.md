@@ -56,6 +56,7 @@ cases:
 - `id` must be unique within the file.
 - Zod schemas in each test file validate `input` and `expected` on load.
 - Expand datasets via normal PR — no code changes needed.
+- New datasets an agent loads start as TOON; scope test and tooling in `machine-data-format.md`.
 
 ## Adding a new case
 

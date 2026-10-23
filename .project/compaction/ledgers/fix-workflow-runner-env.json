@@ -1,64 +1,153 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "fix-workflow-runner-env",
   "sections": [
     {
       "source": "SHIPPED.md#final-verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-1-shippedmdfinal-verification",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains historical verification with build-time Node parity explicitly distinguished.",
+      "bodyHash": "sha256:443786daab03cca19dfc0d473331359ba505e967f53683910793704c735a2553"
     },
     {
       "source": "SHIPPED.md#reconciliation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-2-shippedmdreconciliation",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the affected runner boundaries and closed reproductions.",
+      "bodyHash": "sha256:37fe0b95970e616ccaa0cc35a4592a50f38338bd45c996fb91e45911022fdb2f"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-3-shippedmdno-gos-honored",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves metrics/history boundaries and the OpenCode runtime limitation.",
+      "bodyHash": "sha256:a5b3389302e198e3f007a65d36eeee873cbdb9089f83c73ee7c624fa1f783bd3"
     },
     {
       "source": "SHIPPED.md#known-behavior-change",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-4-shippedmdknown-behavior-change",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the deliberate hook-input limit and changed oversized-input outcome.",
+      "bodyHash": "sha256:67af639221e85160d04ee51f40efb352d6381dad75d9b977097a4ac3094370d6"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-5-shippedmdknowledge-extracted",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/knowledge/patterns/one-boundary-selects-the-child-runner.md",
+      "helps": "Preserves one runner-selection boundary, precedence and executable assertions.",
+      "bodyHash": "sha256:a819be0f989ee17869eb3eb171cd44558f7d96b60d5cf2cc1c004489a2132d2b"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-6-shippedmdfollowups",
-      "reason": "Preserved in the compact record section."
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-workflow-runner-env.md#acknowledged-items-and-verification-limits",
+      "helps": "Preserves the actual audit acknowledgments separately from additional verification uncertainty.",
+      "bodyHash": "sha256:a3eaa9bdaa3af9b339921318bc1eab01d977e3417bddfd5eb4cd32800a1186e1"
     },
     {
       "source": "log.md#verified-triage",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-7-logmdverified-triage",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the executable mismatch reproductions and misleading-test lesson.",
+      "bodyHash": "sha256:49196c093eae516e5c955bd2fa6569d17211af567d41beb0615640c2074e424e"
     },
     {
       "source": "log.md#approved-build-2026-10-08",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-8-logmdapproved-build-2026-10-08",
-      "reason": "Preserved in the compact record section."
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-workflow-runner-env.md#implementation-and-fixture-lessons",
+      "helps": "Retains child-option preservation, hook coverage and environment-isolation lessons.",
+      "bodyHash": "sha256:6656d1d94bb037d51d00e96e493da37dc0ed30965a7a4f9070cd9f7f5d911296"
     },
     {
       "source": "log.md#build-evidence",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md#section-9-logmdbuild-evidence",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains historical author-run build, parser and parity evidence.",
+      "bodyHash": "sha256:bbe505b911dd470f0fdc9e69de9309acad87fe31ec178d4c6dcd31cb473110ed"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:8dc873b372484640a0cdceb9025ec8d0285f466d3f3c7f3a1dafce2550dfd412",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/fix-workflow-runner-env.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "audit-1-code-prompt.txt",
+      "hash": "sha256:703bc9a637b0f52882666d3d54b0c50f236d608b5669bc5d40b93b528e8dbb35",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-1-conflicts-prompt.txt",
+      "hash": "sha256:a2209ba1da12a594a47784dc7a8e72a318dc59452df2066a27a041c8ef56d6ba",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-1-coverage-prompt.txt",
+      "hash": "sha256:20fc3ab7c24aabf42729f31f480d2457080e6227b882c0dabb6c27de217240c4",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-1-security-prompt.txt",
+      "hash": "sha256:effa0375f5c980f211b11eae4328acc5a71ddaa8e5fd9ac3f5db459183834724",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-context.json",
+      "hash": "sha256:e1eb8f7746a829b595c4729f443db0679ad7316a7e7bd225b4ca44d13fc4d531",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-workflow-runner-env.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:60a7a9929c9c7f7f1089969276edbe5a89e1caed803e7f5dd55bd25ccdd7332e",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-workflow-runner-env.md",
+      "helps": "Preserves the lasting review evidence and limits; transient workflow metadata remains archived."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:3a76667713235e44f1ea12103f74a6453267322ad425e94f9c87b751b18f170d",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-workflow-runner-env.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:17b55502018dc97959f578fcfcba8fbfe544fbec1c329bfe98e19c9e3e65c50c",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:8d59c78951d4d239ae68dcae748c1f35493aeaeb276760eceebd0def04fe4695",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-workflow-runner-env.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:24:47.044Z"
+  "committedAt": "2026-10-22T17:53:06.788Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:95b1d7daa5748b8f3d2897287176e78e6d5f2401475f138be0938df29b5da642",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

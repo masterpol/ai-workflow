@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "slug": "agent-model-sweep",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-statuses",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-resolved",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#deviations",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#verification-final-verify-current-session",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-carried-to-pitchesfollowupsmd-and-the-next-ships-queue",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extractions",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/warn-text-must-be-self-consistent-with-the-code-it-ships.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#incident-2026-10-16-precondition-unmet-at-s1-start-open",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#deviation-2026-10-16-modelscodexdeepeffort-mismatch-in-users-ai-workflowtoon",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#incident-2026-10-16-user-rule-ai-workflowtoon-is-mandatory",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#incident-2026-10-16-audit-cycle-1-must-fix-patches-applied",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#incident-2026-10-16-bet-2-build-3-upgradetestmts-failures-test-fixture-not-bet-2-regression",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-19T03:29:07.665Z"
+}

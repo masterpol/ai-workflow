@@ -1,0 +1,680 @@
+{
+  "schemaVersion": 2,
+  "slug": "connected-memory-consolidation",
+  "sections": [
+    {
+      "source": "SHIPPED.md#track-receipts",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/rollup.md",
+      "helps": "Lists the four track receipts, their approval hashes and runs so each ship can be found and verified.",
+      "bodyHash": "sha256:86e15d16a56c845c5b038583cdc4fdcc624d4fc0b84e79860d9755988c43fe92"
+    },
+    {
+      "source": "SHIPPED.md#exceptions-and-open-items-carried-forward-none-waived-silently",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/rollup.md",
+      "helps": "Names every exception and open item carried past the ship so none is read as waived.",
+      "bodyHash": "sha256:db26ffdaebcc9e5b2c18c16de332f50c502e284e0d4d8ccd94ee4b9ebabf8e0a"
+    },
+    {
+      "source": "SHIPPED.md#followups-and-what-stays-un-bet",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/rollup.md",
+      "helps": "Lists the followups and the pitches that stay un-bet so a later planner starts from them.",
+      "bodyHash": "sha256:e907bbe325ca502f0237975cbea8ccc626d8eb151301c501f4d851fa36e09e22"
+    },
+    {
+      "source": "SHIPPED.md#approval-and-closure",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/rollup.md",
+      "helps": "Records that the umbrella closure was a separate owner approval and what it did and did not touch.",
+      "bodyHash": "sha256:d79651f8f715384f22dd0a7e549ec9ec41f5a98f6a201eeb71e93254a2d82061"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/pitch.md",
+      "helps": "Keeps the standing no-gos that bounded every track.",
+      "bodyHash": "sha256:451da13206523c2657a9bf6be47d417d0159889b145bd4d29a52985b8f33873a"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/pitch.md",
+      "helps": "Keeps the rabbit holes the pitch named, so the same traps are not re-derived.",
+      "bodyHash": "sha256:0fba68ce49908f5a975dd4b18cf995e68f0b3d757f03c0376f1766303de27c37"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-cycles.md#audit-cycle-1",
+      "helps": "Preserves this audit cycle: reviewers, planted control results, findings and fixes.",
+      "bodyHash": "sha256:107ad49bd1453916549fa02c1640a8db9f7adfbddd12f9dee6dab42f33d4e701"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-cycles.md#audit-cycle-2",
+      "helps": "Preserves this audit cycle: reviewers, planted control results, findings and fixes.",
+      "bodyHash": "sha256:61a86c8401b4e5dc76cffc1f43b15ed07c2613415447837623046104ae16fa80"
+    },
+    {
+      "source": "audit-cycle-3.md",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-cycles.md#audit-cycle-3",
+      "helps": "Preserves this audit cycle: reviewers, planted control results, findings and fixes.",
+      "bodyHash": "sha256:b646010eb3a3e883c6da347939c5ec5147390bc8046f1dd96b75123be050b3e9"
+    },
+    {
+      "source": "log.md#2026-10-22-wave-1-p1-s1-p1-s1b-p1-s2-p1-s3-p2a-s1",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 wave 1 p1 s1 p1 s1b p1 s2 p1 s3 p2a s1' with its evidence and decisions.",
+      "bodyHash": "sha256:cce7803a2ff671321999836bdfbfc2e080402b0a04edec223be0768a59a8c85c"
+    },
+    {
+      "source": "log.md#2026-10-22-wave-2-p2a-s2-p2a-s3-p2a-s4",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 wave 2 p2a s2 p2a s3 p2a s4' with its evidence and decisions.",
+      "bodyHash": "sha256:9b0000f3f6208c98b0436671f243d413edf8134f9ed1f64fd28728dbcceea2cd"
+    },
+    {
+      "source": "log.md#2026-10-22-p1-s4-graphify-integration",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p1 s4 graphify integration' with its evidence and decisions.",
+      "bodyHash": "sha256:0d46132185d0b609f178b0688114fc481f9f3f1645f1a622be49fbabcaa694d9"
+    },
+    {
+      "source": "log.md#2026-10-22-full-suite-run-after-p1-s4",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 full suite run after p1 s4' with its evidence and decisions.",
+      "bodyHash": "sha256:527102bf07b4121ffceac5234f883fb58ff777ed6e88afa6cd1312851a6e867e"
+    },
+    {
+      "source": "log.md#2026-10-22-p1-s5-acceptance-scenario-h",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p1 s5 acceptance scenario h' with its evidence and decisions.",
+      "bodyHash": "sha256:177f61d86df5072013f323817d8804bcb8053d48b8190ac477969ea52d22343c"
+    },
+    {
+      "source": "log.md#2026-10-22-p2a-s5-generated-done-work-index",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2a s5 generated done work index' with its evidence and decisions.",
+      "bodyHash": "sha256:3940c58db61cabc1116bce6f98d16d5baa876257f82797529131dfc409354b8d"
+    },
+    {
+      "source": "log.md#2026-10-22-audit-3-cycles-appetite-cap-reached",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 audit 3 cycles appetite cap reached' with its evidence and decisions.",
+      "bodyHash": "sha256:ffca94fe5c15ba48fbb922307109e5e946511f93e3179a9896032d4c0971ea8d"
+    },
+    {
+      "source": "log.md#2026-10-22-p2d-s1-project-side-migration",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2d s1 project side migration' with its evidence and decisions.",
+      "bodyHash": "sha256:42cef434475f3c64f49c7fc67664b3b6dcde770f6ed868e8504a9bc7e06b0bed"
+    },
+    {
+      "source": "log.md#2026-10-22-p2d-s2-sync-and-doctor-integration",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2d s2 sync and doctor integration' with its evidence and decisions.",
+      "bodyHash": "sha256:3f7f4ca6510257eb12c85c3eb9b01191c939b4f50a4390b3fcf44c4f0fb548e4"
+    },
+    {
+      "source": "log.md#2026-10-22-p2d-s3-partial-implementation-three-strike-stop",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2d s3 partial implementation three strike stop' with its evidence and decisions.",
+      "bodyHash": "sha256:0717679dfc2f90518c9bd5c505aaa1aa7637bc1f18f7c773b755baa04415f5fe"
+    },
+    {
+      "source": "log.md#2026-10-22-p2d-s3-resumed-after-explicit-approval",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2d s3 resumed after explicit approval' with its evidence and decisions.",
+      "bodyHash": "sha256:b0c661141607e66a3c2fe85deba8bd883fc5384b31bd868a13724ec786b3d539"
+    },
+    {
+      "source": "log.md#2026-10-22-p2c-s1-status-and-read-only-preparation",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2c s1 status and read only preparation' with its evidence and decisions.",
+      "bodyHash": "sha256:a7c6780bfe168b02722ee28806cb7f3891ae8543db48ccfaaa75bf5e57a077f2"
+    },
+    {
+      "source": "log.md#2026-10-22-p2c-s2-approved-apply-tooling",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2c s2 approved apply tooling' with its evidence and decisions.",
+      "bodyHash": "sha256:e49d5d8a2df6df99bcdd14245b8ae4f6cc5dc69d6c3f752d28896f8c780f0dbf"
+    },
+    {
+      "source": "log.md#2026-10-22-p2c-s3-preparation-and-source-read-gate",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2c s3 preparation and source read gate' with its evidence and decisions.",
+      "bodyHash": "sha256:ba5e73016df3b9659f64f641cebc5ef33aafe9ade7f0af0c109e248e699cd093"
+    },
+    {
+      "source": "log.md#2026-10-22-p2c-s3-first-batch-source-review-and-apply-preview",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2c s3 first batch source review and apply preview' with its evidence and decisions.",
+      "bodyHash": "sha256:d1d16c3d51d8798746481cdd123ac11d09bf6b15f41c72a650ca3dbb19cd752b"
+    },
+    {
+      "source": "log.md#2026-10-22-p2c-s3-batch-1-applied-navigation-exit-repaired",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 22 p2c s3 batch 1 applied navigation exit repaired' with its evidence and decisions.",
+      "bodyHash": "sha256:f26dd10421dba097eccd1b83727af1714b6bc225790efc52c91e2b07d7b32739"
+    },
+    {
+      "source": "log.md#2026-10-23-resume-verification",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 resume verification' with its evidence and decisions.",
+      "bodyHash": "sha256:bc76cf48f66744159e8d1e11a0368c4ebc909331820b7960990ca54e92b064ce"
+    },
+    {
+      "source": "log.md#2026-10-23-final-four-apply-and-closing-exceptions-approved",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 final four apply and closing exceptions approved' with its evidence and decisions.",
+      "bodyHash": "sha256:c6fdce6a487a7fb7ab4ec2165c31a21249e1774e138c4c6423411404ffd019c5"
+    },
+    {
+      "source": "log.md#2026-10-23-build-verification-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 build verification complete' with its evidence and decisions.",
+      "bodyHash": "sha256:82bded1f8d0d3d98e5fa36ae0e51d8210c480cfa22d1d9841725f0a47e1d58bb"
+    },
+    {
+      "source": "log.md#2026-10-23-separate-p2dp2c-cycle1-audits-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 separate p2dp2c cycle1 audits complete' with its evidence and decisions.",
+      "bodyHash": "sha256:893e1f6f097e13bf600b06ca38021a82356a4141ce3082cd808f4cbbffb75a9e"
+    },
+    {
+      "source": "log.md#2026-10-23-audit-end-accepted-separate-repair-shipped",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 audit end accepted separate repair shipped' with its evidence and decisions.",
+      "bodyHash": "sha256:0fc93e008fb3b0631c045f3f6504242bcb20da4a4435744405d6c1e3beaac20a"
+    },
+    {
+      "source": "log.md#2026-10-23-four-separate-ship-proposals-prepared",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 four separate ship proposals prepared' with its evidence and decisions.",
+      "bodyHash": "sha256:fd321b5865c46f5c85818a7a459c1cfbb34975c6071febcfb93be44174ba1c86"
+    },
+    {
+      "source": "log.md#2026-10-23-parallel-session-reconciliation-claude-session-joins-codex",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 parallel session reconciliation claude session joins codex' with its evidence and decisions.",
+      "bodyHash": "sha256:3db1e30545209584a78c9eb71ab08258f96d7bb5b2e8f521a87c1a54345718c5"
+    },
+    {
+      "source": "log.md#2026-10-23-p2c-ship-approved-and-published",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 p2c ship approved and published' with its evidence and decisions.",
+      "bodyHash": "sha256:c162281213bdad91d42aa9bde2b3133f5282392214720a8fc43b98349e669c28"
+    },
+    {
+      "source": "log.md#2026-10-23-p2d-ship-approved-and-published",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 p2d ship approved and published' with its evidence and decisions.",
+      "bodyHash": "sha256:f36766529d4217f128d3b3aede830f8b5b2171e2c88f82ed688eba5937091ddb"
+    },
+    {
+      "source": "log.md#2026-10-23-p2a-ship-approved-and-published",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 p2a ship approved and published' with its evidence and decisions.",
+      "bodyHash": "sha256:38b2fc2cb986e54a0baf9b328723707941bd7f7c71a4879ebe82a9d168d2cb68"
+    },
+    {
+      "source": "log.md#2026-10-23-p1-ship-approved-and-published-all-four-track-receipts-exist",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 p1 ship approved and published all four track receipts exist' with its evidence and decisions.",
+      "bodyHash": "sha256:c57cd1c26a3a1412b3bf1a416eb43278d485fc27782c75c1c944d6d187ff7599"
+    },
+    {
+      "source": "log.md#2026-10-23-umbrella-closure-approved-and-published",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/closure.md",
+      "helps": "Keeps the dated build-log entry '2026 10 23 umbrella closure approved and published' with its evidence and decisions.",
+      "bodyHash": "sha256:2787e5d47abbd5c651f7f58adc18a07d002780013069a8524a4fa4eaa2a58956"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/rollup.md",
+      "helps": "The umbrella rollup ship record, moved to the common records.",
+      "hash": "sha256:b775753c5d2b14a5dd169debefe7caf6f49e1693db2d4b663a240230d74f5cf6"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/pitch.md",
+      "helps": "The original pitch with its no-gos and rabbit holes, moved to the common records.",
+      "hash": "sha256:5103119d9d674e7847bf26f1af0c94e9ef03ea611fa8f7a6a629a2fe0f9aeeae"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "The complete build log is kept in the umbrella archive run; its final entry is in closure.md.",
+      "hash": "sha256:8b56e8fbedca7b0f4c0e58647c14fbeb7e152e19153f4f2c73380807c5ad4bf5"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-connected-memory-consolidation.md",
+      "helps": "The complete hill chart is kept in the umbrella archive run.",
+      "hash": "sha256:19469d4a2712bfd80de6899f0ff959cd8c5cf31a0fcc46c9a3069b6f53bf4fb4"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/plan.md",
+      "helps": "The plan, scope table and exit criteria, moved to the common records.",
+      "hash": "sha256:6cf92043355283803d4acaeb48f3d1bd6e5d1859c95d38992c0cb300992374de"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/deviations.md",
+      "helps": "Deviations D1-D31 with reasons, moved to the common records.",
+      "hash": "sha256:6512420b2a700254d7a01a1d15139c6667becbfafd39dcb4f2758a5ab6b48483"
+    },
+    {
+      "path": "shaping-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/shaping-evidence.md",
+      "helps": "The shaping evidence behind the bet, moved to the common records.",
+      "hash": "sha256:8b4bfc00f393947b7e1d1990a262ffded9dc66ff8bb3e9f27369dbacf5826532"
+    },
+    {
+      "path": "remaining-work.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/remaining-work.md",
+      "helps": "The remaining-work tracker, moved to the common records.",
+      "hash": "sha256:a33045c5f490973821f9b026dbf6165d95cec76e951528e51d297e358f9093b5"
+    },
+    {
+      "path": "knowledge-extraction.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/knowledge-extraction.md",
+      "helps": "Incident dispositions and read accounting, moved to the common records.",
+      "hash": "sha256:9cf6d73a5490bcbac52193f8a9d6072038382ebf24c77e2dc56e9ab34645aa57"
+    },
+    {
+      "path": "closing-exceptions.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/closing-exceptions.md",
+      "helps": "The two campaign closing exceptions and their reasoning.",
+      "hash": "sha256:b799ad9a2858d60fc4874ed02e832b0f84ed0f154d804ff108378286d61504d8"
+    },
+    {
+      "path": "closing-exceptions.approved.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/closing-exceptions.approved.toon",
+      "helps": "The owner-approved exceptions receipt, byte-identical.",
+      "hash": "sha256:1803576d89122bd207fa515cb892658e83e75a7557d590a299a03a7ba2901edd"
+    },
+    {
+      "path": "closing-exceptions.proposed.toon",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:618831563b56bb147d0acfa175103e2fdee6aa28ba43ddb2dce3774186e1b008"
+    },
+    {
+      "path": "audit-p2d-p2c-cycle-1.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-cycles.md#audit-p2d-p2c-cycle-1",
+      "helps": "The separate P2d/P2c audit cycle.",
+      "hash": "sha256:221dfbe151f5d5eda591ed11fcc21c33ea9fca338c3e56e39cc674b8f9940be0"
+    },
+    {
+      "path": "baseline.mts",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tools.md",
+      "helps": "The baseline measurement script.",
+      "hash": "sha256:7cf78c4d2dbef2282fd004cb89bb416db226762923af7ad8c6a7ec9c823b6f3f"
+    },
+    {
+      "path": "precision.mts",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tools.md",
+      "helps": "The graph precision measurement script.",
+      "hash": "sha256:8254fcb3e8bae5ea26ff955572002cb299b5daa1f6d3b1c8e2a80e3db6dfadd3"
+    },
+    {
+      "path": "ships/p1.SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The track ship record, kept in the common track records.",
+      "hash": "sha256:1d35f4f739205b86745bb79269248ef1edda4e60eadc18ff91f92ab5359897f0"
+    },
+    {
+      "path": "ships/p1.approved.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The hash-bound track approval receipt, kept verbatim in the track records.",
+      "hash": "sha256:78ca04b268a32bf8d262748462a78548022dafbf7e19355962d746e355e2c266"
+    },
+    {
+      "path": "ships/p1.proposed.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:5b7930670df62952009d9e4e4c72226463e4393274c9d0839692780f1515e8f6"
+    },
+    {
+      "path": "ships/p2a.SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The track ship record, kept in the common track records.",
+      "hash": "sha256:2328787e5a91167badbb9bdf035ce9959c1b54371f74a5152691aaa8e33020e7"
+    },
+    {
+      "path": "ships/p2a.approved.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The hash-bound track approval receipt, kept verbatim in the track records.",
+      "hash": "sha256:87cb53711a71d785f90f6400416d65a5d8bc8a9a2699e1945606353eca8fe682"
+    },
+    {
+      "path": "ships/p2a.proposed.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:996dfada595a4a983614fee911bcc9788992baca611c54e39a229741ab9b7b5a"
+    },
+    {
+      "path": "ships/p2c.SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The track ship record, kept in the common track records.",
+      "hash": "sha256:17ce29d5ac219c9e77c88aea8840dd34fd54928418753e9ee630b924be2efbca"
+    },
+    {
+      "path": "ships/p2c.approved.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The hash-bound track approval receipt, kept verbatim in the track records.",
+      "hash": "sha256:fb6e6054b1b7147f82df85ef286e025a320f28a3539c9eaec1364ee56363d973"
+    },
+    {
+      "path": "ships/p2c.proposed.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:b9a2a8e50f93a0f6752c5ff2a3e96826fe7cf265911aca2c74c0b8d981eedb70"
+    },
+    {
+      "path": "ships/p2d.SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The track ship record, kept in the common track records.",
+      "hash": "sha256:ed517894e1eac0313efcb39f5f1de9bcc1a67ea177f2fc2d57a61350f95bd0eb"
+    },
+    {
+      "path": "ships/p2d.approved.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/tracks.md",
+      "helps": "The hash-bound track approval receipt, kept verbatim in the track records.",
+      "hash": "sha256:6bf91593df52cc4ad23fd022d217cc39403eecf33f7c0437e5697857946e1641"
+    },
+    {
+      "path": "ships/p2d.proposed.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:33de5d73dd3bd112fa46c152609618cb06d81becc01c96ddd574f721f0107012"
+    },
+    {
+      "path": "audit-records/cycle1-code-graph.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:34c3c9e1386705d66559b3b26c7daa90520565d4e06df203b82dcece6f661269"
+    },
+    {
+      "path": "audit-records/cycle1-code-schemas.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:6b8fae9ff6ed84351bdbfeb757f663f73e7771562320a27a6254048105e81cbd"
+    },
+    {
+      "path": "audit-records/cycle1-cross-pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:ab6ebedbd9ff9fcf678a3a012e7924701e7326e48d01981d5ce8d9b4f41f6802"
+    },
+    {
+      "path": "audit-records/cycle1-security-resumed.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:4671ae23d48009318e2b110390142ca20b5556918a1359053274d8ccdf5ffd23"
+    },
+    {
+      "path": "audit-records/cycle1-security-retry.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:9aabca342e5be0ec7632436cbb5cfd4d057b27e36a1fc55d22da7efa53b2109c"
+    },
+    {
+      "path": "audit-records/cycle1-test-coverage.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:7bcff77d8026f9fa1692f92621e4feb84cec2aa31edf10d59599a2572e8fd16c"
+    },
+    {
+      "path": "audit-records/cycle2-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:9f54036516cd058ea48484eeb273a412cdf0a4a198fbd69c138e0eb1bcdabe40"
+    },
+    {
+      "path": "audit-records/cycle3-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:aa888409396d9504eb962073292d702fbc21a7b865c18e4c57f7c649bdbd0795"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/actual-ownership.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:d630e9944b17cbce24a2e050946c36176566eca87acab3e0843a13d6af105025"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/baseline-provenance.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:65b563aefbbcb138b5310ccd9725170882bbb079f2620d51fb81f9531f54945b"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/completion-code.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:d17646ff78f1385bb290781ab8fedb2015eba45517c4d25db819d768f43000ae"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/completion-code.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:0c5a95e75d74a3b1c9dde658879097c8310cc11209eed6a21e80e4f6304db95a"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/completion-coverage.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:80e57303cde66854678ef426ecd5390892aaab8650025fa0d2fc76b68e9e02a4"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/completion-coverage.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:10aa732b4407c4482eb61c4f46c3c5085bce38f1b63aff9139d2c69501c4d70c"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/completion-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:e3745ceefa599df96a6167e807dfcc7700e73a80c77c6df60d34ad86ce49648e"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/completion-security.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:d6bc944960c02e988126b1c397e42b256892294a5c57954baecbed411e55849d"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/cross-complete.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:70779e7d1a89c8b9110659557dc59ad856bffe79307bc07628bb8420c1114e34"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/cross-complete.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:05e9732f32b1067b5854bcfd4f90815b46b39786ecdabbeb182d1f1ac36050c3"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/cross.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:5f0fe225ef44c25a28ab093c749ec0c102c344da91ea8f662332c96aaceb72ee"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/cross.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:72d2de01d067cae1bbf2c13f90f445221b20a7b146cf3f47d98f2940dea70cc5"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/guard-and-source-witness.toon",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:5864d22da25fe859b486d5666d7cb56c75a9dd43968e046151c110524b8b234d"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/initial-code.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:ba31fcdaad05504cda0251096ddd3a737abf4cb87fe43700d52de68353bc1803"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/initial-code.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:a15e690db79b0e85b228f7b390755d6a370d9058c55aae04a189f5200083b978"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/initial-coverage.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:89b26e4b84bc8ba5e896bd3eb717ca4da9f1852e457effc10d2b75155ca720c0"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/initial-coverage.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:2662205f1df4b8cec66876edf52fa72d5ce76814d08c9920ebcc2cf92417d77c"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/initial-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/consolidation/audit-reviews.md",
+      "helps": "The reviewer result or witness, kept verbatim in the audit reviews.",
+      "hash": "sha256:d403abed8358a878b7840bdb6a6f309ecfb8a8678b7922edabdff2accaf647dd"
+    },
+    {
+      "path": "audit-records/2026-10-23-p2d-p2c-repair/initial-security.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:56571b0af1474a63dfff1549802fe0192788739e4519366c5b68d768468aaace"
+    },
+    {
+      "path": "campaign/",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:f4d1cb5e131b4634a07dee4ed4728ca057593b53880b8918a084af6e6a1dffcc",
+      "count": 185
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T16:26:00.015Z"
+}

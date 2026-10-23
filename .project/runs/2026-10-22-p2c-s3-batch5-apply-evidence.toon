@@ -1,0 +1,54 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[5]: agent-model-sweep,fix-instruction-conflicts,orca-engines-range,path-safety-hardening,shape-lite
+pitches[5]:
+  -
+    slug: agent-model-sweep
+    status: upgraded
+    outcomeBytes: 1493
+    v1Hash: "sha256:988732548d6f4a80a271a5a139199aa1e13bb2cde9a69addd3f6ff1d40a4cde0"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: fix-instruction-conflicts
+    status: upgraded
+    outcomeBytes: 1583
+    v1Hash: "sha256:a18bceb099a61c793ffc8fbbcb10973dd632085661f7d80c64dde727b4f0723f"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: orca-engines-range
+    status: upgraded
+    outcomeBytes: 1381
+    v1Hash: "sha256:d55e30d32180d7585eda7450daca4e1a0037a868b0bdf75c3f87a98b2bcf2424"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: path-safety-hardening
+    status: upgraded
+    outcomeBytes: 1534
+    v1Hash: "sha256:2425d1a9ef46fab071fff0bb4db8cc08906a2c32ae544aa0240e702dc20320d9"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: shape-lite
+    status: upgraded
+    outcomeBytes: 1363
+    v1Hash: "sha256:079933cf243f484bdb4cc0ea8531d8aec7a8be1bc0adb6db59070350f28c7f93"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+counts:
+  legacy: 26
+  partial: 0
+  upgraded: 20

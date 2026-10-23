@@ -1,0 +1,100 @@
+{
+  "schemaVersion": 1,
+  "slug": "pitch-compaction",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit-findings-final-disposition",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/index.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#what-downstream-pitches-can-now-build-on",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#version",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#c1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#c2-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-09-25T13:39:04.077Z"
+}

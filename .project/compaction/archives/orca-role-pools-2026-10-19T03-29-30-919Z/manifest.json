@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-role-pools",
+  "sourceRoot": ".project/pitches/orca-role-pools",
+  "archivedAt": "2026-10-19T03:29:30.921Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "42d660a19d95aa6390751b8abfd0a10f596c8b7b50caa96340df9565d3881268",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "8b1c9cdc39594fa1bc44c7ba4ca8d6d03b5212d55865b7df0daee11f6d6ed58f",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "06694ecf106a8e0ef9be8d79639cf8eceb7c7ad4e93aaa12e7c191789e7a028a",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "7fd0201c7040eda7db2fb8b4238c437dd465a06fb4717edf8812b8badae297d1",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "5169f167b2ce30bf27cc3414f90e051a6922a6536d6493c6bd4754773343a1f4",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "5edb91bdc8119b4d1973a496ffad6383019a8f0d818955ad873a2dcb24997ce9",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "629a9799305b7aac47d2fee2ef1b02f2804151605e05c22b961e710dc6edd3b3",
+      "mode": 420
+    }
+  }
+}

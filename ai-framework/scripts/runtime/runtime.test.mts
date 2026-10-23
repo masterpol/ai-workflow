@@ -1,18 +1,90 @@
 import assert from "node:assert/strict";
-import { copyFileSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
-import { spawnSync } from "node:child_process";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+const testDeps = createTestDeps();
+const { copyFileSync, linkSync, mkdtempSync, mkdirSync, readFileSync, readdirSync, realpathSync, rmSync, symlinkSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join } = testDeps.path;
 import { test } from "node:test";
-import { fileURLToPath } from "node:url";
 
-import { createNodeDeps } from "./node.mts";
+import { createNodeDeps, pendingChildPids, posixGroupIsRunning } from "./node.mts";
 import { createBunDeps } from "./bun.mts";
-import { loadWorkflowEnv, WORKFLOW_ENV_FILE } from "./env.mts";
+import { inspectWorkflowEnv, loadConfigEnv, loadWorkflowEnv, readLegacyFile, WORKFLOW_ENV_FILE } from "./env.mts";
 import { RUNNER_VAR, orcaMultiAgentEnabled, resolveRunner, selectRuntime } from "./select.mts";
 import type { RuntimeDeps } from "./types.mts";
+import { adapterNet, createTestDeps, spawnSync as rawSpawnSync, toonFixtureText, urlPath, type SpawnSyncLike } from "./test-helpers.mts";
+const delay = (ms: number): Promise<void> => createTestDeps().clock.sleep(ms);
 
-const here = fileURLToPath(new URL(".", import.meta.url));
+function spawnSync(command: string, args: string[], options: SpawnSyncLike = { encoding: "utf8" }) {
+  return rawSpawnSync(command, args, { ...options, encoding: "utf8", shell: false, windowsHide: true,
+    timeout: options.timeout ?? 10000, killSignal: "SIGKILL" });
+}
+
+async function portOpen(port: number): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = adapterNet.connect({ host: "127.0.0.1", port });
+    const finish = (value: boolean): void => { socket.destroy(); resolve(value); };
+    socket.setTimeout(150, () => finish(false));
+    socket.once("connect", () => finish(true));
+    socket.once("error", () => finish(false));
+  });
+}
+
+// The grandchild always stops itself; even a failed ownership regression awaits that
+// fallback before deleting the fixture. No detached or unref'd test workers.
+async function nestedCommand(deps: RuntimeDeps, mode: "timeout" | "output" | "early" | "graceful" | "early-ignored"): Promise<void> {
+  const dir = scratch();
+  const ready = join(dir, "ready.json");
+  const grandchild = join(dir, "grandchild.cjs");
+  const wrapper = join(dir, "wrapper.cjs");
+  writeFileSync(grandchild, [
+    "const fs = require('node:fs');",
+    "const server = require('node:net').createServer(s => s.end());",
+    "process.on('SIGTERM', () => {});",
+    "server.listen(0, '127.0.0.1', () => fs.writeFileSync(process.argv[2], JSON.stringify({ pid: process.pid, port: server.address().port })));",
+    "setTimeout(() => process.exit(0), 3500);",
+  ].join("\n"));
+  writeFileSync(wrapper, [
+    "const fs = require('node:fs');",
+    "require('node:child_process').spawn(process.execPath, [process.argv[2], process.argv[3]], { shell: false, windowsHide: true, stdio: ['graceful', 'early-ignored'].includes(process.argv[4]) ? 'ignore' : ['ignore', 'inherit', 'inherit'] });",
+    "const ready = setInterval(() => { if (!fs.existsSync(process.argv[3])) return; clearInterval(ready);",
+    "  if (process.argv[4].startsWith('early')) process.exit(0);",
+    "  if (process.argv[4] === 'output') process.stdout.write('x'.repeat(200000));",
+    "}, 10);",
+    "setTimeout(() => process.exit(0), 5000);",
+  ].join("\n"));
+  let port: number | undefined;
+  const before = pendingChildPids();
+  try {
+    let failure: (Error & { code?: string; ownerPid?: number }) | undefined;
+    let result;
+    try { result = await deps.child.run(deps.proc.execPath, [wrapper, grandchild, ready, mode], { timeoutMs: 1500, maxBufferBytes: 1000, killSignal: mode === "graceful" ? "SIGTERM" : "SIGKILL" }); }
+    catch (error) { failure = error as typeof failure; }
+    const receipt = JSON.parse(readFileSync(ready, "utf8"));
+    port = receipt.port;
+    const survived = await portOpen(port!);
+    if (failure) {
+      const cause = (failure as { cause?: { code?: string; message?: string } }).cause;
+      assert.equal(mode, "early", `a live owning wrapper must support cleanup (${failure.code}: ${cause?.code ?? ""} ${cause?.message ?? ""})`);
+      assert.equal(process.platform, "win32");
+      assert.equal(failure.code, "EPROCESSCLEANUP");
+      assert.ok(pendingChildPids().includes(failure.ownerPid!), "uncertain ownership stays observable");
+    } else {
+      assert.equal(survived, false, "the descendant server survived command completion");
+      assert.deepEqual(pendingChildPids(), before);
+      if (!mode.startsWith("early")) assert.equal(result?.errorCode, mode === "output" ? "ENOBUFS" : "ETIMEDOUT");
+    }
+  } finally {
+    if (port === undefined) {
+      try { port = JSON.parse(readFileSync(ready, "utf8")).port; } catch { /* launch may have failed */ }
+    }
+    const deadline = Date.now() + 5500;
+    while (Date.now() < deadline && ((port !== undefined && await portOpen(port)) || pendingChildPids().some(pid => !before.includes(pid)))) await delay(25);
+    if (port !== undefined) assert.equal(await portOpen(port), false, "bounded fixture descendant stopped");
+    assert.deepEqual(pendingChildPids(), before, "all fixture process handles closed");
+    rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+const here = urlPath(new URL(".", import.meta.url));
 import * as entry from "./entry.mts";
 import type { TestContext } from "node:test";
 const underBun = typeof (globalThis as unknown as { Bun?: unknown }).Bun !== "undefined";
@@ -20,6 +92,21 @@ const underBun = typeof (globalThis as unknown as { Bun?: unknown }).Bun !== "un
 function scratch(): string {
   return realpathSync(mkdtempSync(join(tmpdir(), "runtime-test-")));
 }
+
+function supportsFileSymlinks(): boolean {
+  const dir = scratch();
+  try {
+    const file = join(dir, "target");
+    writeFileSync(file, "");
+    symlinkSync(file, join(dir, "link"), "file");
+    return true;
+  } catch (error) {
+    if (process.platform === "win32" && ["EPERM", "EACCES"].includes((error as NodeJS.ErrnoException).code ?? "")) return false;
+    throw error;
+  } finally { rmSync(dir, { recursive: true, force: true }); }
+}
+const fileSymlinks = supportsFileSymlinks();
+const needsFileSymlink = { skip: fileSymlinks ? false : "file symlink privilege is unavailable on this Windows host" };
 
 const adapters: Array<[string, () => RuntimeDeps]> = [["node", () => createNodeDeps({})]];
 if (underBun) adapters.push(["bun", () => createBunDeps({})]);
@@ -73,7 +160,7 @@ for (const [name, make] of adapters) {
     const dir = scratch();
     try {
       const link = join(dir, "link");
-      symlinkSync(dir, link);
+      symlinkSync(dir, link, process.platform === "win32" ? "junction" : "dir");
       assert.equal(deps.fs.realpathSync(link), dir);
     } finally { rmSync(dir, { recursive: true, force: true }); }
   });
@@ -93,11 +180,22 @@ for (const [name, make] of adapters) {
     assert.deepEqual(async, sync);
   });
 
+  test(`${name} adapter: a child that exits without reading its input still reports its status (EPIPE is not a launch failure)`, () => {
+    const deps = make();
+    const input = "x".repeat(4 * 1024 * 1024);
+    assert.equal(deps.child.runSync(deps.proc.execPath, ["-e", "process.exit(4)"], { input }).status, 4);
+    assert.equal(deps.child.runBytesSync(deps.proc.execPath, ["-e", "process.exit(5)"], { input }).status, 5);
+    assert.throws(() => deps.child.runSync("/nonexistent/workflow-runner", [], { input }), /ENOENT/);
+  });
+
   test(`${name} adapter: timeout kills a hung child`, async () => {
     const deps = make();
     const result = await deps.child.run(deps.proc.execPath, ["-e", "setTimeout(()=>{},60000)"], { timeoutMs: 200 });
-    assert.equal(result.status, null);
-    assert.equal(result.signal, "SIGKILL");
+    assert.notEqual(result.status, 0);
+    if (process.platform !== "win32") {
+      assert.equal(result.status, null);
+      assert.equal(result.signal, "SIGKILL");
+    }
     assert.equal(result.errorCode, "ETIMEDOUT");
   });
 
@@ -108,13 +206,14 @@ for (const [name, make] of adapters) {
     assert.ok(result.stdout.length <= 1000 + 70000);
   });
 
-  test(`${name} adapter: a grandchild holding the pipe open does not outlast the timeout`, async () => {
-    const deps = make();
-    const script = "require('child_process').spawn('sleep',['6'],{stdio:['ignore','inherit','inherit'],detached:true}).unref(); setTimeout(()=>{},60000)";
-    const started = Date.now();
-    const result = await deps.child.run(deps.proc.execPath, ["-e", script], { timeoutMs: 300 });
-    assert.equal(result.errorCode, "ETIMEDOUT");
-    assert.ok(Date.now() - started < 3000, `waited ${Date.now() - started} ms`);
+  for (const mode of ["timeout", "output", "early", "graceful"] as const) {
+    test(`${name} adapter: descendant ownership after ${mode}`, { timeout: 15000 }, async () => {
+      await nestedCommand(make(), mode);
+    });
+  }
+
+  test(`${name} adapter: POSIX normal wrapper exit awaits an ignored-stdio descendant`, { skip: process.platform === "win32", timeout: 15000 }, async () => {
+    await nestedCommand(make(), "early-ignored");
   });
 
   test(`${name} adapter: clock is monotonic and io writes through`, () => {
@@ -127,7 +226,7 @@ for (const [name, make] of adapters) {
 }
 
 for (const [name, make] of adapters) {
-  test(`${name} adapter: extended fs surface behaves like node:fs`, async () => {
+  test(`${name} adapter: extended fs surface behaves like node:fs`, needsFileSymlink, async () => {
     const deps = make();
     const dir = scratch();
     const fs = deps.fs;
@@ -212,7 +311,8 @@ for (const [name, make] of adapters) {
     const deps = make();
     const quiet = deps.child.runSync(deps.proc.execPath, ["-e", "console.log('x'); console.error('y')"], { stdio: "ignore" });
     assert.deepEqual([quiet.status, quiet.stdout, quiet.stderr], [0, "", ""]);
-    const shell = deps.child.runSync("echo one && echo two 1>&2; exit 2", [], { shell: true });
+    const line = process.platform === "win32" ? "echo one&&echo two 1>&2&exit /b 2" : "echo one && echo two 1>&2; exit 2";
+    const shell = deps.child.runSync(line, [], { shell: true });
     assert.deepEqual([shell.status, shell.stdout.trim(), shell.stderr.trim()], [2, "one", "two"]);
     const asyncShell = await deps.child.run("echo hi", [], { shell: true });
     assert.equal(asyncShell.stdout.trim(), "hi");
@@ -229,9 +329,19 @@ for (const [name, make] of adapters) {
     assert.equal(slow.errorCode, "ETIMEDOUT");
   });
 
+  test(`${name} adapter: sync timeout defaults to SIGKILL even when SIGTERM is ignored`, () => {
+    const deps = make();
+    const script = "process.on('SIGTERM', () => {}); setTimeout(()=>{},60000)";
+    const result = deps.child.runSync(deps.proc.execPath, ["-e", script], { timeoutMs: 300 });
+    assert.equal(result.errorCode, "ETIMEDOUT");
+    assert.equal(result.signal, "SIGKILL");
+    const bytes = deps.child.runBytesSync(deps.proc.execPath, ["-e", script], { timeoutMs: 300 });
+    assert.equal(bytes.signal, "SIGKILL");
+  });
+
   test(`${name} adapter: maxBufferBytes stops a child that floods stdout`, () => {
     const deps = make();
-    const flood = deps.child.runSync("/bin/sh", ["-c", "head -c 20000000 /dev/zero"], { maxBufferBytes: 1024 * 1024 });
+    const flood = deps.child.runSync(deps.proc.execPath, ["-e", "process.stdout.write(Buffer.alloc(20000000));"], { maxBufferBytes: 1024 * 1024, timeoutMs: 5000 });
     assert.equal(flood.errorCode, "ENOBUFS");
     assert.ok(flood.stdout.length < 8 * 1024 * 1024, `buffered ${flood.stdout.length} chars`);
   });
@@ -306,7 +416,7 @@ test("the secret-bearing .env is never read for the runner or the Orca switch", 
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
-test("loadWorkflowEnv: process env wins, a missing file is a no-op, a symlink escaping the root is ignored", () => {
+test("loadWorkflowEnv: process env wins, a missing file is a no-op, a symlink escaping the root is ignored", needsFileSymlink, () => {
   const deps = createNodeDeps({});
   const root = scratch();
   const outside = scratch();
@@ -335,7 +445,7 @@ test("a settings file that is a directory, oversize or a FIFO contributes nothin
     assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {});
     assert.equal(entry.readRunner(root, {}), "node");
     rmSync(file);
-    if (spawnSync("mkfifo", [file]).status === 0) {
+    if (process.platform !== "win32" && spawnSync("mkfifo", [file]).status === 0) {
       assert.deepEqual(loadWorkflowEnv(deps.fs, deps.path, root, {}), {}); // would hang on a read
       assert.equal(entry.readRunner(root, {}), "node");
     }
@@ -459,7 +569,7 @@ process.stdout.write(typeof main);`);
   assert.equal(readFileSync(script, "utf8").includes("runDirect"), true);
 });
 
-test("direct invocation through a symlink executes once, and importing that symlink remains quiet", (t) => {
+test("direct invocation through a symlink executes once, and importing that symlink remains quiet", needsFileSymlink, (t) => {
   const { root, script } = commandFixture(t);
   const link = join(root, "command.mts");
   symlinkSync(script, link);
@@ -483,7 +593,7 @@ test("direct command reports missing Bun once when the selected runner is not on
   assert.deepEqual([result.status, result.stdout, result.stderr], [1, "", 'AI_WORKFLOW_RUNNER=bun but "bun" was not found on PATH\n']);
 });
 
-test("reports a nonexecutable Bun on PATH with a launch error", (t) => {
+test("reports a nonexecutable Bun on PATH with a launch error", { skip: process.platform === "win32" ? "POSIX executable permission semantics" : false }, (t) => {
   const { root, script } = commandFixture(t);
   const bin = join(root, "bin");
   mkdirSync(bin);
@@ -495,7 +605,7 @@ test("reports a nonexecutable Bun on PATH with a launch error", (t) => {
   assert.equal(result.stderr.trim().split("\n").length, 1);
 });
 
-test("runtime CLI invoked through a symlink executes the requested module", (t) => {
+test("runtime CLI invoked through a symlink executes the requested module", needsFileSymlink, (t) => {
   const { root, script } = commandFixture(t);
   const link = join(root, "cli.mts");
   symlinkSync(join(root, "ai-framework/scripts/runtime/cli.mts"), link);
@@ -529,7 +639,7 @@ test("Bun direct execution keeps the selected runtime and exit code in process",
   assert.equal(JSON.parse(result.stdout).runtime, "bun");
 });
 
-test("direct command preserves a terminating signal from a selected Bun child", { skip: !bunAvailable }, (t) => {
+test("direct command preserves a terminating signal from a selected Bun child", { skip: !bunAvailable || process.platform === "win32" }, (t) => {
   const { script } = commandFixture(t);
   const result = direct(script, ["signal"], { [RUNNER_VAR]: "bun" });
   assert.deepEqual([result.status, result.signal, result.stdout, result.stderr], [null, "SIGTERM", "", ""]);
@@ -548,4 +658,224 @@ test("guard: no any-typed escape hatches in the runtime", () => {
     if (!file.endsWith(".mts") || file.endsWith(".test.mts")) continue;
     assert.doesNotMatch(readFileSync(join(here, file), "utf8"), /:\s*any\b|\bas any\b/, `${file} uses any`);
   }
+});
+
+const visibleProc = "1 0 0:1 / /proc rw,nosuid,nodev,noexec - proc proc rw\n";
+function processStat(pid: string, state: string, group: number, threads = "1"): string {
+  const fields = [state, "1", String(group), ...Array(18).fill("0")];
+  fields[17] = threads; // field20, because state is field3
+  return pid + " (name with ) brackets) " + fields.join(" ");
+}
+
+test("POSIX cleanup distinguishes runnable members and threads from reaping-only zombies", () => {
+  const inspection = {
+    platform: "linux", probe: () => {}, pids: () => ["self", "11", "12"], mountinfo: () => visibleProc,
+    stat: (pid: string) => processStat(pid, pid === "11" ? "Z" : "S", 11),
+  };
+  assert.equal(posixGroupIsRunning(11, inspection), true, "a zombie leader does not hide a live member");
+  assert.equal(posixGroupIsRunning(11, { ...inspection, stat: pid => processStat(pid, "Z", 11) }), false);
+  for (const state of ["Z", "X", "x"]) {
+    assert.equal(posixGroupIsRunning(11, {
+      ...inspection, pids: () => ["11"], stat: pid => processStat(pid, state, 11, "2"),
+    }), true, "a dead leader with another thread cannot certify process termination");
+  }
+  for (const threads of ["0", "-1", "invalid", "9007199254740992"]) {
+    assert.throws(() => posixGroupIsRunning(11, {
+      ...inspection, pids: () => ["11"], stat: pid => processStat(pid, "Z", 11, threads),
+    }), /thread count/);
+  }
+});
+
+test("POSIX cleanup refuses partial procfs visibility even with a visible zombie", () => {
+  const inspection = {
+    platform: "linux", probe: () => {}, pids: () => ["11"],
+    stat: (pid: string) => processStat(pid, "Z", 11), mountinfo: () => visibleProc,
+  };
+  for (const hidepid of ["1", "2", "4", "noaccess", "invisible", "ptraceable"]) {
+    assert.throws(() => posixGroupIsRunning(11, {
+      ...inspection, mountinfo: () => visibleProc.replace("proc rw", "proc rw,hidepid=" + hidepid),
+    }), /complete \/proc visibility/, "a visible zombie cannot prove that hidden members exited");
+  }
+  assert.throws(() => posixGroupIsRunning(11, {
+    ...inspection, mountinfo: () => visibleProc + "2 1 0:2 / /proc/12 ro - tmpfs tmpfs ro\n",
+  }), /complete \/proc visibility/);
+  assert.throws(() => posixGroupIsRunning(11, { ...inspection, mountinfo: () => "" }), /complete \/proc visibility/);
+  assert.equal(posixGroupIsRunning(11, {
+    ...inspection, mountinfo: () => visibleProc.replace("proc rw", "proc rw,hidepid=off"),
+  }), false);
+});
+
+test("POSIX cleanup refuses invisible or unreadable groups, but handles processes disappearing", () => {
+  const absent = (): never => { throw Object.assign(new Error("no process"), { code: "ESRCH" }); };
+  const empty = { platform: "linux", probe: () => {}, pids: () => [] as string[], stat: () => "", mountinfo: () => visibleProc };
+  assert.throws(() => posixGroupIsRunning(11, empty), /members cannot be inspected/, "hidepid is not an exit receipt");
+  assert.throws(() => posixGroupIsRunning(11, { ...empty, pids: () => ["11"], stat: () => {
+    throw Object.assign(new Error("access denied"), { code: "EACCES" });
+  } }), { code: "EACCES" });
+  assert.throws(() => posixGroupIsRunning(11, { ...empty, pids: () => ["11"], stat: () => "truncated" }), /Unable to verify/);
+  let probes = 0;
+  assert.equal(posixGroupIsRunning(11, { ...empty, probe: () => { if (++probes > 1) absent(); }, pids: () => ["11"], stat: absent }), false);
+  assert.equal(probes, 2, "a disappearing enumeration member still requires confirmation that the group exited");
+});
+
+test("every deps object owns its child methods, so replacing one in a test cannot leak into another", () => {
+  const first = createNodeDeps();
+  const second = createNodeDeps();
+  assert.notEqual(first.child, second.child);
+  first.child.runSync = () => ({ status: 9, signal: null, stdout: "fake", stderr: "" });
+  assert.equal(second.child.runSync(process.execPath, ["-e", "process.stdout.write('real')"]).stdout, "real");
+  if (process.versions.bun) assert.notEqual(createBunDeps().child, createBunDeps().child);
+});
+
+// ---- loadConfig reader branches (loadConfigEnv): TOON-first, legacy fallback, fail closed ----
+const TOON_FILE = "ai-workflow.toon";
+const toonText = (runner: string, multiAgent: boolean): string =>
+  toonFixtureText().replace("runner: node", `runner: ${runner}`).replace("multiAgent: false", `multiAgent: ${multiAgent}`);
+
+test("loadConfig branch: loadConfigEnv takes runner and switch from ai-workflow.toon; process env wins; legacy-only roots still work", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, TOON_FILE), toonText("bun", true));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" });
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, { [RUNNER_VAR]: "node", X: "1" }), { [RUNNER_VAR]: "node", AI_WORKFLOW_ORCA_MULTI_AGENT: "true", X: "1" });
+    assert.equal(entry.readRunner(root, {}, deps), "bun");
+    assert.equal(orcaMultiAgentEnabled(root, deps, {}), true);
+    const legacyOnly = scratch();
+    try {
+      writeFileSync(join(legacyOnly, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }));
+      assert.deepEqual(loadConfigEnv(deps.fs, deps.path, legacyOnly, {}), loadWorkflowEnv(deps.fs, deps.path, legacyOnly, {}), "missing TOON: identical to the legacy reader");
+      assert.equal(entry.readRunner(legacyOnly, {}, deps), "bun");
+    } finally { rmSync(legacyOnly, { recursive: true, force: true }); }
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("loadConfig branch: TOON beats a disagreeing legacy file; an invalid TOON contributes nothing and never falls back to legacy", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: true }));
+    writeFileSync(join(root, TOON_FILE), toonText("node", false));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "node", AI_WORKFLOW_ORCA_MULTI_AGENT: "false" });
+    for (const body of ["schemaVersion: 99\n", "garbage ::\n  x", ""]) {
+      writeFileSync(join(root, TOON_FILE), body);
+      assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, { X: "1" }), { X: "1" }, JSON.stringify(body));
+      assert.equal(entry.readRunner(root, {}, deps), "node", "legacy bun is not read");
+      assert.equal(orcaMultiAgentEnabled(root, deps, {}), false);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("loadConfig branch: a symlinked ai-workflow.toon is ignored without reading its target, then a regular one wins over legacy", needsFileSymlink, () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  const outside = scratch();
+  try {
+    writeFileSync(join(outside, "stolen"), toonText("bun", true));
+    symlinkSync(join(outside, "stolen"), join(root, TOON_FILE));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), {}, "refused TOON, no legacy file");
+    rmSync(join(root, TOON_FILE));
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun" }));
+    writeFileSync(join(root, TOON_FILE), toonText("node", false));
+    assert.equal(loadConfigEnv(deps.fs, deps.path, root, {})[RUNNER_VAR], "node", "a valid regular TOON file wins over the legacy file");
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("loadConfig branch: selectRuntime reads the runner from ai-workflow.toon and the env var still beats it", async () => {
+  const root = scratch();
+  try {
+    writeFileSync(join(root, TOON_FILE), toonText("bun", false));
+    if (underBun) assert.equal((await selectRuntime(root, {})).runtime, "bun");
+    else await assert.rejects(selectRuntime(root, {}), /requires running under Bun/);
+    assert.equal((await selectRuntime(root, { [RUNNER_VAR]: "node" })).runtime, "node");
+    writeFileSync(join(root, TOON_FILE), "schemaVersion: 99\n");
+    assert.equal((await selectRuntime(root, {})).runtime, "node", "invalid TOON selects the default runner");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("legacy settings reader is pinned: a file swapped for a FIFO or an out-of-root symlink after inspection is never read", needsFileSymlink, () => {
+  const base = createNodeDeps({});
+  const root = scratch();
+  const outside = scratch();
+  const file = join(root, WORKFLOW_ENV_FILE);
+  try {
+    writeFileSync(join(outside, "big.json"), ENV_JSON({ [RUNNER_VAR]: "bun", pad: "x".repeat(2_000_000) }));
+    for (const kind of ["fifo", "symlink"]) {
+      if (kind === "fifo" && (process.platform === "win32" || spawnSync("mkfifo", [join(outside, "probe")]).status !== 0)) continue;
+      rmSync(file, { force: true });
+      writeFileSync(file, ENV_JSON({ [RUNNER_VAR]: "node" }));
+      let swapped = false;
+      const swap = (): void => {
+        if (swapped) return;
+        swapped = true;
+        rmSync(file);
+        if (kind === "fifo") spawnSync("mkfifo", [file]); else symlinkSync(join(outside, "big.json"), file);
+      };
+      // Swap the leaf right after the first look at it: a check-then-read reader would follow the swap.
+      const racing: RuntimeDeps["fs"] = { ...base.fs,
+        lstatSync: (p: string) => { const stat = base.fs.lstatSync(p); if (p === file) swap(); return stat; },
+        statSync: (p: string) => { const stat = base.fs.statSync(p); if (p === file) swap(); return stat; } };
+      assert.deepEqual(loadConfigEnv(racing, base.path, root, {}), {}, kind);
+      assert.equal(inspectWorkflowEnv(racing, base.path, root).status === "valid", false, kind);
+    }
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("readLegacyFile: a leaf replaced by a different regular file (hard link) after the realpath check is refused by the open-time dev/ino pin", () => {
+  const base = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, "a.json"), '{"a":1}');
+    writeFileSync(join(root, "other.json"), '{"evil":1}');
+    const realRoot = base.fs.realpathSync(root);
+    const file = join(realRoot, "a.json");
+    let swapped = false;
+    const racing: RuntimeDeps["fs"] = { ...base.fs, realpathSync: (p: string) => {
+      const out = base.fs.realpathSync(p);
+      if (!swapped && p === file) { swapped = true; rmSync(file); linkSync(join(realRoot, "other.json"), file); }
+      return out;
+    } };
+    const result = readLegacyFile(racing, base.path, root, "a.json");
+    assert.equal(swapped, true, "the race fired");
+    assert.deepEqual(result, { status: "refused", reason: "changed between inspect and open" });
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("readLegacyFile: symlink leaf, FIFO, directory and oversize are refused; a plain file is read; absent is missing", needsFileSymlink, () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  const outside = scratch();
+  try {
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "a.json").status, "missing");
+    writeFileSync(join(root, "a.json"), "{}");
+    assert.deepEqual(readLegacyFile(deps.fs, deps.path, root, "a.json"), { status: "ok", text: "{}" });
+    writeFileSync(join(outside, "x.json"), "{}");
+    symlinkSync(join(outside, "x.json"), join(root, "link.json"));
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "link.json").status, "refused");
+    writeFileSync(join(root, "big.json"), "#".repeat(70 * 1024));
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "big.json").status, "refused");
+    mkdirSync(join(root, "dir.json"));
+    assert.equal(readLegacyFile(deps.fs, deps.path, root, "dir.json").status, "refused");
+    if (process.platform !== "win32" && spawnSync("mkfifo", [join(root, "pipe.json")]).status === 0) {
+      assert.equal(readLegacyFile(deps.fs, deps.path, root, "pipe.json").status, "refused"); // would hang on a blocking read
+    }
+    // A stat that lies about the size cannot bypass the cap: the read itself is bounded.
+    const lying: RuntimeDeps["fs"] = { ...deps.fs, lstatSync: (p: string) => { const stat = deps.fs.lstatSync(p); return p.endsWith("big.json") ? Object.assign(Object.create(Object.getPrototypeOf(stat)), stat, { size: 10, isSymbolicLink: () => false, isFile: () => true }) : stat; },
+      fstatSync: (fd: number) => { const stat = deps.fs.fstatSync(fd); return Object.assign(Object.create(Object.getPrototypeOf(stat)), stat, { size: 10, isFile: () => true }); } };
+    assert.equal(readLegacyFile(lying, deps.path, root, "big.json").status, "refused");
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("loadConfigEnv: a throwing loader contributes nothing and never falls back to the legacy file", () => {
+  const deps = createNodeDeps({});
+  const root = scratch();
+  try {
+    writeFileSync(join(root, WORKFLOW_ENV_FILE), ENV_JSON({ [RUNNER_VAR]: "bun" }));
+    assert.deepEqual(loadConfigEnv(deps.fs, deps.path, root, {}), { [RUNNER_VAR]: "bun" }, "no TOON: legacy fallback applies");
+    const throwing = { ...deps.fs, realpathSync: (): never => { throw new TypeError("boom"); } } as RuntimeDeps["fs"];
+    // realpath throwing is a refusal inside loadConfig (not "missing"), so the legacy file is not consulted.
+    assert.deepEqual(loadConfigEnv(throwing, deps.path, root, { X: "1" }), { X: "1" });
+    const exploding = new Proxy(deps.fs, { get: (target, key) => { if (key === "constants") throw new Error("boom"); return Reflect.get(target, key); } });
+    assert.deepEqual(loadConfigEnv(exploding, deps.path, root, { X: "1" }), { X: "1" });
+  } finally { rmSync(root, { recursive: true, force: true }); }
 });

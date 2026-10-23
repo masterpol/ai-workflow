@@ -1,0 +1,98 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: upstream-project-drift
+sourceProof:
+  archiveDirectory: upstream-project-drift-2026-10-19T03-31-00-981Z
+  manifestHash: "sha256:476a925907b0262c63f1804b836bc5c6f070ae3df83160b6fc73218518f630b0"
+  sourceBytes: 93757
+  verifiedFiles: 9
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/upstream-project-drift.supplement.md"
+  destination: ".project/records/legacy-upgrades/upstream-project-drift.md"
+  hash: "sha256:91578593398fa96587540f7473e0e79b642a4254ec55df26207771b76c0f1472"
+payload:
+  ledgerHash: "sha256:92bab9dbb13800154087962f25eec10d4be7fa151ae4e17622a0bd021716f9de"
+  legacyEntryHash: "sha256:08d7b0acc1d4582304dd87c26ced444e32933c28e5822504323c2dcff727b1d6"
+  bindings:
+    ".project/analysis/2026-10-16-upstream-drift-ledger-analysis.md": "sha256:8b2adc6f16fcd2a7dc24a718aa829ff0d55751c2e216cf2c25ecc763d7f830e6"
+    ".project/records/legacy-upgrades/upstream-project-drift.md": "sha256:91578593398fa96587540f7473e0e79b642a4254ec55df26207771b76c0f1472"
+  mapping:
+    schemaVersion: 2
+    sections[21]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scopes",behavior,merged,".project/records/legacy-upgrades/upstream-project-drift.md#delivered-scope","What each of S0 to S10 delivered, the 178-row ledger and the 131 of 178 sync match.","sha256:2e73383971031178c3f624e79926697a4e9e180c4ec272327141fa33aedf82f9"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/upstream-project-drift.md#scope-and-limits",Projects untouched with exact HEADs; the S3 pull-forward and added S10 deviations.,"sha256:3b8bd3c57055bf9392f8f4b78e4fed08dc82a75d65bcb3cee8acc925ecce501c"
+      "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#scope-and-limits","Resolved holes plus the three new risks: flaky tests, 2.22.x attempts and the Codex update prompt.","sha256:8807fc8d55ce928449e4e620c49c0e66afb3c3cc2bcdb2a595fc138ddbfe08c6"
+      "SHIPPED.md#verify-re-run-2026-10-16-at-the-unified-toon-config-head-which-contains-this-pitch",behavior,merged,".project/records/legacy-upgrades/upstream-project-drift.md#verification-history",Later re-run counts at the unified-toon-config head and the absent build tooling.,"sha256:4dbc10030f5174ecfddf5d149a569aaf0d4922993104db6eb0fcf8a647c02383"
+      "SHIPPED.md#open-at-close",limit,merged,".project/records/legacy-upgrades/upstream-project-drift.md#release-state-and-open-items","Release on a feature branch, merge or PR decisions open, dry-run-only sync.","sha256:6e079d7659bc689c3f02a666134b4144555638488239834fb4445a9eaaa94e56"
+      "SHIPPED.md#followups-generated",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#release-state-and-open-items","Pointer to the backlog section holding the leftovers, with the items summarised.","sha256:48bae5312448af29b311103277ab3c519cc3948235998ead89dcdcbbb41ada4f"
+      "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/upstream-project-drift.md#scope-and-limits",Four no-gos including the three sibling-pitch boundaries.,"sha256:11e295235bcafe5d04f57738b1f514882633c5ed698110f81b6b99d9464c552a"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#scope-and-limits","Grammar choice, orca-vendors.json, graphify edit, the 1.4.224 floor and risks pushed to plan.","sha256:ea0218c37862b2838f523ba577990e63b7c6de59bf71c17c7fb064797de2c325"
+      "deviations.md#d1-plan-s3-rewires-the-version-call-sites-now",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations",S3 rewired the version call sites now so pitch 3 only changes the function body.,"sha256:49f6e9f2fc3bdc406b0194e276930446c311458a9c160fcd3c1e964011e7a723"
+      "deviations.md#d2-plan-climbing-ownership-fixes-stay-in-this-pitch",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations",Ownership fixes stay; orca-policy shape and grader fixtures left to role pools.,"sha256:994e98dd0e1eacfb96f57c4b42c9309f35cfda89e9a7b009d05fb3fa43a435a6"
+      "deviations.md#d3-s0-2026-10-16-s8-and-s1-shrink-most-climbing-docsrules-are-project-adaptations",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations","Why S8 and S1 shrank: climbing docs and rules are project adaptations.","sha256:8b54a00ec0969cfd4d4758c10ccf8efae17bae089da71f5eb29a244a2288b64f"
+      "deviations.md#d4-s0-rn-is-mostly-a-runner-rewrite-not-improvements",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations","47 RN rows are runner text; the ten real improvements.","sha256:26aca38d4d360f613e76740300ed1afe39e2423779ecfb2af4272f7915dee9c6"
+      "deviations.md#d5-build-2026-10-16-interim-exact-orca-pin-14224-before-s3",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations",The interim exact 1.4.224 pin and why it was needed.,"sha256:6a8ccd1925d10c36e5f997d8fc66fe4a95066526e1a2c24aee57c715c45a7d52"
+      "deviations.md#d6-build-2026-10-16-s3-pulled-forward-ahead-of-s2",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations",Orca auto-updated to 1.4.227 and forced S3 ahead of S2.,"sha256:06112c3bf58da75450487f6ea05943e4b557bb97fcd6b58bf92219e76eaf707a"
+      "deviations.md#d7-s2-2026-10-16-climbings-runtime-needed-three-fixes-before-base-could-take-it",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations","Three runtime fixes before the climbing copy worked on macOS and Bun, and the Linux check.","sha256:c383bc28f77b499247e879983ebf878459effe22809924e088a267e54d1736ef"
+      "deviations.md#d8-build-2026-10-16-new-scope-s10-free-opencodes-port-before-the-first-opencode-worker",behavior,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations",Why S10 exists and what opencode-service free does.,"sha256:0bab993fa8701d6b7172b8fd451179ca3204d81a6d4a51b20c7a2faa396e59e7"
+      "deviations.md#d9-build-2026-10-16-s3-gap-found-in-s4-s5-by-the-coordinator-s7-applied-without-orca-evidence",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations","S3 gap, S5 by the coordinator, S7 applied by hand and the regex revert.","sha256:813564290f2ecea541b0fbb7aadcf2526f169ec818491eb24343676a2a2c12aa"
+      "log.md#2026-10-16-s0",behavior,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-log-and-lessons",Branch provenance and the already-present OpenCode V2 fix.,"sha256:1b6dfeca0ab5a341673e2a8c3a8b4b7822d2060cf7555885e79fb1766f2e2ccb"
+      "log.md#2026-10-16-baseline-before-s1-s8-node-v24210-bun-143",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#verification-history",Baseline counts and the pre-existing upgrade and timeout failures.,"sha256:7d0da6163336d1da0e384f3e30022e7fbd4961fbb7b045b378becfe37b1b385f"
+      "log.md#2026-10-16-opencode-v2-token-consumption-fix-300fa80-validated",behavior,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-log-and-lessons",Live OpenCode v2.0.29 validation and the stale plugins in LAH and RN.,"sha256:17b6d0eb9cee90da4913d2787ba1997c9b307025b9541272d3ae541d9aafc98c"
+      "log.md#2026-10-16-wave-2-start-orca",know-how,merged,".project/records/legacy-upgrades/upstream-project-drift.md#build-log-and-lessons","Wave outcomes, Orca gating failures, reconcile ordering, the runner env hang and release numbers.","sha256:ab6dc5484e115ef92d934e4521dfebac70fd05f7fa62a2888220397a7fcd7300"
+    otherFiles[9]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:8bcbe637d7707a0e5096fb07048f8955193f7718747bd88e7a9d676602568af6"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#delivered-scope"
+        helps: "Preserves scope table, verification, release state and followups across the supplement sections."
+      -
+        path: checkpoint.md
+        hash: "sha256:3c9cbeff695884be6fe05f30fe90e5238cf1ccc9ead16d2aab1358a3cef14ccf"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations"
+        helps: "Preserves the mid-build commit list, rules learned, retained Codex terminals and the open owner decisions."
+      -
+        path: deviations.md
+        hash: "sha256:76664b1a78095873c3612f9f00d04cabc5358037febdeb8accf302113afe3423"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations"
+        helps: Preserves deviations D1 to D9.
+      -
+        path: drift-ledger.md
+        hash: "sha256:43777d94ab41bbf64e4d54a59b32da19e6e5abd36f69dfb85919f98ea7b5283b"
+        disposition: merged
+        destination: ".project/analysis/2026-10-16-upstream-drift-ledger-analysis.md"
+        helps: "Byte-for-byte home of the 178-row ledger, method, summary, relocation recipe, S8 notes and S9 sync proof."
+      -
+        path: hill.md
+        hash: "sha256:b9e9a58c1b9d1357f689101b426b157560960b992fb703d71a5f476a3f0adf7e"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:abbdf87265c0ec7352ceab7fac1f0d2ddb479c35533484ed76cb6c31e824cc28"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#build-log-and-lessons"
+        helps: "Preserves baseline, V2 validation, Orca wave outcomes, S9 results and lessons."
+      -
+        path: pitch.md
+        hash: "sha256:75b1598c055249c93ac5bddb8778e427a844cd85876f4d62e08bde9958466780"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#problem-and-pitch"
+        helps: "Preserves the problem, drift inventory, rabbit holes, critique findings and the bet disposition."
+      -
+        path: plan.md
+        hash: "sha256:4725398c86cb45be25c34275bfefaf2c70a3571ba253fdc15376506d3a63d3cb"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#delivered-scope"
+        helps: "Preserves measured drift, scope table with dispatch models, exit criteria, risks, waves and plan-time deviations."
+      -
+        path: sync-proof.json
+        hash: "sha256:6f7c8207b18e1a0131047736d15caee13f9ac4e1920f3aa41500ef7f1f99840a"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/upstream-project-drift.md#drift-ledger-and-sync-proof"
+        helps: "Preserves per-project rows, matches, dry-run counts and the mismatch classes."
+  outcomeRecord: "---\nslug: upstream-project-drift\nshipped: 2026-10-16\nschemaVersion: 1\n---\n# upstream-project-drift\n\nImprovements fixed by hand in three downstream projects were classified in a 178-row ledger and the portable ones taken into the base (release 2.23.0).\nThe base gained task ownership, runtime child ownership, hook hardening, a strict Orca minimum version and an OpenCode port step.\nNo project was synced or edited; the ledger and sync proof hand the rollout to workflow-v3-rollout.\n\n- outcome: The base absorbed the portable downstream fixes, and the remaining drift is classified for the rollout.\n- docs: [drift ledger analysis](.project/analysis/2026-10-16-upstream-drift-ledger-analysis.md)\n- decisions: [build decisions and deviations](.project/records/legacy-upgrades/upstream-project-drift.md#build-decisions-and-deviations)\n- knowledge: [reconcile every worker of a wave](.project/knowledge/patterns/reconcile-every-worker-of-a-wave-before-committing-any-scope.md)\n- code: [opencode service](ai-framework/scripts/opencode-service.mts), [orca preflight](ai-framework/scripts/orca-preflight.mts), [runtime node](ai-framework/scripts/runtime/node.mts)\n- verification: [verification history](.project/records/legacy-upgrades/upstream-project-drift.md#verification-history)\n- followups: [release state and open items](.project/records/legacy-upgrades/upstream-project-drift.md#release-state-and-open-items), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/upstream-project-drift.md)\n"

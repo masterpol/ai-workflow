@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "test-execution-performance",
+  "sourceRoot": ".project/pitches/test-execution-performance",
+  "archivedAt": "2026-10-22T02:43:33.899Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "f6b13390949adb27789dd7f89151a20a99d3e3b9410f55e6dad50fc827b3be0c",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "862fdc0a22965ad57f99a81ec7149b55daa29be25c431dfbb2eb56b4e2db204b",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "a88c20e9ad74293a67bede761a5bab67b841d36aab6101125dbfac56b788842b",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "337a6936ba8501095a6d9a42c1b97acc53c89d39086e7f61e17e9d2cef47bf37",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "6c4bf77a9444c03fc26244b6e193f69bf6da4327bfc9a05afd336894aa43fade",
+      "mode": 420
+    },
+    "measurements.md": {
+      "hash": "43b09daf522908bb1423380b0be7d186d978a4c7f9956d14cdfe7fe86c3559ab",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "d1ac0bba9f23c87ef4386cd31d5b1167d6d07a9c0ed776e265fcd71b0085a7bc",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "e052dea3dbb4da7bb72ec888d4cd83e9a25836225b715fd1562dffe18df4d1ca",
+      "mode": 420
+    },
+    "research.md": {
+      "hash": "4f4cc59d4555cb12f46e847ec54c6c37979c4be7b3fcf85e3df3120677d06cc3",
+      "mode": 420
+    }
+  }
+}

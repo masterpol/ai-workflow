@@ -1,4 +1,5 @@
 import { recordEvent } from "../../ai-framework/hooks/scripts/token-consumption.mts";
+import { captureWorkflowEvent } from "../../ai-framework/hooks/scripts/workflow-capture.mts";
 
 // --- V1 types (kept for the legacy server() entrypoint) ---
 interface V1ToolInput { tool?: unknown; callID?: string; sessionID?: string; args?: { name?: unknown } }
@@ -50,6 +51,11 @@ interface V2PluginContext {
 }
 
 // --- Shared helpers ---
+async function recordCapture(payload: unknown, directory: string): Promise<void> {
+  try { await captureWorkflowEvent("opencode", payload, directory); }
+  catch { /* Capture failure must not interrupt the host or token reporting. */ }
+}
+
 async function recordSkillUse(skill: string, callID: string | undefined, sessionID: string | undefined, directory: string): Promise<void> {
   try {
     await recordEvent({
@@ -102,6 +108,7 @@ async function tokenConsumptionV1(ctx: V1PluginContext) {
       const skill = typeof input.args?.name === "string" ? input.args.name : null;
       if (!skill) return;
       await recordSkillUse(skill, input.callID, input.sessionID, directory);
+      await recordCapture({ type: "tool.execute.after", data: { tool: "skill", sessionID: input.sessionID, input: { name: skill } } }, directory);
     },
     event: async ({ event }: { event?: V1BusEvent }) => {
       if (event?.type !== "message.updated") return;
@@ -134,6 +141,7 @@ async function tokenConsumptionV2(ctx: V2PluginContext): Promise<() => void> {
     const skill = typeof event.input?.name === "string" ? event.input.name : null;
     if (!skill) return;
     await recordSkillUse(skill, event.id, event.sessionID, directory);
+    await recordCapture({ type: "tool.execute.after", data: { tool: "skill", sessionID: event.sessionID, input: { name: skill } } }, directory);
   });
 
   // Assistant completions are reported from the event stream so token/cost data is authoritative.
@@ -146,6 +154,7 @@ async function tokenConsumptionV2(ctx: V2PluginContext): Promise<() => void> {
             if (d.assistantMessageID && typeof d.agent === "string" && d.model?.id && d.model?.providerID) {
               steps.set(d.assistantMessageID, { agent: d.agent, model: d.model });
             }
+            await recordCapture(event, directory);
             continue;
           }
 
@@ -168,6 +177,7 @@ async function tokenConsumptionV2(ctx: V2PluginContext): Promise<() => void> {
             );
             steps.delete(d.assistantMessageID);
           }
+          await recordCapture(event, directory);
         } catch {
           // Each event is handled independently; one malformed event must not kill the stream.
         }

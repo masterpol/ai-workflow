@@ -1,0 +1,42 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[2]: instruction-compression,unified-toon-config
+sourceBytes: 360817
+sourceFiles: 26
+requiredSections: 55
+retainedSections: 55
+otherFilesAccounted: 26
+retainedOtherFiles: 26
+omissions:
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[2]:
+  -
+    slug: instruction-compression
+    payloadHash: "sha256:0c278c46a7a90acc0f1a8042296c17791357b4932e916a497aa5b1f142b66c09"
+    supplementHash: "sha256:4e782ce3cffdb5d35bf854b08041a819d68ab78783158de4fde49e7a97e897ac"
+    sourceProof:
+      archiveDirectory: instruction-compression-2026-10-19T03-31-38-824Z
+      manifestHash: "sha256:d3061986ccb9ebe1a146d323559c2c6be2c2d10162735d33b3a360f59ae1acb4"
+      sourceBytes: 173715
+      verifiedFiles: 20
+    recordBytes: 1920
+  -
+    slug: unified-toon-config
+    payloadHash: "sha256:6af8de5437a044a56d4a8f4d1ac82a5ed2cd5c9dc27df9b69d0a4122224a96aa"
+    supplementHash: "sha256:9d9af4bd8490674c78de800376673f435801a2769c9e9fdbfd46e44df2819cfd"
+    sourceProof:
+      archiveDirectory: unified-toon-config-2026-10-19T03-30-26-236Z
+      manifestHash: "sha256:e88d6bd88e1e4eb6b11a9e2cc6c289280de193f087a6f6e12681754dbf33dbef"
+      sourceBytes: 187102
+      verifiedFiles: 6
+    recordBytes: 1844
+validation: "{\"slug\":\"instruction-compression\",\"coverage\":1,\"sections\":33,\"otherFiles\":20,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":1920,\"recordCap\":3000,\"supplementBytes\":31352,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"unified-toon-config\",\"coverage\":1,\"sections\":22,\"otherFiles\":6,\"omissions\":{},\"acceptedGaps\":[],\"recordBytes\":1844,\"recordCap\":3000,\"supplementBytes\":26854,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"newKnowledgeEntries\":0,\"sourceArchivesReopened\":false}"
+rehearsal: "instruction-compression: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 20 neighbouring done-work entries byte-identical\nunified-toon-config: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 20 neighbouring done-work entries byte-identical\nRehearsal: 2 generated index rows, 2 upgraded slugs, retired narratives absent, neighbouring done-work entries byte-identical; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 21
+  partial: 0
+  upgraded: 25
+  total: 46
+sourceArchivesReopenedForRehearsal: false

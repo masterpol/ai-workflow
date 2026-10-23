@@ -1,130 +1,231 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "project-state-report",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#report-contract-and-authorities",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:4ca6978ff95b2ccc64f9e6acef5fccf98e9a3702bf2798b7f76eb4cb0cb955d7"
     },
     {
       "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:0c7498e79dc4b61a40a438037e1b24ddbb32580968a6230ede6c1fb2962f406b"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:05598853b5e79ea24fe1e98ca171b43281fb84f55f6d8742d30634245bf9485d"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#report-contract-and-authorities",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:de8caa126b0ce3438fa29d44fc069598c4fae2d5901282dd010920da42866118"
     },
     {
       "source": "SHIPPED.md#deviations-that-changed-the-plan-see-deviationsmd",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:b65687d0f856dbe4461dac380b6262b3f4a4de9c8ff090ffee4f9d99fdae55fb"
     },
     {
       "source": "SHIPPED.md#audit-findings-final-disposition",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:05b0d25609322c352c414173ee2e77155d1ee8566c016533404e084351f85e89"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/index.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#followups-knowledge-and-later-history",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:a19e54c436624cdef81c3df18eb3cd833562b8b251a304ed90933e51a19949d8"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#followups-knowledge-and-later-history",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:fb310f7b98936aae472dfaa07694ad39183bf58a5cb39253cfb8e3b439c62b3f"
     },
     {
       "source": "SHIPPED.md#version",
-      "status": "extracted",
-      "destination": "CHANGELOG.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#followups-knowledge-and-later-history",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:b6715a9052a50395eef66444d8992abfb37cf026a06e48742106ef16f281704d"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-1",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:fbfd94c6e035821cd98825479dcc1fa34a9005386b7198cb3d9bc7a45fb65849"
     },
     {
       "source": "audit-cycle-2.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/hardening-a-shared-reader-made-its-writer-destructive.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-2-and-destructive-reader-regression",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:7781be90e67046e24d9ba7bc8a7e3d58a361e01512f03533288a6a3051224111"
     },
     {
       "source": "audit-cycle-3.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:25e783eb38d6dfc4896b43582cf6d0070cbedc19bbdbddfa34b99ea4384b2058"
     },
     {
       "source": "deviations.md#t1",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:034a60ee06df878c233c749e258d9e9c5b577a6f2ecce262e63c80ebcc0d85e5"
     },
     {
       "source": "deviations.md#t2",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:3f118df7b98ad092b1da5db3bcda55781a0c19726399a1dbe4cc0a9f51a44d5d"
     },
     {
       "source": "deviations.md#audit-cycle-1-scope-changes-made-while-fixing",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:0bc9f3b188ebc1989f97ad4dfbcdd8c1d18365f4891bb65d8f451e9b60c7408b"
     },
     {
       "source": "log.md#2026-09-25-t1-built",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#build-verification-and-test-caught-defects",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:b571acc137a9b68286f84d5058334001f340a51368637317f396235300f36515"
     },
     {
       "source": "log.md#2026-09-25-t2-built",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/project-state-report-design.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:922645ae182c1ce4fcbf850fe4fc6849d088e68759d1b43767c8c20670278aa9"
     },
     {
       "source": "log.md#2026-09-25-audit-3-cycles",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence",
+      "helps": "Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.",
+      "bodyHash": "sha256:5b5ede16ad78cd6badeb7e0df3fe4c856f39ab1f0610a067543df83399299976"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:bf89dc56a6762a35d602e6c288ba547a765c649b607ccc303685dbc464294383"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:9668a82a748446f905ae8b5af5e3c559566a1da1ed12054042b5b2dd8c48680f"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:167631a86b0c3c897bf9deb0e62e71500429004764be6d9002d405d8b10898ea"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#build-verification-and-test-caught-defects",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:38ba97ab3324eb211487c47bd6cb2c41007f2881ad53c9390471d51244f3d925"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:f2ddd3f488717e208fc82a46de1db88d6a7d5abf71f1aeba2e63a73bb3fcd9fe"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#report-contract-and-authorities",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:93a52a24f1c73800a3ee8455b8ec11f3d9d7ac60c4e7fc624433478008aa3ebf"
+    },
+    {
+      "path": "state-html.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:c68dc6ce78875c3a8ba527195d2bff4b273befcdea6885eb3ca9f642337e874c"
+    },
+    {
+      "path": "state-snapshot.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos",
+      "helps": "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement.",
+      "hash": "sha256:72f46d6b4ef8be278f764b48a4660b84e0670407481f60a5179029c87b9cb60e"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-09-25T13:39:04.551Z"
+  "committedAt": "2026-10-23T14:23:28.486Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:fb8379695da3a40f8b6739c3de994befc3a35690032fe5be46829c20a9052d58",
+    "introducingCommit": "ea82bcee68b70bb0b4f2938268c9c796425ccff0"
+  }
 }

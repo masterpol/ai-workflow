@@ -1,0 +1,70 @@
+@toon-data 1
+ledgerHash: "sha256:38bc457370b250e2b01585a932276c4b8bbe694f752629a65ee5d3f96d662605"
+legacyEntryHash: "sha256:a9668cd43591f4f3b90a846c3ca6631386658a54916a0e8414fbe9697440a732"
+bindings:
+  ".project/runs/2026-10-08-orca-auto-start-all-phases.md": "sha256:9e6f0aba550c80ffb5d7552470508b158172176855da2b58b588561b8a5be783"
+  ".project/knowledge/decisions/orca-auto-start-design.md": "sha256:899a33b34982f368c840c0dff57a9e3dc70c72b6e519361e631eb2f37f27d68c"
+  ".project/knowledge/patterns/a-blocking-hook-owns-its-runner-and-its-deadline.md": "sha256:09fbc13005c613609e9ddb50392238aacd674247dad1a487aa97609a10ada8b9"
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+  ".project/knowledge/issues/a-probe-child-ran-a-bare-command-with-the-parent-path.md": "sha256:775a9a6603d6d28f989f638a782abd7624202040d41f1430a369bd54788f3baf"
+  ".project/records/legacy-upgrades/orca-auto-start-all-phases.md": "sha256:ba53d7e5f622ea8912cb7406c155ce022065133da58c605ca700e4cc265c40c3"
+mapping:
+  schemaVersion: 2
+  sections[12]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#pitch-implementation",behavior,merged,".project/runs/2026-10-08-orca-auto-start-all-phases.md#pitch--implementation","Promise-by-promise result: what the switch, stop-and-ask, orca=normal and readiness do, and what was cut.","sha256:128ffd544b4a5b3de3a7a0faee2ce694c6d3730b9ef316ae497eaa2d7ea70979"
+    "SHIPPED.md#scopes",know-how,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#what-shipped","Scope outcomes P0-S5, the 15-file list and ~1,000 lines (run file also holds it, #scopes).","sha256:c257caeaf36173b20928301314ec8fe9f591e61d357ad68538d940a7e82d50e2"
+    "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#no-gos",The six no-gos and that each held.,"sha256:f7233c6cce292f723c51b5029c1c7fc6ae55253dbd2288a01be79cbee5d2b8cd"
+    "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#rabbit-holes-and-how-they-closed",R-by-R resolution (R1-R15) incl. the audit-found R14 fix.,"sha256:6ce353e027a914cadf728372b4b404f1c52a0d7bda1c401806c50ce4bf6f03c5"
+    "SHIPPED.md#deviations-see-deviationsmd-and-audit-cycle-12md",know-how,merged,".project/runs/2026-10-08-orca-auto-start-all-phases.md#deviations-see-deviationsmd-and-audit-cycle-12md",Where the build diverged from the plan.,"sha256:109d7bccc3c45de92940f24b2f1a7bf79d5a8a8c9c27a1a3317f128f5df050ce"
+    "SHIPPED.md#verification-at-ship",know-how,merged,".project/runs/2026-10-08-orca-auto-start-all-phases.md#verification-at-ship","Suite counts, live hook output, the Bun-parallel token-consumption flake.","sha256:c950002e192160a50a152f6517541028a5f7ce6444393adbe7e3b64a385e3297"
+    "SHIPPED.md#knowledge-extracted",know-how,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#lessons-and-where-they-live",Which knowledge entries came out of this pitch.,"sha256:f0f02453719bf10236b8f4f965fdb325316cec19ed5d330a038b5c85965b0865"
+    "SHIPPED.md#followups",limit,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#open-items-and-later-status","The four followups plus their later status. (_followups.md itself is refused for v2: pitches/*.)","sha256:8ec3d27eaaced7864df760bb3f185bb6cd1dcdc70e34c2e867e3b3d6ee21777a"
+    "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#no-gos",Six boundaries (full text).,"sha256:fa3abb91735686bbdceca3838257f73263b8c57161ded3fb7323337bfcf4af30"
+    "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#rabbit-holes-and-how-they-closed","Resolved decisions (stop-and-ask, 12 phase skills, recursion, off path) plus R1-R15 and pushed-to-no-go.","sha256:36ea2b3d3338c01fc3614491469b011b565de57d888d7ba9604cf8d50d360c64"
+    audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#audit-triage","M1, M2, S1-S3, canary, acknowledged items, fix spec (the issue file holds only M1).","sha256:8af3370cec2865d000d1b07d59dadc2afecffe8da10939be4c027b695a7090a8"
+    audit-cycle-2.md,know-how,merged,".project/records/legacy-upgrades/orca-auto-start-all-phases.md#audit-triage","Cycle-2 canary, coordinator verification, residual fail-open.","sha256:7a847d63feb630f9bdc0771b26741a1950089f65d2ae8253dcd71d51130a00fd"
+  otherFiles[6]:
+    -
+      path: SHIPPED.md
+      disposition: omitted
+      reason: superseded
+      hash: "sha256:985dc19ad940896cd77c8645957c25996cbe93ce2605996188d466ebe34e5faa"
+    -
+      path: deviations.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#deviations"
+      helps: Preserves dated implementation deviations and audit-driven contract changes.
+      hash: "sha256:f502b4af49f89ecef07d949bb8745a47393a89196a14cacfc8838be95b8318e4"
+    -
+      path: hill.md
+      disposition: omitted
+      reason: process-noise
+      hash: "sha256:369003d037bd83fe6929a92b5c53d7f33691bf7d4956403beec30a7c8c21126f"
+    -
+      path: log.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#build-log-facts"
+      helps: "Preserves scope outcomes, measurements and verification history."
+      hash: "sha256:d10282a0ff5541213f7598f8ed20006c62eb11b69ffe65c16bf611143dd11f96"
+    -
+      path: pitch.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#problem-and-shaping"
+      helps: "Preserves the original problem, decisions, constraints, risks and scope choices."
+      hash: "sha256:a4ef5a0d72a40a7d59b3a4a9ba9e48246f8fe72f755e3ad8a206d44df39ca6cf"
+    -
+      path: plan.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#plan-contract"
+      helps: "Preserves the implementation contract, exit criteria, dispatch boundaries and risks."
+      hash: "sha256:38f166f53531ca7e748d0caea5c38c204d2efeea1be88865bbe5348f848555e5"
+outcomeRecord: "---\nslug: orca-auto-start-all-phases\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# orca-auto-start-all-phases\n\nOrca phase startup and explicit fail-closed recovery shipped with hook and command-path limits retained.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: Orca phase startup and explicit fail-closed recovery shipped with hook and command-path limits retained.\n- docs: [source supplement](.project/records/legacy-upgrades/orca-auto-start-all-phases.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/orca-auto-start-all-phases.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/orca-auto-start-all-phases.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/orca-auto-start-all-phases.md)\n- followups: [retained limits](.project/records/legacy-upgrades/orca-auto-start-all-phases.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/orca-auto-start-all-phases.md)\n"
+acceptDestinationDrift:
+  ".project/knowledge/decisions/orca-auto-start-design.md":
+    committed: "sha256:9c7fe387a21f330361fbdedc6ae3e59e8c7d4703ae068578e8d2df7b4a8531dd"
+    current: "sha256:899a33b34982f368c840c0dff57a9e3dc70c72b6e519361e631eb2f37f27d68c"
+    reason: One frontmatter related line adds orca-policy; mapped decision content is unchanged.
+  ".project/pitches/_followups.md":
+    committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+    current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    reason: "Reviewed +218/-2 lines: removed lines are strikethrough resolutions for other pitches; this pitch own four-bullet section is byte-identical. Later lookupWorker 256 KiB overflow is separate orca-bounded-control-receipts work."

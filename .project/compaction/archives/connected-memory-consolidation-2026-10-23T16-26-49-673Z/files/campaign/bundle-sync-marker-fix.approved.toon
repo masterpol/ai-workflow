@@ -1,0 +1,64 @@
+@toon-data 1
+ledgerHash: "sha256:75a31fdcc716e25a6f2c2c0eb402b74a5ebc9d7eec90647ada2c6d9c08ff94f6"
+legacyEntryHash: "sha256:b1fb3a6623a214c1c202dd8e28de153742d9db12b767d0a8f36c1145af21989d"
+bindings:
+  ".project/records/pitch-compression/bundle-sync-marker-fix.md": "sha256:977cec47522335f4eaa26eb0f104aa479c36ced0f6ce90825871d759e1df75cc"
+  ".project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md": "sha256:91ee7ca6953c7329e9424194a8051a4e5e7099fd9f1353a4ed072f98b0cd2632"
+  ".project/records/legacy-upgrades/bundle-sync-marker-fix.md": "sha256:181e3eb4c7de2710dc2c97b59a01860a33a27c14751e91c22d55929083b9b6de"
+mapping:
+  schemaVersion: 2
+  sections[11]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/legacy-upgrades/bundle-sync-marker-fix.md#effective-base-contract-and-boundaries",Preserves per-entry effective bases and repeated-comparison behavior.,"sha256:14fb4c8ba1b57c30920abe09b3056eb7e7c09c1b2a11babacb4a886c60602ebd"
+    "SHIPPED.md#verification",know-how,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-2-shippedmdverification",Retains historical ship-time checks and their reported limits.,"sha256:36f569117d749f4334edebc53df05ef6d02f99d67bcc733a368438c46cb01742"
+    "SHIPPED.md#audit",rule,merged,".project/records/legacy-upgrades/bundle-sync-marker-fix.md#audit-context",Retains reviewer scope and the requirement to recheck settled source after later fixes.,"sha256:ccf19a90080f6bc13ce012f442e9e80a20881103991792b185d8e5d7916b78f7"
+    "SHIPPED.md#no-gos-honored",limit,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-4-shippedmdno-gos-honored","Preserves customization, overwrite, CSS, history and application boundaries.","sha256:9188ef057c70f04a0cd8826f4c64813c2d2c1ca19796c4d3c5f3962bcd9b73de"
+    "SHIPPED.md#rabbit-holes-and-deviations",decision,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-5-shippedmdrabbit-holes-and-deviations",Retains effective-base semantics and removal/prune handling.,"sha256:989f746744f3c6ba6ea752157108320b88e01a6c7e6e23d156db4390ad2af260"
+    "SHIPPED.md#knowledge-and-followups",limit,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-6-shippedmdknowledge-and-followups",Retains durable knowledge and the safety pitches outside the approval.,"sha256:01ff363327b950b217bc15e11d3e84d048bbb5e876dd15665068e540b14940d9"
+    "SHIPPED.md#delivery",know-how,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-7-shippedmddelivery",Retains historical approval provenance and delivery exclusions.,"sha256:50d7568373afa55ec371477c72552c7835de0ca845a34f9544841095fa084c97"
+    "pitch.md#no-gos",limit,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-8-pitchmdno-gos","Preserves unverified-file, schema-change and unrelated-reconciliation exclusions.","sha256:fd83050ed2547696612f22f7ab070bcb45cb5517c7ad18a954ad834f64915ad5"
+    "pitch.md#rabbit-holes",decision,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-9-pitchmdrabbit-holes",Retains marker decisions and excluded conflict and instance-sync behavior.,"sha256:a45ccfe0c18e9ec3f3996240ab878e9c400fd0fb3f6aa34658e1183304c4aa36"
+    audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/bundle-sync-marker-fix.md#audit-context",Preserves historical review scope and cross-pitch recheck requirements.,"sha256:f6dca97090de3eb11956abf3b8b30801dd96170167264caecf64cb9a50bdce30"
+    "log.md#s1-2026-09-26",know-how,merged,".project/records/pitch-compression/bundle-sync-marker-fix.md#section-11-logmds1-2026-09-26",Retains historical regressions and comparison-only help-command evidence.,"sha256:cea0ba5d0fe0cd38b499a05b0ea1699efbd1302be67910b2536fb0d1ab10bd97"
+  otherFiles[7]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:b558c501bb941bdb72feb38a72ca4fe7c38337e887a0d7d46c38a4c2ec8a8320"
+      disposition: merged
+      destination: ".project/records/pitch-compression/bundle-sync-marker-fix.md"
+      helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    -
+      path: deviations.md
+      hash: "sha256:9bde016aedf029bb1fb58d50b979ea754d3f19eb0f0d3278c8e39507981b663c"
+      disposition: merged
+      destination: ".project/records/pitch-compression/bundle-sync-marker-fix.md"
+      helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    -
+      path: hill.md
+      hash: "sha256:05d4a64cdc0982218f8f6d91174daf13097a7446971fec6c5efc167b20b785d3"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:1e8e531bc2f6565344acd7e7d0309a8bf65931872d89226a78df5b6e2173b0b1"
+      disposition: merged
+      destination: ".project/records/pitch-compression/bundle-sync-marker-fix.md"
+      helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    -
+      path: pitch.md
+      hash: "sha256:8c941742fb99666b25c243029ca9224da674c8219fa89e525b967c577f008ca6"
+      disposition: merged
+      destination: ".project/records/pitch-compression/bundle-sync-marker-fix.md"
+      helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    -
+      path: plan.md
+      hash: "sha256:901fd1e87daa6839caa1dc71d0c69333c98085e9d582ad8a5836bfddba613b24"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/bundle-sync-marker-fix.md"
+      helps: Preserves the lasting behavior contract and boundaries; transient workflow metadata remains archived.
+    -
+      path: ship-readiness.md
+      hash: "sha256:27b3350f97e8af7d4e02c9c47d705e0fd369941ab276c0197f7d2972f3ab7eb4"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/bundle-sync-marker-fix.md"
+      helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+outcomeRecord: "---\nslug: bundle-sync-marker-fix\nshipped: 2026-09-26\nschemaVersion: 1\n---\n# bundle-sync-marker-fix\n\nBundle sync records the effective base for each file outcome.\nThe decision and code links below describe the current implementation.\nHistorical verification and closure evidence remain in the compact record.\n\n- outcome: Bundle sync retains correct per-file bases across repeated comparisons.\n- docs: [documentation](ai-framework/docs/versioning-and-sync.md)\n- decisions: [decision](.project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md)\n- knowledge: none\n- code: [implementation](ai-framework/scripts/bundle-sync.mts)\n- verification: [historical closure](.project/records/pitch-compression/bundle-sync-marker-fix.md)\n- followups: none\n- archive: [compact record](.project/records/pitch-compression/bundle-sync-marker-fix.md), [source supplement](.project/records/legacy-upgrades/bundle-sync-marker-fix.md)\n"

@@ -1,16 +1,19 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import * as fs from "node:fs";
-import * as os from "node:os";
-import * as path from "node:path";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { CALL_TIMEOUT_MS, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, executablePresent, main, report, selectExecutable } from "./orca-preflight.mts";
+import { CALL_TIMEOUT_MS, DEFAULT_ENGINE_RANGE, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, engineRange, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
+import { parseRange } from "./runtime/semver-range.mts";
+import { ownedPaths } from "./skill-sync.mts";
 import type { Receipt, ReportOptions, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
+import { orcaPolicyToonText, createTestDeps, copyTree, spawnSync } from "./runtime/test-helpers.mts";
 import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -33,7 +36,7 @@ function receipts(): Values {
   return [
     { name: "orca-cli", markdown: "worktree current; terminal" },
     { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
-    { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.223" },
+    { ok: true, result: { target: { kind: "local" }, runtime: { reachable: true, state: "ready", appVersion: "1.4.224" },
       caller: { live: true, orcaSessionId: "fixture-session" } } },
   ];
 }
@@ -187,7 +190,7 @@ test("probes only fixed read-only argv with one executable and bounded process o
   assert.equal(result.capabilities, "documented");
   assert.equal(result.orchestration, "unverified");
   assert.equal(result.reason, "orchestration-unverified");
-  assert.equal(result.runtimeVersion, "1.4.223");
+  assert.equal(result.runtimeVersion, "1.4.224");
   assertNormal(result);
 });
 
@@ -226,7 +229,7 @@ test("refuses unsupported guides and unproven runtime/caller receipts", (t: Test
     ["runtime-unreachable", (values: Values) => { values[2].result.runtime.reachable = false; }],
     ["runtime-unreachable", (values: Values) => { values[2].result.runtime.state = "starting"; }],
     ["runtime-version-unsupported", (values: Values) => { delete values[2].result.runtime.appVersion; }],
-    ["runtime-version-unsupported", (values: Values) => { values[2].result.runtime.appVersion = "99.0.0"; }],
+    ["runtime-version-unsupported", (values: Values) => { values[2].result.runtime.appVersion = "1.4.223"; }],
     ["caller-unverified", (values: Values) => { delete values[2].result.caller; }],
     ["caller-unverified", (values: Values) => { values[2].result.caller.live = false; }],
     ["caller-unverified", (values: Values) => { values[2].result.caller.orcaSessionId = "stale-session"; }],
@@ -255,12 +258,27 @@ test("does not infer launch authority from an unpinned experimental feature fiel
   }
 });
 
+test("isSupportedVersion accepts the floor and later strict x.y.z versions only", () => {
+  for (const version of ["1.4.224", "1.4.225", "1.4.1000", "1.5.0", "2.0.0", "999999.0.0"]) assert.equal(isSupportedVersion(version), true, version);
+  for (const version of ["1.4.223", "1.3.999", "0.9.300", "01.4.224", "1.04.224", "1.4", "1.4.224.1", "1.4.224-beta", "v1.4.224",
+    " 1.4.224", "1.4.224\n", "", `1.4.${"9".repeat(400)}`, "1000000.0.0"]) assert.equal(isSupportedVersion(version), false, JSON.stringify(version));
+  for (const value of [undefined, null, 1.4, 10424, ["1.4.224"], { version: "1.4.224" }]) assert.equal(isSupportedVersion(value), false, String(value));
+});
+
+test("a later runtime version passes the probe and reports the observed version", (t: TestContext) => {
+  const values = receipts();
+  values[2].result.runtime.appVersion = "1.4.227";
+  const result = report(fixture(t), "codex", probe(values).options);
+  assert.equal(result.reason, "orchestration-unverified");
+  assert.equal(result.runtimeVersion, "1.4.227");
+});
+
 test("bounds the complete probe and reduces per-call timeout to remaining budget", (t: TestContext) => {
   const root = fixture(t);
   assert.equal(CALL_TIMEOUT_MS, 5000);
   assert.equal(TOTAL_TIMEOUT_MS, 20000);
   assert.equal(MAX_OUTPUT_BYTES, 262144);
-  assert.equal(SUPPORTED_VERSION, "1.4.223");
+  assert.equal(SUPPORTED_VERSION, "1.4.224");
   const { options, calls } = probe();
   let time = 0;
   options.now = () => time;
@@ -315,19 +333,30 @@ test("keeps public CLI default/probe/worker diagnostics read-only and normal", (
   }
 });
 
-test("doctor validates optional local policy without probing or repairing it", { skip: process.platform === "win32" }, (t: TestContext) => {
+// The Orca policy comes from `ai-workflow.toon` (`integrations.orca`); a legacy `.project/orchestration.json` is only
+// read when the toon is absent, and the doctor (whose mandatory check needs the toon) never reads it then either.
+test("doctor validates the toon Orca policy without probing, creating or rewriting it", { skip: process.platform === "win32", timeout: 60000 }, (t: TestContext) => {
   const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-doctor-")));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
   const bundle = path.resolve(HERE, "../..");
   const skip = new Set(["node_modules", "caveman", "settings.local.json", "credentials.json", ".aws"]);
-  // .env is local and secret-bearing, never copied; the settings file is local too; the .example.json is a tracked template that README links to.
-  const filter = (source: string) => !skip.has(path.basename(source)) && !path.basename(source).startsWith(".env") && path.basename(source) !== "ai_workflow_env.json";
+  // .env is local and secret-bearing, never copied; the settings file is local too; the local ai-workflow.toon is never copied.
+  // Wrappers of skills the host installed through its registry are host state, not bundle files: leave them out so the
+  // fixture is the same bundle-only install whether this runs in the bundle repo or in an installed project.
+  const hostOwned = new Set([...ownedPaths(bundle)].flatMap((file) => [file, path.dirname(file)]));
+  const filter = (source: string) => !skip.has(path.basename(source)) && !path.basename(source).startsWith(".env") && path.basename(source) !== "ai_workflow_env.json" && path.basename(source) !== "ai-workflow.toon"
+    && !hostOwned.has(path.relative(bundle, source).toLowerCase());
   for (const item of [".claude", ".agents", ".codex", ".cursor", ".opencode", "ai-framework",
-    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md", "ai_workflow_env.example.json"]) {
-    fs.cpSync(path.join(bundle, item), path.join(root, item), { recursive: true, filter });
+    "AGENTS.md", "CLAUDE.md", "README.md", "SETUP.md"]) {
+    // SETUP.md (and README's doc index) exist only in the bundle repo; an installed project runs this test without them.
+    if (fs.existsSync(path.join(bundle, item))) copyTree(testDeps, path.join(bundle, item), path.join(root, item), filter);
   }
   // No project-local registry/packages or their external wrappers belong to this bundle fixture.
   fs.rmSync(path.join(root, ".opencode/skills"), { recursive: true, force: true });
+  const toonFile = path.join(root, "ai-workflow.toon");
+  const example = fs.readFileSync(path.join(bundle, "ai-framework/templates/ai-workflow.example.toon"));
+  // Project-owned routing keeps this Orca-policy test independent of the host's own agent model routes.
+  const toon = (enabled: boolean, extra = (text: string) => text) => extra(example.replace(/^(\s*)enabled: (true|false)/m, `$1enabled: ${enabled}`).replace(/^(\s*)modelRouting: \w+/m, "$1modelRouting: project"));
   const bin = path.join(root, "fixture-bin");
   fs.mkdirSync(bin);
   const marker = path.join(root, "orca-was-executed");
@@ -340,50 +369,56 @@ test("doctor validates optional local policy without probing or repairing it", {
   // This fixture deliberately validates the Node runner with a restricted PATH.
   const nodeExecutable = spawnSync("node", ["-p", "process.execPath"], { encoding: "utf8" }).stdout.trim();
   const run = (...args: string[]) => spawnSync(nodeExecutable, [...NODE_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--json", ...args],
-    { cwd: root, encoding: "utf8", env, timeout: 10000, maxBuffer: 1024 * 1024 });
-  const assertDoctor = (status: string, expected: number, args: string[] = []) => {
+    { cwd: root, encoding: "utf8", env, timeout: 20000, maxBuffer: 1024 * 1024 });
+  // `exit` undefined: assert only the Orca policy result (before the scaffold exists, a host's own routing file cannot apply).
+  const assertDoctor = (status: string, exit: number | undefined, args: string[] = []) => {
     const result = run(...args);
     const report = JSON.parse(result.stdout);
-    assert.equal(result.status, expected, result.stderr || JSON.stringify(report.results.filter((item: Obj) => item.status === "fail")));
-    assert.equal(report.results.find((item: Obj) => item.name === "Orca policy").status, status);
-    assert.equal(report.failures, expected);
+    const policy = report.results.find((item: Obj) => item.name === "Orca policy");
+    if (exit !== undefined) {
+      assert.equal(result.status, exit, result.stderr || JSON.stringify(report.results.filter((item: Obj) => item.status === "fail")));
+      assert.equal(exit === 0 ? report.failures === 0 : report.failures > 0, true);
+    }
+    assert.equal(policy.status, status, JSON.stringify(policy));
     assert.equal(fs.existsSync(marker), false, "doctor must never execute Orca or alternate vendors");
     assert.ok(!result.stdout.includes("SECRET_MARKER"));
-    return report;
+    return policy as Obj;
   };
-  assertDoctor("info", 0, ["--fix"]);
-  assert.equal(fs.existsSync(path.join(root, ".project")), false);
+
+  fs.writeFileSync(toonFile, toon(false));
+  assert.match(String(assertDoctor("info", undefined, ["--fix"]).detail), /policy disabled; normal workflow/);
+  assert.equal(fs.existsSync(path.join(root, ".project")), false, "--fix does not scaffold a project");
   fs.mkdirSync(path.join(root, ".project"));
-  // Only install the normal scaffold; optional orchestration is not a template requirement.
-  fs.cpSync(path.join(root, "ai-framework/templates/project"), path.join(root, ".project"), { recursive: true });
+  copyTree(testDeps, path.join(root, "ai-framework/templates/project"), path.join(root, ".project"));
   fs.writeFileSync(path.join(root, ".project/pitches/_followups.md"), "# Follow-ups\n");
-  const file = path.join(root, ".project/orchestration.json");
+  // A host that owns its model routing keeps that choice in the fixture (its agent mirrors carry its own routes).
+  const routing = path.join(bundle, ".project/workflow-doctor.json");
+  if (fs.existsSync(routing)) fs.copyFileSync(routing, path.join(root, ".project/workflow-doctor.json"));
+  const legacy = path.join(root, ".project/orchestration.json");
   assertDoctor("info", 0, ["--fix"]);
-  assert.equal(fs.existsSync(file), false, "doctor must not create optional policy in an installed project");
-  const value = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
-  fs.writeFileSync(file, JSON.stringify(value));
-  assertDoctor("info", 0);
-  value["use-orca-orchestration"] = true;
-  fs.writeFileSync(file, JSON.stringify(value));
-  const valid = assertDoctor("pass", 0);
-  assert.match(valid.results.find((item) => item.name === "Orca policy").detail, /runtime unverified; normal workflow; dispatch disabled/);
-  for (const text of ["SECRET_MARKER", JSON.stringify({ ...value, schemaVersion: 2 }),
-    JSON.stringify({ ...value, "use-orca-orchestration": "true" })]) {
-    fs.writeFileSync(file, text);
+  assert.equal(fs.existsSync(legacy), false, "doctor must not create a legacy policy in an installed project");
+
+  fs.writeFileSync(toonFile, toon(true));
+  assert.match(String(assertDoctor("pass", 0).detail), /runtime unverified; normal workflow; dispatch disabled/);
+  // A legacy file next to a valid toon is ignored, not merged or rewritten.
+  const legacyText = JSON.stringify({ ...JSON.parse(fs.readFileSync(EXAMPLE)) as Obj, "use-orca-orchestration": false });
+  fs.writeFileSync(legacy, legacyText);
+  assertDoctor("pass", 0, ["--fix"]);
+  assert.equal(fs.readFileSync(legacy), legacyText);
+  fs.unlinkSync(legacy);
+
+  for (const broken of [toon(true, (text) => text.replace(/maxConcurrentWorkers: \d+/, "maxConcurrentWorkers: 99")), toon(true, (text) => text.replace(/^schemaVersion: 3/m, "schemaVersion: 2")), "SECRET_MARKER\n"]) {
+    fs.writeFileSync(toonFile, broken);
     assertDoctor("fail", 1, ["--fix"]);
-    assert.equal(fs.readFileSync(file, "utf8"), text, "doctor must not rewrite invalid policy");
+    assert.equal(fs.readFileSync(toonFile), broken, "doctor must not rewrite an invalid toon");
   }
-  fs.unlinkSync(file);
-  fs.mkdirSync(file);
+  const target = path.join(root, "outside-policy.toon");
+  fs.writeFileSync(target, toon(true));
+  fs.rmSync(toonFile);
+  fs.symlinkSync(target, toonFile);
   assertDoctor("fail", 1, ["--fix"]);
-  assert.equal(fs.statSync(file).isDirectory(), true);
-  fs.rmdirSync(file);
-  const target = path.join(root, "outside-policy.json");
-  fs.writeFileSync(target, "SECRET_MARKER");
-  fs.symlinkSync(target, file);
-  assertDoctor("fail", 1, ["--fix"]);
-  assert.equal(fs.lstatSync(file).isSymbolicLink(), true);
-  assert.equal(fs.readFileSync(target, "utf8"), "SECRET_MARKER");
+  assert.equal(fs.lstatSync(toonFile).isSymbolicLink(), true);
+  assert.equal(fs.readFileSync(target), toon(true));
 });
 
 // ---- main() and the default probe runner against injected RuntimeDeps ------------------------------------
@@ -439,13 +474,24 @@ test("main returns 1 with the fixed stderr line for any invalid invocation", (t:
   }
 });
 
-test("default runner reports a killed child after the full timeout as probe-timeout", (t: TestContext) => {
+test("default runner preserves byte/time budgets and adapter failure codes", (t: TestContext) => {
   const root = fixture(t);
-  let clock = 0;
-  const h = harness(root, () => { clock += CALL_TIMEOUT_MS; return { status: null, signal: "SIGTERM", stdout: "", stderr: "" }; }, undefined, () => clock);
-  assert.equal(main(["report", "--root", root, "--vendor", "codex", "--json", "--probe"], h.deps), 0);
-  assert.equal(JSON.parse(h.out.join("")).reason, "probe-timeout");
-  assert.equal(h.spawned.length, 1);
+  for (const [errorCode, reason] of [["ETIMEDOUT", "probe-timeout"], ["ENOBUFS", "probe-output-limit"], ["EIO", "probe-failed"]]) {
+    const { run: _injectedRunner, ...options } = probe().options;
+    const calls: Array<Parameters<RuntimeDeps["child"]["runSync"]>> = [];
+    const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child,
+      runSync: (...args) => { calls.push(args); return { status: null, signal: "SIGKILL", stdout: "", stderr: "", errorCode }; },
+    } };
+    assert.equal(report(root, "codex", options, deps).reason, reason);
+    assert.equal(calls.length, 1);
+    const limits = calls[0][2]!;
+    assert.equal(limits.cwd, root);
+    assert.equal(limits.shell, false);
+    assert.equal(limits.encoding, "utf8");
+    assert.equal(limits.killSignal, "SIGKILL");
+    assert.equal(limits.maxBufferBytes, MAX_OUTPUT_BYTES);
+    assert.ok(limits.timeoutMs! > 0 && limits.timeoutMs! <= CALL_TIMEOUT_MS);
+  }
 });
 
 test("default runner maps a signal before the timeout, a spawn failure and oversized output", (t: TestContext) => {
@@ -498,4 +544,54 @@ test("without the multi-agent switch --probe never contacts Orca", (t: TestConte
     assert.equal(result.reason, "orca-multi-agent-disabled", String(flag));
     assert.equal(harness.calls.length, 0, String(flag));
   }
+});
+
+// ---- loadConfig reader branches: TOON-first, legacy fallback, fail closed ----
+function toonFixture(t: TestContext, enabled = true, legacyToo = false): string {
+  const root = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "orca-preflight-toon-")));
+  t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(enabled));
+  if (legacyToo) {
+    fs.mkdirSync(path.join(root, ".project"));
+    const policy = JSON.parse(fs.readFileSync(EXAMPLE, "utf8")) as Obj;
+    policy["use-orca-orchestration"] = true;
+    fs.writeFileSync(path.join(root, ".project/orchestration.json"), JSON.stringify(policy));
+  }
+  return root;
+}
+
+test("loadConfig branch: ai-workflow.toon and the legacy policy file give identical preflight reports", (t: TestContext) => {
+  const options = { env: { PATH: "/usr/bin" }, platform: "darwin", present: () => false };
+  for (const enabled of [true, false]) {
+    const viaLegacy = report(fixture(t, enabled), "codex", options);
+    const viaToon = report(toonFixture(t, enabled), "codex", options);
+    assert.deepEqual(viaToon, viaLegacy, `enabled=${enabled}`);
+    assert.equal(String(viaToon.reason).startsWith("policy-"), !enabled, `enabled=${enabled} reason ${String(viaToon.reason)}`);
+  }
+});
+
+test("loadConfig branch: a present but invalid ai-workflow.toon is policy-bound normal workflow, never the legacy file", (t: TestContext) => {
+  const root = toonFixture(t, true, true);
+  const options = { probe: true, present: () => { throw Error("availability must not run"); }, run: () => { throw Error("probe must not run"); } };
+  assert.equal(report(root, "codex", { env: { PATH: "/usr/bin" }, platform: "darwin", present: () => false }).reason !== "policy-disabled", true);
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), "schemaVersion: 99\n");
+  const result = report(root, "codex", options);
+  assert.match(String(result.reason), /^policy-(malformed|refused)$/);
+  assertNormal(result);
+});
+
+test("isSupportedVersion honors a parsed range and engineRange falls back to the floor or reports an invalid range", () => {
+  const ranged = engineRange(fs.mkdtempSync(path.join(os.tmpdir(), "orca-engine-")));
+  assert.ok("range" in ranged);
+  assert.equal(ranged.text, DEFAULT_ENGINE_RANGE);
+  assert.equal(isSupportedVersion("1.4.223", ranged.range), false);
+  assert.equal(isSupportedVersion("1.4.224", ranged.range), true);
+  for (const [text, version, expected] of [[">=1.4.224 <1.6.0", "1.6.0", false], [">=1.4.224 <1.6.0", "1.5.0", true], ["1.4.x", "1.5.0", false]] as const) {
+    const parsed = parseRange(text);
+    assert.ok(parsed.ok);
+    assert.equal(isSupportedVersion(version, parsed.ok ? parsed.range : undefined), expected, `${text} ${version}`);
+  }
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "orca-engine-"));
+  fs.writeFileSync(path.join(root, "ai-workflow.toon"), orcaPolicyToonText(true).replace('engine: ">=1.4.224"', 'engine: "^^1"'));
+  assert.deepEqual(engineRange(root), { invalid: true, text: "^^1" });
 });

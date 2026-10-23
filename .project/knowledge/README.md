@@ -22,7 +22,7 @@ knowledge/
 ## Knowledge Types
 
 ### Decisions (`decisions/`)
-Technical decisions that affect multiple features. Extracted from ADRs but indexed for quick search.
+Technical decisions that affect multiple features, indexed for quick search. A decision carries `status: accepted | superseded | deprecated` (no status reads as accepted). Replacing one is two edits: the new entry lists `supersedes: [old-id]`, the old one gets `status: superseded` and `superseded_by: new-id`; `graphify.mts --check` fails if either side is missing.
 
 ### Patterns (`patterns/`)
 Recurring code patterns discovered during development. "This is how we do X in this project."
@@ -104,7 +104,7 @@ created: YYYY-MM-DD
 updated: YYYY-MM-DD
 tags: [tag1, tag2]
 related: [other-entry-id]
-source: ADR-XXX | feature-name | manual
+source: feature-name | manual
 confidence: low | medium | high
 ---
 

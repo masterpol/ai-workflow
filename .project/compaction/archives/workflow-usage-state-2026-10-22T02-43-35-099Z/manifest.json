@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "slug": "workflow-usage-state",
+  "sourceRoot": ".project/pitches/workflow-usage-state",
+  "archivedAt": "2026-10-22T02:43:35.102Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "ba79eaea772872b9e3764f66dc6f1eb854a643f647f4769ae586b19e2fd7acba",
+      "mode": 420
+    },
+    "audit-prompts/code.txt": {
+      "hash": "3ecc9ebeb43a0cac487f1f79712eeaf47783934f1888bd26a0c228e98fbeee68",
+      "mode": 420
+    },
+    "audit-prompts/cycle2.txt": {
+      "hash": "a32103cc867baccfb976bdf3c17ba8df4689b2ec92e4673c5dd9e6e0a06967a0",
+      "mode": 420
+    },
+    "audit-prompts/security.txt": {
+      "hash": "3554189e3e1527ec8328e89bd79e06f009f7cbbce8b0b48e5dd33f3baa00871e",
+      "mode": 420
+    },
+    "audit-prompts/test.txt": {
+      "hash": "1cd52d6883ee5379a29a190cdaa01de61e009245c80e5f261218018fcf022775",
+      "mode": 420
+    },
+    "audit-record-code.md": {
+      "hash": "aa7e53b3c1f03b51bf30a603376cc07383674d76a41b48963bc751e021418281",
+      "mode": 420
+    },
+    "audit-record-security.md": {
+      "hash": "fc457aa16e8e5783b11d74eee971d5eb6321ee7951bf5aefd2f516bd17520f63",
+      "mode": 420
+    },
+    "audit-record-test.md": {
+      "hash": "35b148c1ae260733daf25239aa9f5512e15da47ed4172ab284b6fc242e6dac83",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "1bb3444b48bb9b796322fcd810f076a7b894b736ab356549dbea718e4d7eec88",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "52f5cd36404afc6774c9cc90166982bc8ab2a742dd4cd1755ee2d553af1b1617",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "ae00fdbf195f316deda4b70556137662266b0bff01398c3f8b3a16026c0a05f6",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "a8ddff2eb74816278fa5f4ce3a3579b17d6bd116101e7b5e2a9c608cb28d3f38",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "2fc77fac57423b34d65dc03b740fcea13d557087593e6a891dea38c12cc896a1",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "e934e43a999cae1ac41d23be9ca3db75e886aa87a7103cb48792ecf31bb73570",
+      "mode": 420
+    },
+    "spike-s1.md": {
+      "hash": "85dd59bb0a588f109226ad8cacb4894f0a919f71479de338bba96a681acf4dc8",
+      "mode": 420
+    }
+  }
+}

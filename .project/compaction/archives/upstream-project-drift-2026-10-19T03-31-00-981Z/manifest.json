@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "upstream-project-drift",
+  "sourceRoot": ".project/pitches/upstream-project-drift",
+  "archivedAt": "2026-10-19T03:31:00.983Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "85fcde1801dc99450ac0a25c2bfda77a0398102137fe542460d85ff26f8957c9",
+      "mode": 420
+    },
+    "checkpoint.md": {
+      "hash": "9f114c864595460d4947a8f5eb9568405e0e46093f2e56a05acfdf27c0280365",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "1ddbca0b15ba1ea7748600704b252ca9e0403b92dcd665661514ec8a54d131b8",
+      "mode": 420
+    },
+    "drift-ledger.md": {
+      "hash": "563f517f8431bb6e02f839f3be2cbacaf0140f186f769f98b9a5d9e061997d87",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "daeacd7f7b3496853ea5daaa9b7461c9738197d760836a6170a7f8010e2d1952",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "758862e1d91ead8874976fe50b6a06e5f62d7fa83a5f63822a303109889208fd",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "da22dd86eb2559984aecb7184ec1bf99bb77c59ae8c237a07217fc48187a0a12",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "084ad983b1c5cd59b529ec32e7f5b8d3a7ad8f7571cd4f7ec43013267c8ce3ac",
+      "mode": 420
+    },
+    "sync-proof.json": {
+      "hash": "6f7c8207b18e1a0131047736d15caee13f9ac4e1920f3aa41500ef7f1f99840a",
+      "mode": 420
+    }
+  }
+}

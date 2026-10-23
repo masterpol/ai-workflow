@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-fragment-sanitizer",
+  "sourceRoot": ".project/pitches/state-fragment-sanitizer",
+  "archivedAt": "2026-10-22T02:43:35.774Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "2a4446a877698de2a8daad91673faea2bd99f2bf053ffe94f9af1486b4de9093",
+      "mode": 420
+    },
+    "audit-cycle1.md": {
+      "hash": "9f3af002085c92b3981458d9825184ff9f37a2cb7619a4031003cc6a3a35e388",
+      "mode": 420
+    },
+    "audit-cycle2.md": {
+      "hash": "a03c4dbb33d67a1bc5e7d743da6b0e4b8da45a3fc62b4c53450ebc76c679e24a",
+      "mode": 420
+    },
+    "audit-cycle3.md": {
+      "hash": "2c46ba393d05bcd17fe4be19380b982e26bda1fa8cb85a635f2f3556753c1632",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "9d089a2036d21bbe71e47645fdb797089b35c7f3aa1fd4569d0091f257d901c0",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "9c0bfb5d069f2514f36759c74d323a6b61f52132b04b68296cbd156d5af38cbf",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "d0364ec31ee188123e574f15ce2252af44166449723a5dd26eec4d79764a0f07",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "c7a3620484d134382efaa122b40c1105238c4c5252a86f09632a856a5425b6c2",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "434013b78cdbeb11b181ddefd0a10847d09b6d7665e94161b5319ebea1a78a17",
+      "mode": 420
+    },
+    "spike-s1.md": {
+      "hash": "3c43a54185f1f44468f2898e9e19fcb0ae500dba0037f1d4f72065bdd9116676",
+      "mode": 420
+    }
+  }
+}

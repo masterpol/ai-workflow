@@ -4,7 +4,7 @@ type: pattern
 created: 2026-10-08
 updated: 2026-10-08
 tags: [validator, lexer, fail-closed, guards, testing]
-related: [prove-a-guard-test-with-an-in-memory-mutant, guard-tests-can-fail-for-the-wrong-reason, a-gate-must-not-audit-its-own-instrument]
+related: [prove-a-guard-test-with-an-in-memory-mutant, guard-tests-can-fail-for-the-wrong-reason, a-gate-must-not-audit-its-own-instrument, graphify]
 source: runner-aware-runtime-boundary-validator
 ---
 # Pattern: a source scanner fails closed on whatever it cannot read

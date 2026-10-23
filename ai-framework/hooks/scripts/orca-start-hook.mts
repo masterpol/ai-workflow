@@ -4,10 +4,17 @@ import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 
 const PHASES = new Set(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
 const DEADLINE_MS = 5000;
+// Ordinary prompts and unrelated skills can carry large pastes; only a phase invocation's arguments are size-limited.
+const MAX_INPUT_BYTES = 4 * 1024 * 1024;
+const MAX_ARGS_BYTES = 64 * 1024;
 type ObjectValue = Record<string, unknown>;
 const object = (value: unknown): value is ObjectValue => value !== null && typeof value === "object" && !Array.isArray(value);
 const blockedLine = (reason: string): string => `Orca requested but not ready: ${reason}. Fix it, or re-invoke with orca=normal to run this phase without Orca.\n`;
 
+// Config cutover (unified-toon-config c2.4): the opt-in switch is read through orcaMultiAgentEnabled -> loadConfigEnv ->
+// loadConfig, so a valid <root>/ai-workflow.toon wins and legacy ai_workflow_env.json is only a fallback while no TOON file
+// exists (migrate with ai-framework/scripts/config-migrate.mts). A present but invalid TOON file fails closed (switch off);
+// this hook never reads either file itself.
 /** Only opted-in coordinator phase invocations load the start decision library. */
 export async function main(_argv: string[], deps: RuntimeDeps): Promise<number> {
   const root = deps.proc.env.CLAUDE_PROJECT_DIR || deps.proc.cwd();
@@ -20,7 +27,7 @@ export async function main(_argv: string[], deps: RuntimeDeps): Promise<number> 
   const block = (reason: string): number => { deps.io.stderr.write(blockedLine(reason)); return 2; };
   try {
     let value: unknown;
-    try { value = JSON.parse(await deps.io.stdin.readText(64 * 1024)) as unknown; }
+    try { value = JSON.parse(await deps.io.stdin.readText(MAX_INPUT_BYTES)) as unknown; }
     catch { return block("invalid-hook-input"); }
     if (!object(value)) return block("invalid-hook-input");
     if (value.agent_id !== undefined) return 0;
@@ -40,6 +47,7 @@ export async function main(_argv: string[], deps: RuntimeDeps): Promise<number> 
     if (typeof phase !== "string") return block("invalid-hook-input");
     if (!PHASES.has(phase)) return 0;
     if (argsText !== undefined && typeof argsText !== "string") return block("invalid-hook-input");
+    if (argsText !== undefined && new TextEncoder().encode(argsText).length > MAX_ARGS_BYTES) return block("invalid-hook-input");
     const { decideStart } = await import("../../scripts/orca-start.mts");
     const remaining = Math.floor(end - deps.clock.perfNowMs());
     if (remaining < 1) return block("timeout");

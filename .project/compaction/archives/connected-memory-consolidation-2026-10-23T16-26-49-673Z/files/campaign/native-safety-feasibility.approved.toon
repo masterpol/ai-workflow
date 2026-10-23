@@ -1,0 +1,155 @@
+@toon-data 1
+ledgerHash: "sha256:c429da7fd1384e5f36d68175b675954789bc8dc7599feee84e76dcd35cc50230"
+legacyEntryHash: "sha256:5a90f3f016a86299fa3d610ae30a21d64a1aceb2a406aeaf992d2aeaae708fe2"
+bindings:
+  ".project/records/pitch-compression/native-safety-feasibility.md": "sha256:1d2bf904288aab72c98546e892745f12bdb4b861e3eb4ba16c14bb35378a84af"
+  ".project/records/legacy-upgrades/native-safety-feasibility.md": "sha256:707b5bf69c1534b14cd6df35abfd147320282def4f9556b90a6edc75b9fe69e1"
+mapping:
+  schemaVersion: 2
+  sections[10]:
+    -
+      source: "SHIPPED.md#reconciliation"
+      class: behavior
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-1-shippedmdreconciliation"
+      helps: "Retains measured symlink, moved-directory, lock and inode-replacement outcomes."
+      bodyHash: "sha256:348012ba234be45c8e0c261b889a9d137cfc6bf37043b2de7d7d0ee173f4e5c7"
+    -
+      source: "SHIPPED.md#verification-and-audit"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-2-shippedmdverification-and-audit"
+      helps: "Retains final test counts, the review independence limit and the missing-runtime fix."
+      bodyHash: "sha256:5dee2912167610499a1e6d0448f70711863572bf1337baabab3be973891647c0"
+    -
+      source: "SHIPPED.md#no-gos-and-documentation"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-3-shippedmdno-gos-and-documentation"
+      helps: Retains prohibited production changes and the absence of an attacker-proof claim.
+      bodyHash: "sha256:31a2c040afd48bbea900cc9a55b08fd83bf45f5d3beaed69329058c51eb29d73"
+    -
+      source: "SHIPPED.md#knowledge-and-remaining-work"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-4-shippedmdknowledge-and-remaining-work"
+      helps: Retains the decision link and ownership of the unfinished parent pitches.
+      bodyHash: "sha256:76ec2fe601395d0af58596036343835009d51c6b6da48bea7831b2c229d331af"
+    -
+      source: "SHIPPED.md#delivery"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:7c8fea7a326337e9e91cd6a96a44b099dc231b425b48ed65b6cb44adeba92d71"
+    -
+      source: "pitch.md#no-gos"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-6-pitchmdno-gos"
+      helps: "Retains standing no-gos, including the bounded same-user lock-inode replacement."
+      bodyHash: "sha256:cb78bebc36adcddc2729d8e4b43ed19b4add5a48f2382721dd226bc21aa243e3"
+    -
+      source: "pitch.md#rabbit-holes"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-7-pitchmdrabbit-holes"
+      helps: "Retains the API-availability-only caveat, stable lock file, cooperation assumption and planner-owned risks."
+      bodyHash: "sha256:afe7cb45647a2f0229ec167a1eac1c94542114218bf41f909582fbc4aca0968a"
+    -
+      source: "log.md#2026-09-26-s1-complete"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-8-logmd2026-09-26-s1-complete"
+      helps: "Retains test strategy, mutation proof and measured limits."
+      bodyHash: "sha256:a804a3fa22d828749dca075171cc074c5db02554d9ccec76a744e946b16fff92"
+    -
+      source: "log.md#2026-09-26-audit-complete-ready-for-ship-gate"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md#section-9-logmd2026-09-26-audit-complete-ready-for-ship-gate"
+      helps: "Retains the audit defect and fix, final counts and untested gaps; supplement adds triage and reviewer limits."
+      bodyHash: "sha256:d60042b6668c61e089c11825482edaa2dd300d42f072a2baf5537899fe2bfbee"
+    -
+      source: "log.md#2026-09-26-shipped"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:407c962d4abfbf89eaf100a975703d5b97825de837de628103b89670e150af72"
+  otherFiles[14]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:1aad9bbbef1dc6a3bfb2c2c0f4ccaf72ea396e3667d8162d427563fb20bda0c4"
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md"
+      helps: "Preserves historical closure, measured outcomes and boundaries."
+    -
+      path: audit-code-cycle-1.md
+      hash: "sha256:d8de22ebd6bc5d449a8e0d8265ac8d8283ce3fac307e20a1fd548a6fddbb971f"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: audit-code-cycle-2.md
+      hash: "sha256:6160932f8cab537092bc2786dac835909c7937e4a0289adae3896b40789e2db5"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: audit-cross-cycle-1.md
+      hash: "sha256:b73eab0823ca6856f2a6a28e5d3e5a4141d58d5ec5c5b67390411960619c714c"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: audit-prompts.md
+      hash: "sha256:a66649cfbe19eba76197e70b4725d48fddc2a0ac1875646bdf347211e0415511"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: audit-security-cycle-1.md
+      hash: "sha256:38eaa5c97dfa4f8469dcf7b577c09edb1368355cf01fd428656f8dd3276cba05"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: audit-test-cycle-1.md
+      hash: "sha256:be76c04f4c38ace9eff3690a9e3b7e68d3501c0e13b04169134593686a647f98"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: audit.md
+      hash: "sha256:46ace00eb50386cc41c0ffa06f84a3735539f7be66d2c7f1de77fff47c6f2f23"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/native-safety-feasibility.md#audit-triage"
+      helps: "Preserves the M1 severity promotion, cross-pitch finding and scratch canaries."
+    -
+      path: deviations.md
+      hash: "sha256:63a6374d6d31c7236d05176586aed194f89086d7821b028e27aeebf138d9cc68"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/native-safety-feasibility.md#assurance-limits"
+      helps: "Preserves the deviation notes, including the 384 versus 386 line count."
+    -
+      path: hill.md
+      hash: "sha256:9b285ed59b110860a534a525e9729848abc589a16d3037667854353a7868197f"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:3101e5e14b0d20c73c49bb1e0dcdbcf3d6e150ec2ecd47d1bc0b930d85cfd370"
+      disposition: merged
+      destination: ".project/records/pitch-compression/native-safety-feasibility.md"
+      helps: Retains the build and audit chronology in compact sections.
+    -
+      path: pitch.md
+      hash: "sha256:a1dcc9f4ed8fe79282cb931ba43181a80c2ef38e67baca5ed554d477d4990edc"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/native-safety-feasibility.md#problem-and-plan-contract"
+      helps: "Preserves the problem statement, consulted knowledge and documentation sources."
+    -
+      path: plan.md
+      hash: "sha256:bc8b866605c64980fdf67899e4ee9e5cd9050d64335711211da376e7899b5739"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/native-safety-feasibility.md#problem-and-plan-contract"
+      helps: "Preserves the exit contract, deadlines and capability handling."
+    -
+      path: ship-readiness.md
+      hash: "sha256:18a09b7b966c510d8163e92296573ee40d7a47cfb8249e8972fe3f90c251597a"
+      disposition: omitted
+      reason: process-noise
+outcomeRecord: "---\nslug: native-safety-feasibility\nshipped: 2026-09-27\nschemaVersion: 1\n---\n# native-safety-feasibility\n\nA scratch-only spike measured directory-relative and inode-anchored primitives on one macOS host.\nIt changed no production code and does not certify other platforms.\nAssurance limits and the date discrepancy remain separately recorded.\n\n- outcome: Scratch measurements informed the inode-anchoring decision without changing the runtime contract.\n- docs: none\n- decisions: [inode anchoring and stable inode locks](.project/knowledge/decisions/inode-anchoring-and-stable-inode-locks.md)\n- knowledge: none\n- code: none\n- verification: [historical closure](.project/records/pitch-compression/native-safety-feasibility.md)\n- followups: [assurance limits](.project/records/legacy-upgrades/native-safety-feasibility.md#assurance-limits)\n- archive: [compact record](.project/records/pitch-compression/native-safety-feasibility.md), [source supplement](.project/records/legacy-upgrades/native-safety-feasibility.md)\n"

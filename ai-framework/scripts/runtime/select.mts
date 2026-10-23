@@ -1,4 +1,4 @@
-import { loadWorkflowEnv } from "./env.mts";
+import { loadConfigEnv } from "./env.mts";
 import { createNodeDeps } from "./node.mts";
 import type { RunnerName, RuntimeDeps } from "./types.mts";
 
@@ -12,7 +12,7 @@ export const ORCA_MULTI_AGENT_VAR = "AI_WORKFLOW_ORCA_MULTI_AGENT";
  */
 export function orcaMultiAgentEnabled(root: string, deps: RuntimeDeps, env: Record<string, string | undefined> = deps.proc.env): boolean {
   try {
-    const merged = loadWorkflowEnv(deps.fs, deps.path, root, { [ORCA_MULTI_AGENT_VAR]: env[ORCA_MULTI_AGENT_VAR] });
+    const merged = loadConfigEnv(deps.fs, deps.path, root, { [ORCA_MULTI_AGENT_VAR]: env[ORCA_MULTI_AGENT_VAR] });
     return merged[ORCA_MULTI_AGENT_VAR]?.trim().toLowerCase() === "true";
   } catch { return false; }
 }
@@ -32,7 +32,7 @@ export function resolveRunner(env: Record<string, string | undefined>): RunnerNa
  */
 export async function selectRuntime(root: string, env: Record<string, string | undefined> = process.env): Promise<RuntimeDeps> {
   const boot = createNodeDeps(env);
-  const merged = loadWorkflowEnv(boot.fs, boot.path, root, { [RUNNER_VAR]: env[RUNNER_VAR] });
+  const merged = loadConfigEnv(boot.fs, boot.path, root, { [RUNNER_VAR]: env[RUNNER_VAR] });
   const runner = resolveRunner(merged);
   const selectedEnv = { ...env, [RUNNER_VAR]: runner };
   if (runner === "node") return createNodeDeps(selectedEnv);

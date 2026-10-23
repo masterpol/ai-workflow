@@ -1,0 +1,118 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-multipage-report",
+  "sections": [
+    {
+      "source": "SHIPPED.md#pitch-implementation",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-state-multipage-report.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#deviations-see-deviationsmd",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/a-local-workflow-env-file-changes-which-runner-path-tests-spawn.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/orca-workers-differ-from-the-coordinator-environment.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "audit-cycle-3.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "deviations.md#2026-10-08-s0-orca-policy-valid-dispatch-not-ready",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "deviations.md#2026-10-08-s1-touched-state-themetestmts-1-line",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/project-state-report-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "deviations.md#2026-10-08-stale-state-stage-blocks---apply",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-report-never-overwrites-a-file-it-did-not-write.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "deviations.md#2026-10-08-correction-to-the-s0-entry",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "deviations.md#2026-10-08-second-correction-to-the-s0-entry-supersedes-the-one-above",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/status-dispatch-ready-false-is-not-launch-authority.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T20:43:32.633Z"
+}

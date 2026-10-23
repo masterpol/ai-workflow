@@ -1,0 +1,43 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[2]: state-quoted-fonts,workflow-usage-metrics
+sourceBytes: 80519
+sourceFiles: 41
+requiredSections: 33
+retainedSections: 28
+otherFilesAccounted: 40
+retainedOtherFiles: 25
+omissions:
+  process-noise: 20
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[2]:
+  -
+    slug: state-quoted-fonts
+    payloadHash: "sha256:3cbcf86bbe6a59ebe6075873b1d3a381d0d9d2097f88ae93cc9f949cdefce46a"
+    supplementHash: "sha256:8223f1334df7be02a8b3754c497b8ae97611b4170d89927553ad7f30e1ddad7b"
+    sourceProof:
+      archiveDirectory: state-quoted-fonts-2026-09-27T01-27-20-753Z
+      manifestHash: "sha256:3c44830c6841cf98b91bb3fc856064fca260d6ab5a66216fc3a73602faf986cd"
+      sourceBytes: 9359
+      verifiedFiles: 8
+    recordBytes: 1121
+  -
+    slug: workflow-usage-metrics
+    payloadHash: "sha256:708ea1b73db21694969f00b0fcd5d6a1cbb39939d338e11f5bee3e04560ad5c6"
+    supplementHash: "sha256:7d8e65b462a6e4b7f0e0748cc0b81c169c3f16fca47a18f96c8b140b05cbd38d"
+    sourceProof:
+      archiveDirectory: workflow-usage-metrics-2026-10-08T16-26-38-943Z
+      manifestHash: "sha256:3a0c147fd393022a4d46f28ec5b0670753e884d75422efbee07dbbb34c656639"
+      sourceBytes: 71160
+      verifiedFiles: 33
+    recordBytes: 1614
+validation: "{\"slug\":\"state-quoted-fonts\",\"coverage\":1,\"sections\":11,\"otherFiles\":7,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1121,\"recordCap\":3000,\"supplementBytes\":2025,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"workflow-usage-metrics\",\"coverage\":0.7727272727272727,\"sections\":22,\"otherFiles\":33,\"omissions\":{\"process-noise\":19},\"acceptedGaps\":[],\"recordBytes\":1614,\"recordCap\":3000,\"supplementBytes\":4973,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"newKnowledgeEntries\":0,\"sourceArchivesReopened\":false}"
+rehearsal: "state-quoted-fonts: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nworkflow-usage-metrics: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nRehearsal: 2 generated index rows, 2 upgraded slugs; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 33
+  partial: 0
+  upgraded: 13
+  compacted: 46
+sourceArchivesReopenedForRehearsal: false

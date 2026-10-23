@@ -1,18 +1,18 @@
 import { NODE_FLAGS } from "../../scripts/runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, urlPath, spawnSync } from "../../scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
-import { fileURLToPath } from "node:url";
 
 import { markdown, html, main } from "./token-report.mts";
 import { blankSnapshot, recordEvent } from "./token-consumption.mts";
-import type { Dimensions, Snapshot } from "./token-consumption.mts";
+import type { Dimensions, Flows, Snapshot } from "./token-consumption.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 type Loose = Record<string, unknown>;
 // Fixtures deliberately put hostile or wrong-typed values where the snapshot type expects valid ones.
 const loose = (snapshot: Snapshot): Loose => snapshot as unknown as Loose;
@@ -28,12 +28,13 @@ function map<T>(source: Record<string, T>): Record<string, T> {
 }
 
 type Nested = Record<string, Record<string, unknown>>;
-interface SnapshotParts { models?: Nested; agents?: Nested; efforts?: Nested; skills?: Nested; since?: string | null; vendors?: Record<string, unknown> }
-function snapshotWith({ models = {}, agents = {}, efforts = {}, skills = {}, since = "2026-09-24T10:00:00.000Z", vendors = {} }: SnapshotParts = {}): Snapshot {
+interface SnapshotParts { models?: Nested; agents?: Nested; efforts?: Nested; skills?: Nested; since?: string | null; vendors?: Record<string, unknown>; flows?: Record<string, unknown> }
+function snapshotWith({ models = {}, agents = {}, efforts = {}, skills = {}, since = "2026-09-24T10:00:00.000Z", vendors = {}, flows }: SnapshotParts = {}): Snapshot {
   const snapshot = blankSnapshot();
   const nested = (source: Nested): Nested => map(Object.fromEntries(Object.entries(source).map(([vendor, byName]) => [vendor, map(byName)])));
   snapshot.dimensions = { since, models: nested(models), agents: nested(agents), efforts: nested(efforts), skills: nested(skills) } as unknown as Dimensions;
   loose(snapshot).lifetime = { ...snapshot.lifetime, vendors: map(vendors) };
+  if (flows !== undefined) loose(snapshot).flows = flows as Flows;
   return snapshot;
 }
 
@@ -282,4 +283,114 @@ test("the renderer is pure: rendering twice gives the same text and leaves the i
   assert.equal(markdown(snapshot), markdown(snapshot));
   assert.equal(html(snapshot), html(snapshot));
   assert.equal(JSON.stringify(snapshot), before);
+});
+
+// ---- Flows (token snapshot revision 3) ----
+
+const FLOW_SINCE = "2026-10-19T12:00:00.000Z";
+
+function flow(overrides: Loose = {}): Loose {
+  return { since: FLOW_SINCE, pitches: {}, ...overrides };
+}
+
+test("the By Flow table lists Pitch, Phase, Scope, Vendor, Completions, Tokens and Cost, sorted by completions", () => {
+  const output = markdown(snapshotWith({
+    flows: flow({
+      pitches: {
+        alpha: { phases: { build: { scopes: { S1: { opencode: row({ completions: 5, reportedUsageCount: 5, unavailableCount: 0, tokens: 100, costUsd: 0.5, pricedCount: 5 }) } } } } },
+        beta: { phases: { plan: { scopes: { "(none)": { claude: row({ completions: 10, reportedUsageCount: 0, unavailableCount: 10, tokens: 0, costUsd: 0, pricedCount: 0 }) } } } } },
+      },
+    }),
+  }));
+  assert.match(output, /## By Flow/);
+  assert.match(output, /\| Pitch \| Phase \| Scope \| Vendor \| Completions \| Tokens \| Cost \|/);
+  const claudeIndex = output.indexOf("| beta | plan | (none) | claude | 10 |");
+  const opencodeIndex = output.indexOf("| alpha | build | S1 | opencode | 5 |");
+  assert.ok(claudeIndex >= 0);
+  assert.ok(opencodeIndex >= 0);
+  assert.ok(claudeIndex < opencodeIndex, "higher completion count sorts first");
+  assert.match(html(snapshotWith({ flows: flow({ pitches: { alpha: { phases: { build: { scopes: { S1: { opencode: row() } } } } } } }) })), /<h2>By Flow<\/h2>/);
+});
+
+test("Claude rows in By Flow show tokens and Unpriced cost when no price was reported", () => {
+  const output = markdown(snapshotWith({
+    flows: flow({ pitches: { alpha: { phases: { build: { scopes: { S1: { claude: row({ completions: 3, reportedUsageCount: 3, unavailableCount: 0, tokens: 42, costUsd: 0, pricedCount: 0 }) } } } } } } }),
+  }));
+  assert.match(output, /\| alpha \| build \| S1 \| claude \| 3 \| 42 \| Unpriced \|/);
+});
+
+test("Codex rows in By Flow show Unavailable tokens when usage was not reported", () => {
+  const output = markdown(snapshotWith({
+    flows: flow({ pitches: { alpha: { phases: { build: { scopes: { S1: { codex: row({ completions: 2, reportedUsageCount: 0, unavailableCount: 2, tokens: 0, costUsd: 0, pricedCount: 0 }) } } } } } } }),
+  }));
+  assert.match(output, /\| alpha \| build \| S1 \| codex \| 2 \| Unavailable \| Unpriced \|/);
+});
+
+test("the unattributed line reports the share or No data yet, never a zero share", () => {
+  const withData = markdown(snapshotWith({
+    flows: flow({
+      pitches: {
+        "(unattributed)": { phases: { "(unattributed)": { scopes: { "(none)": { claude: row({ completions: 7 }) } } } } },
+        alpha: { phases: { build: { scopes: { S1: { opencode: row({ completions: 3 }) } } } } },
+      },
+    }),
+  }));
+  assert.match(withData, /Unattributed: 7 of 10 completions since 2026-10-19T12:00:00\.000Z/);
+  const empty = markdown(snapshotWith({ flows: flow({ pitches: {} }) }));
+  assert.match(empty, /Unattributed: No data yet/);
+  assert.doesNotMatch(empty, /Unattributed: 0 of 0 completions/);
+});
+
+test("a snapshot without a flows block renders exactly as before", () => {
+  const snapshot = snapshotWith(TWO_VENDORS);
+  delete (loose(snapshot) as Loose).flows;
+  const output = markdown(snapshot);
+  assert.doesNotMatch(output, /## By Flow/);
+  assert.doesNotMatch(output, /Unattributed:/);
+});
+
+test("hostile hand-edited flow labels render as inert text in Markdown and HTML", () => {
+  const evil = "<script>alert(1)</script>";
+  const md = markdown(snapshotWith({
+    flows: flow({
+      pitches: {
+        [evil]: { phases: { [evil]: { scopes: { [evil]: { [evil]: row({ completions: 1 }) } } } } },
+        "www.evil.example": { phases: { "a | b\n| injected | row |": { scopes: { "a@b.example": { claude: row({ completions: 1 }) } } } } },
+      },
+    }),
+  }));
+  assert.doesNotMatch(md, /<script|alert\(1\)|injected|https:\/\/evil|www\.evil|a@b\.example/);
+  assert.match(md, /Other \(overflow\)/);
+  const page = html(snapshotWith({
+    flows: flow({ pitches: { [evil]: { phases: { [evil]: { scopes: { [evil]: { [evil]: row() } } } } } } }),
+  }));
+  assert.doesNotMatch(page, /<script|alert\(1\)/);
+  assert.match(page, /Other \(overflow\)/);
+});
+
+test("the renderer stays pure when flows are present", () => {
+  const snapshot = snapshotWith({
+    flows: flow({
+      pitches: {
+        alpha: { phases: { build: { scopes: { S1: { opencode: row({ completions: 5, reportedUsageCount: 5, unavailableCount: 0, tokens: 100, costUsd: 0.5, pricedCount: 5 }) } } } } },
+      },
+    }),
+  });
+  const before = JSON.stringify(snapshot);
+  assert.equal(markdown(snapshot), markdown(snapshot));
+  assert.equal(html(snapshot), html(snapshot));
+  assert.equal(JSON.stringify(snapshot), before);
+});
+
+test("flow names that clean to the same label are merged, and the unattributed phase keeps its name", () => {
+  const row = (completions: number) => ({ completions, reportedUsageCount: completions, unavailableCount: 0, tokens: completions, costUsd: 0, pricedCount: 0 });
+  const flows = { since: "2026-10-19T00:00:00.000Z", pitches: {
+    "(unattributed)": { phases: { "(unattributed)": { scopes: { "(none)": { claude: row(3) } } } } },
+    "a b": { phases: { build: { scopes: { S1: { claude: row(5) } } } } },
+    "c d": { phases: { build: { scopes: { S1: { claude: row(7) } } } } },
+  } };
+  const text = markdown({ flows });
+  assert.match(text, /\| \(unattributed\) \| \(unattributed\) \| \(none\) \| claude \| 3 \|/);
+  assert.match(text, /\| Other \(overflow\) \| build \| S1 \| claude \| 12 \|/, "5 + 7 merged, nothing erased");
+  assert.match(text, /Unattributed: 3 of 15 completions/);
 });

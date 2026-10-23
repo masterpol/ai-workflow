@@ -103,6 +103,12 @@ named instead of left for the next doctor run to fail on:
 3. **Recommended default skills not installed** (currently `caveman`): the instruction that
    references it now exists in every skill and agent but is inert until it is installed —
    run the printed `/add-skill ...` command. The choice to install stays with the human.
+4. **Consolidation scaffold**: when the source ships `consolidation-migrate.mts`, one
+   `consolidation` step reports the number of legacy compacted pitches and names
+   `node ai-framework/scripts/consolidation-migrate.mts`. Complete the two sync passes below first:
+   the old script installs the new scripts; the new script then reports their current next steps.
+   Run the migration without flags to review its plan, then `--apply` after approval. It preserves
+   local templates and all legacy records. Upgrading legacy pitch content is a separate gated operation.
 
 A project synced from an **older** bundle version runs its own older script for the first apply.
 For an installation with JavaScript entries, that command is still

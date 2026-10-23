@@ -112,7 +112,10 @@ async function git(ctx: Ctx, args: readonly string[], input?: string, okStatuses
     if (result.errorCode === "ENOBUFS") return fail("git-output-limit");
     if (result.status === null || !okStatuses.includes(result.status) || result.signal) return fail("git-failed");
     return { ok: true, stdout: result.stdout };
-  } catch { return fail("git-failed"); }
+  } catch (error) {
+    if (errorCode(error) === "EPROCESSCLEANUP") throw error;
+    return fail("git-failed");
+  }
 }
 
 /** lstat every component of `rel` below `root`. Returns the final stat, null when absent, or a refusal reason. */
@@ -423,7 +426,10 @@ export async function isApplied(options: { root: string; patch: string; entries:
     const fields = attrs.stdout.split("\0");
     for (let i = 0; i + 2 < fields.length; i += 3) if (fields[i + 2] !== "unspecified") return false;
     return (await git(ctx, ["apply", "--check", "--reverse", "--binary", "-"], options.patch)).ok;
-  } catch { return false; }
+  } catch (error) {
+    if (errorCode(error) === "EPROCESSCLEANUP") throw error;
+    return false;
+  }
 }
 
 export async function applyAdmitted(options: ApplyOptions): Promise<ApplyResult> {
@@ -516,5 +522,9 @@ export async function applyAdmitted(options: ApplyOptions): Promise<ApplyResult>
       }
     }
     return { status: "applied", snapshot: snap.dir, touched, order: workers.map((w) => w.attemptKey) };
-  } catch { return refuse(fail("apply-error")); }
+  } catch (error) {
+    // A child may still write: preserve the snapshot and partial tree for explicit reconciliation, never race a rollback.
+    if (errorCode(error) === "EPROCESSCLEANUP") throw error;
+    return refuse(fail("apply-error"));
+  }
 }

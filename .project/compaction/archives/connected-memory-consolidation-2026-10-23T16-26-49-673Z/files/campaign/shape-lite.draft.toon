@@ -1,0 +1,21 @@
+@toon-data 1
+slug: shape-lite
+draft: true
+state: needs-decision
+ledgerHash: "sha256:079933cf243f484bdb4cc0ea8531d8aec7a8be1bc0adb6db59070350f28c7f93"
+bindings:
+legacyEntryHash: "sha256:afea087a9d0fe7025203f858d7e96a225d501929a3a494744de68a8a0f765d5c"
+mapping:
+  schemaVersion: 2
+  sections[2]{source,class,disposition,destination,helps,bodyHash}:
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+  otherFiles[0]:
+judgments[2]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: shape-lite\nshipped: 2026-10-07\nschemaVersion: 1\ndraft: true\n---\n# shape-lite\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#shape-lite","sha256:afea087a9d0fe7025203f858d7e96a225d501929a3a494744de68a8a0f765d5c","## shape-lite — shipped 2026-10-07\n\n`/shape-lite` shipped as bundle 2.9.0/2.9.1: a compressed variant of `/shape` for small tasks and user rejections, one skill\non four vendors (canonical `.claude`, byte-copy `.cursor`, `.agents` stub, `.opencode` command). It runs standalone (a card of\n≤150 tokens) or inline (patches the one active pitch and logs a `## Revisions` row), with a graph-only knowledge gate, a\nmechanical escalation test back to full `/shape` (>2 files or >100 LOC, prompt/LLM call sites, security-rules paths, overlap with\nanother active pitch) and one Approve / Revise / Back / Stop gate. A user-requested added scope made `setup-validator.js`\naccept a `CLAUDE.md` that loads `AGENTS.md` through `@AGENTS.md` (`entry-import.js`, wired into `bundle-sync`, SETUP.md and the\nsetup skill).\n\nNo-gos held: full `/shape` behaviour, template and gates are unchanged; lite runs no critique fan-out and adds no agents; it\nnever auto-advances past its gate or edits a pitch the user did not name; standing workflow-tooling no-gos respected. Rabbit\nholes resolved: escalation drift (hard triggers evaluated first, with evidence), recording a rejection without bloating the pitch\n(one Revisions row; a knowledge entry only if reusable), the AI-prompt golden-eval gate (lite refuses and escalates). Pushed to\nplan and closed there: doctor/test skill counts (the doctor discovers skills dynamically, no code change). Pushed to no-go:\na cross-pitch conflict check inside lite (file-set overlap is an escalation trigger instead).\n\nAudit ran two cycles with independent reviewers and caught canaries: a quadratic fence regex (a 1 MB `CLAUDE.md` blocked tooling\nfor about 187 s) and a directive judged on a code-stripped line, both fixed; stale escalation ordering in the skill also fixed.\nKnowledge: [[shape-lite-is-a-gated-escalating-variant-of-shape]] and [[backtracking-regex-over-untrusted-text-is-quadratic]].\nOpen followups are in `.project/pitches/_followups.md` (\"shape-lite followups\").\n",false
+unavailable[1]: ".project/records/pitch-compression/shape-lite.md"

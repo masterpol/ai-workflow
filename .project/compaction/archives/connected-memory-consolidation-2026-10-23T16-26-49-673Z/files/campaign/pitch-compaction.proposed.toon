@@ -1,0 +1,106 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: pitch-compaction
+sourceProof:
+  archiveDirectory: pitch-compaction-2026-09-25T13-39-04-109Z
+  manifestHash: "sha256:26381dc709e1311fe760d79d16f2c2222ee657ac3a7d6039e567f38f7e63c64f"
+  sourceBytes: 52339
+  verifiedFiles: 10
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/pitch-compaction.supplement.md"
+  destination: ".project/records/legacy-upgrades/pitch-compaction.md"
+  hash: "sha256:a77145166e5525ca25267499120b158b221910b4d4ca0e6479a58f5badbfbbba"
+payload:
+  ledgerHash: "sha256:3fba001ea8c9e6be5a2f7b598487913a14b71349e78bdc9ba7c6b74b9c76bdf0"
+  legacyEntryHash: "sha256:7ff42bbd97c3b501aa68d378d8efd22c7699ed79f99efd80d7227dada65763b7"
+  bindings:
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md": "sha256:62ae5aab21c4f63cc7a6dd3923d12a989da12784028e93b8212034c1f84644f0"
+    ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md": "sha256:17e2166775be74a603538c8a62d1a850abfd07b31971a0314283c3a8c8a5712e"
+    ".project/knowledge/index.md": "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+    ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md": "sha256:82661418824c1154db7b84ca2eb8e170c993aeef94079516e4044ea5d457b92c"
+    ".project/records/legacy-upgrades/pitch-compaction.md": "sha256:a77145166e5525ca25267499120b158b221910b4d4ca0e6479a58f5badbfbbba"
+    ".project/runs/2026-09-25-pitch-compaction.md": "sha256:9754acdcb6f31b2f2bcc2db1d5612e74ea25481b496cfdebb77737dbd254c0de"
+  mapping:
+    schemaVersion: 2
+    sections[15]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility","Preserves SHIPPED.md#scope-reconciliation with safety history and verification limits.","sha256:fac47eb6b5a1ec78b4e4eac306d431b07ddaec9102534aa2baf3103158742bcf"
+      "SHIPPED.md#confidence-read-this-before-relying-on-it",limit,merged,".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence","Preserves SHIPPED.md#confidence-read-this-before-relying-on-it with safety history and verification limits.","sha256:1e570fa8df141aa4cf59bb34a581d35388ace9a3a938852e44952baf1409c656"
+      "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract","Preserves SHIPPED.md#no-gos-honored with safety history and verification limits.","sha256:7bee9325cb840bb34896b57abc295d5a1e50ddb97c77fe8603a8426c10ebef80"
+      "SHIPPED.md#rabbit-holes-resolved-as-committed",decision,merged,".project/records/legacy-upgrades/pitch-compaction.md#shared-machinery-and-generated-context","Preserves SHIPPED.md#rabbit-holes-resolved-as-committed with safety history and verification limits.","sha256:f1ca60f3f78d84fe10863dc33d6e2b5abc1d20eec5ef7b91aa816b4a0b839c93"
+      "SHIPPED.md#audit-findings-final-disposition",know-how,merged,".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence","Preserves SHIPPED.md#audit-findings-final-disposition with safety history and verification limits.","sha256:4b0ec0138522ebe974be42da2119eff3b022e797b496e36c7019dcac4aebaeb5"
+      "SHIPPED.md#knowledge-extracted",know-how,merged,".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence","Preserves SHIPPED.md#knowledge-extracted with safety history and verification limits.","sha256:e7db93061921b31c9965a1486e120f9509b9f99e723b33592e168c02b56e86a2"
+      "SHIPPED.md#followups-generated",limit,merged,".project/records/legacy-upgrades/pitch-compaction.md#followups-version-and-later-narrative","Preserves SHIPPED.md#followups-generated with safety history and verification limits.","sha256:61af6343bd8eb7447bbabde38f07c4a591f0d66e05be6c4d96a65738585f7aaf"
+      "SHIPPED.md#what-downstream-pitches-can-now-build-on",behavior,merged,".project/records/legacy-upgrades/pitch-compaction.md#shared-machinery-and-generated-context","Preserves SHIPPED.md#what-downstream-pitches-can-now-build-on with safety history and verification limits.","sha256:30444a492ce40f053b4bab4cb7523c8ae644cd40a911d75378a320c8f6ee7cc6"
+      "SHIPPED.md#version",limit,merged,".project/records/legacy-upgrades/pitch-compaction.md#followups-version-and-later-narrative","Preserves SHIPPED.md#version with safety history and verification limits.","sha256:558b22fd18b651861da5b6dfce219282fb31d247dac0178b75f8fab591b5e49d"
+      "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract","Preserves pitch.md#no-gos with safety history and verification limits.","sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
+      "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/pitch-compaction.md#shared-machinery-and-generated-context","Preserves pitch.md#rabbit-holes with safety history and verification limits.","sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
+      audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence",Preserves audit-cycle-1.md with safety history and verification limits.,"sha256:8fa383195c65c2e84f57f6b594f1f805bd8ef25bb9a9d295048ba10cdf48e3f2"
+      "deviations.md#c1-2026-09-25",know-how,merged,".project/records/legacy-upgrades/pitch-compaction.md#build-verification-and-unique-lessons","Preserves deviations.md#c1-2026-09-25 with safety history and verification limits.","sha256:dc609c2f9b8840225f4df61bf91f7269a41469ee87f161825c3bf8e184e99f29"
+      "deviations.md#c2-2026-09-25",decision,merged,".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract","Preserves deviations.md#c2-2026-09-25 with safety history and verification limits.","sha256:0f0c36fd51b34168937f418fefc29d66dadaaa658aae2239cb6b2113623917c7"
+      "deviations.md#audit-cycle-1-2026-09-25",know-how,merged,".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence","Preserves deviations.md#audit-cycle-1-2026-09-25 with safety history and verification limits.","sha256:b64ff3e8aaf7797a8c580b9991922ee18fafde7237ab08e5aef02b14b7482fcf"
+    otherFiles[9]:
+      -
+        path: SHIPPED.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility"
+        helps: "Preserves substantive SHIPPED.md commitments, measurements and limits."
+        hash: "sha256:95ddf91255c7047951884899df213befa39315982d858e7e090c0d1b160dee54"
+      -
+        path: c1-evidence.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#build-verification-and-unique-lessons"
+        helps: "Preserves substantive c1-evidence.md commitments, measurements and limits."
+        hash: "sha256:091e13e026e3440819fb4da9333e31e05c33ab194e23573881e70f75bfc0c420"
+      -
+        path: c2-evidence.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#build-verification-and-unique-lessons"
+        helps: "Preserves substantive c2-evidence.md commitments, measurements and limits."
+        hash: "sha256:06c1959dfeb666c36e450e15ff18a167593864a96e70ec0247e94592002a6c7e"
+      -
+        path: compaction-index.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility"
+        helps: "Preserves substantive compaction-index.md commitments, measurements and limits."
+        hash: "sha256:ba4608afa85e8a2f9f8151a457d45153f554bcd2c8654d74bb7e24b4f2dceac5"
+      -
+        path: compaction-removal.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract"
+        helps: "Preserves substantive compaction-removal.md commitments, measurements and limits."
+        hash: "sha256:c23be7eb735103d6270d036ab960c33803df0a681f290ad07d0e14b1bc59b3aa"
+      -
+        path: deviations.md
+        disposition: merged
+        destination: ".project/runs/2026-09-25-pitch-compaction.md"
+        helps: "Tracked run is byte-identical to cached deviations, retaining the superseded safety interpretation."
+        hash: "sha256:29ae5ffef50c499fa4d761bc5f728ce8f86bdf1fe55ae5fb5df39cb909f2a15b"
+      -
+        path: hill.md
+        disposition: omitted
+        reason: process-noise
+        hash: "sha256:78f43a20451b7b83e3c7457e7bf7c662a77ed1bfe666d9f92014da9874ea8c64"
+      -
+        path: pitch.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility"
+        helps: "Preserves substantive pitch.md commitments, measurements and limits."
+        hash: "sha256:1d3d35f9302614b7893e903c25440759e8c2d4a40bbd25c6f11d162a7000ceff"
+      -
+        path: plan.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility"
+        helps: "Preserves substantive plan.md commitments, measurements and limits."
+        hash: "sha256:108192273bbd531a3db57fd5229a9289385559c8d2f884b190504c224f3dc0e4"
+  outcomeRecord: "---\nslug: pitch-compaction\nshipped: 2026-09-25\nschemaVersion: 1\n---\n# pitch-compaction\n\nPitch compaction preserves verified recovery sources and durable coverage before removing live pitch records.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: Pitch compaction preserves verified recovery sources and durable coverage before removing live pitch records.\n- docs: [source supplement](.project/records/legacy-upgrades/pitch-compaction.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/pitch-compaction.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/pitch-compaction.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/pitch-compaction.md)\n- followups: [retained limits](.project/records/legacy-upgrades/pitch-compaction.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/pitch-compaction.md)\n"
+  acceptDestinationDrift:
+    ".project/pitches/_followups.md":
+      committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Against introducing ea82bcee: +319/-0. Original re-review/first-use/state/version history preserved; later additions do not erase it. First-use entry already records Sept25 completion and limits; retain shipped not-yet-used statement as earlier history, not current state."
+    ".project/knowledge/index.md":
+      committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+      current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+      reason: "Against introducing ea82bcee: +560/-45. Generated date/counts/tag tables and graph command changed, many later entries added. Compaction gate/prefix lessons remain listed. Index is navigation, not full retained content; map substantive claims to supplement or confirmed durable decision."

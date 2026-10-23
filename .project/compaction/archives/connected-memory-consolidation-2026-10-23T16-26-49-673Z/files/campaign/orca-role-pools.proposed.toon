@@ -1,0 +1,88 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: orca-role-pools
+sourceProof:
+  archiveDirectory: orca-role-pools-2026-10-19T03-29-30-919Z
+  manifestHash: "sha256:df65378316f3ba52832af554afc0eaf618844fb7431b49ffe06ed20594c910bd"
+  sourceBytes: 48063
+  verifiedFiles: 7
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/orca-role-pools.supplement.md"
+  destination: ".project/records/legacy-upgrades/orca-role-pools.md"
+  hash: "sha256:9ce929eaae69830c9063ad4fef3837c09e7d9649b1441c0cef02256a1a6a2102"
+payload:
+  ledgerHash: "sha256:e68222c8ad3e71298725ed9194732363dadf7b332c9912837477e844c1e9a5c1"
+  legacyEntryHash: "sha256:70f7c3bfda5cb40eca0c9765d155cb3067e6abeb19a81275c86fd605ab3d47d6"
+  bindings:
+    ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md": "sha256:13cc84d4cfd74ec1273c3e8a3b8fc4b814911888a51884766388d95b814ebb0a"
+    ".project/records/legacy-upgrades/orca-role-pools.md": "sha256:9ce929eaae69830c9063ad4fef3837c09e7d9649b1441c0cef02256a1a6a2102"
+  mapping:
+    schemaVersion: 2
+    sections[23]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scopes",behavior,merged,".project/records/legacy-upgrades/orca-role-pools.md#shipped-scope","Scope-by-scope delivery S0 to S7, the skipped S4 spike and the added S0 baseline repair.","sha256:8a6f3678fb45e35a09d28bee544b4a77034a3d3add086d0dcec23af6c2e77c51"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/orca-role-pools.md#no-gos-and-resolved-rabbit-holes","Concurrency stayed bounded, launch authority unchanged, no swarm or fan-out review.","sha256:7cfd3eadd176b1e3962012559d6c72eb13bc7550ac8c81922d79d09093377d41"
+      "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#no-gos-and-resolved-rabbit-holes",Resolved and still-open risks with their chosen mechanisms and the pool-size limit.,"sha256:d84dc5ef5ccf4dba384a5ef3e923f1c5ddf086b2c6eeb5686995fda488802c71"
+      "SHIPPED.md#audit",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#audit-chronology","Two cycles, canaries, the M1 must-fix, about 30 mutant-driven tests and the missing prompt hashes.","sha256:2ebf599b56d0a8de9a411bdeeee8c9f5cd0dfdd7cfd28fa368a7cc8fc9278e3d"
+      "SHIPPED.md#verify",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#verification-and-historical-counts","Final suite figures, the three unrelated upgrade.test failures and the gate results.","sha256:58c3f0ec1f9ed0f02e6d0b229732fe9ee5e06863e8388e4df29fe99938883730"
+      "SHIPPED.md#upgrade-note",behavior,merged,".project/records/legacy-upgrades/orca-role-pools.md#upgrade-note","Operator-visible changes: pool syntax, assign input, disjoint paths and the start probe of every member.","sha256:96dbf821b0238769da34cb6a793108ba9234b32d383116665bf65e43c008f9ba"
+      "SHIPPED.md#followups-generated",limit,merged,".project/records/legacy-upgrades/orca-role-pools.md#follow-ups-and-historical-limits",The six backlog items and where the live list is.,"sha256:76c7bfa557990c28ce07ddcf32fe63caece31ffbb8dabd69b42f973139b7c26b"
+      "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/orca-role-pools.md#no-gos-and-resolved-rabbit-holes","No unbounded concurrency, no change to launch authority, standing no-gos apply.","sha256:5c41e2a412c4e9cba646d80297f550b9a47d79221a7f7bb712a6e4bf85a14272"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#no-gos-and-resolved-rabbit-holes","Resolved, pushed-to-plan and pushed-to-no-go dispositions.","sha256:e52190513f0a282632195b79869e5b329ea57fade0a41a5d93ed970bbc496539"
+      "deviations.md#d1-2026-10-16-s0-baseline-repair-added-not-in-plan",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations",Baseline repair of 98 red tests added as S0 and the unrepaired in-place conversion.,"sha256:62ff2770da17906d63543861d362477b0f8a1dd0e153db4414c423218472761d"
+      "deviations.md#d2-2026-10-16-pools-hold-distinct-vendor-names-so-a-pool-has-at-most-3-members",limit,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations","A pool has at most 3 distinct vendors; the 16 is concurrency, not pool size.","sha256:f38dac9913ec0be89a26626c0f4c7e07de340a30b5532a1c09d041336b760970"
+      "deviations.md#d3-2026-10-16-configmts-unchanged",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations",config.mts unchanged; only pin tests were added.,"sha256:766fea0d4d6487f9060f2cfff1c7e13e556e1af9f98047b494a10a79279453e6"
+      "deviations.md#d4-2026-10-16-example-toon-edit-landed-inside-agent-model-sweeps-commit-0c2bb35",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations",The example pool edit landed inside commit 0c2bb35 of a concurrent session.,"sha256:f5412e2feee2f5e9ce8def789106fa7399cde90dd182d09871c3f99d313c5875"
+      "deviations.md#d5-2026-10-16-s4-live-spike-skipped",limit,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations","S4 spike skipped; default 3, ceiling 16, unverified above 3 live workers.","sha256:0256f0d9ec28c58b462fe0386370e0676c6dd95f6be018b5bf8d63225c6a1029"
+      "deviations.md#d6-2026-10-16-opencodecommandsbuildmd-and-codex-need-no-edit",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations",Which mirrors needed no edit and why the Cursor copy was refreshed with cp.,"sha256:e049e6783dd1dc245d68e8505792723d2fca86296b945d884b095ec34c4ba791"
+      "deviations.md#d7-2026-10-16-review-independence-rule-and-pool-size",decision,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations","Degenerate review pool: blocked plus humanAction with no flag, the builder's choice.","sha256:15a7e6d35332012c5ed7b87c38ec1d820fccd9aab6a9e1a98c66aaeb4f12c31e"
+      "deviations.md#d8-2026-10-16-release-bumped-in-s7-not-at-ship",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations","2.27.0 was bumped in S7 and ship reconciles instead of bumping again.","sha256:6c3c281600b099ae1912cd51916905ab30a494ee49d7472146f3cff0360cfdb6"
+      "deviations.md#d9-2026-10-16-existing-tests-changed-for-the-overlap-guard",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations",Two existing tests moved to one path per scope for the overlap guard.,"sha256:a20a283436ca85343bfdc6b09c28ad11ce220e203df0e7f7f527a43cc77d2740"
+      "log.md#incident-2026-10-16-full-suite-not-green-at-head-before-any-role-pools-edit",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#incidents","Red baseline cause, fix, and the residual upgrade.test and timing failures not caused here.","sha256:ebb497c998c1832f5e0e1c1c0fbe19b5d6a5a8d5c1b463935cb68c6fb03f6a74"
+      "log.md#incident-2026-10-16-concurrent-session-in-the-same-checkout",know-how,merged,".project/records/legacy-upgrades/orca-role-pools.md#incidents",Stage by explicit path and recheck git status before each commit in a shared checkout.,"sha256:ad801a0c7f9a4ec7124bf30f94c3a92429792f7b8de6b557df4be8b7dfe20502"
+      "log.md#s1-evidence-policy-carries-pools",behavior,merged,".project/records/legacy-upgrades/orca-role-pools.md#verification-and-historical-counts","66 policy tests with 7 new, no workers.length cap and the one roles consumer.","sha256:dfb50139e220aeac6e93a04fb2a4bb7ec8728cbfa343c6fa26994bbb3fe1b667"
+      "log.md#s2-evidence-start-reads-pools",behavior,merged,".project/records/legacy-upgrades/orca-role-pools.md#verification-and-historical-counts",Three start tests; probe count equals distinct members.,"sha256:5610392922df8f9694bf705c30f1d2ee55de3d5745263378644e1ad0d72979da"
+      "log.md#s5s7-evidence",behavior,merged,".project/records/legacy-upgrades/orca-role-pools.md#verification-and-historical-counts","Assign, dispatch, ledger and grader test counts, mutant results, schema-unchanged assertion and the vanished local toon.","sha256:3f54eafc3b7b535f27ff3ed9c6ebfedaeb42dd9088fffec2a7f87d6c40c59dfd"
+    otherFiles[7]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:3f5537ed2af51cbff33b00a18540e225ef106a6967760e1211f12c76adc3c1c8"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/orca-role-pools.md#shipped-scope"
+        helps: "Preserves scope status, upgrade note, verification and followups across the supplement sections."
+      -
+        path: audit.md
+        hash: "sha256:d0da73cd6db6b74cad62cdf26b5ea860b5b7255ffe85e5d50836ca4d36abe16d"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/orca-role-pools.md#audit-chronology"
+        helps: "Preserves M1, S1 to S6, acknowledged items, cross-pitch X1 and X2, canaries, cycle 2 and the vanished toon."
+      -
+        path: deviations.md
+        hash: "sha256:1895b106b2f8a60ff2c64964b29de17a7fd9e1a75d2e75e783033ed99ab4c16e"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations"
+        helps: Preserves deviations D1 to D9.
+      -
+        path: hill.md
+        hash: "sha256:a4de38a923b9afbef98d29ec8f613c88d343a1528fa830406836500c72809746"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:a358936ff8f76f6c8005412e4e89a9faacea46bae4138a5348d84333bd5d34fd"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/orca-role-pools.md#incidents"
+        helps: "Preserves the two incidents, scope evidence and counts."
+      -
+        path: pitch.md
+        hash: "sha256:6373b71954a5d74d357f23803fcaa15ac0c71f6d6a1303b1e86f11cefdb3af9e"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/orca-role-pools.md#problem-and-owner-decisions"
+        helps: "Preserves the problem, owner decisions, sketch, critique findings and their disposition."
+      -
+        path: plan.md
+        hash: "sha256:b2b5b7b39d7a422fa1cf2751706ade39e8a7cbfea743f4d737525b6fe425cc61"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/orca-role-pools.md#plan-and-exit-criteria"
+        helps: "Preserves read-first facts, preconditions, waves, exit criteria, risks and the dispatch plan."
+  outcomeRecord: "---\nslug: orca-role-pools\nshipped: 2026-10-17\nschemaVersion: 1\n---\n# orca-role-pools\n\nA coordinator can now list itself and several workers, and a role can be a pool of up to three distinct vendors.\nA pure assignment module splits scopes round-robin, keeps reviewer different from implementer and rotates only after a proven clean failure.\nLaunch authority is unchanged; overlapping authorized paths across live scopes are refused. Concurrency above 3 is unverified.\n\n- outcome: Orca roles accept worker pools with deterministic, resumable assignment and a path-overlap guard.\n- docs: [orca vendors](ai-framework/integrations/orca-vendors.md)\n- decisions: [build decisions and deviations](.project/records/legacy-upgrades/orca-role-pools.md#build-decisions-and-deviations)\n- knowledge: [schema bump left stale tests](.project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md), [ownership predicate](.project/knowledge/patterns/an-ownership-predicate-must-mirror-the-claim-transactions-set.md), [gate spawns what it probed](.project/knowledge/patterns/a-gate-spawns-exactly-what-it-probed.md)\n- code: [assign](ai-framework/scripts/orca-assign.mts), [policy](ai-framework/scripts/orca-policy.mts), [dispatch](ai-framework/scripts/orca-dispatch.mts), [ledger](ai-framework/scripts/orca-ledger.mts)\n- verification: [verification and historical counts](.project/records/legacy-upgrades/orca-role-pools.md#verification-and-historical-counts)\n- followups: [follow-ups and historical limits](.project/records/legacy-upgrades/orca-role-pools.md#follow-ups-and-historical-limits), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/orca-role-pools.md)\n"

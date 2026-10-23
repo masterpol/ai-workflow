@@ -1,28 +1,36 @@
+import type { SpawnSyncOptions } from "node:child_process";
 // Simulates the real upgrade of an existing install: a project holding the pre-migration bundle runs its OWN
 // (old) bundle-sync.js against this tree, with plain `node` and no flags, and must end healthy with the same
 // command output as before after a second direct TypeScript sync. Skips when the historical ref is unavailable.
 import assert from "node:assert/strict";
-import { spawnSync } from "node:child_process";
-import { appendFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { createTestDeps, urlPath, spawnSync as rawSpawnSync } from "./test-helpers.mts";
+const testDeps = createTestDeps();
+const { appendFileSync, existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { join } = testDeps.path;
 import { test } from "node:test";
-import { fileURLToPath } from "node:url";
 import { NODE_FLAGS } from "./entry.mts";
+import { WORKFLOW_ENV_FILE } from "./env.mts";
+
+function spawnSync(command: string, args: string[], options: SpawnSyncOptions = {}) {
+  return rawSpawnSync(command, args, { ...options, shell: false, windowsHide: true, timeout: 120000, killSignal: "SIGKILL" });
+}
 
 /** Last commit before the TypeScript migration (the bundle existing installs hold). */
 const PRE_MIGRATION_REF = "53bca03";
-const repoRoot = fileURLToPath(new URL("../../..", import.meta.url));
+const repoRoot = urlPath(new URL("../../..", import.meta.url));
 /** The tree the old install upgrades TO. Defaults to this checkout; override to test an isolated copy. */
 const source = process.env.UPGRADE_SIM_SOURCE ?? repoRoot;
-const nodeExecutable = spawnSync("node", ["-p", "process.execPath"], { encoding: "utf8" }).stdout.trim();
-const run = (command: string, args: string[], cwd: string, env: Record<string, string> = {}) =>
-  spawnSync(command, args, { cwd, encoding: "utf8", env: { ...process.env, ...env }, maxBuffer: 64 * 1024 * 1024 });
+const nodeExecutable = String(spawnSync("node", ["-p", "process.execPath"], { encoding: "utf8" }).stdout).trim();
+const run = (command: string, args: string[], cwd: string, env: Record<string, string | undefined> = {}) => {
+  const result = spawnSync(command, args, { cwd, encoding: "utf8", env: { ...process.env, AI_WORKFLOW_RUNNER: undefined, ...env }, maxBuffer: 64 * 1024 * 1024 });
+  return { ...result, stdout: String(result.stdout ?? ""), stderr: String(result.stderr ?? "") };
+};
 
 const hasRef = run("git", ["cat-file", "-e", `${PRE_MIGRATION_REF}^{commit}`], repoRoot).status === 0;
 const hasBun = run("bun", ["--version"], source).status === 0;
 const hasNoStripFlag = run(process.execPath, ["--no-experimental-strip-types", "-e", "0"], source).status === 0;
-const skip = hasRef ? false : `git ref ${PRE_MIGRATION_REF} not available`;
+const skip = process.platform === "win32" ? "historical bundle has no verified Windows process lifecycle" : hasRef ? false : `git ref ${PRE_MIGRATION_REF} not available`;
 
 const COMMANDS: Array<{ name: string; args: string[]; identical: boolean }> = [
   { name: "workflow-doctor", args: ["ai-framework/scripts/workflow-doctor.js", "--no-color"], identical: false },
@@ -43,12 +51,12 @@ function oldProject(): string {
 
 const sortLines = (text: string): string => text.split("\n").sort().join("\n");
 
-function snapshot(project: string, env: Record<string, string> = {}, migrated = false): Record<string, { status: number | null; stdout: string; stderr: string }> {
-  const out: Record<string, { status: number | null; stdout: string; stderr: string }> = {};
+function snapshot(project: string, env: Record<string, string> = {}, migrated = false): Record<string, { status: number | null; stdout: string; stderr: string; raw: string }> {
+  const out: Record<string, { status: number | null; stdout: string; stderr: string; raw: string }> = {};
   for (const command of COMMANDS) {
     const args = migrated ? [...NODE_FLAGS, command.args[0].replace(/\.js$/, ".mts"), ...command.args.slice(1)] : command.args;
     const result = run(nodeExecutable, args, project, env);
-    out[command.name] = { status: result.status, stdout: sortLines(result.stdout), stderr: result.stderr };
+    out[command.name] = { status: result.status, stdout: sortLines(result.stdout), stderr: result.stderr, raw: result.stdout };
   }
   return out;
 }
@@ -57,6 +65,8 @@ function snapshot(project: string, env: Record<string, string> = {}, migrated = 
  * An old install never receives README.md (bundle-sync only flags it) and an old bundle-sync never copies a
  * directory it does not know, so a bundle that moves docs into ai-framework/docs makes the doctor fail on exactly
  * those paths. That belongs to the docs change, not to this migration: tolerate it, and nothing else.
+ * The simulated install is the bundle repo itself (it has SETUP.md), so those README checks apply to it; a real
+ * project's README is its own and the doctor skips them there.
  */
 const DOCS_ONLY = /README\.md|ai-framework\/docs\//;
 function docsOnlyDoctorFailures(after: ReturnType<typeof snapshot>): boolean {
@@ -67,6 +77,18 @@ function docsOnlyDoctorFailures(after: ReturnType<typeof snapshot>): boolean {
 /** The delivered graphify adds an empty `files` list to --json (stdout is line-sorted here), so drop it and trailing commas. */
 function comparable(text: string): string {
   return text.split("\n").filter((line) => line.trim() !== '"files": []' && line.trim() !== '"files": [],').map((line) => line.replace(/,$/, "")).join("\n");
+}
+
+/**
+ * What the old graphify reported that the delivered one must still report identically: its counts, its problems and its
+ * wrote flag. The delivered one adds `stats.decisionStatus` and a `workflow` block (edge counts, dropped boilerplate hubs);
+ * both are new information an old install had no way to report, so they are removed before comparing. Parsed, because
+ * `snapshot` line-sorts stdout.
+ */
+function graphifyShape(raw: string): string {
+  const report = JSON.parse(raw) as { stats: Record<string, unknown>; problems: unknown; wrote: unknown };
+  const { decisionStatus: _added, ...stats } = report.stats;
+  return JSON.stringify({ stats, problems: report.problems, wrote: report.wrote });
 }
 
 function assertHealthy(label: string, before: ReturnType<typeof snapshot>, after: ReturnType<typeof snapshot>, skip: string[] = []): void {
@@ -83,9 +105,29 @@ function assertHealthy(label: string, before: ReturnType<typeof snapshot>, after
     assert.equal(now.status, was.status, `${label}: ${command.name} exit status. ${detail}`);
     assert.equal(now.stderr, "", `${label}: ${command.name} wrote to stderr`);
     assert.doesNotMatch(now.stdout, /^FAIL /m, `${label}: ${command.name} reports a failure`);
-    if (command.identical) assert.equal(comparable(now.stdout), comparable(was.stdout), `${label}: ${command.name} output changed`);
+    if (command.identical) {
+      if (command.name === "graphify") assert.equal(graphifyShape(now.raw), graphifyShape(was.raw), `${label}: ${command.name} output changed`);
+      else assert.equal(comparable(now.stdout), comparable(was.stdout), `${label}: ${command.name} output changed`);
+    }
   }
 }
+
+/** The documented post-sync step: `ai-workflow.toon` is instance data the sync never writes, so the migrator builds it. */
+const migrateConfig = (project: string) => {
+  const result = run(nodeExecutable, [...NODE_FLAGS, "ai-framework/scripts/config-migrate.mts", "--apply", "--root", "."], project);
+  assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
+  assert.ok(existsSync(join(project, "ai-workflow.toon")));
+  // Project-owned ignore rules are not overwritten by bundle-sync; model the required post-sync merge.
+  const ignoreFile = join(project, ".gitignore");
+  const ignoreText = readFileSync(ignoreFile, "utf8");
+  for (const rule of [".project/evals/runs/", ".project/evals/.cache/"]) {
+    if (!ignoreText.split(/\r?\n/).includes(rule)) appendFileSync(ignoreFile, `\n${rule}\n`);
+  }
+  // The sync's `scaffold` next step: a bundle that adds project-template files (here `.project/records/shipped/`) leaves them
+  // missing in an existing `.project/`; `workflow-doctor --fix` restores missing files only, never overwrites.
+  const restored = run(nodeExecutable, [...NODE_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--fix", "--no-color"], project);
+  assert.equal(existsSync(join(project, ".project/records/shipped/_template.md")), true, `${restored.stdout}${restored.stderr}`);
+};
 
 const sync = (project: string, extra: string[], migrated = false) => {
   const entry = migrated ? [...NODE_FLAGS, "ai-framework/scripts/bundle-sync.mts"] : ["ai-framework/scripts/bundle-sync.js"];
@@ -120,6 +162,11 @@ test("old install upgrades with its own bundle-sync (apply + prune) and every co
     assert.equal(existsSync(join(project, ".opencode/plugins/token-consumption.js")), false);
     assert.equal(existsSync(join(project, ".opencode/plugins/token-consumption.ts")), true);
     assert.equal(second.conflict, 0, JSON.stringify(second));
+    const codexHooks = JSON.parse(readFileSync(join(project, ".codex/hooks.json"), "utf8"));
+    assert.ok(Array.isArray(codexHooks.hooks.UserPromptSubmit), "the sync registers the Codex startup hook an old install lacks");
+    const claudeSettings = JSON.parse(readFileSync(join(project, ".claude/settings.json"), "utf8"));
+    assert.ok(Array.isArray(claudeSettings.hooks.UserPromptExpansion) && Array.isArray(claudeSettings.hooks.PreToolUse), "the sync registers the Claude Orca start hooks");
+    migrateConfig(project);
     assertHealthy("direct Node", before, snapshot(project, {}, true));
 
     const again = sync(project, [], true);
@@ -140,17 +187,28 @@ test("a locally edited script is kept by the old sync and the project still work
     assert.match(readFileSync(join(project, "ai-framework/scripts/graphify.js"), "utf8"), /local customization/);
     sync(project, ["--apply", "--prune"], true);
     assert.match(readFileSync(join(project, "ai-framework/scripts/graphify.js"), "utf8"), /local customization/);
+    migrateConfig(project);
     assertHealthy("preserved edited graphify.js with direct graphify.mts", before, snapshot(project, {}, true));
   } finally { rmSync(project, { recursive: true, force: true }); }
 });
 
-test("a project whose .env selects bun runs the same commands", { skip: skip || (hasBun ? false : "bun not installed"), timeout: 240000 }, () => {
+test("a project whose workflow settings select Bun actually uses Bun and runs the same commands", { skip: skip || (hasBun ? false : "bun not installed"), timeout: 240000 }, () => {
   const project = oldProject();
   try {
     const before = snapshot(project);
     sync(project, ["--apply", "--prune"]);
     sync(project, ["--apply", "--prune"], true);
-    appendFileSync(join(project, ".env"), "AI_WORKFLOW_RUNNER=bun\n");
-    assertHealthy(".env runner", before, snapshot(project, {}, true));
+    writeFileSync(join(project, WORKFLOW_ENV_FILE), JSON.stringify({ AI_WORKFLOW_RUNNER: "bun" }));
+    migrateConfig(project);
+    assert.match(readFileSync(join(project, "ai-workflow.toon"), "utf8"), /runner: bun/, "the migrator carries the legacy runner setting");
+    const probe = join(project, "ai-framework/scripts/upgrade-runtime-probe.mts");
+    writeFileSync(probe, [
+      'import { runDirect } from "./runtime/cli.mts";',
+      'runDirect(import.meta.url, (_args, deps) => { deps.io.stdout.write(JSON.stringify({ selected: deps.runtime, host: process.versions.bun ? "bun" : "node" })); return 0; });',
+    ].join("\n"));
+    const host = run(nodeExecutable, [...NODE_FLAGS, probe], project);
+    assert.equal(host.status, 0, host.stderr);
+    assert.deepEqual(JSON.parse(host.stdout), { selected: "bun", host: "bun" });
+    assertHealthy("workflow settings runner", before, snapshot(project, {}, true));
   } finally { rmSync(project, { recursive: true, force: true }); }
 });

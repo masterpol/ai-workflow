@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "slug": "portable-skill-defaults",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#grounding-decision-that-shaped-the-build",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit-findings-final-disposition",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/index.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#what-downstream-pitches-can-now-build-on",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#version",
+      "status": "extracted",
+      "destination": "CHANGELOG.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d2-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d3-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/skill-defaults-attribution-guard-and-runtime-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/resolve-before-matching-a-protected-path-allowlist.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#audit-cycle-1-2026-09-25",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-09-25T13:39:03.807Z"
+}

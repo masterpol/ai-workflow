@@ -21,7 +21,7 @@ If `NODE_OPTIONS` disables type stripping, pass `--experimental-strip-types` exp
 
 ## Choosing Node or Bun
 
-Set `AI_WORKFLOW_RUNNER` in the environment or in the project-root `ai_workflow_env.json` (the environment wins):
+Set `AI_WORKFLOW_RUNNER` in the environment or as `runtime.runner` in the project-root `ai-workflow.toon` (the environment wins; the legacy `ai_workflow_env.json` is read only when no `ai-workflow.toon` exists):
 
 | Value | Runtime |
 |---|---|
@@ -37,10 +37,9 @@ they apply Node's compatibility flags only to Node and honor an explicit child r
 An explicit child environment replaces the inherited environment; include `PATH` when selecting
 another executable by name. A sanitized environment without a runner keeps the parent's selection.
 
-`ai_workflow_env.json` (a flat object; see `ai_workflow_env.example.json`) is read only from the project root that
+`ai-workflow.toon` (TOON; see `ai-framework/templates/ai-workflow.example.toon`; the legacy flat `ai_workflow_env.json` is the fallback, see `ai-framework/templates/ai_workflow_env.example.json`) is read only from the project root that
 contains `ai-framework/`, never from an unrelated working directory, and the secret-bearing `.env` is never read. A
-symlink leaving that root, a non-regular file, a file over 64 KiB or malformed JSON is ignored. Only the two keys
-`AI_WORKFLOW_RUNNER` and `AI_WORKFLOW_ORCA_MULTI_AGENT` (string or boolean) are taken from it; other keys never reach a
+symlink leaving that root, a non-regular file, a file over 64 KiB or malformed content is ignored. A present but invalid `ai-workflow.toon` contributes nothing and never falls back to the legacy file. Only the runner (`runtime.runner`) and the Orca switch (`integrations.orca.multiAgent` in a `schemaVersion: 2` file; legacy keys `AI_WORKFLOW_RUNNER` and `AI_WORKFLOW_ORCA_MULTI_AGENT`, string or boolean) are taken from it; other keys never reach a
 child process. The Orca switch is read by the same loader through the Orca launch gate. A selected executable missing from `PATH` fails with an error; it never falls back to
 another runtime. Portable reminder hooks and review-bench test commands use the same selection.
 
@@ -59,6 +58,16 @@ another runtime. Portable reminder hooks and review-bench test commands use the 
   `node:os`, `node:path` or `node:child_process` directly: `createTestDeps()`, `tempFixture()`,
   `runScript()`, `memoryFs()` and `captureIo()`. `node:test` and `node:assert` stay as they are —
   Bun supports both under `bun test`.
+- The same module covers the common Node shapes over those dependencies: `spawnSync()` and
+  `execFileSync()` (text output, launch failures and timeouts returned as `error` like Node),
+  `urlPath()` / `fileUrl()` for `import.meta.url` conversions, `listTree()` for a recursive
+  listing and `copyTree()` for a recursive copy. `deps.fs.readFileSync` always returns text;
+  read binary content with `readBytesSync`.
+- A few tests need raw platform handles. They take them from the Node adapter's test-support
+  exports, re-exported by `test-helpers.mts`: `spawnTestChild()` for a long-lived child with live
+  stdio or IPC, `stripTypes()` to load an in-memory mutant on either runner, `moduleRequire()` for
+  CommonJS interop checks and `adapterNet` (the adapter's own `node:net` instance) for port tests.
+  Production code never uses them.
 - The OpenCode plugin is `.opencode/plugins/token-consumption.ts`: its host discovers `.ts`
   files, while shared libraries remain `.mts`.
 

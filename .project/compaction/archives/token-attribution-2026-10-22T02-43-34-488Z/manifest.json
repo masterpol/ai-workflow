@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "slug": "token-attribution",
+  "sourceRoot": ".project/pitches/token-attribution",
+  "archivedAt": "2026-10-22T02:43:34.492Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "b4c98a042785f7758c0b2e132e17b830ad70446dcec25411b6992fd7d45785e1",
+      "mode": 420
+    },
+    "audit-record-code.md": {
+      "hash": "281be9e91f0e0b5ec2111464a2820b58beb9537ae4afb945b9f68641f64c046e",
+      "mode": 420
+    },
+    "audit-record-security.md": {
+      "hash": "9d554d72785cd88c3c41be35f9c8d3954c4a35b80b14b05cc651245901b0a61b",
+      "mode": 420
+    },
+    "audit-record-test.md": {
+      "hash": "0331ff05cdb55bd73fb58128bed8cf569848996d206aebf265566dc1e1a2273d",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "62913dd2cea941076f17fe1cf03016d613e9ad9f09a9b19d703495add66a2144",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "20dbd9575a7378e232e0c5293a9e5d145fa3a53027ac9c75ab672db9c86e22b5",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "13d555ecb2cc4e5db2de7214db10d6ab906a825caa4ca617ba0fc87ab1e6bf27",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "703d8c490318f67ae7d7fb7a54290972485605002b16510a6c53339a15fdd7e2",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "5692441495b398a949e2313c84301adc236e8e342b9392c4e916d53d14a066d2",
+      "mode": 420
+    },
+    "rollout.md": {
+      "hash": "f719b64a2df6143137dcc4083cf6a293ed1b8c2bd7fa52c273f5b94a00996093",
+      "mode": 420
+    },
+    "spike-s1-pointer.md": {
+      "hash": "702920529be6c647c0904d933e6883e828730679459813ca2e29ceba45327e54",
+      "mode": 420
+    },
+    "spike-s2-codex.md": {
+      "hash": "11d87bb2d002696598b5c1c3e720b81bff6fc1070e77b7a211552fadb6f51fba",
+      "mode": 420
+    },
+    "spike-s3-transcript.md": {
+      "hash": "628bdaf784872274938f54fa5a3163a48cb697bec1440667993d1c49c7ca3f9a",
+      "mode": 420
+    }
+  }
+}

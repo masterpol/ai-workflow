@@ -1,0 +1,35 @@
+@toon-data 1
+slug: orca-engines-range
+draft: true
+state: needs-decision
+ledgerHash: "sha256:d55e30d32180d7585eda7450daca4e1a0037a868b0bdf75c3f87a98b2bcf2424"
+bindings:
+legacyEntryHash: "sha256:cac843d46660866648bb43005793d9e226f0ba65a5c00bc47bd731a13b02660b"
+mapping:
+  schemaVersion: 2
+  sections[9]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#verify",null,null,null,null,null
+    "SHIPPED.md#upgrade-note",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+  otherFiles[0]:
+judgments[9]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verify",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#upgrade-note",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-engines-range\nshipped: 2026-10-16\nschemaVersion: 1\ndraft: true\n---\n# orca-engines-range\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-engines-range","sha256:cac843d46660866648bb43005793d9e226f0ba65a5c00bc47bd731a13b02660b","## orca-engines-range — shipped 2026-10-16\n\n`integrations.orca.engine` became an npm-style version range (v2.26.0, one day, small-batch): S1 a pure `runtime/semver-range.mts` (no imports; 2480 npm-semver fixture rows, 57 tests, 3 mutants caught), S2 preflight, launch gate and start hook check the range and refuse naming range and found version, S3 config validation with position, a doctor failure on a bad range and a migrator/example default of `>=1.4.224`, S4 `orca-vendors.md` and the changelog. Upgrade note: a bare `engine: \"1.4.224\"` is now an exact pin; use `>=1.4.224` for the old \"this or later\" meaning.\n\nNo-gos held: no network check for the latest Orca, no prerelease or build-metadata support, `engines.node` and `engines.bun` reserved but not checked. Rabbit holes: prerelease tags rejected (Orca ships plain x.y.z); hand-written parser instead of a library, table-tested against fixtures generated once from npm `semver` outside the bundle. Deviations: d1 `config.mts` calls `parseRange` directly so the built-in check always runs (the optional validator hook is unchanged); d2 an invalid range surfaces as `policy-malformed` because config validation runs first, with `engine-range-invalid` kept as defence in depth; d3 no doctor warning for a bare-version pin (documented instead); d4 the test helper engine is now `\">=1.4.224\"`; d5 the migrator got `SAFE_RANGE` so range characters can be written.\n\nAudit, 1 cycle: code, security and test reviewers, independent, planted canary (a raw `appVersion` echo in a scratch copy) caught by all three and refuted against the repo; two should-fix fixed (diagnostics now printable-ASCII with a strict x.y.z found version; 320 more fixture rows and unit tests for `compareVersions`, wildcard ends, boundaries and error positions) and four acknowledged (empty engine handling, duplicated default constant, unreachable `engine-range-invalid` branches, default floor when config is refused). Verify: Node 1560 tests, 1558 pass, 0 fail, 2 skippe",true
+unavailable[1]: ".project/records/pitch-compression/orca-engines-range.md"

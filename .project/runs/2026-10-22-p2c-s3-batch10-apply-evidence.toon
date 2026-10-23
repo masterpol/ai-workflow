@@ -1,0 +1,38 @@
+@toon-data 1
+schemaVersion: 1
+state: applied-verified
+totals:
+  legacy: 4
+  upgraded: 42
+  partial: 0
+  problems[0]:
+legacyNarratives: 4
+results[5]{slug,state,dryReplay,archiveValid,manifestUnchanged,v1ByteIdentical,approvalHash,supplementHash,outcomeLint,narrativeRetired,bindingsUnchanged}:
+  codex-orca-coordinator-parity,upgraded,true,true,true,true,"sha256:2fe55c4c573a9c66be82084bf7dd9971b70cb8b48863495a10a89e2c874b67d7","sha256:ddec0fa289bb96213842755449ee63afa7bfa976decca27f67769de001595ee4",passed,true,true
+  state-multipage-report,upgraded,true,true,true,true,"sha256:0006172faad5b52c32b673d850fa46d04471f04ab907a89e66d442d7f4685926","sha256:dd0ddb9daa6633657f6359d8ef173d9ce40eb1cf6d34f59c3ac97a2942b4bda6",passed,true,true
+  collector-robustness,upgraded,true,true,true,true,"sha256:5fb25da817dfbcfdecb3f39cb4f1b3dce62e797cb1bc81e5698d019f5e69c5aa","sha256:0ddcbde2663e8e3e934f02add64482c451d6fb9742617066b944664609a930e1",passed,true,true
+  fix-orca-dispatch-resume-gate,upgraded,true,true,true,true,"sha256:e7c80051ec25baca7672620324121ed07ad48b1e142abdb92246378a3d155290","sha256:98452a6c274bb6a1db8ebd3a433c49cdbfcb3e6a5e90c06e3fe404e8da2c7157",passed,true,true
+  metrics-report-dimensions,upgraded,true,true,true,true,"sha256:2d071207dd90db9ae538c4e4ffde70075824f7d1c07884832369630d767b5f88","sha256:ab3ef0e3261beaa185f3b1ddef76d53671ef8fffe77de8a4b4fb22ed4aad2b71",passed,true,true
+firstAttempt: supplements published; absolute --file refused before any ledger change; corrected relative input resumed same payloads
+finalChecks:
+  setup: "READY, 25 checks"
+  graph: CLEAN 119 entries / 336 knowledge links
+  relations: "0 problems"
+  supplementLinks: "42 files, 0 broken"
+  navigation[5]:
+    -
+      slug: codex-orca-coordinator-parity
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/codex-orca-coordinator-parity.md"
+    -
+      slug: state-multipage-report
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/state-multipage-report.md"
+    -
+      slug: collector-robustness
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/collector-robustness.md"
+    -
+      slug: fix-orca-dispatch-resume-gate
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md"
+    -
+      slug: metrics-report-dimensions
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/metrics-report-dimensions.md"
+  fullSuite: not rerun; dedicated missing-evidence repair still triage-gated

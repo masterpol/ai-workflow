@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "slug": "workflow-usage-capture",
+  "sourceRoot": ".project/pitches/workflow-usage-capture",
+  "archivedAt": "2026-10-22T02:43:36.973Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "9ea3adbd1e829cf4dcddaa07e87699b25e09e85cde62c6f884f7345d330045b6",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "4e1b84a468498e06e4bd2a382f4f14ccfd4bbb29f70777b262c5ed47f88ab0f6",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "d7220b90c0516bfa6c8810ba698b4edee815253c6afcec59bfeabdc28119a5d3",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "540734143e163b37c161a50cbb7be652abd9734aa30c9d97cbaa5394e4fc503f",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "f250ad2820ed9b79326a3d5296d16d05f17ec35c7f2e87de0e848ad311001176",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "e556208cbda913573c7de614012dc7afb4bf43390031a769a981d48deca8d796",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "1938e7d636d571a342de066feda2f3f5fdddc76aa352e8ecb426d1f36e6dfe7a",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "715767afdf536f7d7c37976c5edd69087754d389c10e03ef8b443c3106e709ca",
+      "mode": 420
+    },
+    "rollout.md": {
+      "hash": "da1c6c4e50e6b9b45afb2656a78f3c7d897f467c68cc380aa2af4386c5a9a6f2",
+      "mode": 420
+    },
+    "shaping-draft.md": {
+      "hash": "f7109efcf4dcd7e74fc341d20b7ee2a3cc3d5bd7434a996db95b454887ce8e1e",
+      "mode": 420
+    },
+    "ship-readiness.md": {
+      "hash": "28e97bf46aa51e0da077ae9e6ee78730b5193aa3e5529b9220d0f8ca77ffd119",
+      "mode": 420
+    },
+    "spike-s1-payloads.md": {
+      "hash": "5aa6cbbc0a9e1370be909b763e19bc4d5ceebcfa8e8300effa175eeaae24943f",
+      "mode": 420
+    }
+  }
+}

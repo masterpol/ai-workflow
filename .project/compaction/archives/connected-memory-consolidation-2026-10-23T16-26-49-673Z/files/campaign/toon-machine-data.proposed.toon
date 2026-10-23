@@ -1,0 +1,82 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: toon-machine-data
+sourceProof:
+  archiveDirectory: toon-machine-data-2026-10-19T03-29-51-996Z
+  manifestHash: "sha256:4da323f0052807fc224c32da2f0c8a55c6db8108738cc5de37db2c398530b401"
+  sourceBytes: 43364
+  verifiedFiles: 9
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/toon-machine-data.supplement.md"
+  destination: ".project/records/legacy-upgrades/toon-machine-data.md"
+  hash: "sha256:35f00e8f1128a215782a0d3b10a97e457e2b6a9edd5ef81346a09307cc6a0750"
+payload:
+  ledgerHash: "sha256:8cff798347ffd196ceec871e42b00e02f9a9f54db8e45b60adfcfdadb9bea549"
+  legacyEntryHash: "sha256:2329b96fcb54537fb7f58f7708570ec788f990e3b4b931f02dea2a2e8ae8f98e"
+  bindings:
+    ".project/records/legacy-upgrades/toon-machine-data.md": "sha256:35f00e8f1128a215782a0d3b10a97e457e2b6a9edd5ef81346a09307cc6a0750"
+  mapping:
+    schemaVersion: 2
+    sections[7]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scopes",behavior,merged,".project/records/legacy-upgrades/toon-machine-data.md#what-shipped","Per-scope outcomes S0 to S6 with S5 dropped, test counts 30, 27 and 21, and releases 2.32.0 then 2.32.1.","sha256:47a92ada2b3928e4ae65f246aaf2b5cf2c34c93cc41dc65d09afaaecc94f177f"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/toon-machine-data.md#scope-and-limits","Nothing converted, no skill or agent edited, named proxies, and the shared-file overlap with instruction-compression.","sha256:1aeb9e042f9cb55469217acf0def11840cfc7caa1974d5e83e8b421a854fd266"
+      "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/toon-machine-data.md#lessons-and-rabbit-holes","Which files count, TOON does not always save, parser safety, plus races and depth mismatch found in audit.","sha256:0ef5b61da087195b5e87498873cec577daea014881aadce6d9d9399045f4c1fe"
+      "SHIPPED.md#result-against-the-original-ask",behavior,merged,".project/records/legacy-upgrades/toon-machine-data.md#what-shipped","Honest outcome: tooling and rule shipped, no existing file converted, TOON beat pretty JSON and was mixed against minified.","sha256:e71e2c73bce6b0fe0bd690ace45a5eb1b5281f2c62f91d02ee040c7eae86900c"
+      "SHIPPED.md#followups-generated",know-how,merged,".project/records/legacy-upgrades/toon-machine-data.md#followups",The four open followups including toon-skill-registry and the five unrun live-only golden cases.,"sha256:a7aad34e9a4c96c7fb31b999271e99d4a0313a202fffe4112529838245233741"
+      "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/toon-machine-data.md#scope-and-limits","Six prohibitions bounding the pitch: host-native files, unmeasured claims, prose rewrites, full TOON spec, secrets.","sha256:e1046a9f89896fbd213cd7667cb2e635629e4298738f737107b2db510907b1b4"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/toon-machine-data.md#lessons-and-rabbit-holes","Resolved, pushed-to-plan and pushed-to-no-go dispositions with owners.","sha256:23cb2cc5065a3693879f97cb64bbeda6620d62fa1e0b06416bb0e930fd5bf3a8"
+    otherFiles[9]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:8011db9aa4e2fe91a44c59d94805617039833592c355eb94f234443840450a66"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#what-shipped"
+        helps: "Preserves scope table, result against the ask and followups across the supplement sections."
+      -
+        path: audit.md
+        hash: "sha256:49cf07179fb53bdb4bd4a2b49998c47100a31d53ea20ef30fe83756f17b68cf1"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#audit-and-review-chronology"
+        helps: "Preserves must-fix M1 to M3, should-fix, cycle 2 C1 to C5, acknowledged A1 to A6, eval gate, canaries and the mutation hang incident."
+      -
+        path: build-start.md
+        hash: "sha256:5ac0e396809ccd48c253656bb0c1fd9883051849667c99193b4cb651c3bc280c"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: deviations.md
+        hash: "sha256:82c242695b435a2b27f8ca6ad36f5a4c9ec39c5291bb694ff9889531d244cdc4"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#build-decisions-and-deviations"
+        helps: Preserves the eight recorded plan-versus-reality deviations and their decisions.
+      -
+        path: hill.md
+        hash: "sha256:242653c58711ef421982d553e52aed19deb6f436cff4f815e5d202a5068288b2"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: inventory.md
+        hash: "sha256:5d4a9a59019a12b775edf216db6bb892d8ee18fe2d50c9e2a768a08dbb68f34c"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#inventory-and-no-go-decision"
+        helps: "Preserves the agent-load method, the 14 candidate verdicts, the NO-GO decision and its consequences."
+      -
+        path: log.md
+        hash: "sha256:0e042766624ace6cbdce54586fbc241ab6f7887290e1a5a87609fe6a13964758"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#build-decisions-and-deviations"
+        helps: "Preserves approval mode, the proxy finding, the node:util boundary refusal, suite counts and the 37-minute hang."
+      -
+        path: pitch.md
+        hash: "sha256:54ad8e84e622a2a50a6bd87d37ecd635aef2d257262d2fdddb9ec18f5d782182"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#scope-and-limits"
+        helps: "Preserves the problem, scope test, critique findings and the Bet-over-Re-shape decision."
+      -
+        path: plan.md
+        hash: "sha256:feeabc515e276d0c7bb1afb753723bd4cac896fbd6f5ae8bda1049c8e1281251"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/toon-machine-data.md#build-decisions-and-deviations"
+        helps: "Preserves scope sequencing, file cap, sequencing gate, exit criteria highlights and risks."
+  outcomeRecord: "---\nslug: toon-machine-data\nshipped: 2026-10-19\nschemaVersion: 1\n---\n# toon-machine-data\n\nWorkflow-only data files read by agents can now be written in a lossless TOON subset (data grammar 1.0) with a shared reader and writer.\nA converter proves a round trip before writing, and a rule says when to use TOON and to measure each file.\nNothing in the repository was converted because no existing file qualified; the skill registry is the real saving.\n\n- outcome: New agent-loaded data files can start in TOON with a rule, a converter and a hardened reader and writer.\n- docs: [machine-data-format rule](ai-framework/rules/machine-data-format.md), [data grammar](.project/decisions/toon-data-grammar.md)\n- decisions: [data files use their own grammar](.project/knowledge/decisions/data-files-use-their-own-toon-grammar-not-the-config-parser.md)\n- knowledge: [convert only where loaded](.project/knowledge/patterns/convert-a-format-only-where-an-agent-loads-the-file-and-measure-it.md), [writer re-inspects](.project/knowledge/patterns/a-writer-reinspects-the-target-at-the-publish-step.md), [mutation hang](.project/knowledge/issues/an-unbounded-mutation-run-hangs-on-a-mutant-that-removes-a-stall-guard.md)\n- code: [parser](ai-framework/scripts/runtime/toon-data.mts), [reader and writer](ai-framework/scripts/runtime/data-file.mts), [converter](ai-framework/scripts/toon-convert.mts)\n- verification: [audit and review chronology](.project/records/legacy-upgrades/toon-machine-data.md#audit-and-review-chronology)\n- followups: [followups](.project/records/legacy-upgrades/toon-machine-data.md#followups), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/toon-machine-data.md)\n"

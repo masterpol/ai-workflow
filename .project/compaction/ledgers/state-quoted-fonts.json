@@ -1,76 +1,152 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "state-quoted-fonts",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-1-shippedmdscope-reconciliation",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Quoted family plus one same-file variable hop, canonical re-emit and revalidation at render.",
+      "bodyHash": "sha256:8cf6a75a1ccb8e6a5de0c50e2b7d2b14ff14fd4293f430f5b2fe533318d7dfef"
     },
     {
       "source": "SHIPPED.md#verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-2-shippedmdverification",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Historical test and check counts; supplement distinguishes the count scopes. No build or lint command is configured.",
+      "bodyHash": "sha256:36f569117d749f4334edebc53df05ef6d02f99d67bcc733a368438c46cb01742"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-3-shippedmdaudit",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Review roles and the dependency on the later independent re-review; supplement adds the reviewed module scope.",
+      "bodyHash": "sha256:ccf19a90080f6bc13ce012f442e9e80a20881103991792b185d8e5d7916b78f7"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-4-shippedmdno-gos-honored",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Prohibited CSS evaluation, external stylesheets and sync behavior.",
+      "bodyHash": "sha256:9188ef057c70f04a0cd8826f4c64813c2d2c1ca19796c4d3c5f3962bcd9b73de"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-and-deviations",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-5-shippedmdrabbit-holes-and-deviations",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "No deviation; grammar rules, precedence and rejected forms.",
+      "bodyHash": "sha256:989f746744f3c6ba6ea752157108320b88e01a6c7e6e23d156db4390ad2af260"
     },
     {
       "source": "SHIPPED.md#knowledge-and-followups",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-6-shippedmdknowledge-and-followups",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Decision link, no followup and the incomplete safety pitches.",
+      "bodyHash": "sha256:01ff363327b950b217bc15e11d3e84d048bbb5e876dd15665068e540b14940d9"
     },
     {
       "source": "SHIPPED.md#delivery",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-7-shippedmddelivery",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "No commit or publication; sibling safety pitches not shipped.",
+      "bodyHash": "sha256:50d7568373afa55ec371477c72552c7835de0ca845a34f9544841095fa084c97"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-8-pitchmdno-gos",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Standing no-gos for the font slice.",
+      "bodyHash": "sha256:f3912fd8a6a404f18b7c4c9e6a619e536fe41b319c8f66c0a408124efcd9869f"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-9-pitchmdrabbit-holes",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Bounded lookup rationale and exclusions.",
+      "bodyHash": "sha256:8d76c5738a742aea34c99fbf582f82655592dd0fb8b68080b3acf394a20e5e5b"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-10-audit-cycle-1md",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Audit chronology and cross-pitch caveat; supplement notes the superseded pre-gate approval wording.",
+      "bodyHash": "sha256:6577508e82a63773cb777d18eb4b79920ebb05021c67289d1a6747487e8fa907"
     },
     {
       "source": "log.md#s1-2026-09-26",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/state-quoted-fonts.md#section-11-logmds1-2026-09-26",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-quoted-fonts.md#mutation-proof",
+      "helps": "Supplement keeps the mutation proof that bypassing the grammar fails the hostile-font test; compact keeps the 85-test evidence.",
+      "bodyHash": "sha256:57f286ae7001e9f3700b81a3bd76884b3b02d0a499c798d427f2f9df1fd03bda"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:e1b58b8c7d56ee9be5b52a465ec26aeb12d22c9ae77419b6c925ebd9e21e4095",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md",
+      "helps": "Preserves the closure record, grammar rules and followups in the compact record."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:ef6ef6f9ec4f6c8070f2e029f0707acf7b1c52f8984d9d0d3ad2e6d9831332c2",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/state-quoted-fonts.md",
+      "helps": "Records no implementation deviation; compact section 5 keeps that statement."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:8f023059acad6dde5cf907e312ea66672c0b42714c9cb252bbddbf0b275926b3",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:3b083976cfa02c4f5e308815d9c831d99a174b857a7785583901c6fcbe6da400",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-quoted-fonts.md#mutation-proof",
+      "helps": "Preserves the build evidence and the mutation proof."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:4ff999c67af12fc894e8c9616e0c5991972f4038458c5293149f76a279b54263",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-quoted-fonts.md#scope-and-problem",
+      "helps": "Preserves the problem statement, appetite and bet context missing from the compact record."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:41649dc26d832895e4cd792d860de3fa1d0bd67d51e235fb7ab8421f0adc1916",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-quoted-fonts.md#scope-and-problem",
+      "helps": "Preserves the S1 exit criteria, sequential dispatch and medium risk."
+    },
+    {
+      "path": "ship-readiness.md",
+      "hash": "sha256:12a911721dd946273d1197d7c4db68efa171ec98515f0857874d404cab3ba914",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-quoted-fonts.md#review-and-verification-chronology",
+      "helps": "Preserves the twelve-suite final verification and approval status."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-09-27T01:26:57.576Z"
+  "committedAt": "2026-10-22T19:08:28.297Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:3cbcf86bbe6a59ebe6075873b1d3a381d0d9d2097f88ae93cc9f949cdefce46a",
+    "introducingCommit": "ea82bcee68b70bb0b4f2938268c9c796425ccff0"
+  }
 }

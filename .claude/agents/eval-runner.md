@@ -1,8 +1,8 @@
 ---
 name: eval-runner
-description: Runs the eval-harness against golden datasets, computes per-criterion deltas vs baseline, enforces regression thresholds. Use during /audit when diff touches lib/ai/prompts/ or LLM call sites. Hard-fails on >0.3 regression.
+description: Runs the eval-harness against golden datasets, computes per-criterion deltas vs baseline, enforces regression thresholds. Use during /audit for any AI-prompt scope: a diff that changes model behavior (prompts, model/parameters, tools or context given to a model, model output handling, LLM call sites) wherever it lives, e.g. lib/ai/prompts/. Hard-fails on >0.3 regression.
 tools: ["Read", "Bash", "Grep"]
-model: claude-haiku-5-5
+profile: fast
 ---
 
 > **Sub-agent dispatch:** if the active harness supports nested dispatch, split independent, checkable subtasks of this role out to their own sub-agents instead of doing them all yourself — pick each spawned subtask's model by its own complexity (`fast`/`standard`/`deep`), not this role's profile. Fall back to sequential passes on a harness without nested dispatch. See "Sub-agent Dispatch" in `ai-framework/integrations/harnesses.md`.

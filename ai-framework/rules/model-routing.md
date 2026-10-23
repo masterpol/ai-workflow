@@ -61,7 +61,7 @@ Harness mappings and role assignments: `ai-framework/integrations/harnesses.md`.
 
 | Profile | Claude Code | OpenCode | Codex |
 |---|---|---|---|
-| `fast` | Claude Haiku | `opencode-go/space-bunny` | GPT-5.6 Luna or Terra |
+| `fast` | Claude Haiku | `opencode-go/minimax-m3.1-flash-free` | GPT-5.6 Luna or Terra |
 | `standard` | Claude Sonnet | `opencode-go/minimax-m3` | GPT-5.6, medium/high reasoning |
 | `deep` | Claude Opus | `opencode-go/kimi-k2.7-code` | GPT-5.6, high/xhigh reasoning |
 
@@ -71,6 +71,11 @@ OpenCode's routes all use OpenCode Go, so one provider connection covers them. U
 route instead of the fast one for confidential source or data. There is no silent fallback:
 connect the required provider in OpenCode first, and let a missing configured model fail rather
 than downgrading a security or architecture task.
+
+The actual model identifiers live in the project-root `ai-workflow.toon` `models` block (see
+[Capability Profiles](../integrations/harnesses.md#capability-profiles)). The table above is
+the shipped default; the example toon encodes it. Update the toon to change routes, not the
+agent/command files.
 
 ---
 

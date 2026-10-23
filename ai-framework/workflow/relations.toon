@@ -1,0 +1,162 @@
+@toon-data 1
+schemaVersion: 1
+entries[50]:
+  -
+    path: ".claude/skills/shape/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/0-shape.md
+    dispatches[1]: ".claude/skills/critique/SKILL.md"
+  -
+    path: ".claude/skills/shape-lite/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/0-shape.md
+    dispatches[3]: ".claude/agents/appetite-auditor.md",".claude/agents/knowledge-historian.md",".claude/agents/skeptic.md"
+    reads[1]: ai-framework/rules/security.md
+  -
+    path: ".claude/skills/critique/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/0-shape.md
+    dispatches[5]: ".claude/agents/knowledge-historian.md",".claude/agents/skeptic.md",".claude/agents/appetite-auditor.md",".claude/agents/cross-pitch-projector.md",".claude/agents/eval-regression-projector.md"
+  -
+    path: ".claude/skills/plan/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/1-plan.md
+  -
+    path: ".claude/skills/build/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/2-build.md
+    dispatches[1]: ".claude/agents/build-error-resolver.md"
+    reads[2]: ai-framework/rules/boundaries.md,ai-framework/rules/coding-standards.md
+  -
+    path: ".claude/skills/audit/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/3-audit.md
+    dispatches[7]: ".claude/agents/code-reviewer.md",".claude/agents/security-reviewer.md",".claude/agents/test-coverage-checker.md",".claude/agents/ux-reviewer.md",".claude/agents/i18n-checker.md",".claude/agents/eval-runner.md",".claude/agents/cross-pitch-conflict-checker.md"
+    reads[5]: ai-framework/rules/boundaries.md,ai-framework/rules/coding-standards.md,ai-framework/rules/security.md,ai-framework/rules/testing.md,ai-framework/rules/ui-ux-review.md
+  -
+    path: ".claude/skills/ship/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/4-ship.md
+  -
+    path: ".claude/skills/cooldown/SKILL.md"
+    phaseDoc: ai-framework/workflow/phases/5-cooldown.md
+  -
+    path: ".claude/skills/fix/SKILL.md"
+    dispatches[3]: ".claude/agents/architect.md",".claude/agents/build-error-resolver.md",".claude/agents/refactor-cleaner.md"
+    reads[1]: ai-framework/rules/boundaries.md
+  -
+    path: ".claude/skills/impact/SKILL.md"
+    reads[1]: ai-framework/rules/boundaries.md
+  -
+    path: ".claude/skills/knowledge-health/SKILL.md"
+    reads[1]: ai-framework/rules/coding-standards.md
+  -
+    path: ".claude/skills/setup/SKILL.md"
+    reads[5]: ai-framework/rules/boundaries.md,ai-framework/rules/ci-deployment.md,ai-framework/rules/coding-standards.md,ai-framework/rules/component-architecture.md,ai-framework/rules/ui-ux-review.md
+  -
+    path: ".claude/skills/test-strategy/SKILL.md"
+    reads[1]: ai-framework/rules/testing.md
+  -
+    path: ".claude/skills/ui-design/SKILL.md"
+    reads[3]: ai-framework/rules/boundaries.md,ai-framework/rules/component-architecture.md,ai-framework/rules/i18n.md
+  -
+    path: ".claude/skills/add-skill/SKILL.md"
+    standalone: Installs and manages external skills through the skill registry; no fixed agent dispatch or rule gate.
+  -
+    path: ".claude/skills/bundle-sync/SKILL.md"
+    standalone: "Compares an unpacked project with a newer bundle copy and applies approved updates; operates on files, not on agents or rules."
+  -
+    path: ".claude/skills/changelog/SKILL.md"
+    standalone: Writes VERSION and CHANGELOG.md entries via the changelog script; no agents or gating rules.
+  -
+    path: ".claude/skills/checkpoint/SKILL.md"
+    standalone: Saves mid-session progress to the active pitch's checkpoint.md; no agents or gating rules.
+  -
+    path: ".claude/skills/dependency-security/SKILL.md"
+    standalone: Read-only dependency vulnerability audit run on demand; dispatches no agent and names no rule.
+  -
+    path: ".claude/skills/eval-harness/SKILL.md"
+    standalone: Evaluation framework skill (eval-driven development) invoked on demand; no fixed dispatch or rule edge.
+  -
+    path: ".claude/skills/pitch-compress/SKILL.md"
+    standalone: Compacts a shipped pitch into knowledge and a done-work record via scripts; dispatches no agent.
+  -
+    path: ".claude/skills/resume/SKILL.md"
+    standalone: Reads the status index and loads one pitch's context; no agents or gating rules.
+  -
+    path: ".claude/skills/search/SKILL.md"
+    standalone: "Queries the knowledge graph, sessions, ADRs and requirements; dispatches no agent."
+  -
+    path: ".claude/skills/setup-validator/SKILL.md"
+    standalone: "Verifies setup output (context, entry files, graph, mirrors) with the validator script; no agents or rules."
+  -
+    path: ".claude/skills/state/SKILL.md"
+    standalone: Reports an evidence-backed project snapshot from scripts and records; dispatches no agent.
+  -
+    path: ".claude/skills/switch/SKILL.md"
+    standalone: Checkpoints the current pitch then loads the target through the resume flow; dispatches no agent.
+  -
+    path: ".claude/skills/sync/SKILL.md"
+    standalone: Syncs local workflow tasks with a Notion database; no agents or gating rules.
+  -
+    path: ".claude/skills/workflow-doctor/SKILL.md"
+    standalone: Diagnoses the install and restores missing template artifacts; no agents or gating rules.
+  -
+    path: ".claude/agents/code-reviewer.md"
+    reads[4]: ai-framework/rules/component-architecture.md,ai-framework/rules/security.md,ai-framework/rules/performance.md,ai-framework/rules/boundaries.md
+  -
+    path: ".claude/agents/security-reviewer.md"
+    reads[1]: ai-framework/rules/security.md
+  -
+    path: ".claude/agents/test-coverage-checker.md"
+    reads[1]: ai-framework/rules/testing.md
+  -
+    path: ".claude/agents/ux-reviewer.md"
+    reads[2]: ai-framework/rules/ui-ux-review.md,ai-framework/rules/component-architecture.md
+  -
+    path: ".claude/agents/i18n-checker.md"
+    reads[1]: ai-framework/rules/i18n.md
+  -
+    path: ".claude/agents/eval-runner.md"
+    reads[1]: ai-framework/rules/eval-harness.md
+  -
+    path: ".claude/agents/eval-regression-projector.md"
+    reads[1]: ai-framework/rules/eval-harness.md
+  -
+    path: ".claude/agents/architect.md"
+    reads[4]: ai-framework/rules/performance.md,ai-framework/rules/security.md,ai-framework/rules/boundaries.md,ai-framework/rules/testing.md
+  -
+    path: ".claude/agents/planner.md"
+    reads[2]: ai-framework/rules/testing.md,ai-framework/rules/performance.md
+  -
+    path: ".claude/agents/build-error-resolver.md"
+    reads[2]: ai-framework/rules/security.md,ai-framework/rules/performance.md
+  -
+    path: ".claude/agents/appetite-auditor.md"
+    standalone: Pre-bet projection of file count and LOC against the breadboard; names no rule and dispatches no agent.
+  -
+    path: ".claude/agents/cross-pitch-conflict-checker.md"
+    standalone: Compares this pitch's diff with other active pitches' file sets; names no rule and dispatches no agent.
+  -
+    path: ".claude/agents/cross-pitch-projector.md"
+    standalone: Projects this pitch's file set against other active pitches pre-bet; names no rule and dispatches no agent.
+  -
+    path: ".claude/agents/knowledge-historian.md"
+    standalone: Searches .project/knowledge/ for missed entries; names no rule and dispatches no agent.
+  -
+    path: ".claude/agents/refactor-cleaner.md"
+    standalone: Dead-code cleanup via analysis tools; names no rule and dispatches no agent.
+  -
+    path: ".claude/agents/skeptic.md"
+    standalone: Proposes extra rabbit holes from the stack's common mistakes; names no rule and dispatches no agent.
+  -
+    path: ai-framework/rules/model-routing.md
+    reads[1]: ai-framework/rules/context-management.md
+  -
+    path: ai-framework/rules/eval-harness.md
+    reads[1]: ai-framework/rules/machine-data-format.md
+  -
+    path: ai-framework/rules/canonical-mirror-sync.md
+    standalone: "Cross-cutting editing rule (canonical edit ships its Cursor copy regen in the same commit); applies to maintainers, no per-phase or per-role gate."
+  -
+    path: ai-framework/rules/data-modeling.md
+    standalone: Stack-level data-modeling rule (lossless projection in replace-style upserts); no skill or agent names it.
+  -
+    path: ai-framework/rules/observability.md
+    standalone: Framework-agnostic error-handling and observability rule specialised by /setup per stack; no skill or agent names it.
+  -
+    path: ai-framework/rules/tool-use.md
+    standalone: Rule on enforcing AI tool-call constraints server-side; no skill or agent names it.

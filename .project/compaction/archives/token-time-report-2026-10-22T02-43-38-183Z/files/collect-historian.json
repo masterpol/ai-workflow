@@ -1,0 +1,18 @@
+{
+  "attemptKey": "attempt:ttr-shape-historian-20261021",
+  "message": {
+    "id": "msg_17bf2a8ddfd3",
+    "run_id": "run_d3b6ac5bc706",
+    "delivery_contract": "current_delivery",
+    "from_handle": "term_52ed43b6-daf1-4d79-96a1-cd3e1725ce48",
+    "to_handle": "run:run_d3b6ac5bc706",
+    "subject": "Historian critique written: 8 missed-knowledge findings",
+    "body": "Read the knowledge-historian role, pitch.md, shaping-evidence.md and a keyword sweep of .project/knowledge, then checked the shared metrics-state readers and writers in workflow-metrics-state.mts. Found 8 relevance-confirmed misses, four high: guarded-reader reuse must keep refused and missing distinct (issues/hardening-a-shared-reader-made-its-writer-destructive), the owned report write needs a user-file guard (patterns/a-report-never-overwrites-a-file-it-did-not-write), the single-lease snapshot needs identity pinning (pin-directory-identities-across-async-leases with metrics-ancestor-swap), and hostile labels need an allow-list at ingest and render. Projected budget is 9 files, 9 to 12 with the missed entries, under the 15-file cap; the swing item is an exported reader helper that could add a module, and the pitch should split if it passes 13. Left for the owner: add the cited entries to Knowledge consulted and pin the reader-helper decision during planning.",
+    "type": "worker_done",
+    "priority": "normal",
+    "thread_id": null,
+    "payload": "{\"taskId\":\"task_a44dbe965931\",\"dispatchId\":\"ctx_645df4e32462\",\"outcome\":\"succeeded\",\"filesModified\":[\".project/pitches/token-time-report/critique-historian.md\"],\"reportPath\":\".project/pitches/token-time-report/critique-historian.md\"}",
+    "created_at": "2026-10-21T23:37:10Z",
+    "delivered_at": null
+  }
+}

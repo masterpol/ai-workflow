@@ -1,0 +1,31 @@
+@toon-data 1
+slug: toon-machine-data
+draft: true
+state: needs-decision
+ledgerHash: "sha256:8cff798347ffd196ceec871e42b00e02f9a9f54db8e45b60adfcfdadb9bea549"
+bindings:
+legacyEntryHash: "sha256:2329b96fcb54537fb7f58f7708570ec788f990e3b4b931f02dea2a2e8ae8f98e"
+mapping:
+  schemaVersion: 2
+  sections[7]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#result-against-the-original-ask",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+  otherFiles[0]:
+judgments[7]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#result-against-the-original-ask",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: toon-machine-data\nshipped: 2026-10-19\nschemaVersion: 1\ndraft: true\n---\n# toon-machine-data\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#toon-machine-data","sha256:2329b96fcb54537fb7f58f7708570ec788f990e3b4b931f02dea2a2e8ae8f98e","## toon-machine-data — shipped 2026-10-19\n\nAgent-loaded workflow data files can now be written in a lossless TOON subset (\"data grammar 1.0\", v2.32.0, hardened in 2.32.1, big-batch, 12 files against a 15-file cap). S0 inventoried which workflow-only data an agent actually opens and returned `Decision: NO-GO` for converting any existing file; S1 `runtime/toon-data.mts` (parser and encoder: required `@toon-data 1` header, sized arrays checked against their rows, tables for uniform rows, JSON-style quoting with lone surrogates and DEL escaped, linear single-pass scanning, one fixed-text problem with code, line and column, forbidden keys refused everywhere, 1 MiB and 32-level limits) and `.project/decisions/toon-data-grammar.md`, kept separate from the closed-schema config parser; S2 `runtime/data-file.mts` (`readData`, `readDataFile`, `writeData`: parsed, absent and refused never collapsed, a `.toon` plus `.json` pair is an error, bytes judged rather than strings, short writes continued, target and directories re-inspected before publishing, new files published with a hard link, `createOnly`, the published inode returned); S3 `toon-convert.mts` (dry-run default, round trip proved before writing, a json changed since it was read is kept, cleanup removes only the inode it wrote, `--report` prints chars/4 and lexemes against the stored file and minified JSON and says \"mixed\" when they disagree); S4 the rule `ai-framework/rules/machine-data-format.md` (a three-part scope test: workflow-only, agent-loaded with a `file:line`, not host-native; measure, never assume) plus one pointer line in `eval-harness.md`; S6 golden cases (13, of which 8 are enforced by named tests and 5 are live-only and not run). S5 (convert a proven dataset) was dropped after S0.\n\nThe inventory (quote of the decisive rows): only datasets that `eval-runner` and `eval-regression-projector` take as input are agent-loaded (agent files name them), and no existing dataset qualified (`orca-vendor-orchestration",true
+unavailable[1]: ".project/records/pitch-compression/toon-machine-data.md"

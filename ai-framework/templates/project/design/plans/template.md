@@ -3,6 +3,9 @@
 **Date**: YYYY-MM-DD
 **Status**: Draft | Approved | Implemented
 **Requirement**: [Link to requirements doc]
+**Pitch plan**: [Link to `.project/pitches/{slug}/plan.md`]
+
+Use this document for supporting design detail when needed. The pitch plan owns scope order, dependencies, and verification exits.
 
 ## Overview
 [2-3 sentence summary of the approach]

@@ -175,15 +175,18 @@ Create `.project/` from `ai-framework/templates/project/`. Structure to create:
 ├── design/             ← decisions/ plans/ wireframes/
 ├── requirements/       ← features/ bugs/
 ├── pitches/            ← _templates/ (hill, pitch, plan) + _followups.md + _parked/ + _archive/
+├── evals/              ← datasets/ (tracked golden cases) + runs/ + .cache/ (ignored local eval data)
+├── records/            ← shipped/ (one links-only outcome record per compacted pitch, from _template.md)
 ├── runs/               ← session + phase history
 └── status.md           ← ≤100-line index (from template)
 ```
 
 Steps:
 1. Copy the tree from `ai-framework/templates/project/` into `.project/`.
-2. Seed an empty backlog: create `.project/pitches/_followups.md` with a single `# Followups` heading.
-3. Create empty `.project/pitches/_parked/` and `.project/pitches/_archive/` dirs (add `.gitkeep` if your VCS needs it).
-4. **Initialize the knowledge graph:** install [`uv`](https://docs.astral.sh/uv/) if missing, then run
+2. **Merge the bundle's root `.gitignore` rules into the project root `.gitignore`.** At minimum, local workflow instance data must stay untracked: `.project/metrics/`, `.project/evals/runs/`, `.project/evals/.cache/`, `ai-workflow.toon`, and the Graphify cache. The dataset specs under `.project/evals/datasets/` are project records and should remain tracked.
+3. Seed an empty backlog: create `.project/pitches/_followups.md` with a single `# Followups` heading.
+4. Create empty `.project/pitches/_parked/` and `.project/pitches/_archive/` dirs (add `.gitkeep` if your VCS needs it).
+5. **Initialize the knowledge graph:** install [`uv`](https://docs.astral.sh/uv/) if missing, then run
    `node ai-framework/scripts/graphify.mts setup` from the project root. It runs Graphify
    (`uv tool run --from graphifyy`, pinned), creates `.graphifyignore` and the `.gitignore` block, installs
    the rebuild-on-commit git hooks, migrates a legacy `.project/knowledge/graph.json` if present, scans `.project/knowledge/{decisions,patterns,entities,issues}/`, and writes
@@ -192,10 +195,11 @@ Steps:
    this just produces the initial empty graph — the point is that it exists and every later phase
    that writes a knowledge entry can rebuild it the same way, so the graph never drifts from the
    entries on disk. See `ai-framework/scripts/graphify.mts`'s header comment for how it works.
-5. **Workflow settings:** copy `ai_workflow_env.example.json` to `ai_workflow_env.json` in the project root and add
-   `ai_workflow_env.json` to the project's `.gitignore`. It holds `AI_WORKFLOW_RUNNER` (`node` or `bun`) and
-   `AI_WORKFLOW_ORCA_MULTI_AGENT` (`true` only to opt in) and no secrets, so agents may read and edit it; the workflow
-   never reads `.env` for these. Process environment variables override it. `workflow-doctor` reports what it sets.
+6. **Workflow settings:** copy `ai-framework/templates/ai-workflow.example.toon` to `ai-workflow.toon` in the project
+   root. It holds the runner (`node` or `bun`) and the Orca opt-in (`integrations.orca.multiAgent` in a `schemaVersion: 3` file, `true` only to opt in)
+   and no secrets, so agents may read and edit it; the workflow never reads `.env` for these. Process environment
+   variables override it. `workflow-doctor` reports what it sets. A project with the older `ai_workflow_env.json`
+   or `.project/orchestration.json` runs `node ai-framework/scripts/config-migrate.mts` to convert it.
 
 **Gate:** show the tree you'll create, then wait for approval. Step 4 (graphify) only writes
 derived/generated files inside the just-approved `.project/knowledge/`, so it runs immediately
@@ -209,7 +213,8 @@ The workflow needs three context docs and a root entry file, all derived from th
 project — never guessed.
 
 **If the active installer is Claude Code:** run `/setup` — the skill scans the repo and drafts `AGENTS.md`
-project specifics, the full `CLAUDE.md` mirror (required — see below), and
+project specifics, the full `CLAUDE.md` mirror (required — see below; a kept valid `@AGENTS.md` import is
+equally valid), and
 `.project/context/{product,architecture,stack}.md`, then gates for approval.
 
 **If the active installer is OpenCode, Cursor, Codex, or another harness:** do the scan manually, following
@@ -342,8 +347,9 @@ Confirm the install works end-to-end:
 
 1. **Files present:** `ai-framework/`, `.claude/agents/` (18), `.claude/skills/` (pipeline
    skills), `.opencode/{opencode.json,commands/,agents/,plugins/,package.json}`, `.codex/` + `.agents/`,
-   `.cursor/{agents/,skills/}`, `.project/` scaffold, `AGENTS.md`, and the full `CLAUDE.md`
-   mirror (not the Step-1 bootstrap stub — confirm it was replaced in Step 4).
+   `.cursor/{agents/,skills/}`, `.project/` scaffold, `AGENTS.md`, and a `CLAUDE.md` that is either the full
+   mirror or a valid one-line `@AGENTS.md` import kept from before (not the Step-1 bootstrap stub — confirm it was
+   replaced or kept in Step 4).
 2. **Each harness resolves its entry points:** Claude Code loads `/shape` from
    `.claude/skills/`; OpenCode loads `/shape` from `.opencode/commands/` and can dispatch its
    `.opencode/agents/`; Codex exposes the `shape` skill from `.agents/skills/` and its

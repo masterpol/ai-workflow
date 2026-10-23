@@ -1,0 +1,86 @@
+@toon-data 1
+slug: token-time-report
+draft: true
+state: needs-decision
+ledgerHash: "sha256:143ea0435bf01c3d53976452f5f8dac6f1f13e87c2bb14e9b10662c9a3cf4fdb"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:8a15b9faed48038427bf869d6c5827227078123eab029bd67b1765166ec106ed"
+mapping:
+  schemaVersion: 2
+  sections[34]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#result",null,null,null,null,null
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#verification",null,null,null,null,null
+    "SHIPPED.md#audit-and-evidence-boundaries",null,null,null,null,null
+    "SHIPPED.md#no-gos-and-rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#knowledge-and-follow-ups",null,null,null,null,null
+    "SHIPPED.md#documents-and-recovery",null,null,null,null,null
+    "SHIPPED.md#final-closure",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#s1-2026-10-21",null,null,null,null,null
+    "deviations.md#s2-2026-10-21",null,null,null,null,null
+    "deviations.md#s3-2026-10-21",null,null,null,null,null
+    "deviations.md#audit-cycle-1-2026-10-21",null,null,null,null,null
+    "deviations.md#audit-recovery-closeout-2026-10-21",null,null,null,null,null
+    "deviations.md#cohesive-module-size-exception-audit-addendum-2026-10-21",null,null,null,null,null
+    "log.md#s1-started-2026-10-21",null,null,null,null,null
+    "log.md#s1-preliminary-review",null,null,null,null,null
+    "log.md#s1-independent-review-resolved",null,null,null,null,null
+    "log.md#s2-started-2026-10-21",null,null,null,null,null
+    "log.md#s2-review-and-verification-resolved",null,null,null,null,null
+    "log.md#s3-started-2026-10-21-local-date",null,null,null,null,null
+    "log.md#s3-full-suite-attempt-1-timing-bound-failure",null,null,null,null,null
+    "log.md#s3-full-suite-failure-resolved-without-code-changes",null,null,null,null,null
+    "log.md#audit-started-2026-10-21",null,null,null,null,null
+    "log.md#audit-launch-refused-2026-10-21",null,null,null,null,null
+    "log.md#orca-recovery-authorized-2026-10-21",null,null,null,null,null
+    "log.md#audit-cycle-1-synthesis-and-limited-retry",null,null,null,null,null
+    "log.md#orca-repair-verified-audit-remains-open",null,null,null,null,null
+    "log.md#additional-evidence-pass-explicitly-approved-2026-10-21",null,null,null,null,null
+    "log.md#additional-evidence-pass-completed-2026-10-21",null,null,null,null,null
+    "log.md#direct-ship-gauntlet-explicitly-approved-2026-10-21",null,null,null,null,null
+    "log.md#release-ready-for-final-gate-2026-10-21",null,null,null,null,null
+    "log.md#final-closure-2026-10-22t020106348z",null,null,null,null,null
+  otherFiles[0]:
+judgments[34]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#result",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#verification",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#audit-and-evidence-boundaries",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-and-rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#knowledge-and-follow-ups",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#documents-and-recovery",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#final-closure",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#s1-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s2-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s3-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-cycle-1-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-recovery-closeout-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#cohesive-module-size-exception-audit-addendum-2026-10-21",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "log.md#s1-started-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s1-preliminary-review",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s1-independent-review-resolved",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s2-started-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s2-review-and-verification-resolved",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-started-2026-10-21-local-date",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-full-suite-attempt-1-timing-bound-failure",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-full-suite-failure-resolved-without-code-changes",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-started-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-launch-refused-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#orca-recovery-authorized-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-cycle-1-synthesis-and-limited-retry",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#orca-repair-verified-audit-remains-open",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#additional-evidence-pass-explicitly-approved-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#additional-evidence-pass-completed-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#direct-ship-gauntlet-explicitly-approved-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#release-ready-for-final-gate-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#final-closure-2026-10-22t020106348z",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: token-time-report\nshipped: 2026-10-22\nschemaVersion: 1\ndraft: true\n---\n# token-time-report\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#token-time-report","sha256:8a15b9faed48038427bf869d6c5827227078123eab029bd67b1765166ec106ed","## token-time-report — shipped 2026-10-22\n\nThe joined token/time report shipped as bundle 2.41.0: `node ai-framework/scripts/flow-report.mts --root .` previews JSON (`--format markdown|html` for others); `--apply` publishes three fixed `.project/metrics/flow-report` files only when existing targets are owned, one file at a time (not atomic; generation IDs reveal mixed results). The joiner matches exact canonical pitch/phase/scope identities, keeps source-specific and one-sided rows, and shows token reporting coverage, interval-union timing, lower-bound wait, provisional activity and source windows. Missing coverage is never zero; no productivity, effort, cost or comparability estimate is fabricated. The `/state` metrics page links an existing report without generating it. Review-bench guard now shares a bounded 16 MiB snapshot limit and skips secret-shaped paths.\n\nOpen limits: comparable-window ratios need separate capture work; the OS path-check-to-syscall race remains without anchored filesystem APIs; a substituted stage is preserved for operator recovery. Pre-ship wrapper failed (package-less bundle) and a direct-check gauntlet was approved.\n\nLessons: [[join-metrics-by-exact-identity-and-disclose-evidence-windows]], [[history-projections-can-leak-hidden-values]], [[staging-substitution-can-redirect-cleanup]]. Contract: `ai-framework/integrations/workflow-metrics.md`. Followups TTR-A1–A4 are in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/token-time-report.md"

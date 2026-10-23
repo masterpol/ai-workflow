@@ -1,5 +1,5 @@
 import { report as policyReport } from "./orca-policy.mts";
-import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
+import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, engineRange, isSupportedVersion, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, ReportOptions, Run, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
@@ -10,11 +10,11 @@ import type { RuntimeDeps } from "./runtime/types.mts";
  *
  * WHAT MAKES A LAUNCH ALLOWED (the single place this is defined, see `evaluateLaunch`). A launch is allowed
  * only when, evaluated fresh immediately before that call and never cached:
- *   0. AI_WORKFLOW_ORCA_MULTI_AGENT is `true` (process env or project-root ai_workflow_env.json); otherwise the normal workflow;
+ *   0. AI_WORKFLOW_ORCA_MULTI_AGENT is `true` (process env, else project-root ai-workflow.toon via loadConfig, else legacy ai_workflow_env.json); otherwise the normal workflow;
  *   1. the caller is not itself a worker (no `--worker-context` flag, no WORKER_ENV_MARKERS in env);
  *   2. the policy file is re-read and the requested coordinator vendor is eligible (policy-eligible);
  *   3. a fresh runtime probe passes: Orca executable present, both guides verified, local runtime reachable
- *      and ready, and its appVersion equals SUPPORTED_VERSION.
+ *      and ready, and its appVersion passes isSupportedVersion (SUPPORTED_VERSION or later).
  * Foundation preflight/policy keep `dispatchReady: false`; this gate, not those reports, is the launch authority.
  *
  * DEVIATION (runtime-contract.md): an external coordinator outside an Orca terminal gets no `caller` block
@@ -108,7 +108,7 @@ export interface LaunchOptions {
   platform?: string;
   present?: ReportOptions["present"];
 }
-export interface LaunchDecision { allowed: boolean; reason: string; vendor: string; policyReason?: string; runtimeVersion?: string; executable?: string }
+export interface LaunchDecision { allowed: boolean; reason: string; vendor: string; policyReason?: string; runtimeVersion?: string; executable?: string; engine?: string; foundVersion?: string }
 
 /** Fresh policy read plus fresh probe on every call. Fails closed on any thrown error. */
 export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
@@ -124,14 +124,17 @@ export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
     const policy = policyReport(root, vendor, deps) as Json & { eligible?: boolean; reason?: string };
     if (policy.eligible !== true) return deny(String(policy.reason ?? "policy-ineligible"), { policyReason: String(policy.reason) });
     const probe = preflightReport(root, vendor, { probe: true, env, run: options.run, now: options.now,
-      platform: options.platform, present: options.present }, deps) as Json & { eligible?: boolean; reason?: string; runtimeVersion?: string };
-    if (probe.eligible !== true) return deny(String(probe.reason), { policyReason: String(policy.reason) });
-    if (!VERSION_PROVEN_REASONS.includes(String(probe.reason))) return deny(String(probe.reason), { policyReason: String(policy.reason) });
-    if (probe.runtimeVersion !== undefined && probe.runtimeVersion !== SUPPORTED_VERSION) return deny("runtime-version-unsupported");
+      platform: options.platform, present: options.present }, deps) as Json & { eligible?: boolean; reason?: string; runtimeVersion?: string; engine?: string; foundVersion?: string };
+    const why = { policyReason: String(policy.reason), ...(probe.engine ? { engine: probe.engine } : {}), ...(probe.foundVersion ? { foundVersion: probe.foundVersion } : {}) };
+    if (probe.eligible !== true) return deny(String(probe.reason), why);
+    if (!VERSION_PROVEN_REASONS.includes(String(probe.reason))) return deny(String(probe.reason), why);
+    const engine = engineRange(root, deps);
+    if ("invalid" in engine) return deny("engine-range-invalid");
+    if (probe.runtimeVersion !== undefined && !isSupportedVersion(probe.runtimeVersion, engine.range)) return deny("runtime-version-unsupported", { engine: engine.text, foundVersion: probe.runtimeVersion });
     // The probe proved this executable and no other; launchWorker spawns exactly it.
     const executable = selectExecutable(env, options.platform ?? deps.proc.platform, deps);
     if (!executable) return deny("launcher-unavailable");
-    return { allowed: true, reason: "launch-allowed", vendor, policyReason: String(policy.reason), runtimeVersion: SUPPORTED_VERSION, executable };
+    return { allowed: true, reason: "launch-allowed", vendor, policyReason: String(policy.reason), runtimeVersion: probe.runtimeVersion ?? SUPPORTED_VERSION, executable };
   } catch { return deny("gate-error"); }
 }
 
@@ -143,7 +146,7 @@ export interface LaunchRequest extends LaunchOptions {
   deadlineMs: number;
 }
 export interface LaunchResult {
-  launched: boolean; reason: string; status?: number | null; signal?: string | null; stdout?: string; stderr?: string; decision?: LaunchDecision;
+  launched: boolean; reason: string; status?: number | null; signal?: string | null; stdout?: string; stderr?: string; decision?: LaunchDecision; ownerPid?: number;
 }
 
 const launcherAcceptable = (command: string, deps: RuntimeDeps): boolean =>
@@ -174,7 +177,14 @@ export async function launchWorker(request: LaunchRequest): Promise<LaunchResult
     if (result.errorCode === "ENOBUFS") return { launched: false, reason: "launch-output-limit", decision };
     if (result.status !== 0 || result.signal) return { launched: false, reason: "launch-failed", status: result.status, signal: result.signal, stdout: result.stdout, stderr: result.stderr, decision };
     return { launched: true, reason: "launched", status: 0, stdout: result.stdout, stderr: result.stderr, decision };
-  } catch { return { launched: false, reason: "launch-failed", decision }; }
+  } catch (error) {
+    if (error && typeof error === "object" && "code" in error && error.code === "EPROCESSCLEANUP") {
+      const pid = "ownerPid" in error ? error.ownerPid : undefined;
+      return { launched: false, reason: "launch-cleanup-unconfirmed", decision,
+        ...(Number.isSafeInteger(pid) && (pid as number) > 0 ? { ownerPid: pid as number } : {}) };
+    }
+    return { launched: false, reason: "launch-failed", decision };
+  }
 }
 
 export type { Receipt, RunOptions };

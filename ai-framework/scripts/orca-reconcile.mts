@@ -5,7 +5,8 @@ import type { AdmittedWorker } from "./orca-apply.mts";
 import { copyEvidence, decideCleanup, performCleanup, recordFinalState, verifyEvidence } from "./orca-evidence.mts";
 import type { WorktreeRef } from "./orca-evidence.mts";
 import { buildWorkerEnv } from "./orca-launch-gate.mts";
-import { createLedger, idOf, ATTEMPT_PREFIX } from "./orca-ledger.mts";
+import { createLedger, idOf, ATTEMPT_PREFIX, pathAuthorized, validAuthorizedPaths } from "./orca-ledger.mts";
+import type { Ledger } from "./orca-ledger.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
@@ -13,12 +14,12 @@ import type { RuntimeDeps } from "./runtime/types.mts";
 /**
  * Reconcile verified worker changes onto the coordinator checkout.
  *
- * The order is fixed and every step before the apply is side-effect free:
- *   switch -> ledger state (only an attempt completed by its own worker_done) -> hardened diff admission ->
+ * The order is fixed. Validation leaves tracked files untouched; local ownership leases serialize the whole operation:
+ *   switch -> checkout integration lease -> ledger state (only an attempt completed by its own worker_done) -> hardened diff admission ->
  *   claims versus the measured diff -> check-definition guard -> baseline check run -> snapshot and apply (all workers
  *   are `git apply --check`ed first) -> post-apply checks (a check that passed at the baseline and fails now is
  *   worker-caused: roll back only the touched paths) -> hash-verified evidence -> ledger `settled` -> cleanup only on
- *   positive proof of settlement.
+ *   positive proof of settlement. The integration lease spans every check, rollback and cleanup; uncertain child cleanup retains it.
  *
  * Worker claims (`filesModified`) are never the source of truth: the changed set is measured from the worker tree.
  * Checks come from a catalog the trusted caller supplies, never from worker text, and run with the worker env allowlist.
@@ -42,7 +43,7 @@ export interface ReconcileOptions {
   checks: Readonly<Record<string, CheckSpec>>;
   /** Names from the catalog to run before and after the apply. */
   runChecks: readonly string[];
-  /** A person confirmed diffs that touch check definitions or differ from the worker's claims. */
+  /** A person confirmed check-definition/claim discrepancies. Never expands the ledger's authorized file scope. */
   humanConfirmed?: boolean;
   /** Roll back when a check that passed at the baseline fails after the apply. Default true. */
   rollbackOnFailure?: boolean;
@@ -51,7 +52,7 @@ export interface ReconcileOptions {
   deadlineMs: number;
   now?: () => number;
 }
-export type AttemptState = "integrated" | "already-reconciled" | "excluded";
+export type AttemptState = "integrated" | "already-reconciled" | "excluded" | "integration-uncertain";
 export interface AttemptResult {
   state: AttemptState;
   reason?: string;
@@ -63,6 +64,7 @@ export interface CheckResult { name: string; ok: boolean; errorCode?: string; ou
 export interface ReconcileOutcome {
   status: "normal" | "refused" | "rolled-back" | "integrated";
   reason: string;
+  humanAction?: string;
   attempts: Record<string, AttemptResult>;
   baselineChecks?: CheckResult[];
   checks?: CheckResult[];
@@ -72,6 +74,8 @@ export interface ReconcileOutcome {
   failedChecks?: string[];
   /** Paths a failed rollback could not restore. */
   unrestored?: string[];
+  /** A local child may still be writing; no rollback, settlement or cleanup is safe yet. */
+  pendingProcessOwner?: { pid?: number; recorded: boolean; retainedPaths?: string[] };
 }
 
 const HEX40 = /^[0-9a-f]{40}$/;
@@ -124,7 +128,36 @@ async function runCheckSet(names: readonly string[], options: ReconcileOptions, 
   return results;
 }
 
+const isCleanupFailure = (error: unknown): error is { code: "EPROCESSCLEANUP"; ownerPid?: unknown; retainedPaths?: unknown } =>
+  error !== null && typeof error === "object" && "code" in error && error.code === "EPROCESSCLEANUP";
+
+/** A runtime with unconfirmed child cleanup retains ownership; never race that child with rollback or a second apply. */
 export async function reconcile(options: ReconcileOptions): Promise<ReconcileOutcome> {
+  const deps = options.deps ?? defaultDeps();
+  try { return await reconcileCore({ ...options, deps }); }
+  catch (error) {
+    if (!isCleanupFailure(error)) throw error;
+    const pid = Number.isSafeInteger(error.ownerPid) && (error.ownerPid as number) > 0 ? error.ownerPid as number : undefined;
+    const retainedPaths = Array.isArray(error.retainedPaths) && error.retainedPaths.length <= 32
+      && error.retainedPaths.every((file) => typeof file === "string" && file.length <= 4096 && deps.path.isAbsolute(file))
+      ? [...error.retainedPaths] as string[] : undefined;
+    const ledger = createLedger(options.root, deps);
+    const attempts: Record<string, AttemptResult> = {};
+    let recorded = pid !== undefined;
+    for (const attempt of options.attempts) {
+      attempts[attempt.attemptKey] = { state: "integration-uncertain", reason: "process-cleanup-unconfirmed", cleanup: "not-attempted" };
+      if (pid !== undefined) {
+        const current = ledger.read(attempt.attemptKey);
+        if (current.status === "ok") {
+          if (ledger.update(attempt.attemptKey, { processOwnerPid: pid }).status !== "ok") recorded = false;
+        } else recorded = false;
+      }
+    }
+    return { status: "refused", reason: "process-cleanup-unconfirmed", attempts, pendingProcessOwner: { ...(pid === undefined ? {} : { pid }), recorded, ...(retainedPaths ? { retainedPaths } : {}) } };
+  }
+}
+
+async function reconcileCore(options: ReconcileOptions): Promise<ReconcileOutcome> {
   const deps = options.deps ?? defaultDeps();
   const now = options.now ?? (() => deps.clock.perfNowMs());
   const attempts: Record<string, AttemptResult> = {};
@@ -144,17 +177,59 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
   if (!(options.deadlineMs - now() >= 1)) return done("refused", "time-budget");
 
   const ledger = createLedger(options.root, deps);
+  const lease = ledger.acquireIntegration();
+  if (lease.status !== "acquired") {
+    if (lease.status === "missing") {
+      for (const attempt of options.attempts) attempts[attempt.attemptKey] = { state: "excluded", reason: "ledger-missing" };
+      return done("refused", "nothing-to-integrate");
+    }
+    if (lease.status === "busy") {
+      for (const attempt of options.attempts) {
+        const owner = ledger.read(attempt.attemptKey);
+        if (owner.status === "ok" && owner.record.processOwnerPid !== undefined) {
+          attempts[attempt.attemptKey] = { state: "integration-uncertain", reason: "process-cleanup-unconfirmed", cleanup: "not-attempted" };
+          return done("refused", "process-cleanup-unconfirmed", { pendingProcessOwner: { pid: owner.record.processOwnerPid, recorded: true } });
+        }
+      }
+    }
+    return done("refused", `integration-lock-${lease.status}`, {
+      humanAction: "inspect .project/metrics/orca-ledger/.integration-lock and its owner; retry after the active integration finishes, or reconcile a crashed/unconfirmed owner before removing its lock",
+    });
+  }
+  try { return await reconcileLocked(options, deps, ledger, now, attempts); }
+  catch (error) {
+    if (isCleanupFailure(error)) lease.retain();
+    throw error;
+  } finally { lease.release(); }
+}
+
+async function reconcileLocked(options: ReconcileOptions, deps: RuntimeDeps, ledger: Ledger, now: () => number,
+  attempts: Record<string, AttemptResult>): Promise<ReconcileOutcome> {
+  const done = (status: ReconcileOutcome["status"], reason: string, extra: Partial<ReconcileOutcome> = {}): ReconcileOutcome => ({ status, reason, attempts, ...extra });
+  const names = [...(options.runChecks ?? [])];
   const ordered = [...options.attempts].sort((a, b) => (a.attemptKey < b.attemptKey ? -1 : 1));
   const candidates: ReconcileAttempt[] = [];
+  const authorized = new Map<string, readonly string[]>();
   const settledNow: ReconcileAttempt[] = [];
   for (const attempt of ordered) {
     const read = ledger.read(attempt.attemptKey);
     if (read.status === "refused" || read.status === "corrupt") return done("refused", `ledger-${read.status}`);
     if (read.status === "missing") { attempts[attempt.attemptKey] = { state: "excluded", reason: "ledger-missing" }; continue; }
+    if (read.record.processOwnerPid !== undefined) {
+      attempts[attempt.attemptKey] = { state: "integration-uncertain", reason: "process-cleanup-unconfirmed", cleanup: "not-attempted" };
+      return done("refused", "process-cleanup-unconfirmed", { pendingProcessOwner: { pid: read.record.processOwnerPid, recorded: true } });
+    }
+    if (!validAuthorizedPaths(read.record.authorizedPaths)) {
+      attempts[attempt.attemptKey] = { state: "excluded", reason: "authorized-paths-missing" };
+      continue;
+    }
+    authorized.set(attempt.attemptKey, read.record.authorizedPaths);
     const state = read.record.state;
     if (state === "settled") {
       // Already integrated in an earlier run; its worker tree may be gone, so only the evidence can be re-checked.
-      if (verifyEvidence({ root: options.root, attemptKey: attempt.attemptKey, deps }).status === "ok") {
+      const evidence = verifyEvidence({ root: options.root, attemptKey: attempt.attemptKey, deps });
+      if (evidence.status === "ok" && evidence.manifest.entries.every((entry) => pathAuthorized(entry.path, read.record.authorizedPaths!)
+        && (entry.from === undefined || pathAuthorized(entry.from, read.record.authorizedPaths!)))) {
         attempts[attempt.attemptKey] = { state: "already-reconciled", evidence: "ok" };
         settledNow.push(attempt);
       } else attempts[attempt.attemptKey] = { state: "excluded", reason: "settled-without-evidence" };
@@ -168,6 +243,11 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
   for (const attempt of candidates) {
     const admission = await admitDiff({ worktree: attempt.worktree.path, baseline: options.baseline, deps });
     if (admission.status !== "admitted") { attempts[attempt.attemptKey] = { state: "excluded", reason: `admission:${admission.reason}` }; continue; }
+    const scope = authorized.get(attempt.attemptKey)!;
+    if (admission.entries.some((entry) => !pathAuthorized(entry.path, scope) || (entry.from !== undefined && !pathAuthorized(entry.from, scope)))) {
+      attempts[attempt.attemptKey] = { state: "excluded", reason: "outside-authorized-paths" };
+      continue;
+    }
     if (attempt.claims !== undefined && !claimsMatch(admission.entries, attempt.claims) && options.humanConfirmed !== true) {
       attempts[attempt.attemptKey] = { state: "excluded", reason: "claim-mismatch" };
       continue;
@@ -197,7 +277,7 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
   if (workers.length > 0) {
     // Baseline first: a check that already fails there is not the worker's fault.
     let before: CheckResult[] | "time-budget";
-    try { before = await runCheckSet(names, options, deps, now); } catch { return done("refused", "check-error"); }
+    try { before = await runCheckSet(names, options, deps, now); } catch (error) { if (isCleanupFailure(error)) throw error; return done("refused", "check-error"); }
     if (before === "time-budget") return done("refused", "time-budget");
     baselineChecks = before;
     // When a resumed change is already in the tree, the baseline run is not a baseline: it contains that unproven change,
@@ -213,7 +293,8 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
     try {
       checks = await runCheckSet(names, options, deps, now);
       failedChecks = checks === "time-budget" ? ["time-budget"] : checks.filter((check) => !check.ok && !baselineFailing.includes(check.name)).map((check) => check.name);
-    } catch {
+    } catch (error) {
+      if (isCleanupFailure(error)) throw error;
       failedChecks = ["check-error"];
       checks = "time-budget";
     }
@@ -238,7 +319,7 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
     // There is no baseline to compare with, so any failure stops the settle and leaves the decision to a person.
     try {
       checks = await runCheckSet(names, options, deps, now);
-    } catch { checks = "time-budget"; }
+    } catch (error) { if (isCleanupFailure(error)) throw error; checks = "time-budget"; }
     const failing = checks === "time-budget" ? ["time-budget"] : checks.filter((check) => !check.ok).map((check) => check.name);
     if (failing.length > 0) {
       for (const worker of present) attempts[worker.attemptKey] = { state: "excluded", reason: `checks-failing-on-resume:${failing.join(",")}` };
@@ -278,7 +359,8 @@ export async function reconcile(options: ReconcileOptions): Promise<ReconcileOut
       const verified = verifyEvidence({ root: options.root, attemptKey: attempt.attemptKey, deps });
       if (verified.status === "ok") attempts[attempt.attemptKey] = await cleanupAttempt(options, deps, attempt, verified.manifestSha256, attempts[attempt.attemptKey]);
     }
-  } catch {
+  } catch (error) {
+    if (isCleanupFailure(error)) throw error;
     // Something threw after the apply: the change is in the tree and its evidence is unproven. Report it; never throw.
     // A worker that is already settled (evidence verified, ledger updated, tree possibly removed) must never be rolled
     // back; only a failure before any settle is undone.
@@ -334,5 +416,5 @@ async function firstIgnored(options: ReconcileOptions, deps: RuntimeDeps, entrie
     if (result.status === 1) return undefined;
     if (result.status !== 0) return "";
     return result.stdout.split("\0").find(Boolean) ?? "";
-  } catch { return ""; }
+  } catch (error) { if (isCleanupFailure(error)) throw error; return ""; }
 }

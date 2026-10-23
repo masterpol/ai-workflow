@@ -1,0 +1,224 @@
+@toon-data 1
+ledgerHash: "sha256:2b3c5420ac4996ed2fdacc781620d319157336566e2ed293753bd92f2f0b0070"
+legacyEntryHash: "sha256:fc61cd08e925368aec0051aeac307d4dfa2929c2ccb8b2b05cd140a27313dd9f"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-foundation.md": "sha256:19fd6c7d6626f48eb1d67953e90c37c2f9d4445b241e58876f20ec5d1311b2cd"
+  ".project/records/legacy-upgrades/orca-vendor-foundation.md": "sha256:f149a4368ad3c4c0a4aee43e603d3c7c2998772948cb26e90018792085f7d4a5"
+mapping:
+  schemaVersion: 2
+  sections[21]:
+    -
+      source: "SHIPPED.md#final-verification"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-1-shippedmdfinal-verification"
+      helps: "Retains the verification set, outside-sandbox rerun and the no-live-proof boundary; supplement adds count chronology."
+      bodyHash: "sha256:e4a69ac37bc4074a423bc68d2ba8dafac4f5c150a879e3651033ea407ce3183c"
+    -
+      source: "SHIPPED.md#reconciliation"
+      class: behavior
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-2-shippedmdreconciliation"
+      helps: Retains scope outputs S1 to S3 and the file cap; supplement adds file and line-count history and the release number.
+      bodyHash: "sha256:aec13879ebd811a1e3b35e728059cf90963794226474a560256fb5ce882dfef0"
+    -
+      source: "SHIPPED.md#no-gos-honored"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-3-shippedmdno-gos-honored"
+      helps: Retains standing prohibitions and dispatchReady false.
+      bodyHash: "sha256:deaaeaa1c43f29fce613a4f673fdf565928285c99a3fad1e709e3c8b58db7424"
+    -
+      source: "SHIPPED.md#rabbit-holes-and-deviations"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#open-items"
+      helps: "Retains policy ownership and conservative runtime evidence; supplement records the open cross-platform, child-environment and PATH items."
+      bodyHash: "sha256:cfa2b6848f9c8256569519c008a7a8a41dc88cba865ba71ca7975ae57b74b9cc"
+    -
+      source: "SHIPPED.md#knowledge-extraction"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-5-shippedmdknowledge-extraction"
+      helps: Retains the two issues and the opt-in pattern; supplement links their files.
+      bodyHash: "sha256:b981376f0ce6d46e30f34bf7491e878538f221b5bfb1b01f330af24e7d6b86f2"
+    -
+      source: "SHIPPED.md#followups-generated"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-6-shippedmdfollowups-generated"
+      helps: Retains the four deferred hardening items.
+      bodyHash: "sha256:66d255584739676c0bc2f34fcf25ce335808cd3ce4b4a336f71683ecc0a400df"
+    -
+      source: "SHIPPED.md#documentation-and-status"
+      class: behavior
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-7-shippedmddocumentation-and-status"
+      helps: Retains where the data flow and run snapshots live.
+      bodyHash: "sha256:94444e9f21657c9c97420acfa07cf8eb548c1d8b47cf2a26b6a2d48df21d3c2e"
+    -
+      source: "SHIPPED.md#closing-gate"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:9bc644d5b0d99c4ec430992355bdc36dc5577073ebd127c394bb67f8808287cc"
+    -
+      source: "pitch.md#no-gos"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-9-pitchmdno-gos"
+      helps: Retains the original no-go list.
+      bodyHash: "sha256:676e40bc712b8ce98a73d8441031644c88f02255c6b6595cf983284dc7c47c52"
+    -
+      source: "pitch.md#rabbit-holes"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-10-pitchmdrabbit-holes"
+      helps: Retains the shaped unknowns and their owners.
+      bodyHash: "sha256:8919852e58b5e35be108a6ceebec1da8950ffb123fe8b8b078902f0bcc5f3b16"
+    -
+      source: audit-cycle-1.md
+      class: know-how
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#review-and-release-provenance"
+      helps: "Supplement adds the audit canaries, real fixes, deferred and acknowledged items and review coverage gaps that the compact record summarizes."
+      bodyHash: "sha256:84c197f7afae26670ebd70e08421dda5644d561dafd69fbd1ee4897772f28076"
+    -
+      source: "deviations.md#d1-explicit-orca-opt-in"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-12-deviationsmdd1-explicit-orca-opt-in"
+      helps: Retains the opt-in flag replacing a mode.
+      bodyHash: "sha256:e304c6b9d47ab95d0f46fa2990fc349c9f11da8b94fcae39fff27ecadb744125"
+    -
+      source: "deviations.md#d2-portable-fixture-assertions"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-13-deviationsmdd2-portable-fixture-assertions"
+      helps: Retains the portable fixture assertions.
+      bodyHash: "sha256:1215681d414dbaad745107ba7db553d6494094216b9d8fc84b2ed40f9d304ab9"
+    -
+      source: "deviations.md#d3-cohesive-policy-module"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-14-deviationsmdd3-cohesive-policy-module"
+      helps: Retains the cohesive module rationale.
+      bodyHash: "sha256:504395b2ad4f917219fd6753e38fade2a50392bd66315ee21ada79ac5143d401"
+    -
+      source: "deviations.md#d4-conservative-runtime-proof"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-15-deviationsmdd4-conservative-runtime-proof"
+      helps: Retains the conservative runtime proof decision.
+      bodyHash: "sha256:e7ce62ccdb6eae3ddcc68cef246e49fc840e12f0da393aa5e93be379d839a6e2"
+    -
+      source: "log.md#s1-test-review"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-16-logmds1-test-review"
+      helps: Retains the mock-drops-prototype test lesson.
+      bodyHash: "sha256:c7af0581ed484d1702fb5b3dc29b4ad259a9ea8a877791e38c3b148670894d09"
+    -
+      source: "log.md#s2-boundary-and-evidence-review"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md#section-17-logmds2-boundary-and-evidence-review"
+      helps: Retains the rounded-zero timeout and mutation baseline discipline.
+      bodyHash: "sha256:31a5e56d21da39551800ca90b5ada47c3217cc375b8f0cb8156f04aaab4141a4"
+    -
+      source: "log.md#s3-fixture-and-sandbox-verification"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#review-and-release-provenance"
+      helps: Retains the fixture omission and EPERM lease; supplement names external commit 8c7474d and the pre-build inventory status.
+      bodyHash: "sha256:7752caacb40ba9fd5252087afd94c459e7e8191f23dcd200fb1f764c899692f7"
+    -
+      source: "log.md#audit-cycles-1-2"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:1be32e9a3c06e9b74af016119dd944d864d3d4b41b259925b5dac5c3f6ecc047"
+    -
+      source: "log.md#ship-preparation-2026-10-07"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:01eb5d044cafee0c81e6ae6d7e33978821ec386466e9f2daa1f32c1ee5932968"
+    -
+      source: "log.md#ship-closed-2026-10-07"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:1a54bbaed9f78d2781b1c4c2931ca83a02d844add0c63465433eaf148010a2df"
+  otherFiles[12]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:9fbeccda4b92693fcfc052d185299782cd725311ff4746722b165c1f844ccb24"
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md"
+      helps: "Preserves historical closure, scope outputs and boundaries."
+    -
+      path: deviations.md
+      hash: "sha256:492498c2dbcc72b61a9128ddc01fe7ae5c0a6d81a0ef2af8853e3f4921f03120"
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-foundation.md"
+      helps: Preserves the four recorded deviations.
+    -
+      path: hill.md
+      hash: "sha256:6384037b2beaed29bdc2e4686dc7fe049cede19df496e7414083cc75eac86122"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:17cb409d8845edb38fcde6396e631e590010c6ea0eaf041d870ed7112e790cf8"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#review-and-release-provenance"
+      helps: "Retains review chronology, release numbering and the external-commit incident."
+    -
+      path: pitch.md
+      hash: "sha256:644a9c5ac70954fffd0344749f50051a78489e04c3fec449c270abb7855110ce"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#scope-and-policy-contract"
+      helps: "Preserves the breadboard, bet and shaped size."
+    -
+      path: plan.md
+      hash: "sha256:f38abf87e234e8bde8b4773d6cff24de9492cc2ce466c47d92c3d8d359ec7928"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#scope-and-policy-contract"
+      helps: Preserves the policy and preflight contract and the planned size.
+    -
+      path: pre-build-inventory.json
+      hash: "sha256:2c379bdc5018408b34779d749eac4138cbac5ebcb108eac7b8a990edbaa1fcd2"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: s1-evidence.md
+      hash: "sha256:56ba28398df4ad0df17238eb1f5b8bce0fe6ca35eab101ffca8968f607d774ba"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#verification-and-mutation-evidence"
+      helps: Preserves S1 coverage and mutation outcomes.
+    -
+      path: s1-mutations.json
+      hash: "sha256:71879fa2d2047fc6f15b87434f587d65de4c2395fd96f306c3aa3e0085576124"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#verification-and-mutation-evidence"
+      helps: Preserves the 17 detected and 3 survived guard mutations with reasons.
+    -
+      path: s2-evidence.md
+      hash: "sha256:ca47025eb49e17f925a83c5d84deb84a3dd4f0a0bbe64fbf036dbed4b33c700e"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#pinned-runtime-contract"
+      helps: "Preserves the pinned Orca contract, guide hashes and fixture-only caller rule."
+    -
+      path: s2-mutations.json
+      hash: "sha256:81345b5b680b406f3a95aa6f286c9e13b932e855631755ca09d625b90652f3ff"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#verification-and-mutation-evidence"
+      helps: Preserves the 15 detected guard mutations and the baseline requirement.
+    -
+      path: s3-evidence.md
+      hash: "sha256:dd4b6d365bd885c4293a10a0ec217094f099af9f7f900cf34ec386a807f08739"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-foundation.md#review-and-release-provenance"
+      helps: "Preserves doctor results, documentation checks and release numbering."
+outcomeRecord: "---\nslug: orca-vendor-foundation\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# orca-vendor-foundation\n\nFoundation added an opt-in vendor policy reader, a bounded read-only preflight and static doctor diagnostics.\nNo worker is launched and every result reports normal workflow with dispatch not ready.\nFixture and mutation evidence does not establish live Orca readiness.\n\n- outcome: Opt-in vendor policy, bounded preflight and diagnostics prepare Orca coordination without launching workers.\n- docs: [current Orca contract](ai-framework/integrations/orca-vendors.md)\n- decisions: [policy and preflight contract](.project/records/legacy-upgrades/orca-vendor-foundation.md#scope-and-policy-contract)\n- knowledge: [opt-in before discovery](.project/knowledge/patterns/opt-in-before-runtime-discovery.md), [rounded-zero timeout](.project/knowledge/issues/rounded-zero-timeout-disables-cancellation.md)\n- code: [policy](ai-framework/scripts/orca-policy.mts), [preflight](ai-framework/scripts/orca-preflight.mts)\n- verification: [historical closure](.project/records/pitch-compression/orca-vendor-foundation.md)\n- followups: [open items](.project/records/legacy-upgrades/orca-vendor-foundation.md#open-items)\n- archive: [compact record](.project/records/pitch-compression/orca-vendor-foundation.md), [source supplement](.project/records/legacy-upgrades/orca-vendor-foundation.md)\n"

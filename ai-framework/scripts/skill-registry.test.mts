@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
-import { createHash } from "node:crypto";
-import fs from "node:fs";
-import { createRequire } from "node:module";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, moduleRequire } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 import type { TestContext } from "node:test";
 
@@ -13,7 +13,7 @@ import { context, digest, json, readRegistry, recover, resolveFile, snapshot, tr
 import type { Operation, RegistryContext } from "./skill-registry.mts";
 
 // The old call forms (no deps) are kept on purpose: they go through the direct TypeScript command, as every unmigrated caller does.
-const require = createRequire(import.meta.url);
+const require = moduleRequire(import.meta.url);
 const shim = require("./skill-registry.mts") as {
   digest(data: Uint8Array): string;
   context(project: string, scope: string, location?: string): RegistryContext;
@@ -21,7 +21,7 @@ const shim = require("./skill-registry.mts") as {
   transact(ctx: RegistryContext, operations: Operation[], options?: object): void;
 };
 
-const sha = (data: string | Uint8Array): string => createHash("sha256").update(data).digest("hex");
+const sha = (data: string | Uint8Array): string => testDeps.crypto.sha256Hex(data);
 const bytes = (text: string): Buffer => Buffer.from(text);
 
 function project(t: TestContext): string {

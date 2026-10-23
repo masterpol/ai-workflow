@@ -2,13 +2,19 @@
 
 The workflow has one portable core and three native adapters. `AGENTS.md` is the shared project contract; `ai-framework/workflow/` is the canonical phase specification; `.claude/agents/` contains the canonical role prompts.
 
+## Mandatory: project-root `ai-workflow.toon`
+
+A project-root `ai-workflow.toon` is **mandatory**. It holds the `models` block the workflow doctor uses to validate every agent and skill against the active capability profile. The doctor emits a top-level `ai-workflow.toon (mandatory)` failure if the file is absent, refused, or missing the `models` block. Copy `ai-framework/templates/ai-workflow.example.toon` to the project root and edit the `models` block for your project. The file is git-ignored (project-local). To migrate an older `schemaVersion: 2` file, run `node ai-framework/scripts/config-migrate.mts --apply --root .`.
+
+The example toon encodes exactly the model table below. Future bundle updates ship a new example and a new migrator default; the project's local `ai-workflow.toon` is untouched.
+
 ## Capability Profiles
 
 Select a model available in the active harness that meets the profile. Never substitute an unavailable provider or model just to match this table.
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/space-bunny` for non-sensitive, bounded work | `gpt-6-luna` |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/minimax-m3.1-flash-free` for non-sensitive, bounded work | `gpt-6-luna` |
 | `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-6.1-sol` at medium or high effort |
 | `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-6-astra` at high or xhigh effort |
 
@@ -24,7 +30,12 @@ Escalate one profile only when the returned work is demonstrably incomplete or u
 
 ## Claude Code
 
-Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `model:` values in those role files are Claude-specific suggestions. Phase skills state a profile, so another harness can make an equivalent selection.
+Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The canonical
+agents declare their capability profile via a `profile:` frontmatter key (not a `model:`
+line). Claude Code does **not** read `ai-workflow.toon`; it resolves an omitted `model:`
+to the parent conversation's model (or the per-invocation `CLAUDE_CODE_SUBAGENT_MODEL`
+override). The toon's `models` block is read by the workflow doctor and by future dispatchers.
+Phase skills state a profile, so another harness can make an equivalent selection.
 
 ## OpenCode
 
@@ -32,7 +43,7 @@ Claude Code discovers `.claude/skills/` and `.claude/agents/` directly. The `mod
 
 The included OpenCode routes are explicit and all run on OpenCode Go, so a single provider
 connection covers them (a route through an unconnected provider errors instead of falling back):
-fast roles use `opencode-go/space-bunny`, standard roles use `opencode-go/minimax-m3`, and deep
+fast roles use `opencode-go/minimax-m3.1-flash-free`, standard roles use `opencode-go/minimax-m3`, and deep
 roles (shape, architecture, planning, and the default `build` agent) use
 `opencode-go/kimi-k2.7-code`. `workflow-doctor` and `setup-validator` run on the standard route
 because diagnostics can expose broad project context. Before assuming a model id from this doc
@@ -146,6 +157,14 @@ the reserved names `__proto__`, `constructor`, and `prototype`, fold into `(othe
 cut at 80 characters. A v1 file migrates in place with its lifetime totals intact, but an older
 collector cannot read a v2 file and would start a blank snapshot, so update every checkout that
 shares one `.project/metrics/` together. Rendering lives in `ai-framework/hooks/scripts/token-report.mts`.
+
+Automatic workflow activity capture uses `ai-framework/hooks/scripts/workflow-capture.mts` alongside the
+token collector. Claude captures session starts, prompt/Stop turns, session ends, subagent starts/stops,
+and phase starts from slash-command expansion or Skill tool use; OpenCode captures V2 step starts,
+ends and failures plus phase skill calls in V1/V2. It never reads prompt, response or transcript text.
+OpenCode wait is `Unavailable` when no verified user-turn boundary exists; V1 completions do not imply
+intervals. Codex and Cursor automatic workflow activity capture is not wired. Capture writes bounded
+metadata to `.project/metrics/workflow-usage.json`; token and capture collectors acquire their leases separately.
 
 ## Sub-agent Dispatch
 

@@ -76,6 +76,32 @@ acceptance is recorded in the ledger, shown at the Step 5 gate, and re-checked b
 (a ledger with an unaccepted gap never opens the deletion gate, even if hand-placed). A summary
 claiming "everything extracted" is never sufficient by itself; the ledger is the proof.
 
+### Ledger version 2 (the authoring format)
+
+A mapping with `"schemaVersion": 2` is the format to write; a mapping without one still commits the original version 1 byte for byte, so
+existing ledgers and tooling keep working. Version 2 asks for what version 1 let an author skip:
+
+```json
+{"schemaVersion": 2,
+ "sections": [{"source": "SHIPPED.md#summary", "class": "decision", "disposition": "extracted",
+               "destination": ".project/knowledge/decisions/x.md", "helps": "Why X was chosen over Y."},
+              {"source": "log.md#a-false-alarm", "class": "omit", "disposition": "omitted", "reason": "resolved-false-positive"}],
+ "otherFiles": [{"path": "pitch.md", "disposition": "omitted", "reason": "superseded"}]}
+```
+
+- `class` is `behavior | decision | know-how | rule | limit | omit`; `disposition` is `extracted | merged | omitted` and `omit` goes with `omitted`.
+- Every kept section needs a `helps` line (what this lets a future agent do) and a real `destination`. A destination under `.project/pitches/` is refused, and
+  `behavior` and `decision` content cannot point at `.project/done-work.md` or an outcome record: those only link.
+- An omission needs a `reason` from the closed set `duplicate | superseded | process-noise | resolved-false-positive | failed-approach | other`. A
+  `failed-approach` also names the destination of its lesson; `other` is a gap and needs `--accept-gap`, exactly as in version 1.
+- `otherFiles` accounts for every file in the pitch that no section covers (`pitch.md`, plans, notes, data, a `deviations.md` or `log.md` with no sections). `bodyHash` and file `hash`
+  are computed by the tool and stored; one you supply must match the live content, so a judgment made against older text is refused.
+- `pitch-archive.mts remove` reads both versions and refuses on any doubt (stale hash, unlisted file, unknown version) before deleting anything.
+- A folder of many files (staging, reviewer prompts, snapshots) is accounted for by one **group** entry in `otherFiles`: a `path` ending in `/` (relative to the pitch folder) with a `disposition` and a `reason`, or a `destination` and `helps`. The tool computes the file `count` and a tree `hash` over every member's path and hash, and a `count` or `hash` you supply must match. A file added, dropped, renamed or edited inside the folder invalidates the entry, and `remove` re-checks it. A file belongs to one entry, so a group cannot overlap a single entry or another group. Limits: 200 ledger entries, 2000 files outside the covered sections.
+- A destination is judged by what it is, not how it is spelled: a path that resolves (through a symlink, another letter case or a character the disk folds) into a pitch folder, `.project/pitches` or the compaction folder is refused, for version 1 as well as version 2. `SHIPPED.md`, `deviations.md` and `log.md` also appear in `otherFiles` with a whole-file hash, because text outside their sections belongs to no section.
+
+`/ship` is unchanged by this: it does not yet write version 2 or an outcome record. That arrives with the `ship-consolidate-step` pitch.
+
 ## Step 3 — Write done-work.md
 
 ```sh
@@ -87,6 +113,9 @@ short agent-written summary, `[[wiki-link]]`s to the knowledge entries this pitc
 pointers to the recovery archive (once Step 4 creates it) and the untouched
 `.project/runs/<date>-<slug>.md` ship-time log. Never hand-edit `done-work.md` directly —
 regenerated the same way `graph.json`/`CHANGELOG.md` already are.
+
+A pitch that has an outcome record (`.project/records/shipped/<slug>.md`, format and lint in `ai-framework/scripts/outcome-record.mts`) is also listed in the generated
+index at the top of `done-work.md`: `node ai-framework/scripts/done-work-index.mts --apply` rewrites only that block, never a legacy entry.
 
 ## Step 4 — Archive (recovery, before anything is removed)
 
@@ -125,6 +154,18 @@ node ai-framework/scripts/pitch-archive.mts restore <slug> [--to /absolute/path]
 
 Reproduces the original pitch directory byte-for-byte from its verified archive. Refuses to
 overwrite an existing directory without `--force`.
+
+## Keep a pitch small while it is built
+
+A pitch that cannot be compacted usually grew files nothing consumes. Before shipping, keep only what is not derivable:
+
+- A `prepare` draft is never kept: re-run `prepare`. An approved input that is the proposal unwrapped is never kept beside the proposal. A supplement that is already published at its final path is that copy; keep the file only once.
+- Keep one result file per batch (preview, evidence and result together). Record each pitch's approved payload hash in it; the upgraded ledger already carries the approval hash.
+- Stage campaign files under `.project/compaction/staging/<campaign>/`, not in the pitch folder, and delete them after the batch result is written.
+- Snapshot a shared log once. When a pitch ships in several tracks, each track's run holds its reconciliation, its hill rows and a link to the one full snapshot.
+- Keep a reviewer's result, not its prompt, unless the prompt changes the result's meaning; a prompt's hash is enough.
+
+If a pitch is still too large, account for the bulk with a group entry above, never by raising a limit.
 
 ## What this skill never touches
 

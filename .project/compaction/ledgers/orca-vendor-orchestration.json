@@ -1,22 +1,74 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "orca-vendor-orchestration",
   "sections": [
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-orchestration.md#section-1-pitchmdno-gos",
-      "reason": "No-gos preserved in the compact record."
+      "helps": "Preserves coordination, provider, permission, history, recursion and scope exclusions.",
+      "bodyHash": "sha256:10895c6ee89e8f51a2d0c80ca264dce9bcef88bfbbc007488c4da98410ef3e52"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/orca-vendor-orchestration.md#section-2-pitchmdrabbit-holes",
-      "reason": "Rabbit holes and their owning part pitches preserved."
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md#closure-and-provenance",
+      "helps": "Separates documented feasibility, failed discovery and proposed all-vendor acceptance from the actual partial closure.",
+      "bodyHash": "sha256:5c26925d3a0f708ed2869ca2f74607898d601c25a9b729ab9b31df1151d34d6b"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:5c10bd461a08995d6510a2fae4b9c102c5254d041ece5d70f64c095452322201",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md",
+      "helps": "Preserves the actual four-part closure and dated partial live-proof boundary."
+    },
+    {
+      "path": "critique.md",
+      "hash": "sha256:33e7357d0d47bb4e8aca95c006f2541844341c2e15fecc76fef8525088b28241",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md",
+      "helps": "Preserves ownership, independent-gate and cleanup-evidence constraints through linked implementation guidance."
+    },
+    {
+      "path": "investigation.md",
+      "hash": "sha256:b27f758f9188f4b79aed6ea512e7df1f6677f920be3a1f745e5b8a2d4651e351",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md",
+      "helps": "Retains read-only feasibility findings, adapter policy ownership, mail semantics and validation boundaries."
+    },
+    {
+      "path": "online-verification.md",
+      "hash": "sha256:f81b5012e0d4399842b178ef8f0bec3f3c6f110d1f25f32ead113a23cdddbd7e",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md",
+      "helps": "Retains experimental-setting and model-override uncertainty without promoting online interfaces to local proof."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:baa30f7aeac84d74e51527e5462bce348b3b066001c539b3a29207bb1c22002f",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md",
+      "helps": "Preserves original design, prohibitions and acceptance ambition separately from actual closure."
+    },
+    {
+      "path": "runtime-verification.md",
+      "hash": "sha256:e1dfefd621bae9eda205308d692b684ce4337a5a8869e24822d6b6fe06847082",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-orchestration.md",
+      "helps": "Retains failed launcher observations, unproven diagnosis, no-switch boundary and conditional scratch-only test plan."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:22:37.590Z"
+  "committedAt": "2026-10-22T18:31:45.139Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:b671c0195858dd70683a0700df17000ad701f959e29d12817304092db5bcdf2e",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

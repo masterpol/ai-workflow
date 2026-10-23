@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "slug": "vendor-model-toon",
+  "sourceRoot": ".project/pitches/vendor-model-toon",
+  "archivedAt": "2026-10-19T03:28:10.564Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "7bcbdda4118c96e40b7e37adbcef7534aa036df669dd5137d21086cba74e1a35",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "3f85fbf880bbcbe53725a631049ed12a5991fa3d767286edd7947510de47d599",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "3c5e0a9ae9e82d8c3f6c15a0a2c37c943da8882c6918935a82f95de9cd50fcab",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "c3fd902183f834a30a2134c2d901a2fa95e01e7b138983d16121e3179081acc5",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "e84c7cc54095c708971ccab0172729ab8664b4687128f213c84d5a186b0adfd0",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "83fbc8d8ef14844a82b12acf8cfec865769d7e26529b8b333a87fe3df30c5e90",
+      "mode": 420
+    }
+  }
+}

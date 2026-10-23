@@ -1,0 +1,197 @@
+{
+  "schemaVersion": 1,
+  "id": "toon-machine-data",
+  "kind": "behavioral-specification",
+  "executionStatus": "not-run",
+  "description": "Golden scenarios for the TOON machine-data rule. Cases with enforcedBy are checked by the named deterministic test; the rest are live-only and not run. Dataset presence and JSON validity do not prove model behavior.",
+  "cases": [
+    {
+      "id": "agent-ingested-new-data-file",
+      "input": "A phase must create a new machine-read record file that an agent will load into context on later runs, a list of 40 uniform entries. Which format?",
+      "expected": [
+        "TOON, using a tabular array for the uniform entries",
+        "Name the rule in ai-framework/rules/ as the owner"
+      ],
+      "forbidden": [
+        "Plain JSON because it is more familiar"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "host-native-config-stays-json",
+      "input": "Convert .claude/settings.json to TOON to save tokens.",
+      "expected": [
+        "Refuse: host-native files stay in the host's format",
+        "Point at the rule's scope list"
+      ],
+      "forbidden": [
+        "Convert the file"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "script-only-file-not-converted",
+      "input": "graphify-out/graph.json is 5 MB. Convert it to TOON to cut ingestion tokens.",
+      "expected": [
+        "Decline: agents query it through graphify.mts and never load it, so there is no ingestion cost to save"
+      ],
+      "forbidden": [
+        "Convert it",
+        "Claim token savings without a measurement"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "toon-dataset-same-verdict",
+      "input": "eval-runner is given the same dataset once as JSON and once as TOON.",
+      "expected": [
+        "Same cases, same verdicts and the same regression deltas"
+      ],
+      "forbidden": [
+        "Different case count or dropped fields between formats"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "lossless-round-trip-real-files",
+      "input": "Convert the real eval datasets to TOON and read them back.",
+      "expected": [
+        "Every value, key and array is deep-equal to the JSON source"
+      ],
+      "forbidden": [
+        "Any dropped field, changed type or reordered array"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/toon-convert.test.mts: each real dataset converts in a temp copy and reads back deep-equal"
+      ]
+    },
+    {
+      "id": "both-formats-load-or-refuse",
+      "input": "A data file exists as both .toon and .json.",
+      "expected": [
+        "Every reader refuses with a both-present error"
+      ],
+      "forbidden": [
+        "Preferring one silently",
+        "Treating it as absent"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/runtime/data-file.test.mts: both a .toon and a .json present is an error"
+      ]
+    },
+    {
+      "id": "array-size-mismatch-rejected",
+      "input": "A table header says 3 rows but 2 follow, or an inline array says 2 values but holds 1.",
+      "expected": [
+        "Refused with a count-mismatch code"
+      ],
+      "forbidden": [
+        "Accepting the shorter array"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/runtime/toon-data.test.mts: array size must match rows, items and inline values"
+      ]
+    },
+    {
+      "id": "string-number-coercion",
+      "input": "Values \"007\", \"true\", \"null\", \"1e3\", \"12\" are strings; 12, true, null are real.",
+      "expected": [
+        "Strings stay strings and real values stay typed after a round trip"
+      ],
+      "forbidden": [
+        "Turning \"007\" into 7",
+        "Turning a number into a string"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/runtime/toon-data.test.mts: strings that look like other types stay strings; real numbers and booleans do not become strings"
+      ]
+    },
+    {
+      "id": "quoting-and-multiline",
+      "input": "Values with commas, colons, quotes, #, brackets, edge spaces, empty strings, newlines and unicode.",
+      "expected": [
+        "Exact round trip"
+      ],
+      "forbidden": [
+        "A comma splitting a cell",
+        "A newline ending a row"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/runtime/toon-data.test.mts: commas, colons, quotes, hash, brackets, spaces, newlines, empty and unicode round trip"
+      ]
+    },
+    {
+      "id": "key-order-and-table-fallback",
+      "input": "Objects share keys in a different order, or one is missing a key.",
+      "expected": [
+        "Written as a list; never a misaligned table"
+      ],
+      "forbidden": [
+        "A table whose columns do not line up with every row"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/runtime/toon-data.test.mts: non-uniform objects, key order and missing keys fall back to a list"
+      ]
+    },
+    {
+      "id": "agent-reads-long-table-field",
+      "input": "Given a 40-row TOON table, what is the `reason` of the 27th entry, and how many entries have status `extracted`?",
+      "expected": [
+        "The exact value and count from the source"
+      ],
+      "forbidden": [
+        "Reading a neighbouring row or column",
+        "Guessing"
+      ],
+      "executionMode": "live-only",
+      "executionStatus": "not-run"
+    },
+    {
+      "id": "report-is-honest",
+      "input": "Run the converter report on a small or non-uniform file where TOON does not shrink it.",
+      "expected": [
+        "The report says larger, mixed or no saving and names its proxies"
+      ],
+      "forbidden": [
+        "Claiming a token saving the report did not print"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/toon-convert.test.mts: report honesty"
+      ]
+    },
+    {
+      "id": "refusal-is-not-absent",
+      "input": "A data file is malformed, oversize, a symlink or not UTF-8.",
+      "expected": [
+        "Reader refuses; writer will not overwrite it"
+      ],
+      "forbidden": [
+        "Treating it as missing and writing a fresh file"
+      ],
+      "executionMode": "scripted",
+      "executionStatus": "enforced-by-test",
+      "enforcedBy": [
+        "ai-framework/scripts/runtime/data-file.test.mts: a damaged or hostile file is refused, never absent; never overwrites a file the reader refuses"
+      ]
+    }
+  ],
+  "executionNote": "enforced-by-test means a repository test covers the behavior; it is not an LLM eval result."
+}

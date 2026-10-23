@@ -4,7 +4,7 @@ type: decision
 created: 2026-10-08
 updated: 2026-10-08
 tags: [orca, orchestration, hooks, stop-and-ask, design]
-related: [status-dispatch-ready-false-is-not-launch-authority, a-blocking-hook-owns-its-runner-and-its-deadline, a-probe-child-ran-a-bare-command-with-the-parent-path, a-thin-cli-keeps-every-guard-in-the-library, opt-in-before-runtime-discovery, orca-workers-differ-from-the-coordinator-environment]
+related: [status-dispatch-ready-false-is-not-launch-authority, a-blocking-hook-owns-its-runner-and-its-deadline, a-probe-child-ran-a-bare-command-with-the-parent-path, a-thin-cli-keeps-every-guard-in-the-library, opt-in-before-runtime-discovery, orca-workers-differ-from-the-coordinator-environment, orca-policy]
 source: orca-auto-start-all-phases
 ---
 # Decision: how Orca starts automatically on workflow phases

@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 1,
+  "slug": "token-time-report",
+  "sourceRoot": ".project/pitches/token-time-report",
+  "archivedAt": "2026-10-22T02:43:38.190Z",
+  "files": {
+    "S1-evidence.md": {
+      "hash": "392df3fab09f60cf827f0e60c753553dcf51ec3841e4d1b36d6e25c30d42695d",
+      "mode": 420
+    },
+    "S2-evidence.md": {
+      "hash": "431bfef51e1cb8776a397375d4f8ab98c89fd66a0464363302d757b54dfb1b89",
+      "mode": 420
+    },
+    "S3-evidence.md": {
+      "hash": "0a96abd629cc47e1ca889d8473e9d9387c477b82b0a2aa29d77cf586d242f8d5",
+      "mode": 420
+    },
+    "SHIPPED.md": {
+      "hash": "2dda5ae76d79bba13d50fb0f4d84472d38e8cb6bd7ba5c5da8dffddb7846b60f",
+      "mode": 420
+    },
+    "audit-approved-evidence-code.md": {
+      "hash": "0abb1ca0cbad6e8aac486b6caf1d6ac09446038c248e5a7e0a8f88781854987d",
+      "mode": 420
+    },
+    "audit-approved-evidence-coverage.md": {
+      "hash": "b3c24201c9afef55c9cc8af07c55ce54120d686836ad16fed0cb0bd4a6b3c14b",
+      "mode": 420
+    },
+    "audit-approved-evidence-security.md": {
+      "hash": "9b57311b719fea6e32fdb859038e41fc71f1e2b9becbfca36b68daf77be79a2d",
+      "mode": 420
+    },
+    "audit-approved-evidence-ux.md": {
+      "hash": "4f3dea63155a1d676936c971c6799075ed28c944781b66d989fb60db6fb6b176",
+      "mode": 420
+    },
+    "audit-final-evidence.md": {
+      "hash": "b5c1ba2c063bfd82069233e7c4957ff81c8d0e2b00b31f19a776f96dec399cec",
+      "mode": 420
+    },
+    "audit-review-code-retry.md": {
+      "hash": "b3bc0e3917a422937953548628237c19e1fbdffbd496e52aafc702f15b839924",
+      "mode": 420
+    },
+    "audit-review-code.md": {
+      "hash": "d86f7d5c7782b6192dac314940292799a98555e05ea34421678a93d6befc9cae",
+      "mode": 420
+    },
+    "audit-review-coverage-retry.md": {
+      "hash": "e0187e4fff6f9a73fd768b1cf0df603c03354ff34766d080e32dc0d4efab27da",
+      "mode": 420
+    },
+    "audit-review-coverage.md": {
+      "hash": "5ae50b5a3ea4a8f9f235b4b27a0ba2cdc0b3fa74adbbaed8a6f7c46f7470b5c5",
+      "mode": 420
+    },
+    "audit-review-cross.md": {
+      "hash": "bdcb340a2c7d0763f864b81fee04973e93634560316648cdcc120888dba21061",
+      "mode": 420
+    },
+    "audit-review-security-retry.md": {
+      "hash": "20766afde0357ab4ff2d41efe0eb73d8562a247d499e41e739b8f71f45170f69",
+      "mode": 420
+    },
+    "audit-review-security.md": {
+      "hash": "c207b75722ba01fdcc965e9d7d155a781d76faa35468609d77918d2c6cc28510",
+      "mode": 420
+    },
+    "audit-review-ux-recheck.md": {
+      "hash": "9ff4397d44e30487fded198cc5655321126b27e830a8c257aca62fbc349a9a2a",
+      "mode": 420
+    },
+    "audit-review-ux.md": {
+      "hash": "6b89706d9b6fd58d96e4bee5a32a2cab4ba0b5e7984e39bcc57e2aafeaeb4588",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "064ff34d7ccd91bc65010f1b68c573d0aecccd73949103b5da8daac7957ce267",
+      "mode": 420
+    },
+    "build-start.md": {
+      "hash": "9b064591c5ebb6ab37d3f52ebb3b05cd916c53f827f4717fe8a3139289add249",
+      "mode": 420
+    },
+    "collect-historian.json": {
+      "hash": "0b0ba95117ea06e1418a030d3728c554e3dabba04f4fc6ebb3822ddbe296a0bb",
+      "mode": 420
+    },
+    "collect-skeptic.json": {
+      "hash": "85d1104f751a22b37e0898b69d69278525f930f222063cf3a72f2a807eba8651",
+      "mode": 420
+    },
+    "critique-appetite.md": {
+      "hash": "b6769d747c2c4d2ffb060858b34aeee55a31b66cb7c469da75e390e872afc1c9",
+      "mode": 420
+    },
+    "critique-historian.md": {
+      "hash": "d439befc1952f7b2ebaf172e5f811c2ff2dbc0f0a8648c4b8d9b999dfdfc4d7e",
+      "mode": 420
+    },
+    "critique-overlap.md": {
+      "hash": "a4bdb20138762c5801e7f45ad840613b6405cffe405ea8df7a685dd50f57ab9a",
+      "mode": 420
+    },
+    "critique-skeptic.md": {
+      "hash": "7f8eb75c8d2e52fd6765aca3292b86fa318c8da8ea1b94a4d15c1a916c5663c0",
+      "mode": 420
+    },
+    "delivery-pending.json": {
+      "hash": "7dec85c89a0b8ab613ac65d20988def008d19767f58382b65fcf0ff2035cda20",
+      "mode": 420
+    },
+    "deviations.md": {
+      "hash": "2043073e674c3facf678de34a96c10383c837f807b4ac76a6c3bc6bdc09b2b26",
+      "mode": 420
+    },
+    "dispatch-appetite.json": {
+      "hash": "a92e162d28e99299a7d72aaa73e0fc3fb4c54b0499e04880ab0ee139a558b689",
+      "mode": 420
+    },
+    "dispatch-historian.json": {
+      "hash": "facac90691328770ae30d704c1addc1a9db8f0c471a9a45544116377265c0614",
+      "mode": 420
+    },
+    "dispatch-overlap.json": {
+      "hash": "826ae83ec8cb5dd3959f5425bb16b900e15b3ee05d39eaba876208cae5f51aa5",
+      "mode": 420
+    },
+    "dispatch-skeptic.json": {
+      "hash": "0dad8eb83e688e37651f6b71c4613f1cbf76f558265e02973f8bd2a0a4352d3c",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "ee505b67de2c865a7e30b3fbb50704c9b0b47feb4fe09cf80017d1d42025ba56",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "9436cb25bba7e31d415f86e20fb1812c307afaac205b743e503cbc27fdeeb033",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "78b3d73717d3b9edd79f0f7853040331ed9fe1f4927435617b422bfbcd34d111",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "d3dc531ed78d6229f5fdbcad6ea680be0280b08e90a7da21128772a5f96eb587",
+      "mode": 420
+    },
+    "seed-2026-10-19.md": {
+      "hash": "29b57d6a9e9c0cdf733ffdbd564141d9110ae8783b2b7753628e4b8c6473a534",
+      "mode": 420
+    },
+    "shaping-evidence.md": {
+      "hash": "03d677a4eb7ddc85bc7af63d9aa3f4d36f1eb508b1b2b3319dfe38fdb81fff4e",
+      "mode": 420
+    },
+    "ship-start.md": {
+      "hash": "2fc59554d18ee2b459d136441614dc5fa48421c2be16ef4692f477daf10c1045",
+      "mode": 420
+    }
+  }
+}

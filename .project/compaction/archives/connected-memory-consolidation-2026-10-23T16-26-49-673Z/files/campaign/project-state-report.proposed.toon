@@ -1,0 +1,119 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: project-state-report
+sourceProof:
+  archiveDirectory: project-state-report-2026-09-25T13-39-04-583Z
+  manifestHash: "sha256:52c28d8d38a0781c669cf0985044736a27edd591a40693a30a758c3a48a9fa72"
+  sourceBytes: 54215
+  verifiedFiles: 11
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/project-state-report.supplement.md"
+  destination: ".project/records/legacy-upgrades/project-state-report.md"
+  hash: "sha256:992568e1a2748ce2e536d5ea891998eff2403f718e7e09c4488b136ef6c4d10b"
+payload:
+  ledgerHash: "sha256:bf084f474dcb025cd8bc172f0c2a7247d28d94378bf9b1f97663b9c13315b7d8"
+  legacyEntryHash: "sha256:dcd6c1028692b978bed13a0971e85e1fa25b339e52c5f6586d7c85ef51ba0933"
+  bindings:
+    ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md": "sha256:62ae5aab21c4f63cc7a6dd3923d12a989da12784028e93b8212034c1f84644f0"
+    ".project/knowledge/decisions/project-state-report-design.md": "sha256:6a83f90465ff66d827e32505b92bc8504b7e9b43a6c68db2916e4a8cce8587b2"
+    ".project/knowledge/patterns/a-report-over-an-untrusted-tree-runs-only-bundle-code.md": "sha256:177527021d6518f15455eaa61f7cbe05f17038a55bcaa589846ac6a3989130d9"
+    ".project/knowledge/index.md": "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    CHANGELOG.md: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+    ".project/knowledge/issues/hardening-a-shared-reader-made-its-writer-destructive.md": "sha256:3e2521f2908d24c6f25856e33f8b7a51232be26d82eb9eac53786cf3702224de"
+    ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md": "sha256:4cd8aae21ce042bbc7a94a28671bd4a6f38b3afa67ed4cd587c23bc832cd98a1"
+    ".project/records/legacy-upgrades/project-state-report.md": "sha256:992568e1a2748ce2e536d5ea891998eff2403f718e7e09c4488b136ef6c4d10b"
+  mapping:
+    schemaVersion: 2
+    sections[20]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/legacy-upgrades/project-state-report.md#report-contract-and-authorities","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:4ca6978ff95b2ccc64f9e6acef5fccf98e9a3702bf2798b7f76eb4cb0cb955d7"
+      "SHIPPED.md#confidence-read-this-before-relying-on-it",limit,merged,".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:0c7498e79dc4b61a40a438037e1b24ddbb32580968a6230ede6c1fb2962f406b"
+      "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:05598853b5e79ea24fe1e98ca171b43281fb84f55f6d8742d30634245bf9485d"
+      "SHIPPED.md#rabbit-holes-resolved-as-committed",decision,merged,".project/records/legacy-upgrades/project-state-report.md#report-contract-and-authorities","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:de8caa126b0ce3438fa29d44fc069598c4fae2d5901282dd010920da42866118"
+      "SHIPPED.md#deviations-that-changed-the-plan-see-deviationsmd",decision,merged,".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:b65687d0f856dbe4461dac380b6262b3f4a4de9c8ff090ffee4f9d99fdae55fb"
+      "SHIPPED.md#audit-findings-final-disposition",decision,merged,".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:05b0d25609322c352c414173ee2e77155d1ee8566c016533404e084351f85e89"
+      "SHIPPED.md#knowledge-extracted",know-how,merged,".project/records/legacy-upgrades/project-state-report.md#followups-knowledge-and-later-history","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:a19e54c436624cdef81c3df18eb3cd833562b8b251a304ed90933e51a19949d8"
+      "SHIPPED.md#followups-generated",know-how,merged,".project/records/legacy-upgrades/project-state-report.md#followups-knowledge-and-later-history","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:fb310f7b98936aae472dfaa07694ad39183bf58a5cb39253cfb8e3b439c62b3f"
+      "SHIPPED.md#version",know-how,merged,".project/records/legacy-upgrades/project-state-report.md#followups-knowledge-and-later-history","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:b6715a9052a50395eef66444d8992abfb37cf026a06e48742106ef16f281704d"
+      "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
+      "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
+      audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/project-state-report.md#audit-cycle-1","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:fbfd94c6e035821cd98825479dcc1fa34a9005386b7198cb3d9bc7a45fb65849"
+      audit-cycle-2.md,know-how,merged,".project/records/legacy-upgrades/project-state-report.md#audit-cycle-2-and-destructive-reader-regression","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:7781be90e67046e24d9ba7bc8a7e3d58a361e01512f03533288a6a3051224111"
+      audit-cycle-3.md,know-how,merged,".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:25e783eb38d6dfc4896b43582cf6d0070cbedc19bbdbddfa34b99ea4384b2058"
+      "deviations.md#t1",decision,merged,".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:034a60ee06df878c233c749e258d9e9c5b577a6f2ecce262e63c80ebcc0d85e5"
+      "deviations.md#t2",decision,merged,".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:3f118df7b98ad092b1da5db3bcda55781a0c19726399a1dbe4cc0a9f51a44d5d"
+      "deviations.md#audit-cycle-1-scope-changes-made-while-fixing",decision,merged,".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:0bc9f3b188ebc1989f97ad4dfbcdd8c1d18365f4891bb65d8f451e9b60c7408b"
+      "log.md#2026-09-25-t1-built",know-how,merged,".project/records/legacy-upgrades/project-state-report.md#build-verification-and-test-caught-defects","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:b571acc137a9b68286f84d5058334001f340a51368637317f396235300f36515"
+      "log.md#2026-09-25-t2-built",know-how,merged,".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:922645ae182c1ce4fcbf850fe4fc6849d088e68759d1b43767c8c20670278aa9"
+      "log.md#2026-09-25-audit-3-cycles",know-how,merged,".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence","Preserves the source contract, historical evidence, correction sequence and explicit limits on the original claims.","sha256:5b5ede16ad78cd6badeb7e0df3fe4c856f39ab1f0610a067543df83399299976"
+    otherFiles[8]:
+      -
+        path: SHIPPED.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#audit-cycle-3-and-final-confidence"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:bf89dc56a6762a35d602e6c288ba547a765c649b607ccc303685dbc464294383"
+      -
+        path: deviations.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#theme-rendering-and-write-decisions"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:9668a82a748446f905ae8b5af5e3c559566a1da1ed12054042b5b2dd8c48680f"
+      -
+        path: hill.md
+        disposition: omitted
+        reason: process-noise
+        hash: "sha256:167631a86b0c3c897bf9deb0e62e71500429004764be6d9002d405d8b10898ea"
+      -
+        path: log.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#build-verification-and-test-caught-defects"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:38ba97ab3324eb211487c47bd6cb2c41007f2881ad53c9390471d51244f3d925"
+      -
+        path: pitch.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:f2ddd3f488717e208fc82a46de1db88d6a7d5abf71f1aeba2e63a73bb3fcd9fe"
+      -
+        path: plan.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#report-contract-and-authorities"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:93a52a24f1c73800a3ee8455b8ec11f3d9d7ac60c4e7fc624433478008aa3ebf"
+      -
+        path: state-html.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:c68dc6ce78875c3a8ba527195d2bff4b273befcdea6885eb3ca9f642337e874c"
+      -
+        path: state-snapshot.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/project-state-report.md#scope-vendor-requirements-and-no-gos"
+        helps: "Retains meaningful source behavior, decisions, verification and historical caveats in the synthesized supplement."
+        hash: "sha256:72f46d6b4ef8be278f764b48a4660b84e0670407481f60a5179029c87b9cb60e"
+  outcomeRecord: "---\nslug: project-state-report\nshipped: 2026-09-25\nschemaVersion: 1\n---\n# project-state-report\n\nProject state reporting presents evidence-backed status with unavailable states and bounded safe publication.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: Project state reporting presents evidence-backed status with unavailable states and bounded safe publication.\n- docs: [source supplement](.project/records/legacy-upgrades/project-state-report.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/project-state-report.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/project-state-report.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/project-state-report.md)\n- followups: [retained limits](.project/records/legacy-upgrades/project-state-report.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/project-state-report.md)\n"
+  acceptDestinationDrift:
+    ".project/knowledge/decisions/project-state-report-design.md":
+      committed: "sha256:8ea395772e637285dccf74d1b6f866b0195b3b17268df83b19ce60dc22bcb753"
+      current: "sha256:6a83f90465ff66d827e32505b92bc8504b7e9b43a6c68db2916e4a8cce8587b2"
+      reason: "Against introducing ea82bce, +11/-1 adds 2026-10-08 multipage decisions and ownership-pattern relation. Original state decision retained; later seven-page/staged-write behavior remains later history."
+    ".project/knowledge/index.md":
+      committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+      current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+      reason: "Against introducing ea82bce, +560/-45 reflects regenerated graph growth and generator/schema metadata changes; original ship count17 is historical. Index is generated, not a durable container for pitch evidence."
+    ".project/pitches/_followups.md":
+      committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Against introducing ea82bce, +319/-0 adds later backlog. Original live-vendor/automatic-state choices persist, quoted fonts were already resolved in introducing text; preserve original deferrals and subsequent resolutions as history."
+    CHANGELOG.md:
+      committed: "sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa"
+      current: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+      reason: "Against introducing ea82bce, +565/-0 consists of later release history; original2.8.0 section is byte-identical. Its four-must-fix summary conflicts with source audit4+1 and is preserved as historical discrepancy."
+    ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md":
+      committed: "sha256:391c9c6847c3bd7e2739bdbe9baf24dacd8076bda0247bb14a048d9d6b48a1ce"
+      current: "sha256:4cd8aae21ce042bbc7a94a28671bd4a6f38b3afa67ed4cd587c23bc832cd98a1"
+      reason: "Against introducing ea82bce, +20/-3 updates metadata/confidence and adds later sanitizer/capture/token-time-report recurrences. Original reviewer measurement lesson unchanged; retain canary-vs-live and author-vs-independent distinctions."

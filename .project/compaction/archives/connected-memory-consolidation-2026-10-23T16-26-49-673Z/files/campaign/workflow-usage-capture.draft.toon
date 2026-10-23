@@ -1,0 +1,79 @@
+@toon-data 1
+slug: workflow-usage-capture
+draft: true
+state: needs-decision
+ledgerHash: "sha256:c451e95c5d59c9acf555f056a59690010bde1d9560d80eb11e7e2ef99f586f90"
+bindings:
+legacyEntryHash: "sha256:a5c3cac9be2842c785340c9e2638e346becf9990c059826b819d2eb47e0f9a06"
+mapping:
+  schemaVersion: 2
+  sections[31]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#reconciliation",null,null,null,null,null
+    "SHIPPED.md#verification-and-approval",null,null,null,null,null
+    "SHIPPED.md#limits-and-deferred-work",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    audit-cycle-1.md,null,null,null,null,null
+    audit-cycle-2.md,null,null,null,null,null
+    "deviations.md#2026-10-20-s1-dependency-and-probe-limits",null,null,null,null,null
+    "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",null,null,null,null,null
+    "deviations.md#2026-10-20-s2-implementation-details",null,null,null,null,null
+    "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",null,null,null,null,null
+    "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",null,null,null,null,null
+    "deviations.md#2026-10-20-s5-execution-order",null,null,null,null,null
+    "deviations.md#2026-10-20-s6-integration-fixture",null,null,null,null,null
+    "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",null,null,null,null,null
+    "deviations.md#2026-10-21-audit-recovery-and-witness-limits",null,null,null,null,null
+    "deviations.md#2026-10-21-ship-verification-preparation",null,null,null,null,null
+    "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",null,null,null,null,null
+    "log.md#2026-10-20-s1-evidence",null,null,null,null,null
+    "log.md#2026-10-20-approved-prerequisite-repair",null,null,null,null,null
+    "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",null,null,null,null,null
+    "log.md#2026-10-20-s2-pure-event-mapper",null,null,null,null,null
+    "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",null,null,null,null,null
+    "log.md#2026-10-20-s4-start",null,null,null,null,null
+    "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",null,null,null,null,null
+    "log.md#s5-doctor-validation-2026-10-20",null,null,null,null,null
+    "log.md#s6-opencode-capture-2026-10-20",null,null,null,null,null
+    "log.md#s7-docs-and-rollout-2026-10-20",null,null,null,null,null
+    "log.md#audit-preparation-2026-10-2021-utc",null,null,null,null,null
+    "log.md#ship-preparation-2026-10-21",null,null,null,null,null
+    "log.md#final-closure-2026-10-21",null,null,null,null,null
+  otherFiles[0]:
+judgments[31]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#reconciliation",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#verification-and-approval",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#limits-and-deferred-work",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  audit-cycle-1.md,needs-decision,gap,null,audit cycle record; outcome and lessons are in knowledge entries,false
+  audit-cycle-2.md,needs-decision,gap,null,audit cycle record; outcome and lessons are in knowledge entries,false
+  "deviations.md#2026-10-20-s1-dependency-and-probe-limits",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-s2-implementation-details",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-s5-execution-order",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-s6-integration-fixture",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-21-audit-recovery-and-witness-limits",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#2026-10-21-ship-verification-preparation",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-s1-evidence",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-approved-prerequisite-repair",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-s2-pure-event-mapper",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-s4-start",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s5-doctor-validation-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s6-opencode-capture-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s7-docs-and-rollout-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-preparation-2026-10-2021-utc",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#ship-preparation-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#final-closure-2026-10-21",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: workflow-usage-capture\nshipped: 2026-10-22\nschemaVersion: 1\ndraft: true\n---\n# workflow-usage-capture\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#workflow-usage-capture","sha256:a5c3cac9be2842c785340c9e2638e346becf9990c059826b819d2eb47e0f9a06","## workflow-usage-capture — shipped 2026-10-22\n\nClaude lifecycle hooks and OpenCode plugin events now feed metadata-only workflow usage capture through the existing state boundary (bundle 2.38.0). Eight capture-owned Claude hook groups are installed (shell p95 100 ms, coexistence skips 0/60), the CLI has a shared 3 s pre-acquisition budget and at most two writer attempts, doctor validates exact hook wiring, and OpenCode V2 step intervals and V1/V2 phase skills are captured after token writes settle. Schema 2 and the lease contract are unchanged; the A1 prerequisite repaired sentinel attribution, label inheritance and atomic phase replacement.\n\nStanding constraints: prompt, response and transcript content is never selected or stored; invocation arguments reach only the phase resolver. Unverified: OpenCode user-turn timing (wait is Unavailable) and live OpenCode V2 (fixture-verified only). Out of scope: Codex/Cursor automatic capture. `workflow-v3-rollout` must repeat its scratch-copy dry run before a real sync.\n\nLessons: [[observational-hooks-check-budget-before-acquiring-a-lease]], [[native-capture-needs-state-boundary-attribution]], [[review-guard-snapshot-can-outgrow-its-reader]], [[package-less-bundle-ship-wrapper-cannot-select-checks]], [[orca-model-preflight-can-leave-unproven-ledger-ownership]]. Followups in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/workflow-usage-capture.md"

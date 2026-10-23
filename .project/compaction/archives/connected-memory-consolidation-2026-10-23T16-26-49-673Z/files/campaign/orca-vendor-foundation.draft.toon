@@ -1,0 +1,61 @@
+@toon-data 1
+slug: orca-vendor-foundation
+draft: true
+state: needs-decision
+ledgerHash: "sha256:2b3c5420ac4996ed2fdacc781620d319157336566e2ed293753bd92f2f0b0070"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-foundation.md": "sha256:19fd6c7d6626f48eb1d67953e90c37c2f9d4445b241e58876f20ec5d1311b2cd"
+legacyEntryHash: "sha256:fc61cd08e925368aec0051aeac307d4dfa2929c2ccb8b2b05cd140a27313dd9f"
+mapping:
+  schemaVersion: 2
+  sections[21]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-3-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#rabbit-holes-and-deviations",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-4-shippedmdrabbit-holes-and-deviations",null,null
+    "SHIPPED.md#knowledge-extraction",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-5-shippedmdknowledge-extraction",null,null
+    "SHIPPED.md#followups-generated",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-6-shippedmdfollowups-generated",null,null
+    "SHIPPED.md#documentation-and-status",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-7-shippedmddocumentation-and-status",null,null
+    "SHIPPED.md#closing-gate",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-8-shippedmdclosing-gate",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-9-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-10-pitchmdrabbit-holes",null,null
+    audit-cycle-1.md,null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-11-audit-cycle-1md",null,null
+    "deviations.md#d1-explicit-orca-opt-in",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-12-deviationsmdd1-explicit-orca-opt-in",null,null
+    "deviations.md#d2-portable-fixture-assertions",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-13-deviationsmdd2-portable-fixture-assertions",null,null
+    "deviations.md#d3-cohesive-policy-module",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-14-deviationsmdd3-cohesive-policy-module",null,null
+    "deviations.md#d4-conservative-runtime-proof",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-15-deviationsmdd4-conservative-runtime-proof",null,null
+    "log.md#s1-test-review",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-16-logmds1-test-review",null,null
+    "log.md#s2-boundary-and-evidence-review",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-17-logmds2-boundary-and-evidence-review",null,null
+    "log.md#s3-fixture-and-sandbox-verification",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-18-logmds3-fixture-and-sandbox-verification",null,null
+    "log.md#audit-cycles-1-2",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-19-logmdaudit-cycles-1-2",null,null
+    "log.md#ship-preparation-2026-10-07",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-20-logmdship-preparation-2026-10-07",null,null
+    "log.md#ship-closed-2026-10-07",null,null,".project/records/pitch-compression/orca-vendor-foundation.md#section-21-logmdship-closed-2026-10-07",null,null
+  otherFiles[0]:
+judgments[21]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-3-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#rabbit-holes-and-deviations",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-4-shippedmdrabbit-holes-and-deviations",Preserved in the compact record section.,false
+  "SHIPPED.md#knowledge-extraction",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-5-shippedmdknowledge-extraction",Preserved in the compact record section.,false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-6-shippedmdfollowups-generated",Preserved in the compact record section.,false
+  "SHIPPED.md#documentation-and-status",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-7-shippedmddocumentation-and-status",Preserved in the compact record section.,false
+  "SHIPPED.md#closing-gate",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-8-shippedmdclosing-gate",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-9-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-10-pitchmdrabbit-holes",Preserved in the compact record section.,false
+  audit-cycle-1.md,needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-11-audit-cycle-1md",Preserved in the compact record section.,false
+  "deviations.md#d1-explicit-orca-opt-in",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-12-deviationsmdd1-explicit-orca-opt-in",Preserved in the compact record section.,false
+  "deviations.md#d2-portable-fixture-assertions",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-13-deviationsmdd2-portable-fixture-assertions",Preserved in the compact record section.,false
+  "deviations.md#d3-cohesive-policy-module",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-14-deviationsmdd3-cohesive-policy-module",Preserved in the compact record section.,false
+  "deviations.md#d4-conservative-runtime-proof",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-15-deviationsmdd4-conservative-runtime-proof",Preserved in the compact record section.,false
+  "log.md#s1-test-review",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-16-logmds1-test-review",Preserved in the compact record section.,false
+  "log.md#s2-boundary-and-evidence-review",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-17-logmds2-boundary-and-evidence-review",Preserved in the compact record section.,false
+  "log.md#s3-fixture-and-sandbox-verification",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-18-logmds3-fixture-and-sandbox-verification",Preserved in the compact record section.,false
+  "log.md#audit-cycles-1-2",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-19-logmdaudit-cycles-1-2",Preserved in the compact record section.,false
+  "log.md#ship-preparation-2026-10-07",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-20-logmdship-preparation-2026-10-07",Preserved in the compact record section.,false
+  "log.md#ship-closed-2026-10-07",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-foundation.md#section-21-logmdship-closed-2026-10-07",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-vendor-foundation\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# orca-vendor-foundation\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-vendor-foundation","sha256:fc61cd08e925368aec0051aeac307d4dfa2929c2ccb8b2b05cd140a27313dd9f","## orca-vendor-foundation — shipped 2026-10-08\n\nOrca foundation (v2.10.0) added the opt-in vendor policy (guarded reader, `use-orca-orchestration` flag, three vendor routes), a bounded read-only preflight with conservative fallback and worker-context guard, and static doctor diagnostics. No worker is launched; every result reports normal workflow and `dispatchReady: false`. 109 tests; independent audit with caught canaries; the live Orca launcher stayed broken, so live readiness was unverified.\n\nNo-gos held: no launch, messaging, integration, installation, credentials or fabricated savings. Lessons: [[rounded-zero-timeout-disables-cancellation]], [[guard-tests-can-fail-for-the-wrong-reason]]; followups in `.project/pitches/_followups.md`.\n\n\n",false
+  ".project/records/pitch-compression/orca-vendor-foundation.md","sha256:19fd6c7d6626f48eb1d67953e90c37c2f9d4445b241e58876f20ec5d1311b2cd","# Compaction record: orca-vendor-foundation\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[rounded-zero-timeout-disables-cancellation]], [[guard-tests-can-fail-for-the-wrong-reason]], [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].\n\n## Section 1: SHIPPED.md#final-verification\n\n109 tests pass, zero skipped (policy, preflight, skill-defaults, skill-vendors, bundle-sync); setup validator, graphify, changelog and git diff checks passed. The suite needed an authorized outside-sandbox rerun because the token-report socket lease is denied in the sandbox; no source workaround or skip was added. No build, typecheck, lint or i18n commands exist. Fixture and mutation evidence does not prove live Orca readiness.\n\n## Section 2: SHIPPED.md#reconciliation\n\nS1 policy (guarded reader, schema, exact optional flag, three vendor routes, example, tests), S2 preflight (opt-in guard, explicit worker context, bounded fixed read-only probes, conservative fallback), S3 diagnostics and docs (static doctor, optional config ignore, schema guide, version entry). Six new and four modified implementation paths, about 1,100 added lines, within the file cap.\n\n## Section 3: SHIPPED.md#no-gos-honored\n\nNo worker launch, messages, lifecycle mutation, integration of worker changes, remote execution, installation, authentication, credential handling or runtime setting changes; no fabricated cost, speed or quality claims. No partial dispatch path: every foundation result reports normal workflow and `dispatchReady: false`. A missing or false flag performs no Orca discovery, even with `--probe`. Doctor reads local policy only.\n\n## Section 4: SHIPPED.md#rabbit-holes-and-deviations\n\nPolicy path, schema and ownership settled without making the config a required scaffold artifact. Three established read-only commands and the inspected 1.4.222 contract bound discovery; unproved capabil",true
+unavailable[0]:

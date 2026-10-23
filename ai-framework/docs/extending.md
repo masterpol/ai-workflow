@@ -25,19 +25,28 @@ companion. Nothing to register — `workflow-doctor.mts` discovers every file un
 `ai-framework/rules/` automatically.
 
 **Add a new subagent role**
-1. Write the canonical prompt at `.claude/agents/<name>.md` with a Claude-compatible `model:`
-   frontmatter value drawn from a `claude-haiku-*` (fast) / `claude-sonnet-*` (standard) /
-   `claude-opus-*` (deep) family — that's the single declaration its profile is derived from
-   everywhere else. Add the "Sub-agent dispatch" clause every other agent file carries (copy
-   it from any existing one) so `workflow-doctor.mts` doesn't flag it as undocumented.
-2. Mirror it: `.opencode/agents/<name>.md` (thin shim, `model:`/`reasoningEffort:` per the
-   profile's OpenCode model) and `.codex/agents/<name>.toml` (`model =` / optionally
-   `model_reasoning_effort =`).
+1. Write the canonical prompt at `.claude/agents/<name>.md` with a YAML frontmatter
+   `profile: fast|standard|deep` key — that's the single declaration its profile is derived
+   from everywhere else. The agent file must NOT carry a `model:` line; the actual model id
+   lives in the project-root `ai-workflow.toon` `models.claude.<profile>.model` entry
+   (see `ai-framework/integrations/harnesses.md`). Add the "Sub-agent dispatch" clause every
+   other agent file carries (copy it from any existing one) so `workflow-doctor.mts` doesn't
+   flag it as undocumented.
+2. Mirror it: `.opencode/agents/<name>.md` (thin shim, `model:` matching
+   `ai-workflow.toon` `models.opencode.<profile>.model`) and `.codex/agents/<name>.toml`
+   (`model =` matching `models.codex.<profile>.model`, optionally
+   `model_reasoning_effort =` matching `models.codex.<profile>.effort`).
 3. Add the name to the matching profile list in `ai-framework/integrations/harnesses.md`'s
    Role Profiles table (documentation only — the doctor doesn't read this table).
 4. Run `node ai-framework/scripts/workflow-doctor.mts` — it discovers the new agent from
-   `.claude/agents/` automatically, derives its profile from `model:`, and checks both mirrors.
-   Nothing to register by hand.
+   `.claude/agents/` automatically, reads its `profile:`, and checks both mirrors against
+   the toon. Nothing to register by hand.
+
+> **Claude Code runtime note:** Claude Code does NOT read `ai-workflow.toon`. The toon is
+> read by the workflow doctor and by future dispatchers. Claude Code resolves an omitted
+> `model:` to the parent conversation's model (or the per-invocation
+> `CLAUDE_CODE_SUBAGENT_MODEL` override). The canonical agent's `profile:` key is metadata
+> for the workflow tooling; it is not consumed by Claude Code's runtime model selection.
 A mobile-focused example of this exact pattern is described in `SETUP.md` Step 5 / the `/setup`
 skill's Step 2b (generated only for projects that need it).
 

@@ -11,7 +11,8 @@ import { migrateInstanceEntries } from "./runtime/migrate.mts";
  * Only the bundle's canonical directories are compared (rules, workflow, templates,
  * integrations, scripts, hooks, canonical agents/skills, and their OpenCode/Codex/Cursor
  * mirrors). .project/, settings files, and credentials are never touched; AGENTS.md,
- * CLAUDE.md, opencode.json, and .codex/config.toml are only flagged for manual review.
+ * CLAUDE.md, SETUP.md, README.md, opencode.json, and .codex/config.toml are only flagged for
+ * manual review.
  *
  * Local customizations are protected by a three-way comparison against the bundle version
  * the project was last synced from ("base"): the hash manifest in .project/.bundle-sync.json,
@@ -34,6 +35,7 @@ import { migrateInstanceEntries } from "./runtime/migrate.mts";
 
 import { ownedPaths } from "./skill-sync.mts";
 import { resolveClaudeEntry } from "./entry-import.mts";
+import { CONSOLIDATION_COMMAND, legacyInventory } from "./consolidation-migrate.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 type Status = "new" | "changed" | "local" | "conflict" | "unverified" | "removed";
@@ -80,7 +82,7 @@ export const SYNCED_DIRS: readonly string[] = [
 // target side so their files are reported as removed-in-source.
 export const RETIRED_DIRS: readonly string[] = ["ai-framework/contexts"];
 
-export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml"];
+export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml", "SETUP.md", "README.md"];
 
 const IGNORE_NAMES = new Set([".DS_Store"]);
 const MARKER = ".project/.bundle-sync.json";
@@ -319,6 +321,12 @@ function makeSync(argv: string[], deps: RuntimeDeps) {
     }
     if (missing.length) {
       steps.push({ kind: "scaffold", message: `${missing.length} project scaffold file(s) new in this bundle version are missing from .project/ (${missing.slice(0, 5).join(", ")}${missing.length > 5 ? ", ..." : ""}): run node ai-framework/scripts/workflow-doctor.mts --fix (restores missing files only, never overwrites)` });
+    }
+    if (await exists(path.join(sourceRoot, "ai-framework/scripts/consolidation-migrate.mts"))) {
+      let summary = "legacy compacted pitch count unavailable (inventory refused; inspect before migrating)";
+      try { summary = `${legacyInventory(root, deps).pitches} legacy compacted pitch(es)`; }
+      catch { /* Guidance remains actionable without treating a refused inventory as zero. */ }
+      steps.push({ kind: "consolidation", message: `${summary}: after both sync passes, run ${CONSOLIDATION_COMMAND}, review its plan, then use --apply. This migrates scaffold only; legacy content upgrades require their own approval. No project records are migrated by bundle-sync.` });
     }
     // The knowledge graph moved from the in-house .project/knowledge/graph.json to Graphify (uv) at graphify-out/graph.json.
     // The synced graphify.mts migrates it, but only when run: name that step instead of leaving a stale graph behind.

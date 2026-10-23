@@ -1,22 +1,24 @@
 import { NODE_FLAGS } from "../../scripts/runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
+// Bun child processes can deadlock when requiring the same .mts file concurrently; use Node for the writer fixture.
+const CHILD_EXEC = process.versions.bun ? "node" : process.execPath;
+const CHILD_FLAGS = process.versions.bun ? NODE_FLAGS : RUNTIME_FLAGS;
 import assert from "node:assert/strict";
-import { spawn, spawnSync } from "node:child_process";
-import fs from "node:fs";
-import net from "node:net";
-import os from "node:os";
-import path from "node:path";
+import { createTestDeps, fileUrl, urlPath, spawnTestChild, spawnSync, adapterNet as net } from "../../scripts/runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test, { after } from "node:test";
 import type { TestContext } from "node:test";
-import { fileURLToPath, pathToFileURL } from "node:url";
 
 import type { RuntimeDeps, WriteOptions } from "../../scripts/runtime/types.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
-import { recordEvent, normalizedEvent, applyToSnapshot, blankSnapshot, main } from "./token-consumption.mts";
+import { recordEvent, normalizedEvent, applyToSnapshot, blankSnapshot, main, SNAPSHOT_REVISION, resolvePhaseContext, activeContext, transcriptTokens } from "./token-consumption.mts";
 import type { CollectorInput, CompletionRecord, Routing } from "./token-consumption.mts";
 import { endpointFor } from "./metrics-lock.mts";
 
-const here = path.dirname(fileURLToPath(import.meta.url));
+const here = path.dirname(urlPath(import.meta.url));
 // Snapshot JSON read back from disk is whatever JSON.parse returns (untyped in the TS lib); tests index into it
 // as the old tests did. No explicit escape-hatch type is written here.
 type Json = ReturnType<typeof JSON.parse>;
@@ -232,13 +234,13 @@ function v1Fixture(): Json {
   };
 }
 
-test("a v1 snapshot migrates to v2 without losing its lifetime totals", async () => {
+test("a v1 snapshot migrates to the current token snapshot revision without losing its lifetime totals", async () => {
   await withRoot(async (root) => {
     fs.mkdirSync(path.join(root, ".project", "metrics"));
     fs.writeFileSync(metricsFile(root), JSON.stringify(v1Fixture()));
     await recordEvent(message("m-1"), root);
     const snapshot = readSnapshot(root);
-    assert.equal(snapshot.schemaVersion, 2);
+    assert.equal(snapshot.schemaVersion, SNAPSHOT_REVISION);
     assert.equal(snapshot.lifetime.agentCompletions, 6);
     assert.equal(snapshot.lifetime.tokens.total, 135);
     assert.equal(snapshot.lifetime.vendors.claude.completions, 2);
@@ -636,11 +638,12 @@ test("a FIFO or a symlink at the snapshot path is refused without blocking or re
 test("a snapshot from a newer schema is not read, downgraded or overwritten; an oversize one is refused", async (t) => {
   const root = metricsRoot(t);
   fs.mkdirSync(path.join(root, ".project/metrics"), { recursive: true });
-  const original = JSON.stringify({ schemaVersion: 3, lifetime: { agentCompletions: 500 }, recentEventKeys: [] });
+  const newer = SNAPSHOT_REVISION + 1;
+  const original = JSON.stringify({ schemaVersion: newer, lifetime: { agentCompletions: 500 }, recentEventKeys: [] });
   fs.writeFileSync(snapshotFile(root), original);
   const result = await recordEvent(event(), root);
   assert.equal(result.written, false);
-  assert.match(result.reason, /schemaVersion 3 is newer/);
+  assert.match(result.reason, new RegExp(`schemaVersion ${newer} is newer`));
   assert.equal(fs.readFileSync(snapshotFile(root), "utf8"), original);
   fs.writeFileSync(snapshotFile(root), `{"schemaVersion":2,"pad":"${"x".repeat(5 * 1024 * 1024)}"}`);
   assert.match((await recordEvent(event(), root)).reason, /larger than 4 MB/);
@@ -710,7 +713,7 @@ test("stored current and previous records with the wrong shape start a fresh sna
 });
 
 test("a file-system error reaches stderr as a code, never with the project path", async (t) => {
-  if (process.getuid && process.getuid() === 0) return;
+  if (process.platform === "win32" || (process.getuid && process.getuid() === 0)) { t.skip("requires POSIX directory permissions without root privileges"); return; }
   const root = metricsRoot(t);
   await recordEvent(event(), root);
   const directory = path.join(root, ".project/metrics");
@@ -743,7 +746,8 @@ test("a FIFO or oversize modes.json is skipped without blocking, and the mode si
   assert.equal(readSnap(bigRoot).current.mode, null, "an oversize modes.json is not read");
 });
 
-test("a snapshot whose dimension rows or stored routing are hostile is replaced, not left to fail every later event", async (t) => {
+// Six hostile snapshots each require three real collector processes; retain every case with an integration budget.
+test("a snapshot whose dimension rows or stored routing are hostile is replaced, not left to fail every later event", { timeout: 30000 }, async (t) => {
   const seeded = async (mutate: (snapshot: Json) => void): Promise<string> => {
     const root = metricsRoot(t);
     await recordEvent(event(), root);
@@ -840,10 +844,16 @@ test("a real-shaped snapshot from this collector validates and keeps its totals 
 // A lease or test server left open by a failed assertion must fail this file, not hang it (see metrics-lock.test.mts).
 // Node only: `node --test` runs each file in its own process, but `bun test <dir>` runs every file in ONE process,
 // where this timer would end the whole run (and its report) two seconds after this file finished.
-if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => { setTimeout(() => process.exit(), 2000).unref(); });
+if (typeof (globalThis as { Bun?: unknown }).Bun === "undefined") after(() => {
+  setTimeout(() => {
+    process.stderr.write("Test leaked a lease, server or child after cleanup\n");
+    process.exit(1);
+  }, 2000).unref();
+});
 
 // Each child waits at a barrier (one stdin line) so all of them contend at once, then records five
 // events of its own plus one event whose id every child shares.
+const WRITER_BARRIER_MS = typeof (globalThis as { Bun?: unknown }).Bun !== "undefined" ? 30000 : 5000;
 const WRITER = `
 const { recordEvent } = require(process.argv[1]);
 const [root, prefix] = [process.argv[2], process.argv[3]];
@@ -860,15 +870,16 @@ process.stdout.write("ready\\n");`;
 test("concurrent writer processes keep exact totals, and a shared event id is counted once", async (t) => {
   const root = metricsRoot(t);
   const writers = Array.from({ length: 6 }, (_, index) => {
-    const child = spawn(process.execPath, [...RUNTIME_FLAGS, "-e", WRITER, COLLECTOR, root, `w${index}`], { stdio: ["pipe", "pipe", "pipe"] });
+    // The writer imports the collector, which re-executes itself under the configured runner; pin it to the Node child.
+    const child = spawnTestChild(CHILD_EXEC, [...CHILD_FLAGS, "-e", WRITER, COLLECTOR, root, `w${index}`], { stdio: ["pipe", "pipe", "pipe"], env: { ...process.env, AI_WORKFLOW_RUNNER: "node" } });
     let output = "";
     let errors = "";
     child.stdout.on("data", (chunk: Buffer) => { output += chunk; });
     child.stderr.on("data", (chunk: Buffer) => { errors += chunk; });
-    t.after(() => { if (child.exitCode == null) child.kill("SIGKILL"); });
+    t.after(() => { if (child.exitCode == null && child.signalCode == null) child.kill("SIGKILL"); });
     const exited = new Promise((resolve) => child.on("exit", resolve));
     const ready = new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error("writer never reached the barrier")), 5000);
+      const timer = setTimeout(() => reject(new Error("writer never reached the barrier")), WRITER_BARRIER_MS);
       child.stdout.on("data", () => { if (output.includes("ready")) { clearTimeout(timer); resolve(); } });
     });
     return { child, exited, ready, result: () => ({ output, errors }) };
@@ -925,17 +936,25 @@ test("another program on the metrics endpoint makes recordEvent skip within its 
 });
 
 test("the lease is released even when recording throws, so the next event is not blocked", async (t) => {
-  if (process.getuid && process.getuid() === 0) { t.skip("root ignores directory permissions"); return; }
   const root = metricsRoot(t);
   await recordEvent(event(), root);
-  // A metrics directory that cannot be written makes the atomic write throw while the lease is held.
-  const metrics = path.join(root, ".project", "metrics");
-  fs.chmodSync(metrics, 0o500);
-  try {
-    await assert.rejects(() => recordEvent(event({ agent_id: "b" }), root), { code: "EACCES" });
-  } finally { fs.chmodSync(metrics, 0o700); }
+  const base = createNodeDeps();
+  let failures = 0;
+  const deps: RuntimeDeps = {
+    ...base,
+    fs: { ...base.fs, writeFileSync(file, data, options) {
+      if (String(file).includes("token-consumption.json.") && options?.flag === "wx") {
+        failures += 1;
+        throw Object.assign(new Error("injected write failure"), { code: "EACCES" });
+      }
+      return base.fs.writeFileSync(file, data, options);
+    } },
+  };
+  await assert.rejects(() => recordEvent(event({ agent_id: "b" }), root, {}, deps), { code: "EACCES" });
+  assert.equal(failures, 1, "the write failed after acquiring the lease");
   const next = await recordEvent(event({ agent_id: "c" }), root, { lock: { waitMs: 100 } });
   assert.equal(next.written, true, "a failure inside the lease did not leave it held");
+  assert.equal(readSnap(root).lifetime.agentCompletions, 2, "the failed event never changed the snapshot");
 });
 
 // ---- ts-runtime-injection: main(argv, deps) driven by injected deps (stdin, stderr, clock, crypto, pid, cwd) ----
@@ -1029,7 +1048,7 @@ const inBun = typeof (globalThis as { Bun?: unknown }).Bun !== "undefined";
 const ADAPTER = inBun ? "bun" : "node";
 async function adapterDeps(): Promise<RuntimeDeps> {
   if (!inBun) return createNodeDeps();
-  const url = pathToFileURL(path.join(here, "..", "..", "scripts", "runtime", "bun.mts")).href;
+  const url = fileUrl(path.join(here, "..", "..", "scripts", "runtime", "bun.mts"));
   const { createBunDeps } = (await import(url)) as { createBunDeps(): RuntimeDeps };
   return createBunDeps();
 }
@@ -1085,4 +1104,558 @@ test(`privacy (${ADAPTER} adapter): path containment, symlinked snapshot refusal
   for (const name of ["token-consumption.json", "token-consumption.md", "token-consumption.html"]) {
     assert.doesNotMatch(fs.readFileSync(metricsFile(root, name), "utf8"), /ADAPTER-(PROMPT|RESPONSE|TRANSCRIPT)/, name);
   }
+});
+
+// ---- Token snapshot revision 3: append-only migration, validated blocks, directory-identity pin ----
+
+const v2Fixture = (): Json => ({ ...v1Fixture(), schemaVersion: 2, dimensions: { since: "2026-09-25T00:00:00.000Z", models: {}, agents: {}, efforts: {}, skills: {} } });
+const BLOCKS = ["flows", "transcripts", "contexts"];
+const withoutBlocks = (snapshot: Json): Json => Object.fromEntries(Object.entries(snapshot).filter(([key]) => !BLOCKS.includes(key)));
+const oneRow = { completions: 1, reportedUsageCount: 1, unavailableCount: 0, tokens: 3, costUsd: 0, pricedCount: 0 };
+
+test("a v2 snapshot migrates to revision 3 append-only and survives a strict re-read", async () => {
+  await withRoot(async (root) => {
+    fs.mkdirSync(path.join(root, ".project", "metrics"));
+    const original = v2Fixture();
+    fs.writeFileSync(metricsFile(root), JSON.stringify(original));
+    const first = await recordEvent({ vendor: "opencode", event: "message.completed", idempotencyKey: "m-0", raw: { tokens: { input: 1, output: 2 } } }, root);
+    assert.equal(first.written, true);
+    const migrated = readSnapshot(root);
+    assert.equal(migrated.schemaVersion, 3);
+    assert.deepEqual(Object.keys(migrated.flows.pitches), ["(unattributed)"], "the first completion after migration is the first flow row");
+    assert.ok(migrated.flows.since);
+    assert.deepEqual(migrated.transcripts, {});
+    assert.deepEqual(migrated.contexts, {});
+    assert.equal(migrated.dimensions.since, original.dimensions.since, "earlier blocks are carried over");
+    assert.equal(migrated.lifetime.agentCompletions, original.lifetime.agentCompletions + 1);
+    assert.equal((await recordEvent(message("m-1"), root)).written, true, "the migrated file is re-read without being rejected");
+    assert.equal(fs.existsSync(`${metricsFile(root)}.rejected`), false);
+    assert.equal(readSnapshot(root).lifetime.agentCompletions, original.lifetime.agentCompletions + 2);
+  });
+});
+
+test("migration only appends: untouched earlier blocks come through equal, and the new blocks are the only additions", async () => {
+  await withRoot(async (root) => {
+    fs.mkdirSync(path.join(root, ".project", "metrics"));
+    const original = v2Fixture();
+    original.note = "kept";
+    fs.writeFileSync(metricsFile(root), JSON.stringify(original));
+    await recordEvent(message("m-2"), root);
+    const migrated = readSnapshot(root);
+    assert.equal(migrated.schemaVersion, 3);
+    assert.deepEqual(migrated.lifetime.vendors.claude, { ...original.lifetime.vendors.claude, pricedCount: 0 }, "an untouched vendor row is unchanged");
+    assert.deepEqual(migrated.recentEventKeys.slice(1), original.recentEventKeys);
+    assert.deepEqual(migrated.dimensions.models.claude, undefined);
+    assert.deepEqual(Object.keys(migrated).filter((key) => !(key in original)).sort(), [...BLOCKS, "agentModels", "recentSkillKeys"].sort());
+  });
+});
+
+test("a revision newer than this collector is refused and its bytes stay unchanged", async () => {
+  await withRoot(async (root) => {
+    fs.mkdirSync(path.join(root, ".project", "metrics"));
+    const original = JSON.stringify({ ...v2Fixture(), schemaVersion: SNAPSHOT_REVISION + 1 });
+    fs.writeFileSync(metricsFile(root), original);
+    const result = await recordEvent(message("m-3"), root);
+    assert.equal(result.written, false);
+    assert.match(String(result.reason), /is newer than this collector understands/);
+    assert.equal(fs.readFileSync(metricsFile(root), "utf8"), original);
+  });
+});
+
+test("hostile flows, contexts or transcripts, and flow routing that resolves to no row, are replaced and kept aside", async () => {
+  const blocks: Json[] = [
+    { flows: { since: null, pitches: { p: { phases: { build: { scopes: { S1: { claude: { completions: -1 } } } } } } } } },
+    { flows: { since: 5, pitches: {} } },
+    { flows: [] },
+    { contexts: { s: { pitch: 1, phase: "build", scope: "S1", at: "x" } } },
+    { transcripts: { k: { offset: "9", size: 1, ino: 1, dev: 1, recentIds: [], at: "x" } } },
+    { current: { ...v1Fixture().current, flow: { applied: true, pitch: "p", phase: "build", scope: "S1" } } },
+  ];
+  for (const bad of blocks) {
+    await withRoot(async (root) => {
+      fs.mkdirSync(path.join(root, ".project", "metrics"));
+      const text = JSON.stringify({ ...v2Fixture(), schemaVersion: 3, flows: { since: null, pitches: {} }, transcripts: {}, contexts: {}, ...bad });
+      fs.writeFileSync(metricsFile(root), text);
+      assert.equal((await recordEvent(message("m-4"), root)).written, true);
+      assert.equal(readSnapshot(root).lifetime.agentCompletions, 1, "a blank snapshot replaced the hostile one");
+      assert.equal(fs.readFileSync(`${metricsFile(root)}.rejected`, "utf8"), text, "the original text is kept byte-equal");
+    });
+  }
+});
+
+test("a stored flow whose row exists is accepted", async () => {
+  await withRoot(async (root) => {
+    fs.mkdirSync(path.join(root, ".project", "metrics"));
+    const current = { ...v1Fixture().current, flow: { applied: true, pitch: "p", phase: "build", scope: "S1" } };
+    const flows = { since: "2026-09-25T00:00:00.000Z", pitches: { p: { phases: { build: { scopes: { S1: { claude: oneRow } } } } } } };
+    fs.writeFileSync(metricsFile(root), JSON.stringify({ ...v2Fixture(), schemaVersion: 3, current, flows, transcripts: {}, contexts: {} }));
+    assert.equal((await recordEvent(message("m-5"), root)).written, true);
+    assert.equal(fs.existsSync(`${metricsFile(root)}.rejected`), false);
+    assert.equal(readSnapshot(root).flows.pitches.p.phases.build.scopes.S1.claude.completions, 1);
+  });
+});
+
+test("a metrics directory swapped for a link while the lease is awaited is not followed, and the next event records", async () => {
+  await withRoot(async (root) => {
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), "token-outside-"));
+    try {
+      const metrics = path.join(root, ".project", "metrics");
+      const parked = path.join(root, "parked");
+      fs.mkdirSync(metrics);
+      const base = createNodeDeps({});
+      let swaps = 0;
+      const deps: RuntimeDeps = { ...base, net: { tryListen: async () => {
+        if (swaps++ === 0) { fs.renameSync(metrics, parked); fs.symlinkSync(outside, metrics); }
+        return { server: { close: async () => {} } };
+      } } };
+      const result = await recordEvent(message("m-6"), root, {}, deps);
+      assert.equal(result.written, false);
+      assert.match(String(result.reason), /metrics directory changed while waiting for the lease/);
+      assert.deepEqual(fs.readdirSync(outside), [], "nothing was written through the link");
+      fs.rmSync(metrics, { force: true });
+      fs.renameSync(parked, metrics);
+      assert.equal((await recordEvent(message("m-7"), root, {}, deps)).written, true, "the lease was released and recording resumes");
+      assert.equal(readSnapshot(root).lifetime.agentCompletions, 1);
+    } finally { fs.rmSync(outside, { recursive: true, force: true }); }
+  });
+});
+
+// ---- Active-context pointer and phase-start event ----
+
+interface SpyDeps { deps: RuntimeDeps; listens: () => number; setNow: (ms: number) => void }
+// An in-memory lease keeps these tests off the shared loopback port derived from the project path.
+function spyDeps(start = Date.UTC(2026, 9, 19, 12)): SpyDeps {
+  const base = createNodeDeps({});
+  let listens = 0;
+  let now = start;
+  const deps: RuntimeDeps = { ...base, clock: { ...base.clock, now: () => now }, net: { tryListen: async () => { listens += 1; return { server: { close: async () => {} } }; } } };
+  return { deps, listens: () => listens, setNow: (ms: number) => { now = ms; } };
+}
+const slash = (name: string, args: string, extra: Json = {}): CollectorInput => ({ vendor: "claude", event: "phase-start", raw: { session_id: "sess-1", expansion_type: "slash_command", command_name: name, command_args: args, ...extra } });
+const pitchDir = (root: string, slug: string): void => fs.mkdirSync(path.join(root, ".project", "pitches", slug), { recursive: true });
+
+test("resolvePhaseContext: a slug, a closed phase and an S<n> scope; everything else is dropped", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "token-attribution");
+    const { deps } = spyDeps();
+    assert.deepEqual(resolvePhaseContext("build", "token-attribution S5 anything else", root, deps), { pitch: "token-attribution", phase: "build", scope: "S5" });
+    assert.deepEqual(resolvePhaseContext("/Build", "token-attribution", root, deps), { pitch: "token-attribution", phase: "build", scope: "(none)" });
+    assert.deepEqual(resolvePhaseContext("plan", undefined, root, deps), { pitch: "(unattributed)", phase: "plan", scope: "(none)" });
+    assert.equal(resolvePhaseContext("deploy", "token-attribution", root, deps), null, "not a phase");
+    assert.equal(resolvePhaseContext("build:other", "", root, deps), null);
+    assert.equal(resolvePhaseContext({}, "", root, deps), null);
+  });
+});
+
+test("pitch argument validation: missing or linked directories and odd names never become keys", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "real-one");
+    pitchDir(root, "_parked");
+    const outside = fs.mkdtempSync(path.join(os.tmpdir(), "pitch-outside-"));
+    try {
+      fs.symlinkSync(outside, path.join(root, ".project", "pitches", "linked"));
+      const { deps } = spyDeps();
+      const pitchOf = (args: string): string => resolvePhaseContext("build", args, root, deps)!.pitch;
+      assert.equal(pitchOf("real-one"), "real-one");
+      for (const bad of ["missing", "linked", "_parked", "Real-One", "../real-one", "real-one/x", "__proto__", "a".repeat(81), "S5 real-one"]) assert.equal(pitchOf(bad), "(unattributed)", bad);
+      assert.equal(resolvePhaseContext("build", "real-one S1000 S12", root, deps)!.scope, "S12", "a scope needs one to three digits");
+      assert.equal(resolvePhaseContext("build", "real-one S5x s5 S", root, deps)!.scope, "(none)");
+    } finally { fs.rmSync(outside, { recursive: true, force: true }); }
+  });
+});
+
+test("a UserPromptExpansion command sets the session context and never counts a completion", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "token-attribution");
+    const spy = spyDeps();
+    const result = await recordEvent(slash("build", "token-attribution S6 SECRET-TEXT"), root, {}, spy.deps);
+    assert.equal(result.written, true);
+    const snapshot = readSnapshot(root);
+    assert.deepEqual(snapshot.contexts["sess-1"], { pitch: "token-attribution", phase: "build", scope: "S6", at: "2026-10-19T12:00:00.000Z" });
+    assert.equal(snapshot.lifetime.agentCompletions, 0);
+    for (const name of ["token-consumption.json", "token-consumption.md", "token-consumption.html"]) assert.doesNotMatch(fs.readFileSync(metricsFile(root, name), "utf8"), /SECRET-TEXT/, name);
+  });
+});
+
+test("the skill-use path sets a context for a phase skill and not for another skill", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "p-one");
+    const spy = spyDeps();
+    const skill = (name: string, args = ""): CollectorInput => ({ vendor: "claude", event: "skill-use", raw: { session_id: "sess-2", tool_use_id: `tu-${name}`, tool_input: { skill: name, args } } });
+    await recordEvent(skill("caveman"), root, {}, spy.deps);
+    assert.deepEqual(readSnapshot(root).contexts, {}, "a non-phase skill leaves no pointer");
+    await recordEvent(skill("audit", "p-one"), root, {}, spy.deps);
+    const snapshot = readSnapshot(root);
+    assert.equal(snapshot.contexts["sess-2"].phase, "audit");
+    assert.equal(snapshot.contexts["sess-2"].pitch, "p-one");
+    assert.equal(snapshot.dimensions.skills.claude.audit.uses, 1, "the skill is still counted by name");
+    await recordEvent({ vendor: "opencode", event: "skill-use", skill: "plan", raw: { session_id: "oc-1" } }, root, {}, spy.deps);
+    assert.equal(readSnapshot(root).contexts["oc-1"].phase, "plan", "the OpenCode shape sets one too");
+  });
+});
+
+test("a subagent's own call never overwrites the parent's context", async () => {
+  await withRoot(async (root) => {
+    const spy = spyDeps();
+    await recordEvent(slash("build", ""), root, {}, spy.deps);
+    const result = await recordEvent(slash("ship", "", { agent_id: "helper-1" }), root, {}, spy.deps);
+    assert.equal(result.written, false);
+    assert.equal(readSnapshot(root).contexts["sess-1"].phase, "build");
+  });
+});
+
+test("a command that is not a phase returns before the directory or the lease is touched", async () => {
+  await withRoot(async (root) => {
+    const spy = spyDeps();
+    for (const input of [slash("help", ""), slash("build", "", { expansion_type: "other" }), slash("build", "", { session_id: undefined }), { vendor: "claude", event: "phase-start", raw: {} }]) {
+      assert.equal((await recordEvent(input, root, {}, spy.deps)).written, false);
+    }
+    assert.equal(spy.listens(), 0, "the lease was never requested");
+    assert.equal(fs.existsSync(path.join(root, ".project", "metrics")), false);
+  });
+});
+
+test("the context expires after the TTL, and an attributed refresh keeps it alive", async () => {
+  await withRoot(async (root) => {
+    const spy = spyDeps();
+    const hour = 60 * 60 * 1000;
+    const start = Date.UTC(2026, 9, 19, 12);
+    await recordEvent(slash("build", ""), root, {}, spy.deps);
+    assert.ok(activeContext(readSnapshot(root), "sess-1", start + 6 * hour), "exactly at the TTL it is still live");
+    assert.equal(activeContext(readSnapshot(root), "sess-1", start + 6 * hour + 1), null, "one millisecond later it is not");
+    assert.equal(activeContext(readSnapshot(root), null, start), null);
+    spy.setNow(start + 5 * hour);
+    await recordEvent(slash("checkpoint", ""), root, {}, spy.deps);
+    assert.ok(activeContext(readSnapshot(root), "sess-1", start + 10 * hour), "checkpoint refreshed it");
+    spy.setNow(start + 20 * hour);
+    assert.equal((await recordEvent(slash("checkpoint", ""), root, {}, spy.deps)).written, false, "an expired pointer is not revived");
+    assert.equal((await recordEvent(slash("checkpoint", "", { session_id: "never-started" }), root, {}, spy.deps)).written, false, "checkpoint alone writes nothing");
+  });
+});
+
+test("the 33rd session evicts the least recently touched pointer", async () => {
+  await withRoot(async (root) => {
+    const spy = spyDeps();
+    for (let index = 1; index <= 32; index += 1) {
+      spy.setNow(Date.UTC(2026, 9, 19, 12) + index * 1000);
+      await recordEvent(slash("build", "", { session_id: `s-${index}` }), root, {}, spy.deps);
+    }
+    spy.setNow(Date.UTC(2026, 9, 19, 12) + 40000);
+    await recordEvent(slash("build", "", { session_id: "s-33" }), root, {}, spy.deps);
+    const contexts = readSnapshot(root).contexts;
+    assert.equal(Object.keys(contexts).length, 32);
+    assert.equal(contexts["s-1"], undefined, "the oldest was evicted");
+    assert.ok(contexts["s-33"] && contexts["s-2"]);
+  });
+});
+
+test("the phase-start hook prints nothing and exits 0 for valid, malformed, oversized and hostile input", async (t) => {
+  const root = metricsRoot(t);
+  const args = ["--vendor", "claude", "--event", "phase-start"];
+  const inputs: unknown[] = [slash("build", "x").raw, "{not json", "", { command_name: "build", command_args: "A".repeat(2 * 1024 * 1024), session_id: "s" }, { command_name: "__proto__", session_id: "s" }, [1, 2], { command_name: "build", command_args: { a: 1 }, session_id: "s" }];
+  for (const input of inputs) {
+    const result = cli(root, input, args);
+    assert.equal(result.status, 0);
+    assert.equal(result.stdout, "", "stdout would be added to the model's context");
+    assert.ok(!result.stderr.includes(root), result.stderr);
+  }
+});
+
+// ---- Flows, caps and transcript usage ----
+
+const leavesOf = (snapshot: Json): number => Object.values<Json>(snapshot.flows.pitches).reduce((sum: number, pitch: Json) => sum + Object.values<Json>(pitch.phases).reduce((inner: number, phase: Json) => inner + Object.values<Json>(phase.scopes).reduce((n: number, v: Json) => n + Object.keys(v).length, 0), 0), 0);
+const flowCompletions = (snapshot: Json): number => Object.values<Json>(snapshot.flows.pitches).reduce((sum: number, pitch: Json) => sum + Object.values<Json>(pitch.phases).reduce((inner: number, phase: Json) => inner + Object.values<Json>(phase.scopes).reduce((n: number, v: Json) => n + Object.values<Json>(v).reduce((c: number, row: Json) => c + row.completions, 0), 0), 0), 0);
+
+async function startPhase(root: string, deps: RuntimeDeps, name: string, args = "", session = "sess-1"): Promise<void> {
+  await recordEvent(slash(name, args, { session_id: session }), root, {}, deps);
+}
+const stop = (agent: string, extra: Json = {}, session = "sess-1"): CollectorInput => ({ vendor: "claude", event: "subagent-complete", raw: { session_id: session, agent_id: agent, agent_type: "Explore", ...extra } });
+
+test("a completion is stamped with the session's pitch, phase and scope, and an unknown session is unattributed", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "token-attribution");
+    const spy = spyDeps();
+    await startPhase(root, spy.deps, "build", "token-attribution S7");
+    await recordEvent(stop("a1"), root, {}, spy.deps);
+    await recordEvent(stop("a2", {}, "other-session"), root, {}, spy.deps);
+    const snapshot = readSnapshot(root);
+    assert.equal(snapshot.flows.pitches["token-attribution"].phases.build.scopes.S7.claude.completions, 1);
+    assert.equal(snapshot.flows.pitches["(unattributed)"].phases["(unattributed)"].scopes["(none)"].claude.completions, 1);
+    assert.deepEqual(snapshot.previous.flow, { applied: true, pitch: "token-attribution", phase: "build", scope: "S7" });
+    assert.equal(flowCompletions(snapshot), snapshot.lifetime.agentCompletions);
+  });
+});
+
+test("an upgrade reuses the stored routing even if the context moved to another phase in between", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "p1");
+    const spy = spyDeps();
+    await startPhase(root, spy.deps, "plan", "p1");
+    await recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "sess-1", agent_id: "a1", agent_type: "Explore" } }, root, {}, spy.deps);
+    await startPhase(root, spy.deps, "build", "p1");
+    await recordEvent({ vendor: "claude", event: "agent-result", metricScope: "final_request", raw: { session_id: "sess-1", tool_use_id: "tu-1", tool_input: { subagent_type: "Explore" }, usage: { input_tokens: 9, output_tokens: 6 } } }, root, {}, spy.deps);
+    const snapshot = readSnapshot(root);
+    assert.equal(snapshot.lifetime.agentCompletions, 1);
+    assert.equal(snapshot.flows.pitches.p1.phases.plan.scopes["(none)"].claude.tokens, 15, "the upgraded record stayed under plan");
+    assert.equal(snapshot.flows.pitches.p1.phases.build, undefined);
+  });
+});
+
+test("applying then reversing a record restores flows, an underflow throws, and a record without flow.applied is skipped", () => {
+  const snapshot = blankSnapshot();
+  const start = JSON.stringify(snapshot.flows);
+  const record = normalizedEvent({ vendor: "claude", event: "subagent-complete", agentId: "a", raw: { session_id: "s", usage: { input_tokens: 4, output_tokens: 1 } } }, "/nowhere");
+  applyToSnapshot(snapshot, record, 1, { pitch: "p", phase: "build", scope: "S1" });
+  assert.equal(snapshot.flows.pitches.p.phases.build.scopes.S1.claude.tokens, 5);
+  applyToSnapshot(snapshot, record, -1);
+  assert.equal(JSON.stringify({ ...snapshot.flows, pitches: snapshot.flows.pitches }).replace(/"since":[^,]*,/, ""), start.replace(/"since":[^,]*,/, ""));
+  assert.throws(() => applyToSnapshot(snapshot, record, -1), /underflow/, "no clamping");
+  const old = normalizedEvent({ vendor: "claude", event: "subagent-complete", agentId: "b", raw: { session_id: "s" } }, "/nowhere");
+  applyToSnapshot(snapshot, old, 1);
+  assert.equal(old.flow, undefined, "no intent and no stored routing: nothing is added to flows");
+  assert.doesNotThrow(() => applyToSnapshot(snapshot, old, -1));
+});
+
+test("caps: the 51st pitch gets a row, totals are kept by folding into (other), and the reversal of current still resolves", () => {
+  const snapshot = blankSnapshot();
+  const records = [];
+  for (let index = 0; index < 60; index += 1) {
+    const record = normalizedEvent({ vendor: "claude", event: "subagent-complete", agentId: `a${index}`, raw: { session_id: "s", usage: { input_tokens: 1, output_tokens: 1 } } }, "/nowhere");
+    record.recordedAt = new Date(Date.UTC(2026, 9, 19, 12, 0, index)).toISOString();
+    snapshot.previous = snapshot.current;
+    snapshot.current = record;
+    applyToSnapshot(snapshot, record, 1, { pitch: `pitch-${index}`, phase: "build", scope: "S1" });
+    records.push(record);
+  }
+  const names = Object.keys(snapshot.flows.pitches);
+  assert.ok(names.includes("pitch-59"), "the newest pitch has its own row");
+  assert.ok(names.includes("(other)"));
+  assert.ok(names.filter((name) => name !== "(other)").length <= 50);
+  assert.equal(flowCompletions(snapshot as Json), 60, "the sum of all flow leaves equals the completions recorded");
+  assert.doesNotThrow(() => applyToSnapshot(snapshot, snapshot.current as CompletionRecord, -1), "current still resolves after folds");
+});
+
+test("with every cap filled the serialized snapshot stays far below the file cap", () => {
+  const snapshot = blankSnapshot();
+  let index = 0;
+  for (let pitch = 0; pitch < 70; pitch += 1) {
+    for (const phase of ["shape", "plan", "build", "audit", "ship"]) {
+      for (let scope = 1; scope <= 30; scope += 1) {
+        const record = normalizedEvent({ vendor: index % 2 ? "claude" : "opencode", event: "message.completed", idempotencyKey: `k${index}`, raw: { session_id: "s", tokens: { input: 1, output: 1 } } }, "/nowhere");
+        record.recordedAt = new Date(Date.UTC(2026, 9, 19, 12) + index * 1000).toISOString();
+        snapshot.previous = snapshot.current;
+        snapshot.current = record;
+        applyToSnapshot(snapshot, record, 1, { pitch: `pitch-${pitch}`, phase, scope: `S${scope}` });
+        index += 1;
+      }
+    }
+  }
+  assert.ok(leavesOf(snapshot as Json) <= 700, `leaves ${leavesOf(snapshot as Json)}`);
+  assert.equal(flowCompletions(snapshot as Json), index, "totals are kept through every fold");
+  assert.ok(JSON.stringify(snapshot).length < 2 * 1024 * 1024, "well below the 4 MiB file cap");
+});
+
+// -- transcript usage --
+
+const asst = (id: string, output = 5, extra: Json = {}): string => `${JSON.stringify({ type: "assistant", message: { id, model: "claude-sonnet-5-5", role: "assistant", content: [{ type: "text", text: "TRANSCRIPT-TEXT-MARKER" }], usage: { input_tokens: 10, cache_creation_input_tokens: 2, cache_read_input_tokens: 3, output_tokens: output, ...extra } }, toolUseResult: "TRANSCRIPT-TEXT-MARKER" })}\n`;
+interface Claude { root: string; home: string; deps: RuntimeDeps; transcript: string; snapshot: () => Json }
+function claude(t: TestContext): Claude {
+  const root = metricsRoot(t);
+  const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), "claude-home-")));
+  t.after(() => fs.rmSync(home, { recursive: true, force: true }));
+  const projects = path.join(home, ".claude", "projects", "s", "subagents");
+  fs.mkdirSync(projects, { recursive: true });
+  const spy = spyDeps();
+  const deps: RuntimeDeps = { ...createTestDeps({ HOME: home, CLAUDE_CONFIG_DIR: undefined }), clock: spy.deps.clock, net: spy.deps.net };
+  return { root, home, deps, transcript: path.join(projects, "agent-1.jsonl"), snapshot: () => readSnap(root) };
+}
+const withTranscript = (c: Claude, agent: string, file = c.transcript): CollectorInput => stop(agent, { agent_transcript_path: file });
+
+test("a SubagentStop counts the agent's transcript usage as a reported agent total, unpriced", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, asst("m1", 5) + asst("m1", 9) + asst("m2", 4));
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  const snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.agentCompletions, 1);
+  assert.equal(snapshot.lifetime.tokens.input, 20);
+  assert.equal(snapshot.lifetime.tokens.output, 13, "the last line of a repeated message id wins");
+  assert.equal(snapshot.lifetime.tokens.cacheRead, 6);
+  assert.equal(snapshot.lifetime.tokens.cacheWrite, 4);
+  assert.equal(snapshot.current.metricScope, "agent_total");
+  assert.equal(snapshot.current.availability, "reported");
+  assert.equal(snapshot.current.costUsd, null);
+  assert.equal(snapshot.current.model, "claude-sonnet-5-5");
+  const keys = Object.keys(snapshot.transcripts);
+  assert.equal(keys.length, 1);
+  assert.match(keys[0], /^[0-9a-f]{64}$/, "keyed by a hash of the real path, never the path");
+});
+
+test("a repeated SubagentStop counts tokens once, with or without an agent id", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, asst("m1") + asst("m2"));
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  await recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "sess-1", agent_type: "Explore", agent_transcript_path: c.transcript } }, c.root, {}, c.deps);
+  await recordEvent({ vendor: "claude", event: "subagent-complete", raw: { session_id: "sess-1", agent_type: "Explore", agent_transcript_path: c.transcript } }, c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 20, "each message was counted once");
+});
+
+test("a partial trailing line is counted only once a later event reads it complete; a shorter file never double counts", async (t) => {
+  const c = claude(t);
+  const partial = asst("m2").trimEnd();
+  fs.writeFileSync(c.transcript, asst("m1") + partial);
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 10);
+  fs.appendFileSync(c.transcript, "\n");
+  await recordEvent(withTranscript(c, "a2"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 20);
+  fs.writeFileSync(c.transcript, asst("m1") + asst("m2") + asst("m3").slice(0, 10));
+  await recordEvent(withTranscript(c, "a3"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 20, "m1 and m2 are in the id window");
+});
+
+test("a failed snapshot write leaves the offset and totals unchanged, and the next event counts each message once", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, asst("m1") + asst("m2"));
+  await recordEvent(withTranscript(c, "seed"), c.root, {}, c.deps);
+  fs.appendFileSync(c.transcript, asst("m3"));
+  const before = fs.readFileSync(snapshotFile(c.root), "utf8");
+  let armed = true;
+  const failing: RuntimeDeps = { ...c.deps, fs: { ...c.deps.fs, renameSync: (from: string, to: string) => { if (armed && to.endsWith("token-consumption.json")) { armed = false; throw new Error("disk"); } c.deps.fs.renameSync(from, to); } } };
+  await assert.rejects(() => recordEvent(withTranscript(c, "a2"), c.root, {}, failing));
+  assert.equal(fs.readFileSync(snapshotFile(c.root), "utf8"), before);
+  await recordEvent(withTranscript(c, "a2"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 30, "m3 counted exactly once");
+});
+
+test("two events interleaved on one transcript count each message once", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, asst("m1") + asst("m2"));
+  await Promise.all([recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps), recordEvent(withTranscript(c, "a2"), c.root, {}, c.deps)]);
+  const snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.tokens.input, 20);
+  assert.equal(snapshot.lifetime.agentCompletions, 2);
+});
+
+test("a foreground agent-result after a SubagentStop reported from its transcript is absorbed, and fills a missing model", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, `${JSON.stringify({ message: { id: "m1", usage: { input_tokens: 10, output_tokens: 5 } } })}\n`);
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().current.model, null);
+  await recordEvent({ vendor: "claude", event: "agent-result", metricScope: "final_request", raw: { session_id: "sess-1", tool_use_id: "tu-9", model: "claude-opus-5-5", tool_input: { subagent_type: "Explore" }, usage: { input_tokens: 99, output_tokens: 99 } } }, c.root, {}, c.deps);
+  const snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.agentCompletions, 1);
+  assert.equal(snapshot.lifetime.tokens.total, 15, "transcript totals stay");
+  assert.equal(snapshot.current.model, "claude-opus-5-5");
+  assert.equal(snapshot.dimensions.models.claude["claude-opus-5-5"].completions, 1);
+  assert.equal(flowCompletions(snapshot), 1);
+});
+
+test("a main-session Stop counts new transcript usage once per turn, and degrades to unavailable without a path", async (t) => {
+  const c = claude(t);
+  const main = path.join(c.home, ".claude", "projects", "s", "main.jsonl");
+  fs.writeFileSync(main, asst("t1") + asst("t2"));
+  const turn: CollectorInput = { vendor: "claude", event: "session-turn", raw: { session_id: "sess-1", transcript_path: main } };
+  await recordEvent(turn, c.root, {}, c.deps);
+  let snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.agentCompletions, 1);
+  assert.equal(snapshot.current.agentType, "primary");
+  assert.equal(snapshot.lifetime.tokens.input, 10, "the newest group waits until the file is final or another id follows");
+  await recordEvent(turn, c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.agentCompletions, 1, "no new usage: no empty completion");
+  fs.appendFileSync(main, asst("t3"));
+  await recordEvent(turn, c.root, {}, c.deps);
+  snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.agentCompletions, 2);
+  assert.equal(snapshot.lifetime.tokens.input, 20);
+  await recordEvent({ vendor: "claude", event: "session-turn", raw: { session_id: "sess-1" } }, c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.unavailableCount, 1, "no transcript_path: counted as an unavailable completion");
+});
+
+test("a refused transcript still counts the completion as unavailable, writes no cursor, and touches nothing outside the metrics directory", async (t) => {
+  const c = claude(t);
+  const outside = fs.mkdtempSync(path.join(os.tmpdir(), "tx-outside-"));
+  t.after(() => fs.rmSync(outside, { recursive: true, force: true }));
+  fs.writeFileSync(path.join(outside, "o.jsonl"), asst("o1"));
+  fs.symlinkSync(path.join(outside, "o.jsonl"), path.join(path.dirname(c.transcript), "link.jsonl"));
+  const fifo = path.join(path.dirname(c.transcript), "pipe.jsonl");
+  assert.equal(spawnSync("mkfifo", [fifo]).status, 0);
+  const before = fs.readdirSync(outside);
+  for (const file of [path.join(path.dirname(c.transcript), "link.jsonl"), path.join(outside, "o.jsonl"), fifo, path.join(path.dirname(c.transcript), "missing.jsonl")]) {
+    await recordEvent(withTranscript(c, `a-${path.basename(file)}`, file), c.root, {}, c.deps);
+  }
+  const snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.agentCompletions, 4);
+  assert.equal(snapshot.lifetime.unavailableCount, 4);
+  assert.deepEqual(snapshot.transcripts, {});
+  assert.deepEqual(fs.readdirSync(outside), before);
+});
+
+test("transcript text never reaches a metrics file, an id block or stderr", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, asst("m1") + asst("m2"));
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  const ran = spawnSync(process.execPath, [...RUNTIME_FLAGS, COLLECTOR, "--vendor", "claude", "--event", "subagent-complete", "--root", c.root], { input: JSON.stringify(withTranscript(c, "a9").raw), encoding: "utf8", env: { ...process.env, HOME: c.home, CLAUDE_CONFIG_DIR: "" } });
+  assert.equal(ran.status, 0);
+  assert.doesNotMatch(ran.stderr, /TRANSCRIPT-TEXT-MARKER/);
+  const directory = path.join(c.root, ".project", "metrics");
+  for (const name of fs.readdirSync(directory)) {
+    if (fs.lstatSync(path.join(directory, name)).isFile()) assert.doesNotMatch(fs.readFileSync(path.join(directory, name), "utf8"), /TRANSCRIPT-TEXT-MARKER|\/claude-home-/, name);
+  }
+});
+
+test("reader values are re-validated at the write point", () => {
+  const messages = [{ input: 1.5, output: -1, cacheRead: 2e12, cacheWrite: null }, { input: 3, output: 4, cacheRead: null, cacheWrite: 5 }];
+  assert.deepEqual(transcriptTokens([messages[0]]), { input: null, output: null, reasoning: null, cacheRead: null, cacheWrite: null, total: null });
+  const mixed = transcriptTokens(messages);
+  assert.equal(mixed.input, 3);
+  assert.equal(mixed.output, 4);
+  assert.equal(mixed.total, 7);
+});
+
+test("a replay of the same completion identity keeps its stored routing after the context moved", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "p1");
+    const spy = spyDeps();
+    const turn = (tokens: number): CollectorInput => ({ vendor: "claude", event: "agent-complete", raw: { session_id: "sess-1", turn_id: "t1", usage: { input_tokens: tokens } } });
+    await startPhase(root, spy.deps, "plan", "p1");
+    await recordEvent(turn(1), root, {}, spy.deps);
+    await startPhase(root, spy.deps, "build", "p1");
+    await recordEvent(turn(5), root, {}, spy.deps);
+    const snapshot = readSnapshot(root);
+    assert.equal(snapshot.lifetime.agentCompletions, 1, "the replay replaced the first record");
+    assert.equal(snapshot.flows.pitches.p1.phases.plan.scopes["(none)"].claude.tokens, 5);
+    assert.equal(snapshot.flows.pitches.p1.phases.build, undefined);
+  });
+});
+
+test("a transcript path over the length cap is ignored: the completion is unavailable and no cursor is written", async (t) => {
+  const c = claude(t);
+  const long = path.join(path.dirname(c.transcript), "a".repeat(4100));
+  await recordEvent(withTranscript(c, "a1", long), c.root, {}, c.deps);
+  const snapshot = c.snapshot();
+  assert.equal(snapshot.lifetime.unavailableCount, 1);
+  assert.deepEqual(snapshot.transcripts, {});
+});
+
+test("at most 200 transcript cursors are kept, the least recently used going first", async (t) => {
+  const c = claude(t);
+  const dir = path.dirname(c.transcript);
+  for (let index = 0; index < 202; index += 1) {
+    const file = path.join(dir, `agent-${index}.jsonl`);
+    fs.writeFileSync(file, asst(`m${index}`));
+    await recordEvent(withTranscript(c, `a${index}`, file), c.root, {}, c.deps);
+  }
+  const keys = Object.keys(c.snapshot().transcripts);
+  assert.equal(keys.length, 200);
+});
+
+test("a transcript rewritten shorter on the same inode counts its new messages under the lease", async (t) => {
+  const c = claude(t);
+  fs.writeFileSync(c.transcript, asst("m1") + asst("m2") + asst("m3"));
+  await recordEvent(withTranscript(c, "a1"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 30);
+  fs.writeFileSync(c.transcript, asst("m9"));
+  await recordEvent(withTranscript(c, "a2"), c.root, {}, c.deps);
+  assert.equal(c.snapshot().lifetime.tokens.input, 40, "m9 counted once; the old ids are not counted again");
 });

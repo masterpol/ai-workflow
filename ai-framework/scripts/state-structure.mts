@@ -15,7 +15,7 @@ export interface Fact<T = unknown> { value: T; status: string; evidence: string[
 export interface StructureHelpers {
   scrub: (text: unknown) => string;
   /** Size-bounded, symlink-refusing text reader (state-snapshot's readMarkdown). */
-  readMarkdown: (root: string, relative: string) => { text?: string; missing?: boolean; error?: string };
+  readMarkdown: (root: string, relative: string) => { text?: string; missing?: boolean; error?: string; truncated?: boolean };
 }
 
 export const MAX_DEPTH = 3;
@@ -24,6 +24,11 @@ const MAX_VISITED = 5000;
 const MAX_DECISION_FILES = 100;
 const MAX_FOLDERS_PER_DECISION = 3;
 const DECISION_DIRS = [".project/knowledge/decisions", ".project/design/decisions"];
+const REPO_SHAPE_WORKSPACE_ROOTS = ["packages", "apps", "libs", "services", "modules"];
+const REPO_SHAPE_MANIFESTS = ["package.json", "Cargo.toml", "go.mod", "pyproject.toml"];
+const REPO_SHAPE_STRONG_FILES = ["pnpm-workspace.yaml", "lerna.json"];
+const MAX_ENTRY_POINTS = 10;
+const ENTRY_PATH = /^[A-Za-z0-9._@+/-]{1,300}$/;
 
 // Dependency, VCS, cache and build-output directories carry no project structure.
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", "out", ".next", ".nuxt", ".svelte-kit", ".turbo", ".cache", "coverage", "target", ".gradle", "Pods", "DerivedData", "__pycache__", ".venv", "venv", "vendor", ".idea"]);
@@ -80,6 +85,68 @@ function bindStateStructure(deps: RuntimeDeps) {
     add("mobile", dirs(["ios", "android"]));
     add("ai-prompts", dirs(["lib/ai/prompts"]));
     return found;
+  }
+
+  function hasNonemptyWorkspaces(value: unknown): boolean {
+    if (!value || typeof value !== "object") return false;
+    const workspaces = (value as { workspaces?: unknown }).workspaces;
+    if (Array.isArray(workspaces) && workspaces.length > 0 && workspaces.every((item) => typeof item === "string")) return true;
+    if (workspaces && typeof workspaces === "object" && !Array.isArray(workspaces)) {
+      const packages = (workspaces as { packages?: unknown }).packages;
+      if (Array.isArray(packages) && packages.length > 0 && packages.every((item) => typeof item === "string")) return true;
+    }
+    return false;
+  }
+
+  function detectRepoShape(root: string, helpers: StructureHelpers): Fact<"monorepo" | "single"> {
+    const { scrub, readMarkdown } = helpers;
+    const evidence: string[] = [];
+    for (const name of REPO_SHAPE_STRONG_FILES) if (realFile(root, name)) evidence.push(name);
+    const pkg = readMarkdown(root, "package.json");
+    let pkgProblem: string | undefined;
+    if (pkg.error === "too large to read" || pkg.truncated) {
+      pkgProblem = "package.json exceeds the 64 KB read limit";
+    } else if (pkg.text !== undefined) {
+      try {
+        if (hasNonemptyWorkspaces(JSON.parse(pkg.text))) evidence.push("package.json");
+      } catch { pkgProblem = "package.json is not valid JSON"; }
+    }
+    if (evidence.length > 0) {
+      return { value: "monorepo", status: "observed", evidence: evidence.slice(0, 6), note: "strong workspace signal at the project root" };
+    }
+
+    const siblings: string[] = [];
+    // Two manifests already decide the shape, so stop listing then; the per-directory cap bounds a huge workspace root.
+    for (const dir of REPO_SHAPE_WORKSPACE_ROOTS) {
+      if (siblings.length >= 2) break;
+      if (!realDir(root, dir)) continue;
+      for (const entry of fs.readdirEntriesSync(path.join(root, dir)).slice(0, 200)) {
+        if (siblings.length >= 2) break;
+        if (entry.isSymbolicLink() || !entry.isDirectory()) continue;
+        const child = entry.name;
+        if (isSecretName(child) || scrub(child) !== child) continue;
+        const childRel = `${dir}/${child}`;
+        if (!realDir(root, childRel)) continue;
+        for (const manifest of REPO_SHAPE_MANIFESTS) {
+          if (realFile(root, `${childRel}/${manifest}`)) { siblings.push(`${childRel}/${manifest}`); break; }
+        }
+      }
+    }
+    if (siblings.length >= 2) {
+      return { value: "monorepo", status: "observed", evidence: siblings.slice(0, 6), note: "multiple child manifests under workspace roots" };
+    }
+
+    for (const name of ["turbo.json", "nx.json"]) if (realFile(root, name)) evidence.push(name);
+    if (evidence.length > 0) {
+      return { value: "single", status: "observed", evidence: evidence.slice(0, 6), note: "task-runner config without workspace signals" };
+    }
+
+    return {
+      value: "single",
+      status: "unconfigured",
+      evidence: [],
+      note: pkgProblem || (siblings.length === 1 ? "only one child manifest under workspace roots" : "no workspace signals found"),
+    };
   }
 
   function roleFor(relative: string, types: string[]): string {
@@ -156,7 +223,7 @@ function bindStateStructure(deps: RuntimeDeps) {
     return out;
   }
 
-  /** Builds `structure`: { projectType, detectedTypes, limits, tree, decisions }, each a fact or an array of facts. */
+  /** Builds `structure`: { projectType, detectedTypes, repoShape, limits, tree, decisions }, each a fact or an array of facts. */
   function scanStructure(root: string, helpers: StructureHelpers) {
     const { scrub } = helpers;
     const detected = detect(root);
@@ -166,14 +233,39 @@ function bindStateStructure(deps: RuntimeDeps) {
       : { value: types.length === 1 ? types[0] : "mixed", status: "observed", evidence: detected.flatMap((item) => item.evidence).map(scrub).slice(0, 12), ...(types.length > 1 ? { note: `detected: ${types.join(", ")}` } : {}) };
     const { tree, truncated } = scanTree(root, types, scrub);
     const detectedTypes: Fact<string[]> = { value: types, status: types.length ? "observed" : "unconfigured", evidence: projectType.evidence, note: "from directory and file names only; contents are never read" };
+    const repoShape = detectRepoShape(root, helpers);
     const limits: Fact<{ entries: number; truncated: boolean; maxDepth: number; maxEntries: number }> = { value: { entries: tree.length, truncated, maxDepth: MAX_DEPTH, maxEntries: MAX_ENTRIES }, status: truncated ? "stale" : "observed", evidence: [], note: truncated ? `scan stopped at the ${MAX_ENTRIES}-entry or ${MAX_VISITED}-visit limit; deeper folders are not listed` : `directories only, up to depth ${MAX_DEPTH}, skipping dependency, build and secret-shaped names` };
     let decisions: Array<Fact<{ path: string; id: string; title: string }>> | Fact<null>;
     try { decisions = mapDecisions(root, tree, helpers); } catch { decisions = { value: null, status: "unavailable", evidence: [], note: "decision records could not be read" }; }
     return {
-      projectType, detectedTypes, limits,
+      projectType, detectedTypes, repoShape, limits,
       tree: tree.map((item): Fact<typeof item> => ({ value: item, status: "observed", evidence: [item.path] })),
       decisions,
     };
+  }
+
+  /** Entry points: `main` and `bin` paths of the root package.json that are safe relative paths to real files. */
+  function entryPoints(root: string, helpers: StructureHelpers): Fact<string[] | null> {
+    const unavailable = (note: string): Fact<null> => ({ value: null, status: "unavailable", evidence: [], note });
+    const pkg = helpers.readMarkdown(root, "package.json");
+    if (pkg.missing) return { value: null, status: "unconfigured", evidence: [], note: "no root package.json" };
+    if (pkg.error === "too large to read" || pkg.truncated) return unavailable("package.json exceeds the 64 KB read limit");
+    if (pkg.text === undefined) return unavailable("package.json could not be read");
+    let parsed: unknown;
+    try { parsed = JSON.parse(pkg.text); } catch { return unavailable("package.json is not valid JSON"); }
+    const manifest = parsed !== null && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {};
+    const bin = manifest.bin;
+    const candidates: unknown[] = [manifest.main, ...(typeof bin === "string" ? [bin] : bin !== null && typeof bin === "object" ? Object.keys(bin).slice(0, 50).map((key) => (bin as Record<string, unknown>)[key]) : [])];
+    const paths: string[] = [];
+    for (const candidate of candidates) {
+      if (typeof candidate !== "string") continue;
+      const relative = candidate.startsWith("./") ? candidate.slice(2) : candidate;
+      const parts = relative.split("/");
+      if (!ENTRY_PATH.test(relative) || parts.some((part) => part === "" || part === "." || part === ".." || isSecretName(part)) || helpers.scrub(relative) !== relative) continue;
+      if (realFile(root, relative) && !paths.includes(relative)) paths.push(relative);
+      if (paths.length >= MAX_ENTRY_POINTS) break;
+    }
+    return { value: paths, status: paths.length ? "observed" : "unconfigured", evidence: paths.length ? ["package.json", ...paths] : [], note: paths.length ? "main and bin paths from the root package.json that exist as files" : "no main or bin path resolves to a real file" };
   }
 
   /** Base skills: the bundle's own `.claude/skills` directory, keyed by skill id (directory names only). */
@@ -189,7 +281,7 @@ function bindStateStructure(deps: RuntimeDeps) {
     return ids.map((id) => ({ value: { id, enabled: true, phases: [], scope: "base" }, status: "observed", evidence: [`${dir}/${id}`], note: "present in the bundle skill directory; phases and enablement come from the bundle, not a registry" }));
   }
 
-  return { scanStructure, baseSkills, detect, realDir };
+  return { scanStructure, baseSkills, entryPoints, detect, realDir };
 }
 
 let nodeDeps: RuntimeDeps | undefined;
@@ -197,3 +289,4 @@ function defaultDeps(): RuntimeDeps { return (nodeDeps ??= createNodeDeps()); }
 export function createStateStructure(deps: RuntimeDeps): ReturnType<typeof bindStateStructure> { return bindStateStructure(deps); }
 export function scanStructure(root: string, helpers: StructureHelpers, deps: RuntimeDeps = defaultDeps()) { return createStateStructure(deps).scanStructure(root, helpers); }
 export function baseSkills(root: string, scrub: (text: unknown) => string, deps: RuntimeDeps = defaultDeps()) { return createStateStructure(deps).baseSkills(root, scrub); }
+export function entryPoints(root: string, helpers: StructureHelpers, deps: RuntimeDeps = defaultDeps()) { return createStateStructure(deps).entryPoints(root, helpers); }

@@ -1,0 +1,72 @@
+@toon-data 1
+slug: state-ai-authoring
+draft: true
+state: needs-decision
+ledgerHash: "sha256:8f2e7ce0133b09fde1b696e175a1797e7d30950aa9280a812804bea4a0a3bf76"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:7e7b326760ca1353767084c0c731c3e56cfde5e09c26b279a5ea7467522d1c97"
+mapping:
+  schemaVersion: 2
+  sections[27]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "SHIPPED.md#doc-updates",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#s1-preflight-2026-10-20",null,null,null,null,null
+    "deviations.md#s2-2026-10-20",null,null,null,null,null
+    "deviations.md#s3-2026-10-20",null,null,null,null,null
+    "deviations.md#s4-2026-10-20",null,null,null,null,null
+    "deviations.md#s5-2026-10-20",null,null,null,null,null
+    "deviations.md#s6-2026-10-20",null,null,null,null,null
+    "deviations.md#s7-2026-10-20",null,null,null,null,null
+    "deviations.md#s9-2026-10-20",null,null,null,null,null
+    "deviations.md#audit-cycle-1-2026-10-20",null,null,null,null,null
+    "log.md#s2-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s3-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s4-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s5-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s6-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s7-review-record-2026-10-20",null,null,null,null,null
+    "log.md#s7-third-round-2026-10-20",null,null,null,null,null
+    "log.md#s8-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s9-evidence-2026-10-20",null,null,null,null,null
+    "log.md#s10-evidence-2026-10-20",null,null,null,null,null
+    "log.md#audit-cycle-1-2026-10-20",null,null,null,null,null
+  otherFiles[0]:
+judgments[27]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#doc-updates",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#s1-preflight-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s2-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s3-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s4-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s5-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s6-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s7-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s9-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-cycle-1-2026-10-20",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "log.md#s2-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s4-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s5-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s6-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s7-review-record-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s7-third-round-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s8-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s9-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s10-evidence-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit-cycle-1-2026-10-20",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: state-ai-authoring\nshipped: 2026-10-20\nschemaVersion: 1\ndraft: true\n---\n# state-ai-authoring\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#state-ai-authoring","sha256:7e7b326760ca1353767084c0c731c3e56cfde5e09c26b279a5ea7467522d1c97","## state-ai-authoring — shipped 2026-10-20\n\n`/state` can carry short analysis written by the authoring model (bundle 2.37.0). `state-fragment-inject.mts` hashes the snapshot (a staleness hint), stamps a draft only after sanitizer and citation checks pass, and the renderer shows stamped fragments on four pages inside an \"AI analysis (proposed, not observed)\" box with evidence, model id and a stale notice. Failures are closed per slot; a rejected draft is never repaired and a stale fragment is never shown as current. No script calls a model or the network; writes stay inside `.project/reports/fragments/`; the retry cap and draft-age check are workflow aids, not security boundaries.\n\n**The live claim is `blocked`:** 51 of 72 blind-graded runs pass (Claude Code 21/24, Codex 20/24, OpenCode 10/24); `uncited-claim` fails everywhere because the fixture's knowledge fact has no evidence path. Accepted: a same-user process can race one by-path write or delete in `fragments/`.\n\nLessons: [[a-planted-canary-makes-a-reviewer-finding-checkable]], [[a-prose-example-in-a-model-instruction-is-followed-literally]], [[a-headless-cli-follows-pwd-not-the-process-cwd]]. Contract: `ai-framework/integrations/state-report.md`. Followups (small-model Step 3 hardening, fixture/rubric decision) are in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/state-ai-authoring.md"

@@ -2,13 +2,13 @@
 id: substring-hook-wiring-check-accepts-echoed-commands
 type: issue
 created: 2026-10-08
-updated: 2026-10-08
+updated: 2026-10-21
 tags: [validation, hooks, shell]
 related: [parse-untrusted-values-and-re-emit-them]
 source: codex-orca-coordinator-parity
 severity: low
 resolved: true
-confidence: low
+confidence: medium
 ---
 
 # Issue: Substring hook wiring check accepts echoed commands
@@ -18,3 +18,7 @@ The first Codex doctor check looked for Node flags, an adapter path and trusted-
 The fix recognizes the exact supported inline invocation or an anchored guarded Git assignment followed by the exact invocation. Echoes, comments and trailing shell commands fail; existing inline and installed guarded registrations pass. This is structural validation only; trusted host activation remains a separate unverified case.
 
 Evidence: workflow-doctor.mts checkCodexStartupWiring, its shell-text and installed-registration tests, codex-orca-coordinator-parity audit-cycle-2.md. The guard regression failed before the fix and passed after it under Node and Bun.
+
+## Additional evidence — 2026-10-21
+
+Capture S5 independently exercised this issue across eight registrations: exact command, matcher, type and timeout are checked per event; echoed/suffixed commands and duplicate groups fail. Its command-comparison mutant was killed by the echoed-command test.

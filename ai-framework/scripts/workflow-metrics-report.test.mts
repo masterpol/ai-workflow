@@ -79,7 +79,7 @@ test("shows attribution gaps without unknown model rankings, and treats native p
   assert.deepEqual(models.rows.map(row => row[1]), ["openai/gpt"]);
   assert.equal(report.health["Model attribution gaps (agent events)"], 2);
   assert.equal(report.activity["Ships (completed pitches)"], 1);
-  assert.equal(report.collection.automaticCapture, "unconfigured");
+  assert.equal(report.collection.automaticCapture, "observed");
   assert.match(report.tables.find(t => t.title === "Collection sources")!.note, /does not verify/);
 });
 
@@ -239,4 +239,52 @@ test("guards hostile persisted state through the actual CLI and labels stale rep
     const result = run("html"); assert.equal(result.status, 1); assert.doesNotMatch(result.stderr + result.stdout, /SECRET|evil\.example/);
     assert.equal(deps.fs.readFileSync(file), text); assert.equal(deps.fs.readFileSync(deps.path.join(directory, "workflow-usage.html")), view);
   }
+});
+
+const DAY = 86_400_000;
+const nativeAt = (deps: RuntimeDeps, daysAgo: number | null) => {
+  const state = scenario(deps);
+  state.sources.native.lastEventAt = daysAgo === null ? null : new Date(Date.parse(AT) - daysAgo * DAY).toISOString();
+  return state;
+};
+
+test("computes automatic capture from the last native event in every format", t => {
+  const { deps } = fixture(t);
+  for (const [daysAgo, status] of [[null, "unconfigured"], [6, "observed"], [8, "stale"]] as const) {
+    const outputs = createReports(nativeAt(deps, daysAgo), AT);
+    assert.equal(JSON.parse(outputs.json).collection.automaticCapture, status);
+    assert.match(outputs.markdown, new RegExp(`^Automatic capture: ${status}$`, "m"));
+    assert.match(outputs.html, new RegExp(`Automatic capture: <strong>${status}</strong>`));
+    for (const text of [outputs.markdown, outputs.html]) assert.match(text, new RegExp(`capture is ${status}`));
+  }
+  const exact = createReports(nativeAt(deps, 7), AT);
+  assert.equal(exact.report.collection.automaticCapture, "observed");
+  assert.equal(buildReport(null, AT).collection.automaticCapture, "unconfigured");
+});
+
+test("shows the time and flow start, the new health rows and the wait definition without new tables", t => {
+  const { deps } = fixture(t), state = scenario(deps), before = buildReport(state, AT).tables.map(table => table.title);
+  const outputs = createReports(state, AT);
+  assert.equal(outputs.report.collection.usageSince, AT);
+  assert.match(outputs.markdown, /^Time and flow counted since: 2026-10-08T12:00:00.000Z$/m);
+  assert.match(outputs.html, /Time and flow counted since: 2026-10-08T12:00:00.000Z/);
+  const names = ["Captures dropped before recording (at least)", "Pitches folded into overflow (least recently used)", "Time intervals clipped at the record cap", "Intervals with mixed clock sources", "Turns replaced by a new prompt", "Sessions evicted at the cap"];
+  for (const name of names) {
+    assert.equal(outputs.report.health[name], 0); assert.ok(outputs.markdown.includes(`| ${name} | 0 |`)); assert.ok(outputs.html.includes(`<th scope="row">${name}</th><td>0</td>`));
+  }
+  assert.ok(outputs.report.notes.some(note => /elapsed between turns, not necessarily think-time/.test(note)));
+  assert.deepEqual(before, outputs.report.tables.map(table => table.title)); assert.equal(outputs.report.schemaVersion, 1);
+  assert.equal(outputs.report.tables.some(table => /active|wait/i.test(table.title)), false);
+});
+
+test("a v1 state read for a report is not yet counting and its file is untouched", async t => {
+  const { deps, root, directory, file } = fixture(t), lease: RuntimeDeps = { ...deps, net: { ...deps.net, tryListen: async () => ({ server: { close: async () => {} } }) } };
+  const { usage: _usage, ...legacy } = scenario(deps);
+  const text = `${JSON.stringify({ ...legacy, schemaVersion: 1 })}\n`;
+  deps.fs.writeFileSync(file, text);
+  const result = await generateReport(root, "markdown", lease);
+  assert.equal(result.written, true);
+  assert.match(result.output!, /^Time and flow counted since: not yet counting \(state predates schema 2\)$/m);
+  assert.equal(deps.fs.readFileSync(file), text); void directory;
+  assert.match((await generateReport(root, "json", lease)).output!, /"usageSince": null/);
 });

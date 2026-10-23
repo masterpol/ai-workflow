@@ -1,0 +1,553 @@
+{
+  "schemaVersion": 2,
+  "slug": "token-time-report",
+  "sections": [
+    {
+      "source": "SHIPPED.md#result",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#what-shipped",
+      "helps": "Retains joined-report commands, exact identities, one-sided rows and unavailable semantics.",
+      "bodyHash": "sha256:853669f4a7360cd65f599a0bb1b97c46e9ddec5e947565725ab36cc08797794b"
+    },
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#what-shipped",
+      "helps": "Preserves S1–S3 outcomes and authorized review-bench repairs.",
+      "bodyHash": "sha256:0a10685a9bc427968f1ee7d790b3ef9e8ea1a2131ef38fc4d4fb56dca91a791a"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "Preserves final Node/Bun, coverage and validator results plus wrapper failure and N/A checks.",
+      "bodyHash": "sha256:d8ffe735cd0efcbf1a6a4349127b980785eb913060e67b9c3eb837ec7e1983ff"
+    },
+    {
+      "source": "SHIPPED.md#audit-and-evidence-boundaries",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Keeps incomplete reports, citation corrections, discarded mutants and independence limits.",
+      "bodyHash": "sha256:8d5ef4c6069078044299938c95edb6d202318d98831601e82604a3d9c58abcf1"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-and-rabbit-holes",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#standing-constraints",
+      "helps": "Retains exclusions, separate-window limits, per-file publication and filesystem race.",
+      "bodyHash": "sha256:051d23b9637feb4c07f23a8e6edf24d11638c60d83b30362de03c622ce639927"
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-follow-ups",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#lessons-and-open-items",
+      "helps": "Preserves extracted lessons, TTR-A1–A4 and unmeasured browser limits.",
+      "bodyHash": "sha256:f1862ead29de227edac62b09b70c594f5e6a9115dbecf32fd86305f58058106a"
+    },
+    {
+      "source": "SHIPPED.md#documents-and-recovery",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#release-and-recovery-records",
+      "helps": "Records contract ownership, preparation snapshots, evidence archive and cooldown state.",
+      "bodyHash": "sha256:611b78b356d44209a090e323b68a3d7a989793339359c4964408034228e292cf"
+    },
+    {
+      "source": "SHIPPED.md#final-closure",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#release-and-recovery-records",
+      "helps": "Records owner-approved local closure without commit, push or human-terminal cleanup.",
+      "bodyHash": "sha256:27e21b1b498a2b5bc9b6476485fae1829a44fb7df6917d8a13d54a359da37941"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#standing-constraints",
+      "helps": "Keeps no collector/schema/backfill/transcript/estimate scope and no implicit state generation.",
+      "bodyHash": "sha256:3be8e5e0221d0cd28cff8308fc5cc9ff75a8b588c981c32f8dfdef5a036f4b1a"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#design-decisions",
+      "helps": "Keeps guarded-reader reuse, identity pins, cap folds and deferred comparable-window work.",
+      "bodyHash": "sha256:6f2896aee56deadccfcaf650ce0f22cc422e29a6425d2fb0669eacf25fdb37c6"
+    },
+    {
+      "source": "deviations.md#s1-2026-10-21",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#design-decisions",
+      "helps": "Preserves asymmetric 52/18 usage versus 51/16 token bounds and measured S1 expansion.",
+      "bodyHash": "sha256:fdedff981daea73605ce5edd0437b53e52c4c2b3f7459a1a473dc8237788995c"
+    },
+    {
+      "source": "deviations.md#s2-2026-10-21",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#design-decisions",
+      "helps": "Preserves mutually exclusive preview/apply, static UX exception and unchanged appetite.",
+      "bodyHash": "sha256:6939f62822808185dd6a85a00b8c72345225063a8ebd267081ec7507f62749b9"
+    },
+    {
+      "source": "deviations.md#s3-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "Retains timing failure, identical retry and 67-line S3 delta.",
+      "bodyHash": "sha256:53a78e0828c4558666001fa530ce3f52620b0233c8f12ad1fa5aefe808e910d8"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Keeps confirmed fixes, refuted trace leak, incomplete rule reads and failed full run.",
+      "bodyHash": "sha256:e0289a708a875bc378476d1fea23390db9df000e0c94a154e34cab176f9ecbf2"
+    },
+    {
+      "source": "deviations.md#audit-recovery-closeout-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Keeps guard exclusions, deferred tools, redundant mtime and incomplete-review boundaries.",
+      "bodyHash": "sha256:34b1a1314ede286626250bc122db292b28c71c80cb9934fba6a07a35ac124959"
+    },
+    {
+      "source": "deviations.md#cohesive-module-size-exception-audit-addendum-2026-10-21",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#cohesive-module-exceptions",
+      "helps": "Preserves named module sizes, cohesion rationale and rejected mechanical extraction.",
+      "bodyHash": "sha256:83534d4da71a8a70773e7d9396196706338306412b26e4fe02dac468a40e6c1c"
+    },
+    {
+      "source": "log.md#s1-started-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Records separate build authorization, bounded worker ownership and 78-test baseline.",
+      "bodyHash": "sha256:bf2f681d5aebd9898060dc8187a1721bc3134ec40818097c652c171aaf5fc8d0"
+    },
+    {
+      "source": "log.md#s1-preliminary-review",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Keeps history privacy/availability symptoms and pre-completion worker correction.",
+      "bodyHash": "sha256:b51bba5444f5ae774af351199590d632a28a4b48b4c81723794d9a598d8ad30b"
+    },
+    {
+      "source": "log.md#s1-independent-review-resolved",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Retains coordinator fixes, independent fixtures and 26-test Node/Bun reruns.",
+      "bodyHash": "sha256:580b85418078fc3aa42f0d5d6c4affdc67865ee7e48f79b07ad19187388a2f88"
+    },
+    {
+      "source": "log.md#s2-started-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Records serialized ownership transfer, 631-line allowance and unchanged oracle input hashes.",
+      "bodyHash": "sha256:886979dbf0e7881506af1f26d233d77a8b5e7f364d3ffb483439ef9004a013d2"
+    },
+    {
+      "source": "log.md#s2-review-and-verification-resolved",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Preserves reproduced outside deletion and corrected stage cleanup/accounting.",
+      "bodyHash": "sha256:09a83d02f4a132a8fc7cdf58fa854d5e0eaa96312e16901cc5b0d917b432063b"
+    },
+    {
+      "source": "log.md#s3-started-2026-10-21-local-date",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#what-shipped",
+      "helps": "Keeps safe fixed state link, no refresh and delayed release metadata.",
+      "bodyHash": "sha256:d061f1302b5051d4c6d08a7bae41bd056746b063c8e5ceb5a939c503f6ca9c67"
+    },
+    {
+      "source": "log.md#s3-full-suite-attempt-1-timing-bound-failure",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "Preserves 1030.85225 ms failure against 1000 ms and unchanged assertions.",
+      "bodyHash": "sha256:41b6d2e14a374ec044fb95ed44b676de3203a1d9ff813dade23682af6ec9a673"
+    },
+    {
+      "source": "log.md#s3-full-suite-failure-resolved-without-code-changes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "Retains isolated 154 pass and identical full retry after graph work finished.",
+      "bodyHash": "sha256:f4bf5f68d9b5da871754a909d7301e52620052628c3826972ce4f62d215683b6"
+    },
+    {
+      "source": "log.md#audit-started-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Keeps five applicable roles, i18n/eval N/A and scratch independence criteria.",
+      "bodyHash": "sha256:af9db7182cd9e03362b71d599153a20d03b60080b42595914402e6824c2c7e1f"
+    },
+    {
+      "source": "log.md#audit-launch-refused-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Retains invalid-authorizedPaths refusal and snapshot-reader mismatch before any launch.",
+      "bodyHash": "sha256:2c8c0805f49cb1b68ebd615dbc000b2853421d275f4496b437262e18f6656378"
+    },
+    {
+      "source": "log.md#orca-recovery-authorized-2026-10-21",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Preserves explicit repair authorization and separate 16 MiB snapshot bound.",
+      "bodyHash": "sha256:8711ae3c054f75934dce50c9b1ce1df095f38ffad5bc3b66edb644230fa128d8"
+    },
+    {
+      "source": "log.md#audit-cycle-1-synthesis-and-limited-retry",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Keeps five completions, scratch-only defects, live fixes and narrowed retries.",
+      "bodyHash": "sha256:74a6e0fb14dcbaaced4dd76d4936800226c81f144e5bcf5652a7249e52132a48"
+    },
+    {
+      "source": "log.md#orca-repair-verified-audit-remains-open",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Retains nine settled attempts, human-owned terminal and missing independent evidence.",
+      "bodyHash": "sha256:501dab4091d5375a39798451289b2d5a53b066a10db9d77bff31e5d5bf40da59"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-explicitly-approved-2026-10-21",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Preserves owner-authorized extra pass beyond automatic retry limit, without source changes.",
+      "bodyHash": "sha256:2e18c52ab20bee9b72b8ca06ac65104b36b3ac8a0ae08319afe709e6c2884885"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-completed-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Retains four fresh bounded checks, M1–M5 closure and misnumbered citations.",
+      "bodyHash": "sha256:1fcf219fe6cbeef30f6f96a60c5a7a7da66bd1453b37f24d10f0625c405f554b"
+    },
+    {
+      "source": "log.md#direct-ship-gauntlet-explicitly-approved-2026-10-21",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "Keeps separate approval for direct package-less verification and failed-wrapper disclosure.",
+      "bodyHash": "sha256:df36ff8f978beb7fa440ca15c7e81501596d8e00bbcb569a1f8bbfe3ad876e37"
+    },
+    {
+      "source": "log.md#release-ready-for-final-gate-2026-10-21",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#release-and-recovery-records",
+      "helps": "Preserves 1489 lines/13 files, release date, graph and 218-member evidence archive.",
+      "bodyHash": "sha256:c738c15d50cfc550eba21dd6f8422652b1aeee36e0d5de4894bc166c6f292d29"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-22t020106348z",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#release-and-recovery-records",
+      "helps": "Keeps final hash checks, explicit local closure and untouched historical evidence.",
+      "bodyHash": "sha256:2aa595246d6a546d96bb95812e8fa724a14146ed53a1a165c20cf298d416072d"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "S1-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "S1 independent oracles, 26/26 Node/Bun and coverage details.",
+      "hash": "sha256:deb4fc8ac1b40d0bcaa580b5ef540ed0f5c7d1f9af6e13aad96c4a0784bb42c8"
+    },
+    {
+      "path": "S2-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "S2 swaps, ownership, 41/41 Node/Bun, publication and static UX limits.",
+      "hash": "sha256:7a1a5fdfa21d39dfb7e8ca61bab863f4d93ee01790bb4867bfde702305a63e9a"
+    },
+    {
+      "path": "S3-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "S3 real state-link smoke, failing first full run and clean identical retry.",
+      "hash": "sha256:cd6a110cf761055af9bfafcb000e79e947a9e285819e16fedc85dd5863273f0e"
+    },
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#what-shipped",
+      "helps": "Release reconciliation, scope completion, verification, limits and closure retained across supplement.",
+      "hash": "sha256:87b2718d08f102ec7e67e49adee537c55c614db03551458af5a4c83ac9af3411"
+    },
+    {
+      "path": "audit-approved-evidence-code.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Fresh bounded role checks, scratch findings and coordinator-qualified proof limits retained.",
+      "hash": "sha256:dd47a89b7e3c67d16c1ff6af77ca0aa1902b8a159e5daf3f6bde7fdad089a841"
+    },
+    {
+      "path": "audit-approved-evidence-coverage.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Fresh bounded role checks, scratch findings and coordinator-qualified proof limits retained.",
+      "hash": "sha256:588c50b21f716cef9d3d1b871b034d16dc3c0b1d529feed583aeafb74b18a2fd"
+    },
+    {
+      "path": "audit-approved-evidence-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Fresh bounded role checks, scratch findings and coordinator-qualified proof limits retained.",
+      "hash": "sha256:0670b661f41b66620606af1e4258ef2c243ce84260344111c8fa91febfdcc932"
+    },
+    {
+      "path": "audit-approved-evidence-ux.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "Fresh bounded role checks, scratch findings and coordinator-qualified proof limits retained.",
+      "hash": "sha256:a2b167d7245d5c7ac073490e8f8446c517da0285ad75d400e0e1df8ea2d73346"
+    },
+    {
+      "path": "audit-final-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-evidence-and-limits",
+      "helps": "M1–M5 closure, corrected citations, discarded mutants and read-only limits.",
+      "hash": "sha256:38a70bccb0d70ea2a28619112284864c0bebb73e271c90031d3ba86ab7f8cf60"
+    },
+    {
+      "path": "audit-review-code-retry.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:8a54a37349413eb364beab5df744c76ce7975fdc8ed587f49a64359220af536b"
+    },
+    {
+      "path": "audit-review-code.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:a72ee4c8d5889b188acde7ae66a4f197c2841e697e0deead6e09f586dd4dbba4"
+    },
+    {
+      "path": "audit-review-coverage-retry.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:9e52b46939f3885877bb42aff2b14efb37f6b56b1f46710e85a11064ae5065c4"
+    },
+    {
+      "path": "audit-review-coverage.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:f40fd2def8cc7e9038ff131b2c388aef9a1d0b6413a7b1f7266d6fdb073c3d0f"
+    },
+    {
+      "path": "audit-review-cross.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:e4b3be09fbf90d8910aa58d7ca7f0fffba7d3ea305f72d9cab5217ed3bc6b226"
+    },
+    {
+      "path": "audit-review-security-retry.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:28e5a330e631a5eb4795693fbbba3a5625feb5cb3c647d5249c71754d59c92d6"
+    },
+    {
+      "path": "audit-review-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:6753a158b82575e2748426f89502eaa6753e6257b43a87525088a8a8f5805076"
+    },
+    {
+      "path": "audit-review-ux-recheck.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:884774d68d7cfff68f2ea9e008a87ddc413b6911a3614d5312cc8db7e27c85b7"
+    },
+    {
+      "path": "audit-review-ux.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Historical role findings, incomplete checks, refutations and deferred items retained; scratch BLOCK is not a live defect claim.",
+      "hash": "sha256:ed743da7338c923fc89d3b6f2bba48240ddaa2b8faba2489ea5f4cdfdbbc8c2e"
+    },
+    {
+      "path": "audit.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#audit-triage",
+      "helps": "Open M1–M5 history, confirmed fixes/refutations and subsequent approved resolution.",
+      "hash": "sha256:2029868d9465419ef49e70eb9f1e81cf9989a9a54dcbc13fa6feeae5d2090860"
+    },
+    {
+      "path": "build-start.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Separate owner authorization, standard worker choice and serialized four-file ownership.",
+      "hash": "sha256:7cf19afa9ad0406437c9a505d5772ff9c7966d6373218eca7edb88146772a536"
+    },
+    {
+      "path": "collect-historian.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:d36267a6f9a2ad5245d2016d3ad0f580b6f59a354841dccb25ce37ae785373cc"
+    },
+    {
+      "path": "collect-skeptic.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:cd8ecadbd096f34a150c75134fb5e94a3b3e8ff20852fdbaa7931b970b69c175"
+    },
+    {
+      "path": "critique-appetite.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#shaping-and-critique",
+      "helps": "Initial budget omissions and guarded-reader/no-go tension resolved before build.",
+      "hash": "sha256:4cff8d1e603904035dd24bb835a09c3f49908961eaa3a345aef950ed5006fc7f"
+    },
+    {
+      "path": "critique-historian.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#shaping-and-critique",
+      "helps": "All K1–K8 guard, ownership, labels and source-state constraints retained.",
+      "hash": "sha256:90465a5a6ec9477d3d4c792d3511ca622f8bfd2ed7fa269ec095e9a3f0763263"
+    },
+    {
+      "path": "critique-overlap.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#shaping-and-critique",
+      "helps": "Rollout sequencing, release serialization and unmodified shared lease concerns.",
+      "hash": "sha256:9320755418de401c2c73fa22b118607c462d6c359ee1839053e97b259e0b0f44"
+    },
+    {
+      "path": "critique-skeptic.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#shaping-and-critique",
+      "helps": "Directory pins, hostile map keys, scrubbing and asymmetric-fold fixture; live fold claim corrected.",
+      "hash": "sha256:1e2c46c5299ef2e8db3e9477afd6f847cf4880b66a9b9fc04e641183c6f7fbe9"
+    },
+    {
+      "path": "delivery-pending.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:3b6514ee7beada2c0ddb257990fe5ee5a6130e66bcbfc06b124ebe0ba331c68f"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#design-decisions",
+      "helps": "All six deviations retained across decisions, audit, verification and module exceptions.",
+      "hash": "sha256:9bdb23e95f75888f8dd4b5d9b8a76118e0151132553b9b8b23ad9cfb7f0b25eb"
+    },
+    {
+      "path": "dispatch-appetite.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:09fd2ccdb2880c10df543d7541abc76ec622b5b79fd0cda194e38cdc900cc919"
+    },
+    {
+      "path": "dispatch-historian.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:7dc3f5a5d4b72b68e4b060f1b4c481dfbdb5402542ed2b49926eeb6333541354"
+    },
+    {
+      "path": "dispatch-overlap.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:f12e65cfcc1bbac0cf4b6a1aeb498851e080e86986dc430c1eb6ef5d21fc7e01"
+    },
+    {
+      "path": "dispatch-skeptic.json",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:daef8be69ea99fecbb074149269910029eef5b853715243b4690f15de0271f47"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:9bf4dd250fede40d6a59553c60c787ec254274c38a7ec88f09e3e08773653a17"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#build-and-orca-history",
+      "helps": "Complete build/audit/ship trajectory including closure absent from dated run.",
+      "hash": "sha256:44811255a6ae704f25b0a3697145787235807e5432d74a6a5dd325a5f885f0aa"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#shaping-and-critique",
+      "helps": "Problem, boundaries, accepted critique and October 21 bet.",
+      "hash": "sha256:afa217a2b25aad5fd05f33c6dbaa3a75c731d0a84ab0ed71b288c502d0ff67a7"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#design-decisions",
+      "helps": "Exact grammar, caps, statuses, history, publication, exits, risks and ownership.",
+      "hash": "sha256:2c6a2a63755a329df2be944a669ff350f2ee2f3a89f7e48297f9b6881c9ce6e6"
+    },
+    {
+      "path": "seed-2026-10-19.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#historical-contradictions",
+      "helps": "Original wider effort/efficiency request and A1/A2 prerequisites contrasted with shipped scope.",
+      "hash": "sha256:4fbe4a625c68cdc78ef71a7a757460103616dae67ae7cf353e9fe03ecdca013d"
+    },
+    {
+      "path": "shaping-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#shaping-and-critique",
+      "helps": "Sparse live observations, manual Orca recovery, corrected fold claim and revised budget.",
+      "hash": "sha256:6aa1854186fb1d7034bec1016541df889c6b54ccaf6bd6f95e75c2cc9ac895ad"
+    },
+    {
+      "path": "ship-start.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-time-report.md#verification-history",
+      "helps": "Initial wrapper failure and later distinct fallback approval preserved.",
+      "hash": "sha256:bc63a0d1785dbf06f6659d8f6777385b39f0ebca595350cd1f157460f944ed8e"
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:39:45.093Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:4e32f249752ae50d869c3b2116d182fc2c1d15606d88e9fa856e85a3d5a9e8e9",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
+}

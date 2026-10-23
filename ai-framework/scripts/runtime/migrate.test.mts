@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
-import { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { dirname, join } from "node:path";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 import { createNodeDeps } from "./node.mts";
 import { migrateInstanceEntries } from "./migrate.mts";
+import { createTestDeps, urlPath } from "./test-helpers.mts";
+const testDeps = createTestDeps();
+const { mkdirSync, mkdtempSync, readFileSync, readdirSync, realpathSync, rmSync, statSync, symlinkSync, writeFileSync } = testDeps.fs;
+const tmpdir = (): string => testDeps.os.tmpdir();
+const { dirname, join } = testDeps.path;
 
 function write(root: string, relative: string, text: string): void {
   const file = join(root, relative);
@@ -190,4 +192,85 @@ test("changes only the executable operand and leaves workflow-like arguments int
   write(root, ".claude/settings.json", JSON.stringify({ hooks: [{ type: "command", command: "node ai-framework/scripts/graphify.js --input ai-framework/scripts/graphify.js" }] }));
   assert.deepEqual(migrateInstanceEntries(root, source, true, deps), [{ path: ".claude/settings.json", status: "applied" }]);
   assert.equal(JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8")).hooks[0].command, "node --experimental-strip-types --disable-warning=ExperimentalWarning ai-framework/scripts/graphify.mts --input ai-framework/scripts/graphify.js");
+});
+
+const orcaGroup = (matcher: string) => ({ matcher, hooks: [{ type: "command", command: 'node "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts"', timeout: 8 }] });
+const sourceSettings = { permissions: { allow: ["bundle-only"] }, hooks: {
+  SubagentStop: [{ matcher: "*", hooks: [{ type: "command", command: 'node "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.mts" --vendor claude' }] }],
+  PreToolUse: [orcaGroup("Skill"), { matcher: "Bash", hooks: [{ type: "command", command: "echo not a workflow script" }] }],
+  UserPromptExpansion: [orcaGroup("*")],
+} };
+
+test("adds bundle workflow hook groups an older instance lacks, keeping every instance entry", (t) => {
+  const { root, source, deps } = fixture(t);
+  write(source, ".claude/settings.json", JSON.stringify(sourceSettings));
+  const instance = { env: { CUSTOM: "kept" }, hooks: { SubagentStop: [{ matcher: "*", hooks: [{ type: "command", command: 'node "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/token-consumption.mts" --vendor claude --custom' }] }] } };
+  write(root, ".claude/settings.json", JSON.stringify(instance));
+  const result = migrateInstanceEntries(root, source, true, deps);
+  assert.deepEqual(result, [{ path: ".claude/settings.json", status: "applied" }]);
+  const after = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+  assert.deepEqual(after.env, { CUSTOM: "kept" });
+  assert.equal(after.permissions, undefined, "only hook groups are copied");
+  assert.deepEqual(after.hooks.SubagentStop, instance.hooks.SubagentStop, "an already registered script is not duplicated");
+  assert.deepEqual(after.hooks.PreToolUse, [orcaGroup("Skill")], "a group running no workflow script is not copied");
+  assert.deepEqual(after.hooks.UserPromptExpansion, [orcaGroup("*")]);
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), [], "a second run is a no-op");
+});
+
+test("adds the Codex UserPromptSubmit startup hook to an older .codex/hooks.json; dry-run writes nothing", (t) => {
+  const { root, source, deps } = fixture(t);
+  const startup = { hooks: [{ type: "command", command: 'AI_WORKFLOW_RUNNER=node node "$workflow_root/ai-framework/hooks/scripts/orca-start-codex-hook.mts" --root "$workflow_root"', timeout: 8 }] };
+  write(source, ".codex/hooks.json", JSON.stringify({ hooks: { UserPromptSubmit: [startup] } }));
+  const old = JSON.stringify({ description: "old", hooks: { SubagentStop: [] } });
+  write(root, ".codex/hooks.json", old);
+  assert.deepEqual(migrateInstanceEntries(root, source, false, deps), [{ path: ".codex/hooks.json", status: "ready" }]);
+  assert.equal(readFileSync(join(root, ".codex/hooks.json"), "utf8"), old);
+  migrateInstanceEntries(root, source, true, deps);
+  const after = JSON.parse(readFileSync(join(root, ".codex/hooks.json"), "utf8"));
+  assert.equal(after.description, "old");
+  assert.deepEqual(after.hooks.UserPromptSubmit, [startup]);
+});
+
+test("a hook registered under a different matcher, or wrapped, still counts by script and matcher", (t) => {
+  const { root, source, deps } = fixture(t);
+  write(source, ".claude/settings.json", JSON.stringify(sourceSettings));
+  const wrapped = { hooks: { PreToolUse: [{ matcher: "Skill", hooks: [{ type: "command", command: 'wrapper -- node "$CLAUDE_PROJECT_DIR/ai-framework/hooks/scripts/orca-start-hook.mts"' }] }], UserPromptExpansion: [orcaGroup("Other")] } };
+  write(root, ".claude/settings.json", JSON.stringify(wrapped));
+  migrateInstanceEntries(root, source, true, deps);
+  const after = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+  assert.equal(after.hooks.PreToolUse.length, 1, "the wrapped Skill hook is not duplicated");
+  assert.deepEqual(after.hooks.UserPromptExpansion, [orcaGroup("Other"), orcaGroup("*")], "another matcher is a different registration");
+});
+
+test("propagates all capture groups once beside existing token and Orca groups, and preserves wrapped registrations", t => {
+  const { root, source, deps } = fixture(t);
+  const livePath = urlPath(new URL("../../../.claude/settings.json", import.meta.url));
+  const canonical = JSON.parse(readFileSync(livePath, "utf8"));
+  const isCapture = (group: { hooks: { command?: string }[] }): boolean => group.hooks.some(hook => hook.command?.includes("workflow-capture.mts"));
+  const old = structuredClone(canonical);
+  for (const event of Object.keys(old.hooks)) {
+    old.hooks[event] = old.hooks[event].filter((group: { hooks: { command?: string }[] }) => !isCapture(group));
+    if (old.hooks[event].length === 0) delete old.hooks[event];
+  }
+  write(source, ".claude/settings.json", JSON.stringify(canonical));
+  write(source, "ai-framework/hooks/scripts/workflow-capture.mts", "export {};\n");
+  write(root, ".claude/settings.json", JSON.stringify(old));
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), [{ path: ".claude/settings.json", status: "applied" }]);
+  const after = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+  let count = 0;
+  for (const [event, groups] of Object.entries(canonical.hooks) as [string, { hooks: { command?: string }[] }[]][]) {
+    const added = after.hooks[event].filter(isCapture), expected = groups.filter(isCapture);
+    assert.deepEqual(added, expected, event); count += added.length;
+    assert.deepEqual(after.hooks[event].filter((group: { hooks: { command?: string }[] }) => !isCapture(group)), old.hooks[event] ?? [], event);
+  }
+  assert.equal(count, 8);
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), []);
+  const wrapped = structuredClone(old), registration = structuredClone(canonical.hooks.UserPromptSubmit.find(isCapture));
+  registration.hooks[0].command = `wrapper -- ${registration.hooks[0].command}`;
+  wrapped.hooks.UserPromptSubmit = [registration];
+  write(root, ".claude/settings.json", JSON.stringify(wrapped));
+  migrateInstanceEntries(root, source, true, deps);
+  const migrated = JSON.parse(readFileSync(join(root, ".claude/settings.json"), "utf8"));
+  assert.deepEqual(migrated.hooks.UserPromptSubmit, [registration]);
+  assert.deepEqual(migrateInstanceEntries(root, source, true, deps), []);
 });

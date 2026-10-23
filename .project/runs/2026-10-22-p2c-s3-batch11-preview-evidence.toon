@@ -1,0 +1,144 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+sections: 70
+retained: 70
+files: 40
+kept: 36
+sourceFiles: 46
+sourceBytes: 230845
+proposals[4]:
+  -
+    slug: pitch-compaction
+    sections: 15
+    retainedSections: 15
+    otherFiles: 9
+    retainedFiles: 8
+    sourceBytes: 52339
+    sourceFiles: 10
+    recordBytes: 1083
+    supplementBytes: 16478
+    payloadHash: "sha256:bd59a5e66dc9bb2aa725ad525f5d8a0d6072e70628662fe3187dde19d16f8bce"
+    supplementHash: "sha256:a77145166e5525ca25267499120b158b221910b4d4ca0e6479a58f5badbfbbba"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Against introducing ea82bcee: +319/-0. Original re-review/first-use/state/version history preserved; later additions do not erase it. First-use entry already records Sept25 completion and limits; retain shipped not-yet-used statement as earlier history, not current state."
+      ".project/knowledge/index.md":
+        committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+        current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+        reason: "Against introducing ea82bcee: +560/-45. Generated date/counts/tag tables and graph command changed, many later entries added. Compaction gate/prefix lessons remain listed. Index is navigation, not full retained content; map substantive claims to supplement or confirmed durable decision."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[7]: C2 evidence attributes two bug discoveries both to real tests and to manual flow before formal tests; cannot resolve order.,C2 combined coverage reported100% branches while pitch-archive individual coverage83.91%; preserve both measurements.,"C2 ledger-existence simplification weakened per-gap acceptance, then was explicitly reversed at audit.",Ship audit independent only for code; three reviewers failed HTTP429; author security checks do not establish independent coverage/cross-pitch review.,Narrative no-archive/delete-during-build is real-checkout scoped; fixture archive/removal/restore tests ran.,Ship version deferred; later narrative reports missing dedicated feature changelog.,No-real-use ship limit later superseded by recorded first-use trial; retain temporal distinction.
+  -
+    slug: portable-skill-defaults
+    sections: 16
+    retainedSections: 16
+    otherFiles: 12
+    retainedFiles: 11
+    sourceBytes: 63017
+    sourceFiles: 13
+    recordBytes: 1149
+    supplementBytes: 17957
+    payloadHash: "sha256:cbb4218cfc5311436573eebf8a4679e0fa649eda03d72f32746f22112bbc1498"
+    supplementHash: "sha256:a71045fe2ffd75f08f61353e2198afa498555db1e773cb4fa33eaecdd5bb18e2"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift:
+      ".project/knowledge/index.md":
+        committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+        current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+        reason: "Against introducing ea82bce: +560/-45 generated lines. Timestamp/runner changed, typed/status totals grew, tags/graph/traversal regenerated. Three mapped knowledge entry lines remain byte-identical; current 16 decisions/53 patterns/2 entities/48 issues are later catalog state, not ship-time five-entry evidence. Supplement retains unique content, index is navigation only."
+      CHANGELOG.md:
+        committed: "sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa"
+        current: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+        reason: "Against introducing ea82bce: +565/-0. Seventy later release sections (2.9.0–2.48.1) inserted after unchanged header. Original 2.5.0 block byte-identical. SHIPPED deferred version generation until commit; narrative’s 2.5.0 is later bundling, preserved as chronology, not rewritten ship evidence."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[6]: SHIPPED version unbumped versus narrative later 2.5.0; chronology retained.,Plan seven modes plus off conflicts with six enumerated modes plus off.,D3 per-vendor + overall promise narrowed to single global CLI report; structural adapters are not direct-host execution proof.,Audit table verifies missing Python timeout by code reading while surrounding prose claims every security finding had live before/after PoCs; no execution evidence invented.,"Source says mode null when caveman uninstalled, but D2 evidence implements file/key presence without registry attribution; phase/invocation attribution absent by design.","Cache 16 sections matches original v1/draft 16; all 13 files read, all 12 otherFiles accounted."
+  -
+    slug: portable-skill-installation
+    sections: 19
+    retainedSections: 19
+    otherFiles: 11
+    retainedFiles: 10
+    sourceBytes: 61274
+    sourceFiles: 12
+    recordBytes: 1177
+    supplementBytes: 16564
+    payloadHash: "sha256:79d76edead951b7d99af3009380ac185e7f8826a5afaa461b92be972519be793"
+    supplementHash: "sha256:8f2b80b30a8277d14c32d0076768e66d63315799e5b46a6edd4ec6f0ea4037bc"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift:
+      ".project/knowledge/index.md":
+        committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+        current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+        reason: "Against introducing ea82bcee: +560/-45 lines. Generated date, counts, tags and graph pointer changed, and later entries were added. The four installation lesson links remain; this index was navigation, not a content copy. Supplement maps substantive content directly."
+      ".project/pitches/_followups.md":
+        committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Against introducing ea82bcee: +319/-0 lines. Later backlog additions preserve all original installation followup text byte-for-byte. Retain TOCTOU and marker issue as ship-time deferrals, not current-open claims."
+      CHANGELOG.md:
+        committed: "sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa"
+        current: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+        reason: "Against introducing ea82bcee: +565/-0 lines. Later releases were prepended; the original 2.4.0 installation entry remains byte-for-byte. Preserve consolidated-release history and staged version resets."
+      ai-framework/integrations/skills.md:
+        committed: "sha256:3cc1d11d94d5ce9a62a7b42a59159037816c50017ec5e2a39d947b9f4d2451b4"
+        current: "sha256:b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403"
+        reason: "Against introducing ea82bcee, changes are .js to .mts command/test references plus Node type-stripping flags for coverage. Source-era install/reconcile/format ownership behavior is unchanged; preserve .js historical measurements without replacing current docs."
+      ".claude/skills/add-skill/SKILL.md":
+        committed: "sha256:1620061f7c66ebf09135d07258c1ea00edd6c29fb079728b3dd0f1294ccc2cbb"
+        current: "sha256:22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+        reason: "Against introducing ea82bcee, thirteen command/script references migrated .js to .mts (26 diff lines); inspect/choice/preview/approval/apply/lifecycle contract unchanged. Preserve live source-selection incident and runtime caveats in supplement."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[5]: Narrative no-install/delete-during-build claim applies only to the real checkout; fixture installs/removals ran.,"Prettier provenance spy proves argument origin, not real Prettier cascading behavior (binary absent).","63 final tests versus 62 pre-audit; 27+9+26=62 excludes the later provenance test.",S2/SHIPPED intermediate version accounts differ in scope; final consolidated release is 2.4.0.,"Host execution remained partial: Claude verified, OpenCode discovery only, Codex quota blocked, Cursor absent."
+  -
+    slug: project-state-report
+    sections: 20
+    retainedSections: 20
+    otherFiles: 8
+    retainedFiles: 7
+    sourceBytes: 54215
+    sourceFiles: 11
+    recordBytes: 1115
+    supplementBytes: 20412
+    payloadHash: "sha256:fb8379695da3a40f8b6739c3de994befc3a35690032fe5be46829c20a9052d58"
+    supplementHash: "sha256:992568e1a2748ce2e536d5ea891998eff2403f718e7e09c4488b136ef6c4d10b"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift:
+      ".project/knowledge/decisions/project-state-report-design.md":
+        committed: "sha256:8ea395772e637285dccf74d1b6f866b0195b3b17268df83b19ce60dc22bcb753"
+        current: "sha256:6a83f90465ff66d827e32505b92bc8504b7e9b43a6c68db2916e4a8cce8587b2"
+        reason: "Against introducing ea82bce, +11/-1 adds 2026-10-08 multipage decisions and ownership-pattern relation. Original state decision retained; later seven-page/staged-write behavior remains later history."
+      ".project/knowledge/index.md":
+        committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+        current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+        reason: "Against introducing ea82bce, +560/-45 reflects regenerated graph growth and generator/schema metadata changes; original ship count17 is historical. Index is generated, not a durable container for pitch evidence."
+      ".project/pitches/_followups.md":
+        committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Against introducing ea82bce, +319/-0 adds later backlog. Original live-vendor/automatic-state choices persist, quoted fonts were already resolved in introducing text; preserve original deferrals and subsequent resolutions as history."
+      CHANGELOG.md:
+        committed: "sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa"
+        current: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+        reason: "Against introducing ea82bce, +565/-0 consists of later release history; original2.8.0 section is byte-identical. Its four-must-fix summary conflicts with source audit4+1 and is preserved as historical discrepancy."
+      ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md":
+        committed: "sha256:391c9c6847c3bd7e2739bdbe9baf24dacd8076bda0247bb14a048d9d6b48a1ce"
+        current: "sha256:4cd8aae21ce042bbc7a94a28671bd4a6f38b3afa67ed4cd587c23bc832cd98a1"
+        reason: "Against introducing ea82bce, +20/-3 updates metadata/confidence and adds later sanitizer/capture/token-time-report recurrences. Original reviewer measurement lesson unchanged; retain canary-vs-live and author-vs-independent distinctions."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[4]: "No v1 required-key drift:20 cache sections and20 draft sections.",Run combines log/deviations and is not a byte-identical SHIPPED copy; no full-copy claim.,Unchanged2.8.0 changelog says4 must-fix including regression; audit records4 cycle1 plus1 cycle2.,"Vendor live claims are discovery checks for Claude/OpenCode, not proof all hosts invoked state."
+rehearsal: "pitch-compaction: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (7 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 3 neighbouring done-work entries byte-identical\nportable-skill-defaults: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (7 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 3 neighbouring done-work entries byte-identical\nportable-skill-installation: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (16 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 3 neighbouring done-work entries byte-identical\nproject-state-report: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (16 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 3 neighbouring done-work entries byte-identical"
+negativeControls: 46
+acceptedGaps[0]:
+sourceArchivesReopenedForRehearsal: false
+live:
+  legacy: 4
+  upgraded: 42
+  partial: 0
+closingExceptionsApproved: false
+repairApproved: false

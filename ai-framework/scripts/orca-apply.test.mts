@@ -8,7 +8,7 @@ import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 // ORCA_APPLY_UNDER_TEST lets a mutant copy of the module be exercised by the same assertions (mutant proofs).
 const mod = await import(process.env.ORCA_APPLY_UNDER_TEST ?? "./orca-apply.mts") as typeof import("./orca-apply.mts");
-const { applyAdmitted, rollback, validRelativePath, parseStatus, parseNumstat } = mod;
+const { applyAdmitted, isApplied, rollback, validRelativePath, parseStatus, parseNumstat } = mod;
 type Worker = import("./orca-apply.mts").AdmittedWorker;
 type Entry = import("./orca-apply.mts").AdmittedEntry;
 
@@ -399,6 +399,39 @@ test("a timeout during the apply phase rolls back instead of leaving a partial t
   assert.deepEqual(tree(root), before);
 });
 
+test("unknown process cleanup during apply preserves the partial tree and snapshot without rollback", async (t: TestContext) => {
+  const { root, head } = makeRepo(t);
+  const p1 = patchFrom(t, root, (c) => put(c, "a.txt", "alpha CHANGED\nline2\n"));
+  const p2 = patchFrom(t, root, (c) => put(c, "c.txt", "charlie CHANGED\n"));
+  const error = Object.assign(new Error("cleanup unknown"), { code: "EPROCESSCLEANUP", ownerPid: 4242 });
+  let writes = 0;
+  const d = wrapped((args, n) => {
+    if (args.includes("apply") && !args.includes("--check") && !args.includes("--numstat")) {
+      writes = n.writes;
+      if (n.writes === 2) {
+        put(root, "c.txt", "partial write still owned\n");
+        throw error;
+      }
+    }
+    return undefined;
+  });
+  await assert.rejects(call(root, head, [worker("w1", p1, [entry("a.txt")]), worker("w2", p2, [entry("c.txt")])], d), (caught: unknown) => caught === error);
+  assert.equal(writes, 2);
+  assert.equal(read(root, "a.txt"), "alpha CHANGED\nline2\n");
+  assert.equal(read(root, "c.txt"), "partial write still owned\n");
+  assert.equal(storeExists(root), true, "the recovery snapshot is retained");
+});
+
+test("unknown process cleanup from isApplied is never a false negative allowing a fresh apply", async (t: TestContext) => {
+  const { root } = makeRepo(t);
+  const error = Object.assign(new Error("cleanup unknown"), { code: "EPROCESSCLEANUP", ownerPid: 4242 });
+  let calls = 0;
+  const d = wrapped(() => { calls++; throw error; });
+  await assert.rejects(isApplied({ root, patch: "patch", entries: [entry("a.txt")], deps: d }), (caught: unknown) => caught === error);
+  assert.equal(calls, 1);
+  assert.equal(storeExists(root), false);
+});
+
 test("every git call is hardened and gets a scrubbed environment", async (t: TestContext) => {
   const { root, head } = makeRepo(t);
   const patch = patchFrom(t, root, (c) => put(c, "a.txt", "alpha CHANGED\nline2\n"));
@@ -435,4 +468,9 @@ test("production code imports no node: module and uses no any", () => {
   const source = deps.fs.readFileSync(deps.path.join(HERE, "orca-apply.mts"), "utf8");
   assert.doesNotMatch(source, /node:/);
   assert.doesNotMatch(source, /: any\b|as any/);
+});
+
+test("loadConfig branch: config files are ordinary paths for apply, while local data stays off limits (no special case for ai-workflow.toon)", () => {
+  for (const name of ["ai-workflow.toon", "ai_workflow_env.json", ".project/orchestration.json", "ai-workflow.toon.bak"]) assert.equal(validRelativePath(name), true, name);
+  for (const name of [".project/metrics/orca-ledger/x.json", "../ai-workflow.toon", "/ai-workflow.toon", ".git/ai-workflow.toon"]) assert.equal(validRelativePath(name), false, name);
 });

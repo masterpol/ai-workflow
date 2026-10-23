@@ -1,0 +1,34 @@
+@toon-data 1
+slug: token-attribution
+draft: true
+state: needs-decision
+ledgerHash: "sha256:94e5462faa3c10f93f03141209f91c7928dd012958f904c0564c65fd0249e4f4"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:7824c31ebde9037569c1d4019556d9f025e2ed28e644565b00cb9a177edc7346"
+mapping:
+  schemaVersion: 2
+  sections[8]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "SHIPPED.md#doc-updates",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+  otherFiles[0]:
+judgments[8]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#doc-updates",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: token-attribution\nshipped: 2026-10-19\nschemaVersion: 1\ndraft: true\n---\n# token-attribution\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#token-attribution","sha256:7824c31ebde9037569c1d4019556d9f025e2ed28e644565b00cb9a177edc7346","## token-attribution — shipped 2026-10-19\n\nToken attribution shipped as bundle 2.34.0: usage is attributed to a pitch, phase and scope through a phase-start hook (`resolvePhaseContext`), flow rows with caps (50/25/600 leaves, 200 cursors, 32 contexts), transcript cursors and a `Stop` session-turn; the report gains By Flow and an Unattributed share. Metrics revision 3 migrates append-only with a directory-identity pin.\n\nStanding constraints: no transcript text, prompts, responses or tool arguments are stored (marker tests over every metrics file); no estimated tokens or cost (Claude cost stays `Unpriced`); the lease mechanism is unchanged and the collector always exits 0. Codex and OpenCode pairs were deferred by the owner; live `Stop` `transcript_path` and hook order are unverified.\n\nLessons: [[read-before-the-lease-commit-cursor-and-totals-together]], [[a-workers-passing-tests-can-encode-the-wrong-data-shape]]. Contract: `ai-framework/docs/token-consumption.md`. Eight followups are in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/token-attribution.md"

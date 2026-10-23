@@ -1,0 +1,158 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: path-safety-hardening
+sourceProof:
+  archiveDirectory: path-safety-hardening-2026-10-07T23-01-44-040Z
+  manifestHash: "sha256:9eb53dede0c07f67b081268fa529f8a692bcac204bd89ff98f6e2830f788b3bb"
+  sourceBytes: 45216
+  verifiedFiles: 22
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/path-safety-hardening.supplement.md"
+  destination: ".project/records/legacy-upgrades/path-safety-hardening.md"
+  hash: "sha256:e17e0cffbbeab9d037b8f7caef21dec2e8aed696e0d769cabd3f7433b6214bef"
+payload:
+  ledgerHash: "sha256:2425d1a9ef46fab071fff0bb4db8cc08906a2c32ae544aa0240e702dc20320d9"
+  legacyEntryHash: "sha256:e5cbfdb68e657caa146a9c6f6e009557a4f8ce5d06ab4d00aa296868e77d276d"
+  bindings:
+    ".project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md": "sha256:4735476e515ff2eb790b23344583e70ed32759a7ab6353f1bc2453019881d80b"
+    ".project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md": "sha256:36b2729c1ba9715a333c7393ded17995ca2a73ed939a64d5aa92ae55556afbb8"
+    ".project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md": "sha256:4651944b56f2db1af9e040bb94bd55899afd338ea64cd35f65f5df9a5132057d"
+    ".project/records/legacy-upgrades/path-safety-hardening.md": "sha256:e17e0cffbbeab9d037b8f7caef21dec2e8aed696e0d769cabd3f7433b6214bef"
+  mapping:
+    schemaVersion: 2
+    sections[12]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/legacy-upgrades/path-safety-hardening.md#contract-and-delivered-behavior","Shared transaction root and journal namespace, refusal of pending journals, legacy recovery route and the quiesce-before-migration duty.","sha256:16114ff96e0d06a408e2c8028e4a2f2b6ab4ba67edb85565ce14ff66f50a213b"
+      "SHIPPED.md#verification",know-how,merged,".project/records/legacy-upgrades/path-safety-hardening.md#verification-history","The 231, 110 and 121 test counts, SIGKILL fixtures, four mutants, coverage and the no-build-command fact.","sha256:0743703bef50ee86551a76ed9e3822eb4fb6fd72d6518dd8e06aa1972ccf4faf"
+      "SHIPPED.md#audit-and-confidence",know-how,merged,".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology","Usage-limit retries, canary results, findings D1, T1 and X1 and the meaning of independence.","sha256:b137c5dd74d7e22394ae0454e6f63727a438aeaa203d06504ee3850ad8d9a3bd"
+      "SHIPPED.md#no-gos-and-remaining-limitations",limit,merged,".project/records/legacy-upgrades/path-safety-hardening.md#historical-limits","Open hostile-relocation limit and retained temp file behavior, with the no-gos in the scope section.","sha256:848f06b5adfd984821d103210d557e79b7674e58f13017620eb80b953baf9bf2"
+      "SHIPPED.md#knowledge-and-followups",know-how,merged,".project/records/legacy-upgrades/path-safety-hardening.md#historical-limits","Which followups closed, the stronger TOCTOU requirement left open and the secret-filename guard followup.","sha256:9fe386583818f9c516f22a4dd85151f6c2a9970601fd068820d79cc53ba0f4c5"
+      "SHIPPED.md#delivery",behavior,merged,".project/records/legacy-upgrades/path-safety-hardening.md#delivery","Version 2.8.6, the UTC date note, the run record link and that no commit or publication happened.","sha256:891dcedd5972146f07abcc363bde7b52f18fe91a1cfb4d82e7ccfde785457b85"
+      "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/path-safety-hardening.md#scope-and-no-gos",The three pitch no-gos.,"sha256:df0efbd9254cf602cd4727c0d76793a23d2203144a3c2ea799b5ce41817939fc"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/path-safety-hardening.md#scope-and-no-gos","Resolved, planned-risk and no-go rabbit-hole decisions.","sha256:76d56c20fc370d3d5bc51b5e3e0f349afc64deeb29c2fb359e18d3dde743584a"
+      audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology","Cycle 1 incomplete verdict (superseded), FIFO fix, cross-pitch ordering and the next-design question.","sha256:234838f87523369ab7f35b9e267ccc1ca1d07f672621cffee47dac75ea17cd3b"
+      "deviations.md#d1-portable-filesystem-limitation-2026-09-26",limit,merged,".project/records/legacy-upgrades/path-safety-hardening.md#historical-limits","Portable-fs limitation, registry-lock side effect and refused unsafe cleanup.","sha256:cd90df6c4d435df614a91a2b0b14cbd885b620f44611d78e26bec1bcfd809a08"
+      "log.md#s1-2026-09-26",know-how,merged,".project/records/legacy-upgrades/path-safety-hardening.md#verification-history","Counts 132, 189 and 58, the macOS /var fixture mismatch, AggregateError rollback and the FIFO subprocess test.","sha256:4f8ffb7ad84bb05b241fc4506f900769009a46238d59bef6f9cee63f233fe4ee"
+      "log.md#reproducible-in-memory-mutation-method",know-how,merged,".project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md",Method kept in the pattern; the five-case script is not kept because three cases belong to other pitches and file names are obsolete.,"sha256:fe02589f1f197a0484024f73c3320fff8e2b9d1feea0a37c95b14174b3cb1f50"
+    otherFiles[21]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:14c15cf56b6754972db9c8a8daef4dcadbd89dc435023c3b20358493606d93b9"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#contract-and-delivered-behavior"
+        helps: "Covered by the contract, verification, audit, limits and delivery sections."
+      -
+        path: completion-audit-code-prompt.txt
+        hash: "sha256:3a5d27e25aa5d6f5ff40afcaab75981145ef5f86a3a4eac97dc29b8b000aa43f"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: completion-audit-code.md
+        hash: "sha256:de112859f8fd698802771dac63577492825d17cb8720670ae973356548ec7251"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: "Preserves the canary result, retry and narrow coverage of the code review."
+      -
+        path: completion-audit-cross-prompt.txt
+        hash: "sha256:afa9b23622df55a96b6664a8e36f5e4b5e0482409692dbbf53f41bd10c7ee98e"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: completion-audit-cross.md
+        hash: "sha256:831f25c5d63e534d9e9dbdb3ea9be4a1c7e4799de5c62b936fabe2a5e4ef2eda"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: "Preserves namespace compatibility review, collector overlap resolution and unreviewed collector runtime."
+      -
+        path: completion-audit-security-prompt.txt
+        hash: "sha256:05ea012b8e888d79c4e29efb198cbb982684eaab28d02d73b6752b43d000eceb"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: completion-audit-security.md
+        hash: "sha256:f7b797fe044a2debc1c30fab02c78f42e98e17294454f2fc44d83268fa6ef63a"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: "Preserves the security traces and the unreviewed reader bounds, regex limits and recovery output."
+      -
+        path: completion-audit-summary-2026-09-27.md
+        hash: "sha256:d8ba14c155ed5e67191387abd3c48221a5f4883db875339e684ecc32f8847261"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: "Preserves the C1, D1, T1 and X1 table, empty must-fix queue and verification figures."
+      -
+        path: completion-audit-test-cycle2-prompt.txt
+        hash: "sha256:e23c9392072920b4d2a7df85b1e02e719e15438d54524b6333bd88df5e4db467"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: completion-audit-test-cycle2.md
+        hash: "sha256:9ec1d2c63ab31a602ac98478eac462d13485d862b88c1d2bc4dcac042bd704f4"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: Preserves the cycle 2 recheck of the preservation assertions and the ASCII and JSON caveat.
+      -
+        path: completion-audit-test-prompt.txt
+        hash: "sha256:ec3f30c59bb596b77ad1d54095ac205cf376d41286e62fb63afaff4a0a4bdaf6"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: completion-audit-test.md
+        hash: "sha256:32c20d512d7202c11e08c47c129728d296fe815cedf59d82abcbe92aea0caa0f"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: "Preserves the assertion gap, invalid mutation loader paths and the cycle 2 handoff."
+      -
+        path: completion-log-2026-09-27.md
+        hash: "sha256:2675355a9bb692f09054894884a33cb9043fc7952aa2d3a41bb40e132aa0a7ad"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: "Preserves the private secret-excluding guard, concurrent commit note and shipped closure."
+      -
+        path: completion-plan-2026-09-27.md
+        hash: "sha256:cb0b4df082416358c68994216897fb345962952c656149ea72060f9be17a1d04"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#contract-and-delivered-behavior"
+        helps: "Preserves the P2 scope, files, approval and the trusted-directory contract wording."
+      -
+        path: deviations.md
+        hash: "sha256:e0af3bc5868fd2c6b0c7ca8d23a2c66720b4c8fd571bf8bb1ba294e3df41966b"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#historical-limits"
+        helps: Preserves the portable-filesystem limitation and registry-lock side effect.
+      -
+        path: hill.md
+        hash: "sha256:671d065ba602aa53f0dfe53f917161161f7381e0ba89f0a440ecd9f01a0c2d24"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:511464228be551875da934a9df711214ec1d4850bf845407c1f3b85417929170"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#verification-history"
+        helps: Preserves the S1 build evidence and the lock read fix.
+      -
+        path: pitch.md
+        hash: "sha256:0c03e0cb2b048a756ae1b1f2f5015c63d527f50992fae88dcdaf17dd2e6d9430"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#scope-and-no-gos"
+        helps: "Preserves the problem, resolved decisions, no-gos and bet."
+      -
+        path: plan.md
+        hash: "sha256:5b9aaa47509bec8b32c7f8fb30921a7de41db511d970117c04de23349a100e9b"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#scope-and-no-gos"
+        helps: "Preserves the S1 exits, sequential decision and medium risk."
+      -
+        path: reshape.md
+        hash: "sha256:28e32413e4eee70d665438edae18d475f3c34fe28e922a190133c8abf5ff89c4"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#audit-chronology"
+        helps: Preserves the native feasibility next step and that S1 was downhill 75% before narrowing.
+      -
+        path: ship-readiness-2026-09-27.md
+        hash: "sha256:19515514074b2f4bdd3f327fe36f9e122bd5b3cc9cc4f0308ce575a686d15b59"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/path-safety-hardening.md#contract-and-delivered-behavior"
+        helps: "Preserves the reconciliation, evidence and closure plan; adds validator and diff checks."
+  outcomeRecord: "---\nslug: path-safety-hardening\nshipped: 2026-09-27\nschemaVersion: 1\n---\n# path-safety-hardening\n\nLedger commits, archive, removal and recovery now share one transaction context and journal namespace.\nNew writes refuse pending compaction or legacy installer journals; ancestor swaps and symlinks are refused.\nThe supported contract is trusted project directories; hostile ancestor races stay unsolved and open.\n\n- outcome: Managed writes stay inside the project under the trusted-directory contract, and interrupted ledger commits recover.\n- docs: [project readme](README.md)\n- decisions: [shared recovery context and trusted directories](.project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md)\n- knowledge: [lock reader exposed to new callers](.project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md), [in-memory mutant](.project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md)\n- code: [skill registry](ai-framework/scripts/skill-registry.mts), [pitch compress](ai-framework/scripts/pitch-compress.mts), [pitch archive](ai-framework/scripts/pitch-archive.mts)\n- verification: [verification history](.project/records/legacy-upgrades/path-safety-hardening.md#verification-history), [run record](.project/runs/2026-09-27-path-safety-hardening.md)\n- followups: [historical limits](.project/records/legacy-upgrades/path-safety-hardening.md#historical-limits)\n- archive: [source supplement](.project/records/legacy-upgrades/path-safety-hardening.md)\n"

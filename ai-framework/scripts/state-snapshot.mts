@@ -12,6 +12,9 @@ import { createNodeDeps } from "./runtime/node.mts";
 import * as skillDefaults from "./skill-defaults.mts";
 import * as registryModule from "./skill-registry.mts";
 import { inventory } from "./pitch-compress.mts";
+import { compactedSlugs } from "./done-work-index.mts";
+import { createStateGraph } from "./state-graph.mts";
+import { createStateHistory } from "./state-history.mts";
 import { createStateStructure } from "./state-structure.mts";
 
 import type { RegistryContext, RootName } from "./skill-registry.mts";
@@ -30,10 +33,11 @@ export const DEPTH_PLACEHOLDER = "[depth limit]";
 function bindStateSnapshot(deps: RuntimeDeps) {
 const { fs, path } = deps;
 const structureApi = createStateStructure(deps);
+const historyApi = createStateHistory(deps);
 // Text printed to a terminal never carries control characters from project-controlled strings.
 const printable = (text: unknown): string => String(text).replace(/[\u0000-\u0009\u000b-\u001f\u007f-\u009f]/g, "?");
 const STATUSES = new Set(["observed", "proposed", "stale", "unavailable", "unconfigured"]);
-const SUPPORTED_METRICS_SCHEMAS = new Set([1, 2]);
+const SUPPORTED_METRICS_SCHEMAS = new Set([1, 2, 3]);
 const STALE_AFTER_MS = 7 * 24 * 60 * 60 * 1000;
 const MAX_FILE_BYTES = 1024 * 1024;
 // Graphify's project graph holds the code too, so it is far larger than the other sources.
@@ -103,7 +107,7 @@ function readSource(root: string, relative: string, maxBytes = MAX_FILE_BYTES) {
     if (within.startsWith("..") || path.isAbsolute(within)) return { error: "resolves outside the project" };
     if (!stat.isFile()) return { error: "not a file" };
     if (stat.size > maxBytes) return { error: "too large to read" };
-    return { text: fs.readFileSync(full), mtimeMs: stat.mtimeMs };
+    return { text: fs.readFileSync(full), mtimeMs: stat.mtimeMs, bytes: stat.size };
   } catch (error) { return { error: failure(error) }; }
 }
 // Markdown goes through regexes and section splitting; only its first MARKDOWN_LIMIT bytes matter here.
@@ -126,7 +130,7 @@ function resolveRoot(root: string) {
 function readJson(root: string, relative: string, maxBytes = MAX_FILE_BYTES) {
   const source = readSource(root, relative, maxBytes);
   if (source.missing || source.error) return source;
-  try { return { value: JSON.parse(source.text), mtimeMs: source.mtimeMs }; } catch { return { error: "not valid JSON" }; }
+  try { return { value: JSON.parse(source.text), mtimeMs: source.mtimeMs, bytes: source.bytes }; } catch { return { error: "not valid JSON" }; }
 }
 const problem = (source: { missing?: boolean; error?: string }): string | undefined => (source.missing ? "file not present" : source.error);
 
@@ -247,12 +251,14 @@ function pitchesSection(root: string, scrub: (text: unknown) => string) {
   const listed = new Set();
   if (status.text) for (const heading of ["Active pitches", "Parked pitches", "Recent ships (last 5)"]) for (const cells of tableRows(status.text, heading)) listed.add(String(cells[0] || "").replace(/`/g, ""));
   const doneWork = readMarkdown(root, ".project/done-work.md");
-  const compacted = new Map();
-  if (doneWork.text) for (const match of doneWork.text.matchAll(/^## ([a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?) — shipped (\d{4}-\d{2}-\d{2})(?![^\s])/gm)) compacted.set(match[1], match[2]);
+  // One entry per slug: an outcome record wins over a legacy narrative entry, and the record folder is read by name, so a truncated done-work.md cannot hide it.
+  const compacted = new Map([...compactedSlugs(root, deps, doneWork.text ?? "")].map(([slug, info]) => [slug, info.shipped]));
 
   const items = inventory(root, deps).slice(0, 100).map((entry) => {
     const rel = `.project/pitches/${entry.slug}`;
-    const base = { slug: scrub(entry.slug), inStatusMd: listed.has(entry.slug) };
+    // A directory name outside the slug rule is replaced, never copied: scrubbing removes secrets but keeps prose.
+    const nameOk = PITCH_SLUG.test(entry.slug);
+    const base = { slug: nameOk ? scrub(entry.slug) : "(invalid name)", inStatusMd: listed.has(entry.slug) };
     if (entry.reason === "already compacted") {
       const shippedDate = compacted.get(entry.slug) || null;
       // A negative (no shipped date found / not listed) is only uncertain if the source that would
@@ -274,7 +280,7 @@ function pitchesSection(root: string, scrub: (text: unknown) => string) {
     const notListedNote = unsureListed
       ? `${TRUNCATED_NOTE(".project/status.md")}; whether this pitch is listed could not be confirmed`
       : "directory is not listed in .project/status.md, the lifecycle authority";
-    return fact({ ...details, phase: "active", reason: scrub(entry.reason) }, unsureListed ? "stale" : "observed", evidence.length ? evidence : [rel], base.inStatusMd ? undefined : notListedNote);
+    return fact({ ...details, phase: "active", reason: scrub(entry.reason) }, unsureListed ? "stale" : "observed", nameOk ? (evidence.length ? evidence : [rel]) : [".project/pitches"], base.inStatusMd ? undefined : notListedNote);
   });
   const statusMd = status.text
     ? fact({ listed: listed.size }, status.truncated ? "stale" : "observed", [".project/status.md"], status.truncated ? TRUNCATED_NOTE(".project/status.md") : undefined)
@@ -282,8 +288,7 @@ function pitchesSection(root: string, scrub: (text: unknown) => string) {
   return { statusMd, items };
 }
 
-function knowledgeSection(root: string) {
-  const graph = readJson(root, "graphify-out/graph.json", GRAPH_FILE_BYTES);
+function knowledgeSection(root: string, graph: TokenRead) {
   if (!graph.value) return unavailable(`graphify-out/graph.json ${problem(graph)}; run node ai-framework/scripts/graphify.mts`, []);
   const all = Array.isArray(graph.value.nodes) ? graph.value.nodes : null;
   if (!all) return unavailable("graphify-out/graph.json has no nodes array", ["graphify-out/graph.json"]);
@@ -327,10 +332,10 @@ function skillsSection(root: string, scrub: (text: unknown) => string) {
   const caveman = report.defaults.find((item) => item.id.endsWith("/caveman"));
   let modes = null;
   let modesProblem = null;
-  try { modes = skillDefaults.loadModes(root, deps); } catch { modesProblem = "is unreadable, invalid, or outside the project"; }
+  try { modes = skillDefaults.loadModes(root, deps); } catch { modesProblem = "(ai-workflow.toon, or legacy modes.json when absent) is unreadable, invalid, or outside the project"; }
   const resolved = {};
   if (!modesProblem) for (const phase of skillDefaults.PHASES) resolved[phase] = skillDefaults.resolveMode(root, { phase }, deps);
-  const cavemanFact = modesProblem ? unavailable(`modes.json ${modesProblem}`, [".project/skills/modes.json"])
+  const cavemanFact = modesProblem ? unavailable(`caveman mode config ${modesProblem}`, ["ai-workflow.toon", ".project/skills/modes.json"])
     : fact({ installed: Boolean(caveman?.installed), enabled: caveman?.enabled ?? null, phaseGap: caveman?.phaseGap || [], persistentlyOff: modes?.caveman?.enabled === false, resolved }, caveman?.installed ? "observed" : "unconfigured", caveman?.installed ? [".project/skills/registry.json"] : [], caveman?.installed ? undefined : "caveman is not installed, so the instruction in every skill and agent is inert");
   return { installed, caveman: cavemanFact, base, project };
 }
@@ -338,12 +343,14 @@ function skillsSection(root: string, scrub: (text: unknown) => string) {
 function count(value: unknown): number | null { return typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : null; }
 // Reads only fields common to schema v1 and v2 of the token snapshot; anything else is ignored,
 // and a version this reader has not seen is reported rather than guessed at.
-function metricsSection(root: string, now: Date, scrub: (text: unknown) => string) {
-  const file = ".project/metrics/token-consumption.json";
-  const snap = readJson(root, file);
+const TOKEN_FILE = ".project/metrics/token-consumption.json";
+const GRAPH_FILE = "graphify-out/graph.json";
+type TokenRead = ReturnType<typeof readJson>;
+function metricsSection(now: Date, scrub: (text: unknown) => string, snap: TokenRead) {
+  const file = TOKEN_FILE;
   if (!snap.value) return unavailable(`token snapshot ${problem(snap)}`, []);
   const version = snap.value.schemaVersion;
-  if (!SUPPORTED_METRICS_SCHEMAS.has(version)) return unavailable(`unsupported token snapshot schemaVersion ${JSON.stringify(version)}`, [file]);
+  if (!SUPPORTED_METRICS_SCHEMAS.has(version)) return unavailable("unsupported token snapshot schemaVersion", [file]);
   const lifetime = snap.value.lifetime || {};
   const completions = count(lifetime.agentCompletions);
   const reported = count(lifetime.reportedUsageCount);
@@ -357,6 +364,173 @@ function metricsSection(root: string, now: Date, scrub: (text: unknown) => strin
   return fact(value, stale ? "stale" : "observed", [file], stale ? "snapshot is older than 7 days" : measured === "partial" ? `partial: ${reported} of ${completions} completions reported usage` : undefined);
 }
 
+// --- tokens: totals, by-model rows and per-pitch flows, copied (never recomputed) from the one token read ---
+const MAX_TOKEN_ROWS = 20;
+const MODEL_LABEL = /^[A-Za-z0-9._:/@+-]{1,80}$/;
+const VENDOR_LABEL = /^[A-Za-z0-9._-]{1,40}$/;
+const PITCH_SLUG = /^[a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?$/;
+const BUCKET_MODELS = new Set(["(unreported)", "(other)"]);
+const BUCKET_PITCHES = new Set(["(unattributed)", "(other)"]);
+const FLOW_SCOPE = /^S\d{1,3}$/;
+const record = (value: unknown): Record<string, unknown> | null => (value !== null && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : null);
+const byCountThenName = <T extends { completions: number | null }>(name: (row: T) => string) => (a: T, b: T): number => ((b.completions ?? -1) - (a.completions ?? -1)) || (name(a) < name(b) ? -1 : name(a) > name(b) ? 1 : 0);
+
+function modelRows(models: unknown, status: string, file: string) {
+  const rows: Array<{ vendor: string; model: string; bucket: boolean; completions: number | null; reportedUsage: number | null; tokens: number | null }> = [];
+  let dropped = 0;
+  for (const [vendor, perModel] of Object.entries(record(models) ?? {}).slice(0, MAX_TOKEN_ROWS)) {
+    if (!VENDOR_LABEL.test(vendor)) { dropped++; continue; }
+    const kept: typeof rows = [];
+    for (const [model, values] of Object.entries(record(perModel) ?? {})) {
+      if (!MODEL_LABEL.test(model) && !BUCKET_MODELS.has(model)) { dropped++; continue; }
+      const row = record(values) ?? {};
+      const reportedUsage = count(row.reportedUsageCount);
+      kept.push({ vendor, model, bucket: BUCKET_MODELS.has(model), completions: count(row.completions), reportedUsage, tokens: reportedUsage ? count(row.tokens) : null });
+    }
+    kept.sort(byCountThenName((row) => row.model));
+    dropped += Math.max(0, kept.length - MAX_TOKEN_ROWS);
+    rows.push(...kept.slice(0, MAX_TOKEN_ROWS));
+  }
+  if (!rows.length) return unavailable("the token snapshot has no model rows", [file]);
+  const note = dropped ? `${dropped} model rows were dropped (unsafe label or over the ${MAX_TOKEN_ROWS}-row cap)` : "tokens is null where no completion in the row reported usage";
+  return rows.map((row) => fact(row, status, [file], note));
+}
+
+// Per-pitch totals from `flows`, joined to hill scopes by slug only (no resolver is called or copied).
+function flowRows(flows: unknown, status: string, file: string, hillScopes: (slug: string) => Set<string> | null) {
+  const pitches = record(record(flows)?.pitches);
+  if (!pitches) return unavailable("the token snapshot has no flows; token-attribution has not shipped them", [file]);
+  const rows: Array<{ pitch: string; bucket: boolean; completions: number; reportedUsage: number; tokens: number | null; scopeDivergence: unknown }> = [];
+  let dropped = 0;
+  for (const [pitch, entry] of Object.entries(pitches)) {
+    const bucket = BUCKET_PITCHES.has(pitch);
+    if (!bucket && !PITCH_SLUG.test(pitch)) { dropped++; continue; }
+    let completions = 0, reportedUsage = 0, tokens = 0;
+    const scopes = new Set<string>();
+    for (const phase of Object.values(record(record(entry)?.phases) ?? {})) {
+      for (const [scope, perVendor] of Object.entries(record(record(phase)?.scopes) ?? {})) {
+        scopes.add(scope);
+        for (const values of Object.values(record(perVendor) ?? {})) {
+          const row = record(values) ?? {};
+          completions += count(row.completions) ?? 0; reportedUsage += count(row.reportedUsageCount) ?? 0; tokens += count(row.tokens) ?? 0;
+        }
+      }
+    }
+    const hill = bucket ? null : hillScopes(pitch);
+    const flowOnly = hill ? [...scopes].filter((scope) => FLOW_SCOPE.test(scope) && !hill.has(scope)).sort() : [];
+    const scopeDivergence = bucket ? { availability: "unavailable", reason: "bucket rows are never joined to a pitch" }
+      : hill ? { availability: "observed", value: { flowOnly: flowOnly.slice(0, 10), count: flowOnly.length } } : { availability: "unavailable", reason: "the pitch has no hill file" };
+    rows.push({ pitch, bucket, completions, reportedUsage, tokens: reportedUsage ? tokens : null, scopeDivergence });
+  }
+  rows.sort(byCountThenName((row) => row.pitch));
+  const kept = rows.slice(0, MAX_TOKEN_ROWS);
+  if (!kept.length) return unavailable("the token snapshot flows hold no attributable pitch rows", [file]);
+  const note = dropped || rows.length > kept.length ? `top ${MAX_TOKEN_ROWS} pitches; ${dropped} rows dropped for an unsafe key` : "tokens is null where no completion reported usage; buckets are never joined to history";
+  return kept.map((row) => fact(row, status, [file], note));
+}
+
+function hillScopeIds(root: string, slug: string): Set<string> | null {
+  const source = readMarkdown(root, `.project/pitches/${slug}/hill.md`);
+  if (source.text === undefined) return null;
+  const ids = new Set<string>();
+  for (const line of source.text.split("\n")) {
+    if (!line.startsWith("|")) continue;
+    const cell = line.split("|", 3)[1]?.trim() ?? "";
+    if (FLOW_SCOPE.test(cell)) ids.add(cell);
+  }
+  return ids;
+}
+
+function tokensSection(root: string, now: Date, snap: TokenRead) {
+  const file = TOKEN_FILE;
+  const none = (reason: string) => ({ totals: unavailable(reason), byModel: unavailable(reason), flows: unavailable(reason) });
+  if (!snap.value) return none(`token snapshot ${problem(snap)}`);
+  if (!SUPPORTED_METRICS_SCHEMAS.has(snap.value.schemaVersion)) return none("unsupported token snapshot schemaVersion");
+  const age = Date.parse(snap.value.updatedAt);
+  const status = Number.isFinite(age) && now.getTime() - age > STALE_AFTER_MS ? "stale" : "observed";
+  const lifetime = record(snap.value.lifetime) ?? {};
+  const reported = count(lifetime.reportedUsageCount);
+  const completions = count(lifetime.agentCompletions);
+  const raw = record(lifetime.tokens) ?? {};
+  const value = { input: count(raw.input), output: count(raw.output), reasoning: count(raw.reasoning), cacheRead: count(raw.cacheRead), cacheWrite: count(raw.cacheWrite), total: count(raw.total) };
+  const totals = reported
+    ? fact(value, status, [file], `from ${reported} of ${completions ?? "an unknown number of"} completions that reported usage; total is copied, not the sum of the fields${status === "stale" ? "; snapshot is older than 7 days" : ""}`)
+    : unavailable("no completion reported usage", [file]);
+  return { totals, byModel: modelRows(record(snap.value.dimensions)?.models, status, file), flows: flowRows(snap.value.flows, status, file, (slug) => hillScopeIds(root, slug)) };
+}
+
+// --- architecture, history and risks: built from one shared graph parse and bounded reads, never from source contents ---
+const BUDGETS: Record<string, number> = { architecture: 256 * 1024, history: 256 * 1024, risks: 32 * 1024, tokens: 32 * 1024 };
+const GLOBAL_BUDGET = 960 * 1024;
+const sizeOf = (value: unknown): number => new TextEncoder().encode(JSON.stringify(value)).length;
+
+type Marked = { status?: string; note?: string; value?: Record<string, unknown> };
+interface StructureView { tree?: unknown; limits?: { status?: string }; repoShape?: { value?: unknown } }
+
+function deepSections(root: string, now: Date, scrub: (text: unknown) => string, snapshot: Record<string, unknown>, graph: TokenRead) {
+  const graphApi = createStateGraph({ ...deps, scrub });
+  const index = graph.value ? graphApi.indexGraph(graph.value, { bytes: graph.bytes ?? 0, mtimeMs: graph.mtimeMs ?? 0 }, now) : { unavailable: `${GRAPH_FILE} ${problem(graph)}` };
+  const structure = snapshot.structure as StructureView | undefined;
+  const treeFacts = Array.isArray(structure?.tree) ? structure.tree as Array<{ value: { path: string } }> : null;
+  const tree: string[] | null = treeFacts ? treeFacts.map((item) => item.value.path) : null;
+  const opts = { treeTruncated: structure?.limits?.status === "stale", repoShape: typeof structure?.repoShape?.value === "string" ? structure.repoShape.value : null };
+  const dependsOnStructure = unavailable("depends on structure");
+  const fromGraph = section(() => graphApi.architectureFacts(index, tree, root, opts), "architecture graph");
+  const riskGraph = section(() => graphApi.riskGraphFacts(index, tree, root, now, opts), "risks graph");
+  const architecture = {
+    modules: tree ? ("modules" in fromGraph ? fromGraph.modules : fromGraph) : dependsOnStructure,
+    imports: tree ? ("imports" in fromGraph ? fromGraph.imports : fromGraph) : dependsOnStructure,
+    graph: "graph" in fromGraph ? fromGraph.graph : fromGraph,
+    entryPoints: section(() => structureApi.entryPoints(root, { scrub, readMarkdown }), "entry points"),
+    packages: unavailable(opts.repoShape === null ? "structure.repoShape not available" : "deferred to followup pitch state-monorepo-packages"),
+  };
+  const knowledge = "unavailable" in index ? null : graphApi.knowledgeEntries(index);
+  const pitches = snapshot.pitches as { items?: StateFact[] } | undefined;
+  const history = section(() => historyApi.historySection(root, { items: pitches?.items as StateFact[], doneWork: snapshot.doneWork as StateFact, knowledge, readMarkdown, scrub }), "history");
+  const risks = {
+    mostConnected: "mostConnected" in riskGraph ? riskGraph.mostConnected : riskGraph,
+    testFiles: "testFiles" in riskGraph ? riskGraph.testFiles : riskGraph,
+    staleKnowledge: "staleKnowledge" in riskGraph ? riskGraph.staleKnowledge : riskGraph,
+    openFollowups: section(() => historyApi.followupsFact(root, readMarkdown), "followups"),
+    todoMarkers: unavailable("TODO counts need file contents, which the report never reads"),
+  };
+  return { architecture, history, risks };
+}
+
+// Shrinks one section to a byte budget: halve every list, then fall back to counts only. A shrunk fact is never
+// left "observed", so nothing describes a trimmed list as complete.
+function shrinkSection(target: Record<string, unknown>, budget: number): void {
+  const mark = (item: unknown, note: string) => {
+    const marked = item as Marked | null;
+    if (marked && typeof marked === "object" && "status" in marked) { if (marked.status === "observed") marked.status = "stale"; marked.note = marked.note ? `${marked.note}; ${note}` : note; }
+  };
+  for (let level = 1; level <= 8 && sizeOf(target) > budget; level++) {
+    const counts = level > 4;
+    const note = counts ? "shrunk to counts only to fit the size budget" : `shrunk to the top entries to fit the ${Math.round(budget / 1024)} KB budget`;
+    let changed = false;
+    for (const key of Object.keys(target)) {
+      const entry = target[key];
+      if (Array.isArray(entry) && entry.length > (counts ? 0 : 1)) {
+        if (counts) target[key] = fact({ count: entry.length, shrunk: true }, "stale", [], note);
+        else { entry.length = Math.ceil(entry.length / 2); entry.forEach((item) => mark(item, note)); }
+        changed = true;
+      } else if (entry && typeof entry === "object" && (entry as Marked).value && typeof (entry as Marked).value === "object") {
+        const inner = (entry as Marked).value as Record<string, unknown>;
+        for (const [name, list] of Object.entries(inner)) if (Array.isArray(list) && list.length > (counts ? 0 : 1)) { inner[name] = list.slice(0, counts ? 0 : Math.ceil(list.length / 2)); mark(entry, note); changed = true; }
+      }
+    }
+    if (!changed && level < 5) level = 4;
+  }
+}
+
+function applyBudgets(snapshot: Record<string, unknown>): void {
+  for (const [name, budget] of Object.entries(BUDGETS)) if (snapshot[name] && typeof snapshot[name] === "object") shrinkSection(snapshot[name] as Record<string, unknown>, budget);
+  for (const name of ["risks", "history", "architecture", "tokens"]) {
+    if (sizeOf(snapshot) + 4096 <= GLOBAL_BUDGET) break;
+    if (snapshot[name] && typeof snapshot[name] === "object") shrinkSection(snapshot[name] as Record<string, unknown>, 0);
+  }
+}
+
 function runsSection(root: string, scrub: (text: unknown) => string) {
   let names;
   try {
@@ -368,8 +542,9 @@ function runsSection(root: string, scrub: (text: unknown) => string) {
 
 function doneWorkSection(root: string) {
   const source = readMarkdown(root, ".project/done-work.md");
-  if (source.missing || source.error) return unavailable(problem(source), []);
-  const entries = [...source.text.matchAll(/^## ([a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?) — shipped (\d{4}-\d{2}-\d{2})(?![^\s])/gm)].map((match) => ({ slug: match[1], shipped: match[2] }));
+  const all = compactedSlugs(root, deps, source.text ?? "");
+  if ((source.missing || source.error) && all.size === 0) return unavailable(problem(source), []);
+  const entries = [...all].map(([slug, info]) => ({ slug, shipped: info.shipped }));
   const status = source.truncated ? "stale" : "observed";
   return fact({ compacted: entries.length, entries: entries.slice(0, 100) }, status, [".project/done-work.md"], source.truncated ? TRUNCATED_NOTE(".project/done-work.md") : undefined);
 }
@@ -384,6 +559,8 @@ function buildSnapshot(root: string, options: SnapshotOptions = {}) {
   const now = options.now ? new Date(options.now) : new Date(deps.clock.now());
   if (Number.isNaN(now.getTime())) throw new StateError("Invalid --now timestamp");
   const { scrub, counter } = makeScrubber();
+  const tokenFile = readJson(root, TOKEN_FILE);
+  const graphFile = readJson(root, GRAPH_FILE, GRAPH_FILE_BYTES);
   const snapshot = {
     schemaVersion: 1,
     generatedAt: now.toISOString(),
@@ -393,12 +570,15 @@ function buildSnapshot(root: string, options: SnapshotOptions = {}) {
     database: section(() => databaseSection(root), "database"),
     pitches: section(() => pitchesSection(root, scrub), "pitches"),
     doneWork: section(() => doneWorkSection(root), "done-work"),
-    knowledge: section(() => knowledgeSection(root), "knowledge"),
+    knowledge: section(() => knowledgeSection(root, graphFile), "knowledge"),
     structure: section(() => structureApi.scanStructure(root, { scrub, readMarkdown }), "structure"),
     skills: section(() => skillsSection(root, scrub), "skills"),
-    metrics: section(() => metricsSection(root, now, scrub), "metrics"),
+    metrics: section(() => metricsSection(now, scrub, tokenFile), "metrics"),
+    tokens: section(() => tokensSection(root, now, tokenFile), "tokens"),
     runs: section(() => runsSection(root, scrub), "runs"),
   };
+  Object.assign(snapshot, section(() => deepSections(root, now, scrub, snapshot, graphFile), "deep evidence"));
+  applyBudgets(snapshot);
   snapshot.redactions = counter.redactions;
   return snapshot;
 }
@@ -470,7 +650,7 @@ function cli(argv: string[]) {
 }
 
 
-return { printable, STATUSES, buildSnapshot, checkSnapshot, writeSnapshot, writeAtomic, readSource, facts, REPORT_FILE, cli };
+return { printable, STATUSES, buildSnapshot, checkSnapshot, writeSnapshot, writeAtomic, readSource, facts, REPORT_FILE, cli, shrinkSection, applyBudgets };
 }
 
 export function createStateSnapshot(deps: RuntimeDeps): ReturnType<typeof bindStateSnapshot> { return bindStateSnapshot(deps); }

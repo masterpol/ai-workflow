@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 2,
+  "slug": "orca-engines-range",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#scopes-and-behavior",
+      "helps": "What S1 to S4 delivered: range engine, shared engineRange helper, config validation and docs.",
+      "bodyHash": "sha256:cb088283b3d3eb7bad292685f5bc903cfcde46ab73bd254be10f5677006be8f0"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#limits-and-no-gos",
+      "helps": "No network check, no prerelease support, engines.node and engines.bun unchecked.",
+      "bodyHash": "sha256:6aff50e676a5e6c209d826fa8ae5e9644005fbd7804973a6311fa157cc1acd52"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#decisions-and-deviations",
+      "helps": "Hand-written parser, fixture provenance and deviations d1 to d5 including policy-malformed surfacing.",
+      "bodyHash": "sha256:945879e24399c95b7f0270e63fbe6c606a5e217dafb1e8704df8373ad58244d4"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#review-chronology",
+      "helps": "Canary, fixes, differential run and the four acknowledged items.",
+      "bodyHash": "sha256:13c265780346c267522ab4773cd4eab85ecd0b233559ebd728a695ce1351487f"
+    },
+    {
+      "source": "SHIPPED.md#verify",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#historical-verification",
+      "helps": "Historical suite counts and READY states, not a new certification.",
+      "bodyHash": "sha256:c9d8cbf8247f66734efbcd0e48999ff208181124ab7a708c98a034a7588a1b37"
+    },
+    {
+      "source": "SHIPPED.md#upgrade-note",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#upgrade-note",
+      "helps": "A bare engine is now an exact pin; use a greater-or-equal range for the old meaning.",
+      "bodyHash": "sha256:5ab2550718d3738d0d93d686d22367748e02503d585e2f83293e877c835aa933"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#followups",
+      "helps": "Points to the four acknowledged items in the backlog and the worker-list cap blocker.",
+      "bodyHash": "sha256:af20af33a7f0b16b60cc8147464c15a37882275589fde85bb8586ba7e34a2f87"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#limits-and-no-gos",
+      "helps": "Same prohibitions as the shipped no-gos, merged once.",
+      "bodyHash": "sha256:b2d328e93150a11ea99aad369d2ecac577120d6965ab27bb278204a6a2e96432"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#decisions-and-deviations",
+      "helps": "Prerelease rejection, fixture-source risk and the engines.node and engines.bun no-go.",
+      "bodyHash": "sha256:0de820036b6435cce40d7395cad12b60016004dabfd5696d6f2c118ba93480d8"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:7e115c49539c7e67f2e39dbd4047f583fde9dae728f9b68d92cf04400bd809e9",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#scopes-and-behavior",
+      "helps": "Covered by the scopes, upgrade note, verification and followups sections."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:062f2bc2067ada8a72ae18908435f660bf51fb6cbc9c13432be75ce4b9319872",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#review-chronology",
+      "helps": "Preserves the findings table, canary and the npm-parity differential run."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:25b0a910fb75ce97f2444b368a2887ca6b495c207e5bd4c43b4468b6753793de",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#decisions-and-deviations",
+      "helps": "Preserves deviations d1 to d5 with their reasons."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:3099dcace3769275d3124b1a0c541c03b29db2a56aff8c09142363e1f2e3aaee",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:28f4df7510a334654934e7e42e3097b43d3e9ce7e5bc356afa05b18c9a5ebd9e",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#problem-and-design",
+      "helps": "Preserves the problem, grammar, default and knowledge consulted."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:9f3efa3ca5649877c8d131c15bc3107a3873068f31d7173eb7420d33613f3da5",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-engines-range.md#scopes-and-behavior",
+      "helps": "Preserves exit criteria, risks, the no-dispatch decision and the worker-list blocker."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-22T19:28:23.683Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:399a4880361106d882ab8e4264840731884c6a81b39e603e858083c080485b4c",
+    "introducingCommit": "fc7d686ccab4849f255e09ccf2e6fdbc17082f54"
+  }
+}

@@ -1,0 +1,73 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[5]: toon-machine-data,vendor-model-toon,workflow-usage-capture,orca-role-pools,upstream-project-drift
+sourceBytes: 388597
+sourceFiles: 43
+requiredSections: 95
+retainedSections: 95
+otherFilesAccounted: 41
+retainedOtherFiles: 35
+omissions:
+  process-noise: 6
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[5]:
+  -
+    slug: toon-machine-data
+    payloadHash: "sha256:cd461a08dc215b908a02987bdfaf68be68b3a1604bdc8ff21f3f2a3afc9b6740"
+    supplementHash: "sha256:35f00e8f1128a215782a0d3b10a97e457e2b6a9edd5ef81346a09307cc6a0750"
+    sourceProof:
+      archiveDirectory: toon-machine-data-2026-10-19T03-29-51-996Z
+      manifestHash: "sha256:4da323f0052807fc224c32da2f0c8a55c6db8108738cc5de37db2c398530b401"
+      sourceBytes: 43364
+      verifiedFiles: 9
+    recordBytes: 1731
+  -
+    slug: vendor-model-toon
+    payloadHash: "sha256:87b92048197dd4d3a47cd3defb4ee27b545b96a665c06a455b0eed42fe59c8e6"
+    supplementHash: "sha256:cbb2c816ac30c669da4934c08f94f62e34ba784718be4302c8b0dd953364b38f"
+    sourceProof:
+      archiveDirectory: vendor-model-toon-2026-10-19T03-28-10-563Z
+      manifestHash: "sha256:8927ca321712a7867ea15cb93c44545feb9ec68c2fd439216a3205c8cdab0724"
+      sourceBytes: 21861
+      verifiedFiles: 6
+    recordBytes: 1546
+  -
+    slug: workflow-usage-capture
+    payloadHash: "sha256:42e6591535b363d8c9b59cda44597abdef3e42425c5789ddc3f44594cdfe9bd0"
+    supplementHash: "sha256:cc6832db83122141cfe3cbb061b1ab169b868a3b9be3b0149d5aeb9ea5c0c5eb"
+    sourceProof:
+      archiveDirectory: workflow-usage-capture-2026-10-22T02-43-36-970Z
+      manifestHash: "sha256:6995a4a98dff700457b747d1cd9b9c30a7b4c6121ac3ddf2ed16bddc3d2724d0"
+      sourceBytes: 181552
+      verifiedFiles: 12
+    recordBytes: 1992
+  -
+    slug: orca-role-pools
+    payloadHash: "sha256:de3a2c572dbc6e4758734d66bcb513617e120f3f5cbe47f9f276e7655196bc11"
+    supplementHash: "sha256:9ce929eaae69830c9063ad4fef3837c09e7d9649b1441c0cef02256a1a6a2102"
+    sourceProof:
+      archiveDirectory: orca-role-pools-2026-10-19T03-29-30-919Z
+      manifestHash: "sha256:df65378316f3ba52832af554afc0eaf618844fb7431b49ffe06ed20594c910bd"
+      sourceBytes: 48063
+      verifiedFiles: 7
+    recordBytes: 1746
+  -
+    slug: upstream-project-drift
+    payloadHash: "sha256:7f56ca7b0d5871c4a91d168732875829ad1d1a3557cd57d8bd09c3509485f657"
+    supplementHash: "sha256:91578593398fa96587540f7473e0e79b642a4254ec55df26207771b76c0f1472"
+    sourceProof:
+      archiveDirectory: upstream-project-drift-2026-10-19T03-31-00-981Z
+      manifestHash: "sha256:476a925907b0262c63f1804b836bc5c6f070ae3df83160b6fc73218518f630b0"
+      sourceBytes: 93757
+      verifiedFiles: 9
+    recordBytes: 1543
+validation: "{\"slug\":\"toon-machine-data\",\"coverage\":1,\"sections\":7,\"otherFiles\":9,\"omissions\":{\"process-noise\":2},\"acceptedGaps\":[],\"recordBytes\":1731,\"recordCap\":3000,\"supplementBytes\":17471,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"vendor-model-toon\",\"coverage\":1,\"sections\":13,\"otherFiles\":6,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1546,\"recordCap\":3000,\"supplementBytes\":10120,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"workflow-usage-capture\",\"coverage\":1,\"sections\":31,\"otherFiles\":10,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1992,\"recordCap\":3000,\"supplementBytes\":31530,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-role-pools\",\"coverage\":1,\"sections\":23,\"otherFiles\":7,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1746,\"recordCap\":3000,\"supplementBytes\":21840,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"upstream-project-drift\",\"coverage\":1,\"sections\":21,\"otherFiles\":9,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1543,\"recordCap\":3000,\"supplementBytes\":23286,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"newKnowledgeEntries\":0,\"sourceArchivesReopened\":false}"
+rehearsal: "toon-machine-data: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 25 neighbouring done-work entries byte-identical\nvendor-model-toon: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 25 neighbouring done-work entries byte-identical\nworkflow-usage-capture: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 25 neighbouring done-work entries byte-identical\norca-role-pools: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 25 neighbouring done-work entries byte-identical\nupstream-project-drift: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links passed; 25 neighbouring done-work entries byte-identical\nRehearsal: 5 generated index rows, 5 upgraded slugs, retired narratives absent, neighbouring done-work entries byte-identical; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 26
+  partial: 0
+  upgraded: 20
+  total: 46
+sourceArchivesReopenedForRehearsal: false

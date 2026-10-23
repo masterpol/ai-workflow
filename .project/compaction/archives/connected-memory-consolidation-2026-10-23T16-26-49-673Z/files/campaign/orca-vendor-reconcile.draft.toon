@@ -1,0 +1,33 @@
+@toon-data 1
+slug: orca-vendor-reconcile
+draft: true
+state: needs-decision
+ledgerHash: "sha256:d7660d2ab260fd05d03b646ec427f8bf83ef77889de6a9f916cc6fbda95ae73b"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-reconcile.md": "sha256:b8743db573ee0e696f2e54afa76698dd566eab836f9925b312077b7504039325"
+legacyEntryHash: "sha256:9062d89dd85d5a1ec373316a8c2e460844396d554b7d9ad41c89b54aedb665b3"
+mapping:
+  schemaVersion: 2
+  sections[7]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#audit",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-3-shippedmdaudit",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-4-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#followups",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-5-shippedmdfollowups",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-6-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/orca-vendor-reconcile.md#section-7-pitchmdrabbit-holes",null,null
+  otherFiles[0]:
+judgments[7]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-3-shippedmdaudit",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-4-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-5-shippedmdfollowups",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-6-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-reconcile.md#section-7-pitchmdrabbit-holes",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-vendor-reconcile\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# orca-vendor-reconcile\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-vendor-reconcile","sha256:9062d89dd85d5a1ec373316a8c2e460844396d554b7d9ad41c89b54aedb665b3","## orca-vendor-reconcile — shipped 2026-10-08\n\nOrca reconcile core (v2.15.0-2.15.1) added hardened diff admission, check-first apply with touched-path rollback, hash-verified evidence, positive-proof cleanup and orchestration, off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true`. Node 982, Bun 966; three audit cycles (13 must-fix fixed) plus a later independent re-review. Incident: a subagent ran a destructive git command in the real repo; subagents now never run destructive git outside scratch repos.\n\nLessons: [[git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded]], [[prove-a-guard-test-with-an-in-memory-mutant]].\n",false
+  ".project/records/pitch-compression/orca-vendor-reconcile.md","sha256:b8743db573ee0e696f2e54afa76698dd566eab836f9925b312077b7504039325","# Compaction record: orca-vendor-reconcile\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded]], [[prove-a-guard-test-with-an-in-memory-mutant]], [[keep-the-fakes-guarantee-the-thing-they-replace]].\n\n## Section 1: SHIPPED.md#final-verification\n\nNode 982/982; Bun 966 pass, 0 fail on the final run (earlier Bun failures were another session's half-written file and a collector-lease flake under load). workflow-doctor and setup-validator READY, graphify CLEAN, docs-links 0 broken. Reconcile is a library, off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true`, wired into no phase at ship time.\n\n## Section 2: SHIPPED.md#reconciliation\n\nR1 diff admission `orca-diff-admit.mts` (31 tests). R2 snapshot, apply, rollback `orca-apply.mts` (20 tests; check-first, touched-path rollback, hidden-edit and filter guards). R3 evidence and cleanup `orca-evidence.mts` (19 tests; hash-verified evidence, positive-proof cleanup re-checked at perform). R4 orchestration `orca-reconcile.mts` (38 tests on real git repos and worktrees). R5 release (docs in `orca-vendors.md`, CHANGELOG 2.15.0 and 2.15.1).\n\n## Section 3: SHIPPED.md#audit\n\nThree cycles with 8, 4 and 1 must-fix findings, all fixed; the cycle-3 fixes were not independently re-reviewed at the time (a later independent re-review passed with five should-fix items, shipped in the follow-up commit). Reviewers independent with caught canaries. Incident D2: an R2 subagent ran `git reset --hard` in the real repo and recovered it; rule: subagents never run destructive git outside scratch repos.\n\n## Section 4: SHIPPED.md#no-gos-honored\n\nNo scheduler, remote support, forced parallelism, permission bypass, automatic commits or publication; no phase wiring or grader (done in `orca-vendor-reconcile-integration`).\n\n## Section 5: SHIPPED.md#followups\n\nTracked in `_followups.md` unde",true
+unavailable[0]:

@@ -1,0 +1,141 @@
+@toon-data 1
+ledgerHash: "sha256:e258c63d1ce710154472f797202e4f0bb70384ae7999ae4c4d45111ff98bd866"
+legacyEntryHash: "sha256:103b80209ee1a625c61ce04d7797c200a4eb4d81f5ced1769126bb9fcc0c7629"
+bindings:
+  ".project/records/pitch-compression/ts-runtime-injection.md": "sha256:3a1c5a664e6de5a222057e9651edeb27af9914fc2a95785ae861d635c897eafa"
+  ".project/records/legacy-upgrades/ts-runtime-injection.md": "sha256:43cea03a0fe93ec19ba3fcf4c78dc028de6e6bf38c4e7a6b46e417ac2177231f"
+mapping:
+  schemaVersion: 2
+  sections[7]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",know-how,merged,".project/records/pitch-compression/ts-runtime-injection.md#section-1-shippedmdfinal-verification",Preserves historical suite evidence and unavailable command categories.,"sha256:01834276fad4a4700cc59bf2a27afeab2b0c3193889266444ac2046b4852837c"
+    "SHIPPED.md#reconciliation",decision,merged,".project/records/legacy-upgrades/ts-runtime-injection.md#scope-and-historical-limits",Retains direct-entry decision while qualifying plugin and Python exceptions.,"sha256:ba041eedd8edde3e12eb999f22b271609ee48ee542c46a089c70f898bc44e41c"
+    "SHIPPED.md#audit",know-how,merged,".project/records/legacy-upgrades/ts-runtime-injection.md#upgrade-and-audit-lessons",Retains audit findings and parser-containment lessons with historical closure linked.,"sha256:c6cd41d142d88f1b8562388ee94fd8656275af9fea4481fb112277cead5eeb54"
+    "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/ts-runtime-injection.md#scope-and-historical-limits",Preserves dependency/history constraints with the dated reproduction-command exception.,"sha256:c3c75da0f2665eb904fec0a78fa9aa25ebf74e318559830dae77e260d2bd6cee"
+    "SHIPPED.md#followups",limit,merged,".project/records/pitch-compression/ts-runtime-injection.md#section-5-shippedmdfollowups",Retains the historical followup pointer with detailed limitations in the supplement.,"sha256:99d47c45f606a1228a63be438c7d519ad83ca3be1d2fb9f2e35a41bd3488d26c"
+    "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/ts-runtime-injection.md#scope-and-historical-limits","Preserves runtime, dependency, test-runner and native-safety rewrite exclusions.","sha256:483dbcf546cd73ead5999bca2e3089bad8d5ff316ccf03845f7a5dad0e65ad90"
+    "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/ts-runtime-injection.md#module-and-adapter-decisions","Retains explicit ESM rationale, adapter parity and accepted semantic differences.","sha256:3c5d10a113f78160a4a7965f91fd83591beb9dd056334726650913a0c920227d"
+  otherFiles[21]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:d27b947bb04a8ce845b0ac951407218ff0d39ba9771cc6b7ea821436be21cf21"
+      disposition: merged
+      destination: ".project/records/pitch-compression/ts-runtime-injection.md"
+      helps: "Retains historical verification and closure, with supplemental scope and evidence qualifications."
+    -
+      path: baseline-g1.md
+      hash: "sha256:347173b10f61922200d7b2c32de81960e96cdf05313b72bc6b330e738e3aed00"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g1b.md
+      hash: "sha256:14808d5d7e7d806ae34a2c94528cfbfff2b7c516c459d1ea9bfad26c43f571a6"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g2.md
+      hash: "sha256:2f3a107c191988e2acb42156f898b42f496218688a8a2b1ff8a5511d05348bb9"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g3.md
+      hash: "sha256:09b393b3175a2f01a26f8c39d69562655e583292230251004e195b366ef679f7"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g4.md
+      hash: "sha256:96d0311f73db849670341892929da28644f3b8a5f5370bac00fd7606deac6da5"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g5.md
+      hash: "sha256:6517a4eb2a8bbbc877765b2f1ec900abbfa1c202400e443d484c6a17c4d23962"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g6.md
+      hash: "sha256:d9f2f1a35b355b329304fed1ff69f51e2ff66b33bfec47a3d9839b3143188c32"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g7.md
+      hash: "sha256:48430b274431caa2ed618505dff3441e85980f5f3dc3fa9a95fba26287517923"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g8.md
+      hash: "sha256:5a14bb0b426e6fdfd5f42db35f165344aebe8005f19b69fc32711487220cb858"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline-g9.md
+      hash: "sha256:e802aa0abd452b695d20b2340b95f14370b397267944ef14c72d5d572d0da69c"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains baseline method, fixture completeness and adapter/instrumentation lessons; raw dated hashes and counts add no enduring behavior."
+    -
+      path: baseline.md
+      hash: "sha256:a217c0b1085fcb092c6da971582f406f6c38289c63a6f23983afa42dfbaf9752"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: checkpoint.md
+      hash: "sha256:3a93eba630bd9d335206d4c42a1f4b76f947bacb0e66f44fe587d775f63a6c1e"
+      disposition: omitted
+      reason: superseded
+    -
+      path: deviations.md
+      hash: "sha256:b42b6d9bd7dd618957a82d9007ecf5841b83c84ea360a8f1dc3d45e499271c71"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains accepted adapter/behavior differences, shared ownership and historical unresolved limits."
+    -
+      path: group-brief.md
+      hash: "sha256:f3bc63d0c8ae3c4278d5b51eb46e5ea1970a947560b4d06bc8b05993f4b5a614"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains shared-capability ownership, preserved assertions and parity requirements."
+    -
+      path: hill.md
+      hash: "sha256:85181b3aa15a9cd9dce47fda731d863a21bb011addf37d3c0bf4eca5747d71ba"
+      disposition: omitted
+      reason: superseded
+    -
+      path: log.md
+      hash: "sha256:53c42668150d85511a98edfd9303a180e2013dea8baa6b08560c0ce116138ba9"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains runtime gaps, independent verification, discovery and final audit lessons."
+    -
+      path: pitch.md
+      hash: "sha256:f753b2392f2c507e3eedcd12841ee44b769da3d389f5151297ddbd78cd96d426"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains module rationale, rewrite boundaries and upgrade/discovery lessons."
+    -
+      path: plan.md
+      hash: "sha256:8a2534f2a2debef1d69d4358b0b4efc22c5dc9ff48bdfbfcc71758db445b4e2d"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains final direct-entry scope, real upgrade sequence and explicit evidence requirements."
+    -
+      path: verification-w2-g8.md
+      hash: "sha256:c3e9cad6c8b3002ffa50d1599d3220536a14760edfec07f7be5a7ae1461233a4"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains reconstructed reference provenance, hidden discovery and isolated mutation safeguards."
+    -
+      path: verification-w2.md
+      hash: "sha256:921f2834e66411ed8f90d7ecbb131b9ea481a51d14836f5098de96fc3eb23390"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/ts-runtime-injection.md"
+      helps: "Retains independently rerun shared gates, adapter ownership and sandbox execution limits."
+outcomeRecord: "---\nslug: ts-runtime-injection\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# ts-runtime-injection\n\nWorkflow tooling uses injected runtime adapters and direct TypeScript entries.\nCurrent runtime and sync documentation own execution and upgrade guidance.\nThe source supplement preserves historical exceptions, migration lessons and verification limits.\n\n- outcome: Injected Node and Bun adapters support direct workflow tooling without a build step.\n- docs: [runtime](ai-framework/scripts/runtime/README.md), [upgrade guidance](ai-framework/docs/versioning-and-sync.md)\n- decisions: [module and adapter choices](.project/records/legacy-upgrades/ts-runtime-injection.md#module-and-adapter-decisions)\n- knowledge: [sync safety](.project/knowledge/patterns/sync-tools-refuse-symlinks-in-source-and-destination.md)\n- code: [runtime selection](ai-framework/scripts/runtime/select.mts)\n- verification: [historical closure](.project/records/pitch-compression/ts-runtime-injection.md)\n- followups: [historical limits](.project/records/legacy-upgrades/ts-runtime-injection.md#scope-and-historical-limits)\n- archive: [compact record](.project/records/pitch-compression/ts-runtime-injection.md), [source supplement](.project/records/legacy-upgrades/ts-runtime-injection.md)\n"

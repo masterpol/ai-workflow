@@ -1,0 +1,50 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: state-report-redesign
+sourceProof:
+  archiveDirectory: state-report-redesign-2026-10-22T02-43-20-872Z
+  manifestHash: "sha256:aebd977224c12f2ecd187437a39243ccc18def4dd5b920fa32cab339a3f4ca87"
+  sourceBytes: 52999
+  verifiedFiles: 12
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/state-report-redesign.supplement.md"
+  destination: ".project/records/legacy-upgrades/state-report-redesign.md"
+  hash: "sha256:55979bfad72c0968f282a9fea318a3e7239a8360a33a788316fee84ac2a1f52d"
+payload:
+  ledgerHash: "sha256:f2741b481f4320c3b739e0dd026e79b69f7d5ad56245dc66cda4371ed37ff4c6"
+  legacyEntryHash: "sha256:1dc9f8cd575d675cf3d27e1db25306754163d93887488f4f6311c40cf813b0c0"
+  bindings:
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    ".project/runs/2026-10-19-state-report-redesign-hill.md": "sha256:0fb213f36827d196279e1d4ef355a2249bdf5c79a3334fb67a7eb5c0b5483373"
+    ".project/records/legacy-upgrades/state-report-redesign.md": "sha256:55979bfad72c0968f282a9fea318a3e7239a8360a33a788316fee84ac2a1f52d"
+  mapping:
+    schemaVersion: 2
+    sections[8]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scopes",behavior,merged,".project/records/legacy-upgrades/state-report-redesign.md#what-shipped","Scope outcomes S1 to S7 and the deviations behind them: plain throws, horizontal bars and git apply.","sha256:26ee26cf709230d94717b74301420fe130ff566f50a92506652467c6d215fa4e"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/state-report-redesign.md#standing-constraints","Which no-gos held, and the replaced token-share and folder-size charts.","sha256:afbb2d7ee1e97b748e69cc14754195ad6c475ad3f3810a220e2ba482140b2a87"
+      "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage","Rabbit holes resolved and the two audit surprises: prototype keys and weak tests.","sha256:47ca4da62437e5b69594a1f2b5cc09ab3cb2332166a17a16d51c55860f661950"
+      "SHIPPED.md#evidence",know-how,merged,".project/records/legacy-upgrades/state-report-redesign.md#verification-history","200 tests against a 170 baseline, two full-suite runs and the validator and doctor verdicts.","sha256:2be8e392e9107334467049c577f82f33df4c231ea16541c4366f1e18a7e2534a"
+      "SHIPPED.md#followups-generated",limit,merged,".project/records/legacy-upgrades/state-report-redesign.md#limits-and-open-items",The seven leftovers and where the backlog keeps them.,"sha256:e4de583bdfa7fd6285f19ebff53a427b8d46a8ddcecb0ff4411d0458eea49404"
+      "SHIPPED.md#doc-updates",behavior,merged,".project/records/legacy-upgrades/state-report-redesign.md#contract-and-docs",The state-report.md scope and the stale /state skill sentence.,"sha256:d86c16ebf824ba83ca65c0d69ddabc85b210a5b801e514aed14415870c0b0013"
+      "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/state-report-redesign.md#standing-constraints","The five no-gos: no script, no lifecycle edits, no new facts, no CSS copy and additive schema.","sha256:235a310a0d1bf75bb3f99e9b11ff9d9796db5869246ab5793606ed1e82c5185f"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/state-report-redesign.md#scope-and-contract","Resolved, pushed-to-plan and no-go items, including critique S1 to S4, A1, A2, X4 and X9.","sha256:8c1455e61edf01ad4a3b9e822537e500399ab0a0e846eadd3cc3b619f0b3845b"
+    otherFiles[12]{path,hash,disposition,destination,helps}:
+      SHIPPED.md,"sha256:e11cd6bd07fcd98dc6c228a7b305795726cf6216a74d92e4db718db93fa53ab7",merged,".project/records/legacy-upgrades/state-report-redesign.md#what-shipped","Preserves the counts, caps and scope outcomes across the supplement."
+      audit-records/code.md,"sha256:d99289575f3fb2bf010f15db5ee398df1ca2ac1decb246b5583387901b8cd227",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",Preserves the code review canary result and its independence.
+      audit-records/cross.md,"sha256:cba5d47e0314ed7b070669639cb776dd8b71a649291200e7028295cc4713cba9",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",Preserves the cross-pitch finding X1 and the merge order.
+      audit-records/sec2.md,"sha256:48943f368b50b781158099c88dc2850eb786b8f6dcab54c7b9c5afac7976212a",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",Preserves the retried security review and its refuted findings.
+      audit-records/security.md,"sha256:1770ff72e18a7dd09b497be9b9a991eb5e55d0f6892eb2b4b150ed94b67405fb",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",Preserves the first security review and why it was incomplete.
+      audit-records/tests.md,"sha256:a528411afa0365efe3944036f57ef94f32b9b4e0ec3dc3810303299415a45457",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",Preserves the first test review and why it was incomplete.
+      audit-records/tests2.md,"sha256:222f3ef3dcaca66bbc54f2c9f3be3da11f296f4fc854aa06cf2721444cef28a3",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage","Preserves the retried test review, the surviving mutants and the added tests."
+      audit-records/ux.md,"sha256:970ab962d0e01026939affe0904995b5d8882daf78b3eee492ba191a723269b7",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",Preserves the UX findings U1 to U3 and their fixes.
+      audit.md,"sha256:725eb067a891bf92ba04151e919ca6f37f4cd72519c1039b6b8b25555926003a",merged,".project/records/legacy-upgrades/state-report-redesign.md#audit-triage","Preserves the cycle 1 triage, the fixed and refuted findings and the environment blocker."
+      hill.md,"sha256:c8a670b7ad8aac2a52bb6dd710bd56916e3818af76dd39bdb6678a9a6adfade5",merged,".project/runs/2026-10-19-state-report-redesign-hill.md",Byte-identical copy of the final scope positions and test counts.
+      pitch.md,"sha256:c07cc49e782255c9a562384f81f11a8fe311bb4d5299082af1d6804429e97f27",merged,".project/records/legacy-upgrades/state-report-redesign.md#what-shipped","Preserves the problem, owner decisions, knowledge consulted, critique table and bet."
+      plan.md,"sha256:8055363a06fa76dbaf7cf0276ab1516f5a66d27ecca5717890bba0023392deaa",merged,".project/records/legacy-upgrades/state-report-redesign.md#scope-and-contract","Preserves the seven plan corrections, detector precedence, exit criteria and the parallel plan."
+  outcomeRecord: "---\nslug: state-report-redesign\nshipped: 2026-10-19\nschemaVersion: 1\n---\n# state-report-redesign\n\nThe /state report was redesigned: one owned stylesheet and shell, a slate and blue default theme, SVG bar charts with data tables, headline cards, five empty fragment slots and a repoShape detector for monorepos.\nOne audit cycle fixed seven should-fix findings after every reviewer must-fix proved to be a planted canary; 200 state tests pass against a 170 baseline.\nRelease 2.33.0 shipped, 12 files and 414 production lines. Skill wording and browser checks at 360px and print remain open.\n\n- outcome: A redesigned inert report with charts, navigation and theme precedence ships; the AI slots stay empty until later parts.\n- docs: [state report guide](ai-framework/integrations/state-report.md)\n- decisions: [state report design](.project/knowledge/decisions/project-state-report-design.md), [bounded font discovery](.project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md)\n- knowledge: [prototype keys in counters](.project/knowledge/issues/counting-untrusted-labels-in-a-plain-object-inherits-prototype-keys.md), [scratch copy runs its suites](.project/knowledge/issues/an-audit-scratch-copy-must-run-its-own-suites.md)\n- code: [design](ai-framework/scripts/state-design.mts), [charts](ai-framework/scripts/state-charts.mts), [structure](ai-framework/scripts/state-structure.mts), [theme](ai-framework/scripts/state-theme.mts)\n- verification: [verification history](.project/records/legacy-upgrades/state-report-redesign.md#verification-history)\n- followups: [limits and open items](.project/records/legacy-upgrades/state-report-redesign.md#limits-and-open-items), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/state-report-redesign.md)\n"
+  acceptDestinationDrift:
+    ".project/pitches/_followups.md":
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 443-451, are unchanged (lines 443-523 hash equal)."

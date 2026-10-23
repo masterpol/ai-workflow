@@ -8,6 +8,8 @@ import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
 import { markdown, html } from "./token-report.mts";
 import { withLease } from "./metrics-lock.mts";
+import { readTranscriptUsage } from "./transcript-usage.mts";
+import type { MessageUsage, UsageRead } from "./transcript-usage.mts";
 import type { LockOptions } from "./metrics-lock.mts";
 
 const SNAPSHOT_NAME = "token-consumption.json";
@@ -25,6 +27,22 @@ const MODE = /^[a-z][a-z-]{0,23}$/;
 const MAX_STDIN_BYTES = 1024 * 1024;
 const MAX_SNAPSHOT_BYTES = 4 * 1024 * 1024;
 const UNREPORTED = "(unreported)";
+const UNATTRIBUTED = "(unattributed)";
+const NO_SCOPE = "(none)";
+// A pointer is replaced by the next phase start and otherwise ends by this sliding TTL: no hook fires when a phase finishes.
+const CONTEXT_TTL_MS = 6 * 60 * 60 * 1000;
+const CONTEXT_CAP = 32;
+const MAX_ARGS_LENGTH = 1000;
+const MAX_ARG_TOKENS = 12;
+const MAX_FLOW_PITCHES = 50;
+const MAX_FLOW_SCOPES = 25;
+const MAX_FLOW_LEAVES = 600;
+const MAX_TRANSCRIPTS = 200;
+const RECENT_TRANSCRIPT_IDS = 50;
+const MAX_TRANSCRIPT_PATH = 4096;
+const PHASES = new Set(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
+const PITCH_SLUG = /^[a-z0-9][a-z0-9-]{0,79}$/;
+const SCOPE_TOKEN = /^S\d{1,3}$/;
 const OTHER = "(other)";
 // Names that would be unsafe or ambiguous as map keys are folded into OTHER, never stored.
 const RESERVED_NAMES = new Set(["__proto__", "constructor", "prototype", UNREPORTED, OTHER]);
@@ -52,6 +70,14 @@ type ByVendor<T> = Record<string, Record<string, T>>;
 export interface Dimensions { since: string | null; models: ByVendor<Row>; agents: ByVendor<Row>; efforts: ByVendor<Row>; skills: ByVendor<{ uses: number }> }
 export interface Routing { applied: true; models?: string; agents?: string; efforts?: string }
 
+/** The snapshot's on-disk revision. A file with a higher revision is refused, never rewritten. */
+export const SNAPSHOT_REVISION = 3;
+export interface FlowRouting { applied: true; pitch: string; phase: string; scope: string }
+export interface FlowPitch { at?: string; phases: Record<string, { scopes: Record<string, Record<string, Row>> }> }
+export interface Flows { since: string | null; pitches: Record<string, FlowPitch> }
+export interface TranscriptCursor { offset: number; size: number; ino: number; dev: number; recentIds: string[]; at: string }
+export interface ActiveContext { pitch: string; phase: string; scope: string; at: string }
+
 export interface CompletionRecord {
   id: string | null;
   identityKey: string;
@@ -71,6 +97,7 @@ export interface CompletionRecord {
   costUsd: number | null;
   mode: string | null;
   dimensions: Routing | null;
+  flow?: FlowRouting | null;
 }
 
 export interface Snapshot {
@@ -83,6 +110,9 @@ export interface Snapshot {
   recentEventKeys: string[];
   recentSkillKeys: string[];
   agentModels: Record<string, string>;
+  flows: Flows;
+  transcripts: Record<string, TranscriptCursor>;
+  contexts: Record<string, ActiveContext>;
 }
 
 /** What the plugin and the hooks pass in. Every field is untrusted payload data. */
@@ -205,6 +235,8 @@ function bundleDefaultMode(deps: RuntimeDeps): unknown {
 // pulling in skill-defaults' full module (its skill-registry dependency is unrelated to a
 // hook's own invocation shape); the bundle default is read from the same catalog JSON
 // skill-defaults uses, so the fallback value is never duplicated by hand.
+// modes.json legacy-window note (X8): this hook deliberately keeps the legacy .project/skills/modes.json read, not loadConfig,
+// for one minor version so attribution cannot disagree with a legacy-warning window in skill-defaults; revisit when that window closes.
 function currentCavemanMode(root: string, deps: RuntimeDeps): string | null {
   const { fs, path } = deps;
   try {
@@ -264,9 +296,13 @@ function blankDimensions(since: string | null = null): Dimensions {
   return { since, models: nullMap(), agents: nullMap(), efforts: nullMap(), skills: nullMap() };
 }
 
+function blankFlows(since: string | null = null): Flows {
+  return { since, pitches: nullMap() };
+}
+
 export function blankSnapshot(): Snapshot {
   return {
-    schemaVersion: 2,
+    schemaVersion: SNAPSHOT_REVISION,
     updatedAt: null,
     current: null,
     previous: null,
@@ -275,6 +311,9 @@ export function blankSnapshot(): Snapshot {
     recentEventKeys: [],
     recentSkillKeys: [],
     agentModels: nullMap(),
+    flows: blankFlows(),
+    transcripts: nullMap(),
+    contexts: nullMap(),
   };
 }
 
@@ -345,9 +384,199 @@ function applyDimensions(dimensions: Dimensions, record: CompletionRecord, direc
   }
 }
 
-export function applyToSnapshot(snapshot: Snapshot, record: CompletionRecord, direction: number): void {
+
+// ---- Flows: pitch > phase > scope > vendor rows, stamped on the record so reversal never re-resolves ----
+
+const FLOW_PHASES = new Set([...PHASES, UNATTRIBUTED, OTHER]);
+const leafCount = (flows: Flows): number => Object.values(flows.pitches).reduce((sum, pitch) => sum + Object.values(pitch.phases).reduce((inner, phase) => inner + Object.values(phase.scopes).reduce((leaves, byVendor) => leaves + Object.keys(byVendor).length, 0), 0), 0);
+
+function mergeRow(target: Record<string, Row>, vendor: string, row: Row): void {
+  const into = (target[vendor] ||= blankRow());
+  into.completions += row.completions;
+  into.reportedUsageCount += row.reportedUsageCount;
+  into.unavailableCount += row.unavailableCount;
+  into.tokens += row.tokens;
+  into.costUsd += row.costUsd;
+  into.pricedCount += row.pricedCount;
+}
+
+function flowContainers(flows: Flows, pitch: string, phase: string, scope: string): Record<string, Row> {
+  const entry = (flows.pitches[pitch] ||= { phases: nullMap() });
+  const scopes = (entry.phases[phase] ||= { scopes: nullMap() }).scopes;
+  return (scopes[scope] ||= nullMap<Row>());
+}
+
+function pruneFlow(flows: Flows, pitch: string, phase: string, scope: string): void {
+  const entry = flows.pitches[pitch];
+  const scopes = entry?.phases[phase]?.scopes;
+  if (scopes === undefined) return;
+  if (scopes[scope] && Object.keys(scopes[scope]).length === 0) delete scopes[scope];
+  if (Object.keys(scopes).length === 0) delete entry.phases[phase];
+  if (Object.keys(entry.phases).length === 0) delete flows.pitches[pitch];
+}
+
+// A row that the current or previous record routes to must stay, or reversing that record would underflow.
+const routedTo = (snapshot: Snapshot, pitch: string, phase?: string, scope?: string): boolean => [snapshot.current, snapshot.previous]
+  .some((record) => record?.flow?.applied === true && record.flow.pitch === pitch && (phase === undefined || record.flow.phase === phase) && (scope === undefined || record.flow.scope === scope));
+
+function foldPitch(flows: Flows, name: string): void {
+  const entry = flows.pitches[name];
+  for (const [phase, { scopes }] of Object.entries(entry.phases)) {
+    for (const [scope, byVendor] of Object.entries(scopes)) {
+      const target = flowContainers(flows, OTHER, phase, scope);
+      for (const [vendor, row] of Object.entries(byVendor)) mergeRow(target, vendor, row);
+    }
+  }
+  delete flows.pitches[name];
+}
+
+function foldScope(flows: Flows, pitch: string, phase: string, scope: string): void {
+  const scopes = flows.pitches[pitch].phases[phase].scopes;
+  const target = (scopes[OTHER] ||= nullMap<Row>());
+  for (const [vendor, row] of Object.entries(scopes[scope])) mergeRow(target, vendor, row);
+  delete scopes[scope];
+}
+
+const leastRecentPitch = (snapshot: Snapshot): string | undefined => Object.entries(snapshot.flows.pitches)
+  .filter(([name]) => name !== OTHER && !routedTo(snapshot, name))
+  .sort((left, right) => Date.parse(left[1].at ?? "") - Date.parse(right[1].at ?? ""))[0]?.[0];
+
+// Caps hide nothing: the least recently used row that no stored record routes to is folded into (other), counters added.
+function resolveFlow(snapshot: Snapshot, intended: PhaseContext, vendor: string): FlowRouting {
+  const { flows } = snapshot;
+  let pitch = intended.pitch;
+  const phase = FLOW_PHASES.has(intended.phase) ? intended.phase : OTHER;
+  let scope = intended.scope;
+  const named = (): number => Object.keys(flows.pitches).filter((name) => name !== OTHER).length;
+  while (flows.pitches[pitch] === undefined && pitch !== OTHER && named() >= MAX_FLOW_PITCHES) {
+    const oldest = leastRecentPitch(snapshot);
+    if (oldest === undefined) { pitch = OTHER; break; }
+    foldPitch(flows, oldest);
+  }
+  const scopes = flows.pitches[pitch]?.phases[phase]?.scopes;
+  if (scopes !== undefined && scopes[scope] === undefined && scope !== OTHER) {
+    while (Object.keys(scopes).filter((name) => name !== OTHER).length >= MAX_FLOW_SCOPES) {
+      const oldest = Object.keys(scopes).find((name) => name !== OTHER && !routedTo(snapshot, pitch, phase, name));
+      if (oldest === undefined) { scope = OTHER; break; }
+      foldScope(flows, pitch, phase, oldest);
+    }
+  }
+  const exists = flows.pitches[pitch]?.phases[phase]?.scopes[scope]?.[vendor] !== undefined;
+  while (!exists && leafCount(flows) >= MAX_FLOW_LEAVES) {
+    const oldest = leastRecentPitch(snapshot);
+    if (oldest === undefined || oldest === pitch) { pitch = OTHER; scope = OTHER; break; }
+    foldPitch(flows, oldest);
+  }
+  return { applied: true, pitch, phase, scope };
+}
+
+// Adding stores the routing on the record (after caps); reversing reuses it. A record without `flow.applied`
+// (recorded before revision 3, or inherited from such a record) is skipped, never subtracted.
+function applyFlows(snapshot: Snapshot, record: CompletionRecord, direction: number, intended?: PhaseContext): void {
+  const { flows } = snapshot;
+  if (direction < 0) {
+    if (record.flow?.applied !== true) return;
+    const { pitch, phase, scope } = record.flow;
+    const byVendor = flows.pitches[pitch]?.phases[phase]?.scopes[scope];
+    if (byVendor === undefined || byVendor[record.vendor] === undefined) throw new Error(`flow aggregate underflow: ${pitch}`);
+    applyToRow(byVendor, record.vendor, record, -1);
+    pruneFlow(flows, pitch, phase, scope);
+    return;
+  }
+  if (record.flow?.applied !== true) {
+    if (intended === undefined) return;
+    record.flow = resolveFlow(snapshot, intended, record.vendor);
+  }
+  const { pitch, phase, scope } = record.flow as FlowRouting;
+  const scopes = flowContainers(flows, pitch, phase, scope);
+  applyToRow(scopes, record.vendor, record, 1);
+  // Move-to-end keeps scope insertion order as recency; the pitch carries an explicit timestamp.
+  const owner = flows.pitches[pitch].phases[phase].scopes;
+  const moved = owner[scope];
+  delete owner[scope];
+  owner[scope] = moved;
+  flows.pitches[pitch].at = record.recordedAt;
+}
+
+export function applyToSnapshot(snapshot: Snapshot, record: CompletionRecord, direction: number, intended?: PhaseContext): void {
   applyRecord(snapshot.lifetime, record, direction);
   applyDimensions(snapshot.dimensions, record, direction);
+  applyFlows(snapshot, record, direction, intended);
+}
+
+export interface PhaseContext { pitch: string; phase: string; scope: string }
+interface PhaseStart extends PhaseContext { sessionId: string }
+
+function isRealPitchDirectory(root: string, slug: string, deps: RuntimeDeps): boolean {
+  const target = deps.path.join(root, ".project", "pitches", slug);
+  try {
+    const stat = deps.fs.lstatSync(target);
+    return !stat.isSymbolicLink() && stat.isDirectory() && staysUnderRoot(root, target, deps);
+  } catch { return false; }
+}
+
+/**
+ * Pure of side effects: maps a command or skill name and its argument text to the pitch, phase and scope it starts.
+ * Returns null unless the name is one of the closed phase names. Only validated tokens are returned; the rest of the
+ * argument text is dropped. The pitch is the first argument when it names a real pitch directory, else (unattributed).
+ */
+export function resolvePhaseContext(name: unknown, args: unknown, root: string, deps: RuntimeDeps = defaultDeps()): PhaseContext | null {
+  if (typeof name !== "string" || name.length > MAX_NAME_LENGTH) return null;
+  const phase = name.replace(/^[/$]/, "").toLowerCase();
+  if (!PHASES.has(phase)) return null;
+  const tokens = typeof args === "string" ? args.slice(0, MAX_ARGS_LENGTH).split(/\s+/).filter(Boolean).slice(0, MAX_ARG_TOKENS) : [];
+  const first = tokens[0];
+  const pitch = first !== undefined && PITCH_SLUG.test(first) && isRealPitchDirectory(root, first, deps) ? first : UNATTRIBUTED;
+  const scope = tokens.find((token) => SCOPE_TOKEN.test(token)) ?? NO_SCOPE;
+  return { pitch, phase, scope };
+}
+
+// The hook payload of a slash command (UserPromptExpansion) or a skill call. A subagent's own calls carry agent_id and
+// never replace the parent's pointer.
+function phaseStartOf(input: CollectorInput, root: string, deps: RuntimeDeps): PhaseStart | null {
+  const raw = input.raw || input;
+  if (field(raw, "agent_id") || input.agentId) return null;
+  const expansion = field(raw, "expansion_type");
+  if (expansion !== undefined && expansion !== "slash_command") return null;
+  const toolInput = field(raw, "tool_input");
+  const name = textOrNull(input.skill) ?? field(toolInput, "skill") ?? field(toolInput, "name") ?? field(raw, "command_name");
+  const args = field(toolInput, "args") ?? field(raw, "command_args");
+  const sessionId = boundedId(input.sessionId) || boundedId(field(raw, "session_id")) || boundedId(field(raw, "sessionId"));
+  const context = resolvePhaseContext(name, args, root, deps);
+  return context && sessionId ? { ...context, sessionId } : null;
+}
+
+function contextLive(context: ActiveContext, now: number): boolean {
+  const at = Date.parse(context.at);
+  return Number.isFinite(at) && now - at <= CONTEXT_TTL_MS;
+}
+
+/** The session's pointer, or null when it has none or it is older than the TTL. */
+export function activeContext(snapshot: Snapshot, sessionId: string | null, now: number): ActiveContext | null {
+  const context = sessionId === null ? undefined : snapshot.contexts[sessionId];
+  return context !== undefined && contextLive(context, now) ? context : null;
+}
+
+// Expired pointers go first, then the least recently touched one; a full map never refuses the event.
+function makeRoom(contexts: Record<string, ActiveContext>, now: number): void {
+  for (const [key, context] of Object.entries(contexts)) if (!contextLive(context, now)) delete contexts[key];
+  while (Object.keys(contexts).length >= CONTEXT_CAP) {
+    const oldest = Object.entries(contexts).sort((left, right) => Date.parse(left[1].at) - Date.parse(right[1].at))[0];
+    delete contexts[oldest[0]];
+  }
+}
+
+function setContext(snapshot: Snapshot, start: PhaseStart, deps: RuntimeDeps): boolean {
+  const now = deps.clock.now();
+  const existing = snapshot.contexts[start.sessionId];
+  if (start.phase === "checkpoint") {
+    if (existing === undefined || !contextLive(existing, now)) return false;
+    existing.at = isoNow(deps);
+    return true;
+  }
+  if (existing === undefined) makeRoom(snapshot.contexts, now);
+  snapshot.contexts[start.sessionId] = { pitch: start.pitch, phase: start.phase, scope: start.scope, at: isoNow(deps) };
+  return true;
 }
 
 function recordSkillUse(snapshot: Snapshot, input: CollectorInput, deps: RuntimeDeps): RecordResult {
@@ -378,12 +607,13 @@ export function normalizedEvent(input: CollectorInput, root?: string, deps: Runt
   const scope = textOrNull(input.metricScope) || (vendor === "claude" && tokens.total !== null ? "final_request" : tokens.total !== null ? "agent_total" : "completion");
   const availability = tokens.total === null ? "unavailable" : scope === "agent_total" ? "reported" : "partial";
   const agentId = boundedId(input.agentId) || boundedId(field(raw, "agent_id")) || boundedId(field(raw, "agentId")) || boundedId(field(toolResponse, "agentId"));
-  const agentType = boundedName(input.agentType) || boundedName(field(raw, "agent_type")) || boundedName(field(raw, "agentType")) || boundedName(field(toolInput, "subagent_type"));
+  const event = boundedName(input.event) || boundedName(field(raw, "hook_event_name")) || "agent-complete";
+  // A main-session Stop is one completion of agentType primary, never an upgrade of an earlier one.
+  const agentType = boundedName(input.agentType) || boundedName(field(raw, "agent_type")) || boundedName(field(raw, "agentType")) || boundedName(field(toolInput, "subagent_type")) || (event === "session-turn" ? "primary" : null);
   const sessionId = boundedId(input.sessionId) || boundedId(field(raw, "session_id")) || boundedId(field(raw, "sessionId"));
   const turnId = boundedId(input.turnId) || boundedId(field(raw, "turn_id")) || boundedId(field(raw, "turnId"));
   const model = knownModel(boundedName(input.model) || boundedName(field(raw, "model")) || boundedName(field(raw, "resolvedModel")) || boundedName(field(toolResponse, "resolvedModel")));
   const effort = boundedName(input.effort) || boundedName(field(field(raw, "effort"), "level")) || boundedName(field(raw, "effort")) || boundedName(field(raw, "variant"));
-  const event = boundedName(input.event) || boundedName(field(raw, "hook_event_name")) || "agent-complete";
   const idempotencyKey =
     boundedId(input.idempotencyKey) ||
     boundedId(field(raw, "message_id")) ||
@@ -391,7 +621,7 @@ export function normalizedEvent(input: CollectorInput, root?: string, deps: Runt
     boundedId(field(raw, "tool_use_id")) ||
     boundedId(field(raw, "toolUseId"));
   const completionKey = idempotencyKey ? ["event", idempotencyKey] : event === "subagent-complete" && agentId ? ["subagent", sessionId, agentId, event] : null;
-  const identity = idempotencyKey ? ["event", idempotencyKey] : event === "subagent-complete" && !agentId ? ["anonymous", deps.crypto.randomUUID()] : sessionId ? ["session", sessionId, agentId, agentType, turnId] : agentId ? ["agent", agentId] : ["fallback", agentType, model, turnId];
+  const identity = idempotencyKey ? ["event", idempotencyKey] : event === "session-turn" ? ["turn", sessionId, deps.crypto.randomUUID()] : event === "subagent-complete" && !agentId ? ["anonymous", deps.crypto.randomUUID()] : sessionId ? ["session", sessionId, agentId, agentType, turnId] : agentId ? ["agent", agentId] : ["fallback", agentType, model, turnId];
   const identityKey = JSON.stringify([vendor, ...identity]);
   return {
     id: completionKey ? JSON.stringify([vendor, ...completionKey]) : null,
@@ -429,6 +659,19 @@ function reviveMaps(snapshot: Snapshot): Snapshot {
   snapshot.dimensions = revived;
   snapshot.recentSkillKeys = Array.isArray(snapshot.recentSkillKeys) ? snapshot.recentSkillKeys : [];
   snapshot.agentModels = nullMap(snapshot.agentModels);
+  const flows = blankFlows(snapshot.flows?.since ?? null);
+  for (const [pitch, byPhase] of Object.entries(snapshot.flows?.pitches || {})) {
+    const phases: Record<string, { scopes: Record<string, Record<string, Row>> }> = nullMap();
+    for (const [phase, entry] of Object.entries(byPhase.phases || {})) {
+      const scopes: Record<string, Record<string, Row>> = nullMap();
+      for (const [scope, byVendor] of Object.entries(entry.scopes || {})) scopes[scope] = nullMap(byVendor);
+      phases[phase] = { scopes };
+    }
+    flows.pitches[pitch] = { ...(typeof byPhase.at === "string" ? { at: byPhase.at } : {}), phases };
+  }
+  snapshot.flows = flows;
+  snapshot.transcripts = nullMap(snapshot.transcripts);
+  snapshot.contexts = nullMap(snapshot.contexts);
   return snapshot;
 }
 
@@ -455,8 +698,32 @@ function validDimensions(dimensions: unknown): boolean {
     return Object.values(byVendor).every((byName) => isObject(byName) && Object.values(byName).every((row) => hasFields(row, fields)));
   });
 }
+// Flow rows are nested pitch > phase > scope > vendor, so no string join can make two tuples collide.
+function validFlows(flows: unknown): boolean {
+  if (flows === undefined) return true;
+  if (!isObject(flows) || (flows.since != null && typeof flows.since !== "string") || !isObject(flows.pitches)) return false;
+  return Object.values(flows.pitches).every((pitch) => isObject(pitch) && isObject(pitch.phases) && (pitch.at === undefined || typeof pitch.at === "string")
+    && Object.values(pitch.phases).every((phase) => isObject(phase) && isObject(phase.scopes)
+      && Object.values(phase.scopes).every((byVendor) => isObject(byVendor) && Object.values(byVendor).every((row) => hasFields(row, DIMENSION_ROW_FIELDS)))));
+}
+const isText = (value: unknown): value is string => typeof value === "string";
+function validContexts(contexts: unknown): boolean {
+  if (contexts === undefined) return true;
+  return isObject(contexts) && Object.values(contexts).every((entry) => isObject(entry) && ["pitch", "phase", "scope", "at"].every((key) => isText(entry[key])));
+}
+function validTranscripts(transcripts: unknown): boolean {
+  if (transcripts === undefined) return true;
+  return isObject(transcripts) && Object.values(transcripts).every((entry) => isObject(entry) && ["offset", "size", "ino", "dev"].every((key) => isCount(entry[key]))
+    && Array.isArray(entry.recentIds) && entry.recentIds.every(isText) && isText(entry.at));
+}
+const isStoredFlow = (flow: unknown): boolean => flow == null || (isObject(flow) && typeof flow.applied === "boolean" && ["pitch", "phase", "scope"].every((key) => isText(flow[key])));
 // A stored record's routing is reversed by name later: a name with no matching row would throw on every event.
 function routingResolves(snapshot: Plain, record: unknown): boolean {
+  const flow = field(record, "flow");
+  if (field(flow, "applied")) {
+    const scopes = field(field(field(field(snapshot.flows, "pitches"), field(flow, "pitch") as string), "phases"), field(flow, "phase") as string);
+    if (!hasFields(field(field(field(scopes, "scopes"), field(flow, "scope") as string), field(record, "vendor") as string), DIMENSION_ROW_FIELDS)) return false;
+  }
   const routing = field(record, "dimensions");
   if (!field(routing, "applied")) return true;
   const vendor = field(record, "vendor") as string;
@@ -473,10 +740,11 @@ function usableShape(snapshot: unknown): boolean {
   if (["reportedCostUsd", "reportedCostCount"].some((key) => lifetime[key] !== undefined && !isCount(lifetime[key]))) return false;
   if (lifetime.vendors !== undefined && !isObject(lifetime.vendors)) return false;
   if (Object.values(lifetime.vendors || {}).some((vendor) => !hasFields(vendor, ["completions", "reportedUsageCount", "unavailableCount", "reportedCostUsd"]) || ((vendor as Plain).pricedCount !== undefined && !isCount((vendor as Plain).pricedCount)))) return false;
-  if (!validDimensions(snapshot.dimensions)) return false;
+  if (!validDimensions(snapshot.dimensions) || !validFlows(snapshot.flows) || !validContexts(snapshot.contexts) || !validTranscripts(snapshot.transcripts)) return false;
   const agentModels = snapshot.agentModels;
   if (agentModels !== undefined && (!isObject(agentModels) || Object.values(agentModels).some((note) => typeof note !== "string"))) return false;
   return isStoredRecord(snapshot.current ?? null) && isStoredRecord(snapshot.previous ?? null)
+    && isStoredFlow(field(snapshot.current, "flow")) && isStoredFlow(field(snapshot.previous, "flow"))
     && routingResolves(snapshot, snapshot.current) && routingResolves(snapshot, snapshot.previous);
 }
 
@@ -495,7 +763,7 @@ function readSnapshot(snapshotPath: string, deps: RuntimeDeps): Loaded {
   try {
     const raw = fs.readFileSync(snapshotPath);
     const snapshot: unknown = JSON.parse(raw);
-    if (isObject(snapshot) && Number.isInteger(snapshot.schemaVersion) && (snapshot.schemaVersion as number) > 2) return { skip: `snapshot schemaVersion ${snapshot.schemaVersion} is newer than this collector understands; not overwritten` };
+    if (isObject(snapshot) && Number.isInteger(snapshot.schemaVersion) && (snapshot.schemaVersion as number) > SNAPSHOT_REVISION) return { skip: `snapshot schemaVersion ${snapshot.schemaVersion} is newer than this collector understands; not overwritten` };
     const usable = usableShape(snapshot);
     // A parseable file that fails validation is replaced by a blank snapshot, but never silently lost: its text is kept aside.
     if (!usable && isObject(snapshot)) return { snapshot: blankSnapshot(), rejectedText: raw };
@@ -503,8 +771,10 @@ function readSnapshot(snapshotPath: string, deps: RuntimeDeps): Loaded {
     // Its stored records carry no `dimensions.applied` flag, so reversing one never touches them.
     try {
       const valid = snapshot as Snapshot;
-      if (usable && valid.schemaVersion === 1) return { snapshot: reviveMaps({ ...valid, schemaVersion: 2, dimensions: blankDimensions(isoNow(deps)) }) };
-      if (usable && valid.schemaVersion === 2) return { snapshot: reviveMaps(valid) };
+      // Each step only appends: revision 2 added dimensions, revision 3 adds flows, transcripts and contexts.
+      if (usable && valid.schemaVersion === 1) return { snapshot: reviveMaps({ ...valid, schemaVersion: SNAPSHOT_REVISION, dimensions: blankDimensions(isoNow(deps)), flows: blankFlows(isoNow(deps)), transcripts: nullMap(), contexts: nullMap() }) };
+      if (usable && valid.schemaVersion === 2) return { snapshot: reviveMaps({ ...valid, schemaVersion: SNAPSHOT_REVISION, flows: blankFlows(isoNow(deps)), transcripts: nullMap(), contexts: nullMap() }) };
+      if (usable && valid.schemaVersion === SNAPSHOT_REVISION) return { snapshot: reviveMaps(valid) };
     } catch { return { snapshot: blankSnapshot(), rejectedText: raw }; } // validated, but still unrevivable: keep it aside too
   } catch {
     // A malformed local metrics file must not break an agent completion hook.
@@ -544,7 +814,85 @@ function rememberAgentModel(snapshot: Snapshot, record: CompletionRecord): void 
   while (ids.length > AGENT_MODEL_NOTES_LIMIT) delete snapshot.agentModels[ids.shift() as string];
 }
 
-function recordCompletion(snapshot: Snapshot, input: CollectorInput, root: string, deps: RuntimeDeps): RecordResult {
+
+// ---- Transcript usage (Claude): read before the lease, reconcile and commit under it ----
+
+interface TranscriptRead { key: string; result: UsageRead }
+
+const usageEvents = new Set(["subagent-complete", "session-turn"]);
+
+// Runs without the lease, from the offset in an unlocked read. Only numbers and bounded ids come back from the reader.
+function readTranscript(input: CollectorInput, snapshotPath: string, deps: RuntimeDeps): TranscriptRead | null {
+  const raw = input.raw || input;
+  const event = textOrNull(input.event);
+  if (boundedName(input.vendor) !== "claude" || event === null || !usageEvents.has(event)) return null;
+  const file = field(raw, event === "subagent-complete" ? "agent_transcript_path" : "transcript_path");
+  if (typeof file !== "string" || file.length === 0 || file.length > MAX_TRANSCRIPT_PATH) return null;
+  let key: string;
+  try { key = deps.crypto.sha256Hex(deps.fs.realpathSync(file)); } catch { key = deps.crypto.sha256Hex(file); }
+  const cursor = readSnapshot(snapshotPath, deps).snapshot?.transcripts[key];
+  const result = readTranscriptUsage(file, deps, {
+    ...(cursor !== undefined ? { previous: { offset: cursor.offset, ino: cursor.ino, dev: cursor.dev }, recentIds: cursor.recentIds } : {}),
+    final: event === "subagent-complete",
+  });
+  return { key, result };
+}
+
+const sumCounts = (values: (number | null)[]): number | null => {
+  const counts = values.map(integerOrNull).filter((value): value is number => value !== null);
+  return counts.length > 0 ? counts.reduce((sum, value) => sum + value, 0) : null;
+};
+
+/** Sums reader output. Each value is re-validated here, whatever the reader promised: a fractional, negative or huge value counts as unreported. */
+export function transcriptTokens(messages: readonly Pick<MessageUsage, "input" | "output" | "cacheRead" | "cacheWrite">[]): Tokens {
+  return tokensFrom({
+    input_tokens: sumCounts(messages.map((message) => message.input)),
+    output_tokens: sumCounts(messages.map((message) => message.output)),
+    cache_read_input_tokens: sumCounts(messages.map((message) => message.cacheRead)),
+    cache_creation_input_tokens: sumCounts(messages.map((message) => message.cacheWrite)),
+  });
+}
+
+// Under the lease: only messages past the locked offset and not in the locked id window count; the offset, ids and
+// totals then commit in the one atomic write. Returns false when nothing new was read.
+function applyTranscript(snapshot: Snapshot, transcript: TranscriptRead, record: CompletionRecord, deps: RuntimeDeps): boolean {
+  if (transcript.result.status !== "ok") return false;
+  const { messages, position, size } = transcript.result;
+  const cursor = snapshot.transcripts[transcript.key];
+  const sameFile = cursor !== undefined && cursor.ino === position.ino && cursor.dev === position.dev && cursor.offset <= size;
+  const locked = sameFile ? cursor.offset : 0;
+  const known = new Set(cursor?.recentIds ?? []);
+  const fresh = messages.filter((message) => message.endOffset > locked && !known.has(message.messageId));
+  const now = isoNow(deps);
+  snapshot.transcripts[transcript.key] = {
+    offset: sameFile ? Math.max(locked, position.offset) : position.offset,
+    size,
+    ino: position.ino,
+    dev: position.dev,
+    recentIds: [...new Set([...fresh.map((message) => message.messageId), ...(cursor?.recentIds ?? [])])].slice(0, RECENT_TRANSCRIPT_IDS),
+    at: now,
+  };
+  const keys = Object.keys(snapshot.transcripts);
+  while (keys.length > MAX_TRANSCRIPTS) {
+    const oldest = keys.sort((left, right) => Date.parse(snapshot.transcripts[left].at) - Date.parse(snapshot.transcripts[right].at))[0];
+    delete snapshot.transcripts[oldest];
+    keys.splice(keys.indexOf(oldest), 1);
+  }
+  if (fresh.length === 0) return false;
+  record.tokens = transcriptTokens(fresh);
+  // The cost stays null (shown as Unpriced): the transcript has token counts, never a price.
+  record.metricScope = "agent_total";
+  record.availability = record.tokens.total === null ? "unavailable" : "reported";
+  record.model ||= knownModel(boundedName(fresh[fresh.length - 1].model));
+  return true;
+}
+
+const flowIntent = (snapshot: Snapshot, record: CompletionRecord, deps: RuntimeDeps): PhaseContext => {
+  const context = activeContext(snapshot, record.sessionId, deps.clock.now());
+  return context === null ? { pitch: UNATTRIBUTED, phase: UNATTRIBUTED, scope: NO_SCOPE } : { pitch: context.pitch, phase: context.phase, scope: context.scope };
+};
+
+function recordCompletion(snapshot: Snapshot, input: CollectorInput, root: string, deps: RuntimeDeps, transcript: TranscriptRead | null = null): RecordResult {
   const raw = input.raw || input;
   const record = normalizedEvent(input, root, deps);
   if (record.id && snapshot.recentEventKeys.includes(record.id)) return { written: false, reason: "duplicate event" };
@@ -559,7 +907,24 @@ function recordCompletion(snapshot: Snapshot, input: CollectorInput, root: strin
     record.model = knownModel(boundedName(snapshot.agentModels[noteKey]));
     delete snapshot.agentModels[noteKey];
   }
+  if (transcript !== null) {
+    const counted = applyTranscript(snapshot, transcript, record, deps);
+    if (!counted && record.event === "session-turn" && transcript.result.status === "ok") return { written: true, reason: "no new usage" };
+  }
   const existing = [snapshot.current, snapshot.previous].find((candidate) => candidate?.identityKey === record.identityKey);
+  // A foreground agent-result that follows a SubagentStop already reported from its transcript is the same completion.
+  const current = snapshot.current;
+  if (record.vendor === "claude" && record.event === "agent-result" && !existing && current?.vendor === "claude" && current.event === "subagent-complete"
+    && current.metricScope === "agent_total" && current.availability === "reported" && record.agentType && record.agentType === current.agentType) {
+    if (!current.model && record.model) {
+      applyToSnapshot(snapshot, current, -1);
+      current.model = record.model;
+      applyToSnapshot(snapshot, current, 1);
+    }
+    snapshot.updatedAt = record.recordedAt;
+    if (record.id) snapshot.recentEventKeys = [record.id, ...snapshot.recentEventKeys.filter((key) => key !== record.id)].slice(0, RECENT_KEYS_LIMIT);
+    return { written: true, record: current };
+  }
   const canUpgradeClaudeCompletion =
     record.vendor === "claude" &&
     record.event === "agent-result" &&
@@ -569,17 +934,21 @@ function recordCompletion(snapshot: Snapshot, input: CollectorInput, root: strin
     record.agentType === snapshot.current.agentType;
   if (existing) {
     applyToSnapshot(snapshot, existing, -1);
+    // A replay or upgrade keeps the routing the first record was stamped with, even if the context moved on.
+    if (existing.flow?.applied) record.flow = { ...existing.flow };
     applyToSnapshot(snapshot, record, 1);
     if (snapshot.current?.identityKey === record.identityKey) snapshot.current = record;
     else snapshot.previous = record;
   } else if (canUpgradeClaudeCompletion) {
-    applyToSnapshot(snapshot, snapshot.current as CompletionRecord, -1);
+    const replaced = snapshot.current as CompletionRecord;
+    applyToSnapshot(snapshot, replaced, -1);
+    if (replaced.flow?.applied) record.flow = { ...replaced.flow };
     applyToSnapshot(snapshot, record, 1);
     snapshot.current = record;
   } else {
     snapshot.previous = snapshot.current;
     snapshot.current = record;
-    applyToSnapshot(snapshot, record, 1);
+    applyToSnapshot(snapshot, record, 1, flowIntent(snapshot, record, deps));
   }
   snapshot.updatedAt = record.recordedAt;
   if (record.id) snapshot.recentEventKeys = [record.id, ...snapshot.recentEventKeys.filter((key) => key !== record.id)].slice(0, RECENT_KEYS_LIMIT);
@@ -600,6 +969,16 @@ function staysUnderRoot(root: string, target: string, deps: RuntimeDeps): boolea
   }
 }
 
+const DIRECTORY_CHANGED = "metrics directory changed while waiting for the lease; event not recorded";
+interface DirectoryIdentity { path: string; real: string; ino: number; dev: number }
+function identityOf(target: string, deps: RuntimeDeps): DirectoryIdentity | null {
+  try {
+    const stat = deps.fs.lstatSync(target);
+    return { path: target, real: deps.fs.realpathSync(target), ino: stat.ino, dev: stat.dev };
+  } catch { return null; }
+}
+const sameIdentity = (pin: DirectoryIdentity, now: DirectoryIdentity | null): boolean => now !== null && now.real === pin.real && now.ino === pin.ino && now.dev === pin.dev;
+
 // Asynchronous: the metrics lease is a kernel-held socket (metrics-lock.mts). Callers must await it.
 // options.lock is passed to the lease (tests use a longer or shorter waitMs).
 export async function recordEvent(input: CollectorInput, root?: string, options: RecordOptions = {}, deps: RuntimeDeps = defaultDeps()): Promise<RecordResult> {
@@ -607,6 +986,10 @@ export async function recordEvent(input: CollectorInput, root?: string, options:
   const base = root === undefined ? deps.proc.cwd() : root;
   const project = path.join(base, ".project");
   if (!fs.existsSync(project)) return { written: false, reason: ".project is not initialized" };
+  const eventName = textOrNull(input.event);
+  // A phase start is not a completion. Anything that is not a phase returns before the directory is created or the lease is taken.
+  const phaseStart = eventName === "phase-start" || eventName === "skill-use" ? phaseStartOf(input, base, deps) : null;
+  if (eventName === "phase-start" && phaseStart === null) return { written: false, reason: "not a workflow phase" };
   const metricsDirectory = path.join(".project", "metrics");
   const directory = path.join(base, metricsDirectory);
   // A cloned repo can commit .project or .project/metrics as a symlink. Resolve both before
@@ -616,8 +999,15 @@ export async function recordEvent(input: CollectorInput, root?: string, options:
   if (fs.existsSync(directory) || isLink(directory, deps)) { if (!staysUnderRoot(base, directory, deps)) return { written: false, reason: "metrics directory resolves outside the project root" }; }
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   if (!staysUnderRoot(base, directory, deps)) return { written: false, reason: "metrics directory resolves outside the project root" };
+  // The lease wait is asynchronous: .project or .project/metrics could be swapped for a link meanwhile.
+  // Their identities are pinned here and rechecked inside the lease before the read and before every write.
+  const pinned = [project, directory].map((target) => identityOf(target, deps));
+  const intact = (): boolean => pinned.every((pin) => pin !== null && sameIdentity(pin, identityOf(pin.path, deps)));
+  // The transcript is read here, before the lease, so a large file never extends the time the lease is held.
+  const transcript = readTranscript(input, path.join(directory, SNAPSHOT_NAME), deps);
   // The lease is held across the read, the snapshot write and both report writes, and released in withLease's finally.
   const held = await withLease(directory, (): RecordResult => {
+    if (!intact()) return { written: false, reason: DIRECTORY_CHANGED };
     if (legacyLockPresent(directory, deps)) {
       return { written: false, reason: `legacy lock ${metricsDirectory}/${LEGACY_LOCK_NAME} is present; stop old collectors, then remove it (see README, Token Consumption)` };
     }
@@ -625,14 +1015,25 @@ export async function recordEvent(input: CollectorInput, root?: string, options:
     const loaded = readSnapshot(snapshotPath, deps);
     if (loaded.skip !== undefined) return { written: false, reason: loaded.skip };
     const snapshot = loaded.snapshot as Snapshot;
-    if (loaded.rejectedText !== undefined) writeAtomically(`${snapshotPath}.rejected`, loaded.rejectedText, deps);
-    const outcome = textOrNull(input.event) === "skill-use" ? recordSkillUse(snapshot, input, deps) : recordCompletion(snapshot, input, base, deps);
+    if (loaded.rejectedText !== undefined) {
+      if (!intact()) return { written: false, reason: DIRECTORY_CHANGED };
+      writeAtomically(`${snapshotPath}.rejected`, loaded.rejectedText, deps);
+    }
+    let outcome: RecordResult;
+    if (eventName === "phase-start") outcome = phaseStart !== null && setContext(snapshot, phaseStart, deps) ? { written: true } : { written: false, reason: "no active context" };
+    else if (eventName === "skill-use") {
+      outcome = recordSkillUse(snapshot, input, deps);
+      if (outcome.written && phaseStart !== null) setContext(snapshot, phaseStart, deps);
+    } else outcome = recordCompletion(snapshot, input, base, deps, transcript);
     if (!outcome.written) return { ...outcome, snapshot };
     snapshot.updatedAt ||= isoNow(deps);
     snapshot.dimensions.since ||= snapshot.updatedAt;
+    snapshot.flows.since ||= snapshot.updatedAt;
+    if (!intact()) return { written: false, reason: DIRECTORY_CHANGED, snapshot };
     writeAtomically(snapshotPath, `${JSON.stringify(snapshot, null, 2)}\n`, deps);
     // The snapshot is the record; a report that cannot be rendered must not stop the next event from being recorded.
     try {
+      if (!intact()) return { ...outcome, snapshot, warning: DIRECTORY_CHANGED };
       writeAtomically(path.join(directory, MARKDOWN_NAME), markdown(snapshot), deps);
       writeAtomically(path.join(directory, HTML_NAME), html(snapshot), deps);
     } catch { return { ...outcome, snapshot, warning: "reports could not be rendered" }; }

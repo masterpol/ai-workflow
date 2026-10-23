@@ -1,0 +1,89 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: fix-workflow-runner-env
+sourceProof:
+  archiveDirectory: fix-workflow-runner-env-2026-10-08T16-26-36-922Z
+  manifestHash: "sha256:9ed97de1d3beba6cdfda87cc764acd1017ff1d78a61391ee8a3914a308974582"
+  sourceBytes: 23059
+  verifiedFiles: 10
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/fix-workflow-runner-env.supplement.md"
+  destination: ".project/records/legacy-upgrades/fix-workflow-runner-env.md"
+  hash: "sha256:c0e63fcd27afc5ec3651b3a16fa34e3c8ceced716737e96f5201c80ec2b8bd1e"
+payload:
+  ledgerHash: "sha256:0651347ab42db8c3a3264005fac75912e5308f4c5559d439530622c6916aec15"
+  legacyEntryHash: "sha256:e159e65aa3fe0cabc8e5623e85a52aee9d54c47701d3e4c6b4a6f6a4cffc8e67"
+  bindings:
+    ".project/records/pitch-compression/fix-workflow-runner-env.md": "sha256:15dfccfa25ff92c2c271e07b71a46732c1cf14d886f987899f1993003b485514"
+    ".project/knowledge/patterns/one-boundary-selects-the-child-runner.md": "sha256:c4175380d74875d15f27ea5105060674f772bab39aa3ee414847a2748e92c05a"
+    ".project/records/legacy-upgrades/fix-workflow-runner-env.md": "sha256:c0e63fcd27afc5ec3651b3a16fa34e3c8ceced716737e96f5201c80ec2b8bd1e"
+  mapping:
+    schemaVersion: 2
+    sections[9]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#final-verification",know-how,merged,".project/records/pitch-compression/fix-workflow-runner-env.md#section-1-shippedmdfinal-verification",Retains historical verification with build-time Node parity explicitly distinguished.,"sha256:443786daab03cca19dfc0d473331359ba505e967f53683910793704c735a2553"
+      "SHIPPED.md#reconciliation",behavior,merged,".project/records/pitch-compression/fix-workflow-runner-env.md#section-2-shippedmdreconciliation",Retains the affected runner boundaries and closed reproductions.,"sha256:37fe0b95970e616ccaa0cc35a4592a50f38338bd45c996fb91e45911022fdb2f"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/pitch-compression/fix-workflow-runner-env.md#section-3-shippedmdno-gos-honored",Preserves metrics/history boundaries and the OpenCode runtime limitation.,"sha256:a5b3389302e198e3f007a65d36eeee873cbdb9089f83c73ee7c624fa1f783bd3"
+      "SHIPPED.md#known-behavior-change",behavior,merged,".project/records/pitch-compression/fix-workflow-runner-env.md#section-4-shippedmdknown-behavior-change",Retains the deliberate hook-input limit and changed oversized-input outcome.,"sha256:67af639221e85160d04ee51f40efb352d6381dad75d9b977097a4ac3094370d6"
+      "SHIPPED.md#knowledge-extracted",know-how,merged,".project/knowledge/patterns/one-boundary-selects-the-child-runner.md","Preserves one runner-selection boundary, precedence and executable assertions.","sha256:a819be0f989ee17869eb3eb171cd44558f7d96b60d5cf2cc1c004489a2132d2b"
+      "SHIPPED.md#followups",limit,merged,".project/records/legacy-upgrades/fix-workflow-runner-env.md#acknowledged-items-and-verification-limits",Preserves the actual audit acknowledgments separately from additional verification uncertainty.,"sha256:a3eaa9bdaa3af9b339921318bc1eab01d977e3417bddfd5eb4cd32800a1186e1"
+      "log.md#verified-triage",know-how,merged,".project/records/pitch-compression/fix-workflow-runner-env.md#section-7-logmdverified-triage",Retains the executable mismatch reproductions and misleading-test lesson.,"sha256:49196c093eae516e5c955bd2fa6569d17211af567d41beb0615640c2074e424e"
+      "log.md#approved-build-2026-10-08",behavior,merged,".project/records/legacy-upgrades/fix-workflow-runner-env.md#implementation-and-fixture-lessons","Retains child-option preservation, hook coverage and environment-isolation lessons.","sha256:6656d1d94bb037d51d00e96e493da37dc0ed30965a7a4f9070cd9f7f5d911296"
+      "log.md#build-evidence",know-how,merged,".project/records/pitch-compression/fix-workflow-runner-env.md#section-9-logmdbuild-evidence","Retains historical author-run build, parser and parity evidence.","sha256:bbe505b911dd470f0fdc9e69de9309acad87fe31ec178d4c6dcd31cb473110ed"
+    otherFiles[10]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:8dc873b372484640a0cdceb9025ec8d0285f466d3f3c7f3a1dafce2550dfd412"
+        disposition: merged
+        destination: ".project/records/pitch-compression/fix-workflow-runner-env.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: audit-1-code-prompt.txt
+        hash: "sha256:703bc9a637b0f52882666d3d54b0c50f236d608b5669bc5d40b93b528e8dbb35"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: audit-1-conflicts-prompt.txt
+        hash: "sha256:a2209ba1da12a594a47784dc7a8e72a318dc59452df2066a27a041c8ef56d6ba"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: audit-1-coverage-prompt.txt
+        hash: "sha256:20fc3ab7c24aabf42729f31f480d2457080e6227b882c0dabb6c27de217240c4"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: audit-1-security-prompt.txt
+        hash: "sha256:effa0375f5c980f211b11eae4328acc5a71ddaa8e5fd9ac3f5db459183834724"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: audit-context.json
+        hash: "sha256:e1eb8f7746a829b595c4729f443db0679ad7316a7e7bd225b4ca44d13fc4d531"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/fix-workflow-runner-env.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: audit.md
+        hash: "sha256:60a7a9929c9c7f7f1089969276edbe5a89e1caed803e7f5dd55bd25ccdd7332e"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/fix-workflow-runner-env.md"
+        helps: Preserves the lasting review evidence and limits; transient workflow metadata remains archived.
+      -
+        path: deviations.md
+        hash: "sha256:3a76667713235e44f1ea12103f74a6453267322ad425e94f9c87b751b18f170d"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/fix-workflow-runner-env.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: hill.md
+        hash: "sha256:17b55502018dc97959f578fcfcba8fbfe544fbec1c329bfe98e19c9e3e65c50c"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:8d59c78951d4d239ae68dcae748c1f35493aeaeb276760eceebd0def04fe4695"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/fix-workflow-runner-env.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+  outcomeRecord: "---\nslug: fix-workflow-runner-env\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# fix-workflow-runner-env\n\nOne runtime boundary selects the executable for workflow child processes.\nThe pattern and code links below describe runner precedence and failure behavior.\nHistorical verification and acknowledged followups remain in the compact record.\n\n- outcome: Workflow child processes respect the selected runner and explicit child overrides.\n- docs: [documentation](ai-framework/scripts/runtime/README.md)\n- decisions: none\n- knowledge: [pattern](.project/knowledge/patterns/one-boundary-selects-the-child-runner.md)\n- code: [implementation](ai-framework/scripts/runtime/entry.mts)\n- verification: [historical closure](.project/records/pitch-compression/fix-workflow-runner-env.md)\n- followups: [source-review limits](.project/records/legacy-upgrades/fix-workflow-runner-env.md)\n- archive: [compact record](.project/records/pitch-compression/fix-workflow-runner-env.md), [source supplement](.project/records/legacy-upgrades/fix-workflow-runner-env.md)\n"

@@ -1,7 +1,7 @@
 ---
 description: Fast evaluation role that runs defined checks and reports scored evidence.
 mode: subagent
-model: opencode-go/space-bunny
+model: opencode-go/minimax-m3.1-flash-free
 permission:
   edit: deny
 ---

@@ -1,117 +1,158 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "fix-orca-dispatch-resume-gate",
   "sections": [
     {
       "source": "SHIPPED.md#scopes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "F1 (resume-gate) and F2 (--vendor array) are the shipped scopes; done-work.md records both with the audit and verify counts."
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#what-shipped",
+      "helps": "F1 rechecks policy/switch before resume; F2 permits distinct status vendors and rejects repeats elsewhere.",
+      "bodyHash": "sha256:64d0d8d954c64cb2200437e19e613a2c96fbfe2c89d3e4f3748653eb0708a9f7"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "No schema change, no new rule, no live worker spawned, no .env read or added. Recorded in done-work.md alongside the summary."
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#standing-constraints",
+      "helps": "No schema change, new rule, live worker or runtime secret-file reads; existing pattern reused.",
+      "bodyHash": "sha256:a3e285706d41d57293a6313dd0890b3b78f9fb4730b0424b1b676d3ef0053ee1"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "Two rabbit holes: workflow-doctor OpenCode port warning (logged as followup) and the wrong-fix-that-was-reverted (logged as the 'a-missing-tracked-file' issue and in done-work.md)."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#incidents-and-lessons",
+      "helps": "Resume semantics kept; environmental OpenCode port warning and wrongly restored template preserved.",
+      "bodyHash": "sha256:1936068d66e84c1e95c686c89ab9720f6a3879b0d09a324b138b33e4228891fe"
     },
     {
       "source": "SHIPPED.md#verification-final-gauntlet-all-six-phases",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "1037 pass / 0 fail / 1 skipped on Node, 66/66 Bun on touched files, setup-validator READY, doctor READY WITH 1 environmental warning, graphify CLEAN. Recorded in done-work.md."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#verification-history",
+      "helps": "Final Node 1037 pass, one skip; scoped Bun 66; validators and N/A build commands retained.",
+      "bodyHash": "sha256:6659ca590b83d598a73188116831f6c5e1415b034c917d391bcd738215519388"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": "Already in _followups.md under 'follow-orca-dispatch-resume-gate': doctor port detection, Bun budget, env doc sweep, missing-tracked-file discipline. Plus the smoke's F1/F2 marked shipped."
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#limits-and-open-items",
+      "helps": "OpenCode config-probe service conflict and unverified full Bun parity remain explicit.",
+      "bodyHash": "sha256:4c91294017772daa9b6d6f0a12c0bc5dc09e33b532461b009b511ef9d88ba613"
     },
     {
       "source": "SHIPPED.md#doc-updates",
-      "status": "extracted",
-      "destination": "ai-framework/integrations/orca-vendors.md",
-      "reason": "CLI usage line, the --vendor status-only note and the resume-policy note were all written into orca-vendors.md and the CHANGELOG bump (2.18.1) at ship."
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#contract-and-later-drift",
+      "helps": "Vendor guide already described status/resume, so this ship did not change it; stack prose was corrected.",
+      "bodyHash": "sha256:71781b0f38fe49b21a8fedc92bc2c333ba06d6428e6ca0d9271fd1e80edeb100"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "Inline review: zero must-fix, zero should-fix, zero acknowledged. The two limits (no scratch copy, no canary) are noted as the documented threat model for internal tooling; no reusable pattern beyond the inline-audit document itself."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#audit-history",
+      "helps": "Inline code/security/coverage pass, no scratch/canary, nine regression cases and skipped roles preserved.",
+      "bodyHash": "sha256:9fd4be62d8b792c695d1e78728a8573785eaf0c25e95431917a9aa35f73221e8"
     },
     {
       "source": "log.md#bug-resume-existing-skips-policy-gate",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/an-idempotent-replay-path-returned-success-without-re-checking-the-gate.md",
-      "reason": "Promoted at ship as the durable lesson for this bug. Real id, tags, and related links to a-gate-must-not-trust-its-own-author and retry-only-on-positive-proof-of-a-clean-failure."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#root-cause-and-fix",
+      "helps": "Replay of unknown-liveness attempt skipped policy checks and returned resume-shaped success.",
+      "bodyHash": "sha256:017240abede3186b9bf8f5524166a003c6201373c868d97ddc1471e84b7edbeb"
     },
     {
       "source": "log.md#fix",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "The fix itself (re-check switch + evaluateLaunch before resumeExisting; --vendor array on status) is the headline summary; recorded in done-work.md."
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#root-cause-and-fix",
+      "helps": "Recheck switch and evaluateLaunch before ledger resume; status vendor list remains command-specific.",
+      "bodyHash": "sha256:b103e739f1373dfc4760e9b9c4b7fef74c78ca8b61f1701502b9ad5c4ae14dd4"
     },
     {
       "source": "log.md#files-changed",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "Files list and changelog entry are the durable record."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#what-shipped",
+      "helps": "Preserves ownership of two source files and their regression tests, with branch cases.",
+      "bodyHash": "sha256:3c12567b3183ec7f20dce4726f011c034d1b2faaecf0188a85447e4ba11607b8"
     },
     {
       "source": "log.md#evidence",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "Test counts and live CLI repro are the headline evidence; recorded in done-work.md."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#verification-history",
+      "helps": "Retains per-suite counts, live read-only refusal proof and missing full Bun evidence.",
+      "bodyHash": "sha256:a609b0a5570c5fda5f8d549d2929b14c331b6349d0f060b609ca68f68d29fb8b"
     },
     {
       "source": "log.md#co-lateral-fix-needed-during-this-build",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/editing-a-canonical-file-alone-breaks-the-byte-identity-mirror-check.md",
-      "reason": "Promoted at ship. Real id, tags, related links."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#incidents-and-lessons",
+      "helps": "Canonical reviewer edits required same-change Cursor byte copies to restore mirror checks.",
+      "bodyHash": "sha256:e46e20dc9aa5966cc40b3c9ed1c068e3d892dbad9cc14ad5eeb22c361e08fa32"
     },
     {
       "source": "log.md#pre-existing-failure-observed-during-the-run",
-      "status": "gap",
-      "destination": null,
-      "reason": "Superseded by 'a-wrong-fix-found-and-reverted-during-this-ship' once the cause was correctly diagnosed as the staged workflow-doctor.mts Workflow-settings check rather than a missing .env.example. The doctor warning itself is logged as a followup; nothing here is reusable once the wrong-fix section is preserved."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#incidents-and-lessons",
+      "helps": "Pre-existing staged doctor setting check lacked fixture config; isolated and full-tree evidence differ.",
+      "bodyHash": "sha256:9a92d125366044d668e887cc740d9d5b08ecd174ef99900530c7416bfe6c05e7"
     },
     {
       "source": "log.md#env-source-validation-post-fix-check",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "Four tests cover file-source vs process-priority; the verification numbers are in done-work.md."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#contract-and-later-drift",
+      "helps": "Four file/process-priority tests confirm existing runtime behavior; historical env migration preserved.",
+      "bodyHash": "sha256:22e2eb42a375f38fdb91b215878f1cfc776e125bdcadd9383701e414d83d0789"
     },
     {
       "source": "log.md#a-wrong-fix-found-and-reverted-during-this-ship",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/a-missing-tracked-file-is-not-an-undeleted-deletion.md",
-      "reason": "Reusable discipline lesson; promoted in this compression run. Real id, tags, related links."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#incidents-and-lessons",
+      "helps": "Wrong template restoration reverted after changelog proved replacement; check intended deletion before restore.",
+      "bodyHash": "sha256:cc9103e56afc982c4fdebce8f821681388b659cd9b0ad634a32d8dda7bef3711"
     },
     {
       "source": "log.md#stale-documentation-corrected-at-ship",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": "The stack.md reword is the durable record (already in CHANGELOG 2.18.1); done-work.md references it."
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#contract-and-later-drift",
+      "helps": "Stack context was the genuine documentation fix, replacing stale runtime-source wording.",
+      "bodyHash": "sha256:7b7ee4bc02b75e0d468e7e6601188c16733892664bbc509a2f58608a1e9bc285"
     }
   ],
-  "coverage": 0.9375,
-  "gaps": [
+  "otherFiles": [
     {
-      "source": "log.md#pre-existing-failure-observed-during-the-run",
-      "reason": "Superseded by 'a-wrong-fix-found-and-reverted-during-this-ship' once the cause was correctly diagnosed as the staged workflow-doctor.mts Workflow-settings check rather than a missing .env.example. The doctor warning itself is logged as a followup; nothing here is reusable once the wrong-fix section is preserved."
-    }
-  ],
-  "acceptedGaps": [
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#what-shipped",
+      "helps": "Retains ship header, result, boundaries, audit/verification and deferred work across the supplement.",
+      "hash": "sha256:cf8bcc68116e284c6461428354c7b4e9996c71517da0edddd8ebafbe0330d4e4"
+    },
     {
-      "source": "log.md#pre-existing-failure-observed-during-the-run",
-      "reason": "Superseded by 'a-wrong-fix-found-and-reverted-during-this-ship' once the cause was correctly diagnosed as the staged workflow-doctor.mts Workflow-settings check rather than a missing .env.example. The doctor warning itself is logged as a followup; nothing here is reusable once the wrong-fix section is preserved.",
-      "acceptedReason": "Superseded once 'a-wrong-fix-found-and-reverted-during-this-ship' preserves the lesson; doctor warning itself is logged as a followup"
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md#root-cause-and-fix",
+      "helps": "Retains all nine bug-log sections, including the original staged-doctor diagnosis and later wrong-restoration correction.",
+      "hash": "sha256:0db70ba469168c3b66f2fe492cccbb9b849006f58ce3780faa705796c1c9c013"
     }
   ],
-  "committedAt": "2026-10-08T17:58:52.567Z"
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:55:43.379Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:e7c80051ec25baca7672620324121ed07ad48b1e142abdb92246378a3d155290",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

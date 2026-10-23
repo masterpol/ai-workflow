@@ -1,0 +1,33 @@
+@toon-data 1
+slug: ts-runtime-injection
+draft: true
+state: needs-decision
+ledgerHash: "sha256:e258c63d1ce710154472f797202e4f0bb70384ae7999ae4c4d45111ff98bd866"
+bindings:
+  ".project/records/pitch-compression/ts-runtime-injection.md": "sha256:3a1c5a664e6de5a222057e9651edeb27af9914fc2a95785ae861d635c897eafa"
+legacyEntryHash: "sha256:103b80209ee1a625c61ce04d7797c200a4eb4d81f5ced1769126bb9fcc0c7629"
+mapping:
+  schemaVersion: 2
+  sections[7]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#audit",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-3-shippedmdaudit",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-4-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#followups",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-5-shippedmdfollowups",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-6-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/ts-runtime-injection.md#section-7-pitchmdrabbit-holes",null,null
+  otherFiles[0]:
+judgments[7]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-3-shippedmdaudit",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-4-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-5-shippedmdfollowups",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-6-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/ts-runtime-injection.md#section-7-pitchmdrabbit-holes",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: ts-runtime-injection\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# ts-runtime-injection\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#ts-runtime-injection","sha256:103b80209ee1a625c61ce04d7797c200a4eb4d81f5ced1769126bb9fcc0c7629","## ts-runtime-injection — shipped 2026-10-08\n\nAll workflow scripts, hooks, the OpenCode plugin and the bench were moved to direct `.mts` on injected `RuntimeDeps` for Node and Bun, with no shims and no build step; `runtime/migrate.mts` upgrades old instance entries. Node 762, Bun 731 pass; audit cycle 2 fixed 3 must-fix (symlinks, hook main escape).\n\nLessons: [[one-boundary-selects-the-child-runner]], [[keep-the-fakes-guarantee-the-thing-they-replace]].\n",false
+  ".project/records/pitch-compression/ts-runtime-injection.md","sha256:3a1c5a664e6de5a222057e9651edeb27af9914fc2a95785ae861d635c897eafa","# Compaction record: ts-runtime-injection\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[one-boundary-selects-the-child-runner]], [[keep-the-fakes-guarantee-the-thing-they-replace]], [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]].\n\n## Section 1: SHIPPED.md#final-verification\n\nNode 762/762 pass over the scripts, runtime, hook and `.claude/hooks` suites; Bun 731 pass, 1 skip, 0 fail. setup-validator READY (22 checks), graphify CLEAN, doctor zero failures. No `.js` workflow files remain and no secrets were added. No build/typecheck/lint/i18n commands exist.\n\n## Section 2: SHIPPED.md#reconciliation\n\nScopes S1-S6 (runtime adapters, pilots, wiring, upgrade simulation) and groups G1-G10 (all scripts, hooks, the OpenCode plugin, the bench) shipped as direct `.mts` on `RuntimeDeps`. Final user decision, superseding plan Revision 1: no `.js` shims and no `entry.js` relaunch; hook and doc commands call `.mts` directly with `--experimental-strip-types`; `runtime/migrate.mts` rewrites old instance entries. Old installs upgrade with their own `bundle-sync.js` and then the `.mts` one (`upgrade.test.mts` 3/3).\n\n## Section 3: SHIPPED.md#audit\n\nCycle 2 on the direct tree: security (opus), code (sonnet) and test (sonnet) reviewers, all with caught canaries and `independent: yes`. 3 must-fix (bundle-sync source/target symlinks, hook `typescript` main escape) and 4 should-fix, all fixed and re-proved.\n\n## Section 4: SHIPPED.md#no-gos-honored\n\nNo dependencies added and no historical records rewritten.\n\n## Section 5: SHIPPED.md#followups\n\nTracked in `_followups.md` under ts-runtime-injection 2026-10-08.\n\n## Section 6: pitch.md#no-gos\n\nNo behaviour changes beyond adapter injection and typing; no new npm dependencies and no bundler or build step; no rewrite of historical records under pitches or design; tests keep node:test (Bun supports it); no runtimes other th",true
+unavailable[0]:

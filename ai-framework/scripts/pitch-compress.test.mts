@@ -1,13 +1,15 @@
 import { NODE_FLAGS } from "./runtime/entry.mts";
 const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 import assert from "node:assert/strict";
-import fs from "node:fs";
-import os from "node:os";
-import path from "node:path";
-import { spawnSync } from "node:child_process";
+import { createTestDeps, spawnSync } from "./runtime/test-helpers.mts";
+const testDeps = createTestDeps();
+const fs = testDeps.fs;
+const os = testDeps.os;
+const path = testDeps.path;
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
+import { buildGraph, overlayKnowledge, renderIndex } from "./graphify.mts";
 import * as compressModule from "./pitch-compress.mts";
 
 const { inventory, buildLedger, requiredSections, commitLedger, writeDoneWork, slugifyHeading, extractSection, createPitchCompress } = compressModule;
@@ -25,11 +27,14 @@ function exists(root, name) { return fs.existsSync(path.join(root, name)); }
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "pitch-compress-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
-  // graphify.mts is dependency-free (fs/path only per its own header) — safe and fast to copy
-  // whole so commitLedger's real --check call has something real to run against.
-  fs.mkdirSync(path.join(root, "ai-framework/scripts"), { recursive: true });
-  fs.copyFileSync(path.join(__dirname, "graphify.mts"), path.join(root, "ai-framework/scripts/graphify.mts"));
   for (const dir of ["decisions", "patterns", "entities", "issues", "templates"]) fs.mkdirSync(path.join(root, `.project/knowledge/${dir}`), { recursive: true });
+  // Ledger validation reads real generated artifacts, including through its child process.
+  // Build only this fixture's knowledge overlay; no Graphify installation or external command is needed.
+  const deps = createNodeDeps();
+  const { graph, problems } = buildGraph(root, deps);
+  assert.deepEqual(problems, []);
+  write(root, "graphify-out/graph.json", JSON.stringify(overlayKnowledge({ nodes: [], links: [] }, graph)) + "\n");
+  write(root, ".project/knowledge/index.md", renderIndex(graph, root, deps));
   return root;
 }
 
@@ -257,7 +262,7 @@ test("commit-ledger rejects a new knowledge entry that fails graphify's own vali
   write(root, ".project/knowledge/patterns/broken-dupe.md", "---\nid: broken\ntype: pattern\n---\n\nDuplicate id on purpose.\n");
   const required = buildLedger(root, "bad-knowledge").required;
   const mapping = { sections: required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" })) };
-  assert.throws(() => commitLedger(root, "bad-knowledge", mapping), /Knowledge graph invalid/);
+  assert.throws(() => commitLedger(root, "bad-knowledge", mapping), /Knowledge graph invalid: .*duplicate id "broken"/);
 });
 
 test("write-done-work is idempotent: a rerun for the same slug replaces only its own section", (t) => {
@@ -586,7 +591,7 @@ test("a failing graph check reports graphify's own problem list, not raw stderr 
   const sections = buildLedger(root, "graphfail").required.map((source) => ({ source, status: "extracted", destination: ".project/knowledge/patterns/broken.md" }));
   let message = "";
   try { commitLedger(root, "graphfail", { sections }, {}); } catch (error) { message = error.message; }
-  assert.match(message, /^Knowledge graph invalid: /);
+  assert.match(message, /^Knowledge graph invalid: .*duplicate id "broken"/);
   assert.ok(!message.includes(root), "no absolute path from the child process");
 });
 
@@ -676,4 +681,295 @@ test("injected graph subprocess is bundle-owned and reports only the validated p
   assert.deepEqual(calls, [{ command: process.versions.bun ? "node" : deps.proc.execPath, args: ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", path.join(__dirname, "graphify.mts"), "--check", "--json"], options: { cwd: root, env: { AI_WORKFLOW_RUNNER: "node" } } }]);
   deps.child.runSync = () => ({ status: 1, signal: null, stdout: '{"problems":[{"message":"stale graph"}]}', stderr: "private child output" });
   assert.throws(() => tools.commitLedger(root, "runtime-graph", mapping), { message: "Knowledge graph invalid: stale graph" });
+});
+
+test("write-done-work reads the ship date from bold and plain `Shipped:` lines, and only falls back to today when there is none", (t) => {
+  const root = fixture(t);
+  const cases = [
+    ["bold", "**Shipped:** 2026-09-25", "2026-09-25"],
+    ["plain", "Bet: 2026-09-20  •  Shipped: 2026-09-26  •  Appetite: small-batch", "2026-09-26"],
+    ["colon-outside", "**Shipped**: 2026-09-27", "2026-09-27"],
+    ["date-line", "**Date**: 2026-09-28", "2026-09-28"],
+  ];
+  for (const [name, line] of cases) write(root, `.project/pitches/${name}/SHIPPED.md`, `# Shipped: ${name}\n${line}\n\n## Summary\n\nDone.\n`);
+  for (const [name] of cases) writeDoneWork(root, name, "Summary text.", { apply: true });
+  const done = read(root, ".project/done-work.md");
+  for (const [name, , expected] of cases) assert.match(done, new RegExp(`## ${name} — shipped ${expected}\\n`));
+});
+
+// ---- ledger version 2 (class, disposition, helps, closed omission reasons, bodyHash, otherFiles) ----
+
+import { bodyHashOf, DONE_WORK_FILE, LEDGER_V2, MAX_HELPS_LENGTH, MAX_LEDGER_BYTES, MAX_SECTIONS, validateLedgerShape } from "./ledger-schema.mts";
+
+const digestOf = (data) => testDeps.crypto.sha256Hex(data);
+const keep = (source, extra = {}) => ({ source, class: "know-how", disposition: "extracted", destination: "notes/dest.md", helps: "Explains why X was chosen over Y.", ...extra });
+function v2Mapping(root, slug, edit = () => undefined) {
+  const sections = buildLedger(root, slug).required.map((source) => keep(source));
+  const otherFiles = createPitchCompress(testDeps).otherPitchFiles(root, slug).map((file) => ({ path: file.path, disposition: "omitted", reason: "superseded" }));
+  const mapping = { schemaVersion: 2, sections, otherFiles };
+  edit(mapping);
+  return mapping;
+}
+function seedV2(t, slug) {
+  const root = fixture(t);
+  seedShippedPitch(root, slug, { audit: true });
+  write(root, "notes/dest.md", "kept content");
+  return root;
+}
+
+test("v2 commits class, disposition, helps and a tool-computed bodyHash, and accounts for every other pitch file", (t) => {
+  const root = seedV2(t, "v2-ok");
+  write(root, ".project/pitches/v2-ok/notes/scratch.txt", "scratch");
+  const tools = createPitchCompress(testDeps);
+  assert.deepEqual(tools.otherPitchFiles(root, "v2-ok").map((file) => file.path), ["deviations.md", "log.md", "notes/scratch.txt", "pitch.md", "SHIPPED.md"], "only an audit-cycle file is covered whole; SHIPPED, deviations and log are also listed because text outside their sections is in no section");
+  const result = commitLedger(root, "v2-ok", v2Mapping(root, "v2-ok"), { apply: true });
+  assert.equal(result.coverage, 1);
+  const ledger = JSON.parse(read(root, ".project/compaction/ledgers/v2-ok.json"));
+  assert.equal(ledger.schemaVersion, LEDGER_V2);
+  const bodies = Object.fromEntries(tools.pitchSections(root, "v2-ok").map((section) => [section.key, section.body]));
+  for (const section of ledger.sections) assert.equal(section.bodyHash, bodyHashOf(bodies[section.source], digestOf), section.source);
+  assert.deepEqual(ledger.otherFiles.map((file) => file.path), ["deviations.md", "log.md", "notes/scratch.txt", "pitch.md", "SHIPPED.md"]);
+  assert.deepEqual(validateLedgerShape(ledger, "v2-ok"), { version: 2, problems: [] });
+});
+
+test("a mapping with no schemaVersion or schemaVersion 1 still commits the original v1 record", (t) => {
+  const root = seedV2(t, "still-v1");
+  const v1 = { sections: buildLedger(root, "still-v1").required.map((source) => ({ source, status: "extracted", destination: "notes/dest.md" })) };
+  commitLedger(root, "still-v1", v1, { apply: true });
+  const first = JSON.parse(read(root, ".project/compaction/ledgers/still-v1.json"));
+  assert.equal(first.schemaVersion, 1);
+  assert.ok(!("otherFiles" in first) && !("class" in first.sections[0]), "v1 input never gains v2 fields");
+  commitLedger(root, "still-v1", { schemaVersion: 1, ...v1 }, { apply: true });
+  assert.equal(JSON.parse(read(root, ".project/compaction/ledgers/still-v1.json")).schemaVersion, 1);
+});
+
+test("a mapping with an unsupported schemaVersion, or that is not an object, is refused", (t) => {
+  const root = seedV2(t, "bad-version");
+  const base = v2Mapping(root, "bad-version");
+  for (const version of [3, 0, "2", null, 2.5]) assert.throws(() => commitLedger(root, "bad-version", { ...base, schemaVersion: version }), /Unsupported ledger schemaVersion/, String(version));
+  for (const mapping of [null, [], "ledger", 7]) assert.throws(() => commitLedger(root, "bad-version", mapping), /must be an object/);
+  assert.ok(!exists(root, ".project/compaction/ledgers/bad-version.json"));
+});
+
+test("v2 refuses destinations that are not lasting: another pitch's file, done-work, the outcome record (scenario G)", (t) => {
+  const root = seedV2(t, "v2-dest");
+  write(root, ".project/pitches/other-pitch/_followups.md", "followups");
+  write(root, DONE_WORK_FILE, "# Done Work\n");
+  // The positive case also runs graph validation, so its published outcome must satisfy the shared format.
+  write(root, ".project/records/shipped/v2-dest.md", ["---", "slug: v2-dest", "shipped: 2026-10-08", "schemaVersion: 1", "---", "# v2-dest", "",
+    "The fixture shipped.", "Read its owning documents.", "Verification is historical.", "", "- outcome: Changed the fixture.",
+    ...["docs", "decisions", "knowledge", "code", "verification", "followups", "archive"].map(field => `- ${field}: none`), ""].join("\n"));
+  const first = buildLedger(root, "v2-dest").required[0];
+  const change = (extra) => (mapping) => { mapping.sections[0] = keep(first, extra); };
+  assert.throws(() => commitLedger(root, "v2-dest", v2Mapping(root, "v2-dest", change({ destination: ".project/pitches/other-pitch/_followups.md" }))), /under \.project\/pitches\//);
+  assert.throws(() => commitLedger(root, "v2-dest", v2Mapping(root, "v2-dest", change({ class: "behavior", destination: DONE_WORK_FILE }))), /behavior content must live in its owning document/);
+  assert.throws(() => commitLedger(root, "v2-dest", v2Mapping(root, "v2-dest", change({ class: "decision", destination: ".project/records/shipped/v2-dest.md" }))), /decision content must live/);
+  commitLedger(root, "v2-dest", v2Mapping(root, "v2-dest", change({ class: "limit", destination: DONE_WORK_FILE })));
+});
+
+test("v2 binds each entry to the content it was judged against", (t) => {
+  const root = seedV2(t, "v2-hash");
+  const sections = createPitchCompress(testDeps).pitchSections(root, "v2-hash");
+  const stale = v2Mapping(root, "v2-hash", (mapping) => { mapping.sections[0].bodyHash = bodyHashOf("what the section said before", digestOf); });
+  assert.throws(() => commitLedger(root, "v2-hash", stale), /Stale content hash for .*changed since it was judged/);
+  const right = v2Mapping(root, "v2-hash", (mapping) => { mapping.sections[0].bodyHash = bodyHashOf(sections[0].body, digestOf); });
+  commitLedger(root, "v2-hash", right);
+  const edited = v2Mapping(root, "v2-hash", (mapping) => { mapping.otherFiles[0].hash = bodyHashOf("old", digestOf); });
+  assert.throws(() => commitLedger(root, "v2-hash", edited), /Stale content hash/);
+});
+
+test("v2 needs an otherFiles entry for every pitch file outside the sections, and none for files that are not there", (t) => {
+  const root = seedV2(t, "v2-files");
+  write(root, ".project/pitches/v2-files/plan.md", "a plan");
+  assert.throws(() => commitLedger(root, "v2-files", v2Mapping(root, "v2-files", (mapping) => { mapping.otherFiles = mapping.otherFiles.slice(1); })), /does not account for pitch file\(s\)/);
+  assert.throws(() => commitLedger(root, "v2-files", v2Mapping(root, "v2-files", (mapping) => { delete mapping.otherFiles; })), /needs an otherFiles list/);
+  assert.throws(() => commitLedger(root, "v2-files", v2Mapping(root, "v2-files", (mapping) => { mapping.otherFiles.push({ path: "ghost.md", disposition: "omitted", reason: "duplicate" }); })), /does not have outside its sections: ghost\.md/);
+  assert.throws(() => commitLedger(root, "v2-files", v2Mapping(root, "v2-files", (mapping) => { mapping.otherFiles.push({ ...mapping.otherFiles[0] }); })), /Duplicate otherFiles entry/);
+  fs.symlinkSync(path.join(root, "notes/dest.md"), path.join(root, ".project/pitches/v2-files/link.md"));
+  assert.throws(() => createPitchCompress(testDeps).otherPitchFiles(root, "v2-files"), /Symlink inside the pitch directory/);
+});
+
+test("v2 omissions use a closed reason set; failed-approach needs a lesson; other needs a named acceptance", (t) => {
+  const root = seedV2(t, "v2-omit");
+  const first = buildLedger(root, "v2-omit").required[0];
+  const omit = (extra) => (mapping) => { mapping.sections[0] = { source: first, class: "omit", disposition: "omitted", ...extra }; };
+  commitLedger(root, "v2-omit", v2Mapping(root, "v2-omit", omit({ reason: "resolved-false-positive" })));
+  assert.throws(() => commitLedger(root, "v2-omit", v2Mapping(root, "v2-omit", omit({}))), /omitted needs a reason from/);
+  assert.throws(() => commitLedger(root, "v2-omit", v2Mapping(root, "v2-omit", omit({ reason: "not interesting" }))), /omitted needs a reason from/);
+  assert.throws(() => commitLedger(root, "v2-omit", v2Mapping(root, "v2-omit", omit({ reason: "failed-approach" }))), /failed-approach omission needs the destination of its lesson/);
+  commitLedger(root, "v2-omit", v2Mapping(root, "v2-omit", omit({ reason: "failed-approach", destination: "notes/dest.md" })));
+  const other = v2Mapping(root, "v2-omit", omit({ reason: "other" }));
+  assert.throws(() => commitLedger(root, "v2-omit", other), /Unaccepted gap\(s\): .*--accept-gap/);
+  const result = commitLedger(root, "v2-omit", other, { acceptGaps: { [first]: "reviewed: superseded by the next pitch" }, apply: true });
+  assert.deepEqual(result.gaps, [{ source: first, reason: "other" }]);
+  assert.ok(result.coverage < 1);
+  assert.deepEqual(JSON.parse(read(root, ".project/compaction/ledgers/v2-omit.json")).acceptedGaps[0].acceptedReason, "reviewed: superseded by the next pitch");
+});
+
+test("v2 rejects a kept entry without helps, a class that disagrees with its disposition, and unknown fields", (t) => {
+  const root = seedV2(t, "v2-shape");
+  const first = buildLedger(root, "v2-shape").required[0];
+  const change = (entry) => (mapping) => { mapping.sections[0] = entry; };
+  assert.throws(() => commitLedger(root, "v2-shape", v2Mapping(root, "v2-shape", change(keep(first, { helps: "" })))), /needs a helps line/);
+  assert.throws(() => commitLedger(root, "v2-shape", v2Mapping(root, "v2-shape", change(keep(first, { helps: "x".repeat(MAX_HELPS_LENGTH + 1) })))), /needs a helps line of 1-/);
+  assert.throws(() => commitLedger(root, "v2-shape", v2Mapping(root, "v2-shape", change(keep(first, { class: "omit" })))), /class omit and disposition omitted go together/);
+  assert.throws(() => commitLedger(root, "v2-shape", v2Mapping(root, "v2-shape", change(keep(first, { class: "story" })))), /class must be one of/);
+  assert.throws(() => commitLedger(root, "v2-shape", v2Mapping(root, "v2-shape", change(keep(first, { score: 5 })))), /unknown field "score"/);
+  assert.throws(() => commitLedger(root, "v2-shape", v2Mapping(root, "v2-shape", change(keep(first, { destination: "notes/missing.md" })))), /Destination does not exist/);
+});
+
+test("a ledger mapping beyond the shared section limit is refused before any work, in both versions", (t) => {
+  const root = seedV2(t, "v2-big");
+  const many = Array.from({ length: MAX_SECTIONS + 1 }, (_, i) => keep(`SHIPPED.md#s${i}`));
+  assert.throws(() => commitLedger(root, "v2-big", { schemaVersion: 2, sections: many, otherFiles: [] }), /limit is 200/);
+  assert.throws(() => commitLedger(root, "v2-big", { sections: many.map((entry) => ({ source: entry.source, status: "extracted", destination: "notes/dest.md" })) }), /limit is 200/);
+});
+
+test("a ledger at the maximum supported size commits and reads back through the shared reader", (t) => {
+  const root = fixture(t);
+  const slug = "v2-max";
+  write(root, `.project/pitches/${slug}/pitch.md`, "# Pitch\n");
+  const headings = Array.from({ length: MAX_SECTIONS }, (_, i) => `## Section ${String(i).padStart(3, "0")}\n\nBody ${i}.\n`).join("\n");
+  write(root, `.project/pitches/${slug}/SHIPPED.md`, `# Shipped\n\n${headings}`);
+  const longDirectory = `notes/${"d".repeat(60)}/${"e".repeat(60)}/${"f".repeat(60)}/${"g".repeat(60)}`;
+  const destination = `${longDirectory}/destination.md`;
+  write(root, destination, "kept");
+  const sections = buildLedger(root, slug).required.map((source) => keep(source, { destination, helps: "h".repeat(MAX_HELPS_LENGTH) }));
+  assert.equal(sections.length, MAX_SECTIONS);
+  commitLedger(root, slug, { schemaVersion: 2, sections, otherFiles: ["SHIPPED.md", "pitch.md"].map((path) => ({ path, disposition: "omitted", reason: "duplicate" })) }, { apply: true });
+  const text = read(root, `.project/compaction/ledgers/${slug}.json`);
+  assert.ok(text.length < MAX_LEDGER_BYTES, `${text.length} bytes is within the bound every reader enforces`);
+  const shape = validateLedgerShape(JSON.parse(text), slug);
+  assert.deepEqual(shape, { version: 2, problems: [] });
+});
+
+test("validateLedgerShape never throws and names what is wrong", () => {
+  for (const value of [undefined, null, [], "x", 3, {}, { schemaVersion: 2 }, { schemaVersion: 2, slug: "s", sections: [null] }, { schemaVersion: 1, slug: "s", sections: [{ source: "a", status: "other" }] }]) {
+    const result = validateLedgerShape(value, "s");
+    assert.ok(result.problems.length > 0, JSON.stringify(value));
+  }
+  assert.match(validateLedgerShape({ schemaVersion: 3 }, "s").problems[0], /unsupported ledger schemaVersion 3/);
+  assert.deepEqual(validateLedgerShape({ schemaVersion: 1, slug: "s", sections: [{ source: "a", status: "gap" }] }, "s"), { version: 1, problems: [] });
+});
+
+test("a deviations.md or log.md with no section content is accounted for as an other file instead of vanishing", (t) => {
+  const root = seedV2(t, "v2-loose");
+  write(root, ".project/pitches/v2-loose/deviations.md", "just a note, no headings\n");
+  const paths = createPitchCompress(testDeps).otherPitchFiles(root, "v2-loose").map((file) => file.path);
+  assert.deepEqual(paths, ["deviations.md", "log.md", "pitch.md", "SHIPPED.md"]);
+  assert.throws(() => commitLedger(root, "v2-loose", v2Mapping(root, "v2-loose", (mapping) => { mapping.otherFiles = mapping.otherFiles.filter((file) => file.path !== "deviations.md"); })), /does not account for pitch file\(s\): deviations\.md/);
+});
+
+// ---- audit cycle 1: guards the v2 commit path must keep, and destination aliasing ----
+
+test("v2 commit refuses pending compaction and installer journals, runs the graph check, and requires every section", (t) => {
+  const root = seedV2(t, "v2-guards");
+  const ledger = ".project/compaction/ledgers/v2-guards.json";
+  for (const [journal, message] of [
+    [".project/compaction/transaction.json", /Interrupted transaction: run recover/],
+    [".project/skills/transaction.json", /Pending legacy or skill transaction/],
+  ]) {
+    write(root, journal, "pending evidence\n");
+    assert.throws(() => commitLedger(root, "v2-guards", v2Mapping(root, "v2-guards"), { apply: true }), message);
+    assert.equal(exists(root, ledger), false, "nothing is written while a journal is pending");
+    fs.unlinkSync(path.join(root, journal));
+  }
+  const deps = createNodeDeps({ AI_WORKFLOW_RUNNER: "node" });
+  deps.child = { ...deps.child, runSync: () => ({ status: 1, signal: null, stdout: '{"problems":[{"message":"stale graph"}]}', stderr: "" }) };
+  const tools = createPitchCompress(deps);
+  assert.throws(() => tools.commitLedger(root, "v2-guards", v2Mapping(root, "v2-guards")), { message: "Knowledge graph invalid: stale graph" });
+  assert.throws(() => commitLedger(root, "v2-guards", v2Mapping(root, "v2-guards", (mapping) => { mapping.sections = mapping.sections.slice(1); })), /Ledger missing required section\(s\)/);
+});
+
+test("a destination is judged by file identity: a symlink into another pitch's folder, or the pitch's own folder spelled in another case, is refused", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "alias-me");
+  write(root, ".project/pitches/other/x.md", "another pitch's file\n");
+  write(root, "notes/dest.md", "kept");
+  fs.mkdirSync(path.join(root, ".project/knowledge/patterns"), { recursive: true });
+  fs.symlinkSync("../../pitches/other/x.md", path.join(root, ".project/knowledge/patterns/link.md"));
+  const tools = createPitchCompress(testDeps);
+  assert.throws(() => tools.checkDestination(root, "alias-me", ".project/knowledge/patterns/link.md", "link"), /inside \.project\/pitches/);
+  tools.checkDestination(root, "alias-me", "notes/dest.md", "ok");
+  if (fs.existsSync(path.join(root, ".PROJECT/PITCHES/ALIAS-ME/pitch.md"))) {
+    assert.throws(() => tools.checkDestination(root, "alias-me", ".project/Pitches/alias-me/pitch.md", "alias"), /inside the pitch being compacted/);
+    assert.throws(() => tools.checkDestination(root, "alias-me", ".PROJECT/pitches/ALIAS-ME/pitch.md", "alias"), /inside the pitch being compacted/);
+  }
+  assert.throws(() => tools.checkDestination(root, "alias-me", ".project/pitches/alias-me/pitch.md", "own"), /inside the pitch being compacted/);
+});
+
+test("text outside a section (a preamble) is bound by a whole-file hash, so rewriting it invalidates the ledger", (t) => {
+  const root = seedV2(t, "v2-preamble");
+  write(root, ".project/pitches/v2-preamble/SHIPPED.md", "# Shipped\n\nPREAMBLE the sections never judge\n\n## Scope reconciliation\n\nDone as pitched.\n");
+  const tools = createPitchCompress(testDeps);
+  const before = tools.otherPitchFiles(root, "v2-preamble").find((file) => file.path === "SHIPPED.md");
+  const sectionBefore = tools.pitchSections(root, "v2-preamble").find((section) => section.key === "SHIPPED.md#scope-reconciliation");
+  assert.ok(before, "SHIPPED.md is listed as a file even though it has sections");
+  write(root, ".project/pitches/v2-preamble/SHIPPED.md", "# Shipped\n\nPREAMBLE rewritten after judgment\n\n## Scope reconciliation\n\nDone as pitched.\n");
+  assert.notEqual(tools.otherPitchFiles(root, "v2-preamble").find((file) => file.path === "SHIPPED.md")?.hash, before.hash);
+  assert.deepEqual(tools.pitchSections(root, "v2-preamble").find((section) => section.key === "SHIPPED.md#scope-reconciliation"), sectionBefore, "the section itself did not change, only the text around it");
+});
+
+test("behavior and decision destinations are refused by identity too: a hard link to done-work.md or a file in the record folder", (t) => {
+  const root = fixture(t);
+  seedShippedPitch(root, "linksonly");
+  write(root, ".project/done-work.md", "# Done Work\n");
+  write(root, ".project/records/shipped/other.md", "record\n");
+  write(root, "notes/dest.md", "kept");
+  fs.linkSync(path.join(root, ".project/done-work.md"), path.join(root, "notes/dw-hardlink.md"));
+  const tools = createPitchCompress(testDeps);
+  assert.throws(() => tools.checkDestination(root, "linksonly", "notes/dw-hardlink.md", "link", "behavior"), /must live in its owning document/);
+  assert.throws(() => tools.checkDestination(root, "linksonly", ".project/records/shipped/other.md", "rec", "decision"), /must live in its owning document/);
+  tools.checkDestination(root, "linksonly", "notes/dw-hardlink.md", "link", "limit");
+  tools.checkDestination(root, "linksonly", "notes/dest.md", "ok", "behavior");
+});
+
+// ---- group entries: one entry, one tree hash, any number of files ----
+
+import { groupHashOf, MAX_OTHER_FILES, MAX_PITCH_FILES } from "./ledger-schema.mts";
+
+function groupedPitch(t, slug, count) {
+  const root = seedV2(t, slug);
+  for (let i = 0; i < count; i++) write(root, `.project/pitches/${slug}/campaign/f${String(i).padStart(4, "0")}.txt`, `staged ${i}`);
+  return root;
+}
+const groupOf = (root, slug, prefix) => createPitchCompress(testDeps).otherPitchFiles(root, slug).filter((file) => file.path.startsWith(prefix));
+function groupedMapping(root, slug, edit = () => undefined) {
+  const mapping = v2Mapping(root, slug);
+  mapping.otherFiles = [...mapping.otherFiles.filter((file) => !file.path.startsWith("campaign/")), { path: "campaign/", disposition: "omitted", reason: "duplicate" }];
+  edit(mapping);
+  return mapping;
+}
+
+test("a group entry covers a folder larger than the per-file ledger limit with one tool-computed tree hash", (t) => {
+  const root = groupedPitch(t, "grp-ok", MAX_OTHER_FILES + 50);
+  assert.throws(() => commitLedger(root, "grp-ok", v2Mapping(root, "grp-ok"), { apply: true }), /otherFiles, limit 200/, "listing every file still hits the entry limit");
+  const result = commitLedger(root, "grp-ok", groupedMapping(root, "grp-ok"), { apply: true });
+  assert.equal(result.coverage, 1);
+  const ledger = JSON.parse(read(root, ".project/compaction/ledgers/grp-ok.json"));
+  const entry = ledger.otherFiles.find((file) => file.path === "campaign/");
+  assert.equal(entry.count, MAX_OTHER_FILES + 50);
+  assert.equal(entry.hash, groupHashOf(groupOf(root, "grp-ok", "campaign/"), digestOf));
+  assert.ok(ledger.otherFiles.length < 10, "the ledger stays small");
+  assert.deepEqual(validateLedgerShape(ledger, "grp-ok"), { version: 2, problems: [] });
+});
+
+test("a group a hash or count was judged against is refused once the folder changed, and a group cannot hide or double a file", (t) => {
+  const root = groupedPitch(t, "grp-doubt", 5);
+  const live = groupOf(root, "grp-doubt", "campaign/");
+  const good = groupHashOf(live, digestOf);
+  assert.throws(() => commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.at(-1).hash = bodyHashOf("old", digestOf); })), /Stale content hash for campaign\//);
+  assert.throws(() => commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.at(-1).hash = good; m.otherFiles.at(-1).count = 4; })), /Stale file count/);
+  assert.throws(() => commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.push({ path: "campaign/f0000.txt", disposition: "omitted", reason: "duplicate" }); })), /overlap/);
+  assert.throws(() => commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.push({ path: "campaign/f0/", disposition: "omitted", reason: "duplicate" }); })), /does not have|overlap/);
+  assert.throws(() => commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.at(-1).path = "nothing/"; })), /group the pitch does not have/);
+  write(root, ".project/pitches/grp-doubt/campaign/extra/deep.txt", "x");
+  assert.throws(() => commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.at(-1).path = "campaign/extra/"; })), /does not account for pitch file\(s\): .*campaign\/f0000\.txt/, "a narrower group leaves the rest unaccounted");
+  const accepted = commitLedger(root, "grp-doubt", groupedMapping(root, "grp-doubt", (m) => { m.otherFiles.at(-1).hash = groupHashOf(groupOf(root, "grp-doubt", "campaign/"), digestOf); }), { apply: true });
+  assert.equal(accepted.coverage, 1, "the same group with the current hash commits");
+});
+
+test("a pitch with more files than the folder bound is refused even when grouped", (t) => {
+  const root = groupedPitch(t, "grp-big", MAX_PITCH_FILES + 1);
+  assert.throws(() => createPitchCompress(testDeps).otherPitchFiles(root, "grp-big"), /more than 2000 files/);
 });

@@ -1,0 +1,73 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: readme-split
+sourceProof:
+  archiveDirectory: readme-split-2026-10-08T16-26-38-199Z
+  manifestHash: "sha256:c34d032cb60c45db2508a805412143dd5839770c23ff78e28182793502a98783"
+  sourceBytes: 17154
+  verifiedFiles: 7
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/readme-split.supplement.md"
+  destination: ".project/records/legacy-upgrades/readme-split.md"
+  hash: "sha256:66e3a09dec506d8638f6065dfc214d177f7776d291d1a59b40c76559172b2239"
+payload:
+  ledgerHash: "sha256:579fc605e4075a880e07809e75e605dd0ef3afec2614ffe2d0ad76091a119fd8"
+  legacyEntryHash: "sha256:d0b9f5b76efaf9d2765a764e960ff19d73a07958e0c3f1c151454606d3ea8afc"
+  bindings:
+    ".project/records/pitch-compression/readme-split.md": "sha256:105adc6ec38fb6fe0c16bf2e32786cd2d08f1dbd0ac5906894be9815594fa5b7"
+    ".project/records/legacy-upgrades/readme-split.md": "sha256:66e3a09dec506d8638f6065dfc214d177f7776d291d1a59b40c76559172b2239"
+  mapping:
+    schemaVersion: 2
+    sections[8]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#final-verification",know-how,merged,".project/records/pitch-compression/readme-split.md#section-1-shippedmdfinal-verification",Retains historical verification counts and unavailable command categories.,"sha256:a41997104a2c54290b0567a8f082a89f9a96738ab204a2dbab01531a2ee7e42c"
+      "SHIPPED.md#reconciliation",behavior,merged,".project/records/pitch-compression/readme-split.md#section-2-shippedmdreconciliation","Retains the documentation layout, checker, doctor and sync behavior that shipped.","sha256:fc6d00db314e25ccecb9d0b807040ece4c90e512e93e127f1c9784fcdd389244"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/pitch-compression/readme-split.md#section-3-shippedmdno-gos-honored",Preserves the permitted text changes and excluded dependencies and history edits.,"sha256:c07ebde310ec8f240d3f373893b945028e631c1709e67a4e254a555bee56d488"
+      "SHIPPED.md#followups",limit,merged,".project/records/legacy-upgrades/readme-split.md#checker-limits-and-review-provenance",Retains the supported-subset limits and unverified review independence.,"sha256:f091419925e24e81e0fe18f993a04b1461b392cf94c67534cff99ce213baba52"
+      "pitch.md#no-gos",limit,merged,".project/records/pitch-compression/readme-split.md#section-5-pitchmdno-gos",Preserves pitch-specific documentation and dependency constraints.,"sha256:4844eacebf66c0c3ceab81dd9594f51797cc84882e7f2f7a80f2cc6d49478f2d"
+      "pitch.md#rabbit-holes",decision,merged,".project/records/pitch-compression/readme-split.md#section-6-pitchmdrabbit-holes","Preserves namespace collision rationale, ownership and required sync registration.","sha256:42afefb7d4e0cca623e571deb84d02183b0dc4d4097b87fb44c827969f3f8308"
+      "log.md#2026-10-07",know-how,merged,".project/records/pitch-compression/readme-split.md#section-7-logmd2026-10-07","Retains move verification, negative checks and reference-update evidence.","sha256:e27c250b8e7cca02634d69eb3add08624215be55c52acfd013f85f31be351443"
+      "log.md#audit-cycle-1",know-how,merged,".project/records/legacy-upgrades/readme-split.md#audit-evidence-and-exclusions",Retains resolved review findings and limits of reviewer verification.,"sha256:9fff187c377fa3ddc4d987e99c1f8220beff6802408874009fa49103502f6a32"
+    otherFiles[7]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:69bbc9c55a06d4c32f568954372d0877b5e1b96c02918c64fc47b68e80ff1543"
+        disposition: merged
+        destination: ".project/records/pitch-compression/readme-split.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: audit.md
+        hash: "sha256:34117be54247deecee901abcd7d43994cbe8a6dad22779be472f4578c93b2701"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/readme-split.md"
+        helps: Preserves the lasting review evidence and limits; transient workflow metadata remains archived.
+      -
+        path: deviations.md
+        hash: "sha256:8fb341c1eb1b3a12591a32a8d2ddb9f0325817e6c20e885e262f52ee350baba4"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/readme-split.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: hill.md
+        hash: "sha256:46c87be5b5d03cd6ff9b99ed6d828b4c773551aea6d956c88003d4ff9ebb374d"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:0e69de757f18a2dd79a062e2126fc2160b8094209307c62f4c3d199fafb33483"
+        disposition: merged
+        destination: ".project/records/pitch-compression/readme-split.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: pitch.md
+        hash: "sha256:28d6f25d08614c391f79f9b333e2ca12321c41095d5897711d67a5a5ebfa2b04"
+        disposition: merged
+        destination: ".project/records/pitch-compression/readme-split.md"
+        helps: "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+      -
+        path: plan.md
+        hash: "sha256:260f6d3e3bd8d5b21a50474d7844e6bdf4527cfc2a6b676d8032cccf1271ccf1"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/readme-split.md"
+        helps: Preserves the lasting behavior contract and boundaries; transient workflow metadata remains archived.
+  outcomeRecord: "---\nslug: readme-split\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# readme-split\n\nThe README links to workflow documentation under the bundle-owned directory.\nThe documentation and link-checker links below describe the current structure.\nHistorical verification and acknowledged limitations remain in the compact record.\n\n- outcome: A short README links to portable workflow documentation checked by the bundle.\n- docs: [documentation](README.md)\n- decisions: [documentation ownership](.project/records/legacy-upgrades/readme-split.md#documentation-ownership)\n- knowledge: none\n- code: [implementation](ai-framework/scripts/docs-links.mts)\n- verification: [historical closure](.project/records/pitch-compression/readme-split.md)\n- followups: [source-review limits](.project/records/legacy-upgrades/readme-split.md)\n- archive: [compact record](.project/records/pitch-compression/readme-split.md), [source supplement](.project/records/legacy-upgrades/readme-split.md)\n"

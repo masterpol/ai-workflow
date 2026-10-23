@@ -1,0 +1,164 @@
+{
+  "schemaVersion": 2,
+  "slug": "state-report-redesign",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#what-shipped",
+      "helps": "Scope outcomes S1 to S7 and the deviations behind them: plain throws, horizontal bars and git apply.",
+      "bodyHash": "sha256:26ee26cf709230d94717b74301420fe130ff566f50a92506652467c6d215fa4e"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#standing-constraints",
+      "helps": "Which no-gos held, and the replaced token-share and folder-size charts.",
+      "bodyHash": "sha256:afbb2d7ee1e97b748e69cc14754195ad6c475ad3f3810a220e2ba482140b2a87"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Rabbit holes resolved and the two audit surprises: prototype keys and weak tests.",
+      "bodyHash": "sha256:47ca4da62437e5b69594a1f2b5cc09ab3cb2332166a17a16d51c55860f661950"
+    },
+    {
+      "source": "SHIPPED.md#evidence",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#verification-history",
+      "helps": "200 tests against a 170 baseline, two full-suite runs and the validator and doctor verdicts.",
+      "bodyHash": "sha256:2be8e392e9107334467049c577f82f33df4c231ea16541c4366f1e18a7e2534a"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#limits-and-open-items",
+      "helps": "The seven leftovers and where the backlog keeps them.",
+      "bodyHash": "sha256:e4de583bdfa7fd6285f19ebff53a427b8d46a8ddcecb0ff4411d0458eea49404"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#contract-and-docs",
+      "helps": "The state-report.md scope and the stale /state skill sentence.",
+      "bodyHash": "sha256:d86c16ebf824ba83ca65c0d69ddabc85b210a5b801e514aed14415870c0b0013"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#standing-constraints",
+      "helps": "The five no-gos: no script, no lifecycle edits, no new facts, no CSS copy and additive schema.",
+      "bodyHash": "sha256:235a310a0d1bf75bb3f99e9b11ff9d9796db5869246ab5793606ed1e82c5185f"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#scope-and-contract",
+      "helps": "Resolved, pushed-to-plan and no-go items, including critique S1 to S4, A1, A2, X4 and X9.",
+      "bodyHash": "sha256:8c1455e61edf01ad4a3b9e822537e500399ab0a0e846eadd3cc3b619f0b3845b"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:e11cd6bd07fcd98dc6c228a7b305795726cf6216a74d92e4db718db93fa53ab7",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#what-shipped",
+      "helps": "Preserves the counts, caps and scope outcomes across the supplement."
+    },
+    {
+      "path": "audit-records/code.md",
+      "hash": "sha256:d99289575f3fb2bf010f15db5ee398df1ca2ac1decb246b5583387901b8cd227",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the code review canary result and its independence."
+    },
+    {
+      "path": "audit-records/cross.md",
+      "hash": "sha256:cba5d47e0314ed7b070669639cb776dd8b71a649291200e7028295cc4713cba9",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the cross-pitch finding X1 and the merge order."
+    },
+    {
+      "path": "audit-records/sec2.md",
+      "hash": "sha256:48943f368b50b781158099c88dc2850eb786b8f6dcab54c7b9c5afac7976212a",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the retried security review and its refuted findings."
+    },
+    {
+      "path": "audit-records/security.md",
+      "hash": "sha256:1770ff72e18a7dd09b497be9b9a991eb5e55d0f6892eb2b4b150ed94b67405fb",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the first security review and why it was incomplete."
+    },
+    {
+      "path": "audit-records/tests.md",
+      "hash": "sha256:a528411afa0365efe3944036f57ef94f32b9b4e0ec3dc3810303299415a45457",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the first test review and why it was incomplete."
+    },
+    {
+      "path": "audit-records/tests2.md",
+      "hash": "sha256:222f3ef3dcaca66bbc54f2c9f3be3da11f296f4fc854aa06cf2721444cef28a3",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the retried test review, the surviving mutants and the added tests."
+    },
+    {
+      "path": "audit-records/ux.md",
+      "hash": "sha256:970ab962d0e01026939affe0904995b5d8882daf78b3eee492ba191a723269b7",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the UX findings U1 to U3 and their fixes."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:725eb067a891bf92ba04151e919ca6f37f4cd72519c1039b6b8b25555926003a",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#audit-triage",
+      "helps": "Preserves the cycle 1 triage, the fixed and refuted findings and the environment blocker."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:c8a670b7ad8aac2a52bb6dd710bd56916e3818af76dd39bdb6678a9a6adfade5",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-19-state-report-redesign-hill.md",
+      "helps": "Byte-identical copy of the final scope positions and test counts."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:c07cc49e782255c9a562384f81f11a8fe311bb4d5299082af1d6804429e97f27",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#what-shipped",
+      "helps": "Preserves the problem, owner decisions, knowledge consulted, critique table and bet."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:8055363a06fa76dbaf7cf0276ab1516f5a66d27ecca5717890bba0023392deaa",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-report-redesign.md#scope-and-contract",
+      "helps": "Preserves the seven plan corrections, detector precedence, exit criteria and the parallel plan."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:12:27.199Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:d3cb2de72b1d6c4249143c00a7cd7e6d1a390c56da462052f54b82365800dbaa",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
+}

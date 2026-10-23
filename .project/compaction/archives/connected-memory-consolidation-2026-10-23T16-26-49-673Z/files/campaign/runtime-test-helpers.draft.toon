@@ -1,0 +1,37 @@
+@toon-data 1
+slug: runtime-test-helpers
+draft: true
+state: needs-decision
+ledgerHash: "sha256:a0fa4531c2b6a3a438d22afc1b09cc37d0b67ee83968fa639b6db5021f558538"
+bindings:
+  ".project/records/pitch-compression/runtime-test-helpers.md": "sha256:2a469383f24d333c46b24484651b689b9a0a53a7834d20849de742fd56fd5afe"
+legacyEntryHash: "sha256:11d85cde159a58da62b2a7f04045da52c8c89205035f55889911eb5fc7411d21"
+mapping:
+  schemaVersion: 2
+  sections[9]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#audit",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-3-shippedmdaudit",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-4-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#knowledge-extracted",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-5-shippedmdknowledge-extracted",null,null
+    "SHIPPED.md#followups",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-6-shippedmdfollowups",null,null
+    "SHIPPED.md#cross-pitch-note",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-7-shippedmdcross-pitch-note",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-8-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/runtime-test-helpers.md#section-9-pitchmdrabbit-holes",null,null
+  otherFiles[0]:
+judgments[9]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-3-shippedmdaudit",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-4-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#knowledge-extracted",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-5-shippedmdknowledge-extracted",Preserved in the compact record section.,false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-6-shippedmdfollowups",Preserved in the compact record section.,false
+  "SHIPPED.md#cross-pitch-note",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-7-shippedmdcross-pitch-note",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-8-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/runtime-test-helpers.md#section-9-pitchmdrabbit-holes",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: runtime-test-helpers\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# runtime-test-helpers\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#runtime-test-helpers","sha256:11d85cde159a58da62b2a7f04045da52c8c89205035f55889911eb5fc7411d21","## runtime-test-helpers — shipped 2026-10-08\n\nShared test helpers (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`) plus three pilots migrated off direct `node:*` imports; `FsDeps.symlinkSync` added (v2.16.1). One audit cycle fixed 3 must-fix (vacuous macOS alias guard, wrong `memoryFs` symlink semantics, path escape in `tempFixture`).\n\nLessons: [[a-temp-helper-that-realpaths-silently-voids-an-alias-guard]], [[keep-the-fakes-guarantee-the-thing-they-replace]], [[word-boundary-replacement-does-not-see-a-prefixed-property]].\n\n",false
+  ".project/records/pitch-compression/runtime-test-helpers.md","sha256:2a469383f24d333c46b24484651b689b9a0a53a7834d20849de742fd56fd5afe","# Compaction record: runtime-test-helpers\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[keep-the-fakes-guarantee-the-thing-they-replace]], [[a-temp-helper-that-realpaths-silently-voids-an-alias-guard]], [[word-boundary-replacement-does-not-see-a-prefixed-property]].\n\n## Section 1: SHIPPED.md#final-verification\n\nPilot, helper and invariants files: Node 70/70, Bun 65/65. Whole-repo Node run 986 total, 984 pass, 3 fail, all in files this pitch never touched and reproduced at HEAD with its adapter changes stashed: `browser-runtime.test.mts:137` needs the agent-browser CLI, `token-consumption.test.mts:860` misses a 5 s barrier under load, and `runtime.test.mts:337` asserted a stale `selectRuntime` contract. workflow-doctor READY (729 checks), setup-validator READY (22), graphify CLEAN, docs-links 0 broken. No secrets in the diff.\n\n## Section 2: SHIPPED.md#reconciliation\n\nS1 helper module `runtime/test-helpers.mts` (`createTestDeps`, `tempFixture`, `runScript`, `memoryFs`, `captureIo`) with its self-tests (13/13 on both runtimes). S2 in-memory pilot `docs-links.test.mts` (17/17). S3 real-fs pilot `graphify.test.mts` (15/15). S4 refactor of `orca-apply.test.mts` (20/20). Counts unchanged by the migration. `FsDeps.symlinkSync` added to the types and adapters. Release 2.16.1.\n\n## Section 3: SHIPPED.md#audit\n\nOne cycle with four independent reviewers (code, security, test-coverage, cross-pitch): 3 must-fix, 5 should-fix, 5 acknowledged. Each must-fix was reproduced with a mutant before being closed. C1: `tmp(t, real=false)` returned an already-realpathed root, so the macOS /var alias guard was vacuous; fixed with `tempFixture(deps, files, { resolve })` and re-proved by mutating the production realpath. C2: `memoryFs.statSync` threw ENOENT for every symlink, contradicting its JSDoc; `links` became a link-to-target map and `statSync` follows a link whose target exists whi",true
+unavailable[0]:

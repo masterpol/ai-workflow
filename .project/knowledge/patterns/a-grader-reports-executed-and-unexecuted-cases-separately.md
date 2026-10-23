@@ -4,7 +4,7 @@ type: pattern
 created: 2026-10-08
 updated: 2026-10-08
 tags: [evals, grader, testing, honesty]
-related: [prove-a-guard-test-with-an-in-memory-mutant, keep-the-fakes-guarantee-the-thing-they-replace]
+related: [prove-a-guard-test-with-an-in-memory-mutant, keep-the-fakes-guarantee-the-thing-they-replace, local-eval-data-is-gitignored]
 source: orca-vendor-reconcile-integration
 ---
 

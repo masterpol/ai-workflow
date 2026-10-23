@@ -1,0 +1,99 @@
+{
+  "schemaVersion": 1,
+  "slug": "opencode-handoff",
+  "sections": [
+    {
+      "source": "SHIPPED.md#what-shipped",
+      "status": "extracted",
+      "destination": ".project/context/opencode-handoff.md",
+      "reason": "deliverable"
+    },
+    {
+      "source": "SHIPPED.md#pitch-implementation-reconciliation",
+      "status": "extracted",
+      "destination": ".project/context/opencode-handoff.md",
+      "reason": "deliverable"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "status": "gap",
+      "destination": null,
+      "reason": "two line-count and status commands, re-runnable and superseded by later handoff"
+    },
+    {
+      "source": "SHIPPED.md#revisions",
+      "status": "gap",
+      "destination": null,
+      "reason": "one correction to the handoff's adapter section, already applied in the file"
+    },
+    {
+      "source": "SHIPPED.md#residuals",
+      "status": "gap",
+      "destination": null,
+      "reason": "handoff-only pitch; live Orca proof is tracked in orca-vendors.md and followups"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "gap",
+      "destination": null,
+      "reason": "three scoping exclusions, all honored; nothing reusable"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "gap",
+      "destination": null,
+      "reason": "no rabbit holes recorded beyond the handoff scope"
+    }
+  ],
+  "coverage": 0.2857142857142857,
+  "gaps": [
+    {
+      "source": "SHIPPED.md#verification",
+      "reason": "two line-count and status commands, re-runnable and superseded by later handoff"
+    },
+    {
+      "source": "SHIPPED.md#revisions",
+      "reason": "one correction to the handoff's adapter section, already applied in the file"
+    },
+    {
+      "source": "SHIPPED.md#residuals",
+      "reason": "handoff-only pitch; live Orca proof is tracked in orca-vendors.md and followups"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "reason": "three scoping exclusions, all honored; nothing reusable"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "reason": "no rabbit holes recorded beyond the handoff scope"
+    }
+  ],
+  "acceptedGaps": [
+    {
+      "source": "SHIPPED.md#verification",
+      "reason": "two line-count and status commands, re-runnable and superseded by later handoff",
+      "acceptedReason": "two re-runnable commands, superseded by later handoff work"
+    },
+    {
+      "source": "SHIPPED.md#revisions",
+      "reason": "one correction to the handoff's adapter section, already applied in the file",
+      "acceptedReason": "one correction already applied in the file"
+    },
+    {
+      "source": "SHIPPED.md#residuals",
+      "reason": "handoff-only pitch; live Orca proof is tracked in orca-vendors.md and followups",
+      "acceptedReason": "handoff-only pitch; live Orca proof tracked in orca-vendors.md and followups"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "reason": "three scoping exclusions, all honored; nothing reusable",
+      "acceptedReason": "three scoping exclusions, all honored"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "reason": "no rabbit holes recorded beyond the handoff scope",
+      "acceptedReason": "none recorded beyond handoff scope"
+    }
+  ],
+  "committedAt": "2026-10-09T14:29:23.427Z"
+}

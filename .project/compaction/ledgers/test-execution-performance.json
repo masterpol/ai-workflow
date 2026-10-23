@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 2,
+  "slug": "test-execution-performance",
+  "sections": [
+    {
+      "source": "SHIPPED.md#result",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#what-shipped",
+      "helps": "What run-tests.mts does and that no speed setting was promoted.",
+      "bodyHash": "sha256:b55f246b213b95bf84a361b4cd594da28a85def5290c2e45e6745fb70ff34147"
+    },
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#scopes-and-deviations",
+      "helps": "Worker cap fixed at 64 and S2 shipped as an unproven evidence record.",
+      "bodyHash": "sha256:a012855c99db4e8fff11fe11ae4fdf924333aea3bb6fead6bab523f8e20fcae9"
+    },
+    {
+      "source": "SHIPPED.md#measured-outcome-full-suite-medians-details-in-measurementsmd",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#measured-outcome",
+      "helps": "The median table and the verdict for each candidate.",
+      "bodyHash": "sha256:b49d33f0e4bc14e678b8e777c52ba7c198c126b7a2dd026513b00b037dadd735"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#no-gos",
+      "helps": "Constraints that held and the stray-process caveat.",
+      "bodyHash": "sha256:fbd4e6984d09dd6ea4716f466f3aa70e6cf01b9b06254cf19143bee6369608ce"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#rabbit-holes",
+      "helps": "Resolved against unresolved risks.",
+      "bodyHash": "sha256:53d361a33f37ffd32c576c2dfd2391b94ed35a9aa1b755293b73f2fb8bc59ba9"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#verification-and-audit",
+      "helps": "Evidence and the known pre-ship-verify limitation.",
+      "bodyHash": "sha256:12ad827c3369e8964a0befc57114467fb8726af5b36dcd4e8fbb64c0c535b2ae"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#verification-and-audit",
+      "helps": "Findings fixed and the guard snapshot limit.",
+      "bodyHash": "sha256:1508248603bea06bbf15257f0a2af723910907d27829f5df12408df5168e64b8"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#open-followups",
+      "helps": "Open work that must not be lost.",
+      "bodyHash": "sha256:9c823e1f4c06ae0caeafa624336ae5b3fe37c2572f649eec45570503c3054033"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:9e1276494af080f5914d61faa687dc5692b1936329b53a7fe5476f62d03c0ca4"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#no-gos",
+      "helps": "The fuller no-go list.",
+      "bodyHash": "sha256:d7086f1560dc899400f100d6ef133ddf100b9abed90a9ff70c761a2f8554aa6d"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#rabbit-holes",
+      "helps": "Plan-owner duties.",
+      "bodyHash": "sha256:b0b0f00312058ceb95b211b71861e4adb0d61b66c9dcd30e324994421737305b"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:ebf3a165450c23df7d2e4d31886462f41a4222e0dd3b490801994821f5a33f56",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#what-shipped",
+      "helps": "Preserves the result, scope, measured outcome, verification and followups across the supplement."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:24499d63de1783eeabf7d0221e6073e92c4b519798c6f31a8b1075a30005894c",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#verification-and-audit",
+      "helps": "Preserves the condensed finding table and the canary result."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:cd86c75b398abb846f1cce0c6e080ca5abf52b9909c2406d42213234930363bc",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#scopes-and-deviations",
+      "helps": "Preserves the recorded deviation from the planned CPU-count worker cap."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:c6aa23ba97d085711907a063da9f2ddf1d5d77df806850c64099819df648f96d",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-21-test-execution-performance-hill.md",
+      "helps": "Byte-identical copy of the final scope positions; the 2425 figure is recorded as a contradiction."
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:dcd4e7193c58950a6a82c1af8573cd9b23067db271c31f02be4e1815d60556c0",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-21-test-execution-performance.md",
+      "helps": "Byte-identical copy of the build log with its three lessons."
+    },
+    {
+      "path": "measurements.md",
+      "hash": "sha256:5b1e3ce81f10d2691ff78a63b783a6ae6605ce69a5a5fda61a286f359c6b4d2d",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#measured-outcome",
+      "helps": "Preserves the measurement conditions, medians and parity limits."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:5eda7e259503808210cd296a6207ef600841c1b581496f5d54eab4684cbad771",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#rabbit-holes",
+      "helps": "Preserves the problem and the no-go and rabbit-hole decisions."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:05406385253e2fc59a9b436314447f7bbf5b7b3226a60af7b379b0503c34d247",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "research.md",
+      "hash": "sha256:3cadfcd5cedb51c3a325d492e6886ff6764236ad9c2fbe85cb3d5aa9d17ac822",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/test-execution-performance.md#research-notes",
+      "helps": "Preserves the sample experiment, strategy tradeoffs, exclusions and deferred ideas."
+    }
+  ],
+  "coverage": 0.9090909090909091,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:12:35.641Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:15105273c14134145ac7b4dc46645d944468b62dbb5eb90ee5f0bbb53b00f7ab",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
+}
