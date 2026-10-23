@@ -12,6 +12,7 @@ import { createNodeDeps } from "./runtime/node.mts";
 import * as skillDefaults from "./skill-defaults.mts";
 import * as registryModule from "./skill-registry.mts";
 import { inventory } from "./pitch-compress.mts";
+import { compactedSlugs } from "./done-work-index.mts";
 import { createStateGraph } from "./state-graph.mts";
 import { createStateHistory } from "./state-history.mts";
 import { createStateStructure } from "./state-structure.mts";
@@ -250,8 +251,8 @@ function pitchesSection(root: string, scrub: (text: unknown) => string) {
   const listed = new Set();
   if (status.text) for (const heading of ["Active pitches", "Parked pitches", "Recent ships (last 5)"]) for (const cells of tableRows(status.text, heading)) listed.add(String(cells[0] || "").replace(/`/g, ""));
   const doneWork = readMarkdown(root, ".project/done-work.md");
-  const compacted = new Map();
-  if (doneWork.text) for (const match of doneWork.text.matchAll(/^## ([a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?) — shipped (\d{4}-\d{2}-\d{2})(?![^\s])/gm)) compacted.set(match[1], match[2]);
+  // One entry per slug: an outcome record wins over a legacy narrative entry, and the record folder is read by name, so a truncated done-work.md cannot hide it.
+  const compacted = new Map([...compactedSlugs(root, deps, doneWork.text ?? "")].map(([slug, info]) => [slug, info.shipped]));
 
   const items = inventory(root, deps).slice(0, 100).map((entry) => {
     const rel = `.project/pitches/${entry.slug}`;
@@ -541,8 +542,9 @@ function runsSection(root: string, scrub: (text: unknown) => string) {
 
 function doneWorkSection(root: string) {
   const source = readMarkdown(root, ".project/done-work.md");
-  if (source.missing || source.error) return unavailable(problem(source), []);
-  const entries = [...source.text.matchAll(/^## ([a-z0-9](?:[a-z0-9-]{0,78}[a-z0-9])?) — shipped (\d{4}-\d{2}-\d{2})(?![^\s])/gm)].map((match) => ({ slug: match[1], shipped: match[2] }));
+  const all = compactedSlugs(root, deps, source.text ?? "");
+  if ((source.missing || source.error) && all.size === 0) return unavailable(problem(source), []);
+  const entries = [...all].map(([slug, info]) => ({ slug, shipped: info.shipped }));
   const status = source.truncated ? "stale" : "observed";
   return fact({ compacted: entries.length, entries: entries.slice(0, 100) }, status, [".project/done-work.md"], source.truncated ? TRUNCATED_NOTE(".project/done-work.md") : undefined);
 }

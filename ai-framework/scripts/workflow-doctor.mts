@@ -16,6 +16,7 @@ import * as skillDefaults from "./skill-defaults.mts";
 import * as orcaPolicy from "./orca-policy.mts";
 import * as docsLinks from "./docs-links.mts";
 import { HOOK_EVENTS, HOOK_START, hasRawHook, hooksDir } from "./graphify.mts";
+import { CONSOLIDATION_COMMAND, legacyInventory } from "./consolidation-migrate.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 
@@ -514,6 +515,16 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
         record("fixed", path.relative(root, to), "restored missing template file");
       }
     }));
+  }
+
+  async function checkConsolidation() {
+    if (!(await exists(absolute(".project")))) return;
+    try {
+      const { legacy, pitches } = legacyInventory(root, deps);
+      record("info", "Consolidation legacy records", `${pitches} legacy compacted pitch(es): ${legacy.ledgers} v1 ledgers, ${legacy.entries} legacy entries, ${legacy.decisions} status-less decisions; dual-read remains valid. Scaffold migration: ${CONSOLIDATION_COMMAND} (dry run, then reviewed --apply); legacy content upgrades are separately gated.`);
+    } catch {
+      record("warn", "Consolidation legacy records", `inventory refused; no legacy count claimed. Inspect unsafe, oversized or unsupported records before running ${CONSOLIDATION_COMMAND}.`);
+    }
   }
 
   async function checkProjectScaffold() {
@@ -1093,6 +1104,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkGitignore(),
     ]);
     await checkProjectScaffold();
+    await checkConsolidation();
     await checkKnowledgeGraph();
     checkGraphHooks();
   }

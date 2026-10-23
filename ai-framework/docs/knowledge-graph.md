@@ -18,6 +18,14 @@ and regenerates:
 - `.project/knowledge/index.md` — human-readable catalog, with a Mermaid graph when entries have
   related edges.
 
+Shipped outcome records under `.project/records/shipped/` also contribute explicit `outcome-link`
+edges to their documentation, decisions, knowledge, code and retained evidence. Run
+`node ai-framework/scripts/graphify.mts explain <slug>` to reach those destinations directly from
+the record's heading. These links follow the outcome format's shared file and link bounds; they
+are kept even when many records share a destination. The inferred prose-reference budget and hub
+filter remain separate. Invalid records, unsafe targets or oversized input fail the graph check;
+recovery-state targets are refused before inspection. Graph navigation never opens recovery sources.
+
 Both are derived — never hand-edit them, edit the entries and re-run the script. Setup creates the
 initial graph; `/ship` and `/cooldown` rebuild it when their approved knowledge extraction,
 promotion, or archive work changes entries. Run it manually (`--check` for a dry-run report,

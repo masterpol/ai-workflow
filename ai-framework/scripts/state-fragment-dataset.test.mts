@@ -14,7 +14,7 @@ const root = process.env.STATE_FRAGMENT_DATASET_ROOT ?? urlPath(new URL("../..",
 const DATASET = ".project/evals/datasets/state-ai-fragments";
 const CHILD_SUITES = ["state-fragment.test.mts", "state-fragment-parse.test.mts", "state-fragment-evidence.test.mts", "state-fragment-inject.test.mts"];
 const AUTHORING = ".project/evals/datasets/state-ai-authoring";
-const LIVE_RECORD = ".project/pitches/state-ai-authoring/live-runs.md";
+const LIVE_RECORD = ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md";
 const CHILD_TIMEOUT_MS = 120_000;
 const CHILD_MAX_BUFFER = 16 * 1024 * 1024;
 

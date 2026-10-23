@@ -75,6 +75,43 @@ function runJson(target, args) {
   assert.equal(result.status, 0, result.stderr);
   return JSON.parse(result.stdout);
 }
+
+test("consolidation guidance counts legacy pitches once and leaves instance records unchanged", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  write(source, "ai-framework/scripts/consolidation-migrate.mts", 'throw new Error("source migration must never execute during sync");\n');
+  write(target, ".project/done-work.md", "# Local header\n\n## alpha — shipped 2026-10-01\n\nLegacy.\n\n## beta — shipped 2026-10-02\n\nLegacy too.\n");
+  write(target, ".project/compaction/ledgers/alpha.json", JSON.stringify({ schemaVersion: 1, slug: "alpha", sections: [{ source: "log.md#one", status: "extracted", destination: ".project/knowledge/a.md" }] }));
+  write(target, ".project/knowledge/templates/decision.md", "# Local decision template\n");
+  write(target, ".project/knowledge/README.md", "# Local README\n");
+  write(target, ".project/relations.toon", "# Local overlay\n");
+  const snapshot = () => Object.fromEntries(listTree(testDeps, path.join(target, ".project"))
+    .filter(name => name !== ".bundle-sync.json" && fs.lstatSync(path.join(target, ".project", name)).isFile())
+    .map(name => [name, testDeps.crypto.sha256Hex(fs.readBytesSync(path.join(target, ".project", name)))]));
+  const before = snapshot();
+  for (const apply of [false, true, true]) {
+    const result = runJson(target, ["--source", source, "--base-ref", baseRef, ...(apply ? ["--apply"] : [])]);
+    const steps = result.nextSteps.filter(step => step.kind === "consolidation");
+    assert.equal(steps.length, 1);
+    assert.match(steps[0].message, /2 legacy compacted pitch\(es\)/);
+    assert.match(steps[0].message, /node ai-framework\/scripts\/consolidation-migrate\.mts/);
+    assert.match(steps[0].message, /after both sync passes/);
+    assert.deepEqual(snapshot(), before, "only the existing sync baseline manifest may change under .project/");
+  }
+  assert.equal(exists(target, ".project/records/shipped"), false, "guidance does not run the migration");
+});
+
+test("consolidation guidance distinguishes a refused inventory from zero legacy pitches", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  write(source, "ai-framework/scripts/consolidation-migrate.mts", "// available after sync\n");
+  write(target, ".project/done-work.md", "# Current\n");
+  let result = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  assert.match(result.nextSteps.find(step => step.kind === "consolidation").message, /0 legacy compacted pitch/);
+  write(target, ".project/compaction/ledgers/future.json", '{"schemaVersion":99}');
+  result = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  const message = result.nextSteps.find(step => step.kind === "consolidation").message;
+  assert.match(message, /count unavailable \(inventory refused/);
+  assert.doesNotMatch(message, /0 legacy/);
+});
 function installSkill(target, repo, extra = {}) {
   const args = { root: target, repo, skill: extra.skill || "example/repository/demo", scope: "project", phases: "manual", apply: true, ...extra };
   const argv = [ADD_SKILL, "install", args.skill, "--root", args.root, "--repo", args.repo, "--scope", "project", "--phases", args.phases, "--apply"];

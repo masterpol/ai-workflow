@@ -646,3 +646,186 @@ test("injected clock and byte reader preserve binary content through archive and
   tools.restore(root, "binary-runtime", { apply: true });
   assert.deepEqual(Buffer.from(fs.readBytesSync(path.join(root, dir, "binary.bin"))), bytes);
 });
+
+// ---- ledger version 2 at the remove gate (P2a-S2) ----
+
+const keepV2 = (source, extra = {}) => ({ source, class: "know-how", disposition: "extracted", destination: "notes/dest.md", helps: "Explains why X was chosen.", ...extra });
+
+// A pitch with an extra file, archived and committed as a version 2 ledger. Returns the ledger path.
+function v2Pitch(t, slug) {
+  const root = fixture(t);
+  const dir = seedShippedPitch(root, slug);
+  write(root, "notes/dest.md", "extracted");
+  const sections = buildLedger(root, slug).required.map((source) => keepV2(source));
+  const otherFiles = ["SHIPPED.md", "deviations.md", "pitch.md"].map((file) => ({ path: file, disposition: "omitted", reason: "superseded" }));
+  archive(root, slug, { apply: true });
+  commitLedger(root, slug, { schemaVersion: 2, sections, otherFiles }, { apply: true });
+  return { root, dir, ledgerFile: `.project/compaction/ledgers/${slug}.json` };
+}
+function editLedger(root, file, edit) {
+  const ledger = JSON.parse(read(root, file));
+  edit(ledger);
+  write(root, file, JSON.stringify(ledger));
+}
+
+test("remove accepts a committed v2 ledger with extracted and omitted sections", (t) => {
+  const { root, dir } = v2Pitch(t, "v2-remove");
+  const result = remove(root, "v2-remove", { apply: true });
+  assert.equal(result.applied, true);
+  assert.equal(exists(root, `${dir}/pitch.md`), false);
+});
+
+test("remove refuses, with every file left in place, a v2 ledger that has any doubt", (t) => {
+  const cases = {
+    "an unaccepted other omission": (root, file) => editLedger(root, file, (l) => { l.sections[0] = { source: l.sections[0].source, class: "omit", disposition: "omitted", reason: "other", bodyHash: l.sections[0].bodyHash }; }),
+    "a stale section hash": (root, file) => editLedger(root, file, (l) => { l.sections[0].bodyHash = `sha256:${"0".repeat(64)}`; }),
+    "a stale other-file hash": (root, file) => editLedger(root, file, (l) => { l.otherFiles[0].hash = `sha256:${"0".repeat(64)}`; }),
+    "a missing otherFiles entry": (root, file) => editLedger(root, file, (l) => { l.otherFiles = l.otherFiles.slice(1); }),
+    "an otherFiles list that is not a list": (root, file) => editLedger(root, file, (l) => { delete l.otherFiles; }),
+    "a destination under the pitch folder": (root, file) => editLedger(root, file, (l) => { l.sections[0].destination = ".project/pitches/v2-doubt/pitch.md"; }),
+    "a destination that no longer exists": (root, file) => { fs.rmSync(path.join(root, "notes/dest.md")); },
+    "a class that disagrees with its disposition": (root, file) => editLedger(root, file, (l) => { l.sections[0].class = "omit"; }),
+    "an unknown schemaVersion 3": (root, file) => editLedger(root, file, (l) => { l.schemaVersion = 3; }),
+    "a section the pitch does not have": (root, file) => editLedger(root, file, (l) => { l.sections.push({ ...l.sections[0], source: "SHIPPED.md#invented" }); }),
+    "an extra field": (root, file) => editLedger(root, file, (l) => { l.sections[0].score = 9; }),
+  };
+  for (const [name, damage] of Object.entries(cases)) {
+    const { root, dir, ledgerFile } = v2Pitch(t, "v2-doubt");
+    damage(root, ledgerFile);
+    assert.throws(() => remove(root, "v2-doubt", { apply: true }), /Refusing to remove/, name);
+    for (const file of ["SHIPPED.md", "pitch.md", "deviations.md"]) assert.equal(exists(root, `${dir}/${file}`), true, `${name}: ${file} must still exist`);
+  }
+});
+
+test("a gap in a v2 ledger that a human accepted by name does open the gate", (t) => {
+  const { root, ledgerFile } = v2Pitch(t, "v2-accepted");
+  const first = JSON.parse(read(root, ledgerFile)).sections[0];
+  editLedger(root, ledgerFile, (l) => {
+    l.sections[0] = { source: first.source, class: "omit", disposition: "omitted", reason: "other", bodyHash: first.bodyHash };
+    l.acceptedGaps = [{ source: first.source, reason: "other", acceptedReason: "reviewed: superseded by a later pitch" }];
+  });
+  assert.equal(remove(root, "v2-accepted", { apply: true }).applied, true);
+});
+
+test("K3: a reader change cannot make the writer destructive — remove deletes only for a good v1 or good v2 ledger", (t) => {
+  const mutate = {
+    absent: (root, file) => fs.rmSync(path.join(root, file)),
+    empty: (root, file) => write(root, file, ""),
+    v0: (root, file) => editLedger(root, file, (l) => { l.schemaVersion = 0; }),
+    v1_ok: () => undefined,
+    v2_ok: () => undefined,
+    v2_bad_hash: (root, file) => editLedger(root, file, (l) => { l.sections[0].bodyHash = `sha256:${"f".repeat(64)}`; }),
+    v3: (root, file) => editLedger(root, file, (l) => { l.schemaVersion = 3; }),
+    truncated: (root, file) => write(root, file, read(root, file).slice(0, 40)),
+    symlink: (root, file) => { const copy = path.join(root, "ledger-copy.json"); fs.copyFileSync(path.join(root, file), copy); fs.rmSync(path.join(root, file)); fs.symlinkSync(copy, path.join(root, file)); },
+  };
+  const deletes = new Set(["v1_ok", "v2_ok"]);
+  for (const [name, damage] of Object.entries(mutate)) {
+    const slug = "k3-table";
+    let root; let dir; let ledgerFile;
+    if (name === "v1_ok" || name === "v0" || name === "absent" || name === "empty") {
+      root = fixture(t);
+      dir = seedShippedPitch(root, slug);
+      archive(root, slug, { apply: true });
+      commitFixtureLedger(root, slug);
+      ledgerFile = `.project/compaction/ledgers/${slug}.json`;
+    } else ({ root, dir, ledgerFile } = v2Pitch(t, slug));
+    damage(root, ledgerFile);
+    const outcome = (() => { try { return remove(root, slug, { apply: true }); } catch (error) { return error; } })();
+    const files = ["SHIPPED.md", "pitch.md", "deviations.md"].map((file) => exists(root, `${dir}/${file}`));
+    if (deletes.has(name)) { assert.equal(outcome.applied, true, name); assert.deepEqual(files, [false, false, false], name); }
+    else { assert.ok(outcome instanceof Error, `${name} must be refused`); assert.deepEqual(files, [true, true, true], `${name} must delete nothing`); }
+  }
+});
+
+test("a real committed v1 ledger is read on the unchanged v1 path (read-only fixture, no archive read)", (t) => {
+  const real = path.join(path.dirname(import.meta.dirname).replace(/\/ai-framework$/, ""), ".project/compaction/ledgers");
+  if (!fs.existsSync(real)) return;
+  const name = fs.readdirSync(real).filter((file) => file.endsWith(".json") && !file.endsWith(".v1.json")).sort()[0];
+  if (!name) return;
+  const slug = name.slice(0, -".json".length);
+  const root = fixture(t);
+  const dir = seedShippedPitch(root, slug);
+  archive(root, slug, { apply: true });
+  write(root, `.project/compaction/ledgers/${name}`, fs.readFileSync(path.join(real, name), "utf8"));
+  assert.throws(() => remove(root, slug, { apply: true }), /does not match this pitch's required sections|unaccepted gap/, "reaches the v1 section comparison, not the malformed branch");
+  assert.equal(exists(root, `${dir}/pitch.md`), true);
+});
+
+test("remove refuses the otherFiles gaps the section table does not cover (audit cycle 1)", (t) => {
+  const cases = {
+    "an otherFiles entry omitted as `other` and not accepted": (root, file) => editLedger(root, file, (l) => { l.otherFiles[0] = { path: l.otherFiles[0].path, disposition: "omitted", reason: "other", hash: l.otherFiles[0].hash }; }),
+    "an otherFiles entry for a file the pitch no longer has": (root, file) => editLedger(root, file, (l) => { l.otherFiles.push({ path: "gone.md", disposition: "omitted", reason: "duplicate", hash: `sha256:${"1".repeat(64)}` }); }),
+    "a whitespace-only acceptance of a gap": (root, file) => editLedger(root, file, (l) => {
+      l.sections[0] = { source: l.sections[0].source, class: "omit", disposition: "omitted", reason: "other", bodyHash: l.sections[0].bodyHash };
+      l.acceptedGaps = [{ source: l.sections[0].source, reason: "other", acceptedReason: "   " }];
+    }),
+    "text rewritten outside every section (a SHIPPED.md preamble)": (root) => write(root, ".project/pitches/v2-more/SHIPPED.md", "# Shipped\n\n**Shipped:** 2026-09-25\n\nREWRITTEN PREAMBLE\n\n## Summary\n\nDone.\n"),
+  };
+  for (const [name, damage] of Object.entries(cases)) {
+    const { root, dir, ledgerFile } = v2Pitch(t, "v2-more");
+    damage(root, ledgerFile);
+    assert.throws(() => remove(root, "v2-more", { apply: true }), /Refusing to remove/, name);
+    for (const file of ["SHIPPED.md", "pitch.md", "deviations.md"]) assert.equal(exists(root, `${dir}/${file}`), true, `${name}: ${file} must still exist`);
+  }
+});
+
+test("remove re-checks destinations itself: a hand-placed v1 or v2 ledger whose destination is a symlink into the pitch deletes nothing", (t) => {
+  for (const version of [1, 2]) {
+    const { root, dir, ledgerFile } = v2Pitch(t, "alias-gate");
+    fs.mkdirSync(path.join(root, "docs"), { recursive: true });
+    fs.symlinkSync("../.project/pitches/alias-gate/pitch.md", path.join(root, "docs/keep.md"));
+    if (version === 2) editLedger(root, ledgerFile, (l) => { for (const entry of l.sections) entry.destination = "docs/keep.md"; });
+    else {
+      const required = buildLedger(root, "alias-gate").required;
+      write(root, ledgerFile, JSON.stringify({ schemaVersion: 1, slug: "alias-gate", sections: required.map((source) => ({ source, status: "extracted", destination: "docs/keep.md" })) }));
+    }
+    assert.throws(() => remove(root, "alias-gate", { apply: true }), /Refusing to remove/, `v${version}`);
+    for (const file of ["SHIPPED.md", "pitch.md", "deviations.md"]) assert.equal(exists(root, `${dir}/${file}`), true, `v${version}: ${file} must still exist`);
+  }
+});
+
+// ---- ledger groups at the remove gate ----
+
+function v2GroupPitch(t, slug, count = 6) {
+  const root = fixture(t);
+  const dir = seedShippedPitch(root, slug);
+  write(root, "notes/dest.md", "extracted");
+  for (let i = 0; i < count; i++) write(root, `${dir}/campaign/f${i}.txt`, `staged ${i}`);
+  const sections = buildLedger(root, slug).required.map((source) => keepV2(source));
+  const otherFiles = [...["SHIPPED.md", "deviations.md", "pitch.md"].map((file) => ({ path: file, disposition: "omitted", reason: "superseded" })), { path: "campaign/", disposition: "omitted", reason: "duplicate" }];
+  archive(root, slug, { apply: true });
+  commitLedger(root, slug, { schemaVersion: 2, sections, otherFiles }, { apply: true });
+  return { root, dir, ledgerFile: `.project/compaction/ledgers/${slug}.json` };
+}
+
+test("remove accepts a committed v2 ledger whose other files are covered by one group entry", (t) => {
+  const { root, dir, ledgerFile } = v2GroupPitch(t, "grp-remove");
+  const ledger = JSON.parse(read(root, ledgerFile));
+  assert.equal(ledger.otherFiles.find((entry) => entry.path === "campaign/").count, 6);
+  const result = remove(root, "grp-remove", { apply: true });
+  assert.equal(result.applied, true);
+  assert.equal(exists(root, `${dir}/campaign/f0.txt`), false);
+});
+
+test("remove refuses, with every file left in place, a group whose folder or ledger entry changed", (t) => {
+  const cases = {
+    "a member edited after the ledger": (root, dir) => write(root, `${dir}/campaign/f3.txt`, "edited"),
+    "a member added after the ledger": (root, dir) => write(root, `${dir}/campaign/late.txt`, "late"),
+    "a member removed after the ledger": (root, dir) => fs.rmSync(path.join(root, dir, "campaign/f2.txt")),
+    "a tampered tree hash": (root, dir, file) => editLedger(root, file, (l) => { l.otherFiles.find((e) => e.path === "campaign/").hash = `sha256:${"0".repeat(64)}`; }),
+    "a tampered count": (root, dir, file) => editLedger(root, file, (l) => { l.otherFiles.find((e) => e.path === "campaign/").count = 99; }),
+    "a count removed": (root, dir, file) => editLedger(root, file, (l) => { delete l.otherFiles.find((e) => e.path === "campaign/").count; }),
+    "a group dropped from the ledger": (root, dir, file) => editLedger(root, file, (l) => { l.otherFiles = l.otherFiles.filter((e) => e.path !== "campaign/"); }),
+    "a file entry hidden under the group": (root, dir, file) => editLedger(root, file, (l) => { l.otherFiles.push({ path: "campaign/f1.txt", disposition: "omitted", reason: "duplicate", hash: `sha256:${"1".repeat(64)}` }); }),
+    "a nested second group": (root, dir, file) => editLedger(root, file, (l) => { l.otherFiles.push({ path: "campaign/sub/", disposition: "omitted", reason: "duplicate", hash: `sha256:${"1".repeat(64)}`, count: 1 }); }),
+    "a group for a folder the pitch no longer has": (root, dir, file) => editLedger(root, file, (l) => { l.otherFiles.push({ path: "gone/", disposition: "omitted", reason: "duplicate", hash: `sha256:${"1".repeat(64)}`, count: 1 }); }),
+  };
+  for (const [name, damage] of Object.entries(cases)) {
+    const { root, dir, ledgerFile } = v2GroupPitch(t, "grp-doubt");
+    damage(root, dir, ledgerFile);
+    assert.throws(() => remove(root, "grp-doubt", { apply: true }), /Refusing to remove/, name);
+    for (const file of ["SHIPPED.md", "pitch.md", "campaign/f0.txt"]) assert.equal(exists(root, `${dir}/${file}`), true, `${name}: ${file} must still exist`);
+  }
+});
+

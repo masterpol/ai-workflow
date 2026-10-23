@@ -51,12 +51,12 @@ function oldProject(): string {
 
 const sortLines = (text: string): string => text.split("\n").sort().join("\n");
 
-function snapshot(project: string, env: Record<string, string> = {}, migrated = false): Record<string, { status: number | null; stdout: string; stderr: string }> {
-  const out: Record<string, { status: number | null; stdout: string; stderr: string }> = {};
+function snapshot(project: string, env: Record<string, string> = {}, migrated = false): Record<string, { status: number | null; stdout: string; stderr: string; raw: string }> {
+  const out: Record<string, { status: number | null; stdout: string; stderr: string; raw: string }> = {};
   for (const command of COMMANDS) {
     const args = migrated ? [...NODE_FLAGS, command.args[0].replace(/\.js$/, ".mts"), ...command.args.slice(1)] : command.args;
     const result = run(nodeExecutable, args, project, env);
-    out[command.name] = { status: result.status, stdout: sortLines(result.stdout), stderr: result.stderr };
+    out[command.name] = { status: result.status, stdout: sortLines(result.stdout), stderr: result.stderr, raw: result.stdout };
   }
   return out;
 }
@@ -79,6 +79,18 @@ function comparable(text: string): string {
   return text.split("\n").filter((line) => line.trim() !== '"files": []' && line.trim() !== '"files": [],').map((line) => line.replace(/,$/, "")).join("\n");
 }
 
+/**
+ * What the old graphify reported that the delivered one must still report identically: its counts, its problems and its
+ * wrote flag. The delivered one adds `stats.decisionStatus` and a `workflow` block (edge counts, dropped boilerplate hubs);
+ * both are new information an old install had no way to report, so they are removed before comparing. Parsed, because
+ * `snapshot` line-sorts stdout.
+ */
+function graphifyShape(raw: string): string {
+  const report = JSON.parse(raw) as { stats: Record<string, unknown>; problems: unknown; wrote: unknown };
+  const { decisionStatus: _added, ...stats } = report.stats;
+  return JSON.stringify({ stats, problems: report.problems, wrote: report.wrote });
+}
+
 function assertHealthy(label: string, before: ReturnType<typeof snapshot>, after: ReturnType<typeof snapshot>, skip: string[] = []): void {
   const tolerateDocs = docsOnlyDoctorFailures(after);
   for (const command of COMMANDS) {
@@ -93,7 +105,10 @@ function assertHealthy(label: string, before: ReturnType<typeof snapshot>, after
     assert.equal(now.status, was.status, `${label}: ${command.name} exit status. ${detail}`);
     assert.equal(now.stderr, "", `${label}: ${command.name} wrote to stderr`);
     assert.doesNotMatch(now.stdout, /^FAIL /m, `${label}: ${command.name} reports a failure`);
-    if (command.identical) assert.equal(comparable(now.stdout), comparable(was.stdout), `${label}: ${command.name} output changed`);
+    if (command.identical) {
+      if (command.name === "graphify") assert.equal(graphifyShape(now.raw), graphifyShape(was.raw), `${label}: ${command.name} output changed`);
+      else assert.equal(comparable(now.stdout), comparable(was.stdout), `${label}: ${command.name} output changed`);
+    }
   }
 }
 
@@ -108,6 +123,10 @@ const migrateConfig = (project: string) => {
   for (const rule of [".project/evals/runs/", ".project/evals/.cache/"]) {
     if (!ignoreText.split(/\r?\n/).includes(rule)) appendFileSync(ignoreFile, `\n${rule}\n`);
   }
+  // The sync's `scaffold` next step: a bundle that adds project-template files (here `.project/records/shipped/`) leaves them
+  // missing in an existing `.project/`; `workflow-doctor --fix` restores missing files only, never overwrites.
+  const restored = run(nodeExecutable, [...NODE_FLAGS, "ai-framework/scripts/workflow-doctor.mts", "--fix", "--no-color"], project);
+  assert.equal(existsSync(join(project, ".project/records/shipped/_template.md")), true, `${restored.stdout}${restored.stderr}`);
 };
 
 const sync = (project: string, extra: string[], migrated = false) => {

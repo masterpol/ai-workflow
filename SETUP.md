@@ -176,6 +176,7 @@ Create `.project/` from `ai-framework/templates/project/`. Structure to create:
 ├── requirements/       ← features/ bugs/
 ├── pitches/            ← _templates/ (hill, pitch, plan) + _followups.md + _parked/ + _archive/
 ├── evals/              ← datasets/ (tracked golden cases) + runs/ + .cache/ (ignored local eval data)
+├── records/            ← shipped/ (one links-only outcome record per compacted pitch, from _template.md)
 ├── runs/               ← session + phase history
 └── status.md           ← ≤100-line index (from template)
 ```

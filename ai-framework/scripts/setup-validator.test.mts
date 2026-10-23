@@ -371,3 +371,81 @@ test("Workflow config reports valid as pass and invalid as fail on a real projec
     assert.deepEqual([item?.status, detail.test(item?.detail ?? "")], [status, true], `${status}: ${item?.detail}`);
   }
 });
+
+// ---- consolidation records: ledgers and outcome records ----
+
+import { consolidationResults } from "./setup-validator.mts";
+import { tempFixture } from "./runtime/test-helpers.mts";
+
+const V1_LEDGER = JSON.stringify({ schemaVersion: 1, slug: "old-one", sections: [{ source: "SHIPPED.md#a", status: "extracted", destination: "x.md" }] });
+const V2_LEDGER = JSON.stringify({
+  schemaVersion: 2, slug: "new-one", otherFiles: [],
+  sections: [{ source: "SHIPPED.md#a", class: "know-how", disposition: "extracted", destination: "x.md", helps: "Why X.", bodyHash: `sha256:${"a".repeat(64)}` }],
+});
+const OUTCOME = (slug: string): string => ["---", `slug: ${slug}`, "shipped: 2026-10-01", "schemaVersion: 1", "---", `# ${slug}`, "", "It changed.", "Look here.", "Nothing else.", "", "- outcome: Changed it.", ...["docs", "decisions", "knowledge", "code", "verification", "followups", "archive"].map((field) => `- ${field}: none`), ""].join("\n");
+
+async function consolidation(files: Record<string, string>): Promise<{ status: string; name: string; detail: string }[]> {
+  const root = tempFixture(testDeps, files);
+  try { return await consolidationResults(root, testDeps); } finally { rmSync(root, { recursive: true, force: true }); }
+}
+
+test("consolidation records: nothing yet is information, never a failure", async () => {
+  assert.deepEqual((await consolidation({ "keep.txt": "" })).map((r) => [r.name, r.status]), [["Compaction ledgers", "info"], ["Outcome records", "info"]]);
+});
+
+test("consolidation records: version 1 and version 2 ledgers and a clean outcome record pass", async () => {
+  const results = await consolidation({
+    ".project/compaction/ledgers/old-one.json": V1_LEDGER,
+    ".project/compaction/ledgers/new-one.json": V2_LEDGER,
+    ".project/compaction/ledgers/old-one.v1.json": "kept sibling, not judged",
+    ".project/records/shipped/good.md": OUTCOME("good"),
+  });
+  assert.deepEqual(results.map((r) => [r.name, r.status, r.detail]), [["Compaction ledgers", "pass", "2 valid (1 v1, 1 v2)"], ["Outcome records", "pass", "1 pass the lint"]]);
+});
+
+test("consolidation records: an unsupported or malformed ledger and a record that fails the lint are failures that name the file", async () => {
+  const results = await consolidation({
+    ".project/compaction/ledgers/future.json": JSON.stringify({ schemaVersion: 3, slug: "future", sections: [] }),
+    ".project/compaction/ledgers/broken.json": "{not json",
+    ".project/records/shipped/bad.md": "no frontmatter\n",
+  });
+  const [ledgers, records] = results;
+  assert.strictEqual(ledgers.status, "fail");
+  assert.match(ledgers.detail, /2 invalid: .*broken \(not a readable ledger\).*future \(unsupported ledger schemaVersion 3/);
+  assert.strictEqual(records.status, "fail");
+  assert.match(records.detail, /1 fail the lint: bad \(/);
+});
+
+test("consolidation records: a FIFO, a symlink or an oversize file in the ledger folder is reported without being read or blocking", async () => {
+  const root = tempFixture(testDeps, { ".project/compaction/ledgers/good.json": V1_LEDGER.replace("old-one", "good"), "outside.json": V1_LEDGER });
+  try {
+    const dir = join(root, ".project/compaction/ledgers");
+    assert.equal(spawnSync("mkfifo", [join(dir, "fifo.json")]).status, 0);
+    testDeps.fs.symlinkSync(join(root, "outside.json"), join(dir, "link.json"));
+    const started = Date.now();
+    const [ledgers] = await consolidationResults(root, testDeps);
+    assert.ok(Date.now() - started < 5000, "did not block on the FIFO");
+    assert.equal(ledgers.status, "fail");
+    assert.match(ledgers.detail, /2 invalid: .*fifo \(not a readable ledger\).*link \(not a readable ledger\)/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("consolidation records: control characters in a ledger name never reach the output, and a symlinked ledger folder is refused unread", async () => {
+  const escaped = await consolidation({ [".project/compaction/ledgers/x\u001b]0;pwned\u0007.json"]: "{}" });
+  assert.ok(!/[\u0000-\u0009\u000b-\u001f\u007f-\u009f]/.test(escaped[0].detail), "no control character in the detail");
+  const outside = tempFixture(testDeps, { "ledgers/y.json": JSON.stringify({ schemaVersion: "SECRET-FROM-OUTSIDE", slug: "y", sections: [] }) });
+  const root = tempFixture(testDeps, { ".project/compaction/keep": "" });
+  try {
+    testDeps.fs.symlinkSync(join(outside, "ledgers"), join(root, ".project/compaction/ledgers"));
+    const [ledgers] = await consolidationResults(root, testDeps);
+    assert.deepEqual([ledgers.status, ledgers.detail], ["fail", "ledgers is a symlink (refused)"]);
+    assert.ok(!ledgers.detail.includes("SECRET"));
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(outside, { recursive: true, force: true }); }
+});
+
+test("consolidation records: a line feed in a ledger name cannot forge extra report lines", async () => {
+  const forged = await consolidation({ ".project/compaction/ledgers/x\nPASS  Compaction ledgers: 46 valid (46 v1)\nPASS  forged.json": "{}" });
+  assert.equal(forged[0].status, "fail");
+  assert.ok(!forged[0].detail.includes("\n"), "the detail is one line");
+  assert.ok(!forged[0].detail.includes("\r"));
+});

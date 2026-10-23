@@ -15,6 +15,37 @@ const os = testDeps.os;
 const path = testDeps.path;
 
 interface Check { status: string; name: string; detail: string }
+
+test("doctor reports legacy consolidation records as information without migrating them", async (t) => {
+  const root = fixture(t);
+  const entry = "# Local\n\n## alpha — shipped 2026-10-01\n\nLegacy.\n";
+  const ledger = JSON.stringify({ schemaVersion: 1, slug: "alpha", sections: [{ source: "log.md#one", status: "extracted", destination: ".project/knowledge/a.md" }] });
+  write(root, ".project/done-work.md", entry);
+  write(root, ".project/compaction/ledgers/alpha.json", ledger);
+  write(root, ".project/knowledge/decisions/a.md", "---\nid: a\ntype: decision\n---\n# A\n");
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const report = checks(capture.output).filter(item => item.name === "Consolidation legacy records");
+  assert.equal(report.length, 1);
+  assert.equal(report[0].status, "info");
+  assert.match(report[0].detail, /1 legacy compacted pitch\(es\): 1 v1 ledgers, 1 legacy entries, 1 status-less decisions/);
+  assert.match(report[0].detail, /node ai-framework\/scripts\/consolidation-migrate\.mts/);
+  assert.equal(fs.readFileSync(path.join(root, ".project/done-work.md")), entry);
+  assert.equal(fs.readFileSync(path.join(root, ".project/compaction/ledgers/alpha.json")), ledger);
+  assert.equal(fs.existsSync(path.join(root, ".project/records")), false);
+  assert.ok(!capture.calls.some(call => call.some(arg => arg.includes("consolidation-migrate.mts"))), "doctor never executes a target migration script");
+});
+
+test("doctor warns when legacy inventory is refused without claiming an empty count", async (t) => {
+  const root = fixture(t);
+  write(root, ".project/compaction/ledgers/future.json", '{"schemaVersion":99}');
+  const capture = injected(root);
+  await main(["--json"], capture.deps);
+  const report = checks(capture.output).find(item => item.name === "Consolidation legacy records");
+  assert.equal(report?.status, "warn");
+  assert.match(report?.detail ?? "", /inventory refused; no legacy count claimed/);
+  assert.doesNotMatch(report?.detail ?? "", /0 legacy compacted/);
+});
 function fixture(t: TestContext): string {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "workflow-doctor-injection-"));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));

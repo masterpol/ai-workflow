@@ -170,3 +170,13 @@ See `workflow/phases/`:
 The portable bundle contains the current phase documents. Older phase names may appear in historical records, but no `workflow/phases/_legacy/` directory is included. Use the current pipeline for active work.
 
 Hill updates and final verification are activities inside `/build` and `/ship`; they do not require separate `/hill` or `/verify` commands. Supporting skills such as `/impact`, `/ui-design`, and `/test-strategy` contribute to those phases without adding new pipeline stages.
+
+## Process relations in the graph
+
+The pipeline above is also in the knowledge graph, so an agent entering a phase can ask what that phase depends on instead of searching for it.
+`ai-framework/workflow/relations.toon` declares, for each skill and agent, its `phase-doc`, the agents it `dispatches` and the rules it `reads`
+(or a `standalone` reason). A project's own skills, agents and rules go in `.project/relations.toon`, which a bundle sync never writes.
+Vendor adapters (`.opencode`, `.codex`, `.cursor`, `.agents`) are linked to their canonical `.claude` file with `mirrors`, and path mentions between docs
+become `references` edges (a file named by more than 20 others is boilerplate and gets none). `node ai-framework/scripts/graphify.mts explain .claude/skills/audit/SKILL.md`
+lists a phase's doc, roles and gating rules in one hop; `node ai-framework/scripts/graphify-relations.mts --check` (also part of `graphify.mts --check`) fails when a skill or agent
+has no entry, a target is missing, or an adapter has no canonical file.

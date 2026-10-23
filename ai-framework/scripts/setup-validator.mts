@@ -6,6 +6,9 @@ import { runDirect } from "./runtime/cli.mts";
 import * as skillVendors from "./skill-vendors.mts";
 import * as entryImport from "./entry-import.mts";
 import { CONFIG_FILE, loadConfig } from "./runtime/config.mts";
+import { MAX_LEDGER_BYTES, validateLedgerShape } from "./ledger-schema.mts";
+import { lintOutcomeRecord, OUTCOME_DIR, printable } from "./outcome-record.mts";
+import { recordSlugs } from "./done-work-index.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 type Status = "pass" | "info" | "warn" | "fail";
@@ -33,6 +36,52 @@ const palette: Record<string, string> = { pass: "\u001b[32m", info: "\u001b[34m"
 // Runs under plain `node -e` (CommonJS): parses a TypeScript file by stripping types; exits 1 with the parser message on a syntax error.
 const NODE_PARSE_SCRIPT = 'const m=require("module"),fs=require("fs");if(typeof m.stripTypeScriptTypes!=="function")process.exit(3);m.stripTypeScriptTypes(fs.readFileSync(process.argv[1],"utf8"));';
 const TS_DIRS = ["ai-framework/scripts", "ai-framework/scripts/runtime", "ai-framework/hooks/scripts", ".claude/hooks", ".opencode/plugins"];
+
+/**
+ * The compaction records a project carries: every ledger must be a readable version 1 or 2, and every outcome record must pass the
+ * lint. Read-only. None yet is information, not a failure, so a project that has not compacted anything passes.
+ */
+export async function consolidationResults(root: string, deps: RuntimeDeps): Promise<CheckResult[]> {
+  const results: CheckResult[] = [];
+  const dir = deps.path.join(root, ".project/compaction/ledgers");
+  let names: string[] = [];
+  // A symlinked folder anywhere on the way would send the listing and the reads outside the project.
+  let current = root;
+  for (const part of [".project", "compaction", "ledgers"]) {
+    current = deps.path.join(current, part);
+    try { if (deps.fs.lstatSync(current).isSymbolicLink()) return [{ status: "fail", name: "Compaction ledgers", detail: `${part} is a symlink (refused)` }, { status: "info", name: "Outcome records", detail: "not checked" }]; } catch { break; }
+  }
+  try { names = (await deps.fs.readdir(dir)).filter((name) => name.endsWith(".json") && !name.endsWith(".v1.json")).sort(); } catch { names = []; }
+  if (names.length === 0) results.push({ status: "info", name: "Compaction ledgers", detail: "none yet" });
+  else {
+    const versions: Record<string, number> = {};
+    const bad: string[] = [];
+    for (const name of names) {
+      const slug = name.slice(0, -".json".length);
+      try {
+        // lstat first: a FIFO would block the read forever, and a symlink or oversize file must not be followed or slurped.
+        const stat = deps.fs.lstatSync(deps.path.join(dir, name));
+        if (!stat.isFile() || stat.isSymbolicLink() || stat.size > MAX_LEDGER_BYTES) throw new Error("not a plain bounded file");
+        const text = await deps.fs.readFile(deps.path.join(dir, name));
+        const shape = validateLedgerShape(JSON.parse(text), slug);
+        if (shape.problems.length > 0 || shape.version === null) bad.push(printable(`${slug} (${shape.problems[0] ?? "unreadable"})`));
+        else versions[shape.version] = (versions[shape.version] ?? 0) + 1;
+      } catch { bad.push(printable(`${slug} (not a readable ledger)`)); }
+    }
+    results.push(bad.length === 0
+      ? { status: "pass", name: "Compaction ledgers", detail: `${names.length} valid (${Object.entries(versions).map(([version, count]) => `${count} v${version}`).join(", ")})` }
+      : { status: "fail", name: "Compaction ledgers", detail: `${bad.length} invalid: ${bad.slice(0, 3).join("; ")}${bad.length > 3 ? "; ..." : ""}` });
+  }
+  const slugs = recordSlugs(root, deps);
+  if (slugs.length === 0) results.push({ status: "info", name: "Outcome records", detail: `none yet in ${OUTCOME_DIR}` });
+  else {
+    const failing = slugs.map((slug) => ({ slug, problems: lintOutcomeRecord(root, `${OUTCOME_DIR}/${slug}.md`, deps).problems })).filter((entry) => entry.problems.length > 0);
+    results.push(failing.length === 0
+      ? { status: "pass", name: "Outcome records", detail: `${slugs.length} pass the lint` }
+      : { status: "fail", name: "Outcome records", detail: printable(`${failing.length} fail the lint: ${failing.slice(0, 3).map((entry) => `${entry.slug} (${entry.problems[0]})`).join("; ")}${failing.length > 3 ? "; ..." : ""}`) });
+  }
+  return results;
+}
 
 function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   const root = deps.proc.cwd();
@@ -135,6 +184,9 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
       record(errors.length === 0 ? "pass" : "fail", "Knowledge graph", errors.length === 0 ? `graphify validated ${report.stats.total} entry(ies)` : `graphify found ${errors.length} error(s)`);
     } catch { record("fail", "Knowledge graph", "graphify did not return JSON"); }
   }
+  async function checkConsolidation(): Promise<void> {
+    for (const result of await consolidationResults(root, deps)) record(result.status, result.name, result.detail);
+  }
   async function checkScaffold(): Promise<void> {
     await Promise.all([".project/status.md", ".project/pitches/_followups.md", ".project/pitches/_archive/.gitkeep", ".project/pitches/_parked/.gitkeep", ".project/done-work.md"].map(requireFile));
     if (await exists(".project/status.md")) {
@@ -216,7 +268,7 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   }
   async function validate(): Promise<void> {
     if (!(await exists(".project"))) { record("fail", ".project", "missing; setup has not completed"); return; }
-    await Promise.all([checkWorkflowDoctor(), checkWorkflowConfig(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkScaffold(), checkCursorMirrors(), checkTypeScriptEntries()]);
+    await Promise.all([checkWorkflowDoctor(), checkWorkflowConfig(), checkContext(), checkEntryFiles(), checkCavemanEntryFiles(), checkKnowledgeGraph(), checkConsolidation(), checkScaffold(), checkCursorMirrors(), checkTypeScriptEntries()]);
   }
   return { results, json, paint, out, validate };
 }

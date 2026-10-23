@@ -1,6 +1,7 @@
 import { runDirect } from "./runtime/cli.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { createPitchCompress } from "./pitch-compress.mts";
+import { accountFiles, bodyHashOf, LEDGER_V2, MAX_LEDGER_BYTES, validateLedgerShape, type LedgerFileV2, type LedgerSectionV2 } from "./ledger-schema.mts";
 import * as sourceModule from "./skill-source.mts";
 import * as registryModule from "./skill-registry.mts";
 
@@ -35,6 +36,9 @@ const decode = (bytes: Uint8Array): string => new TextDecoder("utf-8", { ignoreB
 import type { LedgerSection } from "./pitch-compress.mts";
 const { safeRelative } = sourceModule as { safeRelative(value: string): string };
 
+export const MAX_ARCHIVED_FILE_BYTES = 32 * 1024 * 1024;
+export const MAX_ARCHIVED_FILES = 5000;
+export const MAX_ARCHIVE_MANIFEST_BYTES = 4 * 1024 * 1024;
 export interface ArchiveOptions { apply?: boolean; force?: boolean; to?: string }
 export interface ArchiveResult { slug: string; archiveDir: string; fileCount: number; applied: boolean }
 export interface VerifyResult { slug: string; archiveDir?: string; valid: boolean; issues: string[] }
@@ -43,6 +47,7 @@ export interface RestoreResult extends ArchiveResult { destination: string; extr
 interface ManifestEntry { hash: string; mode: number }
 interface Manifest { schemaVersion: number; slug: string; sourceRoot: string; archivedAt: string; files: Record<string, ManifestEntry> }
 interface Ledger { schemaVersion: number; slug: string; sections: LedgerSection[]; acceptedGaps?: { source: string; acceptedReason?: string }[] }
+interface LedgerV2 { schemaVersion: number; slug: string; sections: LedgerSectionV2[]; otherFiles: LedgerFileV2[]; acceptedGaps?: { source: string; acceptedReason?: string }[] }
 interface CliOptions extends ArchiveOptions { root: string; json?: boolean }
 export interface PitchArchiveApi {
   archive(root: string, slug: string, options?: ArchiveOptions): ArchiveResult;
@@ -57,7 +62,7 @@ export interface PitchArchiveApi {
 /** Bind every filesystem, process and clock operation to this runtime. */
 export function createPitchArchive(deps: RuntimeDeps): PitchArchiveApi {
   const { fs, path } = deps;
-  const { requiredSections, checkDestination, assertPlainPath, compactionContext: ctxFor, requireNoPendingCompaction: requireNoPendingTransaction } = createPitchCompress(deps);
+  const { requiredSections, pitchSections, otherPitchFiles, checkDestination, assertPlainPath, compactionContext: ctxFor, requireNoPendingCompaction: requireNoPendingTransaction } = createPitchCompress(deps);
   const snapshot = (ctx: CompactionContext, relative: string): Snapshot | null => registry.snapshot(ctx, relative, undefined, deps);
   // Old CommonJS registry versions serialize Buffer data with .toString("base64").
   // Normalize only at this library boundary; filesystem reads keep their original bytes.
@@ -77,8 +82,6 @@ export function createPitchArchive(deps: RuntimeDeps): PitchArchiveApi {
   const LEDGERS_DIR = `${COMPACTION_DIR}/ledgers`;
   const ARCHIVES_DIR = `${COMPACTION_DIR}/archives`;
   const SLUG = /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/;
-  const MAX_ARCHIVED_FILE_BYTES = 32 * 1024 * 1024;
-  const MAX_ARCHIVED_FILES = 5000;
   // JSON.parse errors quote their input; a fixed message does not.
   function parseJson(text: string, label: string): unknown { try { return JSON.parse(text); } catch { throw new Error(`${label} is not valid JSON`); } }
 
@@ -138,6 +141,41 @@ export function createPitchArchive(deps: RuntimeDeps): PitchArchiveApi {
     return isRegularFile(path.join(root, ledgerPath(slug)));
   }
 
+  // Version 2 holds the same line as version 1 and adds two: each section's content must still be what was judged
+  // (bodyHash), and every pitch file outside the sections must still be accounted for with the same content. Any doubt
+  // refuses before the first delete; nothing here removes anything.
+  function requireCompleteLedgerV2(root: string, slug: string, ledger: LedgerV2): void {
+    const shape = validateLedgerShape(ledger, slug);
+    if (shape.problems.length) throw new Error(`Refusing to remove: coverage ledger for ${slug} is malformed (${shape.problems.slice(0, 3).join("; ")})`);
+    const accepted = new Set((Array.isArray(ledger.acceptedGaps) ? ledger.acceptedGaps : []).filter((gap) => typeof gap.acceptedReason === "string" && gap.acceptedReason.trim()).map((gap) => gap.source));
+    const gaps = [...ledger.sections.map((entry) => ({ name: entry.source, entry })), ...ledger.otherFiles.map((entry) => ({ name: entry.path, entry }))].filter(({ entry }) => entry.disposition === "omitted" && entry.reason === "other").map(({ name }) => name);
+    const unaccepted = gaps.filter((name) => !accepted.has(name));
+    if (unaccepted.length) throw new Error(`Refusing to remove: unaccepted gap(s) in the coverage ledger: ${unaccepted.join(", ")}`);
+
+    const live = pitchSections(root, slug);
+    const required = live.map((section) => section.key);
+    const listed = ledger.sections.map((entry) => entry.source);
+    const missing = required.filter((source) => !listed.includes(source));
+    const unknown = listed.filter((source) => !required.includes(source));
+    if (missing.length || unknown.length) throw new Error(`Refusing to remove: the ledger does not match this pitch's required sections (missing: ${missing.join(", ") || "none"}; unknown: ${unknown.join(", ") || "none"}; duplicated: none)`);
+    const sha = (data: string): string => digest(data);
+    const bodies = new Map(live.map((section) => [section.key, section.body]));
+    const stale = ledger.sections.filter((entry) => entry.bodyHash !== bodyHashOf(bodies.get(entry.source) as string, sha)).map((entry) => entry.source);
+    if (stale.length) throw new Error(`Refusing to remove: content changed since the ledger was committed (stale content hash): ${stale.join(", ")}`);
+
+    const account = accountFiles(otherPitchFiles(root, slug), ledger.otherFiles, sha);
+    const more = (names: string[]): string => `${names.slice(0, 10).join(", ") || "none"}${names.length > 10 ? `, and ${names.length - 10} more` : ""}`;
+    if (account.overlapping.length) throw new Error(`Refusing to remove: ledger entries overlap (a file belongs to one entry): ${more(account.overlapping)}`);
+    if (account.unaccounted.length || account.absent.length) throw new Error(`Refusing to remove: the ledger does not account for the pitch's other files (unaccounted: ${more(account.unaccounted)}; not present: ${more(account.absent)})`);
+    if (account.changed.length) throw new Error(`Refusing to remove: content changed since the ledger was committed (stale content hash): ${more(account.changed)}`);
+
+    for (const entry of [...ledger.sections, ...ledger.otherFiles]) {
+      if (!entry.destination) continue;
+      const name = "source" in entry ? entry.source : entry.path;
+      try { checkDestination(root, slug, entry.destination.split("#")[0], entry.destination, "class" in entry ? entry.class : undefined); } catch { throw new Error(`Refusing to remove: destination for ${name} is missing, empty, outside the project, or inside this pitch`); }
+    }
+  }
+
   // Existence alone is not enough: commitLedger() lets a ledger record gaps, and a gap only counts
   // once a human separately accepted it by name (--accept-gap). Re-read the committed ledger here
   // rather than trusting that the file could only have been written through commitLedger — a
@@ -145,7 +183,8 @@ export function createPitchArchive(deps: RuntimeDeps): PitchArchiveApi {
   function requireCompleteLedger(root: string, slug: string): void {
     if (!ledgerCommitted(root, slug)) throw new Error(`Refusing to remove: no committed coverage ledger for ${slug} (run pitch-compress.mts commit-ledger first)`);
     let ledger: Ledger;
-    try { ledger = JSON.parse(decode(readGuarded(root, ledgerPath(slug), 2 * 1024 * 1024))) as Ledger; } catch { throw new Error(`Refusing to remove: coverage ledger for ${slug} is not valid JSON or not a plain file`); }
+    try { ledger = JSON.parse(decode(readGuarded(root, ledgerPath(slug), MAX_LEDGER_BYTES))) as Ledger; } catch { throw new Error(`Refusing to remove: coverage ledger for ${slug} is not valid JSON or not a plain file`); }
+    if (ledger && ledger.schemaVersion === LEDGER_V2) return requireCompleteLedgerV2(root, slug, ledger as unknown as LedgerV2);
     if (!ledger || ledger.schemaVersion !== 1 || ledger.slug !== slug || !Array.isArray(ledger.sections) || !ledger.sections.length) throw new Error(`Refusing to remove: coverage ledger for ${slug} is malformed`);
     const accepted = new Set((Array.isArray(ledger.acceptedGaps) ? ledger.acceptedGaps : []).filter((gap) => typeof gap.acceptedReason === "string" && gap.acceptedReason.trim()).map((gap) => gap.source));
     const unaccepted = ledger.sections.filter((entry) => entry.status === "gap" && !accepted.has(entry.source)).map((entry) => entry.source);
@@ -174,7 +213,7 @@ export function createPitchArchive(deps: RuntimeDeps): PitchArchiveApi {
     let raw: Uint8Array;
     let checksum: string;
     try {
-      raw = readGuarded(root, `${base}/manifest.json`, 4 * 1024 * 1024);
+      raw = readGuarded(root, `${base}/manifest.json`, MAX_ARCHIVE_MANIFEST_BYTES);
       checksum = decode(readGuarded(root, `${base}/ARCHIVE-CHECKSUM`, 4096)).trim();
     } catch { throw new Error(`Archive is missing a readable manifest or checksum: ${archiveDir}`); }
     const manifest = parseJson(decode(raw), "Archive manifest") as Manifest;

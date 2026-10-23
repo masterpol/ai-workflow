@@ -1,11 +1,16 @@
 ---
 id: <kebab-case-identifier>
 type: decision
+status: accepted
 created: YYYY-MM-DD
 updated: YYYY-MM-DD
 tags: [architecture, backend, frontend, auth, data, ui]
 related: []
-source: ADR-XXX | feature-name
+# supersedes: [older-decision-id]       (on the newer decision)
+# superseded_by: newer-decision-id      (on the older one, with status: superseded)
+# alternatives: [option-considered]
+# applies-to: [ship, audit]
+source: feature-name
 ---
 
 # Decision Title
@@ -25,5 +30,4 @@ What did we decide? Be specific.
 - **Implications**: What this means for future development
 
 ## References
-- Link to ADR: `.project/design/decisions/ADR-XXX.md`
-- Related code: `path/to/relevant/code`
+- Related code or documents: `path/to/relevant/code`

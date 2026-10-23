@@ -28,6 +28,10 @@ a persistent knowledge graph, and cost-aware model routing.
   before raw searches. `index.md` is the human-readable catalog. Both are generated, never
   hand-edited: rebuild with `node ai-framework/scripts/graphify.mts` after any edit to an entry
   under `.project/knowledge/` or after large code changes. Requires `uv`.
+  The graph also carries the process itself: `ai-framework/workflow/relations.toon` declares, per skill and
+  agent, its phase doc, the agents it dispatches and the rules it reads (a project's own files go in
+  `.project/relations.toon`); vendor adapters link to their canonical `.claude` file, and doc-to-doc path
+  mentions become `references` edges. `explain <path>` (for example `.claude/skills/audit/SKILL.md`) lists them.
 
 ## The pipeline
 
@@ -176,3 +180,4 @@ Norandino, live in their own repositories (`../lasallenorandi`) and are not trac
 
 - Validate workflow records: `node ai-framework/scripts/setup-validator.mts`.
 - Validate the knowledge graph: `node ai-framework/scripts/graphify.mts --check`.
+- Validate the process relations: `node ai-framework/scripts/graphify-relations.mts --check`.
