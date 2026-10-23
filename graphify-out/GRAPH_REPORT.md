@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `9c26df1c`
+- Built from commit: `d3042d03`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1690,7 +1690,7 @@ Nodes (7): Bounds and failures, Hook-to-event mapping (planned), Joined token/ti
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `RuntimeDeps` connect `RuntimeDeps` to `skill-registry.mts`, `orca-evidence.mts`, `orca-dispatch.mts`, `token-consumption.mts`, `pitch-archive.mts`, `Issue: a worker's environment differs from the coordinator's, and the first live smoke tests failed for that reason`, `workflow-metrics-report.mts`, `state-theme.mts`, `flow-report.test.mts`, `runtime.test.mts`, `review-bench.mts`, `token-consumption.test.mts`, `graphify.mts`, `config-migrate.mts`, `workflow-metrics-state.mts`, `state-html.test.mts`, `skill-vendors.test.mts`, `setup-validator.mts`, `orca-reconcile.test.mts`, `state-history.mts`, `workflow-doctor.mts`, `orca-dispatch.test.mts`, `state-graph.mts`, `browser-runtime.test.mts`, `workflow-metrics-state.test.mts`, `legacy-upgrade.test.mts`, `flow-join.mts`, `orca-eval-grader.mts`, `flow-report.mts`, `skill-source.mts`, `config-migrate.test.mts`, `orca-run.mts`, `graphify-relations.mts`, `skill-registry.test.mts`, `toon-convert.test.mts`, `validate.test.mts`, `state-snapshot.mts`, `metrics-lock.test.mts`, `post-edit-check.mts`, `orca-launch-gate.test.mts`, `config.mts`, `skill-vendors.mts`, `orca-preflight.mts`, `outcome-record.mts`, `node.mts`, `changelog.test.mts`, `orca-ledger.mts`, `types.mts`, `pre-ship-verify.mts`, `cli.mts`, `orca-run.test.mts`, `data-file.mts`, `skill-sync.mts`, `state-structure.mts`, `orca-policy.mts`, `review-bench.test.mts`, `test-helpers.mts`, `add-skill.mts`, `urlPath`, `legacy-upgrade.mts`, `skill-sync.test.mts`, `state-fragment-evidence.mts`, `add-skill.test.mts`, `state-fragment-inject.mts`, `setup-validator.test.mts`, `Source-review supplement: state-ai-authoring`, `Compaction record: ts-runtime-injection`, `transcript-usage.mts`, `orca-apply.test.mts`, `skill-compress-guard.test.mts`, `runDirect`, `bundle-sync.mts`, `Codex handoff — start here`, `Entity: Graphify (knowledge-graph front end)`, `loadConfig`, `workflow-capture.mts`, `pitch-compress.mts`, `orca-diff-admit.test.mts`, `createNodeDeps`, `consolidation-migrate.mts`, `docs-links.mts`, `orca-apply.mts`?**
-  _High betweenness centrality (0.123) - this node is a cross-community bridge._
+  _High betweenness centrality (0.117) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `RuntimeDeps` (e.g. with `Event contract` and `Boundary validator`) actually correct?**
   _`RuntimeDeps` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `TsDiagnostic`, `Plain`, `testDeps` to the rest of the system?**
