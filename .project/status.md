@@ -8,6 +8,7 @@
 | workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
 | package-less-ship-verification | draft | shape | small-batch | 2026-10-22 |
 | orca-bounded-control-receipts | draft | shape | small-batch | 2026-10-22 |
+| review-bench-hardening | draft | shape | small-batch | 2026-10-23 |
 
 ## Parked pitches
 _None. `restore-vendor-adapters` was removed 2026-10-22 (premise invalidated 2026-10-08; its `_parked/` directory no longer exists)._

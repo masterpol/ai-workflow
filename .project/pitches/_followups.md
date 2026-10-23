@@ -568,3 +568,7 @@ Not shaped or bet. Source followup is at the "coverage" entry above (line ~340).
 - **CMC-G1 — workflow relation completeness** (low): assess sparse role/rule declarations and currently undeclared writes for plan/ship/cooldown against their actual playbooks. Do not invent relations to improve counts; P1 ships only observed declarations and bounded references.
 
 The pre-existing state-history archive fallback remains owned by un-bet P2b, under the explicit closing exception. P2b/P3a/P3b and downstream rollout are not implemented or authorized by these four ship proposals. Cooldown should review repeated source/instance boundary and independent gate evidence lessons; no rule promotion is applied here.
+
+## review-bench-hardening (cooldown 2026-10-23, forced; promoted to a pitch draft)
+
+Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles the review-bench followups: TTR-A1 (trusted-root Git execution: fsmonitor/filter helpers), TTR-A2 (strict appetite counting, NUL-delimited listings), TTR-A3 (bounded input/path diagnostics, in-root `..name` snapshot destinations) and the 2026-09-27 question whether convention-based read-only is enough or the tool needs real process isolation (decide in shaping; the tool is internal developer tooling run on a trusted checkout).

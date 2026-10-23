@@ -424,6 +424,10 @@ accepted by its own reader. Never drop inputs or misreport sizes to pass the rea
 stream both sides consistently. See
 `.project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md`.
 
+## Resolve Caller-Supplied Limits Once
+
+A hard cap read more than once from an object the caller controls can be changed between the reads. Resolve the limits exactly once into a validated plain copy (or refuse), compare that copy against the hard ceiling, and pass the same copy to every later step. Never re-read the caller's object after the check. Test with a getter or proxy that returns a different value on the second read.
+
 ## Code Organization Checklist
 
 Before committing, verify:

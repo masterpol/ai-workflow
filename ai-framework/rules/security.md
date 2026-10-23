@@ -316,3 +316,6 @@ re-validate as a subprocess before trusting the result. See
 - [ ] No script supplied by the analyzed project is executed
 - [ ] No raw error text or absolute path reaches output
 - [ ] Writers refuse non-regular or symlinked targets and replace atomically
+- [ ] A writer re-inspects the target immediately before publishing (identity plus size and mtime for an existing target), publishes a new file with a hard link rather than rename, and returns the published inode
+- [ ] Cleanup and deletion check that inode first and touch only what the writer wrote; never delete or replace a file in a shared output directory unless it carries the generator marker
+- [ ] Each publish-time guard has an injected-hook test that changes the world, and fails when the guard is removed
