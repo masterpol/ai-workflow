@@ -1,0 +1,40 @@
+@toon-data 1
+slug: test-execution-performance
+draft: true
+state: needs-decision
+ledgerHash: "sha256:52924fda6c6924c6c63e230074d670819d88d949c4db6ee657803ab807dee8ae"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:bab5b54aec37eda67efd9713dcc4f61b3b771e2dd968323a7559b59ed31dfa3d"
+mapping:
+  schemaVersion: 2
+  sections[11]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#result",null,null,null,null,null
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#measured-outcome-full-suite-medians-details-in-measurementsmd",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#verification",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "SHIPPED.md#doc-updates",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+  otherFiles[0]:
+judgments[11]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#result",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#measured-outcome-full-suite-medians-details-in-measurementsmd",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verification",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#audit",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#doc-updates",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: test-execution-performance\nshipped: 2026-10-22\nschemaVersion: 1\ndraft: true\n---\n# test-execution-performance\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#test-execution-performance","sha256:bab5b54aec37eda67efd9713dcc4f61b3b771e2dd968323a7559b59ed31dfa3d","## test-execution-performance — shipped 2026-10-22\n\nA portable test command shipped as bundle 2.40.0: `node ai-framework/scripts/run-tests.mts` does deterministic full discovery (75 files), labelled partial runs, Node or Bun selection that reports the effective child runtime, bounded `--workers` (cap 64), Node-only `--cache`, `--coverage`, `--list` and exit-code propagation; unsupported settings are refused, not dropped. Guide: `ai-framework/docs/testing.md`.\n\n**No speed setting was promoted.** Measured full-suite medians (host contended, result unproven): Node 4 workers 24% slower, Node compile cache 8% faster, Bun `--parallel=4` 66% faster but Bun's own default fails two 5 s timeouts. Defaults are unchanged; an idle-host rerun is a followup. No-gos held: no assertion removal, skips, retries or shortened deadlines.\n\nLessons: [[path-containment-compares-real-paths]], [[a-nested-node-test-child-inherits-the-parents-test-context]], [[runcli-replaces-proc-argv-with-the-arguments-only]]. Open followups (Bun timeouts, signal forwarding, subprocess-matrix seams) are in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/test-execution-performance.md"

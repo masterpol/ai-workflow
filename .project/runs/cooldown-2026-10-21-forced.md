@@ -23,3 +23,16 @@ C1–C3 and October 17 proposals remain pending and unchanged.
 
 ## Followups
 TTR-A1–A4 are already recorded; their security-leaning items (A1 fsmonitor execution, A2/A3 review-bench hardening) could be bundled into one review-bench hardening pitch in a later cooldown. Nothing deleted.
+
+## Addendum 2026-10-22 (individual approvals by the owner)
+
+| Item | Decision |
+|------|----------|
+| 10-17 candidates `agent-model-sweep-bet-3`, `mandatory-fixture-seeding`, `doc-sweep-stale-claims`, `bundle-sync-stale-ledger` | Approved as candidate pitches (already bundled in `_followups.md`; marked there). Not yet shaped or bet. |
+| C6 `package-less-ship-verification` | Moved to a pitch draft: `pitches/package-less-ship-verification/pitch.md` |
+| C7 `orca-bounded-control-receipts` | Moved to a pitch draft: `pitches/orca-bounded-control-receipts/pitch.md` (guard-reader half already fixed) |
+| Stale `restore-vendor-adapters` row in `status.md` | Removed |
+| C1 `review-guard-secret-exclusion` | Approved; **closed as already implemented**. Verified 2026-10-22: `review-bench.mts` excludes secret-shaped names (`SECRET_NAME`) before reads, `review-bench.test.mts` passes 35/35 including a credentials-file spy case, issue `review-guard-hashes-ignored-secret-files` is `resolved: true`. No work remains. |
+| C2 `codex-trusted-hook-smoke` | Approved as a candidate pitch in `_followups.md`; needs owner hook trust at a fresh Codex host |
+| C3 `workflow-coverage-instrumentation` | Approved as a candidate pitch in `_followups.md` |
+

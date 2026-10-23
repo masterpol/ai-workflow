@@ -1,0 +1,59 @@
+@toon-data 1
+slug: upstream-project-drift
+draft: true
+state: needs-decision
+ledgerHash: "sha256:92bab9dbb13800154087962f25eec10d4be7fa151ae4e17622a0bd021716f9de"
+bindings:
+legacyEntryHash: "sha256:08d7b0acc1d4582304dd87c26ced444e32933c28e5822504323c2dcff727b1d6"
+mapping:
+  schemaVersion: 2
+  sections[21]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#verify-re-run-2026-10-16-at-the-unified-toon-config-head-which-contains-this-pitch",null,null,null,null,null
+    "SHIPPED.md#open-at-close",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#d1-plan-s3-rewires-the-version-call-sites-now",null,null,null,null,null
+    "deviations.md#d2-plan-climbing-ownership-fixes-stay-in-this-pitch",null,null,null,null,null
+    "deviations.md#d3-s0-2026-10-16-s8-and-s1-shrink-most-climbing-docsrules-are-project-adaptations",null,null,null,null,null
+    "deviations.md#d4-s0-rn-is-mostly-a-runner-rewrite-not-improvements",null,null,null,null,null
+    "deviations.md#d5-build-2026-10-16-interim-exact-orca-pin-14224-before-s3",null,null,null,null,null
+    "deviations.md#d6-build-2026-10-16-s3-pulled-forward-ahead-of-s2",null,null,null,null,null
+    "deviations.md#d7-s2-2026-10-16-climbings-runtime-needed-three-fixes-before-base-could-take-it",null,null,null,null,null
+    "deviations.md#d8-build-2026-10-16-new-scope-s10-free-opencodes-port-before-the-first-opencode-worker",null,null,null,null,null
+    "deviations.md#d9-build-2026-10-16-s3-gap-found-in-s4-s5-by-the-coordinator-s7-applied-without-orca-evidence",null,null,null,null,null
+    "log.md#2026-10-16-s0",null,null,null,null,null
+    "log.md#2026-10-16-baseline-before-s1-s8-node-v24210-bun-143",null,null,null,null,null
+    "log.md#2026-10-16-opencode-v2-token-consumption-fix-300fa80-validated",null,null,null,null,null
+    "log.md#2026-10-16-wave-2-start-orca",null,null,null,null,null
+  otherFiles[0]:
+judgments[21]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verify-re-run-2026-10-16-at-the-unified-toon-config-head-which-contains-this-pitch",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#open-at-close",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d1-plan-s3-rewires-the-version-call-sites-now",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d2-plan-climbing-ownership-fixes-stay-in-this-pitch",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d3-s0-2026-10-16-s8-and-s1-shrink-most-climbing-docsrules-are-project-adaptations",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d4-s0-rn-is-mostly-a-runner-rewrite-not-improvements",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d5-build-2026-10-16-interim-exact-orca-pin-14224-before-s3",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d6-build-2026-10-16-s3-pulled-forward-ahead-of-s2",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d7-s2-2026-10-16-climbings-runtime-needed-three-fixes-before-base-could-take-it",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d8-build-2026-10-16-new-scope-s10-free-opencodes-port-before-the-first-opencode-worker",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#d9-build-2026-10-16-s3-gap-found-in-s4-s5-by-the-coordinator-s7-applied-without-orca-evidence",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-s0",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-baseline-before-s1-s8-node-v24210-bun-143",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-opencode-v2-token-consumption-fix-300fa80-validated",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#2026-10-16-wave-2-start-orca",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: upstream-project-drift\nshipped: 2026-10-16\nschemaVersion: 1\ndraft: true\n---\n# upstream-project-drift\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#upstream-project-drift","sha256:08d7b0acc1d4582304dd87c26ced444e32933c28e5822504323c2dcff727b1d6","## upstream-project-drift — shipped 2026-10-16\n\nImprovements made in three downstream projects (climbing-lab-monorepo, LAH, RN) were classified and the portable ones taken into the base as release 2.23.0 (2026-10-16, big-batch, commit `58cfd7f`). S0 produced a drift ledger of 178 rows (D3/D4: most climbing docs and rules are project adaptations, and 47 RN rows are `node → bun` text only; real RN improvements are ten rows: the Orca start hooks, `stuck-uphill-detector`, `pre-ship-verify`, the `hooks.json` path fix and the `skill-defaults.test.mts` `IN_BUNDLE_REPO` guard). S1 rules plus the graphify dangling-edge finish; S2 runtime child ownership taken from climbing after three fixes (D7); S3 Orca minimum version 1.4.224 with a strict `isSupportedVersion` (x.y.z, at most six digits per part) wired into preflight, launch gate and the start worker check, pulled forward (D6); S4/S5 task ownership, with apply, admit and grader taken from climbing (D9); S6 hooks hardening; S7 doctor, validator and skill tests; S8 `workflow/` and `templates/` hunks (13 files); S10 added (D8) so `opencode-service.mts free` stops a stale `opencode serve --service` and `orca-run dispatch` calls it before the first live OpenCode attempt; S9 version 2.23.0, GAUNTLET node 1327/0 and bun 1323/0, Linux Docker runtime 69/0, and a sync proof inside the ledger (131/178 rows match, the rest explained). Pitch no-gos held: no config-format change (that became `unified-toon-config`), no version-range parser (`orca-engines-range`), no role pools (`orca-role-pools`), no edits inside LAH, RN or climbing (read-only sources), and no wholesale copy of a project file over the base without a ledger row and reason; the standing workflow-tooling no-gos applied. Projects were not synced: `git status --porcelain` and HEADs `02a2f91`, `48a721d`, `bfb81b6` identical before and after.\n\nRabbit holes resolved: two `isSupportedVersion` grammars (LAH loose, climbing strict) → strict now, later replaced by `orca-engines-rang",true
+unavailable[1]: ".project/records/pitch-compression/upstream-project-drift.md"

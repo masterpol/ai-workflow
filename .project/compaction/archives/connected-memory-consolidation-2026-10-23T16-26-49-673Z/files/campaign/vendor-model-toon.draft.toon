@@ -1,0 +1,45 @@
+@toon-data 1
+slug: vendor-model-toon
+draft: true
+state: needs-decision
+ledgerHash: "sha256:ccba119eebc665d45d2d30f387b1e873f7c412331cc6d8b78a94a3192c27a85c"
+bindings:
+  ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md": "sha256:13cc84d4cfd74ec1273c3e8a3b8fc4b814911888a51884766388d95b814ebb0a"
+legacyEntryHash: "sha256:a7a004d11dea9f0605a87f53537c33a426f1fa2f4de2157eb2045f7891dc0f5f"
+mapping:
+  schemaVersion: 2
+  sections[13]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#verify",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "log.md#incident-2026-10-16-effort-scope-clarification",null,null,null,null,null
+    "log.md#incident-2026-10-16-test-suite-ripple-from-schemaversion-bump-resolved",null,null,".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md",null,null
+    "log.md#incident-2026-10-16-development-environment-test-fragility-exposed",null,null,null,null,null
+    "log.md#build-2026-10-17-s1-completion-pass-pre-audit",null,null,null,null,null
+    "log.md#deviation-sequencing",null,null,null,null,null
+  otherFiles[0]:
+judgments[13]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verify",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#incident-2026-10-16-effort-scope-clarification",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#incident-2026-10-16-test-suite-ripple-from-schemaversion-bump-resolved",needs-decision,extracted,".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md","",false
+  "log.md#incident-2026-10-16-development-environment-test-fragility-exposed",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#build-2026-10-17-s1-completion-pass-pre-audit",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#deviation-sequencing",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: vendor-model-toon\nshipped: 2026-10-17\nschemaVersion: 1\ndraft: true\n---\n# vendor-model-toon\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#vendor-model-toon","sha256:a7a004d11dea9f0605a87f53537c33a426f1fa2f4de2157eb2045f7891dc0f5f","## vendor-model-toon — shipped 2026-10-17\n\n`ai-workflow.toon` gained a `models` block (schemaVersion 3, v2.29.0, one scope, small-batch): strict validation (vendor, key and profile allowlists for claude/opencode/codex, all three of fast/standard/deep required for every listed vendor, optional `effort` for any vendor), an in-place v2→v3 `config-migrate --apply` (`convertV2`: changes only the version digit, keeps values, comments and line endings, appends the default `models` block, backs up the original, still validates through the `loadConfig` round trip), an example toon, and a README \"Model configuration\" section. Part landed 2026-10-16, completed 2026-10-17.\n\nNo-gos held: no agent prompt bodies or frontmatter, no doctor routing changes, no dependencies, secrets, aliases, fallback chains or per-role overrides; stripping `model:` from agent files and mirror validation were left to `agent-model-sweep`. One no-go was inverted: the pitch said to ship after `workflow-v3-rollout`, but it landed first and orca-role-pools and agent-model-sweep built on it, so `workflow-v3-rollout` must expect a v3 config. Rabbit holes: a schema bump was required by the TOON grammar decision; profiles are objects with `model:` (and optional `effort:`); the v2 read path kept `loadConfig` strict by textual conversion plus a strict round trip, and helper fixtures and refusal literals were bumped in lockstep; the baseline had shipped with validator gaps (unknown vendor or key, missing profile) and no migrator, closed in the completion pass.\n\nIncidents from the build log: asked to validate `effort` for every vendor, the example toon now shows it for claude, opencode and codex (the shared type and validator already allowed it); bumping `schemaVersion` 2→3 changed the refusal text and the `unsupportedVersion` regex, so 93 tests failed until literals and assertions were updated in lockstep (see the knowledge issue below); two skill-defaults tests copied a developer's gitignored v2 `ai-workflow.too",true
+  ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md","sha256:13cc84d4cfd74ec1273c3e8a3b8fc4b814911888a51884766388d95b814ebb0a","---\nid: a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version\ntype: issue\ncreated: 2026-10-17\nupdated: 2026-10-17\ntags: [schema, migration, testing, config, release]\nrelated: [test-skip-is-a-follow-up-not-a-finish, a-pitch-can-pass-its-own-tests-and-break-on-the-real-file, prove-a-guard-test-with-an-in-memory-mutant]\nsource: orca-role-pools\nseverity: medium\nresolved: true\n---\n# Issue: bumping `ai-workflow.toon` to schemaVersion 3 left `config-migrate` writing 2 and 98 tests red at HEAD\n\n## Summary\n\n`vendor-model-toon` S1 moved the reader to schemaVersion 3 and committed with its own log saying the ripple was open. `config-migrate.mts` still emitted `schemaVersion: 2` and matched `only 2 is supported`, and `config.test.mts` / `config-migrate.test.mts` hard-coded 2. The next pitch inherited a suite that could not go green, and a migrator that produced a file its own reader refused.\n\n## Fix\n\nEmit 3, match `only 3`, update the fixture literals (D1 in `orca-role-pools/deviations.md`). Still open: a v2 file cannot be converted in place (the reader's refusal text promises `--apply` does it; today it needs `--force` and drops the values).\n\n## How to avoid\n\nBump the version constant, the emitter, the refusal regex and every fixture literal in one commit (`grep -rn \"schemaVersion: <old>\"`), and run the whole suite before calling the scope done. A scope marked done with an open red suite hands the red to the next pitch.\n",false
+unavailable[1]: ".project/records/pitch-compression/vendor-model-toon.md"

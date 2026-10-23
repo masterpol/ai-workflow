@@ -1,0 +1,95 @@
+@toon-data 1
+ledgerHash: "sha256:3b1362f84dc669f5b6530e9535db7a1935a6cb59de5afcb458f26c78a3d02bfd"
+legacyEntryHash: "sha256:db692cf20b0d42116cbd9eb9ca5ccd532d75655d347eb1942b6c0dbe8ffedf3e"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-reconcile-integration.md": "sha256:a35fb24c2b9006a184f229dbb2889d49f3baa38a90c583bf443d8c474c773b19"
+  ".project/records/legacy-upgrades/orca-vendor-reconcile-integration.md": "sha256:99f409a51267c7f233361b9e94709053fdcfe6c612b6ff6a375f658bea669dcd"
+mapping:
+  schemaVersion: 2
+  sections[8]:
+    -
+      source: "SHIPPED.md#final-verification"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-1-shippedmdfinal-verification"
+      helps: "Retains historical test counts, the clean-export failure and the opt-in boundary; supplement adds the count comparison."
+      bodyHash: "sha256:ce4d4a1b457e31d311b69af6ac9fd654a1ff135f1237bfcb713b8da0d6d32a0a"
+    -
+      source: "SHIPPED.md#reconciliation"
+      class: behavior
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-2-shippedmdreconciliation"
+      helps: "Preserves the CLI, grader, wiring and release ownership with live-smoke status."
+      bodyHash: "sha256:064bf7fd7f47808ea8ba184bcaa05711dff1b63f146b98a1be6b177d72d1af8f"
+    -
+      source: "SHIPPED.md#audit"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-3-shippedmdaudit"
+      helps: Preserves the independent-review result and the author-run coverage limit.
+      bodyHash: "sha256:aff357bb888a6837f8df76b4285034ef90e9677be6e2e64c6433836d274318fd"
+    -
+      source: "SHIPPED.md#no-gos-honored"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-4-shippedmdno-gos-honored"
+      helps: Retains prohibited automation and the no-live-proof boundary.
+      bodyHash: "sha256:ae9dddad71376433ebb5c93e5aeccd3834f596848bb0fda751f269ca8b51c0c5"
+    -
+      source: "SHIPPED.md#followups"
+      class: omit
+      disposition: omitted
+      reason: process-noise
+      bodyHash: "sha256:89b49395b135897437c39d18176322b786c8a9f5af99e4e81b74f99c5811227d"
+    -
+      source: "pitch.md#no-gos"
+      class: limit
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-6-pitchmdno-gos"
+      helps: Retains the standing no-gos by reference to the shared decision.
+      bodyHash: "sha256:c092d0606a6a545f2a60a5c377fc194884a6923ec552f57a4e7b193fe14106fb"
+    -
+      source: "pitch.md#rabbit-holes"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md#section-7-pitchmdrabbit-holes"
+      helps: "Preserves instrument review, mirror parity and the single release step."
+      bodyHash: "sha256:d32cc38a7ea4d3fe5600e435c069c33add1686765696e8c3591a465acd886d78"
+    -
+      source: "deviations.md#audit-cycle-1-2026-10-08"
+      class: know-how
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile-integration.md#review-and-commit-provenance"
+      helps: "Preserves the canary, fix and acknowledged items; supplement adds reviewer model, scratch-copy isolation and commit hygiene."
+      bodyHash: "sha256:ae8e52b673ce2bf68cb33d4ad4bdfb6f342d7f0dce22846e01646adf7c6e8ea6"
+  otherFiles[5]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:b6cdcd53f430fed2298e1866922881ae39b9a541fb6e78dd0736651ec6ae538b"
+      disposition: merged
+      destination: ".project/records/pitch-compression/orca-vendor-reconcile-integration.md"
+      helps: "Preserves historical closure, outputs and test counts."
+    -
+      path: deviations.md
+      hash: "sha256:48d7628541f94ef666eee2d5700b5e10e3191e19634ac677dae1a8ae3bde4e34"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile-integration.md#scope-and-build-decisions"
+      helps: Preserves the accepted one-file overrun (D1) and the audit deviation.
+    -
+      path: hill.md
+      hash: "sha256:7b49f624bc49520342269e069c75568c0a88db4622e81e58458761b11b7db7db"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: pitch.md
+      hash: "sha256:9efa093f38e5601256806bcc504ba2e08e928a832cd9e06e47e4c3d1e0f3b4fd"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile-integration.md#scope-and-build-decisions"
+      helps: "Preserves the bet, appetite and critique decisions."
+    -
+      path: plan.md
+      hash: "sha256:f610ab226adb71befe96910bdc6372e508d80b6f05746887407fba01eab1c5fe"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/orca-vendor-reconcile-integration.md#scope-and-build-decisions"
+      helps: "Preserves the fixed interfaces, exit codes and commit hygiene."
+outcomeRecord: "---\nslug: orca-vendor-reconcile-integration\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# orca-vendor-reconcile-integration\n\nA thin CLI, grader and opt-in wiring connect Orca reconciliation to the workflow phases.\nWorker text stays data, human gates stay in place and live smoke observed Claude only.\nHistorical counts, review limits and follow-ups remain separately recorded.\n\n- outcome: A thin guarded CLI and grader wire opt-in Orca reconciliation into the workflow without live multi-vendor proof.\n- docs: [current Orca contract](ai-framework/integrations/orca-vendors.md)\n- decisions: [scope and build decisions](.project/records/legacy-upgrades/orca-vendor-reconcile-integration.md#scope-and-build-decisions)\n- knowledge: [thin CLI](.project/knowledge/patterns/a-thin-cli-keeps-every-guard-in-the-library.md), [grader reporting](.project/knowledge/patterns/a-grader-reports-executed-and-unexecuted-cases-separately.md)\n- code: [CLI](ai-framework/scripts/orca-run.mts), [grader](ai-framework/scripts/orca-eval-grader.mts)\n- verification: [historical closure](.project/records/pitch-compression/orca-vendor-reconcile-integration.md)\n- followups: [assurance limits](.project/records/legacy-upgrades/orca-vendor-reconcile-integration.md#historical-assurance-and-limitations)\n- archive: [compact record](.project/records/pitch-compression/orca-vendor-reconcile-integration.md), [source supplement](.project/records/legacy-upgrades/orca-vendor-reconcile-integration.md)\n"

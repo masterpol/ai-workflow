@@ -1,0 +1,156 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: codex-orca-coordinator-parity
+sourceProof:
+  archiveDirectory: codex-orca-coordinator-parity-2026-10-09T13-19-05-788Z
+  manifestHash: "sha256:bcdf98b6f0b0861593423b2c4ac4bea483b3850f21e670a2bc7b42f5b272c1b0"
+  sourceBytes: 88088
+  verifiedFiles: 17
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/codex-orca-coordinator-parity.supplement.md"
+  destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md"
+  hash: "sha256:ddec0fa289bb96213842755449ee63afa7bfa976decca27f67769de001595ee4"
+payload:
+  ledgerHash: "sha256:c0acb4f640b882799358cd981bd101c449ecc08100cf48cb83aa9803d39c4985"
+  legacyEntryHash: "sha256:1bde1c4d6dd2f06085fe82abe76259fa09296c2ad8fe51067c59374a245f27a5"
+  bindings:
+    ".project/runs/2026-10-08-codex-orca-coordinator-parity.md": "sha256:0f1832d9f15fc314af378dc43dd4763974ea0e1f03dd4aad949b52c6e270382b"
+    ".project/knowledge/patterns/verify-run-binding-before-orca-dispatch.md": "sha256:cc19f4dcbc2ca78652af2e52327265e8897b52577dd3fec962b59d7c2827887b"
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    ai-framework/integrations/orca-vendors.md: "sha256:80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+    ".project/knowledge/issues/substring-hook-wiring-check-accepts-echoed-commands.md": "sha256:53e9e895db5b43de53132ddf24003ed027eeccbf9234237cf252bfc3da1d435b"
+    ".project/knowledge/issues/coverage-instrumentation-changes-exact-child-environments.md": "sha256:1b1b84fd814cf578b53d1e5ea2fb14655e4664c8329f15791bcf2c0d12116d03"
+    ".project/knowledge/issues/review-guard-hashes-ignored-secret-files.md": "sha256:9bb2a4fef4ce8f92551060f5dd5fbeb50f8a7a7971c88832c70e41f170975cdb"
+    ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md": "sha256:ddec0fa289bb96213842755449ee63afa7bfa976decca27f67769de001595ee4"
+  mapping:
+    schemaVersion: 2
+    sections[20]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#approval-and-reconciliation",decision,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract","Retains ship authority, single-scope reconciliation, appetite and no-commit boundary.","sha256:15bedcae792d3f940484a81a15db490d9481053a67411d95af6bf1a75c070c0c"
+      "SHIPPED.md#final-verify",behavior,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#verification-contract-and-chronology","Preserves final targeted checks, coverage, counts and settlement evidence boundaries.","sha256:3938f0f21c003864738e1ed09e57a75c0a5c52aa1d0eae8b52d23a83cd0aacd4"
+      "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract",Retains shipped exclusion boundaries and required mirror invariant.,"sha256:1cdf92ead430ebbbb94d47223ca902ebcdc6e55da0114e945967258531242f91"
+      "SHIPPED.md#rabbit-holes-and-limits",limit,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#host-and-bootstrap-limits","Keeps readiness, host activation, bootstrap and secret-guard boundaries distinct.","sha256:dd81b799314c93cf28950f3ffaf218f84d997ae41e54617f96ed35b77d9935a2"
+      "SHIPPED.md#knowledge-and-followups",decision,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#knowledge-and-followups",Preserves four original followups and their later historical resolution context.,"sha256:7b235551b7fe40062df28f77092be76e47dbaae234b9ee5795c5ef39acffbf4b"
+      "SHIPPED.md#docs",decision,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract",Records adapter-only documentation scope and preservation of the dated handoff.,"sha256:410261c8b064d9dd79a4dfe0aff758a761183efbc92be1242ac46827d67cf5f7"
+      "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract",Retains original scope exclusions alongside the approved adapter contract.,"sha256:3a3f24133b2c1aae90f7cc6c06d3b11616b5cd0566ee94d5ac9b3be41277bb43"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract",Preserves ready-but-unbound recovery and coordinator-owned root/parser/deadline risks.,"sha256:9652471509ff8df9647278474f259afaca0d96eb8141899c8ceaecd66dd7c481"
+      audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#audit-method-and-attribution","Retains canary isolation, reviewer limits, verified findings and rejected attributions.","sha256:06e65a82156900a6d6e718c962470f17224356a1097c2c9beb3a6a4ef8f35396"
+      audit-cycle-2.md,know-how,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#findings-and-dispositions","Preserves S1–S6 final dispositions, exact guard proof and limits of audit evidence.","sha256:7758ecd64d5123140e0706eb113a795a3ed1c8c5ff26aede799fb43c204cced6"
+      "deviations.md#coverage-runner",limit,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#coverage-and-guard-lessons",Separates Bun reporter crash from plain parity and passing focused Node coverage.,"sha256:a3571d61bdfe258cac692461c739f1e4e7ff9048afddc4f3e75a2f4f6076aa53"
+      "deviations.md#host-activation-evidence",limit,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#host-and-bootstrap-limits",Prevents PROBE_OK and fixtures from being promoted into trusted-host proof.,"sha256:0a3fb67d0a6ae4b0ddc95dd32bc47a5e2265505eb5f0413b5e8c54ee49652c91"
+      "deviations.md#audit-git-root-bootstrap-availability-boundary",limit,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#host-and-bootstrap-limits",Documents pre-switch Git failure blocking even off/non-phase invocations.,"sha256:2de6283dace4feba3827851aaffdc9d6504fc13356d60f5dcbd23420fd67a9ff"
+      "deviations.md#audit-review-and-test-refinements",know-how,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#findings-and-dispositions",Keeps scratch canaries separate from fixed doctor defect and strengthened boundary tests.,"sha256:7741093dd1dd0d8b4114e500e4500ee36bdb88b8ce76e6d57befe83230939802"
+      "deviations.md#audit-coverage-and-guard-tooling-boundaries",limit,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#coverage-and-guard-lessons",Retains instrumentation failure and secret-safe invocation versus production CLI distinction.,"sha256:01a1efd08a3f88bad1446944114bd0430572385ac6b4c2ee33619d116f47f5f9"
+      "log.md#build-start",decision,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract","Retains approved ownership, alternate-vendor roles and configured-model limitation.","sha256:766390d1de79596d8b643fbeac82ec7ef8ce26861a8008362b5f3ae2a6250e07"
+      "log.md#hook-integration-refinements",behavior,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract",Preserves trusted-root registration and integration refinement within fixed ownership.,"sha256:8ce80c623f6e0a6030347c57ed2d183b68287da767c8b13aebc42f814389c28b"
+      "log.md#final-integration-and-verification",behavior,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#verification-contract-and-chronology","Retains exact lifecycle receipts, staged checks and unverified host classification.","sha256:7783155a6a67afac7e58e9da5615ed3d65c9dd59a8f41b86b020f41008abff8c"
+      "log.md#audit-completion",know-how,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#audit-method-and-attribution","Retains author verification, rejected multiline dispatch and corrected guard/canary limits.","sha256:a2c14dc8656e1b652281fd466b2b588a65ab4058476d800555ad7adb25024a4d"
+      "log.md#ship",decision,merged,".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#knowledge-and-followups","Preserves authorized closure, version, connected knowledge and separate followup gates.","sha256:a5ed88cf00059e7e29b39ae0779fb716d1a84fba0563137486e99a46ff29ca71"
+    otherFiles[15]:
+      -
+        path: SHIPPED.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#verification-contract-and-chronology"
+        helps: "Preserves unique reconciliation, staged verification, lifecycle and historical limitations."
+        hash: "sha256:dc161579408ea4bc31b7e073c4b284483b04b9e55092c8da9a39e4f3158cce82"
+      -
+        path: deviations.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#coverage-and-guard-lessons"
+        helps: "Preserves unique approved contract, deviations and evidence boundaries in the durable supplement."
+        hash: "sha256:6c5b75e7723a1db257031e3bfe2d2d8696818364a1dbab9843da0a17badd4cb6"
+      -
+        path: hill.md
+        disposition: omitted
+        reason: process-noise
+        hash: "sha256:97d82bdae8231888158ed9126cb418d0cc2da05fd05430536068560146c9e242"
+      -
+        path: log.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#verification-contract-and-chronology"
+        helps: "Preserves unique reconciliation, staged verification, lifecycle and historical limitations."
+        hash: "sha256:1e934fdc2cdf41406419a07e6d6c55f53fad5e64a302d866ac33655847d86fbd"
+      -
+        path: pitch.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract"
+        helps: "Preserves unique approved contract, deviations and evidence boundaries in the durable supplement."
+        hash: "sha256:bebe9007c10c64aac06caa1cba61795c879e77018913d97019d6d03fde48ce6e"
+      -
+        path: plan.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#scope-and-contract"
+        helps: "Preserves unique approved contract, deviations and evidence boundaries in the durable supplement."
+        hash: "sha256:c7e3b516abddff03373a9950d6cf652c013afb4dc114025a9633e638dfb008df"
+      -
+        path: review-code-c1.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:9aed67abd54541a6551f170cc85925ee7d3a5bf722b755d342cf7de8b4ea70bd"
+      -
+        path: review-code-c2.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:ddfe18b7c0acb545e551ac4d296c8d05ee09c61cdd2c3cbd251cbaae73bf196c"
+      -
+        path: review-conflicts-c1.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:b7a49a69eeb01a2a928733550628361a97b56e3f15cc8dd98d05f2ca6a29f154"
+      -
+        path: review-security-c1.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:0cccb844e295529705d415778f987d272220e1c70250da8f579ad0d37427707a"
+      -
+        path: review-security-c1b.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:9ad282f65c08f25d545e7dadf5204f8111a675e3cefaa6857153f1b17567e578"
+      -
+        path: review-security-c2.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:48ef7b08fb40b0e1cda0cc1773b8c02b3a6eb205345ea24cffc7880797100a15"
+      -
+        path: review-tests-c1.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:c15e70333ffcf50d6c1a855dee6c500998908dcc738a485de8c315aa3bf62495"
+      -
+        path: review-tests-c1b.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:e55e0671f5c806e408ee6e00109099656579328619baab8f66500edde35411a8"
+      -
+        path: review-tests-c2.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/codex-orca-coordinator-parity.md#per-review-evidence-limits"
+        helps: "Preserves this review’s substantive findings, executed checks, attribution and evidence limits."
+        hash: "sha256:b7090c0e976652bbf32d6df1bbbfd73640bcbd16ccf80511a36531552a0803b7"
+  outcomeRecord: "---\nslug: codex-orca-coordinator-parity\nshipped: 2026-10-09\nschemaVersion: 1\n---\n# codex-orca-coordinator-parity\n\nCodex phase startup and coordinator adapters retain explicit identity, completion and readiness boundaries.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: Codex phase startup and coordinator adapters retain explicit identity, completion and readiness boundaries.\n- docs: [source supplement](.project/records/legacy-upgrades/codex-orca-coordinator-parity.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/codex-orca-coordinator-parity.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/codex-orca-coordinator-parity.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/codex-orca-coordinator-parity.md)\n- followups: [retained limits](.project/records/legacy-upgrades/codex-orca-coordinator-parity.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/codex-orca-coordinator-parity.md)\n"
+  acceptDestinationDrift:
+    ".project/pitches/_followups.md":
+      committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Against introducing commit 1db913a: +218/-2 lines; the two removed lines belong to other pitches and were replaced with resolution annotations. This pitch’s four-bullet section is byte-identical; later additions note guard resolution and trusted-hook/coverage candidate work. Historical source is preserved in supplement, backlog is not a durable destination."
+    ai-framework/integrations/orca-vendors.md:
+      committed: "sha256:a5e59f1eed3e9b02c11b1a109a9e7f014ec4fc79daa26384f0f49009fefda075"
+      current: "sha256:80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+      reason: "Against 1db913a: +95/-16 lines; later TOON config migration, semver policy/runtime floor, pools/self-worker/concurrency, assignment/overlap, OpenCode service management, wiring diagnostics and explicit exit/refusal contract. Codex startup/coordinator-preparation block is byte-identical; supplement preserves old runtime evidence limits."
+    ".project/knowledge/issues/substring-hook-wiring-check-accepts-echoed-commands.md":
+      committed: "sha256:cfad1dddc16d160e90ac05bb9e669867dfb34fe5856e7b061607da8048276953"
+      current: "sha256:53e9e895db5b43de53132ddf24003ed027eeccbf9234237cf252bfc3da1d435b"
+      reason: "Against 1db913a: +6/-2 lines; updated 2026-10-21 and confidence low→medium, plus Additional evidence for capture S5 eight registrations and command-comparison mutant. Original issue/fix text unchanged."
+    ".project/knowledge/issues/review-guard-hashes-ignored-secret-files.md":
+      committed: "sha256:d61174b6b20e3cfc2b4dabe17803740c23d66cfc46cc17b99de544dad01822bd"
+      current: "sha256:9bb2a4fef4ce8f92551060f5dd5fbeb50f8a7a7971c88832c70e41f170975cdb"
+      reason: "Against 1db913a: +7/-3 lines; updated 2026-10-21, resolved false→true, confidence low→high, plus token-time-report production SECRET_NAME-before-read resolution. Original historical incident remains, supplement distinguishes then-unresolved from later-fixed."

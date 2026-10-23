@@ -1,0 +1,33 @@
+@toon-data 1
+slug: fix-instruction-conflicts
+draft: true
+state: needs-decision
+ledgerHash: "sha256:a18bceb099a61c793ffc8fbbcb10973dd632085661f7d80c64dde727b4f0723f"
+bindings:
+legacyEntryHash: "sha256:797ce194894dbd26d1ca8bbb2a6074494da5f41d1fe70da175a789500e3f93ed"
+mapping:
+  schemaVersion: 2
+  sections[8]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scope-single-implicit-scope-logmd",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#verify-final-2026-10-18",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#knowledge",null,null,null,null,null
+    "SHIPPED.md#followups",null,null,null,null,null
+    "log.md#triage-each-finding-verified-against-the-checkout-before-any-edit",null,null,null,null,null
+    "log.md#build-2026-10-17-done-awaiting-the-build-end-gate-bug-fix-gated",null,null,null,null,null
+  otherFiles[0]:
+judgments[8]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scope-single-implicit-scope-logmd",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#verify-final-2026-10-18",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#knowledge",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#triage-each-finding-verified-against-the-checkout-before-any-edit",needs-decision,extracted,".project/done-work.md","",false
+  "log.md#build-2026-10-17-done-awaiting-the-build-end-gate-bug-fix-gated",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: fix-instruction-conflicts\nshipped: 2026-10-18\nschemaVersion: 1\ndraft: true\n---\n# fix-instruction-conflicts\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#fix-instruction-conflicts","sha256:797ce194894dbd26d1ca8bbb2a6074494da5f41d1fe70da175a789500e3f93ed","## fix-instruction-conflicts — shipped 2026-10-18\n\nA bug-fix pass (2.31.1–2.31.4, 2026-10-17 to 2026-10-18) made conflicting workflow instructions agree, each topic with one authoritative owner, without removing any gate, reviewer, evidence requirement or permission boundary. Triage came from an owner-supplied static analysis; every finding was verified against the checkout before any edit. Findings and their owners: A Orca exit 3 was \"continue normally\" in the audit and ship phase specs but \"stop and ask\" in the skills and in `orca-run.mts` `exitCodeFor`, so with Orca requested a refused dispatch could silently fall back; `orca-vendors.md` now owns the decision (\"exit code 3 alone never authorizes the normal path\", with the off, bypassed, worker, ready and stop outcomes, and exit 4 documented). B/C the security reviewer had Write/Edit and was told to remediate while its OpenCode and Codex adapters were read-only, and a clean review was told to print only \"No security findings\"; the canonical prompt is now `Read, Bash, Grep, Glob`, inspect and report only, proofs of concept only in a scratch copy, one summary for every review with Checked and Unverified and a `PASS | BLOCK | INCOMPLETE` verdict (unfinished is never PASS). D three size limits (800 lines in the code reviewer, a hard 150 default in `component-architecture.md`, a soft signal in `coding-standards.md`); `component-architecture.md` is the single owner (project limit, else 150/80/50, the cohesive-unit exception the only way past). E the build gate disagreed between the skill, `2-build.md` and the overview matrix, which had no `/build end` row; the matrix owns it now with the union (auto / gated / gated / gated) and the skill and spec defer to it. F mirrors were documented as pointers only although Cursor holds byte copies; `docs/vendors.md` documents both mechanisms and the refresh procedure (`cursor-mirrors` lists `differs`; copy the canonical file). G entry files and modes: an existing `@AGENTS.md` import",true
+unavailable[1]: ".project/records/pitch-compression/fix-instruction-conflicts.md"

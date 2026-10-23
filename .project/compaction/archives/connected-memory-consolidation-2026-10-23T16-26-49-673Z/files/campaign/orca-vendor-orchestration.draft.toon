@@ -1,0 +1,23 @@
+@toon-data 1
+slug: orca-vendor-orchestration
+draft: true
+state: needs-decision
+ledgerHash: "sha256:749f09ef8f3f6671b4a448a7dab15b20de501724b8cfcdbd9484cbeae4aed22e"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-orchestration.md": "sha256:10972adc03ffea242b5e6f057a6f4f531aa6485ac4a8ef2f8c758a5b92b87f42"
+legacyEntryHash: "sha256:14e994e69ef722c755ede0fe955077cb7b92f8c6e6079b502ceb2d460acf765e"
+mapping:
+  schemaVersion: 2
+  sections[2]{source,class,disposition,destination,helps,bodyHash}:
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/orca-vendor-orchestration.md#section-1-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/orca-vendor-orchestration.md#section-2-pitchmdrabbit-holes",null,null
+  otherFiles[0]:
+judgments[2]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-orchestration.md#section-1-pitchmdno-gos",No-gos preserved in the compact record.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-orchestration.md#section-2-pitchmdrabbit-holes",Rabbit holes and their owning part pitches preserved.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-vendor-orchestration\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# orca-vendor-orchestration\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-vendor-orchestration","sha256:14e994e69ef722c755ede0fe955077cb7b92f8c6e6079b502ceb2d460acf765e","## orca-vendor-orchestration — shipped 2026-10-08\n\nUmbrella pitch for multi-vendor Orca orchestration, decomposed into foundation, dispatch, reconcile and integration; all four shipped (2.10.0 to 2.17.0) behind `AI_WORKFLOW_ORCA_MULTI_AGENT`. Live compatibility stays unverified outside Claude.\n\nSee [[a-thin-cli-keeps-every-guard-in-the-library]] and [[a-grader-reports-executed-and-unexecuted-cases-separately]].\n\n",false
+  ".project/records/pitch-compression/orca-vendor-orchestration.md","sha256:10972adc03ffea242b5e6f057a6f4f531aa6485ac4a8ef2f8c758a5b92b87f42","# Compaction record: orca-vendor-orchestration\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[a-thin-cli-keeps-every-guard-in-the-library]], [[a-grader-reports-executed-and-unexecuted-cases-separately]], [[prove-a-guard-test-with-an-in-memory-mutant]].\n\n## Section 1: pitch.md#no-gos\n\nNo remote/SSH/WSL coordination, new providers, custom scheduler, IDE UI or cross-repository work. No automatic installation, login, permission bypass, historical rewrite or committed credentials. No forced parallelism, estimated savings, blind merges, recursive worker fan-out, or fallback over uncertain live edits. No broad rewrite of every phase or of the metrics collector; vendor model defaults are retained unless configured and supported. Standing no-gos: [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]]. All held across the four part pitches.\n\n## Section 2: pitch.md#rabbit-holes\n\nFeasibility was resolved at shaping: upstream documents all three vendors, supervised dispatch, isolated placement and peer messaging, but the installed CLI failed before discovery, so live compatibility stayed unverified. The rest was pushed to /plan and split across four pitches: foundation (policy, preflight, switch), dispatch (launch gate, ownership ledger, supervised dispatch), reconcile (diff admission, check-first apply, evidence, cleanup) and integration (CLI, grader, phase wiring). Runtime contract, baseline/reconciliation, failure ownership and appetite were each owned by one of them. All four shipped (releases 2.14.0 to 2.17.0); live smoke for Codex, OpenCode and peer messaging remains not-run.\n",false
+unavailable[0]:

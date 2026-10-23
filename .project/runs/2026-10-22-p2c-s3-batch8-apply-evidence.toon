@@ -1,0 +1,58 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[5]: state-ai-authoring,state-deep-evidence,state-fragment-sanitizer,state-report-redesign,test-execution-performance
+driftAccepted:
+  file: .project/pitches/_followups.md
+  committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+  current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+pitches[5]:
+  -
+    slug: state-ai-authoring
+    status: upgraded
+    outcomeBytes: 2027
+    v1Hash: "sha256:8f2e7ce0133b09fde1b696e175a1797e7d30950aa9280a812804bea4a0a3bf76"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: state-deep-evidence
+    status: upgraded
+    outcomeBytes: 1894
+    v1Hash: "sha256:187f531c8a2eb0c2e0f7d9ae8691b48c6837593942d02170c412c4bb75354ae2"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: state-fragment-sanitizer
+    status: upgraded
+    outcomeBytes: 1885
+    v1Hash: "sha256:45babba17765fe77455932978917909d79e10cb23aed884faf25d86d6cc99acf"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: state-report-redesign
+    status: upgraded
+    outcomeBytes: 1822
+    v1Hash: "sha256:f2741b481f4320c3b739e0dd026e79b69f7d5ad56245dc66cda4371ed37ff4c6"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: test-execution-performance
+    status: upgraded
+    outcomeBytes: 1784
+    v1Hash: "sha256:52924fda6c6924c6c63e230074d670819d88d949c4db6ee657803ab807dee8ae"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+counts:
+  legacy: 14
+  partial: 0
+  upgraded: 32

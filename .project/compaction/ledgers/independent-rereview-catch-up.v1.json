@@ -1,0 +1,160 @@
+{
+  "schemaVersion": 1,
+  "slug": "independent-rereview-catch-up",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-1-shippedmdscope-reconciliation",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-2-shippedmdconfidence-read-this-before-relying-on-it",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-3-shippedmdno-gos-honored",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-4-shippedmdrabbit-holes-resolved-as-committed",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#deviations-that-changed-the-plan-see-deviationsmd",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-5-shippedmddeviations-that-changed-the-plan-see-deviationsmd",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#audit-findings-final-disposition",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-6-shippedmdaudit-findings-final-disposition",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-7-shippedmdknowledge-extracted",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "SHIPPED.md#followups-see-followupsmd-for-full-text",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-8-shippedmdfollowups-see-followupsmd-for-full-text",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-9-pitchmdno-gos",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-10-pitchmdrabbit-holes",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-11-audit-cycle-1md",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s0-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-12-deviationsmds0-2026-09-26",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s4-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-13-deviationsmds4-2026-09-26",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s1-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-14-deviationsmds1-2026-09-26",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s2-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-15-deviationsmds2-2026-09-26",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s2-gate-2026-09-27",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-16-deviationsmds2-gate-2026-09-27",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s3-gate-2026-09-27-second-cap-raise",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-17-deviationsmds3-gate-2026-09-27-second-cap-raise",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "deviations.md#s3-2026-09-27",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-18-deviationsmds3-2026-09-27",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-26-s0-built-review-bench",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-19-logmd2026-09-26-s0-built-review-bench",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-26-concurrency-found-before-s1-build-paused",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-20-logmd2026-09-26-concurrency-found-before-s1-build-paused",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-26-s4-built-ahead-of-s1s3-audit-reviewer-contract-first-pass",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-21-logmd2026-09-26-s4-built-ahead-of-s1s3-audit-reviewer-contract-first-pass",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-26-s1-built-compaction-re-review",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-22-logmd2026-09-26-s1-built-compaction-re-review",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-26-s2-built-metrics-collector-re-review",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-23-logmd2026-09-26-s2-built-metrics-collector-re-review",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-27-s3-built-state-collector-theme-renderer-re-review",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-24-logmd2026-09-27-s3-built-state-collector-theme-renderer-re-review",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    },
+    {
+      "source": "log.md#2026-09-27-audit-cycle-1",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/independent-rereview-catch-up.md#section-25-logmd2026-09-27-audit-cycle-1",
+      "reason": "Substance and qualifications preserved in the corresponding compact record section; reusable lessons retained in its linked knowledge entries."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-09-27T18:09:07.543Z"
+}

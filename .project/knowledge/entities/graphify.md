@@ -2,7 +2,8 @@
 id: graphify
 type: entity
 created: 2026-10-18
-updated: 2026-10-18
+updated: 2026-10-23
+confidence: high
 tags: [knowledge-graph, ast, tooling, service]
 related: [a-source-scanner-fails-closed-on-what-it-cannot-read, resolve-before-matching-a-protected-path-allowlist, local-eval-data-is-gitignored]
 source: knowledge-health-audit
@@ -37,6 +38,14 @@ and `/cooldown`.
   on error-level problems.
 - Install (`setup`): write `.graphifyignore`, append the rebuild-on-commit / post-checkout
   block to `.gitignore`, and wire git hooks so the graph never drifts from on-disk entries.
+- Overlay the validated bundle workflow manifest and optional project-local relations, including
+  canonical/mirror adapters, phase documents, dispatches and rule reads. Registry-owned local
+  skills are reported separately; an unlisted local skill still needs a project overlay entry.
+- Add file nodes for declared files omitted by the upstream scanner, including build skills and
+  TOML adapters. Derive bounded references only from existing, non-fenced paths, with canonical
+  targets and explicit hub/budget checks.
+- Overlay typed outcome links from durable shipped records. A valid record is not sufficient
+  evidence of useful navigation: test the expected destination relations independently.
 
 ## Dependencies
 
@@ -80,3 +89,7 @@ graphify.mts ──writes──▶ .project/knowledge/index.md
   local executable for offline or pre-release use.
 - Production code imports no `node:*` module; every fs/path/process effect goes through
   `RuntimeDeps` so test fixtures can inject them.
+- The connected-memory-consolidation P1 acceptance measured typed one-hop `explain` relations:
+  12/12 after versus 0/12 before. This is not a semantic ranking result for lexical `query`.
+  On 2026-10-23, `query 'who reviews /audit'` reached the audit playbook but omitted reviewers;
+  the accepted D7 measurement deviation remains explicit.

@@ -1,0 +1,74 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: opencode-handoff
+sourceProof:
+  archiveDirectory: opencode-handoff-2026-10-09T14-29-23-592Z
+  manifestHash: "sha256:067b2e9bb9ba5b2b485d96682b567bbc0d98b27357146358c0d34eebfaa7bd32"
+  sourceBytes: 3469
+  verifiedFiles: 2
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/opencode-handoff.supplement.md"
+  destination: ".project/records/legacy-upgrades/opencode-handoff.md"
+  hash: "sha256:41947be50cfa64dc271e5249a7304abf0e3ff45b9b2251f434059aabbd0570b5"
+payload:
+  ledgerHash: "sha256:ccd196d70684ead1a8782dbe821fb1fdfde644c056c81c92d72178a6c9ee5575"
+  legacyEntryHash: "sha256:8f08de90ced9c97599a7bc2d369e3ea9d9618854277258ad38c6ec8662e0adae"
+  bindings:
+    ".project/context/opencode-handoff.md": "sha256:2312fa28f7f489535ce58cdac63746a34d1dc88e5e2e7c1fbbba265a19536a2b"
+    ".project/records/legacy-upgrades/opencode-handoff.md": "sha256:41947be50cfa64dc271e5249a7304abf0e3ff45b9b2251f434059aabbd0570b5"
+  mapping:
+    schemaVersion: 2
+    sections[7]:
+      -
+        source: "SHIPPED.md#what-shipped"
+        class: behavior
+        disposition: merged
+        destination: ".project/context/opencode-handoff.md"
+        helps: "Preserves the contextual handoff, historical probe and corrected adapter state."
+        bodyHash: "sha256:b9fdeec92ebd4a6b84fcbc0f71bc770fca2583dc007ce86b0c8625165f3d843f"
+      -
+        source: "SHIPPED.md#pitch-implementation-reconciliation"
+        class: omit
+        disposition: omitted
+        reason: process-noise
+        bodyHash: "sha256:cdcfa6fcf32b6c5c3a5ebf2fa6a03e2fe5a0d20a6b1955019e2be68e122500f0"
+      -
+        source: "SHIPPED.md#verification"
+        class: know-how
+        disposition: merged
+        destination: ".project/context/opencode-handoff.md#how-to-verify"
+        helps: Retains the probe command; historical acceptance checks do not prove a live dispatch.
+        bodyHash: "sha256:92bac1d7d85becb427451889edba1cb33eb03b620ae0b8dc0463a05f017de697"
+      -
+        source: "SHIPPED.md#revisions"
+        class: behavior
+        disposition: merged
+        destination: ".project/context/opencode-handoff.md#current-adapter-state"
+        helps: Closes the false missing-adapter diagnosis using the explicit shipped correction.
+        bodyHash: "sha256:61f6376dfb16640a60a2ffde5b0128095c57c35a217a42e7012e4ba9ca3dc395"
+      -
+        source: "SHIPPED.md#residuals"
+        class: decision
+        disposition: extracted
+        destination: ".project/records/legacy-upgrades/opencode-handoff.md"
+        helps: Retains the handoff-only decision and project-local knowledge boundary.
+        bodyHash: "sha256:c92cd25af9ee0b9c1c485ddae16584d1f2e7b41c66c940a6a6aa0ea6a50a2e41"
+      -
+        source: "pitch.md#no-gos"
+        class: limit
+        disposition: extracted
+        destination: ".project/records/legacy-upgrades/opencode-handoff.md"
+        helps: Preserves excluded implementation changes and the requirement for observed live proof.
+        bodyHash: "sha256:1b84dc48d784bd24bc03159b3d08b087fbe76a059e61bc40435df4a4f8eea6c6"
+      -
+        source: "pitch.md#rabbit-holes"
+        class: decision
+        disposition: extracted
+        destination: ".project/records/legacy-upgrades/opencode-handoff.md"
+        helps: "Preserves follow-up ownership and separation from Codex parity, with the absent-adapter premise explicitly refuted."
+        bodyHash: "sha256:ee6d1dca4e497eab3e4b92c53e0b3cf7ac6e3e73edf2aabc2d082fb42d561518"
+    otherFiles[2]{path,hash,disposition,destination,helps}:
+      SHIPPED.md,"sha256:8e57bd1247e68a7a3bd58f481af4506a3a32798c0cff56c80e5a01bf6f31c1c3",merged,".project/records/legacy-upgrades/opencode-handoff.md","Retains historical scope, correction and verification limits; configuration and commands remain in the linked handoff."
+      pitch.md,"sha256:d9f4d4bffe0f95a80bb78fe4ac77c7bf3ec53684c14cce4244e288e81466b975",merged,".project/records/legacy-upgrades/opencode-handoff.md","Retains historical scope, correction and verification limits; configuration and commands remain in the linked handoff."
+  outcomeRecord: "---\nslug: opencode-handoff\nshipped: 2026-10-09\nschemaVersion: 1\n---\n# opencode-handoff\n\nThe handoff captures OpenCode adapter and Orca integration context.\nIts probe and verification claims describe the historical session.\nCurrent runtime requirements and historical scope limits are linked below.\n\n- outcome: A project-local OpenCode handoff preserves configuration, blockers and verification guidance.\n- docs: [historical handoff](.project/context/opencode-handoff.md), [current Orca contract](ai-framework/integrations/orca-vendors.md)\n- decisions: [scope and evidence limits](.project/records/legacy-upgrades/opencode-handoff.md#scope-and-evidence-limits)\n- knowledge: none\n- code: none\n- verification: [historical checks](.project/context/opencode-handoff.md#how-to-verify)\n- followups: [remaining verification limits](.project/records/legacy-upgrades/opencode-handoff.md)\n- archive: [source supplement](.project/records/legacy-upgrades/opencode-handoff.md)\n"

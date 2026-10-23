@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "slug": "collector-robustness",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scope-reconciliation",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#deviations-see-deviationsmd",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit-findings-final-disposition",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d1-lock-ownership-safety-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d2-identity-semantics-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d3-completion-plan-built-without-a-separate-pre-bet-critique-2026-09-27",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d4-s1s-reclaim-contract-and-its-tests-retired-2026-09-27",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d5-cross-project-endpoint-collisions-are-real-not-theoretical-2026-09-27",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#s1-2026-09-26",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#c2-c3-2026-09-27-completion-plan-approved",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#audit-cycle-2-2026-09-27",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-07T23:01:39.467Z"
+}

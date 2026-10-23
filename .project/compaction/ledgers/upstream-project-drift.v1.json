@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "slug": "upstream-project-drift",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#verify-re-run-2026-10-16-at-the-unified-toon-config-head-which-contains-this-pitch",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#open-at-close",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d1-plan-s3-rewires-the-version-call-sites-now",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d2-plan-climbing-ownership-fixes-stay-in-this-pitch",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d3-s0-2026-10-16-s8-and-s1-shrink-most-climbing-docsrules-are-project-adaptations",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d4-s0-rn-is-mostly-a-runner-rewrite-not-improvements",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d5-build-2026-10-16-interim-exact-orca-pin-14224-before-s3",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d6-build-2026-10-16-s3-pulled-forward-ahead-of-s2",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d7-s2-2026-10-16-climbings-runtime-needed-three-fixes-before-base-could-take-it",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d8-build-2026-10-16-new-scope-s10-free-opencodes-port-before-the-first-opencode-worker",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#d9-build-2026-10-16-s3-gap-found-in-s4-s5-by-the-coordinator-s7-applied-without-orca-evidence",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-10-16-s0",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-10-16-baseline-before-s1-s8-node-v24210-bun-143",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-10-16-opencode-v2-token-consumption-fix-300fa80-validated",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "log.md#2026-10-16-wave-2-start-orca",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-19T03:39:32.656Z"
+}

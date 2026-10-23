@@ -1,0 +1,47 @@
+@toon-data 1
+ledgerHash: "sha256:079933cf243f484bdb4cc0ea8531d8aec7a8be1bc0adb6db59070350f28c7f93"
+legacyEntryHash: "sha256:afea087a9d0fe7025203f858d7e96a225d501929a3a494744de68a8a0f765d5c"
+bindings:
+  ".project/records/legacy-upgrades/shape-lite.md": "sha256:51c99006365a6c72d1a738af827c1a4833baacfa2b613678729c318086c6147e"
+mapping:
+  schemaVersion: 2
+  sections[2]{source,class,disposition,destination,helps,bodyHash}:
+    "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/shape-lite.md#scope-and-limits","Prohibited scope: no change to full shape, no critique fan-out or new agents, one gate, named pitch only.","sha256:298e8bd5b0f694471d7b62c66c3a9233adb681d415daba746c615a8b583301dd"
+    "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/shape-lite.md#scope-and-limits","Resolved, pushed and no-go dispositions including the later-closed doctor count risk.","sha256:8431083657c6643b634a7c6b02561068abaa59e195515842b8029d68a8f9f6ad"
+  otherFiles[6]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:a6de4ae25745a7c12066f632c9d63c2a9c03d9cb483ceffab0f7e7a883adaa05"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/shape-lite.md#release-and-deliverables"
+      helps: "Preserves scope statuses, verification, knowledge and followup counts in the release and audit sections."
+    -
+      path: audit.md
+      hash: "sha256:ee2d044316821a6eedd98e5c4eeb0c1c0fae780cccf3e131aa636388dfa43273"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/shape-lite.md#audit-and-review-chronology"
+      helps: "Preserves findings M1, M2 and S1 to S5, both canaries and the acknowledged items."
+    -
+      path: deviations.md
+      hash: "sha256:41d459f95eef28e960f5e91abf7a753fa0d173218ec421180eff7045b0350e47"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/shape-lite.md#build-decisions-and-deviations"
+      helps: "Preserves the utility phase deviation, the added S4 and the pre-existing test failures."
+    -
+      path: hill.md
+      hash: "sha256:7b235bd360768ec5ebbc54bc36d51785c3b40f53620a8efb0701e886faeedcd4"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: pitch.md
+      hash: "sha256:a8cc31f9251e301fe630af11297b6da03bfb184c63b4bd4ffac6107cb4619b66"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/shape-lite.md#scope-and-limits"
+      helps: "Preserves the problem, critique findings K1 to K4, S1 to S3 and A1."
+    -
+      path: plan.md
+      hash: "sha256:9ae9501e3f6518a7eebc6a15673fcb8acc9a920adc4549ccf5e31f4f96b2bb66"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/shape-lite.md#build-decisions-and-deviations"
+      helps: "Preserves scopes, exit criteria and plan-time assumptions that later changed."
+outcomeRecord: "---\nslug: shape-lite\nshipped: 2026-10-07\nschemaVersion: 1\n---\n# shape-lite\n\nA fast, bounded framing step handles small tasks or mid-flow rejections inside or outside an active pitch.\nIt keeps the graph-only knowledge gate, mechanical escalation to full shape and a single approval gate.\nA validated AGENTS.md import for CLAUDE.md was added during the build.\n\n- outcome: Small tasks and rejections get a compressed framing step that escalates to full shape on hard triggers.\n- docs: [shape-lite skill](.claude/skills/shape-lite/SKILL.md)\n- decisions: [shape-lite is a gated escalating variant](.project/knowledge/decisions/shape-lite-is-a-gated-escalating-variant-of-shape.md)\n- knowledge: [quadratic regex](.project/knowledge/issues/backtracking-regex-over-untrusted-text-is-quadratic.md), [gate must not trust its author](.project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md)\n- code: [entry import](ai-framework/scripts/entry-import.mts), [entry import tests](ai-framework/scripts/entry-import.test.mts)\n- verification: [audit and review chronology](.project/records/legacy-upgrades/shape-lite.md#audit-and-review-chronology)\n- followups: [historical limits](.project/records/legacy-upgrades/shape-lite.md#historical-limits), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/shape-lite.md)\n"

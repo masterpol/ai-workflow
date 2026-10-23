@@ -1,58 +1,108 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "fix-instruction-conflicts",
   "sections": [
     {
       "source": "SHIPPED.md#scope-single-implicit-scope-logmd",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners",
+      "helps": "Per-finding outcome and the single owner file for each topic, findings A to M.",
+      "bodyHash": "sha256:8a4b350d0d013004b2e068893a51ff76348f701a739a5ed15a91bea9f6c5fb75"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#no-gos",
+      "helps": "No gate, reviewer, evidence requirement or permission boundary removed; no compression; external skills untouched.",
+      "bodyHash": "sha256:e4379c8f406443e248045239e6b286a03ed3f7e4d787845236613adafd689b33"
     },
     {
       "source": "SHIPPED.md#verify-final-2026-10-18",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#verification-and-evidence",
+      "helps": "No build, typecheck or lint command here; tests, doctor, validator, graph, link and diff checks substitute.",
+      "bodyHash": "sha256:bf132f2ed5f6e9f2cbcf0a301fecac59ac293d24887347bd76cb7fcda17a2dce"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#review-chronology",
+      "helps": "Orca run, six attempts, canary and the owner-accepted eval residual risk.",
+      "bodyHash": "sha256:0906d847f0610dfbd60b2fd256f1b8c502212be13bd250c2a11a94347912d899"
     },
     {
       "source": "SHIPPED.md#knowledge",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#knowledge-and-durable-owners",
+      "helps": "Links the pattern (confidence low) and the resolved issue.",
+      "bodyHash": "sha256:566e0e53f0e2c68bf5c96d499883aea4b439966ac8247fa6b02d995af88aceca"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#historical-limits",
+      "helps": "Golden cases owned by instruction-compression, the metrics-lock flake and cursor-mirrors skipping project agents.",
+      "bodyHash": "sha256:e454fe2a33fa5a613268c0a3b98d94fefd087c1ae6e3b2e6d4313d5f89c76a23"
     },
     {
       "source": "log.md#triage-each-finding-verified-against-the-checkout-before-any-edit",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners",
+      "helps": "Contradictory sources, failure scenario and owner per finding A to H.",
+      "bodyHash": "sha256:6cf3288552e75a96ebbf69570e117ada49ae67b5f5108d9a9265ba12baf13c9c"
     },
     {
       "source": "log.md#build-2026-10-17-done-awaiting-the-build-end-gate-bug-fix-gated",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners",
+      "helps": "What each fix changed, plus the 7 of 8 pre-fix failure proof and build evidence.",
+      "bodyHash": "sha256:2c00cd45d76ad0e273109c7cdd0936729ef577bdb19c26ee7dce1efc0a8a0258"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:7a660ae652c4786893b90494f6eb140dde982e8932a81df424838cd035488bb0",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners",
+      "helps": "Preserves scope, no-gos, audit and followups in the findings, chronology and limits sections."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:ea62924fd54ec04dd0399e2835360222fd2ce46fbac3d17eca42c301f8ec6474",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#review-chronology",
+      "helps": "Preserves S1 to S9, the canary, incomplete eval, author-run counts and the owner decision."
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:9fcda9e48948e134e573d91e87bc8c830ab9b3fe513658f757964c7cbb17af68",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners",
+      "helps": "Preserves triage, fixes and build evidence."
+    },
+    {
+      "path": "validation-2026-10-18.md",
+      "hash": "sha256:6c10960a05f0e9ad52ce4cef56e0573476932f3409e399b6ec736b2b71705db9",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/fix-instruction-conflicts.md#validation-pass",
+      "helps": "Preserves the corrections, test counts, second Orca run and non-independence caveats."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-19T03:28:32.654Z"
+  "committedAt": "2026-10-22T19:28:15.287Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:98357ab7e6d63ce75f0f3fcbaa391453fe66b02f494d177b57c731fe18f826f2",
+    "introducingCommit": "fc7d686ccab4849f255e09ccf2e6fdbc17082f54"
+  }
 }

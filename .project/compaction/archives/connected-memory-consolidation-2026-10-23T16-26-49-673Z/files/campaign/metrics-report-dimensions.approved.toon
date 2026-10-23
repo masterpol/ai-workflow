@@ -1,0 +1,100 @@
+@toon-data 1
+ledgerHash: "sha256:86119f71c6cf85ddc016a10063903ae672fe29418f9f7f6b6d74d839655581cd"
+legacyEntryHash: "sha256:da4ce7996521efc45178853b063bde7b795cc02ed6cca59440ad4f0b838107bb"
+bindings:
+  ".project/knowledge/decisions/token-metrics-dimensions-design.md": "sha256:136ea4456ec8520a682aed3d006181cfc0555970e7373b55a96af66e2385fbb6"
+  ".project/knowledge/patterns/allow-list-untrusted-labels-at-ingest-and-at-render.md": "sha256:912b6e2b7bdbf402834442e2cabef1166e03b603c8531e1f2584269641e50ff4"
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+  ai-framework/rules/testing.md: "sha256:fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4"
+  ".project/records/legacy-upgrades/metrics-report-dimensions.md": "sha256:ab3ef0e3261beaa185f3b1ddef76d53671ef8fffe77de8a4b4fb22ed4aad2b71"
+mapping:
+  schemaVersion: 2
+  sections[18]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#what-changed-for-the-user",behavior,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#behavior-and-schema-contract","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:d6c3efb318344733ad97dacfb68728af30bef550a8af167b7b09a00640051f03"
+    "SHIPPED.md#scope-reconciliation",know-how,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#verification-timeline-and-evidence-limits","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:2a984f279183c8cdd18901db344fe2b9138d41c66303c06290795883696fd0f9"
+    "SHIPPED.md#audit",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#audit-cycle-2","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:d614b1b74a42293fbe4c3cb1c5065ea9a9c1e0490be10af01e7b22fd55508cee"
+    "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#constraints-and-bounds","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:01167bfdcc24ed3706f4d77abb70c708d015538f42ebee830068066a0ef9ae90"
+    "SHIPPED.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#behavior-and-schema-contract","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:d4c55721539e2bec65d728ed6ad45e12a442413f658b3712b4e1358da9324168"
+    "SHIPPED.md#deviations-deviationsmd",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:b916fad848dde4ac505b019f147d82b0e310b0dd80a2a39adf016ef8d15a781a"
+    "SHIPPED.md#followups-generated-pitchesfollowupsmd",know-how,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#followups-lessons-and-later-history","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:00f7183047381f8b84255570aab0aadeaa2e7edcde1a7795fd53998561dacdf2"
+    "SHIPPED.md#notes-for-cooldown",know-how,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#followups-lessons-and-later-history","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:a3bc6f46056bceaa260c91aec14d6816aff459a7a977b50277e60b53cece8a8b"
+    "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#constraints-and-bounds","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:5b8a88c4c41bf28a4b021d6f4dabd2400f30906de7c7699299ca402b8eea1f6f"
+    "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#behavior-and-schema-contract","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:981aa64a8470dd4984aaee6a2b970d127fa974bccae808393d3a9a69e16cbaaf"
+    audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#audit-cycle-1","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:34bfc61a5ea1e174f705b07ebd3e196ff368c759307c24715171c4d31904bc5f"
+    audit-cycle-2.md,know-how,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#audit-cycle-2","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:a91ab70aaccad39c1f48d8afc82c5a1007402c9470cc6aa82e5d04df63a4e78a"
+    "deviations.md#d1-claude-async-agents-are-double-counted-and-split-across-model-rows-found-in-s0-2026-09-24",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#payload-spike-and-async-correction","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:d6c4e60626083645ca5354c06386424593a2a83d4b8ae760c13e1552d9147abc"
+    "deviations.md#d2-s4-built-inline-not-dispatched-2026-09-24",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:07b74b293db9160518d9b63e65b6f42bc2ab49a481e1dc13a03f38cc0dc4bd13"
+    "deviations.md#d3-collector-coverage-criterion-needed-extra-tests-after-s2-2026-09-24",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:bd7dffca4a5b85c1cf3823800aa8b002d024087587dc26993a53d10d7e8f0a4f"
+    "deviations.md#d4-s2-added-a-by-vendor-unit-table-2026-09-24",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:4b2162db70bc36860c45abd29f4ca61c8328d88b3b4b1b5c38e966a4e2ab01aa"
+    "deviations.md#d5-audit-cycle-1-fixes-and-deferrals-2026-09-24",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:5edd6144d193615b83bb4742b4ed59384466bad66dc4c7eb281e6507c2d1c5a8"
+    "deviations.md#d6-cycle-2-security-re-check-could-not-be-completed-by-a-reviewer-agent-2026-09-25",decision,merged,".project/records/legacy-upgrades/metrics-report-dimensions.md#audit-cycle-2","Preserves source decisions, behavior, historical verification and explicit limits without overstating independent review.","sha256:28d0a594c17aaec15427bb663b90c3437e8ba700270a59f229d0dcfe59b138a0"
+  otherFiles[10]:
+    -
+      path: SHIPPED.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#verification-timeline-and-evidence-limits"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:a68f4b342dd794c8e93d97c4b0d07c0f9fb383305b412252c9db960358ee66ec"
+    -
+      path: deviations.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:40c646f4bf1cb410ff91bf0af1530053ada0d7a15766e7165ecad1d3d5af3ff9"
+    -
+      path: hill.md
+      disposition: omitted
+      reason: process-noise
+      hash: "sha256:aac3c11b7231b9d7dd8f258732077c85afcdbede7a25a52a5a0ebafaed2a68c8"
+    -
+      path: pitch.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#behavior-and-schema-contract"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:7d1622ef7aed7438bc672a1a4cff71875caaf6e5c4e82af81f4546de0f8339c3"
+    -
+      path: plan.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#scope-execution-and-deviations"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:f515ec199b70f28ac7f81d43532cc87a4fbcd5d46dd78852732408aa1c1e617c"
+    -
+      path: s1-evidence.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#verification-timeline-and-evidence-limits"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:d12bd4cb474eaf8cc62634e8e338ec741a825e3620da38611423fc8ff0098b6e"
+    -
+      path: s2-evidence.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#verification-timeline-and-evidence-limits"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:4495a607d8cceacb06616a3427f8452d789cd42f5e77c251aa5ebf1ac14b06a0"
+    -
+      path: s2-s4-evidence.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#verification-timeline-and-evidence-limits"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:e07774849132c90974ea105fbef503c0649e48009532327676a0de5bbc082ffe"
+    -
+      path: s3-evidence.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#payload-spike-and-async-correction"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:5ffddd2194588f076822f182787434f148967137e9b44b511c2bf2c9d49def9d"
+    -
+      path: spike-payloads.md
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/metrics-report-dimensions.md#payload-spike-and-async-correction"
+      helps: "Retains meaningful source facts and explains dated counts, deferred checks and later historical corrections."
+      hash: "sha256:bdc033336429ec1234c07d7f676bf85097c91395c5bfcc9cb777b187618e1ca5"
+outcomeRecord: "---\nslug: metrics-report-dimensions\nshipped: 2026-09-25\nschemaVersion: 1\n---\n# metrics-report-dimensions\n\nToken reporting adds bounded dimensions and explicit reporting coverage with collector and output safeguards.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: Token reporting adds bounded dimensions and explicit reporting coverage with collector and output safeguards.\n- docs: [source supplement](.project/records/legacy-upgrades/metrics-report-dimensions.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/metrics-report-dimensions.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/metrics-report-dimensions.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/metrics-report-dimensions.md)\n- followups: [retained limits](.project/records/legacy-upgrades/metrics-report-dimensions.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/metrics-report-dimensions.md)\n"
+acceptDestinationDrift:
+  ".project/pitches/_followups.md":
+    committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+    current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    reason: "Against introducing ea82bce, +319/-0 lines are later backlog additions; original hook verification remains. Preserve original deferrals and later D7/lease developments as historical sequence."
+  ai-framework/rules/testing.md:
+    committed: "sha256:6087a3ed65b7bac31ef0235a18e25b3b1dd2217d4f37a87e4225da14ada456e2"
+    current: "sha256:fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4"
+    reason: "Against introducing ea82bce, +54/-0 lines add later guard/lifecycle/schema/macOS and runtime-redirection rules; original 2026-09-25 mutation/review-fix promotion remains unchanged. Do not attribute later additions to this pitch."

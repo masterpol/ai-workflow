@@ -1,82 +1,152 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "runner-aware-runtime-boundary-validator",
   "sections": [
     {
       "source": "SHIPPED.md#pitch-implementation",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
-      "reason": "design decision"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#what-shipped",
+      "helps": "Promise-to-result table: violation kinds incl. unparsed and advisory dynamic-computed, doctor/invariants wiring, process.* advisory",
+      "bodyHash": "sha256:e590982d852ea7e69ecb8c42f7cad4c64895ead05b9bf67a23a86c17a7c78158"
     },
     {
       "source": "SHIPPED.md#scopes",
-      "status": "extracted",
-      "destination": ".project/runs/2026-10-08-runner-aware-runtime-boundary-validator.md",
-      "reason": "ship-time run log"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-runner-aware-runtime-boundary-validator.md#scopes",
+      "helps": "V1-V3, six owned files, ~540 lines at build",
+      "bodyHash": "sha256:3da8406dc533e60bd704ee92f6334506932b8700e042b14950bfed539b659608"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
-      "reason": "constraints"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#standing-constraints",
+      "helps": "No rewrite, no dependency, read-only, no app validation, test convention kept",
+      "bodyHash": "sha256:f8dc4c8a6e961612e9c3c190c1c339294d8c9cb0065913d3ea0180180c75708d"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
-      "reason": "scanner lessons"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#scope-and-risks",
+      "helps": "Fixtures then two-cycle hardening; node:url counted plainly; one doctor summary warning",
+      "bodyHash": "sha256:4cd75e00880562f9f5f5b8e58084f967c5e7508b81bc7022bc1a7f9c84bfe452"
     },
     {
       "source": "SHIPPED.md#deviations-see-deviationsmd-audit-cycle-1md-audit-cycle-2md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
-      "reason": "fail-closed lesson"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#deviations",
+      "helps": "unparsed omitted from plan contract; fail-open fix; non-literal rule narrowed; cycle-2 not re-reviewed",
+      "bodyHash": "sha256:8847764b310e0965bb23630e7c1293d172575e85d40e5285aa1e79bffff5b503"
     },
     {
       "source": "SHIPPED.md#verification-at-ship",
-      "status": "extracted",
-      "destination": ".project/runs/2026-10-08-runner-aware-runtime-boundary-validator.md",
-      "reason": "run log"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-runner-aware-runtime-boundary-validator.md#verification-at-ship",
+      "helps": "Node 1239/Bun 1230, doctor figures, no build/lint",
+      "bodyHash": "sha256:3fba2851a17d2a97c24621a2aeea2c4790d629501bcc2685cf101526d8545a0a"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
-      "reason": "entries"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#related-records",
+      "helps": "Names the pattern and decision entries",
+      "bodyHash": "sha256:20a36a2fc6e76be04f6b2d1725ffb402e29632cdbeee721ce0032b577370bf41"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": "followups file"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#limits-and-open-items",
+      "helps": "Open items, with item 1 now resolved",
+      "bodyHash": "sha256:36b0ba8a0069ca67710c8267f064c95ecaf6a34e33197636f3c2ce20950065bd"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/runtime-boundary-validator-design.md",
-      "reason": "constraints"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#standing-constraints",
+      "helps": "Five no-gos",
+      "bodyHash": "sha256:46ee03212e5330fd51f02a0956e76d1e4bf6202003e067b183c6d4493a05edf1"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
-      "reason": "scanner lessons"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#scope-and-risks",
+      "helps": "Resolved/pushed-to-plan/pushed-to-no-go split",
+      "bodyHash": "sha256:40ffb2d0db8d301e0e84ee627f61536f539543f4b7f211c8a478e31e357cb51c"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
-      "reason": "evasions and fail-open"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#audit-triage",
+      "helps": "M1, M2, S1-S4, acknowledged F4/F6, canary outcomes",
+      "bodyHash": "sha256:81964ea7cb819a47fb3d1f3dbf755102c2f317b28d71153ee874eb8a5dd81fb6"
     },
     {
       "source": "audit-cycle-2.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md",
-      "reason": "evasions and fail-open"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#audit-triage",
+      "helps": "M3, S5-S7, spec amendment, evasion list, final evidence",
+      "bodyHash": "sha256:a199846172d5440abe69f2b55de2ddeb74b40adc9f2213e5d2f744c410b1450c"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:8248e114756b8870b9d0d4237ebbe368e32ad119ba4fb08f6513423d6fd5d643"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#deviations",
+      "helps": "Preserves dated implementation deviations and audit-driven contract changes.",
+      "hash": "sha256:f5c90d32bb93b72bb94d10f689dcda6fa9fb1fccc0c3a8ba2ec316160de7b002"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:c28276c6f29889e3cdc4b84b6c71d12f43d8e54678017f08e40fdf55129e94df"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#build-history",
+      "helps": "Preserves scope outcomes, measurements and verification history.",
+      "hash": "sha256:dad6c3c65d5fc0c95d587a6f52144b3d6ac8c5d46876567bb5465ac2a6ba6ce1"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#scope-and-risks",
+      "helps": "Preserves the original problem, decisions, constraints, risks and scope choices.",
+      "hash": "sha256:e914d139560c105ed352dd97e7328982926bc0937459e304ea0873d693055d1c"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md#scope-and-risks",
+      "helps": "Preserves the implementation contract, exit criteria, dispatch boundaries and risks.",
+      "hash": "sha256:d977c70de49e76f2d8e8227b8e5ff4132518a088d9fae046a9170e2e7d6b4030"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-09T03:55:43.320Z"
+  "committedAt": "2026-10-23T00:38:54.645Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:b9140d1aaf1273271a079b5f82acb5711d748dee60d943ea623796e104f77123",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

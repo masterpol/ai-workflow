@@ -1,0 +1,477 @@
+{
+  "schemaVersion": 1,
+  "slug": "token-time-report",
+  "sections": [
+    {
+      "source": "SHIPPED.md#result",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#audit-and-evidence-boundaries",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-and-rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-follow-ups",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#documents-and-recovery",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#final-closure",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s1-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s2-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s3-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-recovery-closeout-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#cohesive-module-size-exception-audit-addendum-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#s1-started-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s1-preliminary-review",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s1-independent-review-resolved",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s2-started-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s2-review-and-verification-resolved",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-started-2026-10-21-local-date",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-full-suite-attempt-1-timing-bound-failure",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-full-suite-failure-resolved-without-code-changes",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-started-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-launch-refused-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#orca-recovery-authorized-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-cycle-1-synthesis-and-limited-retry",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#orca-repair-verified-audit-remains-open",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-explicitly-approved-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-completed-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#direct-ship-gauntlet-explicitly-approved-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#release-ready-for-final-gate-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-22t020106348z",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "coverage": 0.14705882352941177,
+  "gaps": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#audit-and-evidence-boundaries",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#documents-and-recovery",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#final-closure",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "deviations.md#s1-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s2-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s3-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-recovery-closeout-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#cohesive-module-size-exception-audit-addendum-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#s1-started-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s1-preliminary-review",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s1-independent-review-resolved",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s2-started-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s2-review-and-verification-resolved",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-started-2026-10-21-local-date",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-full-suite-attempt-1-timing-bound-failure",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-full-suite-failure-resolved-without-code-changes",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-started-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-launch-refused-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#orca-recovery-authorized-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-cycle-1-synthesis-and-limited-retry",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#orca-repair-verified-audit-remains-open",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-explicitly-approved-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-completed-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#direct-ship-gauntlet-explicitly-approved-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#release-ready-for-final-gate-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-22t020106348z",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "acceptedGaps": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#audit-and-evidence-boundaries",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#documents-and-recovery",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#final-closure",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "deviations.md#s1-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s2-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s3-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-recovery-closeout-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#cohesive-module-size-exception-audit-addendum-2026-10-21",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#s1-started-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s1-preliminary-review",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s1-independent-review-resolved",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s2-started-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s2-review-and-verification-resolved",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-started-2026-10-21-local-date",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-full-suite-attempt-1-timing-bound-failure",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3-full-suite-failure-resolved-without-code-changes",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-started-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-launch-refused-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#orca-recovery-authorized-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-cycle-1-synthesis-and-limited-retry",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#orca-repair-verified-audit-remains-open",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-explicitly-approved-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#additional-evidence-pass-completed-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#direct-ship-gauntlet-explicitly-approved-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#release-ready-for-final-gate-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-22t020106348z",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "committedAt": "2026-10-22T02:43:38.025Z"
+}

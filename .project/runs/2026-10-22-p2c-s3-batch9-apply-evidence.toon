@@ -1,0 +1,43 @@
+@toon-data 1
+schemaVersion: 1
+state: applied-verified
+ownerApproval: Approve to exact batch-9 preview
+totals:
+  legacy: 9
+  upgraded: 37
+  partial: 0
+  problems[0]:
+legacyNarratives: 9
+results[5]{slug,state,dryReplay,archiveValid,manifestUnchanged,preservedV1ByteIdentical,approvedPayloadHash,supplementHash,recordBytes,outcomeLint,narrativeRetired,bindingsUnchanged}:
+  orca-auto-start-all-phases,upgraded,true,true,true,true,"sha256:69b2c227948291baee5aeff97327bfc64617ffec97a05f8025b19d50ae64bf26","sha256:ba53d7e5f622ea8912cb7406c155ce022065133da58c605ca700e4cc265c40c3",1153,passed,true,true
+  runner-aware-runtime-boundary-validator,upgraded,true,true,true,true,"sha256:b9140d1aaf1273271a079b5f82acb5711d748dee60d943ea623796e104f77123","sha256:b175ae15ae7ee7218253e442aab048089dcf2a87c779bbe96d0104a98473ff40",1281,passed,true,true
+  token-attribution,upgraded,true,true,true,true,"sha256:bfbe57eeb143ce25043dd076d4a68f7e754b70aebd0ddcdfd1666ec6ca325192","sha256:1e614d71441175c9a6b9bcdad3065f801f8c96ffc183e5d5075f892d3a161354",1131,passed,true,true
+  token-time-report,upgraded,true,true,true,true,"sha256:4e32f249752ae50d869c3b2116d182fc2c1d15606d88e9fa856e85a3d5a9e8e9","sha256:2bbf573b4dd7d76a4a35538c9c980e6992964e9f14702d912e2f21d12766b734",1127,passed,true,true
+  workflow-usage-state,upgraded,true,true,true,true,"sha256:522f862431865ab7eff984cefd100e086502fc8d29d365ccc2ab177d7ab9e4fe","sha256:8bf5a20df3de0887419373ca174b0903a1cb0f77dc866a7317a54b9433d037ec",1149,passed,true,true
+finalChecks:
+  setup: "READY, 25 checks"
+  graph: "CLEAN, 119 entries / 336 knowledge links"
+  relations: "0 problems"
+  supplementLinks: "37 files, 0 broken"
+  navigation[5]:
+    -
+      slug: orca-auto-start-all-phases
+      outcomeLinks: 2
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/orca-auto-start-all-phases.md"
+    -
+      slug: runner-aware-runtime-boundary-validator
+      outcomeLinks: 2
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md"
+    -
+      slug: token-attribution
+      outcomeLinks: 2
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/token-attribution.md"
+    -
+      slug: token-time-report
+      outcomeLinks: 2
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/token-time-report.md"
+    -
+      slug: workflow-usage-state
+      outcomeLinks: 2
+      targets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/workflow-usage-state.md"
+  fullSuite: not rerun; evidence-path repair remains pending

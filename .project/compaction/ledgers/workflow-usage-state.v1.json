@@ -1,0 +1,318 @@
+{
+  "schemaVersion": 1,
+  "slug": "workflow-usage-state",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#final-verify",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#docs",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "deviations.md#s3",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s4",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s5",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s6",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s7",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s8",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#s2",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s4",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s5",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s6",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s7",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s9",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "coverage": 0.25,
+  "gaps": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#final-verify",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "deviations.md#s3",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s4",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s5",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s6",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s7",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s8",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#s2",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s4",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s5",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s6",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s7",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s9",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "acceptedGaps": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#final-verify",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "deviations.md#s3",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s4",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s5",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s6",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s7",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#s8",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#audit-cycle-1",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#s2",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s3",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s4",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s5",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s6",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s7",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s9",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "committedAt": "2026-10-22T02:43:34.948Z"
+}

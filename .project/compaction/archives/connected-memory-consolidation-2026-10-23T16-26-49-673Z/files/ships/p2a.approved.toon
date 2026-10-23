@@ -1,0 +1,11 @@
+@toon-data 1
+schemaVersion: 1
+state: owner-approved
+track: P2a
+campaign: connected-memory-consolidation
+approvedProposal: ships/p2a.proposed.md
+approvedProposalHash: "sha256:84277ec6a545590e4a785aef8e5425e1acfb5ecd1ab55fa986019070f61b3a02"
+approvedOn: "2026-10-23"
+approvedAs: "written, with the 1500-line appetite overrun and author-run final evidence on the record"
+cooldownIncrements: 1
+umbrellaClosed: false

@@ -1,0 +1,63 @@
+@toon-data 1
+slug: workflow-usage-metrics
+draft: true
+state: needs-decision
+ledgerHash: "sha256:e3eb9d6d0ee15f779129cb3cd98d8bfa0e674b8d158fc21c257c378e487f9beb"
+bindings:
+  ".project/records/pitch-compression/workflow-usage-metrics.md": "sha256:b02eaa4c92f0afb5a2e586f3bf3e6ccc2939eabf4bf8199888c47d11defcf8ab"
+legacyEntryHash: "sha256:8f899f1a87b762774062ccac395b795274fc6cd15825f247c34068d7d9ee52cb"
+mapping:
+  schemaVersion: 2
+  sections[22]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-1-shippedmdscopes",null,null
+    "SHIPPED.md#verification",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-2-shippedmdverification",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-3-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#rabbit-holes-and-deviations",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-4-shippedmdrabbit-holes-and-deviations",null,null
+    "SHIPPED.md#knowledge-and-followups",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-5-shippedmdknowledge-and-followups",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-6-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-7-pitchmdrabbit-holes",null,null
+    "deviations.md#d1-explicit-runner-for-compatibility-verification",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-8-deviationsmdd1-explicit-runner-for-compatibility-verification",null,null
+    "deviations.md#d2-explicit-successful-pitch-counter",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-9-deviationsmdd2-explicit-successful-pitch-counter",null,null
+    "deviations.md#d3-audit-hardening-and-path-check-boundary",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-10-deviationsmdd3-audit-hardening-and-path-check-boundary",null,null
+    "deviations.md#d4-coupled-modules-and-explicit-schema-validation",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-11-deviationsmdd4-coupled-modules-and-explicit-schema-validation",null,null
+    "log.md#2026-10-08-s1-start",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-12-logmd2026-10-08-s1-start",null,null
+    "log.md#s1-verification-attempt-1",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-13-logmds1-verification-attempt-1",null,null
+    "log.md#s1-compatibility-run",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-14-logmds1-compatibility-run",null,null
+    "log.md#s1-exit-evidence-complete",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-15-logmds1-exit-evidence-complete",null,null
+    "log.md#s2-start-approved",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-16-logmds2-start-approved",null,null
+    "log.md#s2-exit-evidence-complete",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-17-logmds2-exit-evidence-complete",null,null
+    "log.md#runtime-test-helper-integration-user-requested",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-18-logmdruntime-test-helper-integration-user-requested",null,null
+    "log.md#s3-start-approved",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-19-logmds3-start-approved",null,null
+    "log.md#s3-exit-evidence-complete",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-20-logmds3-exit-evidence-complete",null,null
+    "log.md#audit-approved-three-cycles-complete",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-21-logmdaudit-approved-three-cycles-complete",null,null
+    "log.md#ship-approved-and-closed-2026-10-08",null,null,".project/records/pitch-compression/workflow-usage-metrics.md#section-22-logmdship-approved-and-closed-2026-10-08",null,null
+  otherFiles[0]:
+judgments[22]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-1-shippedmdscopes",Preserved in the compact record section.,false
+  "SHIPPED.md#verification",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-2-shippedmdverification",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-3-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#rabbit-holes-and-deviations",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-4-shippedmdrabbit-holes-and-deviations",Preserved in the compact record section.,false
+  "SHIPPED.md#knowledge-and-followups",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-5-shippedmdknowledge-and-followups",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-6-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-7-pitchmdrabbit-holes",Preserved in the compact record section.,false
+  "deviations.md#d1-explicit-runner-for-compatibility-verification",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-8-deviationsmdd1-explicit-runner-for-compatibility-verification",Preserved in the compact record section.,false
+  "deviations.md#d2-explicit-successful-pitch-counter",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-9-deviationsmdd2-explicit-successful-pitch-counter",Preserved in the compact record section.,false
+  "deviations.md#d3-audit-hardening-and-path-check-boundary",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-10-deviationsmdd3-audit-hardening-and-path-check-boundary",Preserved in the compact record section.,false
+  "deviations.md#d4-coupled-modules-and-explicit-schema-validation",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-11-deviationsmdd4-coupled-modules-and-explicit-schema-validation",Preserved in the compact record section.,false
+  "log.md#2026-10-08-s1-start",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-12-logmd2026-10-08-s1-start",Preserved in the compact record section.,false
+  "log.md#s1-verification-attempt-1",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-13-logmds1-verification-attempt-1",Preserved in the compact record section.,false
+  "log.md#s1-compatibility-run",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-14-logmds1-compatibility-run",Preserved in the compact record section.,false
+  "log.md#s1-exit-evidence-complete",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-15-logmds1-exit-evidence-complete",Preserved in the compact record section.,false
+  "log.md#s2-start-approved",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-16-logmds2-start-approved",Preserved in the compact record section.,false
+  "log.md#s2-exit-evidence-complete",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-17-logmds2-exit-evidence-complete",Preserved in the compact record section.,false
+  "log.md#runtime-test-helper-integration-user-requested",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-18-logmdruntime-test-helper-integration-user-requested",Preserved in the compact record section.,false
+  "log.md#s3-start-approved",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-19-logmds3-start-approved",Preserved in the compact record section.,false
+  "log.md#s3-exit-evidence-complete",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-20-logmds3-exit-evidence-complete",Preserved in the compact record section.,false
+  "log.md#audit-approved-three-cycles-complete",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-21-logmdaudit-approved-three-cycles-complete",Preserved in the compact record section.,false
+  "log.md#ship-approved-and-closed-2026-10-08",needs-decision,extracted,".project/records/pitch-compression/workflow-usage-metrics.md#section-22-logmdship-approved-and-closed-2026-10-08",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: workflow-usage-metrics\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# workflow-usage-metrics\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#workflow-usage-metrics","sha256:8f899f1a87b762774062ccac395b795274fc6cd15825f247c34068d7d9ee52cb","## workflow-usage-metrics — shipped 2026-10-08\n\nUseful project, pitch, vendor, skill, phase and agent metrics core (v2.16.0): bounded event state, guarded writer, record CLI and shared JSON/Markdown/HTML reports, with no token or cost fields. Node and Bun 156/156; three audit cycles hardened directory identity across async leases. Native capture and adoption remain separate followups.\n\nLessons: [[metrics-ancestor-swap-during-async-lease]], [[pin-directory-identities-across-async-leases]], [[display-buckets-are-not-lifecycle-identities]].\n",false
+  ".project/records/pitch-compression/workflow-usage-metrics.md","sha256:b02eaa4c92f0afb5a2e586f3bf3e6ccc2939eabf4bf8199888c47d11defcf8ab","# Compaction record: workflow-usage-metrics\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[metrics-ancestor-swap-during-async-lease]], [[pin-directory-identities-across-async-leases]], [[display-buckets-are-not-lifecycle-identities]], [[keep-the-fakes-guarantee-the-thing-they-replace]].\n\n## Section 1: SHIPPED.md#scopes\n\nS1 bounded useful event state with a guarded writer and record API/CLI (state, refusal, lifecycle and concurrency tests). S2 shared public JSON/Markdown/HTML report facts with attribution, gap and retention evidence and a safe report CLI. S3 contract guide, a link from the legacy docs, a compatibility smoke and a version record (2.16.0). All shipped 2026-10-08.\n\n## Section 2: SHIPPED.md#verification\n\nFinal Node and Bun suites both pass 156/156 (38 metrics tests, 13 shared-helper tests, 88 collector/plugin/lease tests, 17 docs-links tests). Setup READY, links clean, Graphify rebuilt (44 entries, 124 links) with zero problems, whitespace clean. A CLI fixture smoke shows all formats agree and report reruns preserve state and legacy SHA256 hashes. The real report holds one manual build-skill event, which is not native capture proof. Audit passed in three cycles with zero open must-fix; no canary-qualified reviewer independence is claimed. Security fault-injection proves outside paths are refused across lease and operation interruption.\n\n## Section 3: SHIPPED.md#no-gos-honored\n\nNo token, cost or resource fields; no prompts, responses or arguments; no transcript fallback, raw event journal, historical backfill or deletion, central upload, background repository discovery or automatic rollout. Legacy files and collectors unchanged; Orca ledger, evidence and path guards preserved. Missing attribution, overflow and incomplete collection stay visible; no fabricated coverage percentage or productivity metric.\n\n## Section 4: SHIPPED.md#rabbit-holes-and-devia",true
+unavailable[0]:

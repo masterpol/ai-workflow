@@ -1,0 +1,76 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: state-quoted-fonts
+sourceProof:
+  archiveDirectory: state-quoted-fonts-2026-09-27T01-27-20-753Z
+  manifestHash: "sha256:3c44830c6841cf98b91bb3fc856064fca260d6ab5a66216fc3a73602faf986cd"
+  sourceBytes: 9359
+  verifiedFiles: 8
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/state-quoted-fonts.supplement.md"
+  destination: ".project/records/legacy-upgrades/state-quoted-fonts.md"
+  hash: "sha256:8223f1334df7be02a8b3754c497b8ae97611b4170d89927553ad7f30e1ddad7b"
+payload:
+  ledgerHash: "sha256:f513e2e2ecaaac5e560c73efed31bb0ab1cf3c2a76a5d551b3d07e68e321d428"
+  legacyEntryHash: "sha256:f7d382bac1945c6f658e951384fa0f2ab7468db165ca60607a1fa2af8354868d"
+  bindings:
+    ".project/records/pitch-compression/state-quoted-fonts.md": "sha256:ef35fbae3f30ce782d114b6623521ba2f8f706a080b0499fb242a49e651842ab"
+    ".project/records/legacy-upgrades/state-quoted-fonts.md": "sha256:8223f1334df7be02a8b3754c497b8ae97611b4170d89927553ad7f30e1ddad7b"
+  mapping:
+    schemaVersion: 2
+    sections[11]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-1-shippedmdscope-reconciliation","Quoted family plus one same-file variable hop, canonical re-emit and revalidation at render.","sha256:8cf6a75a1ccb8e6a5de0c50e2b7d2b14ff14fd4293f430f5b2fe533318d7dfef"
+      "SHIPPED.md#verification",know-how,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-2-shippedmdverification",Historical test and check counts; supplement distinguishes the count scopes. No build or lint command is configured.,"sha256:36f569117d749f4334edebc53df05ef6d02f99d67bcc733a368438c46cb01742"
+      "SHIPPED.md#audit",know-how,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-3-shippedmdaudit",Review roles and the dependency on the later independent re-review; supplement adds the reviewed module scope.,"sha256:ccf19a90080f6bc13ce012f442e9e80a20881103991792b185d8e5d7916b78f7"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-4-shippedmdno-gos-honored","Prohibited CSS evaluation, external stylesheets and sync behavior.","sha256:9188ef057c70f04a0cd8826f4c64813c2d2c1ca19796c4d3c5f3962bcd9b73de"
+      "SHIPPED.md#rabbit-holes-and-deviations",behavior,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-5-shippedmdrabbit-holes-and-deviations","No deviation; grammar rules, precedence and rejected forms.","sha256:989f746744f3c6ba6ea752157108320b88e01a6c7e6e23d156db4390ad2af260"
+      "SHIPPED.md#knowledge-and-followups",know-how,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-6-shippedmdknowledge-and-followups","Decision link, no followup and the incomplete safety pitches.","sha256:01ff363327b950b217bc15e11d3e84d048bbb5e876dd15665068e540b14940d9"
+      "SHIPPED.md#delivery",limit,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-7-shippedmddelivery",No commit or publication; sibling safety pitches not shipped.,"sha256:50d7568373afa55ec371477c72552c7835de0ca845a34f9544841095fa084c97"
+      "pitch.md#no-gos",limit,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-8-pitchmdno-gos",Standing no-gos for the font slice.,"sha256:f3912fd8a6a404f18b7c4c9e6a619e536fe41b319c8f66c0a408124efcd9869f"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-9-pitchmdrabbit-holes",Bounded lookup rationale and exclusions.,"sha256:8d76c5738a742aea34c99fbf582f82655592dd0fb8b68080b3acf394a20e5e5b"
+      audit-cycle-1.md,know-how,merged,".project/records/pitch-compression/state-quoted-fonts.md#section-10-audit-cycle-1md",Audit chronology and cross-pitch caveat; supplement notes the superseded pre-gate approval wording.,"sha256:6577508e82a63773cb777d18eb4b79920ebb05021c67289d1a6747487e8fa907"
+      "log.md#s1-2026-09-26",know-how,merged,".project/records/legacy-upgrades/state-quoted-fonts.md#mutation-proof",Supplement keeps the mutation proof that bypassing the grammar fails the hostile-font test; compact keeps the 85-test evidence.,"sha256:57f286ae7001e9f3700b81a3bd76884b3b02d0a499c798d427f2f9df1fd03bda"
+    otherFiles[7]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:e1b58b8c7d56ee9be5b52a465ec26aeb12d22c9ae77419b6c925ebd9e21e4095"
+        disposition: merged
+        destination: ".project/records/pitch-compression/state-quoted-fonts.md"
+        helps: "Preserves the closure record, grammar rules and followups in the compact record."
+      -
+        path: deviations.md
+        hash: "sha256:ef6ef6f9ec4f6c8070f2e029f0707acf7b1c52f8984d9d0d3ad2e6d9831332c2"
+        disposition: merged
+        destination: ".project/records/pitch-compression/state-quoted-fonts.md"
+        helps: Records no implementation deviation; compact section 5 keeps that statement.
+      -
+        path: hill.md
+        hash: "sha256:8f023059acad6dde5cf907e312ea66672c0b42714c9cb252bbddbf0b275926b3"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:3b083976cfa02c4f5e308815d9c831d99a174b857a7785583901c6fcbe6da400"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-quoted-fonts.md#mutation-proof"
+        helps: Preserves the build evidence and the mutation proof.
+      -
+        path: pitch.md
+        hash: "sha256:4ff999c67af12fc894e8c9616e0c5991972f4038458c5293149f76a279b54263"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-quoted-fonts.md#scope-and-problem"
+        helps: "Preserves the problem statement, appetite and bet context missing from the compact record."
+      -
+        path: plan.md
+        hash: "sha256:41649dc26d832895e4cd792d860de3fa1d0bd67d51e235fb7ab8421f0adc1916"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-quoted-fonts.md#scope-and-problem"
+        helps: "Preserves the S1 exit criteria, sequential dispatch and medium risk."
+      -
+        path: ship-readiness.md
+        hash: "sha256:12a911721dd946273d1197d7c4db68efa171ec98515f0857874d404cab3ba914"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-quoted-fonts.md#review-and-verification-chronology"
+        helps: Preserves the twelve-suite final verification and approval status.
+  outcomeRecord: "---\nslug: state-quoted-fonts\nshipped: 2026-09-26\nschemaVersion: 1\n---\n# state-quoted-fonts\n\nThe state report accepts ordinary quoted font families and one same-file CSS variable hop.\nValues are re-emitted in canonical form and validated again at render time.\nHistorical counts and naming differences remain separately recorded.\n\n- outcome: Quoted font families and same-file variables resolve to the project's own typeface in the state report.\n- docs: none\n- decisions: [bounded font discovery](.project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md)\n- knowledge: [bounded font discovery](.project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md)\n- code: [theme parser](ai-framework/scripts/state-theme.mts)\n- verification: [historical closure](.project/records/pitch-compression/state-quoted-fonts.md), [mutation proof](.project/records/legacy-upgrades/state-quoted-fonts.md#mutation-proof)\n- followups: none\n- archive: [compact record](.project/records/pitch-compression/state-quoted-fonts.md), [source supplement](.project/records/legacy-upgrades/state-quoted-fonts.md)\n"

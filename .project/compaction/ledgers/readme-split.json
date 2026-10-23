@@ -1,58 +1,128 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "readme-split",
   "sections": [
     {
       "source": "SHIPPED.md#final-verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/readme-split.md#section-1-shippedmdfinal-verification",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains historical verification counts and unavailable command categories.",
+      "bodyHash": "sha256:a41997104a2c54290b0567a8f082a89f9a96738ab204a2dbab01531a2ee7e42c"
     },
     {
       "source": "SHIPPED.md#reconciliation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/readme-split.md#section-2-shippedmdreconciliation",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the documentation layout, checker, doctor and sync behavior that shipped.",
+      "bodyHash": "sha256:fc6d00db314e25ccecb9d0b807040ece4c90e512e93e127f1c9784fcdd389244"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/readme-split.md#section-3-shippedmdno-gos-honored",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves the permitted text changes and excluded dependencies and history edits.",
+      "bodyHash": "sha256:c07ebde310ec8f240d3f373893b945028e631c1709e67a4e254a555bee56d488"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/readme-split.md#section-4-shippedmdfollowups",
-      "reason": "Preserved in the compact record section."
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/readme-split.md#checker-limits-and-review-provenance",
+      "helps": "Retains the supported-subset limits and unverified review independence.",
+      "bodyHash": "sha256:f091419925e24e81e0fe18f993a04b1461b392cf94c67534cff99ce213baba52"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/readme-split.md#section-5-pitchmdno-gos",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves pitch-specific documentation and dependency constraints.",
+      "bodyHash": "sha256:4844eacebf66c0c3ceab81dd9594f51797cc84882e7f2f7a80f2cc6d49478f2d"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
+      "class": "decision",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/readme-split.md#section-6-pitchmdrabbit-holes",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves namespace collision rationale, ownership and required sync registration.",
+      "bodyHash": "sha256:42afefb7d4e0cca623e571deb84d02183b0dc4d4097b87fb44c827969f3f8308"
     },
     {
       "source": "log.md#2026-10-07",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/readme-split.md#section-7-logmd2026-10-07",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains move verification, negative checks and reference-update evidence.",
+      "bodyHash": "sha256:e27c250b8e7cca02634d69eb3add08624215be55c52acfd013f85f31be351443"
     },
     {
       "source": "log.md#audit-cycle-1",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/readme-split.md#section-8-logmdaudit-cycle-1",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/readme-split.md#audit-evidence-and-exclusions",
+      "helps": "Retains resolved review findings and limits of reviewer verification.",
+      "bodyHash": "sha256:9fff187c377fa3ddc4d987e99c1f8220beff6802408874009fa49103502f6a32"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:69bbc9c55a06d4c32f568954372d0877b5e1b96c02918c64fc47b68e80ff1543",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/readme-split.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:34117be54247deecee901abcd7d43994cbe8a6dad22779be472f4578c93b2701",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/readme-split.md",
+      "helps": "Preserves the lasting review evidence and limits; transient workflow metadata remains archived."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:8fb341c1eb1b3a12591a32a8d2ddb9f0325817e6c20e885e262f52ee350baba4",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/readme-split.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:46c87be5b5d03cd6ff9b99ed6d828b4c773551aea6d956c88003d4ff9ebb374d",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:0e69de757f18a2dd79a062e2126fc2160b8094209307c62f4c3d199fafb33483",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/readme-split.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:28d6f25d08614c391f79f9b333e2ca12321c41095d5897711d67a5a5ebfa2b04",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/readme-split.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:260f6d3e3bd8d5b21a50474d7844e6bdf4527cfc2a6b676d8032cccf1271ccf1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/readme-split.md",
+      "helps": "Preserves the lasting behavior contract and boundaries; transient workflow metadata remains archived."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:25:24.846Z"
+  "committedAt": "2026-10-22T17:53:14.419Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:fb7e9120a312e2f778fa83a24243d5cf1629c2f6da68e295c20183e3e39897a3",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

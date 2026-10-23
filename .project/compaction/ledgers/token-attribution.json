@@ -1,78 +1,169 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "token-attribution",
   "sections": [
     {
       "source": "SHIPPED.md#scopes",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#what-shipped",
+      "helps": "S1-S10 outcomes, spike verdicts, commit hashes and release 2.34.0.",
+      "bodyHash": "sha256:952e85a8d20319b760d0a7e4c6b98d5f036c55749c67ca0724a213aefd00256b"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#standing-constraints",
+      "helps": "Honored no-gos with the cap numbers and the four recorded plan deviations.",
+      "bodyHash": "sha256:e623a91e8fe8d354ae445487ed7f3e931d876a6065825dd9ba919106fd61a13d"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#rabbit-holes-and-risks",
+      "helps": "Which holes were resolved and which three surfaced as followups.",
+      "bodyHash": "sha256:3fa91878c1ab7535169381191c26de406fc66c9a7638bce0a3d806f910b2d9e6"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#audit-history",
+      "helps": "One-cycle audit outcome, planted canaries, independence limits and fixes.",
+      "bodyHash": "sha256:8675cb4a8f6590b6c9657e8d480d288e018f1f87c723a959c32f2de68fe79692"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#open-followups",
+      "helps": "The eight deferred items, spelled out, since _followups.md cannot be a destination.",
+      "bodyHash": "sha256:f06d8df4fcd74cf2ba495cceadad4f2bc4fc45780c58f90a48f31bcd675370e2"
     },
     {
       "source": "SHIPPED.md#doc-updates",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#what-shipped",
+      "helps": "Which docs changed in-pitch (token-consumption.md, state-report.md); no ADR.",
+      "bodyHash": "sha256:136eebee5c1ae03b89d8a87d3de0ea48f21498076189e0b13655460eba8c083b"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#standing-constraints",
+      "helps": "The seven pitch no-gos including Cursor, network, back-fill and hook-blocking bans.",
+      "bodyHash": "sha256:882634afa384701855c7f243fdb9dc1fb4982e070ec28d74a1e8641851afec53"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#rabbit-holes-and-risks",
+      "helps": "Resolved answers, owners of pushed risks, and deferred items with rationale.",
+      "bodyHash": "sha256:a723d3a85f7f3b9a545c7a98f876734f9362464af8b340254c898a97b7146503"
     }
   ],
-  "coverage": 0.75,
-  "gaps": [
+  "otherFiles": [
     {
-      "source": "SHIPPED.md#scopes",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:6ebe77e57fe3dc4ae3d318678774f92929d156d8fc138e60240cbe3e70d45af6"
     },
     {
-      "source": "SHIPPED.md#audit",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
-    }
-  ],
-  "acceptedGaps": [
-    {
-      "source": "SHIPPED.md#scopes",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "audit-record-code.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#audit-history",
+      "helps": "Preserves reviewer findings and dispositions; omits prompt boilerplate.",
+      "hash": "sha256:f6a50097c47d19c8f5d9630c445690ef21734623ba61cfbfba15ec205f51c40a"
     },
     {
-      "source": "SHIPPED.md#audit",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "audit-record-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#audit-history",
+      "helps": "Preserves reviewer findings and dispositions; omits prompt boilerplate.",
+      "hash": "sha256:36e9427efe701f6216449527bf85d1ec9e3f56b3f8968cc54c6cd0780ac7d488"
+    },
+    {
+      "path": "audit-record-test.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#audit-history",
+      "helps": "Preserves reviewer findings and dispositions; omits prompt boilerplate.",
+      "hash": "sha256:512011eaa0b7134a482494d523c57e570c1e20cf4e5f21f4c38e4a99e1ec9bb4"
+    },
+    {
+      "path": "audit.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#audit-history",
+      "helps": "Preserves fixes, audit evidence and cross-pitch findings.",
+      "hash": "sha256:47b9b207b7688f6cadcecb005969f63619a8e0ced06cce97e400eebb9501356c"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:83a720703c9b73e08b3a8ba80c8a6fe0825b65898d0775556df20424367a219f"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#build-notes",
+      "helps": "Preserves mutants, worker rewrite and accepted baseline failures.",
+      "hash": "sha256:0f83d294bb0ca06d66646a9e636e00550de9f8a317274f55329dabc12ce0f5f4"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#scope-and-design",
+      "helps": "Preserves the problem, breadboard, critique and bet.",
+      "hash": "sha256:524bbb48f68f92305a3a3b9b6c73183120d02ab24e38e1500db6356136b98bc1"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#plan-and-gate-decisions",
+      "helps": "Preserves scope design, budget, spike gates and deviations.",
+      "hash": "sha256:4d4ad7927854d974e700498e92e482fc79541962354053ac8cc4ff64c3e1562e"
+    },
+    {
+      "path": "rollout.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#rollout",
+      "helps": "Preserves dry-run counts and operator restart steps.",
+      "hash": "sha256:ff58e71d19cb54b1d4daf746a41f8aa0bc97de953b37eb551db974d71f8870c5"
+    },
+    {
+      "path": "spike-s1-pointer.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#spike-findings",
+      "helps": "Preserves spike observations, decisions and validation limits.",
+      "hash": "sha256:a8cbb23c760ad8c7dd708650359ca0d9aa48f19a683a9073d1109b5f1e3a88a1"
+    },
+    {
+      "path": "spike-s2-codex.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#spike-findings",
+      "helps": "Preserves spike observations, decisions and validation limits.",
+      "hash": "sha256:b1518a6c364d0bbaa8ff3ebb14a0bc0bd7ac4f9b8d46332211492171474b6b35"
+    },
+    {
+      "path": "spike-s3-transcript.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/token-attribution.md#spike-findings",
+      "helps": "Preserves spike observations, decisions and validation limits.",
+      "hash": "sha256:50e400b101fd866626e3fe19905f1993b43667ffedcc0c6b3c6fd8e247a74171"
     }
   ],
-  "committedAt": "2026-10-22T02:43:34.328Z"
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:39:36.272Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:bfbe57eeb143ce25043dd076d4a68f7e754b70aebd0ddcdfd1666ec6ca325192",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
 }

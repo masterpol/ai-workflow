@@ -1,0 +1,11 @@
+@toon-data 1
+schemaVersion: 1
+state: owner-approved
+track: P1
+campaign: connected-memory-consolidation
+approvedProposal: ships/p1.proposed.md
+approvedProposalHash: "sha256:102d99e5231e732abab4fdfd20f61755692e73c6f90f5f3cbc475750fb34a05d"
+approvedOn: "2026-10-23"
+approvedAs: "written, with the lexical-query limit and author-run cycle-3 evidence on the record"
+cooldownIncrements: 1
+umbrellaClosed: false

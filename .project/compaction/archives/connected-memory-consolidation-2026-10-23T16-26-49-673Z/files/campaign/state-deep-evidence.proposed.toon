@@ -1,0 +1,263 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: state-deep-evidence
+sourceProof:
+  archiveDirectory: state-deep-evidence-2026-10-22T02-43-37-580Z
+  manifestHash: "sha256:f118683adc795b49d739131d386b14eef7aff9719a4233142728bb6d2d365181"
+  sourceBytes: 153319
+  verifiedFiles: 9
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/state-deep-evidence.supplement.md"
+  destination: ".project/records/legacy-upgrades/state-deep-evidence.md"
+  hash: "sha256:248a7960b56d1d132db5147fb193c067c21e908ea05b371f0177302e47a64ee9"
+payload:
+  ledgerHash: "sha256:187f531c8a2eb0c2e0f7d9ae8691b48c6837593942d02170c412c4bb75354ae2"
+  legacyEntryHash: "sha256:1e7e7c189fce8012bce8e6329ebe2366a5131533b5610ce3d57163020d5cc4eb"
+  bindings:
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    ".project/runs/2026-10-21-state-deep-evidence-hill.md": "sha256:070d8bbc937e639695bb3510e7f8d7dec73629d371f03067b6a048a02b911a92"
+    ".project/runs/2026-10-21-state-deep-evidence.md": "sha256:8eb4074c81b0feac56bad4a73d184d0759480abfe27ad7296197c8883558d8ef"
+    ".project/records/legacy-upgrades/state-deep-evidence.md": "sha256:248a7960b56d1d132db5147fb193c067c21e908ea05b371f0177302e47a64ee9"
+  mapping:
+    schemaVersion: 2
+    sections[32]:
+      -
+        source: "SHIPPED.md#result"
+        class: behavior
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#what-shipped"
+        helps: "Four additive snapshot sections, schemaVersion 1, unavailable never zero, scrub equality and degree is not risk."
+        bodyHash: "sha256:110d96daa30fc8113d2e860559d29e1382b937b01e11ca8cc16fed042c22abc3"
+      -
+        source: "SHIPPED.md#scopes"
+        class: behavior
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#what-shipped"
+        helps: Scopes S1 to S8 including S6 cut and the S8 accepted-risk evidence record.
+        bodyHash: "sha256:b12881d33c69e4a6f86fb52837d59eb40daed3971ed15fb5b2ead4e581bba430"
+      -
+        source: "SHIPPED.md#verification"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#verification-history"
+        helps: "Final Node, Bun and audit regression counts, the wrapper exit 1 and the owner fallback."
+        bodyHash: "sha256:2d32535a14288b2207648fbc4bd05ccdfc8e9aa4794c0b493f70a05ca0ba9178"
+      -
+        source: "SHIPPED.md#audit-and-accepted-exceptions"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions"
+        helps: "Two owner approvals, canary result and what approval does not convert into a pass."
+        bodyHash: "sha256:6e627c44ec23513092c32be2fd30d0549179773938a49fe1a9faa00fea87058f"
+      -
+        source: "SHIPPED.md#no-gos-and-rabbit-holes"
+        class: limit
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#no-gos-and-constraints"
+        helps: "What the collectors must never do, and the monorepo package map deferral."
+        bodyHash: "sha256:70cfd03b48436ff16dac69239d0f09a71b7b55d99015df4c39a1a8e0a9d722fe"
+      -
+        source: "SHIPPED.md#knowledge-and-followups"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#knowledge-and-followups"
+        helps: "Extracted and reused knowledge entries, and the five followups with where they live."
+        bodyHash: "sha256:ffd4019e3d2b012fa7551f8c4fc28ab7799a2f95098a00d7166478f56cb38047"
+      -
+        source: "SHIPPED.md#closure"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#verification-history"
+        helps: "Closure checks, status compaction, run-copy locations and no commit or push."
+        bodyHash: "sha256:5c6b65a40ccc3b6bca18fd69c533d5e32435f88078338b278d86810b4be62646"
+      -
+        source: "pitch.md#no-gos"
+        class: limit
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#no-gos-and-constraints"
+        helps: Six no-gos and the 11-file projection.
+        bodyHash: "sha256:b2cbeac17c794dc5a5250aae4cc12013b6671a4b1abc02c270e1b188a594d85a"
+      -
+        source: "pitch.md#rabbit-holes"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#design-decisions"
+        helps: "Version stays 1, graph caps and checks, record-format policy, size budgets, and risks pushed to plan."
+        bodyHash: "sha256:cd2917c3f0656baca4380970c785aeff7f1cb517023440deafb66953f70b7ce7"
+      -
+        source: "deviations.md#cohesive-unit-exceptions-coding-standardsmd"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-deviations"
+        helps: "Recorded size exceptions for the graph, history and snapshot modules."
+        bodyHash: "sha256:2e2919323568b818459f572b872ced986425c899fe199db496c7aeb8da3fd10c"
+      -
+        source: "deviations.md#s1-deviations-worker-reported-parent-verified-exits"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-deviations"
+        helps: Five S1 API and rule deviations.
+        bodyHash: "sha256:8e50c84282e91b9faed74e666e701a80095b2bfbb50f4de31ee78dbd08626cbb"
+      -
+        source: "deviations.md#s2-deviations"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-deviations"
+        helps: "Four S2 deviations: audit sub-field, caps and slug allow-list."
+        bodyHash: "sha256:dde17bbae2e16cc1a24773c66ee65caa1c83912828dc72411940406e2556dc53"
+      -
+        source: "deviations.md#open-for-s5"
+        class: omit
+        disposition: omitted
+        reason: superseded
+        bodyHash: "sha256:10df6840226a2518df485dc61fc0e94a030166f51952c6ce230672aeeebba4d6"
+      -
+        source: "deviations.md#s4s5-deviations"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-deviations"
+        helps: "Citation path correction, tree-label gap, snapshot growth and the test-hygiene fix."
+        bodyHash: "sha256:52be2b0a2f373537203388ef26f0d41d73f55f4950d56e36f61c74aeb140ef1e"
+      -
+        source: "deviations.md#s7-deviations"
+        class: limit
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions"
+        helps: The LOC gate failure and the open owner decision on the appetite amendment.
+        bodyHash: "sha256:65b24ece2f78df28be179f34e7c5335cb2397a1c5b64f9f2943f20ef6edace10"
+      -
+        source: "deviations.md#s8-deviations"
+        class: limit
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#live-evaluation"
+        helps: "OpenCode not run, the three-author two-grader shape and the unmatched case texts."
+        bodyHash: "sha256:a464b1ff16044b79dea111a75f74f7469243d15bf6a834b93af4f7c41a28b26a"
+      -
+        source: "deviations.md#audit-deviations-and-dispositions-2026-10-21"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions"
+        helps: "The orca=noraml reading, 1667 LOC, narrowed injection case, guard cap and release overlap."
+        bodyHash: "sha256:07aa954745f46d02b5a249c2c59ce5a8ae221584be757f07423d9b6bf6e173c8"
+      -
+        source: "deviations.md#owner-approved-closure-2026-10-21"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions"
+        helps: "Approvals are exceptions, not repaired measurements."
+        bodyHash: "sha256:6a3ab39785dcd3c51faf6fa35d215d956843192058f1eda6a025c7cca62aa516"
+      -
+        source: "log.md#2026-10-21-build-entry-gate"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-log-highlights"
+        helps: "Base commit, entry checks E1 to E6 and baseline test counts."
+        bodyHash: "sha256:4bc2952bfb31d961cd8ca362a84e2c24944848e2f7a855f0891e0560a5577433"
+      -
+        source: "log.md#2026-10-21-s1-module-key-spike"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#design-decisions"
+        helps: Module key rule and the spike distribution.
+        bodyHash: "sha256:a22505968da5076d547fc20c84db8143358ea8682d23f0fbbadc7252063572aa"
+      -
+        source: "log.md#2026-10-21-s3-done-inline"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-log-highlights"
+        helps: Allow-list guard test and invariants against worktrees.
+        bodyHash: "sha256:d2654f6316cb342bc193a52bcc5c43d4dbaf8362c786ee7f232b105a9ec7e516"
+      -
+        source: "log.md#2026-10-21-wave-a-merged-s1-s2"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-log-highlights"
+        helps: "Stale-commit worktrees, the merge gate and mutants killed."
+        bodyHash: "sha256:1007d414173005cf72bed5ce30e4b6596310e8fe5f8134390923f3515b929b61"
+      -
+        source: "log.md#2026-10-21-s4-done-inline"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-log-highlights"
+        helps: "Shared token read, unreported is null and smoke figures."
+        bodyHash: "sha256:d73d2730f52de78e576d90af0e4b1bb2c91bb2331dffe36897d40621d4010a3a"
+      -
+        source: "log.md#2026-10-21-s5-done-inline"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#build-log-highlights"
+        helps: "Assembly order, budgets, regression counts and the real-repository check."
+        bodyHash: "sha256:30e3b90c1e178779aac927c51e5e55c0fb98e7a5fb4805af51c0cb8898d145aa"
+      -
+        source: "log.md#2026-10-21-s6-cut-s7-done-inline-not-dispatched-the-edits-and-gates-were-already-in-context"
+        class: limit
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions"
+        helps: "LOC breakdown of 1636, the S6 cut and the file count of 13 of 15."
+        bodyHash: "sha256:f20663bf5ae48ccbab6ab40f4c11f5a3dbf33d6912524d34dd4afc6266f403ef"
+      -
+        source: "log.md#2026-10-21-s8-live-re-run-owner-approved-the-full-matrix"
+        class: limit
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#live-evaluation"
+        helps: "Models, cost, grading, results, regressions and the blocked gate."
+        bodyHash: "sha256:17d744f1e1802977f00cb99dd7468cd05b67bbce4d754d44ac10889003ac7db8"
+      -
+        source: "log.md#2026-10-21-audit-cycle-1-started-paused-usage-limit"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-chronology"
+        helps: "Cycle-1 dispatch plan, canaries and the cross-pitch and eval results."
+        bodyHash: "sha256:6bbebc0726109795360d379d49c5881374101fe4739504ecbab604eb827f3637"
+      -
+        source: "log.md#2026-10-21-audit-resumed-via-codex-dispatch-refused"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#incidents"
+        helps: "Multi-line change field refused with exit 3 brief-control-character:change."
+        bodyHash: "sha256:3e42002246f6e22f26442356a72ef32551125d97fa52914f8fe55710034c986e"
+      -
+        source: "log.md#2026-10-21-audit-completed-through-cycle-2-ship-blocked"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-chronology"
+        helps: "Fixes F1 and S1, the canary result and the open gates."
+        bodyHash: "sha256:acea63211fda18e7eac1225255f7f5c1ac399d7aeed03109cd0b03ffa9b782ee"
+      -
+        source: "log.md#2026-10-21-audit-approved-ship-wrapper-failed-audit-cycle-3"
+        class: decision
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions"
+        helps: "Approve, wrapper exit 1, return to audit cycle 3 and the direct-check fallback."
+        bodyHash: "sha256:b5513133acf90ce11bf1caf1466a2ba4d1555de575124cd7d68b940c254a3273"
+      -
+        source: "log.md#2026-10-21-shipped-locally-v2390"
+        class: behavior
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#release-and-records"
+        helps: "Release 2.38.0 to 2.39.0, knowledge triage and no commit or push."
+        bodyHash: "sha256:3390eea3e2e60ca33a91731ab3b436456b645711c8f33df563958332f36cb20b"
+      -
+        source: "log.md#final-closure-checks-2026-10-21"
+        class: know-how
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/state-deep-evidence.md#verification-history"
+        helps: "Ten release tests, the 113 and 322 graph and 11 docs checked."
+        bodyHash: "sha256:ddb83b363ed2cc784d497d7df27fdbff2343aaa0ded68b057cf79d0c8d99c18d"
+    otherFiles[9]{path,hash,disposition,destination,helps}:
+      SHIPPED.md,"sha256:004839cdfd1f342afadef8497268a1fa4d59a2c6f2ffff9624de0d43b30f3909",merged,".project/records/legacy-upgrades/state-deep-evidence.md#what-shipped","Preserves the result, scope outcomes, verification and closure facts across the supplement."
+      audit.md,"sha256:f8b5d39857e0a925224de2ca56073aec1581e0c5915fde033fbbbb9723f3da28",merged,".project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions","Preserves must-fix M1 to M3, F1, S1 to S4, V1 and the validation record."
+      deviations.md,"sha256:a7e9d80fe7f18b172c1b6ff8cbe92bda0155ffe19e8180cf158954399021f131",merged,".project/records/legacy-upgrades/state-deep-evidence.md#build-deviations","Preserves the build, audit and closure deviations across the supplement."
+      hill.md,"sha256:8ed0aeff611639704282d88dd885699df5bed1ec34bca24adbe2c5426b6b00f7",merged,".project/runs/2026-10-21-state-deep-evidence-hill.md","Byte-identical copy of the final scope positions, all done 2026-10-21."
+      live-runs.md,"sha256:6de74f979129354c0849cf30c845ac6eeef97e078fe89870cf5a4c8738201b83",merged,".project/records/legacy-upgrades/state-deep-evidence.md#live-evaluation",Preserves failures and the regression table; row tables are condensed and raw outputs are git-ignored.
+      log.md,"sha256:18447021a26288cc2840bdb9c8b97a130f9ea73f0fde0d85d74fcdb528261014",merged,".project/runs/2026-10-21-state-deep-evidence.md",Byte-identical copy of the build log; its entries are also summarised in the supplement sections.
+      pitch.md,"sha256:e7528af3cab539c390e34d0004a1adf2aec4851b4c9011265852e2cdb87212b6",merged,".project/records/legacy-upgrades/state-deep-evidence.md#problem-and-corrections","Preserves the problem, design decisions and critique rulings across the supplement."
+      plan.md,"sha256:6108e0c238566eef7310c4902ba5cf8c13f99fc7eec313e7f3b627ff9c850242",merged,".project/records/legacy-upgrades/state-deep-evidence.md#plan-and-exit-criteria","Preserves the entry gate, scope ordering, plan-time corrections and exit criteria."
+      ship-readiness.md,"sha256:ae8c45a2ab0dd64887534b04fdd38867a61b7b0cf8a32ccd242d8c420a14c36e",merged,".project/records/legacy-upgrades/state-deep-evidence.md#verification-history",Preserves the verification and closure figures and the owner decisions at ship.
+  outcomeRecord: "---\nslug: state-deep-evidence\nshipped: 2026-10-21\nschemaVersion: 1\n---\n# state-deep-evidence\n\nState snapshots gained four additive sections, architecture, history, risks and tokens, built from bounded, guarded inputs with schemaVersion still 1 and missing data reported as unavailable rather than zero.\nRelease 2.39.0 shipped with the monorepo package map cut and 1667 added lines against a 1350 cap, accepted by the owner in writing.\nThe live matrix was blocked by two 0.50 regressions and unrun OpenCode and Cursor rows; the owner accepted the risk without relabelling any result.\n\n- outcome: Deep evidence facts ship with explicit exceptions for size and live quality; no clean cross-vendor AI-quality claim is made.\n- docs: [state report guide](ai-framework/integrations/state-report.md)\n- decisions: [state report design](.project/knowledge/decisions/project-state-report-design.md), [audit and owner decisions](.project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions)\n- knowledge: [scrubbing bypass](.project/knowledge/issues/snapshot-metadata-bypassed-output-scrubbing.md), [guard snapshot cap](.project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md), [package-less wrapper](.project/knowledge/issues/package-less-bundle-ship-wrapper-cannot-select-checks.md)\n- code: [graph](ai-framework/scripts/state-graph.mts), [history](ai-framework/scripts/state-history.mts), [snapshot](ai-framework/scripts/state-snapshot.mts), [dataset](.project/evals/datasets/state-deep-evidence.json)\n- verification: [verification history](.project/records/legacy-upgrades/state-deep-evidence.md#verification-history)\n- followups: [limits and open items](.project/records/legacy-upgrades/state-deep-evidence.md#limits-and-open-items), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/state-deep-evidence.md)\n"
+  acceptDestinationDrift:
+    ".project/pitches/_followups.md":
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Backlog edited after v1 commit b26b45b (32 changed lines): lines 385, 393, 400, 409 and 414 gained an approval tag or note on other candidate pitches; bullets 537-538 now name moved pitch files; 18 lines were appended. This pitch's own followups, lines 505-515, are unchanged (lines 443-523 hash equal)."

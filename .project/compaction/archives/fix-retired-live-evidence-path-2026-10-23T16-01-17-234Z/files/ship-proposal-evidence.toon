@@ -1,0 +1,55 @@
+@toon-data 1
+schemaVersion: 1
+state: ready-for-final-ship-approval
+date: "2026-10-23"
+integrity:
+  implementationHashesUnchanged: 172
+  upgraded: 46
+  approvalHashesUnchanged: true
+  retainedSupplementsUnchanged: true
+  repairBytes: 36920
+  repairRawHash: "sha256:868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a"
+  linkFiles: 48
+  brokenLinks: 0
+checks:
+  dataset:
+    pass: 54
+    fail: 0
+    skipped: 0
+    exit: 0
+  independentChildren:
+    pass: 347
+    fail: 0
+  fullSuite:
+    files: 86
+    tests: 2712
+    pass: 2709
+    fail: 0
+    skipped: 3
+    exit: 0
+    reusedForUnchangedImplementation: true
+  setup: READY; 25 checks
+  graph:
+    status: CLEAN
+    entries: 120
+    knowledgeLinks: 339
+  relationsProblems: 0
+audit:
+  cycle: 2
+  cap: 2
+  mustFix: 0
+  shouldFix[1]{id,disposition,reason}:
+    FRLE-D1,deferred,Bounded child-failure diagnostics are outside the exact restoration scope; latest required checks pass and original failure is preserved.
+  unknownCauseIncident:
+    childPass: 346
+    childTests: 347
+    parentFailures: 16
+    cause: unconfirmed
+    log: /private/tmp/repair-ship-final-dataset.log
+knowledge:
+  issuesAdded: 1
+  path: ".project/knowledge/issues/live-test-evidence-outlived-its-pitch-path.md"
+  patternsAdded: 0
+  rulesAdded: 0
+proposalHash: "sha256:76c161eec910d7f4f7e3058236ab1907ded3b1d3d0f936dfa8e302b24ab44475"
+closingWritesPending: true

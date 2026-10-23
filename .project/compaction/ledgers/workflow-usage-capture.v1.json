@@ -1,0 +1,450 @@
+{
+  "schemaVersion": 1,
+  "slug": "workflow-usage-capture",
+  "sections": [
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#verification-and-approval",
+      "status": "gap",
+      "destination": null,
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#limits-and-deferred-work",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": ""
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "gap",
+      "destination": null,
+      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "gap",
+      "destination": null,
+      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s1-dependency-and-probe-limits",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s2-implementation-details",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s5-execution-order",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s6-integration-fixture",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-21-audit-recovery-and-witness-limits",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-21-ship-verification-preparation",
+      "status": "gap",
+      "destination": null,
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s1-evidence",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-approved-prerequisite-repair",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s2-pure-event-mapper",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s4-start",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s5-doctor-validation-2026-10-20",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s6-opencode-capture-2026-10-20",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s7-docs-and-rollout-2026-10-20",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-preparation-2026-10-2021-utc",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#ship-preparation-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-21",
+      "status": "gap",
+      "destination": null,
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "coverage": 0.0967741935483871,
+  "gaps": [
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#verification-and-approval",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s1-dependency-and-probe-limits",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s2-implementation-details",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s5-execution-order",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s6-integration-fixture",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-21-audit-recovery-and-witness-limits",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-21-ship-verification-preparation",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s1-evidence",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-approved-prerequisite-repair",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s2-pure-event-mapper",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s4-start",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s5-doctor-validation-2026-10-20",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s6-opencode-capture-2026-10-20",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s7-docs-and-rollout-2026-10-20",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-preparation-2026-10-2021-utc",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#ship-preparation-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "acceptedGaps": [
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "SHIPPED.md#verification-and-approval",
+      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
+      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "reason": "audit cycle record; outcome and lessons are in knowledge entries",
+      "acceptedReason": "audit cycle record; outcome and lessons are in knowledge entries"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "reason": "audit cycle record; outcome and lessons are in knowledge entries",
+      "acceptedReason": "audit cycle record; outcome and lessons are in knowledge entries"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s1-dependency-and-probe-limits",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s2-implementation-details",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s5-execution-order",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s6-integration-fixture",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-21-audit-recovery-and-witness-limits",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "deviations.md#2026-10-21-ship-verification-preparation",
+      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
+      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+    },
+    {
+      "source": "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s1-evidence",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-approved-prerequisite-repair",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s2-pure-event-mapper",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s4-start",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s5-doctor-validation-2026-10-20",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s6-opencode-capture-2026-10-20",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#s7-docs-and-rollout-2026-10-20",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#audit-preparation-2026-10-2021-utc",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#ship-preparation-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    },
+    {
+      "source": "log.md#final-closure-2026-10-21",
+      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
+      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+    }
+  ],
+  "committedAt": "2026-10-22T02:43:36.809Z"
+}

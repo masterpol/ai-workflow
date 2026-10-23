@@ -1,0 +1,11 @@
+@toon-data 1
+schemaVersion: 1
+state: owner-approved
+track: P2c
+campaign: connected-memory-consolidation
+approvedProposal: ships/p2c.proposed.md
+approvedProposalHash: "sha256:01023861e631103c4c9b2e8445f33699531f9484ba9bb893a80e543687bd9fe2"
+approvedOn: "2026-10-23"
+approvedAs: "written, without the optional parallel-session read-accounting line"
+cooldownIncrements: 1
+umbrellaClosed: false

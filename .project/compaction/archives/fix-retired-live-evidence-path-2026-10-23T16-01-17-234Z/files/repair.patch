@@ -1,0 +1,6 @@
+diff --git a/ai-framework/scripts/state-fragment-dataset.test.mts b/ai-framework/scripts/state-fragment-dataset.test.mts
+--- a/ai-framework/scripts/state-fragment-dataset.test.mts
++++ b/ai-framework/scripts/state-fragment-dataset.test.mts
+@@ -17 +17 @@
+-const LIVE_RECORD = ".project/pitches/state-ai-authoring/live-runs.md";
++const LIVE_RECORD = ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md";

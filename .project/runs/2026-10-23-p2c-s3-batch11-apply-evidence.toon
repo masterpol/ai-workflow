@@ -1,0 +1,476 @@
+@toon-data 1
+schemaVersion: 1
+state: applied-verified
+date: "2026-10-23"
+totals:
+  legacy: 0
+  upgraded: 46
+  partial: 0
+  problems[0]:
+legacyNarratives: 0
+results[4]:
+  -
+    slug: pitch-compaction
+    dryReplay: true
+    manifestUnchanged: true
+    bindingsUnchanged: true
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:bd59a5e66dc9bb2aa725ad525f5d8a0d6072e70628662fe3187dde19d16f8bce"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/pitch-compaction.md"
+  -
+    slug: portable-skill-defaults
+    dryReplay: true
+    manifestUnchanged: true
+    bindingsUnchanged: true
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:cbb4218cfc5311436573eebf8a4679e0fa649eda03d72f32746f22112bbc1498"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/portable-skill-defaults.md"
+  -
+    slug: portable-skill-installation
+    dryReplay: true
+    manifestUnchanged: true
+    bindingsUnchanged: true
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:79d76edead951b7d99af3009380ac185e7f8826a5afaa461b92be972519be793"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/portable-skill-installation.md"
+  -
+    slug: project-state-report
+    dryReplay: true
+    manifestUnchanged: true
+    bindingsUnchanged: true
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:fb8379695da3a40f8b6739c3de994befc3a35690032fe5be46829c20a9052d58"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/project-state-report.md"
+all46[46]:
+  -
+    slug: agent-model-sweep
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:eec6cf97fdf42a63f901f3a60841fafea6476373427a3567c8a61c6e15f1c7f9"
+    navigationTargets[9]: ".project/knowledge/decisions/profile-detection-lives-in-frontmatter-not-in-the-model-id.md",".project/knowledge/patterns/mandatory-config-files-emit-one-top-level-failure.md",".project/knowledge/patterns/warn-text-must-be-self-consistent-with-the-code-it-ships.md",".project/records/legacy-upgrades/agent-model-sweep.md",ai-framework/docs/extending.md,ai-framework/docs/vendors.md,ai-framework/integrations/harnesses.md,ai-framework/scripts/agent-frontmatter-invariant.test.mts,ai-framework/scripts/workflow-doctor.mts
+  -
+    slug: bundle-sync-marker-fix
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:574b30f1c02f101667cbe82bec299f49e0b287f33d4e651af413ce30e69575aa"
+    navigationTargets[5]: ".project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md",".project/records/legacy-upgrades/bundle-sync-marker-fix.md",".project/records/pitch-compression/bundle-sync-marker-fix.md",ai-framework/docs/versioning-and-sync.md,ai-framework/scripts/bundle-sync.mts
+  -
+    slug: codex-orca-coordinator-parity
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:2fe55c4c573a9c66be82084bf7dd9971b70cb8b48863495a10a89e2c874b67d7"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/codex-orca-coordinator-parity.md"
+  -
+    slug: collector-robustness
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:5fb25da817dfbcfdecb3f39cb4f1b3dce62e797cb1bc81e5698d019f5e69c5aa"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/collector-robustness.md"
+  -
+    slug: fix-instruction-conflicts
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:98357ab7e6d63ce75f0f3fcbaa391453fe66b02f494d177b57c731fe18f826f2"
+    navigationTargets[9]: ".claude/agents/security-reviewer.md",".project/knowledge/issues/instruction-copies-drift-into-contradictions.md",".project/knowledge/patterns/one-owner-per-instruction-topic-guarded-by-contract-tests.md",".project/records/legacy-upgrades/fix-instruction-conflicts.md",ai-framework/docs/vendors.md,ai-framework/integrations/orca-vendors.md,ai-framework/integrations/skill-defaults.md,ai-framework/scripts/workflow-contracts.test.mts,ai-framework/workflow/overview.md
+  -
+    slug: fix-orca-dispatch-resume-gate
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:e7c80051ec25baca7672620324121ed07ad48b1e142abdb92246378a3d155290"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/fix-orca-dispatch-resume-gate.md"
+  -
+    slug: fix-workflow-runner-env
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:95b1d7daa5748b8f3d2897287176e78e6d5f2401475f138be0938df29b5da642"
+    navigationTargets[5]: ".project/knowledge/patterns/one-boundary-selects-the-child-runner.md",".project/records/legacy-upgrades/fix-workflow-runner-env.md",".project/records/pitch-compression/fix-workflow-runner-env.md",ai-framework/scripts/runtime/README.md,ai-framework/scripts/runtime/entry.mts
+  -
+    slug: independent-rereview-catch-up
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:219f377ac701fcf5e15d3d12c81be27e7ce21b91f08928705f574e237f402a1c"
+    navigationTargets[6]: ".project/knowledge/patterns/a-gate-must-not-audit-its-own-instrument.md",".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",".project/records/legacy-upgrades/independent-rereview-catch-up.md",".project/records/pitch-compression/independent-rereview-catch-up.md",ai-framework/scripts/review-bench.mts,ai-framework/workflow/phases/3-audit.md
+  -
+    slug: instruction-compression
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:0c278c46a7a90acc0f1a8042296c17791357b4932e916a497aa5b1f142b66c09"
+    navigationTargets[12]: ".claude/skills/audit/SKILL.md",".claude/skills/build/SKILL.md",".project/knowledge/issues/mutation-script-killed-leaves-source-mutated.md",".project/knowledge/patterns/a-compression-pilot-keeps-failed-candidates-and-defers.md",".project/knowledge/patterns/one-owner-per-instruction-topic-guarded-by-contract-tests.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/instruction-compression.md",ai-framework/scripts/instruction-loading.test.mts,ai-framework/scripts/runtime/upgrade.test.mts,ai-framework/scripts/workflow-contracts.test.mts,ai-framework/workflow/phases/2-build.md,ai-framework/workflow/phases/3-audit.md
+  -
+    slug: metrics-report-dimensions
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:2d071207dd90db9ae538c4e4ffde70075824f7d1c07884832369630d767b5f88"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/metrics-report-dimensions.md"
+  -
+    slug: native-safety-feasibility
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:7108a33352dab0b7450f52ae6e9283e14406284561258a6f30e33a3677c746c8"
+    navigationTargets[3]: ".project/knowledge/decisions/inode-anchoring-and-stable-inode-locks.md",".project/records/legacy-upgrades/native-safety-feasibility.md",".project/records/pitch-compression/native-safety-feasibility.md"
+  -
+    slug: opencode-handoff
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:46a3d141f3f341caed28d2225263c2a7221dba4a393631b2309e0fd9962c22c9"
+    navigationTargets[3]: ".project/context/opencode-handoff.md",".project/records/legacy-upgrades/opencode-handoff.md",ai-framework/integrations/orca-vendors.md
+  -
+    slug: orca-auto-start-all-phases
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:69b2c227948291baee5aeff97327bfc64617ffec97a05f8025b19d50ae64bf26"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/orca-auto-start-all-phases.md"
+  -
+    slug: orca-engines-range
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:399a4880361106d882ab8e4264840731884c6a81b39e603e858083c080485b4c"
+    navigationTargets[8]: ".project/knowledge/issues/backtracking-regex-over-untrusted-text-is-quadratic.md",".project/knowledge/patterns/parse-untrusted-values-and-re-emit-them.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/orca-engines-range.md",ai-framework/integrations/orca-vendors.md,ai-framework/scripts/orca-preflight.mts,ai-framework/scripts/runtime/config.mts,ai-framework/scripts/runtime/semver-range.mts
+  -
+    slug: orca-role-pools
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:de3a2c572dbc6e4758734d66bcb513617e120f3f5cbe47f9f276e7655196bc11"
+    navigationTargets[10]: ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md",".project/knowledge/patterns/a-gate-spawns-exactly-what-it-probed.md",".project/knowledge/patterns/an-ownership-predicate-must-mirror-the-claim-transactions-set.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/orca-role-pools.md",ai-framework/integrations/orca-vendors.md,ai-framework/scripts/orca-assign.mts,ai-framework/scripts/orca-dispatch.mts,ai-framework/scripts/orca-ledger.mts,ai-framework/scripts/orca-policy.mts
+  -
+    slug: orca-vendor-dispatch
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:a83a083e3cf45e838e4446ba85c46cb9b55f0a463513ea7b77eea06e1109271e"
+    navigationTargets[4]: ".project/records/legacy-upgrades/orca-vendor-dispatch.md",".project/records/pitch-compression/orca-vendor-dispatch.md",ai-framework/integrations/orca-vendors.md,ai-framework/scripts/orca-dispatch.mts
+  -
+    slug: orca-vendor-foundation
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:71e54e0dca63b5e92f703bdc5ffb647f08a80bc4f650446af0b65288ad3a3a90"
+    navigationTargets[7]: ".project/knowledge/issues/rounded-zero-timeout-disables-cancellation.md",".project/knowledge/patterns/opt-in-before-runtime-discovery.md",".project/records/legacy-upgrades/orca-vendor-foundation.md",".project/records/pitch-compression/orca-vendor-foundation.md",ai-framework/integrations/orca-vendors.md,ai-framework/scripts/orca-policy.mts,ai-framework/scripts/orca-preflight.mts
+  -
+    slug: orca-vendor-orchestration
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:b671c0195858dd70683a0700df17000ad701f959e29d12817304092db5bcdf2e"
+    navigationTargets[4]: ".project/knowledge/patterns/a-grader-reports-executed-and-unexecuted-cases-separately.md",".project/records/legacy-upgrades/orca-vendor-orchestration.md",".project/records/pitch-compression/orca-vendor-orchestration.md",ai-framework/integrations/orca-vendors.md
+  -
+    slug: orca-vendor-reconcile
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:8a131e033df4ad983cd12704c7d34f3f229d289fd58d9ac7f81bef29d602ed4f"
+    navigationTargets[5]: ".project/knowledge/patterns/settle-only-with-proof-bound-to-this-patch.md",".project/records/legacy-upgrades/orca-vendor-reconcile.md",".project/records/pitch-compression/orca-vendor-reconcile.md",ai-framework/integrations/orca-vendors.md,ai-framework/scripts/orca-reconcile.mts
+  -
+    slug: orca-vendor-reconcile-integration
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:df250caebdb551b059bf41860d09c5f2d2f41705a1948bdc6955130b42ca8ddc"
+    navigationTargets[7]: ".project/knowledge/patterns/a-grader-reports-executed-and-unexecuted-cases-separately.md",".project/knowledge/patterns/a-thin-cli-keeps-every-guard-in-the-library.md",".project/records/legacy-upgrades/orca-vendor-reconcile-integration.md",".project/records/pitch-compression/orca-vendor-reconcile-integration.md",ai-framework/integrations/orca-vendors.md,ai-framework/scripts/orca-eval-grader.mts,ai-framework/scripts/orca-run.mts
+  -
+    slug: path-safety-hardening
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:051af5667d65344bb27f7dbcc01cc156e31503cde40f8d5d8acdf7e95f114c7a"
+    navigationTargets[9]: ".project/knowledge/decisions/compaction-recovery-shares-context-and-trusted-directories.md",".project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md",".project/knowledge/patterns/prove-a-guard-test-with-an-in-memory-mutant.md",".project/records/legacy-upgrades/path-safety-hardening.md",".project/runs/2026-09-27-path-safety-hardening.md",README.md,ai-framework/scripts/pitch-archive.mts,ai-framework/scripts/pitch-compress.mts,ai-framework/scripts/skill-registry.mts
+  -
+    slug: pitch-compaction
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:bd59a5e66dc9bb2aa725ad525f5d8a0d6072e70628662fe3187dde19d16f8bce"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/pitch-compaction.md"
+  -
+    slug: portable-skill-defaults
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:cbb4218cfc5311436573eebf8a4679e0fa649eda03d72f32746f22112bbc1498"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/portable-skill-defaults.md"
+  -
+    slug: portable-skill-installation
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:79d76edead951b7d99af3009380ac185e7f8826a5afaa461b92be972519be793"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/portable-skill-installation.md"
+  -
+    slug: project-state-report
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:fb8379695da3a40f8b6739c3de994befc3a35690032fe5be46829c20a9052d58"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/project-state-report.md"
+  -
+    slug: readme-split
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:fb7e9120a312e2f778fa83a24243d5cf1629c2f6da68e295c20183e3e39897a3"
+    navigationTargets[4]: ".project/records/legacy-upgrades/readme-split.md",".project/records/pitch-compression/readme-split.md",README.md,ai-framework/scripts/docs-links.mts
+  -
+    slug: runner-aware-runtime-boundary-validator
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:b9140d1aaf1273271a079b5f82acb5711d748dee60d943ea623796e104f77123"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/runner-aware-runtime-boundary-validator.md"
+  -
+    slug: runtime-test-helpers
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:dd029fb2d90789c60b1845fd4bec2628784afe1a2883f6b4ab8eb9dc4b9c0f2e"
+    navigationTargets[5]: ".project/knowledge/issues/a-temp-helper-that-realpaths-silently-voids-an-alias-guard.md",".project/knowledge/patterns/keep-the-fakes-guarantee-the-thing-they-replace.md",".project/records/legacy-upgrades/runtime-test-helpers.md",".project/records/pitch-compression/runtime-test-helpers.md",ai-framework/scripts/runtime/test-helpers.mts
+  -
+    slug: shape-lite
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:0e6d115f6bb45ff423df9d933c73b8484abefc2979334d87e2d8fe7025aad34e"
+    navigationTargets[8]: ".claude/skills/shape-lite/SKILL.md",".project/knowledge/decisions/shape-lite-is-a-gated-escalating-variant-of-shape.md",".project/knowledge/issues/backtracking-regex-over-untrusted-text-is-quadratic.md",".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/shape-lite.md",ai-framework/scripts/entry-import.mts,ai-framework/scripts/entry-import.test.mts
+  -
+    slug: state-ai-authoring
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:2238c27d43ffb6ae388ba72477464ecdc44a8fce4d88cbcd42c99540c5dbfdaf"
+    navigationTargets[12]: ".claude/skills/state/SKILL.md",".project/evals/datasets/state-ai-authoring.json",".project/knowledge/decisions/project-state-report-design.md",".project/knowledge/issues/a-headless-cli-follows-pwd-not-the-process-cwd.md",".project/knowledge/patterns/a-planted-canary-makes-a-reviewer-finding-checkable.md",".project/knowledge/patterns/a-prose-example-in-a-model-instruction-is-followed-literally.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/state-ai-authoring.md",ai-framework/integrations/state-report.md,ai-framework/scripts/state-fragment-dataset.test.mts,ai-framework/scripts/state-fragment-inject.mts,ai-framework/templates/project/reports/README.md
+  -
+    slug: state-deep-evidence
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:3e501bec14dde11ae4ecf89860cea7d0e1849cb7e67d9b4234f4e4c78fc7ba14"
+    navigationTargets[11]: ".project/evals/datasets/state-deep-evidence.json",".project/knowledge/decisions/project-state-report-design.md",".project/knowledge/issues/package-less-bundle-ship-wrapper-cannot-select-checks.md",".project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md",".project/knowledge/issues/snapshot-metadata-bypassed-output-scrubbing.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/state-deep-evidence.md",ai-framework/integrations/state-report.md,ai-framework/scripts/state-graph.mts,ai-framework/scripts/state-history.mts,ai-framework/scripts/state-snapshot.mts
+  -
+    slug: state-fragment-sanitizer
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:beecd845f9e94208040a75776d770a3caee00fa738b52a66404e6e9ee63c672b"
+    navigationTargets[10]: ".project/evals/datasets/state-ai-fragments.json",".project/knowledge/issues/a-sparse-array-hole-skips-every-but-visits-for-of.md",".project/knowledge/patterns/a-caller-supplied-limits-object-can-defeat-a-hard-cap.md",".project/knowledge/patterns/a-golden-dataset-case-counts-only-when-a-named-test-passes.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/state-fragment-sanitizer.md",ai-framework/integrations/state-report.md,ai-framework/scripts/state-fragment-evidence.mts,ai-framework/scripts/state-fragment-parse.mts,ai-framework/scripts/state-fragment.mts
+  -
+    slug: state-multipage-report
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:0006172faad5b52c32b673d850fa46d04471f04ab907a89e66d442d7f4685926"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/state-multipage-report.md"
+  -
+    slug: state-quoted-fonts
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:3cbcf86bbe6a59ebe6075873b1d3a381d0d9d2097f88ae93cc9f949cdefce46a"
+    navigationTargets[4]: ".project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md",".project/records/legacy-upgrades/state-quoted-fonts.md",".project/records/pitch-compression/state-quoted-fonts.md",ai-framework/scripts/state-theme.mts
+  -
+    slug: state-report-redesign
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:d3cb2de72b1d6c4249143c00a7cd7e6d1a390c56da462052f54b82365800dbaa"
+    navigationTargets[11]: ".project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md",".project/knowledge/decisions/project-state-report-design.md",".project/knowledge/issues/an-audit-scratch-copy-must-run-its-own-suites.md",".project/knowledge/issues/counting-untrusted-labels-in-a-plain-object-inherits-prototype-keys.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/state-report-redesign.md",ai-framework/integrations/state-report.md,ai-framework/scripts/state-charts.mts,ai-framework/scripts/state-design.mts,ai-framework/scripts/state-structure.mts,ai-framework/scripts/state-theme.mts
+  -
+    slug: test-execution-performance
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:15105273c14134145ac7b4dc46645d944468b62dbb5eb90ee5f0bbb53b00f7ab"
+    navigationTargets[10]: ".project/knowledge/issues/a-nested-node-test-child-inherits-the-parents-test-context.md",".project/knowledge/issues/runcli-replaces-proc-argv-with-the-arguments-only.md",".project/knowledge/patterns/path-containment-compares-real-paths.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/test-execution-performance.md",ai-framework/docs/testing.md,ai-framework/rules/performance.md,ai-framework/rules/testing.md,ai-framework/scripts/run-tests.mts,ai-framework/scripts/run-tests.test.mts
+  -
+    slug: token-attribution
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:bfbe57eeb143ce25043dd076d4a68f7e754b70aebd0ddcdfd1666ec6ca325192"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/token-attribution.md"
+  -
+    slug: token-time-report
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:4e32f249752ae50d869c3b2116d182fc2c1d15606d88e9fa856e85a3d5a9e8e9"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/token-time-report.md"
+  -
+    slug: toon-machine-data
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:cd461a08dc215b908a02987bdfaf68be68b3a1604bdc8ff21f3f2a3afc9b6740"
+    navigationTargets[11]: ".project/decisions/toon-data-grammar.md",".project/knowledge/decisions/data-files-use-their-own-toon-grammar-not-the-config-parser.md",".project/knowledge/issues/an-unbounded-mutation-run-hangs-on-a-mutant-that-removes-a-stall-guard.md",".project/knowledge/patterns/a-writer-reinspects-the-target-at-the-publish-step.md",".project/knowledge/patterns/convert-a-format-only-where-an-agent-loads-the-file-and-measure-it.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/toon-machine-data.md",ai-framework/rules/machine-data-format.md,ai-framework/scripts/runtime/data-file.mts,ai-framework/scripts/runtime/toon-data.mts,ai-framework/scripts/toon-convert.mts
+  -
+    slug: ts-runtime-injection
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:b44174ee3154c833b1752fe0fc750f1e63e94c49871ce5f73cb703c7df6950de"
+    navigationTargets[6]: ".project/knowledge/patterns/sync-tools-refuse-symlinks-in-source-and-destination.md",".project/records/legacy-upgrades/ts-runtime-injection.md",".project/records/pitch-compression/ts-runtime-injection.md",ai-framework/docs/versioning-and-sync.md,ai-framework/scripts/runtime/README.md,ai-framework/scripts/runtime/select.mts
+  -
+    slug: unified-toon-config
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:6af8de5437a044a56d4a8f4d1ac82a5ed2cd5c9dc27df9b69d0a4122224a96aa"
+    navigationTargets[12]: ".project/decisions/toon-subset-grammar.md",".project/knowledge/decisions/unified-toon-config-schema-v2.md",".project/knowledge/issues/backtracking-regex-over-untrusted-text-is-quadratic.md",".project/knowledge/patterns/reconcile-every-worker-of-a-wave-before-committing-any-scope.md",".project/knowledge/patterns/untrusted-text-reaches-the-terminal-through-error-messages.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/unified-toon-config.md",ai-framework/scripts/config-migrate.mts,ai-framework/scripts/orca-policy.mts,ai-framework/scripts/runtime/README.md,ai-framework/scripts/runtime/config.mts,ai-framework/templates/ai-workflow.example.toon
+  -
+    slug: upstream-project-drift
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:7f56ca7b0d5871c4a91d168732875829ad1d1a3557cd57d8bd09c3509485f657"
+    navigationTargets[7]: ".project/analysis/2026-10-16-upstream-drift-ledger-analysis.md",".project/knowledge/patterns/reconcile-every-worker-of-a-wave-before-committing-any-scope.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/upstream-project-drift.md",ai-framework/scripts/opencode-service.mts,ai-framework/scripts/orca-preflight.mts,ai-framework/scripts/runtime/node.mts
+  -
+    slug: vendor-model-toon
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:87b92048197dd4d3a47cd3defb4ee27b545b96a665c06a455b0eed42fe59c8e6"
+    navigationTargets[9]: ".project/decisions/toon-subset-grammar.md",".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md",".project/knowledge/patterns/a-version-migrator-edits-the-token-not-the-model.md",".project/records/legacy-upgrades/vendor-model-toon.md",ai-framework/integrations/harnesses.md,ai-framework/rules/model-routing.md,ai-framework/scripts/config-migrate.mts,ai-framework/scripts/runtime/config.mts,ai-framework/templates/ai-workflow.example.toon
+  -
+    slug: workflow-usage-capture
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:42e6591535b363d8c9b59cda44597abdef3e42425c5789ddc3f44594cdfe9bd0"
+    navigationTargets[13]: ".opencode/plugins/token-consumption.ts",".project/knowledge/issues/native-capture-needs-state-boundary-attribution.md",".project/knowledge/issues/orca-model-preflight-can-leave-unproven-ledger-ownership.md",".project/knowledge/issues/package-less-bundle-ship-wrapper-cannot-select-checks.md",".project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md",".project/knowledge/patterns/observational-hooks-check-budget-before-acquiring-a-lease.md",".project/pitches/_followups.md",".project/records/legacy-upgrades/workflow-usage-capture.md",ai-framework/hooks/hooks.json,ai-framework/hooks/scripts/workflow-capture.mts,ai-framework/integrations/harnesses.md,ai-framework/integrations/workflow-metrics.md,ai-framework/scripts/workflow-doctor.mts
+  -
+    slug: workflow-usage-metrics
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:708ea1b73db21694969f00b0fcd5d6a1cbb39939d338e11f5bee3e04560ad5c6"
+    navigationTargets[9]: ".project/knowledge/issues/metrics-ancestor-swap-during-async-lease.md",".project/knowledge/patterns/display-buckets-are-not-lifecycle-identities.md",".project/knowledge/patterns/pin-directory-identities-across-async-leases.md",".project/records/legacy-upgrades/workflow-usage-metrics.md",".project/records/pitch-compression/workflow-usage-metrics.md",ai-framework/integrations/workflow-metrics.md,ai-framework/scripts/workflow-metrics-report.mts,ai-framework/scripts/workflow-metrics-state.mts,ai-framework/scripts/workflow-metrics.mts
+  -
+    slug: workflow-usage-state
+    state: upgraded
+    archiveValid: true
+    v1ByteIdentical: true
+    outcomeLint: true
+    approvalHash: "sha256:522f862431865ab7eff984cefd100e086502fc8d29d365ccc2ab177d7ab9e4fe"
+    navigationTargets[2]: ".project/pitches/_followups.md",".project/records/legacy-upgrades/workflow-usage-state.md"
+supplementLinks:
+  checked: 47
+  broken: 0
+firstAttempt: Four supplements published; sandbox graph rebuild refused. Same exact approvals resumed outside sandbox; all four applied.
+exceptions: "Both named closing exceptions explicitly owner-approved; original criteria are acknowledged exceptions, not claimed passed."
+fullSuite:
+  command: node ai-framework/scripts/run-tests.mts --runtime node --workers 1
+  files: 86
+  tests: 2712
+  pass: 2709
+  fail: 0
+  skipped: 3
+  durationSeconds: 436.955
+  exit: 0
+  sandbox: unrestricted; the sandbox attempt was interrupted after lease/socket restrictions
+  log: /private/tmp/consolidation-final-node-tests-unrestricted.log
+finalChecks:
+  setup: READY; 25 checks; 46 valid v2 ledgers; 46 valid outcomes
+  graph: CLEAN; 119 entries; 336 knowledge links; 276 outcome links
+  relations: "0 problems"
+  precision: "12/12 after versus 0/12 before; unrestricted query execution"
+  baseline:
+    ledgers: 46
+    ledgerSchemaVersions[1]: 2
+    ledgersPointingAtDoneWork: 0
+    sectionsPointingAtDoneWork: 0
+    ledgersAllSectionsAtDoneWork: 0
+    doneWork:
+      entries: 0
+      indexRows: 46
+      bytes: 9638
+      medianEntryBytes: null
+      maxEntryBytes: null
+    decisionEntries: 16
+    graph:
+      nodes: 8186
+      links: 15525
+      canonicalFiles: 68
+      canonicalFilesWithOutboundCrossFileEdge: 52
+      isolatedAdapterNodes: 0
+      builtAtCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+  coverage:
+    sections: 727
+    otherFiles: 488
+    acceptedGaps: 0
+    omissions:
+      process-noise: 110
+      superseded: 7
+    largestOutcomeBytes: 2027
+  mirrors: "AGENTS/CLAUDE, canonical/Cursor pitch-compress and bundle-sync byte-identical"
+  scopedDiffCheck: pass
+  wholeCheckoutDiffCheck: "four pre-existing EOF warnings, bound/historical files unchanged"

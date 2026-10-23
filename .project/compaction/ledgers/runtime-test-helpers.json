@@ -1,64 +1,129 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "runtime-test-helpers",
   "sections": [
     {
       "source": "SHIPPED.md#final-verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-1-shippedmdfinal-verification",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains historical verification counts and the three unrelated pre-existing failures; supplement adds the wider environmental failure note.",
+      "bodyHash": "sha256:efd95653dc05f469ddfc86892a233dc4be12af158f4db968eb52fc441469a29b"
     },
     {
       "source": "SHIPPED.md#reconciliation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-2-shippedmdreconciliation",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves the helper API, pilot files and counts, FsDeps.symlinkSync and release 2.16.1.",
+      "bodyHash": "sha256:3a1130f986f39b81aa6c6d683ef0876e228be0a60ad7c6eb5d264556c4283c7e"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-3-shippedmdaudit",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runtime-test-helpers.md#review-chronology",
+      "helps": "Compact record keeps the C1 to C3 fixes with mutant proof; supplement adds the should-fixes (captureIo, runScript) and the 20-test mutant survival.",
+      "bodyHash": "sha256:f4e81a0558aeb83ec226b915ea61dbf18f8d211e0ccfbc010f1c3b34f454f3f0"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-4-shippedmdno-gos-honored",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the prohibited scope.",
+      "bodyHash": "sha256:20cdb5778455655d78a2807ad07435e031d1f060f1127aed54c078db9814ce8d"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-5-shippedmdknowledge-extracted",
-      "reason": "Preserved in the compact record section."
+      "helps": "Points to the three extracted knowledge entries.",
+      "bodyHash": "sha256:66f2f319a667261f8297da9bc059212c073874881c56ff903a3bc32ac176ac81"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-6-shippedmdfollowups",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the three open follow-up items.",
+      "bodyHash": "sha256:c5bccb4815840c771cc1202059798a60d787730d821098beca478d81d3861f28"
     },
     {
       "source": "SHIPPED.md#cross-pitch-note",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-7-shippedmdcross-pitch-note",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the commit-order blocker, runScript takeover, stale test and PATH gap.",
+      "bodyHash": "sha256:4255585d5defdc67be90c98d99a7e78bab3027ffac0846794ed98e93b097258d"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-8-pitchmdno-gos",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the standing no-gos; the pitch no-gos are also covered by the shipped no-go section.",
+      "bodyHash": "sha256:9972be38de2d58cd938e3b94048bec88d6d1c3f3304395c13ef58c813cf41eed"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/runtime-test-helpers.md#section-9-pitchmdrabbit-holes",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains resolved decisions and the pilot risk.",
+      "bodyHash": "sha256:631a2d6357f42299856e1794cf90648b4528b715320deb41cc290c77da9f2831"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:d22a6fef800063fa4bd3cae22d68ca1e7c1c34af9ea3f4a649c26f7c437e989d",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/runtime-test-helpers.md",
+      "helps": "Preserves historical closure, helper API and pilot results."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:281e1c448e2e07f732d265fc1208399a7d2720a30a462d15176d307b9da2bafe",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents",
+      "helps": "Preserves the API changes, caller cleanup duty, Buffer versus Uint8Array and the wider failure list."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:a203d92995eb1c169a43483b1d680ce8167ffd21950f4e1eb80ddd8fec1b5124",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:c11606e7843bc0801359d03719194522e286296cba3dcb2c4187674bfb03a99e",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents",
+      "helps": "Preserves the incidents and chronology, including the sed double-prefix and sequential pilots."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:e620c840540acdd22debffa62d405610ba4fd3e4809713b7b83c6d67158aa5d0",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/runtime-test-helpers.md",
+      "helps": "Retains the no-gos and rabbit-hole decisions in compact sections 8 and 9."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:02dcedd46b90556741dc6e6a8a8678baa51651bb09ee6664d1729cd61dab0cac",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents",
+      "helps": "Preserves the exit criteria and the planned parallel pilot dispatch."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:24:58.574Z"
+  "committedAt": "2026-10-22T18:54:13.795Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:dd029fb2d90789c60b1845fd4bec2628784afe1a2883f6b4ab8eb9dc4b9c0f2e",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

@@ -1,0 +1,66 @@
+@toon-data 1
+slug: workflow-usage-state
+draft: true
+state: needs-decision
+ledgerHash: "sha256:c7887775b4c86ded238dab1909715d36adb132c0e9b26e58f30d7bc7aa658383"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:dd55a08d374500668343d4bac370a3b1cc24b0351a2306228a5521ab42e8a500"
+mapping:
+  schemaVersion: 2
+  sections[24]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#audit",null,null,null,null,null
+    "SHIPPED.md#final-verify",null,null,null,null,null
+    "SHIPPED.md#docs",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+    "deviations.md#s3",null,null,null,null,null
+    "deviations.md#s4",null,null,null,null,null
+    "deviations.md#s5",null,null,null,null,null
+    "deviations.md#s6",null,null,null,null,null
+    "deviations.md#s7",null,null,null,null,null
+    "deviations.md#s8",null,null,null,null,null
+    "deviations.md#audit-cycle-1",null,null,null,null,null
+    "log.md#s2",null,null,null,null,null
+    "log.md#s3",null,null,null,null,null
+    "log.md#s4",null,null,null,null,null
+    "log.md#s5",null,null,null,null,null
+    "log.md#s6",null,null,null,null,null
+    "log.md#s7",null,null,null,null,null
+    "log.md#s9",null,null,null,null,null
+    "log.md#audit",null,null,null,null,null
+  otherFiles[0]:
+judgments[24]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#audit",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#final-verify",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#docs",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "deviations.md#s3",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s4",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s5",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s6",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s7",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#s8",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "deviations.md#audit-cycle-1",needs-decision,gap,null,"build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",false
+  "log.md#s2",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s3",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s4",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s5",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s6",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s7",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#s9",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+  "log.md#audit",needs-decision,gap,null,"scope-by-scope build log; narrative, outcome is in the done-work summary",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: workflow-usage-state\nshipped: 2026-10-20\nschemaVersion: 1\ndraft: true\n---\n# workflow-usage-state\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#workflow-usage-state","sha256:dd55a08d374500668343d4bac370a3b1cc24b0351a2306228a5521ab42e8a500","## workflow-usage-state — shipped 2026-10-20\n\nWorkflow usage state moved to schema 2 (bundle 2.36.0) and can answer how long a pitch, phase or scope took and how much was waiting: scope labels, a label-free activity key, oldest-start eviction, 6 h TTL, an interval engine (active union, wait minus active, four levels, 256-record clip), a pitch tree with LRU fold into `(other)`, and a drop marker (`recordDroppedCapture`) consumed under the next lease. v1→v2 migrates by append; the report never rewrites v1. Full-cap state is about 1 MB against a 4 MiB bound. It is a library: nothing wrote events until `workflow-usage-capture`, and time tables are `token-time-report`.\n\nStanding constraints: no prompts/responses/tool arguments/transcripts stored; no inferred `gate.decided`, `audit.finished` or `pitch.finished`; no back-filled durations; every collection has a cap and a test. Accepted: a residual symlink window on the marker (opened with flag `a`, not `O_NOFOLLOW`).\n\nLessons: [[a-lease-refused-capture-leaves-a-bounded-marker-for-the-next-lease]], [[a-simulated-clock-ahead-of-undelivered-events-folds-them-away]], [[a-forced-fold-loop-spins-on-a-hand-edited-frontier]], [[an-unquoted-test-command-variable-fails-silently-under-zsh]]. Contract: `ai-framework/integrations/workflow-metrics.md`. Followups in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/workflow-usage-state.md"

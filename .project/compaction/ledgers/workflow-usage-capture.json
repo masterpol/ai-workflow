@@ -1,450 +1,333 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "workflow-usage-capture",
   "sections": [
     {
       "source": "SHIPPED.md#reconciliation",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#what-shipped",
+      "helps": "Scope outcomes S1 to S7, measured p95 100 ms, 0/60 coexistence skips, lease failures 0/12, and the 15-file 1325-line budget.",
+      "bodyHash": "sha256:6b584d042638a71ef55a6734c981c82904748abba7e84be1fa0ed74eab7ccef1"
     },
     {
       "source": "SHIPPED.md#verification-and-approval",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Final Node 2360 and Bun 2338 passes, release tests, doctor, graph and privacy scan; the wrapper exit 1 and the owner fallback approval.",
+      "bodyHash": "sha256:7d21739c182906842fb0cf4fdcd0d598a9c604508e3bf6dae5073bab2dd79222"
     },
     {
       "source": "SHIPPED.md#limits-and-deferred-work",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#limits-and-open-items",
+      "helps": "Unverified OpenCode wait and live V2, out-of-scope Codex and Cursor, meaning of the dropped count, and the followups kept.",
+      "bodyHash": "sha256:0598953567ef2fbae278e7fb62d95ea57ce59d73db7e8093aeaaf0ccef999863"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#standing-constraints",
+      "helps": "No prompt or response text stored, no prose emission steps, no schema or lease change, always exit 0, exact registrations.",
+      "bodyHash": "sha256:97ed0bf7b9debdb8cc57f95e438509a3165e4bd7eb41d8108465891f54a97b2a"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#scope-and-contract",
+      "helps": "Dependencies on token-attribution and A1, the spike risks, and what was pushed to no-go.",
+      "bodyHash": "sha256:160ea29e0fce8227bcdad0693ca984bfab9675032af29822cf5d1cc233d2afcb"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "gap",
-      "destination": null,
-      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#audit-triage",
+      "helps": "Canary results, the OpenCode model-pin preflight proof, refuted findings, deferred S1 and S2, and the guard-snapshot witness.",
+      "bodyHash": "sha256:d33791ad1d6bd67b8f2519f4f335533e7ceaf1a2d998a231f79d7bc5e16b886b"
     },
     {
       "source": "audit-cycle-2.md",
-      "status": "gap",
-      "destination": null,
-      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Gate V1: the package-less pre-ship wrapper exit 1 and the owner-approved fallback closure.",
+      "bodyHash": "sha256:d53eefa02002847ea4f84b23cf3dd18b62973e68e501e1d4a7c2121c27d5794c"
     },
     {
       "source": "deviations.md#2026-10-20-s1-dependency-and-probe-limits",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",
+      "helps": "A1 lacked three contracts; which probe fields were unverified at runtime and why Orca-on coexistence is not claimed.",
+      "bodyHash": "sha256:a44d8b1eaf9e0e8d4b76902c04ee281057ac60c89634634f59137f968e2e2cdb"
     },
     {
       "source": "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",
+      "helps": "The exception widened the budget from 12 to 15 files and about 160 lines; canonical segment identity and primary-only replacement.",
+      "bodyHash": "sha256:c1a0e4d9f8398b4e4e3e8f57b0b00473cac323d766eaa12f62fb00f6dfacfdb1"
     },
     {
       "source": "deviations.md#2026-10-20-s2-implementation-details",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "Unknown agent kind for OpenCode steps, event id and dedupe limits, and why one-registration checks stay required.",
+      "bodyHash": "sha256:99dc335daaa65b9d067e74bdd5a3629ac4dfac302bf9e2024f661db5fca0c360"
     },
     {
       "source": "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "Stale C-A1 grep, refused-attempt accounting, outer-call limit and the cohesive adapter size.",
+      "bodyHash": "sha256:0f4c7841807151d0d9c87b43710ada6c77409e1efc33db0398c7828f9fbb5cc1"
     },
     {
       "source": "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Commit 866c68e layout, shell wording tolerance, real-lease tests and the Orca-on refusal that limits coexistence evidence.",
+      "bodyHash": "sha256:65c4456a645c54b525d1224e5e9781a3ebace75101e3e4b22f8a3835908cfa5b"
     },
     {
       "source": "deviations.md#2026-10-20-s5-execution-order",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping",
+      "helps": "S5 ran sequentially on the coordinator checkout instead of the optional isolated wave; the check is 45 lines.",
+      "bodyHash": "sha256:c99353efe9a24212502467e9d6552e198068d1630d6d130dd59ab1db8c592e54"
     },
     {
       "source": "deviations.md#2026-10-20-s6-integration-fixture",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "V2 test host acknowledges after writes settle and removes immediately delivered events; the plugin is compiled in memory for the spy test.",
+      "bodyHash": "sha256:81ecd92e4080523a83f8897415ca613f3b09d9ab6e6c9d7c55b71a38980dabaf"
     },
     {
       "source": "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Sanitizer baseline exception and its resolution, Bun rerun, release bump deferred to ship and the numstat budget method.",
+      "bodyHash": "sha256:232abe17c124885334a10dfbce52dbe89db208ffd338b199bc7d609679b70054"
     },
     {
       "source": "deviations.md#2026-10-21-audit-recovery-and-witness-limits",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#audit-triage",
+      "helps": "OpenCode model-pin limit, the substitute witness, independent:no for all reviews and the retained canary-citation facts.",
+      "bodyHash": "sha256:1c8a02b8a1b3dabb2a089551e0e83302f04e2ef2aa6a6f77b5196434e47cf3a6"
     },
     {
       "source": "deviations.md#2026-10-21-ship-verification-preparation",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Wrapper exit 1 retained, actual stack checks, and generated graph artifacts counted separately from the 15 files.",
+      "bodyHash": "sha256:95c59d731dffb1f2b4150130006b68de9b722c4c5a5f90cdf1136dd223bbd5f7"
     },
     {
       "source": "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",
+      "helps": "The three A1 gaps with the in-memory reproduction, its symptoms and root cause.",
+      "bodyHash": "sha256:19917ec0939aa621f6ba346bad9f74b220a1142f240f580b808d2a6a45c1f0d2"
     },
     {
       "source": "log.md#2026-10-20-s1-evidence",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#measurements",
+      "helps": "Proxy p50 and p95, concurrent p95, 0/60 skips and the inherited 0/12 baseline, with Orca-on refusal.",
+      "bodyHash": "sha256:679a1a49ae7920a74c56ed0a927b4ef4114cc4503f16b9257170b5be1a2760be"
     },
     {
       "source": "log.md#2026-10-20-approved-prerequisite-repair",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",
+      "helps": "Repair design, 63 tests, five mutants, the Orca worker-list cap incident and the sanitizer failures.",
+      "bodyHash": "sha256:fe1ef826dc0c15140354fe4cad6b08a4602e0ec5f568d8253517027ca6cc9c21"
     },
     {
       "source": "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",
+      "helps": "The owner accepted the sanitizer baseline exception and the G1 amendment without waiving new failures; S2 opened.",
+      "bodyHash": "sha256:f15ac32f8f4fd8b0b7cc5529ba51dc61a38d3e70fed81d4e09052d6fd133363c"
     },
     {
       "source": "log.md#2026-10-20-s2-pure-event-mapper",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "Mapper rules, 14 mutants, identity detail, 98.26 percent coverage and the fixture clock fix.",
+      "bodyHash": "sha256:0943fb6016ac40096e8c7c1eabf9739829c48c6f7c6d18d8c2433fab6f0db2f2"
     },
     {
       "source": "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "64 KiB read, 3000 ms budget, two outer attempts, no forced cancellation, four mutants and the lifecycle result.",
+      "bodyHash": "sha256:0cf737862006c17942d19fadebefa84013fde8de69fc875d5dad07008b8ebf6e"
     },
     {
       "source": "log.md#2026-10-20-s4-start",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping",
+      "helps": "C-WIRE passed; plan of eight capture-only groups, template and live settings together, and the checks to run.",
+      "bodyHash": "sha256:025c640ade8f7e2d5fe558c8febad73c78a0cb297032cf712a269eba2e869b8b"
     },
     {
       "source": "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "Eight groups with timeout 5, migration idempotence, exact sh test, and the p95 100 ms and 0/60 measurements.",
+      "bodyHash": "sha256:3ed1a4aec08bebbd9c3a081024244914f3ae6cc7810f5cef236cf2f90379b428"
     },
     {
       "source": "log.md#s5-doctor-validation-2026-10-20",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "Exact-command doctor check, substring mutant and six mutants, 72 tests and the warn on absent capture.",
+      "bodyHash": "sha256:225fa2867d39784d25814e357e82095f0e701886c1640ecac787f8d358217bad"
     },
     {
       "source": "log.md#s6-opencode-capture-2026-10-20",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "OpenCode capture after the token write settles, V1 and V2 tests, 0/12 lease runs before and after.",
+      "bodyHash": "sha256:9f7d1a176454b23730ab3ade16f3f8e20f82d3eedf03eb8ad8046fb8eff27eea"
     },
     {
       "source": "log.md#s7-docs-and-rollout-2026-10-20",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "17 Node failures mapped to the sanitizer followup, Bun 2338 pass, privacy scan and the 15 file budget.",
+      "bodyHash": "sha256:3bdbaaeed64b28f25e3e508200d4a368c295cab850b08154a8a4932093de3c2e"
     },
     {
       "source": "log.md#audit-preparation-2026-10-2021-utc",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#audit-triage",
+      "helps": "Run creation, scratch canaries, the brief control-character refusal and the guard snapshot too large.",
+      "bodyHash": "sha256:9fb077dc704527a4886bc04835ce4832f00e4b53400fb99bb8bc6187394567c6"
     },
     {
       "source": "log.md#ship-preparation-2026-10-21",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Serial Node run, version bump, knowledge extraction, evidence archive and the wrapper decision still pending.",
+      "bodyHash": "sha256:442cb35e945fbb33e7a1ef4e8a018c36959aed2375bd561987b084a90a2a74c3"
     },
     {
       "source": "log.md#final-closure-2026-10-21",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Owner approved the package-less fallback and closure; final numbers and what the closure does not imply.",
+      "bodyHash": "sha256:ae7bea16d01ac960fbf0cd8e6b1c6bfa940582490748dc38429d0ea45abfdef4"
     }
   ],
-  "coverage": 0.0967741935483871,
-  "gaps": [
+  "otherFiles": [
     {
-      "source": "SHIPPED.md#reconciliation",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "SHIPPED.md",
+      "hash": "sha256:44c864e520c2cd2c01332115011ba88d1bf33668e1375c0a1c6333a4d2a21506",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#what-shipped",
+      "helps": "Preserves the release reconciliation, verification table and limits across the supplement."
     },
     {
-      "source": "SHIPPED.md#verification-and-approval",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "deviations.md",
+      "hash": "sha256:f5ca7dedc7937866b185281f6ae4320e552848d9a82c8df3750e5b9501ebd9a1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",
+      "helps": "Preserves the ten dated deviations across the A1 prerequisite, delivered behavior, audit and verification sections."
     },
     {
-      "source": "audit-cycle-1.md",
-      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+      "path": "hill.md",
+      "hash": "sha256:5404e7b9ef1dc1a239400946eb5914979a4d31c16ed7fc129d81ac98f323d91d",
+      "disposition": "omitted",
+      "reason": "process-noise"
     },
     {
-      "source": "audit-cycle-2.md",
-      "reason": "audit cycle record; outcome and lessons are in knowledge entries"
+      "path": "log.md",
+      "hash": "sha256:07d628b800a3d93a7a2d0423e5d57f256b4a87fdd91cc5828dedad0036ee1f39",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",
+      "helps": "Preserves the build, audit and ship logs across delivered behavior, measurements, audit and verification."
     },
     {
-      "source": "deviations.md#2026-10-20-s1-dependency-and-probe-limits",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "pitch.md",
+      "hash": "sha256:fbfa0035c2ab708c89b0aa3520b629d26568515c133081de522f2a01dc087fb9",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#scope-and-contract",
+      "helps": "Preserves the problem, mapping affordances, critique rulings folded in and the bet decision."
     },
     {
-      "source": "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "plan.md",
+      "hash": "sha256:b474c2d02124c8566285d8c6166273ee62a02ab5f0105881e2a2382174b424bc",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping",
+      "helps": "Preserves scopes, file budget, blast radius, event mapping, A1 contract items, start conditions, exits, risks and claim corrections."
     },
     {
-      "source": "deviations.md#2026-10-20-s2-implementation-details",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "rollout.md",
+      "hash": "sha256:b032689bd023c2e2bd9eb7d54164b962fa1026628754a147779676498d04bd4a",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#rollout-check",
+      "helps": "Preserves the RN-shaped scratch sync, byte-identical Orca groups, the two expected doctor failures and the handoff."
     },
     {
-      "source": "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "shaping-draft.md",
+      "hash": "sha256:4bfae9f45f36c44751e8d87f54f60f4e4f3a8b58e4d3252ab34f029c0fa30000",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#shaping-origin-and-part-b",
+      "helps": "Preserves the token-time-report shaping: seed claim corrections, state v2 design intent, critique rulings and the part B note."
     },
     {
-      "source": "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "ship-readiness.md",
+      "hash": "sha256:5c094afe55f442d2f0b72553d7b7eb3d537048376636dd9ecd180018e4fa8684",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",
+      "helps": "Preserves the verification table, reconciliation, decision required and knowledge and archive notes."
     },
     {
-      "source": "deviations.md#2026-10-20-s5-execution-order",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s6-integration-fixture",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-21-audit-recovery-and-witness-limits",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-21-ship-verification-preparation",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s1-evidence",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-approved-prerequisite-repair",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s2-pure-event-mapper",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s4-start",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s5-doctor-validation-2026-10-20",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s6-opencode-capture-2026-10-20",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s7-docs-and-rollout-2026-10-20",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#audit-preparation-2026-10-2021-utc",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#ship-preparation-2026-10-21",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#final-closure-2026-10-21",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "path": "spike-s1-payloads.md",
+      "hash": "sha256:d0c2eed54c51c9044025841f99aabbdff4ac6a7b7e35b052d2c87aa72dc521a1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-capture.md#payload-facts",
+      "helps": "Preserves observed hook keys and order, OpenCode gaps, latency, coexistence, the gate record and the G1 approval."
     }
   ],
-  "acceptedGaps": [
-    {
-      "source": "SHIPPED.md#reconciliation",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
-    },
-    {
-      "source": "SHIPPED.md#verification-and-approval",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
-    },
-    {
-      "source": "audit-cycle-1.md",
-      "reason": "audit cycle record; outcome and lessons are in knowledge entries",
-      "acceptedReason": "audit cycle record; outcome and lessons are in knowledge entries"
-    },
-    {
-      "source": "audit-cycle-2.md",
-      "reason": "audit cycle record; outcome and lessons are in knowledge entries",
-      "acceptedReason": "audit cycle record; outcome and lessons are in knowledge entries"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s1-dependency-and-probe-limits",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s2-implementation-details",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s5-execution-order",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s6-integration-fixture",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-21-audit-recovery-and-witness-limits",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#2026-10-21-ship-verification-preparation",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s1-evidence",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-approved-prerequisite-repair",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s2-pure-event-mapper",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s4-start",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s5-doctor-validation-2026-10-20",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s6-opencode-capture-2026-10-20",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s7-docs-and-rollout-2026-10-20",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#audit-preparation-2026-10-2021-utc",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#ship-preparation-2026-10-21",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#final-closure-2026-10-21",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    }
-  ],
-  "committedAt": "2026-10-22T02:43:36.809Z"
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-22T23:33:49.634Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:42e6591535b363d8c9b59cda44597abdef3e42425c5789ddc3f44594cdfe9bd0",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
 }

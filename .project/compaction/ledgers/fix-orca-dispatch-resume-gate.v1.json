@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "slug": "fix-orca-dispatch-resume-gate",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "F1 (resume-gate) and F2 (--vendor array) are the shipped scopes; done-work.md records both with the audit and verify counts."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "No schema change, no new rule, no live worker spawned, no .env read or added. Recorded in done-work.md alongside the summary."
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "Two rabbit holes: workflow-doctor OpenCode port warning (logged as followup) and the wrong-fix-that-was-reverted (logged as the 'a-missing-tracked-file' issue and in done-work.md)."
+    },
+    {
+      "source": "SHIPPED.md#verification-final-gauntlet-all-six-phases",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "1037 pass / 0 fail / 1 skipped on Node, 66/66 Bun on touched files, setup-validator READY, doctor READY WITH 1 environmental warning, graphify CLEAN. Recorded in done-work.md."
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": "Already in _followups.md under 'follow-orca-dispatch-resume-gate': doctor port detection, Bun budget, env doc sweep, missing-tracked-file discipline. Plus the smoke's F1/F2 marked shipped."
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "status": "extracted",
+      "destination": "ai-framework/integrations/orca-vendors.md",
+      "reason": "CLI usage line, the --vendor status-only note and the resume-policy note were all written into orca-vendors.md and the CHANGELOG bump (2.18.1) at ship."
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "Inline review: zero must-fix, zero should-fix, zero acknowledged. The two limits (no scratch copy, no canary) are noted as the documented threat model for internal tooling; no reusable pattern beyond the inline-audit document itself."
+    },
+    {
+      "source": "log.md#bug-resume-existing-skips-policy-gate",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/an-idempotent-replay-path-returned-success-without-re-checking-the-gate.md",
+      "reason": "Promoted at ship as the durable lesson for this bug. Real id, tags, and related links to a-gate-must-not-trust-its-own-author and retry-only-on-positive-proof-of-a-clean-failure."
+    },
+    {
+      "source": "log.md#fix",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "The fix itself (re-check switch + evaluateLaunch before resumeExisting; --vendor array on status) is the headline summary; recorded in done-work.md."
+    },
+    {
+      "source": "log.md#files-changed",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "Files list and changelog entry are the durable record."
+    },
+    {
+      "source": "log.md#evidence",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "Test counts and live CLI repro are the headline evidence; recorded in done-work.md."
+    },
+    {
+      "source": "log.md#co-lateral-fix-needed-during-this-build",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/editing-a-canonical-file-alone-breaks-the-byte-identity-mirror-check.md",
+      "reason": "Promoted at ship. Real id, tags, related links."
+    },
+    {
+      "source": "log.md#pre-existing-failure-observed-during-the-run",
+      "status": "gap",
+      "destination": null,
+      "reason": "Superseded by 'a-wrong-fix-found-and-reverted-during-this-ship' once the cause was correctly diagnosed as the staged workflow-doctor.mts Workflow-settings check rather than a missing .env.example. The doctor warning itself is logged as a followup; nothing here is reusable once the wrong-fix section is preserved."
+    },
+    {
+      "source": "log.md#env-source-validation-post-fix-check",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "Four tests cover file-source vs process-priority; the verification numbers are in done-work.md."
+    },
+    {
+      "source": "log.md#a-wrong-fix-found-and-reverted-during-this-ship",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/a-missing-tracked-file-is-not-an-undeleted-deletion.md",
+      "reason": "Reusable discipline lesson; promoted in this compression run. Real id, tags, related links."
+    },
+    {
+      "source": "log.md#stale-documentation-corrected-at-ship",
+      "status": "extracted",
+      "destination": ".project/done-work.md",
+      "reason": "The stack.md reword is the durable record (already in CHANGELOG 2.18.1); done-work.md references it."
+    }
+  ],
+  "coverage": 0.9375,
+  "gaps": [
+    {
+      "source": "log.md#pre-existing-failure-observed-during-the-run",
+      "reason": "Superseded by 'a-wrong-fix-found-and-reverted-during-this-ship' once the cause was correctly diagnosed as the staged workflow-doctor.mts Workflow-settings check rather than a missing .env.example. The doctor warning itself is logged as a followup; nothing here is reusable once the wrong-fix section is preserved."
+    }
+  ],
+  "acceptedGaps": [
+    {
+      "source": "log.md#pre-existing-failure-observed-during-the-run",
+      "reason": "Superseded by 'a-wrong-fix-found-and-reverted-during-this-ship' once the cause was correctly diagnosed as the staged workflow-doctor.mts Workflow-settings check rather than a missing .env.example. The doctor warning itself is logged as a followup; nothing here is reusable once the wrong-fix section is preserved.",
+      "acceptedReason": "Superseded once 'a-wrong-fix-found-and-reverted-during-this-ship' preserves the lesson; doctor warning itself is logged as a followup"
+    }
+  ],
+  "committedAt": "2026-10-08T17:58:52.567Z"
+}

@@ -1,0 +1,68 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: runtime-test-helpers
+sourceProof:
+  archiveDirectory: runtime-test-helpers-2026-10-08T16-26-38-405Z
+  manifestHash: "sha256:1cf754efa61c9680cf1bda7b2c95eab761e6e01e3233c47ba64bb74fa2cab2be"
+  sourceBytes: 28388
+  verifiedFiles: 6
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/runtime-test-helpers.supplement.md"
+  destination: ".project/records/legacy-upgrades/runtime-test-helpers.md"
+  hash: "sha256:0a265229eeb7ab41914fcfe03d10c63ffad8978846516d22c2b17691f059a451"
+payload:
+  ledgerHash: "sha256:a0fa4531c2b6a3a438d22afc1b09cc37d0b67ee83968fa639b6db5021f558538"
+  legacyEntryHash: "sha256:11d85cde159a58da62b2a7f04045da52c8c89205035f55889911eb5fc7411d21"
+  bindings:
+    ".project/records/pitch-compression/runtime-test-helpers.md": "sha256:2a469383f24d333c46b24484651b689b9a0a53a7834d20849de742fd56fd5afe"
+    ".project/records/legacy-upgrades/runtime-test-helpers.md": "sha256:0a265229eeb7ab41914fcfe03d10c63ffad8978846516d22c2b17691f059a451"
+  mapping:
+    schemaVersion: 2
+    sections[9]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#final-verification",know-how,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-1-shippedmdfinal-verification",Retains historical verification counts and the three unrelated pre-existing failures; supplement adds the wider environmental failure note.,"sha256:efd95653dc05f469ddfc86892a233dc4be12af158f4db968eb52fc441469a29b"
+      "SHIPPED.md#reconciliation",behavior,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-2-shippedmdreconciliation","Preserves the helper API, pilot files and counts, FsDeps.symlinkSync and release 2.16.1.","sha256:3a1130f986f39b81aa6c6d683ef0876e228be0a60ad7c6eb5d264556c4283c7e"
+      "SHIPPED.md#audit",know-how,merged,".project/records/legacy-upgrades/runtime-test-helpers.md#review-chronology","Compact record keeps the C1 to C3 fixes with mutant proof; supplement adds the should-fixes (captureIo, runScript) and the 20-test mutant survival.","sha256:f4e81a0558aeb83ec226b915ea61dbf18f8d211e0ccfbc010f1c3b34f454f3f0"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-4-shippedmdno-gos-honored",Retains the prohibited scope.,"sha256:20cdb5778455655d78a2807ad07435e031d1f060f1127aed54c078db9814ce8d"
+      "SHIPPED.md#knowledge-extracted",know-how,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-5-shippedmdknowledge-extracted",Points to the three extracted knowledge entries.,"sha256:66f2f319a667261f8297da9bc059212c073874881c56ff903a3bc32ac176ac81"
+      "SHIPPED.md#followups",know-how,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-6-shippedmdfollowups",Retains the three open follow-up items.,"sha256:c5bccb4815840c771cc1202059798a60d787730d821098beca478d81d3861f28"
+      "SHIPPED.md#cross-pitch-note",know-how,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-7-shippedmdcross-pitch-note","Retains the commit-order blocker, runScript takeover, stale test and PATH gap.","sha256:4255585d5defdc67be90c98d99a7e78bab3027ffac0846794ed98e93b097258d"
+      "pitch.md#no-gos",limit,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-8-pitchmdno-gos",Retains the standing no-gos; the pitch no-gos are also covered by the shipped no-go section.,"sha256:9972be38de2d58cd938e3b94048bec88d6d1c3f3304395c13ef58c813cf41eed"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/pitch-compression/runtime-test-helpers.md#section-9-pitchmdrabbit-holes",Retains resolved decisions and the pilot risk.,"sha256:631a2d6357f42299856e1794cf90648b4528b715320deb41cc290c77da9f2831"
+    otherFiles[6]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:d22a6fef800063fa4bd3cae22d68ca1e7c1c34af9ea3f4a649c26f7c437e989d"
+        disposition: merged
+        destination: ".project/records/pitch-compression/runtime-test-helpers.md"
+        helps: "Preserves historical closure, helper API and pilot results."
+      -
+        path: deviations.md
+        hash: "sha256:281e1c448e2e07f732d265fc1208399a7d2720a30a462d15176d307b9da2bafe"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents"
+        helps: "Preserves the API changes, caller cleanup duty, Buffer versus Uint8Array and the wider failure list."
+      -
+        path: hill.md
+        hash: "sha256:a203d92995eb1c169a43483b1d680ce8167ffd21950f4e1eb80ddd8fec1b5124"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:c11606e7843bc0801359d03719194522e286296cba3dcb2c4187674bfb03a99e"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents"
+        helps: "Preserves the incidents and chronology, including the sed double-prefix and sequential pilots."
+      -
+        path: pitch.md
+        hash: "sha256:e620c840540acdd22debffa62d405610ba4fd3e4809713b7b83c6d67158aa5d0"
+        disposition: merged
+        destination: ".project/records/pitch-compression/runtime-test-helpers.md"
+        helps: Retains the no-gos and rabbit-hole decisions in compact sections 8 and 9.
+      -
+        path: plan.md
+        hash: "sha256:02dcedd46b90556741dc6e6a8a8678baa51651bb09ee6664d1729cd61dab0cac"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents"
+        helps: Preserves the exit criteria and the planned parallel pilot dispatch.
+  outcomeRecord: "---\nslug: runtime-test-helpers\nshipped: 2026-10-08\nschemaVersion: 1\n---\n# runtime-test-helpers\n\nShared runtime test helpers were added and piloted on three suites.\nCallers remain responsible for fixture cleanup and for binary-comparison conventions.\nReview chronology and historical failure counts remain separately recorded.\n\n- outcome: Shared runtime test helpers provide fakes and fixtures for workflow test suites.\n- docs: none\n- decisions: [build decisions](.project/records/legacy-upgrades/runtime-test-helpers.md#build-decisions-and-incidents)\n- knowledge: [faithful fakes](.project/knowledge/patterns/keep-the-fakes-guarantee-the-thing-they-replace.md), [alias guard](.project/knowledge/issues/a-temp-helper-that-realpaths-silently-voids-an-alias-guard.md)\n- code: [test helpers](ai-framework/scripts/runtime/test-helpers.mts)\n- verification: [historical closure](.project/records/pitch-compression/runtime-test-helpers.md)\n- followups: [historical limits](.project/records/legacy-upgrades/runtime-test-helpers.md#historical-limits)\n- archive: [compact record](.project/records/pitch-compression/runtime-test-helpers.md), [source supplement](.project/records/legacy-upgrades/runtime-test-helpers.md)\n"

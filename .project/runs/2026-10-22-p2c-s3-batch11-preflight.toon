@@ -1,0 +1,47 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-source-read-approval
+sourceArchivesRead: false
+pitches[4]:
+  -
+    slug: pitch-compaction
+    requiredSections: 15
+    sourceArchiveRead: false
+    ledgerHash: "sha256:3fba001ea8c9e6be5a2f7b598487913a14b71349e78bdc9ba7c6b74b9c76bdf0"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift[2]{path,committed,current}:
+      ".project/pitches/_followups.md","sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c","sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      ".project/knowledge/index.md","sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7","sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+  -
+    slug: portable-skill-defaults
+    requiredSections: 16
+    sourceArchiveRead: false
+    ledgerHash: "sha256:53e95124f60e7f1a52c02a46a5bad2b7fbd7b6ce4ab7f0c1e7773d3e0e2b70f1"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift[2]{path,committed,current}:
+      ".project/knowledge/index.md","sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7","sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+      CHANGELOG.md,"sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa","sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+  -
+    slug: portable-skill-installation
+    requiredSections: 19
+    sourceArchiveRead: false
+    ledgerHash: "sha256:748c1824bbeaae6a455d97c12ff765b55e070e5239de424cbb9a2b549c20127b"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift[5]{path,committed,current}:
+      ".project/knowledge/index.md","sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7","sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+      ".project/pitches/_followups.md","sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c","sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      CHANGELOG.md,"sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa","sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+      ai-framework/integrations/skills.md,"sha256:3cc1d11d94d5ce9a62a7b42a59159037816c50017ec5e2a39d947b9f4d2451b4","sha256:b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403"
+      ".claude/skills/add-skill/SKILL.md","sha256:1620061f7c66ebf09135d07258c1ea00edd6c29fb079728b3dd0f1294ccc2cbb","sha256:22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+  -
+    slug: project-state-report
+    requiredSections: 20
+    sourceArchiveRead: false
+    ledgerHash: "sha256:bf084f474dcb025cd8bc172f0c2a7247d28d94378bf9b1f97663b9c13315b7d8"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift[5]{path,committed,current}:
+      ".project/knowledge/decisions/project-state-report-design.md","sha256:8ea395772e637285dccf74d1b6f866b0195b3b17268df83b19ce60dc22bcb753","sha256:6a83f90465ff66d827e32505b92bc8504b7e9b43a6c68db2916e4a8cce8587b2"
+      ".project/knowledge/index.md","sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7","sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+      ".project/pitches/_followups.md","sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c","sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      CHANGELOG.md,"sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa","sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+      ".project/knowledge/issues/reviewer-reports-contradicted-by-measurement.md","sha256:391c9c6847c3bd7e2739bdbe9baf24dacd8076bda0247bb14a048d9d6b48a1ce","sha256:4cd8aae21ce042bbc7a94a28671bd4a6f38b3afa67ed4cd587c23bc832cd98a1"

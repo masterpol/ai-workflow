@@ -1,52 +1,121 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "orca-vendor-dispatch",
   "sections": [
     {
       "source": "SHIPPED.md#final-verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-1-shippedmdfinal-verification",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains final historical verification and the opt-in boundary.",
+      "bodyHash": "sha256:f359454191f8c3b11d8c2277e7ea10a22500b91abc0b98f1b8ce327fa3c7b32e"
     },
     {
       "source": "SHIPPED.md#reconciliation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-2-shippedmdreconciliation",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains the shipped launch, ownership and dispatch contracts with partial live evidence.",
+      "bodyHash": "sha256:d3f105ef870d9950c71825842f94d89f09878373f806ca949e6fe2abc5139bb9"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-3-shippedmdaudit",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves two audit cycles and the lack of independent review after later fixes.",
+      "bodyHash": "sha256:a698674dd83139353fa443f03b2ae59a98ca6872f62d3342a3200a7e4d99202b"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-4-shippedmdno-gos-honored",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves prohibited automation and the separate reconcile ownership.",
+      "bodyHash": "sha256:c74b68f7eef43f63640e4453f89ae602e53ad9bb1fddec413fe25d7135078ec2"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-5-shippedmdfollowups",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains historical followups, qualified by the supplement and current contract.",
+      "bodyHash": "sha256:035c9731f335637910dc729d5c00646adce88d592a1abcc964276b06b201ee34"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-6-pitchmdno-gos",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves dispatch-specific scope and metrics exclusions.",
+      "bodyHash": "sha256:00d0d43519f64e8855e037daa1b5f7513e4b457b90125ed1d043fe5602cbed96"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md#section-7-pitchmdrabbit-holes",
-      "reason": "Preserved in the compact record section."
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md#scope-and-source-discrepancies",
+      "helps": "Separates planned fake coverage from observed live evidence and records the unresolved appetite claim.",
+      "bodyHash": "sha256:ecb5a09332d09ad4c6610f10d8146d2e46c9e3a5e4ee73ae5c80b9c56d4bafdf"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:481dfae99f913bbea17ff930e9972a0418f5d434d42a63c37cd2a0b96a90369f",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/orca-vendor-dispatch.md",
+      "helps": "Retains dated closure, reconciliation, verification, audit and scope limits."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:52197e96842635cfd6df3f621bec23fd45b42318ceb85271e9ba1822a50f5022",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md",
+      "helps": "Preserves partial-gate authorization, worker-marker uncertainty, failure receipts, flake and superseded configuration."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:fa1f520304f63cf62524f8c9a9e69b2e3ad2e01d3252d3f7637847e5a09d869c",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md",
+      "helps": "Preserves the partial S0 qualification and historical mutation-proof limit; intermediate positions add no behavior."
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:cc2c69e952375c0adc1b7b4e513d8bd18943635596c649ea04f289a6b65f68e4",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md",
+      "helps": "Retains historical audit and mutation gaps; linked current implementations retain operational invariants."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:b934b8fdfb5886f527ceef7f43175893ba2fe8730c9a117e8d910b12c5888821",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md",
+      "helps": "Preserves dispatch/reconcile ownership, live prerequisites, safety invariants and source discrepancies."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:32817b91aa1aeffeab2e734a00d139bf6941485772af12adea08e61c4bd822d1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md",
+      "helps": "Retains behavioral contracts through current implementations, original stop condition and planned-versus-observed limits."
+    },
+    {
+      "path": "runtime-contract.md",
+      "hash": "sha256:3efb2798123146067abd358df1eae0d3fd2c307a061b9da96bf3d37bc0638062",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-dispatch.md",
+      "helps": "Retains observed completion, failure receipts, replay, retry and ownership semantics with live-proof limits."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:23:24.813Z"
+  "committedAt": "2026-10-22T18:31:52.901Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:a83a083e3cf45e838e4446ba85c46cb9b55f0a463513ea7b77eea06e1109271e",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

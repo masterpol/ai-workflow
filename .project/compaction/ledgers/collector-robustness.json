@@ -1,130 +1,266 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "collector-robustness",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#delivered-contract",
+      "helps": "Preserves SHIPPED.md#scope-reconciliation with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:0e4486deaa7568e4a5f675d45d20c41cbda92c5f9ae892a6148ca8570ded76d1"
     },
     {
       "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#confidence-and-followups",
+      "helps": "Preserves SHIPPED.md#confidence-read-this-before-relying-on-it with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:c9b853715d0e5a69d7abe6b83fe888b210f0f46a4c08a4020047e4f45365e54a"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#delivered-contract",
+      "helps": "Preserves SHIPPED.md#no-gos-honored with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:af75c036a308d2e1e4dc8f09dfc3c5be955aadbb0ea2ba11df1b896e4f3d16e1"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#identity-and-migration",
+      "helps": "Preserves SHIPPED.md#rabbit-holes-resolved-as-committed with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:f0fa3291fa4b50c328eb286af284feca5c1dd02ca4c745ae4fdeb59d973dac25"
     },
     {
       "source": "SHIPPED.md#deviations-see-deviationsmd",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves SHIPPED.md#deviations-see-deviationsmd with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:9160abd167efaacc4bb7c053d89a1eccb1da246a5862cbbb3876cb04dfb72654"
     },
     {
       "source": "SHIPPED.md#audit-findings-final-disposition",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves SHIPPED.md#audit-findings-final-disposition with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:de072afb0c8fb47aa2b5a9acba62f4c217b706839ceec96e1571f935526e10b9"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "helps": "Locates the durable lease ownership decision.",
+      "bodyHash": "sha256:ae460dd75611e880a8f6ffc3bafa3517a6cea8e0f987364495d53be59d95f1b6"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#confidence-and-followups",
+      "helps": "Preserves SHIPPED.md#followups with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:7aa2d4377089256d7d598d6c0ace865cb37b297b57b03675f49102fa7c1d16fa"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#delivered-contract",
+      "helps": "Preserves pitch.md#no-gos with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:ca23dee30f7ad9e327bbdbc73d1428887635dd8b11ada0613aca6424062c1b34"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves pitch.md#rabbit-holes with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:6fe05bbf0e4f8c4199b82318c53f1dc718e9c052096124598e5f0529de49847a"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves audit-cycle-1.md with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:c112276a04e3eb0d60428e388ff6001cb5d9069e632589c6f8fe5328cb4c1757"
     },
     {
       "source": "audit-cycle-2.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves audit-cycle-2.md with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:1efe618dd93e79f5447edbb653a9dcb02aa61d4fc8cb9d363a524200ea1bba55"
     },
     {
       "source": "deviations.md#d1-lock-ownership-safety-2026-09-26",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves deviations.md#d1-lock-ownership-safety-2026-09-26 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:1083c427deff5a947be1bc29f964ba3dc62135906776dfee3442760529ddc834"
     },
     {
       "source": "deviations.md#d2-identity-semantics-2026-09-26",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#identity-and-migration",
+      "helps": "Preserves deviations.md#d2-identity-semantics-2026-09-26 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:6486deba0a3dcd8110318c8fdd0471080c69752171c80326188cfbbb63b13993"
     },
     {
       "source": "deviations.md#d3-completion-plan-built-without-a-separate-pre-bet-critique-2026-09-27",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves deviations.md#d3-completion-plan-built-without-a-separate-pre-bet-critique-2026-09-27 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:aff59f8d17dc1425003841b592af25bc105e2772ae8bcb9e5ffd24f5121d7393"
     },
     {
       "source": "deviations.md#d4-s1s-reclaim-contract-and-its-tests-retired-2026-09-27",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves deviations.md#d4-s1s-reclaim-contract-and-its-tests-retired-2026-09-27 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:b25c777e5b4783d7ee8d03867ed85909349834b2bd211b8319f81285f7194098"
     },
     {
       "source": "deviations.md#d5-cross-project-endpoint-collisions-are-real-not-theoretical-2026-09-27",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/collector-metrics-lease-design.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#confidence-and-followups",
+      "helps": "Preserves deviations.md#d5-cross-project-endpoint-collisions-are-real-not-theoretical-2026-09-27 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:9eb5983bcbd9c8a2d706c1da6b67747df2f3cb176f1710c10fdf326f5566c89e"
     },
     {
       "source": "log.md#s1-2026-09-26",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#verification-chronology",
+      "helps": "Preserves log.md#s1-2026-09-26 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:29c9a1ff48f6ec870f51d670ed512b4f744dba5a1f05af32948167ec9787d40b"
     },
     {
       "source": "log.md#c2-c3-2026-09-27-completion-plan-approved",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#verification-chronology",
+      "helps": "Preserves log.md#c2-c3-2026-09-27-completion-plan-approved with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:adda8bee2c665761b9627ed4c99a20bfde98aa6d0ff51fd6e5338b7ecfb84bf3"
     },
     {
       "source": "log.md#audit-cycle-2-2026-09-27",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves log.md#audit-cycle-2-2026-09-27 with behavior, chronology and evidence limits.",
+      "bodyHash": "sha256:39cae91b681c05938970e9ebdde5afd9572cc9a0d0c3832a7a2f08145aa9f503"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#delivered-contract",
+      "helps": "Preserves substantive SHIPPED.md content and its historical limits.",
+      "hash": "sha256:91f1646fc3b3dfa5c7f22fabe73e8256fbce64eae395b4ad3da19ac23bcd46ae"
+    },
+    {
+      "path": "completion-plan-2026-09-27.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#delivered-contract",
+      "helps": "Preserves substantive completion-plan-2026-09-27.md content and its historical limits.",
+      "hash": "sha256:2fca7bc18c7c7f13b914bac3f0a9a7e1db032a2b49359a207068e92a187b69f6"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves substantive deviations.md content and its historical limits.",
+      "hash": "sha256:7f51ccff39240e7194d931364e24c0ad70460b83be2aa3137a2e52c28641285f"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:a38696f3b764de5cae1959c5e36d37caba25914dd96f529837649d7dc34277e0"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#verification-chronology",
+      "helps": "Preserves substantive log.md content and its historical limits.",
+      "hash": "sha256:763dc76a5af288300a326bf3bdd323f77031b608d037e8638cbac603456c1ec7"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves substantive pitch.md content and its historical limits.",
+      "hash": "sha256:f6e510854589caad5e9a63ce001e6a11c5b356962973b3cbb797fe8b8c88dbf1"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves substantive plan.md content and its historical limits.",
+      "hash": "sha256:d1cda77f173edbd6f7f42380a0e3be5b37b0d4f66b0d89ffd8e5883760b0a430"
+    },
+    {
+      "path": "prompts/audit-code.txt",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves substantive prompts/audit-code.txt content and its historical limits.",
+      "hash": "sha256:1b00aa22600f2d50d5ef3ae3239a15857a312306c14396a190b4707d1865e851"
+    },
+    {
+      "path": "prompts/audit-cov.txt",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves substantive prompts/audit-cov.txt content and its historical limits.",
+      "hash": "sha256:8e8e850041f03a64e236501f33d22911bb3a9ad970c4efb1dfeb51673596b92e"
+    },
+    {
+      "path": "prompts/audit-fix.txt",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves substantive prompts/audit-fix.txt content and its historical limits.",
+      "hash": "sha256:deab28af5164a0577c3fb63259ba0ae031b1bb40b1496fb70eca3a73d59640b8"
+    },
+    {
+      "path": "prompts/audit-sec.txt",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves substantive prompts/audit-sec.txt content and its historical limits.",
+      "hash": "sha256:038068498f37b551989d0d2a686e2c227f93fd2aaeffe18ab3ab1175a3d0f3a7"
+    },
+    {
+      "path": "prompts/audit-xpitch.txt",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#audit-findings-and-method",
+      "helps": "Preserves substantive prompts/audit-xpitch.txt content and its historical limits.",
+      "hash": "sha256:3d4c962c7416df62d2a8697883a1f6876284b23d6f45c568462439583fc72f4a"
+    },
+    {
+      "path": "reshape.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/collector-robustness.md#retired-lock-and-planning-contradictions",
+      "helps": "Preserves substantive reshape.md content and its historical limits.",
+      "hash": "sha256:7f3c9d2722fed1d1f8e4f7fdeba71d5ba90aa1df31b84f4522d3bc44b10f3a1a"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-07T23:01:39.467Z"
+  "committedAt": "2026-10-23T00:55:34.429Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:5fb25da817dfbcfdecb3f39cb4f1b3dce62e797cb1bc81e5698d019f5e69c5aa",
+    "introducingCommit": "3be89c081f9c10c281a51bc48e0ed505d2a62214"
+  }
 }

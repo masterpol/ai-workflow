@@ -1,0 +1,113 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: token-attribution
+sourceProof:
+  archiveDirectory: token-attribution-2026-10-22T02-43-34-488Z
+  manifestHash: "sha256:ebdf8cf7f39f1783fe351e80213b43c32c070e26280fbd50672ca7267a9df5ef"
+  sourceBytes: 85058
+  verifiedFiles: 13
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/token-attribution.supplement.md"
+  destination: ".project/records/legacy-upgrades/token-attribution.md"
+  hash: "sha256:1e614d71441175c9a6b9bcdad3065f801f8c96ffc183e5d5075f892d3a161354"
+payload:
+  ledgerHash: "sha256:94e5462faa3c10f93f03141209f91c7928dd012958f904c0564c65fd0249e4f4"
+  legacyEntryHash: "sha256:7824c31ebde9037569c1d4019556d9f025e2ed28e644565b00cb9a177edc7346"
+  bindings:
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    ".project/records/legacy-upgrades/token-attribution.md": "sha256:1e614d71441175c9a6b9bcdad3065f801f8c96ffc183e5d5075f892d3a161354"
+  mapping:
+    schemaVersion: 2
+    sections[8]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scopes",behavior,merged,".project/records/legacy-upgrades/token-attribution.md#what-shipped","S1-S10 outcomes, spike verdicts, commit hashes and release 2.34.0.","sha256:952e85a8d20319b760d0a7e4c6b98d5f036c55749c67ca0724a213aefd00256b"
+      "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/token-attribution.md#standing-constraints",Honored no-gos with the cap numbers and the four recorded plan deviations.,"sha256:e623a91e8fe8d354ae445487ed7f3e931d876a6065825dd9ba919106fd61a13d"
+      "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/token-attribution.md#rabbit-holes-and-risks",Which holes were resolved and which three surfaced as followups.,"sha256:3fa91878c1ab7535169381191c26de406fc66c9a7638bce0a3d806f910b2d9e6"
+      "SHIPPED.md#audit",know-how,merged,".project/records/legacy-upgrades/token-attribution.md#audit-history","One-cycle audit outcome, planted canaries, independence limits and fixes.","sha256:8675cb4a8f6590b6c9657e8d480d288e018f1f87c723a959c32f2de68fe79692"
+      "SHIPPED.md#followups-generated",limit,merged,".project/records/legacy-upgrades/token-attribution.md#open-followups","The eight deferred items, spelled out, since _followups.md cannot be a destination.","sha256:f06d8df4fcd74cf2ba495cceadad4f2bc4fc45780c58f90a48f31bcd675370e2"
+      "SHIPPED.md#doc-updates",know-how,merged,".project/records/legacy-upgrades/token-attribution.md#what-shipped","Which docs changed in-pitch (token-consumption.md, state-report.md); no ADR.","sha256:136eebee5c1ae03b89d8a87d3de0ea48f21498076189e0b13655460eba8c083b"
+      "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/token-attribution.md#standing-constraints","The seven pitch no-gos including Cursor, network, back-fill and hook-blocking bans.","sha256:882634afa384701855c7f243fdb9dc1fb4982e070ec28d74a1e8641851afec53"
+      "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/token-attribution.md#rabbit-holes-and-risks","Resolved answers, owners of pushed risks, and deferred items with rationale.","sha256:a723d3a85f7f3b9a545c7a98f876734f9362464af8b340254c898a97b7146503"
+    otherFiles[13]:
+      -
+        path: SHIPPED.md
+        disposition: omitted
+        reason: superseded
+        hash: "sha256:6ebe77e57fe3dc4ae3d318678774f92929d156d8fc138e60240cbe3e70d45af6"
+      -
+        path: audit-record-code.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#audit-history"
+        helps: Preserves reviewer findings and dispositions; omits prompt boilerplate.
+        hash: "sha256:f6a50097c47d19c8f5d9630c445690ef21734623ba61cfbfba15ec205f51c40a"
+      -
+        path: audit-record-security.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#audit-history"
+        helps: Preserves reviewer findings and dispositions; omits prompt boilerplate.
+        hash: "sha256:36e9427efe701f6216449527bf85d1ec9e3f56b3f8968cc54c6cd0780ac7d488"
+      -
+        path: audit-record-test.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#audit-history"
+        helps: Preserves reviewer findings and dispositions; omits prompt boilerplate.
+        hash: "sha256:512011eaa0b7134a482494d523c57e570c1e20cf4e5f21f4c38e4a99e1ec9bb4"
+      -
+        path: audit.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#audit-history"
+        helps: "Preserves fixes, audit evidence and cross-pitch findings."
+        hash: "sha256:47b9b207b7688f6cadcecb005969f63619a8e0ced06cce97e400eebb9501356c"
+      -
+        path: hill.md
+        disposition: omitted
+        reason: process-noise
+        hash: "sha256:83a720703c9b73e08b3a8ba80c8a6fe0825b65898d0775556df20424367a219f"
+      -
+        path: log.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#build-notes"
+        helps: "Preserves mutants, worker rewrite and accepted baseline failures."
+        hash: "sha256:0f83d294bb0ca06d66646a9e636e00550de9f8a317274f55329dabc12ce0f5f4"
+      -
+        path: pitch.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#scope-and-design"
+        helps: "Preserves the problem, breadboard, critique and bet."
+        hash: "sha256:524bbb48f68f92305a3a3b9b6c73183120d02ab24e38e1500db6356136b98bc1"
+      -
+        path: plan.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#plan-and-gate-decisions"
+        helps: "Preserves scope design, budget, spike gates and deviations."
+        hash: "sha256:4d4ad7927854d974e700498e92e482fc79541962354053ac8cc4ff64c3e1562e"
+      -
+        path: rollout.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#rollout"
+        helps: Preserves dry-run counts and operator restart steps.
+        hash: "sha256:ff58e71d19cb54b1d4daf746a41f8aa0bc97de953b37eb551db974d71f8870c5"
+      -
+        path: spike-s1-pointer.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#spike-findings"
+        helps: "Preserves spike observations, decisions and validation limits."
+        hash: "sha256:a8cbb23c760ad8c7dd708650359ca0d9aa48f19a683a9073d1109b5f1e3a88a1"
+      -
+        path: spike-s2-codex.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#spike-findings"
+        helps: "Preserves spike observations, decisions and validation limits."
+        hash: "sha256:b1518a6c364d0bbaa8ff3ebb14a0bc0bd7ac4f9b8d46332211492171474b6b35"
+      -
+        path: spike-s3-transcript.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/token-attribution.md#spike-findings"
+        helps: "Preserves spike observations, decisions and validation limits."
+        hash: "sha256:50e400b101fd866626e3fe19905f1993b43667ffedcc0c6b3c6fd8e247a74171"
+  outcomeRecord: "---\nslug: token-attribution\nshipped: 2026-10-19\nschemaVersion: 1\n---\n# token-attribution\n\nToken reporting gains canonical pitch, phase and scope attribution while preserving missing-usage and collector safety semantics.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: Token reporting gains canonical pitch, phase and scope attribution while preserving missing-usage and collector safety semantics.\n- docs: [source supplement](.project/records/legacy-upgrades/token-attribution.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/token-attribution.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/token-attribution.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/token-attribution.md)\n- followups: [retained limits](.project/records/legacy-upgrades/token-attribution.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/token-attribution.md)\n"
+  acceptDestinationDrift:
+    ".project/pitches/_followups.md":
+      committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Reviewed 32-line backlog drift since v1 introduction: unrelated candidate approvals, two renamed pitch references and appended candidates/ship blocker; this pitch own followup content is unchanged."

@@ -1,0 +1,34 @@
+@toon-data 1
+slug: state-report-redesign
+draft: true
+state: needs-decision
+ledgerHash: "sha256:f2741b481f4320c3b739e0dd026e79b69f7d5ad56245dc66cda4371ed37ff4c6"
+bindings:
+  ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+legacyEntryHash: "sha256:1dc9f8cd575d675cf3d27e1db25306754163d93887488f4f6311c40cf813b0c0"
+mapping:
+  schemaVersion: 2
+  sections[8]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scopes",null,null,null,null,null
+    "SHIPPED.md#no-gos-honored",null,null,null,null,null
+    "SHIPPED.md#rabbit-holes",null,null,null,null,null
+    "SHIPPED.md#evidence",null,null,null,null,null
+    "SHIPPED.md#followups-generated",null,null,null,null,null
+    "SHIPPED.md#doc-updates",null,null,null,null,null
+    "pitch.md#no-gos",null,null,null,null,null
+    "pitch.md#rabbit-holes",null,null,null,null,null
+  otherFiles[0]:
+judgments[8]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#scopes",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+  "SHIPPED.md#evidence",needs-decision,gap,null,"task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",false
+  "SHIPPED.md#followups-generated",needs-decision,extracted,".project/pitches/_followups.md","",false
+  "SHIPPED.md#doc-updates",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#no-gos",needs-decision,extracted,".project/done-work.md","",false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/done-work.md","",false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: state-report-redesign\nshipped: 2026-10-19\nschemaVersion: 1\ndraft: true\n---\n# state-report-redesign\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[1]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#state-report-redesign","sha256:1dc9f8cd575d675cf3d27e1db25306754163d93887488f4f6311c40cf813b0c0","## state-report-redesign — shipped 2026-10-19\n\nThe `/state` HTML report was redesigned (bundle 2.33.0): a repo-shape detector (`structure.repoShape`, additive, `schemaVersion` stays 1) picks a slate/blue workflow theme, `state-design.mts` owns the stylesheet and shell, and pages carry SVG bar charts, headline cards and empty slots for later AI fragments. Pages stay inert: no script, external load, web font, `style=` or `url()` anywhere, asserted on all seven pages. Monorepos never scan. Token-share and folder-size charts were replaced by completions-by-vendor and subfolders-per-folder because the snapshot holds no token or size data.\n\nLessons: [[counting-untrusted-labels-in-a-plain-object-inherits-prototype-keys]], [[an-audit-scratch-copy-must-run-its-own-suites]]. Contract: `ai-framework/integrations/state-report.md`. Leftovers (the `/state` skill's \"theme rediscovered every run\" text is stale for monorepos) are in `.project/pitches/_followups.md`.\n",false
+unavailable[1]: ".project/records/pitch-compression/state-report-redesign.md"

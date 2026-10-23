@@ -1,22 +1,73 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "shape-lite",
   "sections": [
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#scope-and-limits",
+      "helps": "Prohibited scope: no change to full shape, no critique fan-out or new agents, one gate, named pitch only.",
+      "bodyHash": "sha256:298e8bd5b0f694471d7b62c66c3a9233adb681d415daba746c615a8b583301dd"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#scope-and-limits",
+      "helps": "Resolved, pushed and no-go dispositions including the later-closed doctor count risk.",
+      "bodyHash": "sha256:8431083657c6643b634a7c6b02561068abaa59e195515842b8029d68a8f9f6ad"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:a6de4ae25745a7c12066f632c9d63c2a9c03d9cb483ceffab0f7e7a883adaa05",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#release-and-deliverables",
+      "helps": "Preserves scope statuses, verification, knowledge and followup counts in the release and audit sections."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:ee2d044316821a6eedd98e5c4eeb0c1c0fae780cccf3e131aa636388dfa43273",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#audit-and-review-chronology",
+      "helps": "Preserves findings M1, M2 and S1 to S5, both canaries and the acknowledged items."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:41d459f95eef28e960f5e91abf7a753fa0d173218ec421180eff7045b0350e47",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#build-decisions-and-deviations",
+      "helps": "Preserves the utility phase deviation, the added S4 and the pre-existing test failures."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:7b235bd360768ec5ebbc54bc36d51785c3b40f53620a8efb0701e886faeedcd4",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:a8cc31f9251e301fe630af11297b6da03bfb184c63b4bd4ffac6107cb4619b66",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#scope-and-limits",
+      "helps": "Preserves the problem, critique findings K1 to K4, S1 to S3 and A1."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:9ae9501e3f6518a7eebc6a15673fcb8acc9a920adc4549ccf5e31f4f96b2bb66",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/shape-lite.md#build-decisions-and-deviations",
+      "helps": "Preserves scopes, exit criteria and plan-time assumptions that later changed."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-07T22:59:16.309Z"
+  "committedAt": "2026-10-22T19:28:40.071Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:0e6d115f6bb45ff423df9d933c73b8484abefc2979334d87e2d8fe7025aad34e",
+    "introducingCommit": "3be89c081f9c10c281a51bc48e0ed505d2a62214"
+  }
 }

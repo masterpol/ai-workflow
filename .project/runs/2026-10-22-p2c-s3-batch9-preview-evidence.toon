@@ -1,0 +1,151 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+sections: 90
+retained: 90
+files: 79
+kept: 60
+sourceFiles: 83
+sourceBytes: 538189
+proposals[5]:
+  -
+    slug: orca-auto-start-all-phases
+    sections: 12
+    retainedSections: 12
+    otherFiles: 6
+    retainedFiles: 4
+    sourceBytes: 48429
+    sourceFiles: 8
+    recordBytes: 1153
+    supplementBytes: 17304
+    payloadHash: "sha256:69b2c227948291baee5aeff97327bfc64617ffec97a05f8025b19d50ae64bf26"
+    supplementHash: "sha256:ba53d7e5f622ea8912cb7406c155ce022065133da58c605ca700e4cc265c40c3"
+    introducingCommit: "1db913a2bc2a7fbcd97c358984916ee21097422d"
+    drift:
+      ".project/knowledge/decisions/orca-auto-start-design.md":
+        committed: "sha256:9c7fe387a21f330361fbdedc6ae3e59e8c7d4703ae068578e8d2df7b4a8531dd"
+        current: "sha256:899a33b34982f368c840c0dff57a9e3dc70c72b6e519361e631eb2f37f27d68c"
+        reason: One frontmatter related line adds orca-policy; mapped decision content is unchanged.
+      ".project/pitches/_followups.md":
+        committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Reviewed +218/-2 lines: removed lines are strikethrough resolutions for other pitches; this pitch own four-bullet section is byte-identical. Later lookupWorker 256 KiB overflow is separate orca-bounded-control-receipts work."
+    omissions[2]{file,reason}:
+      SHIPPED.md,superseded
+      hill.md,process-noise
+    notes[1]: "Completed review states six files, but cache has eight files and six otherFiles; its substantive review covers all eight by name. No source-body hashes computed."
+  -
+    slug: runner-aware-runtime-boundary-validator
+    sections: 12
+    retainedSections: 12
+    otherFiles: 6
+    retainedFiles: 4
+    sourceBytes: 33491
+    sourceFiles: 8
+    recordBytes: 1281
+    supplementBytes: 8310
+    payloadHash: "sha256:b9140d1aaf1273271a079b5f82acb5711d748dee60d943ea623796e104f77123"
+    supplementHash: "sha256:b175ae15ae7ee7218253e442aab048089dcf2a87c779bbe96d0104a98473ff40"
+    introducingCommit: "1db913a2bc2a7fbcd97c358984916ee21097422d"
+    drift:
+      ".project/knowledge/patterns/a-source-scanner-fails-closed-on-what-it-cannot-read.md":
+        committed: "sha256:60cf6cec5d08d0448e553817b868b052241e7b19ac4749c961b643563a051271"
+        current: "sha256:c2d3063ff1507a458e23dfddbb49a7a72cea7ef1d5d1774dd320ee32f8bf07bf"
+        reason: Only related frontmatter changed; the scanner pattern body remains unchanged.
+      ".project/pitches/_followups.md":
+        committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Reviewed additive backlog drift and two resolved historical lines for other pitches; scanner followup substance remains, including later path/read-hardening work."
+    omissions[2]{file,reason}:
+      SHIPPED.md,superseded
+      hill.md,process-noise
+    notes[1]: "Completed review states six files, but cache has eight files and six otherFiles; its mapping covers all eight by name. Added missing related-records heading and narrative date/pass-count contradictions."
+  -
+    slug: token-attribution
+    sections: 8
+    retainedSections: 8
+    otherFiles: 13
+    retainedFiles: 11
+    sourceBytes: 85058
+    sourceFiles: 13
+    recordBytes: 1131
+    supplementBytes: 20957
+    payloadHash: "sha256:bfbe57eeb143ce25043dd076d4a68f7e754b70aebd0ddcdfd1666ec6ca325192"
+    supplementHash: "sha256:1e614d71441175c9a6b9bcdad3065f801f8c96ffc183e5d5075f892d3a161354"
+    introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Reviewed 32-line backlog drift since v1 introduction: unrelated candidate approvals, two renamed pitch references and appended candidates/ship blocker; this pitch own followup content is unchanged."
+    omissions[2]{file,reason}:
+      SHIPPED.md,superseded
+      hill.md,process-noise
+    notes[0]:
+  -
+    slug: token-time-report
+    sections: 34
+    retainedSections: 34
+    otherFiles: 39
+    retainedFiles: 31
+    sourceBytes: 274950
+    sourceFiles: 39
+    recordBytes: 1127
+    supplementBytes: 25661
+    payloadHash: "sha256:4e32f249752ae50d869c3b2116d182fc2c1d15606d88e9fa856e85a3d5a9e8e9"
+    supplementHash: "sha256:2bbf573b4dd7d76a4a35538c9c980e6992964e9f14702d912e2f21d12766b734"
+    introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Reviewed 32-line backlog drift since v1 introduction: unrelated candidate approvals, two renamed pitch references and appended candidates/ship blocker; this pitch own followup content is unchanged."
+    omissions[8]{file,reason}:
+      collect-historian.json,process-noise
+      collect-skeptic.json,process-noise
+      delivery-pending.json,process-noise
+      dispatch-appetite.json,process-noise
+      dispatch-historian.json,process-noise
+      dispatch-overlap.json,process-noise
+      dispatch-skeptic.json,process-noise
+      hill.md,process-noise
+    notes[0]:
+  -
+    slug: workflow-usage-state
+    sections: 24
+    retainedSections: 24
+    otherFiles: 15
+    retainedFiles: 10
+    sourceBytes: 96261
+    sourceFiles: 15
+    recordBytes: 1149
+    supplementBytes: 24224
+    payloadHash: "sha256:522f862431865ab7eff984cefd100e086502fc8d29d365ccc2ab177d7ab9e4fe"
+    supplementHash: "sha256:8bf5a20df3de0887419373ca174b0903a1cb0f77dc866a7317a54b9433d037ec"
+    introducingCommit: b26b45b0e90ef02cadd850b9c151def287690cd0
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:b5b291191757d02022ed4dc426b4e505f33050531446fe83f557e8d0c135ec10"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Reviewed 32-line backlog drift since v1 introduction: unrelated candidate approvals, two renamed pitch references and appended candidates/ship blocker; this pitch own followup content is unchanged."
+    omissions[5]{file,reason}:
+      audit-prompts/code.txt,process-noise
+      audit-prompts/cycle2.txt,process-noise
+      audit-prompts/security.txt,process-noise
+      audit-prompts/test.txt,process-noise
+      hill.md,process-noise
+    notes[0]:
+live:
+  upgraded: 32
+  legacy: 14
+  partial: 0
+rehearsal:
+  passed: 5
+  negativeControls: 26
+  neighboursUnchanged: 13
+  sourceArchivesReopened: false
+testDiagnostic:
+  tests: 208
+  pass: 207
+  fail: 1
+  reason: retired live-runs.md path; no repair yet

@@ -1,0 +1,1757 @@
+@toon-data 1
+schemaVersion: 1
+guard:
+  clean: true
+  headChanged: false
+  statusChanged: false
+  changed[0]:
+copiedSources:
+  files: 430
+  hashes:
+    ai-framework/scripts/consolidation-migrate.mts: "8374daab56cac02d3bac575fe2191e8b332ee96860aa18a7910e268f4bfd74f6"
+    ai-framework/scripts/consolidation-migrate.test.mts: c35da87119b5eb3cda0c000e31c96d220a86ca7dce1ccf7fe5d0d2449f697ab7
+    ai-framework/scripts/done-work-index.mts: c31dabc332164f6faf4b8e143101b8ffd0065554fb322c8726b1cf7bc387fb2e
+    ai-framework/scripts/done-work-index.test.mts: c5512956180a4be121c15b21098c1a560f09e0dfc03f51ee3006b60be41237b2
+    ai-framework/scripts/graphify-refs.mts: b3d816aa913e16da3d50069cd310a92f83dd3790267d092e9d9e54f6d9f9ceba
+    ai-framework/scripts/graphify-refs.test.mts: "24de7ac954d6d1ffe17de8e028444b9a6dab14f11c030350d1b3871179c3bb3e"
+    ai-framework/scripts/graphify-relations.mts: "188a05a38c3aeb28dff9584d3915ce59436bb13e465630fbbd1181f21f20614e"
+    ai-framework/scripts/graphify-relations.test.mts: "19dc94408c46fe6be23fc62b410bd6be8cdc235ee8b94512416d7e57ba435c70"
+    ai-framework/scripts/installed-upgrade.test.mts: "8abf9eea79de9e02025fa710d94a0886da98b6a2725cd1c88c21c3c5b796367b"
+    ai-framework/scripts/ledger-schema.mts: f3166ed20310c110b53fc2c26d2d55b06acafba4e592eb9124e2f158de54cf01
+    ai-framework/scripts/ledger-schema.test.mts: b9a14c9c0cf5ffe3eb04c53f5b8ac23bfecf9b0459a64eeadb7706cef115a161
+    ai-framework/scripts/legacy-upgrade.mts: "252a77e0bf0e926a812ac082774c4ea09e675716e3125cb4acba3d4a8236a95e"
+    ai-framework/scripts/legacy-upgrade.test.mts: ab7788e9c067f6301f241765cca4cc42e229593094da681406634fb8fc3d8b94
+    ai-framework/scripts/outcome-record.mts: bd5db227978b2e22c4b8842732cef663829fa0f191e6a786f2029a4cdcbe0524
+    ai-framework/scripts/outcome-record.test.mts: "250a6c1e871cdb2332ca8c64ec0733aebad5535880f881786b35db0be5ad1d5a"
+    ai-framework/templates/project/records/shipped/.gitkeep: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    ai-framework/templates/project/records/shipped/_template.md: c1d60dfa0eada8f2eeb3c317ea3dd0173b0b6bfc5695c99ec09273ce5fa90e59
+    ai-framework/workflow/relations.toon: "1b9c854a1b0ada6eb7eede64571065213a035fa270fa45e9bbc32ab31acb896c"
+    ".agents/skills/add-skill/SKILL.md": d7837a88324d9893b33da31c1488e7c70d8ce259f7c0e4a92ba73af5b7c18383
+    ".agents/skills/audit/SKILL.md": "32d867694d321cd0393e17d8cfa4245c7da6e205c61bac9732920f98c8c8cfc4"
+    ".agents/skills/build/SKILL.md": "22595bb21aeb07b260c7b8af5d082516d9367be95959b0d0d4d46416ccf0fd08"
+    ".agents/skills/bundle-sync/SKILL.md": c0c161afa4744901449ad01a0d4563c9072db3abf16c8e4656b9fa0aeb2f1f32
+    ".agents/skills/changelog/SKILL.md": d7d73123e3ffdfc65bffc53eb4f4b793e6b73684f2dd674ab409375491d06fd7
+    ".agents/skills/checkpoint/SKILL.md": "96556aedde6a13aa5fb77e064736cca30a1ab8f92e7be250a89bf17019368a76"
+    ".agents/skills/cooldown/SKILL.md": "3bc26b12ced53b161132efdaf651054ecce4e48a4090dcb0e476480260c43755"
+    ".agents/skills/critique/SKILL.md": "11c21a8556ab25f4afb115f8a14bb452955f63e05388074aec89ab8d6fc9bbf8"
+    ".agents/skills/dependency-security/SKILL.md": e4c1f4cdb80ed3c38f67d3dc53d31c5fb038754fb4b1a01dcc040c403ab513e6
+    ".agents/skills/eval-harness/SKILL.md": "7dc9cab1549371b2b66f0f20b1e42e849deb28966e2457f1a69758af38a0c2b6"
+    ".agents/skills/fix/SKILL.md": "5e2fe2aec889f5bbe6ae7cedf8fa494734e29a5f2b8a70d73f38cb40006ff16f"
+    ".agents/skills/impact/SKILL.md": "938be82e10cfa944f000efc59a16074f731e35a252fc6a01b0fd3b4c172fbbd8"
+    ".agents/skills/knowledge-health/SKILL.md": "427b596f307332471287f33827a3663fa645c9772acd81feb3e5ea4f79e41339"
+    ".agents/skills/pitch-compress/SKILL.md": "3f15f6ee79fbc21807dd1ae81151b0c64294d42a151af34663ae65222dcb3dc1"
+    ".agents/skills/plan/SKILL.md": "123c4edf8cc16034b151526cd004c73ff9cf889ed2dd68a7f6317fc32ad266be"
+    ".agents/skills/resume/SKILL.md": "9f79d5026375dffbb792a8ab1e8c036f971fca0dadcc07870d87bf99df652615"
+    ".agents/skills/search/SKILL.md": "5e18fe9870171d720bd4626230a38a8cf33283337369318a16b84f653eef2b41"
+    ".agents/skills/setup-validator/SKILL.md": cbc5acbfbd37c681cf03ee4b4e8a5904ad82ca9699661dfd5d87dad655b3f7bb
+    ".agents/skills/setup/SKILL.md": bfdaeb0013c1bf50279c5788045f19f9766f0124afdb1b467af7d96c7b513d48
+    ".agents/skills/shape-lite/SKILL.md": "8db611a176e4aa8bce689cb69c5a4744be840a8cee8337c51de51bf06009d5d0"
+    ".agents/skills/shape/SKILL.md": "997e8ffca9913d7750cc2220380d1daaee781c80a72641b24ac5d297d0bb96de"
+    ".agents/skills/ship/SKILL.md": ab3169550c59630fcd76ba82ef7d6a8d4585469d00a237c8edb6d5cc10f84240
+    ".agents/skills/state/SKILL.md": "5826d2916847ad938ece309158a36daf173ea9b5f3cf895b3ee0cb0e7f14cd20"
+    ".agents/skills/switch/SKILL.md": "96fb35be2e5f0df6beb3108aeb6891efa8907d5b43404112c8a3374e4b75a0a5"
+    ".agents/skills/sync/SKILL.md": b5dc6bc484d7f2bdc89c42dc6b55ddf167c41bbc0ca64888215f21247ad23d19
+    ".agents/skills/test-strategy/SKILL.md": "22f0c4819c70efb45ad4d46dd7e86b5868e34466bc8ae3d1d41b62ce5f1e3787"
+    ".agents/skills/ui-design/SKILL.md": "02c16453c5bea27aa35e38099159b5437e2de053a722546385f0f8658ac99e8e"
+    ".agents/skills/workflow-doctor/SKILL.md": ec23c3cddbaf405e4b233e28d44d2b0be1e83fc54ef956c19612da565ce60b58
+    ".claude/agents/appetite-auditor.md": "8eefe2784aa5abe39451f0cf3e62f5547e2f3be6371a365542d0bd42e6776dd3"
+    ".claude/agents/architect.md": "946d7b59066d8bdf600427f9178ba82418c8e552c01e6a2cbabedd312774f03a"
+    ".claude/agents/build-error-resolver.md": "46f47d4b31ad0e42923f4133a4c9732ca470348d8e3878ef82355647a8446fd5"
+    ".claude/agents/code-reviewer.md": "66e01142e0a10ce05e03a117d210181346e4b12e6ea20c0adf9625983151e8aa"
+    ".claude/agents/cross-pitch-conflict-checker.md": e7730afa362b81ddcdd6e6d2c70b7b2971020ab59e1f0b80f8c9707a3f91727e
+    ".claude/agents/cross-pitch-projector.md": abde0dbeb4996ba4711e6691c7d0eb6bdb8afb8f5ffd6c22bcc9747328cea484
+    ".claude/agents/eval-regression-projector.md": bd18787da6bda83fec81f2776511d85045bf9e35d320d9f7f4a9240f59115092
+    ".claude/agents/eval-runner.md": cfea69c7b1e5aedc7d351cfa770f065d7289022973cb66d13b183ad3802ff2d9
+    ".claude/agents/i18n-checker.md": "906c3cda8a507fedce3f0e1f13d96bc7ce8684173af0c457cec67e6003fbf250"
+    ".claude/agents/knowledge-historian.md": df0db5fbbf9bcc9cc1eb54c4b0a877c7974a45f24393d56274a8996d2672acec
+    ".claude/agents/planner.md": "400e2223c32cdfdb856a21f276f63e19f634a57eb7203e3cd6ce23e425d6327a"
+    ".claude/agents/refactor-cleaner.md": fd309d0a7dd9e8c096d7b8eb6deef8ee33c88a48df5a65e0bd0f2b8b7a7b72da
+    ".claude/agents/security-reviewer.md": "47447823a6a9e15b8ca65707847e7c98f2609d3872fade369d6899cec770e2d2"
+    ".claude/agents/skeptic.md": "2d35896e104c4757552fa4c5fa974c6728bae32ab66b26635f0f76283997cba9"
+    ".claude/agents/test-coverage-checker.md": b0e3bcff229aa21b76b21932ac65335f3aea7e7d22c31d2421766c82f1faf08c
+    ".claude/agents/ux-reviewer.md": "08667ce6bf0d9624993bdc74fc2174a748853dee82fb0ac8530eb93a6deec03c"
+    ".claude/skills/add-skill/SKILL.md": "22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+    ".claude/skills/audit/SKILL.md": "9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+    ".claude/skills/build/SKILL.md": "6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+    ".claude/skills/bundle-sync/SKILL.md": "84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+    ".claude/skills/changelog/SKILL.md": "521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+    ".claude/skills/checkpoint/SKILL.md": "6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+    ".claude/skills/cooldown/SKILL.md": cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+    ".claude/skills/critique/SKILL.md": "8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+    ".claude/skills/dependency-security/SKILL.md": "02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+    ".claude/skills/eval-harness/SKILL.md": d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+    ".claude/skills/fix/SKILL.md": "25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+    ".claude/skills/impact/SKILL.md": bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+    ".claude/skills/knowledge-health/SKILL.md": "316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+    ".claude/skills/pitch-compress/SKILL.md": ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+    ".claude/skills/plan/SKILL.md": "0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+    ".claude/skills/resume/SKILL.md": cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+    ".claude/skills/search/SKILL.md": "23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+    ".claude/skills/setup-validator/SKILL.md": "8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+    ".claude/skills/setup/SKILL.md": adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+    ".claude/skills/shape-lite/SKILL.md": "3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+    ".claude/skills/shape/SKILL.md": a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+    ".claude/skills/ship/SKILL.md": aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+    ".claude/skills/state/SKILL.md": "531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+    ".claude/skills/switch/SKILL.md": f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+    ".claude/skills/sync/SKILL.md": "1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+    ".claude/skills/test-strategy/SKILL.md": "077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+    ".claude/skills/ui-design/SKILL.md": b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+    ".claude/skills/workflow-doctor/SKILL.md": c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+    ".codex/agents/appetite-auditor.toml": "950d04aa91809e1f271fd4161def233e2af6cc381f0b3d24a1385b0adee06674"
+    ".codex/agents/architect.toml": "5c7268383d8d443e5426d197674a308d31b26bbb71bad9d83fbc5d1fa66f53f1"
+    ".codex/agents/build-error-resolver.toml": a7166d2de56ac842a4c3a362df329e7b5a0387ac7f15db29a090493afadce997
+    ".codex/agents/code-reviewer.toml": "3c379b174dfca92bcbda008e61263a758ad48922e3bf7ba70d532e4637fd6eeb"
+    ".codex/agents/cross-pitch-conflict-checker.toml": "24af3aebd95784bb070de363adbbfddc553b4ff899b30b023fa85dd47cd510ac"
+    ".codex/agents/cross-pitch-projector.toml": "0d93072027c5325becbee585659ce3875662a92d085960d82b30bf4e97029ff2"
+    ".codex/agents/eval-regression-projector.toml": "02937025ec7da86f92f736d0649ab68ca2e495a2d83b850de289347a4ffa9d76"
+    ".codex/agents/eval-runner.toml": dd5f532db6ebf0ca3e3e10b0ee80ab846b8c2f308c589d71bb191e24f702f7fb
+    ".codex/agents/i18n-checker.toml": d8af2b2e17ea0180f613b3993132b55cfefe29fff03bea47b5fe1a4a8d9f78f9
+    ".codex/agents/knowledge-historian.toml": "7353de3fce2134043bce9394f9babb2b7ed87d9cf45486d8a60acccead569248"
+    ".codex/agents/planner.toml": afbcacc2e157d89bb225173118d56f26b28209d118555a65549f69a7e3d4e7b4
+    ".codex/agents/refactor-cleaner.toml": a56771324bf3eb9307feaa5aab560171de5edc7b8e4c918882a389520452aa81
+    ".codex/agents/security-reviewer.toml": "824ab52cf562da785219195aced4b87c820b79d8c18280a8c518dad9e44cb6ba"
+    ".codex/agents/skeptic.toml": "98fba04902c641565ba9c1fb5b00c472bf2249d4f37c03d2318e8c9218255a05"
+    ".codex/agents/test-coverage-checker.toml": d61fab07a844c551bbc5fb82befadf97523532f6c84b065f2c9c0f7446586fb2
+    ".codex/agents/ux-reviewer.toml": b19e62df117ed879d75b166c9ad8ac85a63c776c21aea200ed687eff2a654d29
+    ".cursor/skills/add-skill/SKILL.md": "22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+    ".cursor/skills/audit/SKILL.md": "9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+    ".cursor/skills/build/SKILL.md": "6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+    ".cursor/skills/bundle-sync/SKILL.md": "84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+    ".cursor/skills/changelog/SKILL.md": "521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+    ".cursor/skills/checkpoint/SKILL.md": "6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+    ".cursor/skills/cooldown/SKILL.md": cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+    ".cursor/skills/critique/SKILL.md": "8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+    ".cursor/skills/dependency-security/SKILL.md": "02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+    ".cursor/skills/eval-harness/SKILL.md": d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+    ".cursor/skills/fix/SKILL.md": "25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+    ".cursor/skills/impact/SKILL.md": bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+    ".cursor/skills/knowledge-health/SKILL.md": "316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+    ".cursor/skills/pitch-compress/SKILL.md": ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+    ".cursor/skills/plan/SKILL.md": "0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+    ".cursor/skills/resume/SKILL.md": cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+    ".cursor/skills/search/SKILL.md": "23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+    ".cursor/skills/setup-validator/SKILL.md": "8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+    ".cursor/skills/setup/SKILL.md": adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+    ".cursor/skills/shape-lite/SKILL.md": "3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+    ".cursor/skills/shape/SKILL.md": a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+    ".cursor/skills/ship/SKILL.md": aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+    ".cursor/skills/state/SKILL.md": "531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+    ".cursor/skills/switch/SKILL.md": f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+    ".cursor/skills/sync/SKILL.md": "1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+    ".cursor/skills/test-strategy/SKILL.md": "077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+    ".cursor/skills/ui-design/SKILL.md": b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+    ".cursor/skills/workflow-doctor/SKILL.md": c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+    ".gitignore": "6b3798fef1a85f421f9564c35574dadfe7a6dde8e98c5d585566081e64c99bc0"
+    ".graphifyignore": ac41f08adb3b692d4c61d68cd51e1e878b3d33fb6dadf19e36a8e1f644a57771
+    ".opencode/agents/appetite-auditor.md": "6067c968c076d1557bf53e539aa56cad16d9eba9b3dc91d6b8b95c6bc90a73b9"
+    ".opencode/agents/architect.md": a7a75598b94225f54361631692f8e3be28797fe8731bdd9dd8009afc494a7656
+    ".opencode/agents/build-error-resolver.md": "3c4bf7b9b2b2b4cde6aca86250ed2555a08e59ca2ec13b901baf219f4af1dea9"
+    ".opencode/agents/code-reviewer.md": "4b6b95d64769f432c9291f4523fc4522fcb5cc2d08374a74765b806d693f53ba"
+    ".opencode/agents/cross-pitch-conflict-checker.md": f3523bd36501b3608538950dd48a66a644aefe2202eefd5f82ad8d7b5cfdbbf2
+    ".opencode/agents/cross-pitch-projector.md": "05d3000704c89550343a1122d122413c5fd05dbf45d59c4ae7008a27840aef2b"
+    ".opencode/agents/eval-regression-projector.md": "6a05af0ff60fc3abcd6e1c230a939e18545b729e5a3bd5bfb8254d9f806728f4"
+    ".opencode/agents/eval-runner.md": edf8c488ab98d58beeab95232f0a8c1e2c44f93ab09cf07d25b467fae2e887bb
+    ".opencode/agents/i18n-checker.md": "76c389a7d9169320935a24ca220ea89bb322ff79ff8f028b3cf5014cf0ebb22b"
+    ".opencode/agents/knowledge-historian.md": "78decb1d8fffe8db93a067a889253d25089009cc2e94753dd23c2ebeb81ca6ca"
+    ".opencode/agents/planner.md": "4593b7f3308081e1acfcb26b8c5dc92377e0440e2c0e1bba428ff597c2fdffdd"
+    ".opencode/agents/refactor-cleaner.md": "0187f37319a323c67ebc5268429cbb414f4250f9bf48765940c2987e1e3d546d"
+    ".opencode/agents/security-reviewer.md": df8da747d2e84db26c5d2d68740c696c5c151c62e220f864ed8faab7606fec8f
+    ".opencode/agents/skeptic.md": bd8114fc3a698beabfaabbca4101d8ac857841b6545d3de286fb56113d21c44e
+    ".opencode/agents/test-coverage-checker.md": c638436a5fc9613c1e2264af2d79340c060d45318100eda91c4fc7d052b505e1
+    ".opencode/agents/ux-reviewer.md": e1746aebefb0fdaf9e018dab630c3b02fab47abf9f98991e786080588b361c99
+    ".opencode/commands/add-skill.md": a24a853b7cfd2648bc3c6c7e5faceb503367a41125546706dc2e5c1a58eaefa0
+    ".opencode/commands/audit.md": "3e1d85c40b6ea6c9affc8abdc69b5a881824144d30f76899f62aabbafd6c9632"
+    ".opencode/commands/build.md": "161f807562f1303fd47e46a9fd1e78d477cb0195e53d750fbb6c729b2fc7b9ed"
+    ".opencode/commands/bundle-sync.md": "4027c20d5bc08abc8d266eb680535984cebb21e49b365cefd4416ee869687c3f"
+    ".opencode/commands/changelog.md": "28e390fc6fe6abcc2ea11b9118925b96dfd04d55d266499d1b2db84c6808bf83"
+    ".opencode/commands/checkpoint.md": "35cbbe83dfb2d5a2b1dda2a755f96362bb0e5e92fba60cc19af464d7b967f51e"
+    ".opencode/commands/cooldown.md": e03ff5f42597a08f31d57c2f7394404b6e90b91ea0d6f73d649af3c8b45e3e97
+    ".opencode/commands/critique.md": b49ad5e6d69541594a3368923f0031ffe9a148862ee34cc75ea18da013d36cc4
+    ".opencode/commands/dependency-security.md": "6222354d4bc3a9d52b0e0f4e036c6c2e7712ec609b2b6bed19a3fa9fb358c7ff"
+    ".opencode/commands/eval-harness.md": f5af146facb0ffb883a2747abcd315e59c13280e81a7e7c2cf5680f9a01211fc
+    ".opencode/commands/fix.md": d878f6ca6b857e220cab43eeb2aa518c28cca99a099c1fe9aa4598b32e6a6d76
+    ".opencode/commands/impact.md": f068a208d34bc0ffed2926c61eb1a0c2f4e39d524898ff34c2a46535405991da
+    ".opencode/commands/knowledge-health.md": "47bf002b60af30a0792015c940b7fd469a5d182f6919788174762072ce009c15"
+    ".opencode/commands/pitch-compress.md": "840e1c204edf6d9b480f627742a7cf28bbe3eb587239dee529396f943d36bfaa"
+    ".opencode/commands/plan.md": f5663a94fe039dc833ea7ccf34cf219e18e5b3bd30cd5bf7735e132c31f789f2
+    ".opencode/commands/resume.md": "23cd3ebf64dcbbc4c5d85b7bbd7cf1168e33c41a7506e17d13d3e923ef33efaa"
+    ".opencode/commands/search.md": "8c5d195c865f7f5f3e7b85f94134e8fb3d693ad136cd43c3e98804495a430957"
+    ".opencode/commands/setup-validator.md": f91b775bfdc4a5ce9c0e9ed72f112aae4d419d2de07b04aeff2fe0cf02ef91ec
+    ".opencode/commands/setup.md": "1f0112b7797923d620a08020802fa6e702b79a34051a393abcfd674de2d56b72"
+    ".opencode/commands/shape-lite.md": a62d2cce2677a5d29cc0bdefc1034dab7d560e9e33b73d9a9464cb1c71787b0e
+    ".opencode/commands/shape.md": a9c091ed89541016e40502a8458e83da5d8dfce072a6e04d8c787afbf301069b
+    ".opencode/commands/ship.md": "0c854ecb8a070072dd97d30e90cbc5fee3c90ae756dc11467ba4f1a108ac69a8"
+    ".opencode/commands/state.md": "6d860a5ee9bcc56943462b62e37e858cc09430fabf89f2324c98578a2794a419"
+    ".opencode/commands/switch.md": "6d8565bf8f0b85fbc241cb3de0e389abec959bffb796e84e58678496f26e979d"
+    ".opencode/commands/sync.md": "814817fd48af767c8b75b0a89e17970048d4fd02d59f1ad71a326758fc505886"
+    ".opencode/commands/test-strategy.md": da062c2b25400b88e5d218e9b500b2a9c6a3502a3c02091a10420536597c7bdd
+    ".opencode/commands/ui-design.md": "9f903532327b2af84c6e45f66ad4df50bca414c16d6c2ba6fef18161cda73e6a"
+    ".opencode/commands/workflow-doctor.md": b511e97fa072cb1619d8e2b0c5c100172d1b59d5bd8cbf67c63be21d8c505fa5
+    AGENTS.md: feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+    CHANGELOG.md: da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c
+    CLAUDE.md: feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+    README.md: "8b7cf7992df6b7c5401c418f8b87a8efdd0aa0399c046b12c34b7e27c3b9804b"
+    SETUP.md: c1e234187bd02dc51bf42662ba6a41d6ae57595d5529301d3ecae36c57f8817f
+    VERSION: "9bd51d4120f0ac96a8e2e9f9a3e68e8175db7659324704ba2306aa682dffec33"
+    ai-framework/docs/design-notes.md: f4141e7d74b56f20e8e2deec14eb19baf5dbe233b925183025b9ebb5c848f54b
+    ai-framework/docs/extending.md: "935499627ae1c09fe618f9c8736e66b3df6aebed4ce14206448e283949c7588c"
+    ai-framework/docs/knowledge-graph.md: "6a98e9fbf1fe90fdfd712504403ac3faf2e7e29bf7ecbbfb80fb18f74b83ce1e"
+    ai-framework/docs/pipeline.md: da7eb210d0263bf82b2a3f4de8046a5fe396623a7006aefc748dc09b2067942b
+    ai-framework/docs/setup-validator.md: a616b2971976374fb0987ac53d0ec5cb641a39260b194db2b0a2125f1501302a
+    ai-framework/docs/setup.md: "9792b1079b82f19e46ae3338cb01b2eb55823394cffc69ceda5aaa157f1c11ec"
+    ai-framework/docs/testing.md: "2c6d49b64898f9b30250f07fa55ab7de29c4b5702733280595e304a0e209ef95"
+    ai-framework/docs/token-consumption.md: c3c0b442989f000c323e851044f10c26b5c9bf065546d7734eff4bd0249132cc
+    ai-framework/docs/vendors.md: "144911290b522d3ac1356d6d7f3de538a7fd0ed2b4fdac8b6cf609827b5d458e"
+    ai-framework/docs/versioning-and-sync.md: "6993335e25990ee864d5050b8dad9e15544813c6ae4cb1ef3eff89f3e9f53e5d"
+    ai-framework/docs/what-you-get.md: "7cb906b4029ce8d6b8231c60f88ec3d6ac22cd61db77728939b1262a730c0c7b"
+    ai-framework/docs/workflow-doctor.md: "2a435ab9db182c9e251775e4961210db2b93e4bf2ecf50d7b183bacb79cf0b2d"
+    ai-framework/hooks/hooks.json: a043f76bffe935b69ffcde83f8ee411ac0c8db390bf1e0b5ca0a515481aeb738
+    ai-framework/hooks/scripts/metrics-lock.mts: "3735953435a9335c986077b676249ce84eb4c700c47842490a17738fbdc302aa"
+    ai-framework/hooks/scripts/metrics-lock.test.mts: "64e98bcad00c630660891a4c337ae6f93871266ad2bd380ff7fc97cd0c7c0ce7"
+    ai-framework/hooks/scripts/opencode-plugin.test.mts: f8c3cc0155dd27a1d15edc3a8eac8673625d4e974407dd9a670d64a7f6329323
+    ai-framework/hooks/scripts/orca-start-codex-hook.mts: "04d1db5cbabd8a2d92c74ace3c4ed18aecbd86aa5e0d82c1ec5983d878bec9a5"
+    ai-framework/hooks/scripts/orca-start-codex-hook.test.mts: "23b7dd3444ab20ece59faaa0e6ef9aaa8324c8c6afe46be288d241036a2feb06"
+    ai-framework/hooks/scripts/orca-start-hook.mts: "37908c66cd1044e2e1b9b84c88819d495d1c8c2d7c1de18e8485700e0922babc"
+    ai-framework/hooks/scripts/orca-start-hook.test.mts: "5f08b7a54a819b2aba16a6443110020d50e2c73c54eaa7a32738bc3dadb2c83e"
+    ai-framework/hooks/scripts/pre-ship-verify.mts: bb32bd2d5885a9589c0e2ae2247dfc4db7d7ec5a891e4548e752aabd9e877e95
+    ai-framework/hooks/scripts/pre-ship-verify.test.mts: d2fb5a3c8fc8ffc4beabe8ef6f7a8b1335f6fe6dc0f6ce35cba98a8e4d7c3ca9
+    ai-framework/hooks/scripts/stuck-uphill-detector.mts: e3eea81bca629bd8ed4a4c6fdafd1c132b6e210814c64ca1a8b4dc7afd0807bb
+    ai-framework/hooks/scripts/stuck-uphill-detector.test.mts: "555391b2434a5c7b990b50c9f0f44706f538fd65403c8c0421b2dc6f266dba70"
+    ai-framework/hooks/scripts/token-consumption.mts: "59019aab893efd99e20ef3a909096811f5cd05c73d1a7444db32e6e9070b260c"
+    ai-framework/hooks/scripts/token-consumption.test.mts: "9f2af606afd074ef84d734f79c116f6dc63cb2256d4fbde616e7d15b315e3fe5"
+    ai-framework/hooks/scripts/token-report.mts: "16132e33e16b1758b46a82e5cb7f4f8b78f972d29d8491dcbc0fe3e14761780a"
+    ai-framework/hooks/scripts/token-report.test.mts: "25261c9a3edb5c9ea11a6f50e548cea6987101c05b7dd405915e888ef78b40a8"
+    ai-framework/hooks/scripts/transcript-usage.mts: eb61d064e51ec7dbffb15df93fa4c821b6abc9cdf5b3ce1e49000d8e14c75c6a
+    ai-framework/hooks/scripts/transcript-usage.test.mts: d4f44ff24e69030a64474238d7a628a8d3554b320614e7d827426edfb164d612
+    ai-framework/hooks/scripts/workflow-capture.mts: a405d52d6789dfabbe86ed697c459c96c24c8b862b75870fc106f3b8725cbf58
+    ai-framework/hooks/scripts/workflow-capture.test.mts: "220a5ba991285e67165c0f26b73260aaea3c5a64065badb3df21d3ef657e0b78"
+    ai-framework/hooks/scripts/workflow-notice.mts: "78922fb86d1dd5370c70186eb50f6e520808496d7324de0e2a8c3529e8b631b3"
+    ai-framework/hooks/scripts/workflow-notice.test.mts: "71df25da12987497f1bfd071ce6ded207a08f1678927bc7d24b360266fcca6d4"
+    ai-framework/integrations/harnesses.md: "0ef7fe3f102503aca042746a339479b83724bcdf36f72dbf86ecaa8fe843b827"
+    ai-framework/integrations/orca-vendors.example.json: "9b02de69ebc7d86ca64b3a91b03722c22b4b51c83df30d88b58a31e077c0f24e"
+    ai-framework/integrations/orca-vendors.md: "80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+    ai-framework/integrations/skill-defaults.json: "68df8f9dbe489506898f1c7468ade4264b7185c782ae4a67220702db1e251c31"
+    ai-framework/integrations/skill-defaults.md: aed215e20cfdf1fa4ef52074fda880603e491694f2ba47028c0bf2423afaebd4
+    ai-framework/integrations/skill-vendors.json: "984d7f2969bd6e7556604df438ab867002efd10341a01b6f0bc3eae4d8b436c1"
+    ai-framework/integrations/skills.md: b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403
+    ai-framework/integrations/state-report.md: "2f7049c70c92d2209186632d3b9bc79e126f6bcffa75c43b99b75edac8df8dcf"
+    ai-framework/integrations/workflow-metrics.md: dcb13ff9d2c8438df62dc7bf677f9fabbaf5d5f3caca2ad804241fbefe23bc0a
+    ai-framework/rules/boundaries.md: "61a96a6c5f0080cc76bd9ed36334c5b7a78d4d9fa26ebfe99ce746a468d4256d"
+    ai-framework/rules/canonical-mirror-sync.md: f7b6f1aea6da8ac7b632c17c9a8ff8d9f1a0c52e2cb23dbd34698007ad0e4d36
+    ai-framework/rules/ci-deployment.md: "057352139e4a49be9f14ab4a768a5506a7efd9b0b898b49a32a214bb306d51e6"
+    ai-framework/rules/coding-standards.md: "8cf88955b0a5875c55cfd289a34d1f3e095ac82091ed43c5ac9bdaeaf73fc87c"
+    ai-framework/rules/component-architecture.md: "29f3a8bcd7448f9baf7187c117627c9a00401d79dd346b6c7a9ed58e6592b6e1"
+    ai-framework/rules/context-management.md: dc17def4e97dbcb6ddc830b0ffab9e4e34e47337a743d3b2f25a924b69ec2355
+    ai-framework/rules/data-modeling.md: "770be714ae5704510f8eb281d490775b9360d6fb0eeee1ba827a9f35199f6faf"
+    ai-framework/rules/eval-harness.md: c4d2d61523679b9916c98eac78503a7875c6e16f2fbdf0acdbb15ed3060c07c1
+    ai-framework/rules/i18n.md: "0b01cfaa7a5ad3a55fcd5584768834c7b65d639bfb3ad3e542436df34ccbb3ab"
+    ai-framework/rules/machine-data-format.md: "4d1812f421e26771ae07e526dd0cd15f60315d8a1e7a7a3cf6348560b21a1d3e"
+    ai-framework/rules/model-routing.md: "808a11a5bb154f60185c7aa89be669f6cc36e2ac58e6a2f74c1bce9a53747eda"
+    ai-framework/rules/observability.md: "1a9dc8f8b13441fc0fd90d0da0d3ebaa1a4bde7e2c216db3a119b5a321e57fc7"
+    ai-framework/rules/performance.md: "96a68ddf97587c6e30246a0168c2fba4e7253eec5981b742ec89af9a4e17252c"
+    ai-framework/rules/security.md: a4ca5b64c845bceee7c022cfa71af90d30524183e84bab40fee0b6adf1bf98c4
+    ai-framework/rules/testing.md: fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4
+    ai-framework/rules/tool-use.md: "502c479b4fde12525f8e612c6580e133efb1000829f77116a68811415826268c"
+    ai-framework/rules/ui-ux-review.md: f44625f2cb8a7f615e22de2902d572d46056ae31894c19cf83b66e259d98a1cc
+    ai-framework/scripts/add-skill.mts: "139e28020ea1e8364a5b1a477ebd04a3c23131752abb622a2a63ee7ae0b5c2a1"
+    ai-framework/scripts/add-skill.test.mts: "457362b3cddaac608c53e900b8f58de0f64e74baf2341a1c467ada4a03b30a05"
+    ai-framework/scripts/agent-frontmatter-invariant.test.mts: "6cd46140d41c9a829d0b257e289d13097db9e4c70c6e3b37a90857772859d62c"
+    ai-framework/scripts/browser-runtime.mts: "1d41e97b1f475de584753f75373da01ed5311ae34e7d8aaad84f7fc048b30b1b"
+    ai-framework/scripts/browser-runtime.test.mts: f887f452e1f734435b74d1cccd4e97d1161d5efbe962d8e255639214e3c04f9e
+    ai-framework/scripts/bundle-sync.mts: "4e85d956e280ae4c699903e2373b67b55200f2f4c29ea1379a0bd9a8978ff8b5"
+    ai-framework/scripts/bundle-sync.test.mts: "082b41ffee498dec13f5d70a5cd6dcbcd5dc60ba6593d205bc012713c213034f"
+    ai-framework/scripts/changelog.mts: b6dcc744ccd1da5e621fb3298d9fc2d2b67fdf64ccbe45fc472724922207880b
+    ai-framework/scripts/changelog.test.mts: "9f9d8de5c8bd881814a59fb817a6e3d92bcedec62519ab48a3dc8474fbc863ed"
+    ai-framework/scripts/config-migrate.mts: "522e406ba032d4de9914926abf0eb271d6b6d16b32dd5801791230ffc90d8e34"
+    ai-framework/scripts/config-migrate.test.mts: "09c90a02536f7e47ca8b73d82252dfa84ff1b11240f668738c29dfdd5c07f130"
+    ai-framework/scripts/docs-links.mts: "69d9231c293ea15ba740d6584f8437d2b100029050c41290a9324030046e3ebe"
+    ai-framework/scripts/docs-links.test.mts: "937774f162075024a1f2bfa68bd358836cf857a9f368cb449da78d5da95b6736"
+    ai-framework/scripts/entry-import.mts: "452a6e05b8d92e1f8b190d99160e434b86f73a228bbc3bdc4f52359c8bfe42d4"
+    ai-framework/scripts/entry-import.test.mts: ffd52ffd00f1459122060619309860eb6303dada847ca74f15b956ab108005dc
+    ai-framework/scripts/flow-join.mts: e260428733adcbb214c2753725b96db55d592826e4de3a1245b28487bdb69149
+    ai-framework/scripts/flow-join.test.mts: eb3f5f8281342cebd51779c44aaef8a728dabdc29864b2161f0fcbce6d4ae628
+    ai-framework/scripts/flow-render.mts: "8781e59b3fe094be1f71c6f227d8440df70dcf7415ee13f0435e9e719735f482"
+    ai-framework/scripts/flow-render.test.mts: "43264ce93320730f34547f1c0a9d971622248e5b8cb11c0d68fd3c239175a967"
+    ai-framework/scripts/flow-report.mts: "452f07f06a6d57b268b53afbf80ef7ac5f4d94219998f2ace8e691d370376bb1"
+    ai-framework/scripts/flow-report.test.mts: "908fb93e9f9b46d7a04f6afd952368db777beaeeb32713bfdf7d4d5493bdf0fb"
+    ai-framework/scripts/graphify.mts: b15b994c411783aec7e8dca621088c9f9bef175688438eeed6ae4fe301801cb5
+    ai-framework/scripts/graphify.test.mts: "1a4e95b3e13555004842b9af5c43173d356e2036a31e3530a40a0d851f1bda36"
+    ai-framework/scripts/instruction-loading.test.mts: f430f3f61e72e42be161a10f8331965a6ee462a44f086f63cea25e0b8aa9039a
+    ai-framework/scripts/opencode-service.mts: "6f20412410482657070a033d5e9309b7dfa6d9904245c25d9253ff25be39c003"
+    ai-framework/scripts/opencode-service.test.mts: f74ae7c9c1d95ab13c00f087a7667082aa5f314aff5baffc311a3dbd036ec38e
+    ai-framework/scripts/orca-apply.mts: "3031386c17d1941e899ba565a5ebab6cc8e1cfb9ff280bbca6cbebe3e766af26"
+    ai-framework/scripts/orca-apply.test.mts: c677d2be9887b8d325f2a1b05035cec07d0b146c236fd8c724b4a7d4b6c73834
+    ai-framework/scripts/orca-assign.mts: c90ff858e73f04328917eda589f904a0eb1d96643042eb8a1c87499eec90d052
+    ai-framework/scripts/orca-assign.test.mts: "139c68c878e6ea6dc5a97d7b269b09491474e32b97bbd48f124efce11669b3ff"
+    ai-framework/scripts/orca-diff-admit.mts: "1cda46e26b9a70a74753207b341a640b0cae42704002395f46fb4773277739b0"
+    ai-framework/scripts/orca-diff-admit.test.mts: "3c337c6545bf846337d38635d810e220ace7fd2809dd718906e167c2b842a1ae"
+    ai-framework/scripts/orca-dispatch.mts: "6ba5efb1e870eadfbf279f58353007188d72ae839afd4ec1f01076d5bfbcabe9"
+    ai-framework/scripts/orca-dispatch.test.mts: "2948ecc2666aaeb54f139b074696ed68087f57fe5ea1649f03fe3a9b79b6ad19"
+    ai-framework/scripts/orca-eval-grader.mts: aa4793bed42f7fb6d72580a83b18e8d10660ac239908f4e8c5eaa6135045be11
+    ai-framework/scripts/orca-eval-grader.test.mts: c761186bc2e975446314af94fc10a62a0d4c793223aa00b9e3ac7e22b358c1c0
+    ai-framework/scripts/orca-evidence.mts: "490ba3b395e1990dd2a52ce5b7d5732d734e59f65f154cb6b11308289952bb43"
+    ai-framework/scripts/orca-evidence.test.mts: a39f7617c926eb5ff76bff449a901efb484a391eeeb476b645ba649309ac3035
+    ai-framework/scripts/orca-launch-gate.mts: "6a1af51f400040781fc0ded7c9395b35c8bdfa94af537af46acc312092927e92"
+    ai-framework/scripts/orca-launch-gate.test.mts: d4d1e01fdb9f4e4b0f191966e3d0907b3ef1a28f249c3a4882e09222187eb0d7
+    ai-framework/scripts/orca-ledger.mts: fc0b481f7cf7608bd33bea386cef60fb70b24a526ec3f914a2529572dba3e333
+    ai-framework/scripts/orca-ledger.test.mts: "2e287dc27fc617085cb3d0867396fd6ca0d98c056e0a24d6167b73ddb2b9029f"
+    ai-framework/scripts/orca-policy.mts: "60cd83f4c6b47e10eebe48b9a4b156e4a535c249652f3d2dc3258d8ecea1a569"
+    ai-framework/scripts/orca-policy.test.mts: efecdef629d7e758cea86b2256c2ca10450e8b3feec704c5462928b5ae002f44
+    ai-framework/scripts/orca-preflight.mts: "225837b18440d8ce273ee4c4edda1fbc0a8121523a74649cd51318cc9df2c948"
+    ai-framework/scripts/orca-preflight.test.mts: "64d7548c38a5722b1386bf92533b8223944198b91025ca31c72783a22874d794"
+    ai-framework/scripts/orca-reconcile.mts: "27e707fbf19796e650cc2cb1a84d4eb1c9ea114972f11e8dd7e245b209dcde5c"
+    ai-framework/scripts/orca-reconcile.test.mts: "6007c462299b3ecbb30c05887a4fd3a3cfcbc595de145e88808b2354bc1ec9c6"
+    ai-framework/scripts/orca-run.mts: "5c0e0b1fe0f530d23c037133a8ada8a4623ee87e337e587c1443fe7354ec6b74"
+    ai-framework/scripts/orca-run.test.mts: "6c1da356ebacebb46a888d7c0893a00eadbf1c54d65435822e62364f5e0dd75f"
+    ai-framework/scripts/orca-start.mts: "2dab69fed6ab26485bfded1face68a073cbe7fba7f1eb15e9c836188e7575ac3"
+    ai-framework/scripts/orca-start.test.mts: "4e9be424f41695abde281336fbc8a9409fe8be8e8cbb0b50eaae2525062d9496"
+    ai-framework/scripts/pitch-archive.mts: ff8bcc2ab1e404be5647bba6c4b0170cdc692615680b8cbd0832854252be02b5
+    ai-framework/scripts/pitch-archive.test.mts: "5daa7edc577b9cc06e575850254d1922b19f5e25cd499d55153e249189b03eca"
+    ai-framework/scripts/pitch-compress.mts: b65221150ec1bb998c393065d7f9f24c74e79f86752b7d6e9d5a337d347835fe
+    ai-framework/scripts/pitch-compress.test.mts: "9b951cd36bbb9820aadaf251458aa4cc984e8d1331295cfa0efaf7f2273311dd"
+    ai-framework/scripts/review-bench.mts: "02a4a38ff2811ae851b2d3f3248f1b1e2a197516f99ec259d491ea8441b9fead"
+    ai-framework/scripts/review-bench.test.mts: "0cbf0dd552002ebd9cb651beafee114e146b06e22365138d8de0736b02ed04a3"
+    ai-framework/scripts/run-tests.mts: "6b6202eef04a7337cf30b43e3b651635b7c2e3dc41335cd2f0010b5a6e4799a7"
+    ai-framework/scripts/run-tests.test.mts: "1b585a4f2d2d8ad77f812c4293c9e39c20924af84752153428a0dc9cf9c8362c"
+    ai-framework/scripts/runtime/README.md: "4beec211f68764c4a2b219aad3e50fa1a0bfe0e4bd3a31434da9d323d922de20"
+    ai-framework/scripts/runtime/bun.mts: "489795f0d02a8d4091e13602a21ede6d0171760e1acdabaa4635f9cd84a2d5ec"
+    ai-framework/scripts/runtime/cli.mts: e11c515cba0a95bdccf04572f32b3c952380ce711bd86ab36fc043ead18ae78d
+    ai-framework/scripts/runtime/config.mts: "0f305a481661cac02b794f88be45f804956de857d7eebcdd7f4a7896a6962980"
+    ai-framework/scripts/runtime/config.test.mts: "9201ce7e1817efb1f9fcc6de062d4f170202b1a8f4465b4d3723960881aac5b4"
+    ai-framework/scripts/runtime/data-file.mts: "929d6240eb82a5efabbf3009d9f3fd0c5bb0612a928379b952aa9c82d17e1a75"
+    ai-framework/scripts/runtime/data-file.test.mts: b431039c1793ceb7d99844ac6005bbc6802348d7a19eefd6a5ed7a56f5ffcf78
+    ai-framework/scripts/runtime/entry.mts: "62edee638b130c9eaeb2126c30467928509e3eb73c1879403238ab1b8e25698e"
+    ai-framework/scripts/runtime/entry.test.mts: "369aa62e6f5f20c141b05b75f4ca757a0d890252db942ffb8c5e2fb8678cccd0"
+    ai-framework/scripts/runtime/env.mts: "6c6a09653c454bddb7a4b5c3769633eb087cb18b9bd904f0065f7ba03ba82c6e"
+    ai-framework/scripts/runtime/invariants.test.mts: "232159017258e7e183d824725dfc68fdef8c31e92e01b9b4d0b79059e2db8bcd"
+    ai-framework/scripts/runtime/migrate.mts: "617f10fdcd383f80330305b5057a90840ad8b4c42a4e18ab2c7f9044b0ec8c3e"
+    ai-framework/scripts/runtime/migrate.test.mts: "9d8e84638c35ea3ad7fb8f4b8495c45000dc02c74965166c09c9c9d250a8f599"
+    ai-framework/scripts/runtime/node.mts: "45c1551bbcbc52e63d54eaae9973bc28dd25628bd63797fd5757909102a4a2e8"
+    ai-framework/scripts/runtime/oex-lock.mts: c324476014d7feb59452c50b17ec583450d140ae224cdc4cb6191d64a15f17dc
+    ai-framework/scripts/runtime/runtime.test.mts: "1a6216d224eb259bc93b316453a7805a47fc1f412f7cba30fc9cdddecc8273c5"
+    ai-framework/scripts/runtime/select.mts: c68e5af73849bc642305cc341392bba7dc4166f270f43f1a083f15dc3856f630
+    ai-framework/scripts/runtime/semver-range.fixtures.json: "4c127de6e98037f31ccbc74461bfe97ed07dc471af893d7f16dc97cb220e30be"
+    ai-framework/scripts/runtime/semver-range.mts: d06baa220e9a3a4646c9e97aadf39d4ac8e57cfe566614f3c54ab7af1fb8e80c
+    ai-framework/scripts/runtime/semver-range.test.mts: eb164fc979e9a434e682ddd283db3696f02df677d8a4af139f23da4807a9e7c6
+    ai-framework/scripts/runtime/test-helpers.mts: b87441e3dc5d1c223ac7db566afbe5ec367248b4a4f8285485c9bcdc5d85994e
+    ai-framework/scripts/runtime/test-helpers.test.mts: a320f8e7c4ccdcc72f92527d93bcacee0fc2a2144d46dac43ff7400df22249c7
+    ai-framework/scripts/runtime/toon-data.mts: "3c2c402934a07b7da5056d776d6fa39091182102479fed9a349bb27e1191012f"
+    ai-framework/scripts/runtime/toon-data.test.mts: fbec4a02e85e04c7d6c2313e0d9aa4de133c306bc222ddba49f99c425dfbd60f
+    ai-framework/scripts/runtime/types.mts: "29992cf482d689126b23633194750fa28a3bfaa6143d9f12045a5a78a7e6a0b2"
+    ai-framework/scripts/runtime/upgrade.test.mts: "77153c81dae500255f9ad0adb922dbaec46de46953347d55d0d97ef69b34c66b"
+    ai-framework/scripts/runtime/validate.mts: "65576f08658f62fee0d4742006e95db894bf248a4654418782b9a2be25afeb7b"
+    ai-framework/scripts/runtime/validate.test.mts: "3576a389182adc50dc05794f6e78e6e6e095e48714f225b53c0090fad2cdd1cc"
+    ai-framework/scripts/setup-validator.mts: "132ff8995b1403b7ec479532df71b39aa69b4a1a337a1102c3c0e41b3ffce321"
+    ai-framework/scripts/setup-validator.test.mts: "66476d0a0301f33325623909ad510938b6bec2a7fdd82cb16e60d3fe35cacc2f"
+    ai-framework/scripts/skill-compress-guard.mts: "60a9c252d6955a33206db67477995a17dec245c4101d7eed2ad9eb736bc6e46f"
+    ai-framework/scripts/skill-compress-guard.test.mts: dce94212236ac8bdb5642a648561be36b4b7af2b72789195e546555e5f363466
+    ai-framework/scripts/skill-defaults.mts: b0d1faaa4d8edf3a983ac1fc054ae39994a3687e94c1bfa11bc3e582811d1955
+    ai-framework/scripts/skill-defaults.test.mts: a712181bb389e4540f3068fe4ef25a2bfd00c397ae4539798269f71aeab8115b
+    ai-framework/scripts/skill-registry.mts: c88bc17b9a056febaa298a62f5aa1ac83b6af24e060acf49475b287e2342dcda
+    ai-framework/scripts/skill-registry.test.mts: df1bfbade1cb60fdad59f7c7a84c8cc35982b0402ee1935e937ba8ee6af6135b
+    ai-framework/scripts/skill-source.mts: bf71133a6af736463f3633a62a4e7450a99115902dab7db1dfcf3b6a778610b3
+    ai-framework/scripts/skill-source.test.mts: daba16d72dbe246df0e8605e50e2c81367b3afa8aa3969922c88a866be937259
+    ai-framework/scripts/skill-sync.mts: "7dad4f0c56fd583377aeb71cfaad3823f1e738532679edfc2b0d2b642375d4ca"
+    ai-framework/scripts/skill-sync.test.mts: d3622471616a428c5ef5419ba0dc953db1a36036c286e556774a384345a561a9
+    ai-framework/scripts/skill-vendors.mts: "013a987c9ae527176ff5248ab3c458c34c8026dae0dacbf2e54f3ecba7c460c5"
+    ai-framework/scripts/skill-vendors.test.mts: ebdcc633fcc6bf0a2cde01eb1ea259bcf86339e97d132916dde5f8b80b19434f
+    ai-framework/scripts/state-charts.mts: dfd6516c509c89a66289cffef0803648f5891ad222594bac1403d3cf9f07ee0f
+    ai-framework/scripts/state-charts.test.mts: "22bd405f1d994cb6d40d6ceefe3acc669190c2a16a9c8685c73ee1f5c5a217f9"
+    ai-framework/scripts/state-design.mts: d992a544bc7c2daad1fb17e13be8dce2e22011fba1d2893273a396234e3eedd0
+    ai-framework/scripts/state-fragment-dataset.test.mts: "59c5e3e24f7b32508e6be3835e4dd3274f315e1804c09d34de85cdcad92ab1f8"
+    ai-framework/scripts/state-fragment-evidence.mts: "50380b5e5a7a7e82f7a179f464f437774b2fc8df3f71935ee5a9de8792416eac"
+    ai-framework/scripts/state-fragment-evidence.test.mts: "25e49ec95e07d372d759195208733caee1e29b3fc7afb31226c0a96b876cc3f9"
+    ai-framework/scripts/state-fragment-inject.mts: "71269a3070c2d64b31ad6be90bc598068a634a4321f78a4aefe6e4b980ce861f"
+    ai-framework/scripts/state-fragment-inject.test.mts: "0908d064fb22fc1478dea909a387c0c7f841c27db38b59680e4364aa2a4c0fff"
+    ai-framework/scripts/state-fragment-parse.mts: "8df6055a80ecb0a4cdf4da254676ace9a3fe86d805ccf7a19f31eec956193d0b"
+    ai-framework/scripts/state-fragment-parse.test.mts: "5147ef205f61142ea656a03db86f062e3c4a00a35735b68db7bc58d603cf53f0"
+    ai-framework/scripts/state-fragment.mts: "78ecbed5fada3d219f4ab43f6daa1798dce6fe05e846e5fab3a1426c32b201a5"
+    ai-framework/scripts/state-fragment.test.mts: "6f51958f27645d141d2fbd1d8f16fe5b42438533b57bad98b547fa8a8c04bc6f"
+    ai-framework/scripts/state-graph.mts: cde9c5f7df0e3ce159e20a11565ec681945415955397ec2c8747fed9455c2d7b
+    ai-framework/scripts/state-graph.test.mts: d3903429ebdaafea675bc68a5dc048cf05b5a1aa71b23bcadbd2769af498fd73
+    ai-framework/scripts/state-history.mts: "64241c5e5fd03c29d6675f6c0ab3193d846612af3af997e673e93cf0a77e4ec2"
+    ai-framework/scripts/state-history.test.mts: "01a504a8f75ced89af315b2b0bf187d0899a1924bc08153abc812f55e9d59991"
+    ai-framework/scripts/state-html.test.mts: f539844e21b2d836cd7df8556acf20a1e130065ceacb79c607b804693214f872
+    ai-framework/scripts/state-pages.mts: adcb50917171fbc4fc1ac01965d08a0003dba004a3eb41dac869baec0f802d08
+    ai-framework/scripts/state-render.mts: b04c2383693502ce91cef1ee0b00b854e305384364bb6c5f3aa24126fdcc5b53
+    ai-framework/scripts/state-snapshot.mts: "65aa3f9a06f683938a5f2709a56cc498a27cc139a2436db694b7e99cbb7f64ac"
+    ai-framework/scripts/state-snapshot.test.mts: "5ace7d8a47089c2a38fbc7aad52591e3c3ec4a0d75c9abecccc5effab7c8baab"
+    ai-framework/scripts/state-structure.mts: a2e60745aedf7923b94bc4e7a223cf12b3b1a2049cb84a82dbdf8a8b122b7d6b
+    ai-framework/scripts/state-test-helpers.mts: "3d71a4358c3ca3b17a0f0fa54d878b6dd663dacf2d6c5d5a62673cf81e5373bc"
+    ai-framework/scripts/state-theme.mts: "3e1f778d8046718768c63ad45af09870b617ddcd7cf1e19294a617d855885cc8"
+    ai-framework/scripts/state-theme.test.mts: d3240c16c2ad631335b57b9124d278bcd32184a36256a39f29c91fc862110f51
+    ai-framework/scripts/toon-convert.mts: "10e305aa561aa4136409aed61b954db1bcf278faf8a9e62aa953d3efe26cd5a9"
+    ai-framework/scripts/toon-convert.test.mts: "537503e2455ad1da326978dae0f13974bfd4e07f55cfe684ed3470f4b3c17a58"
+    ai-framework/scripts/workflow-contracts.test.mts: "5fe4477b8d32c84b7c5bb3d194bdec66e4e69f5ae1c03bece46754579dc933cd"
+    ai-framework/scripts/workflow-doctor.mts: "54fc4f0203ffdd3a2bf8adb760b980d1fe73e3ebbf2f69fdae859818d7be161d"
+    ai-framework/scripts/workflow-doctor.test.mts: "15f5b2e21ea5dd54b2c8b03d18674273cf40f9abc252e2b09027595811ab3223"
+    ai-framework/scripts/workflow-metrics-report.mts: "98a28139b2e5fc4a965be5adc04331f677e4449668069af2d6dbbf2d298b8662"
+    ai-framework/scripts/workflow-metrics-report.test.mts: "26b2c361577908cf42bc3b2150328bb0f98be18ec0558bb3db462434592b75af"
+    ai-framework/scripts/workflow-metrics-state.mts: "445170d9a49119f9479d522e53ae9421d567ba7a57886c048cd289a261c7fedb"
+    ai-framework/scripts/workflow-metrics-state.test.mts: "0b5914c1446aa7757d328679871d0e19195be7027ec55a72ba02e40b98b124f5"
+    ai-framework/scripts/workflow-metrics.mts: "8ec0824f72cf45cd0c9565483250c51664136ed679defc6301eccfcf9268d35f"
+    ai-framework/scripts/workflow-metrics.test.mts: "97857efe0bbdadbf3b52bc5af44de832ce0685e6bbb6c4fa57f188bc32962b7e"
+    ai-framework/templates/ai-workflow.example.toon: dc41ce03805031b0b4b7e2aa7153d05525bc8eeae65fcbd4790effe0146981c4
+    ai-framework/templates/ai_workflow_env.example.json: "98dbcb3a7b9da4a149e67cd26c8dc4e416e7b1a7dcb22ce09f728c7924850017"
+    ai-framework/templates/project/analysis/README.md: "9116655c8f8d3e6dcbdc69fcd32319804724b18bb6fb52b82ca23cdce9dd5a90"
+    ai-framework/templates/project/context/README.md: "5e76c38ea55af9925fc68548f7fad48373d241c0cd180943b29561ea725a91c9"
+    ai-framework/templates/project/design/decisions/template.md: "53811f0820d81415253f2a4efe16fdb45227a8ed55f04527d1b59e0d92373ce5"
+    ai-framework/templates/project/design/plans/rollback-template.md: a78158600a847a6840ee761e2481890b80bf8609084a92862fe805a1ed812cab
+    ai-framework/templates/project/design/plans/template.md: d62d8649f6cb97dd3db9622f4f86492ff75037ff5afd0e216aa12a9953d16c90
+    ai-framework/templates/project/design/template.md: d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+    ai-framework/templates/project/design/wireframes/template.md: d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+    ai-framework/templates/project/done-work.md: c721b6ec084de8a11a31b5fae753746888c127b85952a335a860ce100264465d
+    ai-framework/templates/project/knowledge/README.md: "99e824eb8d955ffb4ee50b41fa0ea2501c42fce1749690eeab2c42385fe023d5"
+    ai-framework/templates/project/knowledge/templates/decision.md: eb7b93ef148d3da5eec03c75a6de427cf9a648354bdd4b52da412929a8fefe88
+    ai-framework/templates/project/knowledge/templates/entity.md: "15485085bf9faf8fa4a61545df7d795467dd28befe6dfd3910a6816ae0c3eae8"
+    ai-framework/templates/project/knowledge/templates/issue.md: "9270185df6ff085341fab5905134651cd7e0a5d3679ccd604686149100dcc542"
+    ai-framework/templates/project/knowledge/templates/pattern.md: "27621bfc41afc5c984fbc16d310b20715353b6df4dd8b36d82fd2ab3c97773aa"
+    ai-framework/templates/project/pitches/_archive/.gitkeep: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    ai-framework/templates/project/pitches/_parked/.gitkeep: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    ai-framework/templates/project/pitches/_templates/hill.md: "6d728f73ff5b532ff6ef77949221a2dbe4f38a158b6d90985fb4c789530559dc"
+    ai-framework/templates/project/pitches/_templates/pitch.md: eb927ca736585fec3e9afc14539582b5cb9b261e49085759b11f68bf01f8cada
+    ai-framework/templates/project/pitches/_templates/plan.md: "64f750a6d2b90bd36c37daee3427e6183b61f4fb04d937a402f1db122e093b86"
+    ai-framework/templates/project/reports/README.md: "6a09eb48c81bf1eae76b757230c20436a1a1709b45b7a071dcc5081b52766a2a"
+    ai-framework/templates/project/requirements/bugs/template.md: "54f0dc660d2177883bedf8c02be5d6e368b2e1eeb6a5e597c1b2d20d39039f75"
+    ai-framework/templates/project/requirements/features/template.md: "0207eec5f811c08b303783a65c697129a4c4a7f1cd803a9e8db06655e20ad5fc"
+    ai-framework/templates/project/rules/README.md: e1f7f7c7cb05a750ee338a346987bd450e4e53630aec0690a2ba267d9cd5883a
+    ai-framework/templates/project/runs/README.md: "11e2d6c91b7b1a3abad781f73017979a59d403a31bc608850cf7ffe32c99f0a6"
+    ai-framework/templates/project/status.md: "317486b3922fd511b627e5d14b3c28b23b6da25d8950f9461f6f00e6e2f7d8ab"
+    ai-framework/workflow/overview.md: "873bb51f966fef96b0c9970f36a35c3a7b74b6897c64095de318aad7d0b14301"
+    ai-framework/workflow/phases/0-shape.md: "0837ca21f826f0e48a18070f574348c730081915f410ecb9bd95fccb2a1485b7"
+    ai-framework/workflow/phases/1-plan.md: eb9c56adc6f045daf50c0ec6708a5ad4f2a609b6baed789f76c6b42d7d07ac54
+    ai-framework/workflow/phases/2-build.md: d1f1a816bd653e7ab45a2703075eb50ebb2450e7a8015f336e6d4cd29137efab
+    ai-framework/workflow/phases/3-audit.md: "067275df459da6fca94d083ec081076273043e98ce81f3cab9a1f1557b6a603d"
+    ai-framework/workflow/phases/4-ship.md: a8685a3628670eeca49a29359eb6d3d8a9ed66250d1a5b472d7d103602899a9c
+    ai-framework/workflow/phases/5-cooldown.md: "828633bec26df18363126a04e649f15e3f512014527030b8692f9f1a8b37a59f"
+    ".project/status.md": e427b798c76d837566837baa52361b95cfcc3b3630815134c5bc2cca96d0b2ad
+    ".project/context/stack.md": "999ae0207160b3e6c28aba32873f40631a0693571e4e1d41a804d20c0e70b0d9"
+    ".project/pitches/connected-memory-consolidation/plan.md": "259de12cf95ab9c0ad68c518824338610375a21e3c1451e5e06ddda0c3d0509f"
+    ".project/pitches/connected-memory-consolidation/deviations.md": b37e078c68496b77876dcdea95d716fea2df6be976a3b208601ef3638d53f34a
+    ".project/pitches/connected-memory-consolidation/closing-exceptions.approved.toon": aaa288e412348c12222072613543c0a606645618335a87a3d347a0a393a5d92a
+    ".project/pitches/workflow-v3-rollout/pitch.md": eba3bf397244c34e26b68e4fe7fadc4929fa4a160979ea40ed2fe3c558a7cb83
+    ".project/pitches/package-less-ship-verification/pitch.md": ea689efee7916d4392e9f1b0750fc0e1844c1f527387bbf05c894e8ed59b47b2
+    ".project/pitches/orca-bounded-control-receipts/pitch.md": e1cca59fa538576cb37f47b76d756bb640274e2badc3e6d34e41e5eb88930e14
+    ".project/pitches/fix-retired-live-evidence-path/log.md": a69f0a38e643e70f2ce1357a3a2232cdffb711c5172b3954cc4d45b13f5f7c44
+    ".project/pitches/fix-retired-live-evidence-path/source-proof.toon": "38ead5dcdf39d369ce237443e8aae327cd4b514eda4f4100d0a17ed63def4704"
+    ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md": "868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a"
+    ".project/evals/datasets/state-ai-fragments.json": d91d990a62f40de75cbf5ec0b01b03356587a369d8d7a0083bb6e18db91c7f1c
+    ".project/evals/datasets/state-ai-authoring.json": dfb5857b0d6adbbd391c12450576ccf619e006e76d1a30f0c3fb6e67a0b2664c
+initialBenchmarkManifests:
+  p2d:
+    files[428]{path,sha256}:
+      ai-framework/scripts/consolidation-migrate.mts,"8374daab56cac02d3bac575fe2191e8b332ee96860aa18a7910e268f4bfd74f6"
+      ai-framework/scripts/consolidation-migrate.test.mts,c35da87119b5eb3cda0c000e31c96d220a86ca7dce1ccf7fe5d0d2449f697ab7
+      ai-framework/scripts/done-work-index.mts,c31dabc332164f6faf4b8e143101b8ffd0065554fb322c8726b1cf7bc387fb2e
+      ai-framework/scripts/done-work-index.test.mts,c5512956180a4be121c15b21098c1a560f09e0dfc03f51ee3006b60be41237b2
+      ai-framework/scripts/graphify-refs.mts,b3d816aa913e16da3d50069cd310a92f83dd3790267d092e9d9e54f6d9f9ceba
+      ai-framework/scripts/graphify-refs.test.mts,"24de7ac954d6d1ffe17de8e028444b9a6dab14f11c030350d1b3871179c3bb3e"
+      ai-framework/scripts/graphify-relations.mts,"188a05a38c3aeb28dff9584d3915ce59436bb13e465630fbbd1181f21f20614e"
+      ai-framework/scripts/graphify-relations.test.mts,"19dc94408c46fe6be23fc62b410bd6be8cdc235ee8b94512416d7e57ba435c70"
+      ai-framework/scripts/installed-upgrade.test.mts,"8abf9eea79de9e02025fa710d94a0886da98b6a2725cd1c88c21c3c5b796367b"
+      ai-framework/scripts/ledger-schema.mts,f3166ed20310c110b53fc2c26d2d55b06acafba4e592eb9124e2f158de54cf01
+      ai-framework/scripts/ledger-schema.test.mts,b9a14c9c0cf5ffe3eb04c53f5b8ac23bfecf9b0459a64eeadb7706cef115a161
+      ai-framework/scripts/legacy-upgrade.mts,"252a77e0bf0e926a812ac082774c4ea09e675716e3125cb4acba3d4a8236a95e"
+      ai-framework/scripts/legacy-upgrade.test.mts,ab7788e9c067f6301f241765cca4cc42e229593094da681406634fb8fc3d8b94
+      ai-framework/scripts/outcome-record.mts,bd5db227978b2e22c4b8842732cef663829fa0f191e6a786f2029a4cdcbe0524
+      ai-framework/scripts/outcome-record.test.mts,"250a6c1e871cdb2332ca8c64ec0733aebad5535880f881786b35db0be5ad1d5a"
+      ai-framework/templates/project/records/shipped/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/records/shipped/_template.md,c1d60dfa0eada8f2eeb3c317ea3dd0173b0b6bfc5695c99ec09273ce5fa90e59
+      ai-framework/workflow/relations.toon,"1b9c854a1b0ada6eb7eede64571065213a035fa270fa45e9bbc32ab31acb896c"
+      ".agents/skills/add-skill/SKILL.md",d7837a88324d9893b33da31c1488e7c70d8ce259f7c0e4a92ba73af5b7c18383
+      ".agents/skills/audit/SKILL.md","32d867694d321cd0393e17d8cfa4245c7da6e205c61bac9732920f98c8c8cfc4"
+      ".agents/skills/build/SKILL.md","22595bb21aeb07b260c7b8af5d082516d9367be95959b0d0d4d46416ccf0fd08"
+      ".agents/skills/bundle-sync/SKILL.md",c0c161afa4744901449ad01a0d4563c9072db3abf16c8e4656b9fa0aeb2f1f32
+      ".agents/skills/changelog/SKILL.md",d7d73123e3ffdfc65bffc53eb4f4b793e6b73684f2dd674ab409375491d06fd7
+      ".agents/skills/checkpoint/SKILL.md","96556aedde6a13aa5fb77e064736cca30a1ab8f92e7be250a89bf17019368a76"
+      ".agents/skills/cooldown/SKILL.md","3bc26b12ced53b161132efdaf651054ecce4e48a4090dcb0e476480260c43755"
+      ".agents/skills/critique/SKILL.md","11c21a8556ab25f4afb115f8a14bb452955f63e05388074aec89ab8d6fc9bbf8"
+      ".agents/skills/dependency-security/SKILL.md",e4c1f4cdb80ed3c38f67d3dc53d31c5fb038754fb4b1a01dcc040c403ab513e6
+      ".agents/skills/eval-harness/SKILL.md","7dc9cab1549371b2b66f0f20b1e42e849deb28966e2457f1a69758af38a0c2b6"
+      ".agents/skills/fix/SKILL.md","5e2fe2aec889f5bbe6ae7cedf8fa494734e29a5f2b8a70d73f38cb40006ff16f"
+      ".agents/skills/impact/SKILL.md","938be82e10cfa944f000efc59a16074f731e35a252fc6a01b0fd3b4c172fbbd8"
+      ".agents/skills/knowledge-health/SKILL.md","427b596f307332471287f33827a3663fa645c9772acd81feb3e5ea4f79e41339"
+      ".agents/skills/pitch-compress/SKILL.md","3f15f6ee79fbc21807dd1ae81151b0c64294d42a151af34663ae65222dcb3dc1"
+      ".agents/skills/plan/SKILL.md","123c4edf8cc16034b151526cd004c73ff9cf889ed2dd68a7f6317fc32ad266be"
+      ".agents/skills/resume/SKILL.md","9f79d5026375dffbb792a8ab1e8c036f971fca0dadcc07870d87bf99df652615"
+      ".agents/skills/search/SKILL.md","5e18fe9870171d720bd4626230a38a8cf33283337369318a16b84f653eef2b41"
+      ".agents/skills/setup-validator/SKILL.md",cbc5acbfbd37c681cf03ee4b4e8a5904ad82ca9699661dfd5d87dad655b3f7bb
+      ".agents/skills/setup/SKILL.md",bfdaeb0013c1bf50279c5788045f19f9766f0124afdb1b467af7d96c7b513d48
+      ".agents/skills/shape-lite/SKILL.md","8db611a176e4aa8bce689cb69c5a4744be840a8cee8337c51de51bf06009d5d0"
+      ".agents/skills/shape/SKILL.md","997e8ffca9913d7750cc2220380d1daaee781c80a72641b24ac5d297d0bb96de"
+      ".agents/skills/ship/SKILL.md",ab3169550c59630fcd76ba82ef7d6a8d4585469d00a237c8edb6d5cc10f84240
+      ".agents/skills/state/SKILL.md","5826d2916847ad938ece309158a36daf173ea9b5f3cf895b3ee0cb0e7f14cd20"
+      ".agents/skills/switch/SKILL.md","96fb35be2e5f0df6beb3108aeb6891efa8907d5b43404112c8a3374e4b75a0a5"
+      ".agents/skills/sync/SKILL.md",b5dc6bc484d7f2bdc89c42dc6b55ddf167c41bbc0ca64888215f21247ad23d19
+      ".agents/skills/test-strategy/SKILL.md","22f0c4819c70efb45ad4d46dd7e86b5868e34466bc8ae3d1d41b62ce5f1e3787"
+      ".agents/skills/ui-design/SKILL.md","02c16453c5bea27aa35e38099159b5437e2de053a722546385f0f8658ac99e8e"
+      ".agents/skills/workflow-doctor/SKILL.md",ec23c3cddbaf405e4b233e28d44d2b0be1e83fc54ef956c19612da565ce60b58
+      ".claude/agents/appetite-auditor.md","8eefe2784aa5abe39451f0cf3e62f5547e2f3be6371a365542d0bd42e6776dd3"
+      ".claude/agents/architect.md","946d7b59066d8bdf600427f9178ba82418c8e552c01e6a2cbabedd312774f03a"
+      ".claude/agents/build-error-resolver.md","46f47d4b31ad0e42923f4133a4c9732ca470348d8e3878ef82355647a8446fd5"
+      ".claude/agents/code-reviewer.md","66e01142e0a10ce05e03a117d210181346e4b12e6ea20c0adf9625983151e8aa"
+      ".claude/agents/cross-pitch-conflict-checker.md",e7730afa362b81ddcdd6e6d2c70b7b2971020ab59e1f0b80f8c9707a3f91727e
+      ".claude/agents/cross-pitch-projector.md",abde0dbeb4996ba4711e6691c7d0eb6bdb8afb8f5ffd6c22bcc9747328cea484
+      ".claude/agents/eval-regression-projector.md",bd18787da6bda83fec81f2776511d85045bf9e35d320d9f7f4a9240f59115092
+      ".claude/agents/eval-runner.md",cfea69c7b1e5aedc7d351cfa770f065d7289022973cb66d13b183ad3802ff2d9
+      ".claude/agents/i18n-checker.md","906c3cda8a507fedce3f0e1f13d96bc7ce8684173af0c457cec67e6003fbf250"
+      ".claude/agents/knowledge-historian.md",df0db5fbbf9bcc9cc1eb54c4b0a877c7974a45f24393d56274a8996d2672acec
+      ".claude/agents/planner.md","400e2223c32cdfdb856a21f276f63e19f634a57eb7203e3cd6ce23e425d6327a"
+      ".claude/agents/refactor-cleaner.md",fd309d0a7dd9e8c096d7b8eb6deef8ee33c88a48df5a65e0bd0f2b8b7a7b72da
+      ".claude/agents/security-reviewer.md","47447823a6a9e15b8ca65707847e7c98f2609d3872fade369d6899cec770e2d2"
+      ".claude/agents/skeptic.md","2d35896e104c4757552fa4c5fa974c6728bae32ab66b26635f0f76283997cba9"
+      ".claude/agents/test-coverage-checker.md",b0e3bcff229aa21b76b21932ac65335f3aea7e7d22c31d2421766c82f1faf08c
+      ".claude/agents/ux-reviewer.md","08667ce6bf0d9624993bdc74fc2174a748853dee82fb0ac8530eb93a6deec03c"
+      ".claude/skills/add-skill/SKILL.md","22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      ".claude/skills/audit/SKILL.md","9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+      ".claude/skills/build/SKILL.md","6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+      ".claude/skills/bundle-sync/SKILL.md","84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+      ".claude/skills/changelog/SKILL.md","521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+      ".claude/skills/checkpoint/SKILL.md","6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+      ".claude/skills/cooldown/SKILL.md",cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+      ".claude/skills/critique/SKILL.md","8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+      ".claude/skills/dependency-security/SKILL.md","02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+      ".claude/skills/eval-harness/SKILL.md",d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+      ".claude/skills/fix/SKILL.md","25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+      ".claude/skills/impact/SKILL.md",bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+      ".claude/skills/knowledge-health/SKILL.md","316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+      ".claude/skills/pitch-compress/SKILL.md",ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+      ".claude/skills/plan/SKILL.md","0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+      ".claude/skills/resume/SKILL.md",cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+      ".claude/skills/search/SKILL.md","23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+      ".claude/skills/setup-validator/SKILL.md","8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+      ".claude/skills/setup/SKILL.md",adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+      ".claude/skills/shape-lite/SKILL.md","3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+      ".claude/skills/shape/SKILL.md",a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+      ".claude/skills/ship/SKILL.md",aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+      ".claude/skills/state/SKILL.md","531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+      ".claude/skills/switch/SKILL.md",f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+      ".claude/skills/sync/SKILL.md","1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+      ".claude/skills/test-strategy/SKILL.md","077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+      ".claude/skills/ui-design/SKILL.md",b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+      ".claude/skills/workflow-doctor/SKILL.md",c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+      ".codex/agents/appetite-auditor.toml","950d04aa91809e1f271fd4161def233e2af6cc381f0b3d24a1385b0adee06674"
+      ".codex/agents/architect.toml","5c7268383d8d443e5426d197674a308d31b26bbb71bad9d83fbc5d1fa66f53f1"
+      ".codex/agents/build-error-resolver.toml",a7166d2de56ac842a4c3a362df329e7b5a0387ac7f15db29a090493afadce997
+      ".codex/agents/code-reviewer.toml","3c379b174dfca92bcbda008e61263a758ad48922e3bf7ba70d532e4637fd6eeb"
+      ".codex/agents/cross-pitch-conflict-checker.toml","24af3aebd95784bb070de363adbbfddc553b4ff899b30b023fa85dd47cd510ac"
+      ".codex/agents/cross-pitch-projector.toml","0d93072027c5325becbee585659ce3875662a92d085960d82b30bf4e97029ff2"
+      ".codex/agents/eval-regression-projector.toml","02937025ec7da86f92f736d0649ab68ca2e495a2d83b850de289347a4ffa9d76"
+      ".codex/agents/eval-runner.toml",dd5f532db6ebf0ca3e3e10b0ee80ab846b8c2f308c589d71bb191e24f702f7fb
+      ".codex/agents/i18n-checker.toml",d8af2b2e17ea0180f613b3993132b55cfefe29fff03bea47b5fe1a4a8d9f78f9
+      ".codex/agents/knowledge-historian.toml","7353de3fce2134043bce9394f9babb2b7ed87d9cf45486d8a60acccead569248"
+      ".codex/agents/planner.toml",afbcacc2e157d89bb225173118d56f26b28209d118555a65549f69a7e3d4e7b4
+      ".codex/agents/refactor-cleaner.toml",a56771324bf3eb9307feaa5aab560171de5edc7b8e4c918882a389520452aa81
+      ".codex/agents/security-reviewer.toml","824ab52cf562da785219195aced4b87c820b79d8c18280a8c518dad9e44cb6ba"
+      ".codex/agents/skeptic.toml","98fba04902c641565ba9c1fb5b00c472bf2249d4f37c03d2318e8c9218255a05"
+      ".codex/agents/test-coverage-checker.toml",d61fab07a844c551bbc5fb82befadf97523532f6c84b065f2c9c0f7446586fb2
+      ".codex/agents/ux-reviewer.toml",b19e62df117ed879d75b166c9ad8ac85a63c776c21aea200ed687eff2a654d29
+      ".cursor/skills/add-skill/SKILL.md","22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      ".cursor/skills/audit/SKILL.md","9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+      ".cursor/skills/build/SKILL.md","6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+      ".cursor/skills/bundle-sync/SKILL.md","84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+      ".cursor/skills/changelog/SKILL.md","521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+      ".cursor/skills/checkpoint/SKILL.md","6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+      ".cursor/skills/cooldown/SKILL.md",cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+      ".cursor/skills/critique/SKILL.md","8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+      ".cursor/skills/dependency-security/SKILL.md","02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+      ".cursor/skills/eval-harness/SKILL.md",d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+      ".cursor/skills/fix/SKILL.md","25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+      ".cursor/skills/impact/SKILL.md",bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+      ".cursor/skills/knowledge-health/SKILL.md","316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+      ".cursor/skills/pitch-compress/SKILL.md",ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+      ".cursor/skills/plan/SKILL.md","0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+      ".cursor/skills/resume/SKILL.md",cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+      ".cursor/skills/search/SKILL.md","23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+      ".cursor/skills/setup-validator/SKILL.md","8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+      ".cursor/skills/setup/SKILL.md",adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+      ".cursor/skills/shape-lite/SKILL.md","3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+      ".cursor/skills/shape/SKILL.md",a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+      ".cursor/skills/ship/SKILL.md",aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+      ".cursor/skills/state/SKILL.md","531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+      ".cursor/skills/switch/SKILL.md",f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+      ".cursor/skills/sync/SKILL.md","1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+      ".cursor/skills/test-strategy/SKILL.md","077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+      ".cursor/skills/ui-design/SKILL.md",b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+      ".cursor/skills/workflow-doctor/SKILL.md",c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+      ".gitignore","6b3798fef1a85f421f9564c35574dadfe7a6dde8e98c5d585566081e64c99bc0"
+      ".graphifyignore",ac41f08adb3b692d4c61d68cd51e1e878b3d33fb6dadf19e36a8e1f644a57771
+      ".opencode/agents/appetite-auditor.md","6067c968c076d1557bf53e539aa56cad16d9eba9b3dc91d6b8b95c6bc90a73b9"
+      ".opencode/agents/architect.md",a7a75598b94225f54361631692f8e3be28797fe8731bdd9dd8009afc494a7656
+      ".opencode/agents/build-error-resolver.md","3c4bf7b9b2b2b4cde6aca86250ed2555a08e59ca2ec13b901baf219f4af1dea9"
+      ".opencode/agents/code-reviewer.md","4b6b95d64769f432c9291f4523fc4522fcb5cc2d08374a74765b806d693f53ba"
+      ".opencode/agents/cross-pitch-conflict-checker.md",f3523bd36501b3608538950dd48a66a644aefe2202eefd5f82ad8d7b5cfdbbf2
+      ".opencode/agents/cross-pitch-projector.md","05d3000704c89550343a1122d122413c5fd05dbf45d59c4ae7008a27840aef2b"
+      ".opencode/agents/eval-regression-projector.md","6a05af0ff60fc3abcd6e1c230a939e18545b729e5a3bd5bfb8254d9f806728f4"
+      ".opencode/agents/eval-runner.md",edf8c488ab98d58beeab95232f0a8c1e2c44f93ab09cf07d25b467fae2e887bb
+      ".opencode/agents/i18n-checker.md","76c389a7d9169320935a24ca220ea89bb322ff79ff8f028b3cf5014cf0ebb22b"
+      ".opencode/agents/knowledge-historian.md","78decb1d8fffe8db93a067a889253d25089009cc2e94753dd23c2ebeb81ca6ca"
+      ".opencode/agents/planner.md","4593b7f3308081e1acfcb26b8c5dc92377e0440e2c0e1bba428ff597c2fdffdd"
+      ".opencode/agents/refactor-cleaner.md","0187f37319a323c67ebc5268429cbb414f4250f9bf48765940c2987e1e3d546d"
+      ".opencode/agents/security-reviewer.md",df8da747d2e84db26c5d2d68740c696c5c151c62e220f864ed8faab7606fec8f
+      ".opencode/agents/skeptic.md",bd8114fc3a698beabfaabbca4101d8ac857841b6545d3de286fb56113d21c44e
+      ".opencode/agents/test-coverage-checker.md",c638436a5fc9613c1e2264af2d79340c060d45318100eda91c4fc7d052b505e1
+      ".opencode/agents/ux-reviewer.md",e1746aebefb0fdaf9e018dab630c3b02fab47abf9f98991e786080588b361c99
+      ".opencode/commands/add-skill.md",a24a853b7cfd2648bc3c6c7e5faceb503367a41125546706dc2e5c1a58eaefa0
+      ".opencode/commands/audit.md","3e1d85c40b6ea6c9affc8abdc69b5a881824144d30f76899f62aabbafd6c9632"
+      ".opencode/commands/build.md","161f807562f1303fd47e46a9fd1e78d477cb0195e53d750fbb6c729b2fc7b9ed"
+      ".opencode/commands/bundle-sync.md","4027c20d5bc08abc8d266eb680535984cebb21e49b365cefd4416ee869687c3f"
+      ".opencode/commands/changelog.md","28e390fc6fe6abcc2ea11b9118925b96dfd04d55d266499d1b2db84c6808bf83"
+      ".opencode/commands/checkpoint.md","35cbbe83dfb2d5a2b1dda2a755f96362bb0e5e92fba60cc19af464d7b967f51e"
+      ".opencode/commands/cooldown.md",e03ff5f42597a08f31d57c2f7394404b6e90b91ea0d6f73d649af3c8b45e3e97
+      ".opencode/commands/critique.md",b49ad5e6d69541594a3368923f0031ffe9a148862ee34cc75ea18da013d36cc4
+      ".opencode/commands/dependency-security.md","6222354d4bc3a9d52b0e0f4e036c6c2e7712ec609b2b6bed19a3fa9fb358c7ff"
+      ".opencode/commands/eval-harness.md",f5af146facb0ffb883a2747abcd315e59c13280e81a7e7c2cf5680f9a01211fc
+      ".opencode/commands/fix.md",d878f6ca6b857e220cab43eeb2aa518c28cca99a099c1fe9aa4598b32e6a6d76
+      ".opencode/commands/impact.md",f068a208d34bc0ffed2926c61eb1a0c2f4e39d524898ff34c2a46535405991da
+      ".opencode/commands/knowledge-health.md","47bf002b60af30a0792015c940b7fd469a5d182f6919788174762072ce009c15"
+      ".opencode/commands/pitch-compress.md","840e1c204edf6d9b480f627742a7cf28bbe3eb587239dee529396f943d36bfaa"
+      ".opencode/commands/plan.md",f5663a94fe039dc833ea7ccf34cf219e18e5b3bd30cd5bf7735e132c31f789f2
+      ".opencode/commands/resume.md","23cd3ebf64dcbbc4c5d85b7bbd7cf1168e33c41a7506e17d13d3e923ef33efaa"
+      ".opencode/commands/search.md","8c5d195c865f7f5f3e7b85f94134e8fb3d693ad136cd43c3e98804495a430957"
+      ".opencode/commands/setup-validator.md",f91b775bfdc4a5ce9c0e9ed72f112aae4d419d2de07b04aeff2fe0cf02ef91ec
+      ".opencode/commands/setup.md","1f0112b7797923d620a08020802fa6e702b79a34051a393abcfd674de2d56b72"
+      ".opencode/commands/shape-lite.md",a62d2cce2677a5d29cc0bdefc1034dab7d560e9e33b73d9a9464cb1c71787b0e
+      ".opencode/commands/shape.md",a9c091ed89541016e40502a8458e83da5d8dfce072a6e04d8c787afbf301069b
+      ".opencode/commands/ship.md","0c854ecb8a070072dd97d30e90cbc5fee3c90ae756dc11467ba4f1a108ac69a8"
+      ".opencode/commands/state.md","6d860a5ee9bcc56943462b62e37e858cc09430fabf89f2324c98578a2794a419"
+      ".opencode/commands/switch.md","6d8565bf8f0b85fbc241cb3de0e389abec959bffb796e84e58678496f26e979d"
+      ".opencode/commands/sync.md","814817fd48af767c8b75b0a89e17970048d4fd02d59f1ad71a326758fc505886"
+      ".opencode/commands/test-strategy.md",da062c2b25400b88e5d218e9b500b2a9c6a3502a3c02091a10420536597c7bdd
+      ".opencode/commands/ui-design.md","9f903532327b2af84c6e45f66ad4df50bca414c16d6c2ba6fef18161cda73e6a"
+      ".opencode/commands/workflow-doctor.md",b511e97fa072cb1619d8e2b0c5c100172d1b59d5bd8cbf67c63be21d8c505fa5
+      AGENTS.md,feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+      CHANGELOG.md,da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c
+      CLAUDE.md,feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+      README.md,"8b7cf7992df6b7c5401c418f8b87a8efdd0aa0399c046b12c34b7e27c3b9804b"
+      SETUP.md,c1e234187bd02dc51bf42662ba6a41d6ae57595d5529301d3ecae36c57f8817f
+      VERSION,"9bd51d4120f0ac96a8e2e9f9a3e68e8175db7659324704ba2306aa682dffec33"
+      ai-framework/docs/design-notes.md,f4141e7d74b56f20e8e2deec14eb19baf5dbe233b925183025b9ebb5c848f54b
+      ai-framework/docs/extending.md,"935499627ae1c09fe618f9c8736e66b3df6aebed4ce14206448e283949c7588c"
+      ai-framework/docs/knowledge-graph.md,"6a98e9fbf1fe90fdfd712504403ac3faf2e7e29bf7ecbbfb80fb18f74b83ce1e"
+      ai-framework/docs/pipeline.md,da7eb210d0263bf82b2a3f4de8046a5fe396623a7006aefc748dc09b2067942b
+      ai-framework/docs/setup-validator.md,a616b2971976374fb0987ac53d0ec5cb641a39260b194db2b0a2125f1501302a
+      ai-framework/docs/setup.md,"9792b1079b82f19e46ae3338cb01b2eb55823394cffc69ceda5aaa157f1c11ec"
+      ai-framework/docs/testing.md,"2c6d49b64898f9b30250f07fa55ab7de29c4b5702733280595e304a0e209ef95"
+      ai-framework/docs/token-consumption.md,c3c0b442989f000c323e851044f10c26b5c9bf065546d7734eff4bd0249132cc
+      ai-framework/docs/vendors.md,"144911290b522d3ac1356d6d7f3de538a7fd0ed2b4fdac8b6cf609827b5d458e"
+      ai-framework/docs/versioning-and-sync.md,"6993335e25990ee864d5050b8dad9e15544813c6ae4cb1ef3eff89f3e9f53e5d"
+      ai-framework/docs/what-you-get.md,"7cb906b4029ce8d6b8231c60f88ec3d6ac22cd61db77728939b1262a730c0c7b"
+      ai-framework/docs/workflow-doctor.md,"2a435ab9db182c9e251775e4961210db2b93e4bf2ecf50d7b183bacb79cf0b2d"
+      ai-framework/hooks/hooks.json,a043f76bffe935b69ffcde83f8ee411ac0c8db390bf1e0b5ca0a515481aeb738
+      ai-framework/hooks/scripts/metrics-lock.mts,"3735953435a9335c986077b676249ce84eb4c700c47842490a17738fbdc302aa"
+      ai-framework/hooks/scripts/metrics-lock.test.mts,"64e98bcad00c630660891a4c337ae6f93871266ad2bd380ff7fc97cd0c7c0ce7"
+      ai-framework/hooks/scripts/opencode-plugin.test.mts,f8c3cc0155dd27a1d15edc3a8eac8673625d4e974407dd9a670d64a7f6329323
+      ai-framework/hooks/scripts/orca-start-codex-hook.mts,"04d1db5cbabd8a2d92c74ace3c4ed18aecbd86aa5e0d82c1ec5983d878bec9a5"
+      ai-framework/hooks/scripts/orca-start-codex-hook.test.mts,"23b7dd3444ab20ece59faaa0e6ef9aaa8324c8c6afe46be288d241036a2feb06"
+      ai-framework/hooks/scripts/orca-start-hook.mts,"37908c66cd1044e2e1b9b84c88819d495d1c8c2d7c1de18e8485700e0922babc"
+      ai-framework/hooks/scripts/orca-start-hook.test.mts,"5f08b7a54a819b2aba16a6443110020d50e2c73c54eaa7a32738bc3dadb2c83e"
+      ai-framework/hooks/scripts/pre-ship-verify.mts,bb32bd2d5885a9589c0e2ae2247dfc4db7d7ec5a891e4548e752aabd9e877e95
+      ai-framework/hooks/scripts/pre-ship-verify.test.mts,d2fb5a3c8fc8ffc4beabe8ef6f7a8b1335f6fe6dc0f6ce35cba98a8e4d7c3ca9
+      ai-framework/hooks/scripts/stuck-uphill-detector.mts,e3eea81bca629bd8ed4a4c6fdafd1c132b6e210814c64ca1a8b4dc7afd0807bb
+      ai-framework/hooks/scripts/stuck-uphill-detector.test.mts,"555391b2434a5c7b990b50c9f0f44706f538fd65403c8c0421b2dc6f266dba70"
+      ai-framework/hooks/scripts/token-consumption.mts,"59019aab893efd99e20ef3a909096811f5cd05c73d1a7444db32e6e9070b260c"
+      ai-framework/hooks/scripts/token-consumption.test.mts,"9f2af606afd074ef84d734f79c116f6dc63cb2256d4fbde616e7d15b315e3fe5"
+      ai-framework/hooks/scripts/token-report.mts,"16132e33e16b1758b46a82e5cb7f4f8b78f972d29d8491dcbc0fe3e14761780a"
+      ai-framework/hooks/scripts/token-report.test.mts,"25261c9a3edb5c9ea11a6f50e548cea6987101c05b7dd405915e888ef78b40a8"
+      ai-framework/hooks/scripts/transcript-usage.mts,eb61d064e51ec7dbffb15df93fa4c821b6abc9cdf5b3ce1e49000d8e14c75c6a
+      ai-framework/hooks/scripts/transcript-usage.test.mts,d4f44ff24e69030a64474238d7a628a8d3554b320614e7d827426edfb164d612
+      ai-framework/hooks/scripts/workflow-capture.mts,a405d52d6789dfabbe86ed697c459c96c24c8b862b75870fc106f3b8725cbf58
+      ai-framework/hooks/scripts/workflow-capture.test.mts,"220a5ba991285e67165c0f26b73260aaea3c5a64065badb3df21d3ef657e0b78"
+      ai-framework/hooks/scripts/workflow-notice.mts,"78922fb86d1dd5370c70186eb50f6e520808496d7324de0e2a8c3529e8b631b3"
+      ai-framework/hooks/scripts/workflow-notice.test.mts,"71df25da12987497f1bfd071ce6ded207a08f1678927bc7d24b360266fcca6d4"
+      ai-framework/integrations/harnesses.md,"0ef7fe3f102503aca042746a339479b83724bcdf36f72dbf86ecaa8fe843b827"
+      ai-framework/integrations/orca-vendors.example.json,"9b02de69ebc7d86ca64b3a91b03722c22b4b51c83df30d88b58a31e077c0f24e"
+      ai-framework/integrations/orca-vendors.md,"80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+      ai-framework/integrations/skill-defaults.json,"68df8f9dbe489506898f1c7468ade4264b7185c782ae4a67220702db1e251c31"
+      ai-framework/integrations/skill-defaults.md,aed215e20cfdf1fa4ef52074fda880603e491694f2ba47028c0bf2423afaebd4
+      ai-framework/integrations/skill-vendors.json,"984d7f2969bd6e7556604df438ab867002efd10341a01b6f0bc3eae4d8b436c1"
+      ai-framework/integrations/skills.md,b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403
+      ai-framework/integrations/state-report.md,"2f7049c70c92d2209186632d3b9bc79e126f6bcffa75c43b99b75edac8df8dcf"
+      ai-framework/integrations/workflow-metrics.md,dcb13ff9d2c8438df62dc7bf677f9fabbaf5d5f3caca2ad804241fbefe23bc0a
+      ai-framework/rules/boundaries.md,"61a96a6c5f0080cc76bd9ed36334c5b7a78d4d9fa26ebfe99ce746a468d4256d"
+      ai-framework/rules/canonical-mirror-sync.md,f7b6f1aea6da8ac7b632c17c9a8ff8d9f1a0c52e2cb23dbd34698007ad0e4d36
+      ai-framework/rules/ci-deployment.md,"057352139e4a49be9f14ab4a768a5506a7efd9b0b898b49a32a214bb306d51e6"
+      ai-framework/rules/coding-standards.md,"8cf88955b0a5875c55cfd289a34d1f3e095ac82091ed43c5ac9bdaeaf73fc87c"
+      ai-framework/rules/component-architecture.md,"29f3a8bcd7448f9baf7187c117627c9a00401d79dd346b6c7a9ed58e6592b6e1"
+      ai-framework/rules/context-management.md,dc17def4e97dbcb6ddc830b0ffab9e4e34e47337a743d3b2f25a924b69ec2355
+      ai-framework/rules/data-modeling.md,"770be714ae5704510f8eb281d490775b9360d6fb0eeee1ba827a9f35199f6faf"
+      ai-framework/rules/eval-harness.md,c4d2d61523679b9916c98eac78503a7875c6e16f2fbdf0acdbb15ed3060c07c1
+      ai-framework/rules/i18n.md,"0b01cfaa7a5ad3a55fcd5584768834c7b65d639bfb3ad3e542436df34ccbb3ab"
+      ai-framework/rules/machine-data-format.md,"4d1812f421e26771ae07e526dd0cd15f60315d8a1e7a7a3cf6348560b21a1d3e"
+      ai-framework/rules/model-routing.md,"808a11a5bb154f60185c7aa89be669f6cc36e2ac58e6a2f74c1bce9a53747eda"
+      ai-framework/rules/observability.md,"1a9dc8f8b13441fc0fd90d0da0d3ebaa1a4bde7e2c216db3a119b5a321e57fc7"
+      ai-framework/rules/performance.md,"96a68ddf97587c6e30246a0168c2fba4e7253eec5981b742ec89af9a4e17252c"
+      ai-framework/rules/security.md,a4ca5b64c845bceee7c022cfa71af90d30524183e84bab40fee0b6adf1bf98c4
+      ai-framework/rules/testing.md,fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4
+      ai-framework/rules/tool-use.md,"502c479b4fde12525f8e612c6580e133efb1000829f77116a68811415826268c"
+      ai-framework/rules/ui-ux-review.md,f44625f2cb8a7f615e22de2902d572d46056ae31894c19cf83b66e259d98a1cc
+      ai-framework/scripts/add-skill.mts,"139e28020ea1e8364a5b1a477ebd04a3c23131752abb622a2a63ee7ae0b5c2a1"
+      ai-framework/scripts/add-skill.test.mts,"457362b3cddaac608c53e900b8f58de0f64e74baf2341a1c467ada4a03b30a05"
+      ai-framework/scripts/agent-frontmatter-invariant.test.mts,"6cd46140d41c9a829d0b257e289d13097db9e4c70c6e3b37a90857772859d62c"
+      ai-framework/scripts/browser-runtime.mts,"1d41e97b1f475de584753f75373da01ed5311ae34e7d8aaad84f7fc048b30b1b"
+      ai-framework/scripts/browser-runtime.test.mts,f887f452e1f734435b74d1cccd4e97d1161d5efbe962d8e255639214e3c04f9e
+      ai-framework/scripts/bundle-sync.mts,"4e85d956e280ae4c699903e2373b67b55200f2f4c29ea1379a0bd9a8978ff8b5"
+      ai-framework/scripts/bundle-sync.test.mts,"082b41ffee498dec13f5d70a5cd6dcbcd5dc60ba6593d205bc012713c213034f"
+      ai-framework/scripts/changelog.mts,b6dcc744ccd1da5e621fb3298d9fc2d2b67fdf64ccbe45fc472724922207880b
+      ai-framework/scripts/changelog.test.mts,"9f9d8de5c8bd881814a59fb817a6e3d92bcedec62519ab48a3dc8474fbc863ed"
+      ai-framework/scripts/config-migrate.mts,"522e406ba032d4de9914926abf0eb271d6b6d16b32dd5801791230ffc90d8e34"
+      ai-framework/scripts/config-migrate.test.mts,"09c90a02536f7e47ca8b73d82252dfa84ff1b11240f668738c29dfdd5c07f130"
+      ai-framework/scripts/docs-links.mts,"69d9231c293ea15ba740d6584f8437d2b100029050c41290a9324030046e3ebe"
+      ai-framework/scripts/docs-links.test.mts,"937774f162075024a1f2bfa68bd358836cf857a9f368cb449da78d5da95b6736"
+      ai-framework/scripts/entry-import.mts,"452a6e05b8d92e1f8b190d99160e434b86f73a228bbc3bdc4f52359c8bfe42d4"
+      ai-framework/scripts/entry-import.test.mts,ffd52ffd00f1459122060619309860eb6303dada847ca74f15b956ab108005dc
+      ai-framework/scripts/flow-join.mts,e260428733adcbb214c2753725b96db55d592826e4de3a1245b28487bdb69149
+      ai-framework/scripts/flow-join.test.mts,eb3f5f8281342cebd51779c44aaef8a728dabdc29864b2161f0fcbce6d4ae628
+      ai-framework/scripts/flow-render.mts,"8781e59b3fe094be1f71c6f227d8440df70dcf7415ee13f0435e9e719735f482"
+      ai-framework/scripts/flow-render.test.mts,"43264ce93320730f34547f1c0a9d971622248e5b8cb11c0d68fd3c239175a967"
+      ai-framework/scripts/flow-report.mts,"452f07f06a6d57b268b53afbf80ef7ac5f4d94219998f2ace8e691d370376bb1"
+      ai-framework/scripts/flow-report.test.mts,"908fb93e9f9b46d7a04f6afd952368db777beaeeb32713bfdf7d4d5493bdf0fb"
+      ai-framework/scripts/graphify.mts,b15b994c411783aec7e8dca621088c9f9bef175688438eeed6ae4fe301801cb5
+      ai-framework/scripts/graphify.test.mts,"1a4e95b3e13555004842b9af5c43173d356e2036a31e3530a40a0d851f1bda36"
+      ai-framework/scripts/instruction-loading.test.mts,f430f3f61e72e42be161a10f8331965a6ee462a44f086f63cea25e0b8aa9039a
+      ai-framework/scripts/opencode-service.mts,"6f20412410482657070a033d5e9309b7dfa6d9904245c25d9253ff25be39c003"
+      ai-framework/scripts/opencode-service.test.mts,f74ae7c9c1d95ab13c00f087a7667082aa5f314aff5baffc311a3dbd036ec38e
+      ai-framework/scripts/orca-apply.mts,"3031386c17d1941e899ba565a5ebab6cc8e1cfb9ff280bbca6cbebe3e766af26"
+      ai-framework/scripts/orca-apply.test.mts,c677d2be9887b8d325f2a1b05035cec07d0b146c236fd8c724b4a7d4b6c73834
+      ai-framework/scripts/orca-assign.mts,c90ff858e73f04328917eda589f904a0eb1d96643042eb8a1c87499eec90d052
+      ai-framework/scripts/orca-assign.test.mts,"139c68c878e6ea6dc5a97d7b269b09491474e32b97bbd48f124efce11669b3ff"
+      ai-framework/scripts/orca-diff-admit.mts,"1cda46e26b9a70a74753207b341a640b0cae42704002395f46fb4773277739b0"
+      ai-framework/scripts/orca-diff-admit.test.mts,"3c337c6545bf846337d38635d810e220ace7fd2809dd718906e167c2b842a1ae"
+      ai-framework/scripts/orca-dispatch.mts,"6ba5efb1e870eadfbf279f58353007188d72ae839afd4ec1f01076d5bfbcabe9"
+      ai-framework/scripts/orca-dispatch.test.mts,"2948ecc2666aaeb54f139b074696ed68087f57fe5ea1649f03fe3a9b79b6ad19"
+      ai-framework/scripts/orca-eval-grader.mts,aa4793bed42f7fb6d72580a83b18e8d10660ac239908f4e8c5eaa6135045be11
+      ai-framework/scripts/orca-eval-grader.test.mts,c761186bc2e975446314af94fc10a62a0d4c793223aa00b9e3ac7e22b358c1c0
+      ai-framework/scripts/orca-evidence.mts,"490ba3b395e1990dd2a52ce5b7d5732d734e59f65f154cb6b11308289952bb43"
+      ai-framework/scripts/orca-evidence.test.mts,a39f7617c926eb5ff76bff449a901efb484a391eeeb476b645ba649309ac3035
+      ai-framework/scripts/orca-launch-gate.mts,"6a1af51f400040781fc0ded7c9395b35c8bdfa94af537af46acc312092927e92"
+      ai-framework/scripts/orca-launch-gate.test.mts,d4d1e01fdb9f4e4b0f191966e3d0907b3ef1a28f249c3a4882e09222187eb0d7
+      ai-framework/scripts/orca-ledger.mts,fc0b481f7cf7608bd33bea386cef60fb70b24a526ec3f914a2529572dba3e333
+      ai-framework/scripts/orca-ledger.test.mts,"2e287dc27fc617085cb3d0867396fd6ca0d98c056e0a24d6167b73ddb2b9029f"
+      ai-framework/scripts/orca-policy.mts,"60cd83f4c6b47e10eebe48b9a4b156e4a535c249652f3d2dc3258d8ecea1a569"
+      ai-framework/scripts/orca-policy.test.mts,efecdef629d7e758cea86b2256c2ca10450e8b3feec704c5462928b5ae002f44
+      ai-framework/scripts/orca-preflight.mts,"225837b18440d8ce273ee4c4edda1fbc0a8121523a74649cd51318cc9df2c948"
+      ai-framework/scripts/orca-preflight.test.mts,"64d7548c38a5722b1386bf92533b8223944198b91025ca31c72783a22874d794"
+      ai-framework/scripts/orca-reconcile.mts,"27e707fbf19796e650cc2cb1a84d4eb1c9ea114972f11e8dd7e245b209dcde5c"
+      ai-framework/scripts/orca-reconcile.test.mts,"6007c462299b3ecbb30c05887a4fd3a3cfcbc595de145e88808b2354bc1ec9c6"
+      ai-framework/scripts/orca-run.mts,"5c0e0b1fe0f530d23c037133a8ada8a4623ee87e337e587c1443fe7354ec6b74"
+      ai-framework/scripts/orca-run.test.mts,"6c1da356ebacebb46a888d7c0893a00eadbf1c54d65435822e62364f5e0dd75f"
+      ai-framework/scripts/orca-start.mts,"2dab69fed6ab26485bfded1face68a073cbe7fba7f1eb15e9c836188e7575ac3"
+      ai-framework/scripts/orca-start.test.mts,"4e9be424f41695abde281336fbc8a9409fe8be8e8cbb0b50eaae2525062d9496"
+      ai-framework/scripts/pitch-archive.mts,ff8bcc2ab1e404be5647bba6c4b0170cdc692615680b8cbd0832854252be02b5
+      ai-framework/scripts/pitch-archive.test.mts,"5daa7edc577b9cc06e575850254d1922b19f5e25cd499d55153e249189b03eca"
+      ai-framework/scripts/pitch-compress.mts,b65221150ec1bb998c393065d7f9f24c74e79f86752b7d6e9d5a337d347835fe
+      ai-framework/scripts/pitch-compress.test.mts,"9b951cd36bbb9820aadaf251458aa4cc984e8d1331295cfa0efaf7f2273311dd"
+      ai-framework/scripts/review-bench.mts,"02a4a38ff2811ae851b2d3f3248f1b1e2a197516f99ec259d491ea8441b9fead"
+      ai-framework/scripts/review-bench.test.mts,"0cbf0dd552002ebd9cb651beafee114e146b06e22365138d8de0736b02ed04a3"
+      ai-framework/scripts/run-tests.mts,"6b6202eef04a7337cf30b43e3b651635b7c2e3dc41335cd2f0010b5a6e4799a7"
+      ai-framework/scripts/run-tests.test.mts,"1b585a4f2d2d8ad77f812c4293c9e39c20924af84752153428a0dc9cf9c8362c"
+      ai-framework/scripts/runtime/README.md,"4beec211f68764c4a2b219aad3e50fa1a0bfe0e4bd3a31434da9d323d922de20"
+      ai-framework/scripts/runtime/bun.mts,"489795f0d02a8d4091e13602a21ede6d0171760e1acdabaa4635f9cd84a2d5ec"
+      ai-framework/scripts/runtime/cli.mts,e11c515cba0a95bdccf04572f32b3c952380ce711bd86ab36fc043ead18ae78d
+      ai-framework/scripts/runtime/config.mts,"0f305a481661cac02b794f88be45f804956de857d7eebcdd7f4a7896a6962980"
+      ai-framework/scripts/runtime/config.test.mts,"9201ce7e1817efb1f9fcc6de062d4f170202b1a8f4465b4d3723960881aac5b4"
+      ai-framework/scripts/runtime/data-file.mts,"929d6240eb82a5efabbf3009d9f3fd0c5bb0612a928379b952aa9c82d17e1a75"
+      ai-framework/scripts/runtime/data-file.test.mts,b431039c1793ceb7d99844ac6005bbc6802348d7a19eefd6a5ed7a56f5ffcf78
+      ai-framework/scripts/runtime/entry.mts,"62edee638b130c9eaeb2126c30467928509e3eb73c1879403238ab1b8e25698e"
+      ai-framework/scripts/runtime/entry.test.mts,"369aa62e6f5f20c141b05b75f4ca757a0d890252db942ffb8c5e2fb8678cccd0"
+      ai-framework/scripts/runtime/env.mts,"6c6a09653c454bddb7a4b5c3769633eb087cb18b9bd904f0065f7ba03ba82c6e"
+      ai-framework/scripts/runtime/invariants.test.mts,"232159017258e7e183d824725dfc68fdef8c31e92e01b9b4d0b79059e2db8bcd"
+      ai-framework/scripts/runtime/migrate.mts,"617f10fdcd383f80330305b5057a90840ad8b4c42a4e18ab2c7f9044b0ec8c3e"
+      ai-framework/scripts/runtime/migrate.test.mts,"9d8e84638c35ea3ad7fb8f4b8495c45000dc02c74965166c09c9c9d250a8f599"
+      ai-framework/scripts/runtime/node.mts,"45c1551bbcbc52e63d54eaae9973bc28dd25628bd63797fd5757909102a4a2e8"
+      ai-framework/scripts/runtime/oex-lock.mts,c324476014d7feb59452c50b17ec583450d140ae224cdc4cb6191d64a15f17dc
+      ai-framework/scripts/runtime/runtime.test.mts,"1a6216d224eb259bc93b316453a7805a47fc1f412f7cba30fc9cdddecc8273c5"
+      ai-framework/scripts/runtime/select.mts,c68e5af73849bc642305cc341392bba7dc4166f270f43f1a083f15dc3856f630
+      ai-framework/scripts/runtime/semver-range.fixtures.json,"4c127de6e98037f31ccbc74461bfe97ed07dc471af893d7f16dc97cb220e30be"
+      ai-framework/scripts/runtime/semver-range.mts,d06baa220e9a3a4646c9e97aadf39d4ac8e57cfe566614f3c54ab7af1fb8e80c
+      ai-framework/scripts/runtime/semver-range.test.mts,eb164fc979e9a434e682ddd283db3696f02df677d8a4af139f23da4807a9e7c6
+      ai-framework/scripts/runtime/test-helpers.mts,b87441e3dc5d1c223ac7db566afbe5ec367248b4a4f8285485c9bcdc5d85994e
+      ai-framework/scripts/runtime/test-helpers.test.mts,a320f8e7c4ccdcc72f92527d93bcacee0fc2a2144d46dac43ff7400df22249c7
+      ai-framework/scripts/runtime/toon-data.mts,"3c2c402934a07b7da5056d776d6fa39091182102479fed9a349bb27e1191012f"
+      ai-framework/scripts/runtime/toon-data.test.mts,fbec4a02e85e04c7d6c2313e0d9aa4de133c306bc222ddba49f99c425dfbd60f
+      ai-framework/scripts/runtime/types.mts,"29992cf482d689126b23633194750fa28a3bfaa6143d9f12045a5a78a7e6a0b2"
+      ai-framework/scripts/runtime/upgrade.test.mts,"77153c81dae500255f9ad0adb922dbaec46de46953347d55d0d97ef69b34c66b"
+      ai-framework/scripts/runtime/validate.mts,"65576f08658f62fee0d4742006e95db894bf248a4654418782b9a2be25afeb7b"
+      ai-framework/scripts/runtime/validate.test.mts,"3576a389182adc50dc05794f6e78e6e6e095e48714f225b53c0090fad2cdd1cc"
+      ai-framework/scripts/setup-validator.mts,"132ff8995b1403b7ec479532df71b39aa69b4a1a337a1102c3c0e41b3ffce321"
+      ai-framework/scripts/setup-validator.test.mts,"66476d0a0301f33325623909ad510938b6bec2a7fdd82cb16e60d3fe35cacc2f"
+      ai-framework/scripts/skill-compress-guard.mts,"60a9c252d6955a33206db67477995a17dec245c4101d7eed2ad9eb736bc6e46f"
+      ai-framework/scripts/skill-compress-guard.test.mts,dce94212236ac8bdb5642a648561be36b4b7af2b72789195e546555e5f363466
+      ai-framework/scripts/skill-defaults.mts,b0d1faaa4d8edf3a983ac1fc054ae39994a3687e94c1bfa11bc3e582811d1955
+      ai-framework/scripts/skill-defaults.test.mts,a712181bb389e4540f3068fe4ef25a2bfd00c397ae4539798269f71aeab8115b
+      ai-framework/scripts/skill-registry.mts,c88bc17b9a056febaa298a62f5aa1ac83b6af24e060acf49475b287e2342dcda
+      ai-framework/scripts/skill-registry.test.mts,df1bfbade1cb60fdad59f7c7a84c8cc35982b0402ee1935e937ba8ee6af6135b
+      ai-framework/scripts/skill-source.mts,bf71133a6af736463f3633a62a4e7450a99115902dab7db1dfcf3b6a778610b3
+      ai-framework/scripts/skill-source.test.mts,daba16d72dbe246df0e8605e50e2c81367b3afa8aa3969922c88a866be937259
+      ai-framework/scripts/skill-sync.mts,"7dad4f0c56fd583377aeb71cfaad3823f1e738532679edfc2b0d2b642375d4ca"
+      ai-framework/scripts/skill-sync.test.mts,d3622471616a428c5ef5419ba0dc953db1a36036c286e556774a384345a561a9
+      ai-framework/scripts/skill-vendors.mts,"013a987c9ae527176ff5248ab3c458c34c8026dae0dacbf2e54f3ecba7c460c5"
+      ai-framework/scripts/skill-vendors.test.mts,ebdcc633fcc6bf0a2cde01eb1ea259bcf86339e97d132916dde5f8b80b19434f
+      ai-framework/scripts/state-charts.mts,dfd6516c509c89a66289cffef0803648f5891ad222594bac1403d3cf9f07ee0f
+      ai-framework/scripts/state-charts.test.mts,"22bd405f1d994cb6d40d6ceefe3acc669190c2a16a9c8685c73ee1f5c5a217f9"
+      ai-framework/scripts/state-design.mts,d992a544bc7c2daad1fb17e13be8dce2e22011fba1d2893273a396234e3eedd0
+      ai-framework/scripts/state-fragment-dataset.test.mts,"59c5e3e24f7b32508e6be3835e4dd3274f315e1804c09d34de85cdcad92ab1f8"
+      ai-framework/scripts/state-fragment-evidence.mts,"50380b5e5a7a7e82f7a179f464f437774b2fc8df3f71935ee5a9de8792416eac"
+      ai-framework/scripts/state-fragment-evidence.test.mts,"25e49ec95e07d372d759195208733caee1e29b3fc7afb31226c0a96b876cc3f9"
+      ai-framework/scripts/state-fragment-inject.mts,"71269a3070c2d64b31ad6be90bc598068a634a4321f78a4aefe6e4b980ce861f"
+      ai-framework/scripts/state-fragment-inject.test.mts,"0908d064fb22fc1478dea909a387c0c7f841c27db38b59680e4364aa2a4c0fff"
+      ai-framework/scripts/state-fragment-parse.mts,"8df6055a80ecb0a4cdf4da254676ace9a3fe86d805ccf7a19f31eec956193d0b"
+      ai-framework/scripts/state-fragment-parse.test.mts,"5147ef205f61142ea656a03db86f062e3c4a00a35735b68db7bc58d603cf53f0"
+      ai-framework/scripts/state-fragment.mts,"78ecbed5fada3d219f4ab43f6daa1798dce6fe05e846e5fab3a1426c32b201a5"
+      ai-framework/scripts/state-fragment.test.mts,"6f51958f27645d141d2fbd1d8f16fe5b42438533b57bad98b547fa8a8c04bc6f"
+      ai-framework/scripts/state-graph.mts,cde9c5f7df0e3ce159e20a11565ec681945415955397ec2c8747fed9455c2d7b
+      ai-framework/scripts/state-graph.test.mts,d3903429ebdaafea675bc68a5dc048cf05b5a1aa71b23bcadbd2769af498fd73
+      ai-framework/scripts/state-history.mts,"64241c5e5fd03c29d6675f6c0ab3193d846612af3af997e673e93cf0a77e4ec2"
+      ai-framework/scripts/state-history.test.mts,"01a504a8f75ced89af315b2b0bf187d0899a1924bc08153abc812f55e9d59991"
+      ai-framework/scripts/state-html.test.mts,f539844e21b2d836cd7df8556acf20a1e130065ceacb79c607b804693214f872
+      ai-framework/scripts/state-pages.mts,adcb50917171fbc4fc1ac01965d08a0003dba004a3eb41dac869baec0f802d08
+      ai-framework/scripts/state-render.mts,b04c2383693502ce91cef1ee0b00b854e305384364bb6c5f3aa24126fdcc5b53
+      ai-framework/scripts/state-snapshot.mts,"65aa3f9a06f683938a5f2709a56cc498a27cc139a2436db694b7e99cbb7f64ac"
+      ai-framework/scripts/state-snapshot.test.mts,"5ace7d8a47089c2a38fbc7aad52591e3c3ec4a0d75c9abecccc5effab7c8baab"
+      ai-framework/scripts/state-structure.mts,a2e60745aedf7923b94bc4e7a223cf12b3b1a2049cb84a82dbdf8a8b122b7d6b
+      ai-framework/scripts/state-test-helpers.mts,"3d71a4358c3ca3b17a0f0fa54d878b6dd663dacf2d6c5d5a62673cf81e5373bc"
+      ai-framework/scripts/state-theme.mts,"3e1f778d8046718768c63ad45af09870b617ddcd7cf1e19294a617d855885cc8"
+      ai-framework/scripts/state-theme.test.mts,d3240c16c2ad631335b57b9124d278bcd32184a36256a39f29c91fc862110f51
+      ai-framework/scripts/toon-convert.mts,"10e305aa561aa4136409aed61b954db1bcf278faf8a9e62aa953d3efe26cd5a9"
+      ai-framework/scripts/toon-convert.test.mts,"537503e2455ad1da326978dae0f13974bfd4e07f55cfe684ed3470f4b3c17a58"
+      ai-framework/scripts/workflow-contracts.test.mts,"5fe4477b8d32c84b7c5bb3d194bdec66e4e69f5ae1c03bece46754579dc933cd"
+      ai-framework/scripts/workflow-doctor.mts,"54fc4f0203ffdd3a2bf8adb760b980d1fe73e3ebbf2f69fdae859818d7be161d"
+      ai-framework/scripts/workflow-doctor.test.mts,"15f5b2e21ea5dd54b2c8b03d18674273cf40f9abc252e2b09027595811ab3223"
+      ai-framework/scripts/workflow-metrics-report.mts,"98a28139b2e5fc4a965be5adc04331f677e4449668069af2d6dbbf2d298b8662"
+      ai-framework/scripts/workflow-metrics-report.test.mts,"26b2c361577908cf42bc3b2150328bb0f98be18ec0558bb3db462434592b75af"
+      ai-framework/scripts/workflow-metrics-state.mts,"445170d9a49119f9479d522e53ae9421d567ba7a57886c048cd289a261c7fedb"
+      ai-framework/scripts/workflow-metrics-state.test.mts,"0b5914c1446aa7757d328679871d0e19195be7027ec55a72ba02e40b98b124f5"
+      ai-framework/scripts/workflow-metrics.mts,"8ec0824f72cf45cd0c9565483250c51664136ed679defc6301eccfcf9268d35f"
+      ai-framework/scripts/workflow-metrics.test.mts,"97857efe0bbdadbf3b52bc5af44de832ce0685e6bbb6c4fa57f188bc32962b7e"
+      ai-framework/templates/ai-workflow.example.toon,dc41ce03805031b0b4b7e2aa7153d05525bc8eeae65fcbd4790effe0146981c4
+      ai-framework/templates/ai_workflow_env.example.json,"98dbcb3a7b9da4a149e67cd26c8dc4e416e7b1a7dcb22ce09f728c7924850017"
+      ai-framework/templates/project/analysis/README.md,"9116655c8f8d3e6dcbdc69fcd32319804724b18bb6fb52b82ca23cdce9dd5a90"
+      ai-framework/templates/project/context/README.md,"5e76c38ea55af9925fc68548f7fad48373d241c0cd180943b29561ea725a91c9"
+      ai-framework/templates/project/design/decisions/template.md,"53811f0820d81415253f2a4efe16fdb45227a8ed55f04527d1b59e0d92373ce5"
+      ai-framework/templates/project/design/plans/rollback-template.md,a78158600a847a6840ee761e2481890b80bf8609084a92862fe805a1ed812cab
+      ai-framework/templates/project/design/plans/template.md,d62d8649f6cb97dd3db9622f4f86492ff75037ff5afd0e216aa12a9953d16c90
+      ai-framework/templates/project/design/template.md,d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+      ai-framework/templates/project/design/wireframes/template.md,d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+      ai-framework/templates/project/done-work.md,c721b6ec084de8a11a31b5fae753746888c127b85952a335a860ce100264465d
+      ai-framework/templates/project/knowledge/README.md,"99e824eb8d955ffb4ee50b41fa0ea2501c42fce1749690eeab2c42385fe023d5"
+      ai-framework/templates/project/knowledge/templates/decision.md,eb7b93ef148d3da5eec03c75a6de427cf9a648354bdd4b52da412929a8fefe88
+      ai-framework/templates/project/knowledge/templates/entity.md,"15485085bf9faf8fa4a61545df7d795467dd28befe6dfd3910a6816ae0c3eae8"
+      ai-framework/templates/project/knowledge/templates/issue.md,"9270185df6ff085341fab5905134651cd7e0a5d3679ccd604686149100dcc542"
+      ai-framework/templates/project/knowledge/templates/pattern.md,"27621bfc41afc5c984fbc16d310b20715353b6df4dd8b36d82fd2ab3c97773aa"
+      ai-framework/templates/project/pitches/_archive/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/pitches/_parked/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/pitches/_templates/hill.md,"6d728f73ff5b532ff6ef77949221a2dbe4f38a158b6d90985fb4c789530559dc"
+      ai-framework/templates/project/pitches/_templates/pitch.md,eb927ca736585fec3e9afc14539582b5cb9b261e49085759b11f68bf01f8cada
+      ai-framework/templates/project/pitches/_templates/plan.md,"64f750a6d2b90bd36c37daee3427e6183b61f4fb04d937a402f1db122e093b86"
+      ai-framework/templates/project/reports/README.md,"6a09eb48c81bf1eae76b757230c20436a1a1709b45b7a071dcc5081b52766a2a"
+      ai-framework/templates/project/requirements/bugs/template.md,"54f0dc660d2177883bedf8c02be5d6e368b2e1eeb6a5e597c1b2d20d39039f75"
+      ai-framework/templates/project/requirements/features/template.md,"0207eec5f811c08b303783a65c697129a4c4a7f1cd803a9e8db06655e20ad5fc"
+      ai-framework/templates/project/rules/README.md,e1f7f7c7cb05a750ee338a346987bd450e4e53630aec0690a2ba267d9cd5883a
+      ai-framework/templates/project/runs/README.md,"11e2d6c91b7b1a3abad781f73017979a59d403a31bc608850cf7ffe32c99f0a6"
+      ai-framework/templates/project/status.md,"317486b3922fd511b627e5d14b3c28b23b6da25d8950f9461f6f00e6e2f7d8ab"
+      ai-framework/workflow/overview.md,"873bb51f966fef96b0c9970f36a35c3a7b74b6897c64095de318aad7d0b14301"
+      ai-framework/workflow/phases/0-shape.md,"0837ca21f826f0e48a18070f574348c730081915f410ecb9bd95fccb2a1485b7"
+      ai-framework/workflow/phases/1-plan.md,eb9c56adc6f045daf50c0ec6708a5ad4f2a609b6baed789f76c6b42d7d07ac54
+      ai-framework/workflow/phases/2-build.md,d1f1a816bd653e7ab45a2703075eb50ebb2450e7a8015f336e6d4cd29137efab
+      ai-framework/workflow/phases/3-audit.md,"067275df459da6fca94d083ec081076273043e98ce81f3cab9a1f1557b6a603d"
+      ai-framework/workflow/phases/4-ship.md,a8685a3628670eeca49a29359eb6d3d8a9ed66250d1a5b472d7d103602899a9c
+      ai-framework/workflow/phases/5-cooldown.md,"828633bec26df18363126a04e649f15e3f512014527030b8692f9f1a8b37a59f"
+      ".project/status.md",e427b798c76d837566837baa52361b95cfcc3b3630815134c5bc2cca96d0b2ad
+      ".project/context/stack.md","999ae0207160b3e6c28aba32873f40631a0693571e4e1d41a804d20c0e70b0d9"
+      ".project/pitches/connected-memory-consolidation/plan.md","259de12cf95ab9c0ad68c518824338610375a21e3c1451e5e06ddda0c3d0509f"
+      ".project/pitches/connected-memory-consolidation/deviations.md",b37e078c68496b77876dcdea95d716fea2df6be976a3b208601ef3638d53f34a
+      ".project/pitches/connected-memory-consolidation/closing-exceptions.approved.toon",aaa288e412348c12222072613543c0a606645618335a87a3d347a0a393a5d92a
+      ".project/pitches/workflow-v3-rollout/pitch.md",eba3bf397244c34e26b68e4fe7fadc4929fa4a160979ea40ed2fe3c558a7cb83
+      ".project/pitches/package-less-ship-verification/pitch.md",ea689efee7916d4392e9f1b0750fc0e1844c1f527387bbf05c894e8ed59b47b2
+      ".project/pitches/orca-bounded-control-receipts/pitch.md",e1cca59fa538576cb37f47b76d756bb640274e2badc3e6d34e41e5eb88930e14
+      ".project/pitches/fix-retired-live-evidence-path/log.md",a69f0a38e643e70f2ce1357a3a2232cdffb711c5172b3954cc4d45b13f5f7c44
+      ".project/pitches/fix-retired-live-evidence-path/source-proof.toon","38ead5dcdf39d369ce237443e8aae327cd4b514eda4f4100d0a17ed63def4704"
+      ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md","868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a"
+    canary:
+      file: ai-framework/scripts/consolidation-migrate.mts
+      line: 179
+      findSha256: ba26dfade0a231175047fa6fd09d12b64138158d6279b9ac7c956c687e2f2d35
+      replaceSha256: a83ec44af981b1e4fed2f76399e67c88b658ad4351495dd28621f41bbfdaa52a
+    testCommand[3]: node,"--test",ai-framework/scripts/consolidation-migrate.test.mts
+    baselinePassed: true
+    canaryBreaksTests: true
+  p2c:
+    files[428]{path,sha256}:
+      ai-framework/scripts/consolidation-migrate.mts,"8374daab56cac02d3bac575fe2191e8b332ee96860aa18a7910e268f4bfd74f6"
+      ai-framework/scripts/consolidation-migrate.test.mts,c35da87119b5eb3cda0c000e31c96d220a86ca7dce1ccf7fe5d0d2449f697ab7
+      ai-framework/scripts/done-work-index.mts,c31dabc332164f6faf4b8e143101b8ffd0065554fb322c8726b1cf7bc387fb2e
+      ai-framework/scripts/done-work-index.test.mts,c5512956180a4be121c15b21098c1a560f09e0dfc03f51ee3006b60be41237b2
+      ai-framework/scripts/graphify-refs.mts,b3d816aa913e16da3d50069cd310a92f83dd3790267d092e9d9e54f6d9f9ceba
+      ai-framework/scripts/graphify-refs.test.mts,"24de7ac954d6d1ffe17de8e028444b9a6dab14f11c030350d1b3871179c3bb3e"
+      ai-framework/scripts/graphify-relations.mts,"188a05a38c3aeb28dff9584d3915ce59436bb13e465630fbbd1181f21f20614e"
+      ai-framework/scripts/graphify-relations.test.mts,"19dc94408c46fe6be23fc62b410bd6be8cdc235ee8b94512416d7e57ba435c70"
+      ai-framework/scripts/installed-upgrade.test.mts,"8abf9eea79de9e02025fa710d94a0886da98b6a2725cd1c88c21c3c5b796367b"
+      ai-framework/scripts/ledger-schema.mts,f3166ed20310c110b53fc2c26d2d55b06acafba4e592eb9124e2f158de54cf01
+      ai-framework/scripts/ledger-schema.test.mts,b9a14c9c0cf5ffe3eb04c53f5b8ac23bfecf9b0459a64eeadb7706cef115a161
+      ai-framework/scripts/legacy-upgrade.mts,"252a77e0bf0e926a812ac082774c4ea09e675716e3125cb4acba3d4a8236a95e"
+      ai-framework/scripts/legacy-upgrade.test.mts,ab7788e9c067f6301f241765cca4cc42e229593094da681406634fb8fc3d8b94
+      ai-framework/scripts/outcome-record.mts,bd5db227978b2e22c4b8842732cef663829fa0f191e6a786f2029a4cdcbe0524
+      ai-framework/scripts/outcome-record.test.mts,"250a6c1e871cdb2332ca8c64ec0733aebad5535880f881786b35db0be5ad1d5a"
+      ai-framework/templates/project/records/shipped/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/records/shipped/_template.md,c1d60dfa0eada8f2eeb3c317ea3dd0173b0b6bfc5695c99ec09273ce5fa90e59
+      ai-framework/workflow/relations.toon,"1b9c854a1b0ada6eb7eede64571065213a035fa270fa45e9bbc32ab31acb896c"
+      ".agents/skills/add-skill/SKILL.md",d7837a88324d9893b33da31c1488e7c70d8ce259f7c0e4a92ba73af5b7c18383
+      ".agents/skills/audit/SKILL.md","32d867694d321cd0393e17d8cfa4245c7da6e205c61bac9732920f98c8c8cfc4"
+      ".agents/skills/build/SKILL.md","22595bb21aeb07b260c7b8af5d082516d9367be95959b0d0d4d46416ccf0fd08"
+      ".agents/skills/bundle-sync/SKILL.md",c0c161afa4744901449ad01a0d4563c9072db3abf16c8e4656b9fa0aeb2f1f32
+      ".agents/skills/changelog/SKILL.md",d7d73123e3ffdfc65bffc53eb4f4b793e6b73684f2dd674ab409375491d06fd7
+      ".agents/skills/checkpoint/SKILL.md","96556aedde6a13aa5fb77e064736cca30a1ab8f92e7be250a89bf17019368a76"
+      ".agents/skills/cooldown/SKILL.md","3bc26b12ced53b161132efdaf651054ecce4e48a4090dcb0e476480260c43755"
+      ".agents/skills/critique/SKILL.md","11c21a8556ab25f4afb115f8a14bb452955f63e05388074aec89ab8d6fc9bbf8"
+      ".agents/skills/dependency-security/SKILL.md",e4c1f4cdb80ed3c38f67d3dc53d31c5fb038754fb4b1a01dcc040c403ab513e6
+      ".agents/skills/eval-harness/SKILL.md","7dc9cab1549371b2b66f0f20b1e42e849deb28966e2457f1a69758af38a0c2b6"
+      ".agents/skills/fix/SKILL.md","5e2fe2aec889f5bbe6ae7cedf8fa494734e29a5f2b8a70d73f38cb40006ff16f"
+      ".agents/skills/impact/SKILL.md","938be82e10cfa944f000efc59a16074f731e35a252fc6a01b0fd3b4c172fbbd8"
+      ".agents/skills/knowledge-health/SKILL.md","427b596f307332471287f33827a3663fa645c9772acd81feb3e5ea4f79e41339"
+      ".agents/skills/pitch-compress/SKILL.md","3f15f6ee79fbc21807dd1ae81151b0c64294d42a151af34663ae65222dcb3dc1"
+      ".agents/skills/plan/SKILL.md","123c4edf8cc16034b151526cd004c73ff9cf889ed2dd68a7f6317fc32ad266be"
+      ".agents/skills/resume/SKILL.md","9f79d5026375dffbb792a8ab1e8c036f971fca0dadcc07870d87bf99df652615"
+      ".agents/skills/search/SKILL.md","5e18fe9870171d720bd4626230a38a8cf33283337369318a16b84f653eef2b41"
+      ".agents/skills/setup-validator/SKILL.md",cbc5acbfbd37c681cf03ee4b4e8a5904ad82ca9699661dfd5d87dad655b3f7bb
+      ".agents/skills/setup/SKILL.md",bfdaeb0013c1bf50279c5788045f19f9766f0124afdb1b467af7d96c7b513d48
+      ".agents/skills/shape-lite/SKILL.md","8db611a176e4aa8bce689cb69c5a4744be840a8cee8337c51de51bf06009d5d0"
+      ".agents/skills/shape/SKILL.md","997e8ffca9913d7750cc2220380d1daaee781c80a72641b24ac5d297d0bb96de"
+      ".agents/skills/ship/SKILL.md",ab3169550c59630fcd76ba82ef7d6a8d4585469d00a237c8edb6d5cc10f84240
+      ".agents/skills/state/SKILL.md","5826d2916847ad938ece309158a36daf173ea9b5f3cf895b3ee0cb0e7f14cd20"
+      ".agents/skills/switch/SKILL.md","96fb35be2e5f0df6beb3108aeb6891efa8907d5b43404112c8a3374e4b75a0a5"
+      ".agents/skills/sync/SKILL.md",b5dc6bc484d7f2bdc89c42dc6b55ddf167c41bbc0ca64888215f21247ad23d19
+      ".agents/skills/test-strategy/SKILL.md","22f0c4819c70efb45ad4d46dd7e86b5868e34466bc8ae3d1d41b62ce5f1e3787"
+      ".agents/skills/ui-design/SKILL.md","02c16453c5bea27aa35e38099159b5437e2de053a722546385f0f8658ac99e8e"
+      ".agents/skills/workflow-doctor/SKILL.md",ec23c3cddbaf405e4b233e28d44d2b0be1e83fc54ef956c19612da565ce60b58
+      ".claude/agents/appetite-auditor.md","8eefe2784aa5abe39451f0cf3e62f5547e2f3be6371a365542d0bd42e6776dd3"
+      ".claude/agents/architect.md","946d7b59066d8bdf600427f9178ba82418c8e552c01e6a2cbabedd312774f03a"
+      ".claude/agents/build-error-resolver.md","46f47d4b31ad0e42923f4133a4c9732ca470348d8e3878ef82355647a8446fd5"
+      ".claude/agents/code-reviewer.md","66e01142e0a10ce05e03a117d210181346e4b12e6ea20c0adf9625983151e8aa"
+      ".claude/agents/cross-pitch-conflict-checker.md",e7730afa362b81ddcdd6e6d2c70b7b2971020ab59e1f0b80f8c9707a3f91727e
+      ".claude/agents/cross-pitch-projector.md",abde0dbeb4996ba4711e6691c7d0eb6bdb8afb8f5ffd6c22bcc9747328cea484
+      ".claude/agents/eval-regression-projector.md",bd18787da6bda83fec81f2776511d85045bf9e35d320d9f7f4a9240f59115092
+      ".claude/agents/eval-runner.md",cfea69c7b1e5aedc7d351cfa770f065d7289022973cb66d13b183ad3802ff2d9
+      ".claude/agents/i18n-checker.md","906c3cda8a507fedce3f0e1f13d96bc7ce8684173af0c457cec67e6003fbf250"
+      ".claude/agents/knowledge-historian.md",df0db5fbbf9bcc9cc1eb54c4b0a877c7974a45f24393d56274a8996d2672acec
+      ".claude/agents/planner.md","400e2223c32cdfdb856a21f276f63e19f634a57eb7203e3cd6ce23e425d6327a"
+      ".claude/agents/refactor-cleaner.md",fd309d0a7dd9e8c096d7b8eb6deef8ee33c88a48df5a65e0bd0f2b8b7a7b72da
+      ".claude/agents/security-reviewer.md","47447823a6a9e15b8ca65707847e7c98f2609d3872fade369d6899cec770e2d2"
+      ".claude/agents/skeptic.md","2d35896e104c4757552fa4c5fa974c6728bae32ab66b26635f0f76283997cba9"
+      ".claude/agents/test-coverage-checker.md",b0e3bcff229aa21b76b21932ac65335f3aea7e7d22c31d2421766c82f1faf08c
+      ".claude/agents/ux-reviewer.md","08667ce6bf0d9624993bdc74fc2174a748853dee82fb0ac8530eb93a6deec03c"
+      ".claude/skills/add-skill/SKILL.md","22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      ".claude/skills/audit/SKILL.md","9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+      ".claude/skills/build/SKILL.md","6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+      ".claude/skills/bundle-sync/SKILL.md","84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+      ".claude/skills/changelog/SKILL.md","521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+      ".claude/skills/checkpoint/SKILL.md","6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+      ".claude/skills/cooldown/SKILL.md",cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+      ".claude/skills/critique/SKILL.md","8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+      ".claude/skills/dependency-security/SKILL.md","02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+      ".claude/skills/eval-harness/SKILL.md",d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+      ".claude/skills/fix/SKILL.md","25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+      ".claude/skills/impact/SKILL.md",bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+      ".claude/skills/knowledge-health/SKILL.md","316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+      ".claude/skills/pitch-compress/SKILL.md",ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+      ".claude/skills/plan/SKILL.md","0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+      ".claude/skills/resume/SKILL.md",cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+      ".claude/skills/search/SKILL.md","23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+      ".claude/skills/setup-validator/SKILL.md","8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+      ".claude/skills/setup/SKILL.md",adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+      ".claude/skills/shape-lite/SKILL.md","3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+      ".claude/skills/shape/SKILL.md",a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+      ".claude/skills/ship/SKILL.md",aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+      ".claude/skills/state/SKILL.md","531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+      ".claude/skills/switch/SKILL.md",f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+      ".claude/skills/sync/SKILL.md","1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+      ".claude/skills/test-strategy/SKILL.md","077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+      ".claude/skills/ui-design/SKILL.md",b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+      ".claude/skills/workflow-doctor/SKILL.md",c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+      ".codex/agents/appetite-auditor.toml","950d04aa91809e1f271fd4161def233e2af6cc381f0b3d24a1385b0adee06674"
+      ".codex/agents/architect.toml","5c7268383d8d443e5426d197674a308d31b26bbb71bad9d83fbc5d1fa66f53f1"
+      ".codex/agents/build-error-resolver.toml",a7166d2de56ac842a4c3a362df329e7b5a0387ac7f15db29a090493afadce997
+      ".codex/agents/code-reviewer.toml","3c379b174dfca92bcbda008e61263a758ad48922e3bf7ba70d532e4637fd6eeb"
+      ".codex/agents/cross-pitch-conflict-checker.toml","24af3aebd95784bb070de363adbbfddc553b4ff899b30b023fa85dd47cd510ac"
+      ".codex/agents/cross-pitch-projector.toml","0d93072027c5325becbee585659ce3875662a92d085960d82b30bf4e97029ff2"
+      ".codex/agents/eval-regression-projector.toml","02937025ec7da86f92f736d0649ab68ca2e495a2d83b850de289347a4ffa9d76"
+      ".codex/agents/eval-runner.toml",dd5f532db6ebf0ca3e3e10b0ee80ab846b8c2f308c589d71bb191e24f702f7fb
+      ".codex/agents/i18n-checker.toml",d8af2b2e17ea0180f613b3993132b55cfefe29fff03bea47b5fe1a4a8d9f78f9
+      ".codex/agents/knowledge-historian.toml","7353de3fce2134043bce9394f9babb2b7ed87d9cf45486d8a60acccead569248"
+      ".codex/agents/planner.toml",afbcacc2e157d89bb225173118d56f26b28209d118555a65549f69a7e3d4e7b4
+      ".codex/agents/refactor-cleaner.toml",a56771324bf3eb9307feaa5aab560171de5edc7b8e4c918882a389520452aa81
+      ".codex/agents/security-reviewer.toml","824ab52cf562da785219195aced4b87c820b79d8c18280a8c518dad9e44cb6ba"
+      ".codex/agents/skeptic.toml","98fba04902c641565ba9c1fb5b00c472bf2249d4f37c03d2318e8c9218255a05"
+      ".codex/agents/test-coverage-checker.toml",d61fab07a844c551bbc5fb82befadf97523532f6c84b065f2c9c0f7446586fb2
+      ".codex/agents/ux-reviewer.toml",b19e62df117ed879d75b166c9ad8ac85a63c776c21aea200ed687eff2a654d29
+      ".cursor/skills/add-skill/SKILL.md","22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      ".cursor/skills/audit/SKILL.md","9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+      ".cursor/skills/build/SKILL.md","6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+      ".cursor/skills/bundle-sync/SKILL.md","84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+      ".cursor/skills/changelog/SKILL.md","521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+      ".cursor/skills/checkpoint/SKILL.md","6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+      ".cursor/skills/cooldown/SKILL.md",cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+      ".cursor/skills/critique/SKILL.md","8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+      ".cursor/skills/dependency-security/SKILL.md","02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+      ".cursor/skills/eval-harness/SKILL.md",d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+      ".cursor/skills/fix/SKILL.md","25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+      ".cursor/skills/impact/SKILL.md",bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+      ".cursor/skills/knowledge-health/SKILL.md","316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+      ".cursor/skills/pitch-compress/SKILL.md",ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+      ".cursor/skills/plan/SKILL.md","0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+      ".cursor/skills/resume/SKILL.md",cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+      ".cursor/skills/search/SKILL.md","23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+      ".cursor/skills/setup-validator/SKILL.md","8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+      ".cursor/skills/setup/SKILL.md",adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+      ".cursor/skills/shape-lite/SKILL.md","3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+      ".cursor/skills/shape/SKILL.md",a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+      ".cursor/skills/ship/SKILL.md",aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+      ".cursor/skills/state/SKILL.md","531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+      ".cursor/skills/switch/SKILL.md",f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+      ".cursor/skills/sync/SKILL.md","1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+      ".cursor/skills/test-strategy/SKILL.md","077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+      ".cursor/skills/ui-design/SKILL.md",b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+      ".cursor/skills/workflow-doctor/SKILL.md",c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+      ".gitignore","6b3798fef1a85f421f9564c35574dadfe7a6dde8e98c5d585566081e64c99bc0"
+      ".graphifyignore",ac41f08adb3b692d4c61d68cd51e1e878b3d33fb6dadf19e36a8e1f644a57771
+      ".opencode/agents/appetite-auditor.md","6067c968c076d1557bf53e539aa56cad16d9eba9b3dc91d6b8b95c6bc90a73b9"
+      ".opencode/agents/architect.md",a7a75598b94225f54361631692f8e3be28797fe8731bdd9dd8009afc494a7656
+      ".opencode/agents/build-error-resolver.md","3c4bf7b9b2b2b4cde6aca86250ed2555a08e59ca2ec13b901baf219f4af1dea9"
+      ".opencode/agents/code-reviewer.md","4b6b95d64769f432c9291f4523fc4522fcb5cc2d08374a74765b806d693f53ba"
+      ".opencode/agents/cross-pitch-conflict-checker.md",f3523bd36501b3608538950dd48a66a644aefe2202eefd5f82ad8d7b5cfdbbf2
+      ".opencode/agents/cross-pitch-projector.md","05d3000704c89550343a1122d122413c5fd05dbf45d59c4ae7008a27840aef2b"
+      ".opencode/agents/eval-regression-projector.md","6a05af0ff60fc3abcd6e1c230a939e18545b729e5a3bd5bfb8254d9f806728f4"
+      ".opencode/agents/eval-runner.md",edf8c488ab98d58beeab95232f0a8c1e2c44f93ab09cf07d25b467fae2e887bb
+      ".opencode/agents/i18n-checker.md","76c389a7d9169320935a24ca220ea89bb322ff79ff8f028b3cf5014cf0ebb22b"
+      ".opencode/agents/knowledge-historian.md","78decb1d8fffe8db93a067a889253d25089009cc2e94753dd23c2ebeb81ca6ca"
+      ".opencode/agents/planner.md","4593b7f3308081e1acfcb26b8c5dc92377e0440e2c0e1bba428ff597c2fdffdd"
+      ".opencode/agents/refactor-cleaner.md","0187f37319a323c67ebc5268429cbb414f4250f9bf48765940c2987e1e3d546d"
+      ".opencode/agents/security-reviewer.md",df8da747d2e84db26c5d2d68740c696c5c151c62e220f864ed8faab7606fec8f
+      ".opencode/agents/skeptic.md",bd8114fc3a698beabfaabbca4101d8ac857841b6545d3de286fb56113d21c44e
+      ".opencode/agents/test-coverage-checker.md",c638436a5fc9613c1e2264af2d79340c060d45318100eda91c4fc7d052b505e1
+      ".opencode/agents/ux-reviewer.md",e1746aebefb0fdaf9e018dab630c3b02fab47abf9f98991e786080588b361c99
+      ".opencode/commands/add-skill.md",a24a853b7cfd2648bc3c6c7e5faceb503367a41125546706dc2e5c1a58eaefa0
+      ".opencode/commands/audit.md","3e1d85c40b6ea6c9affc8abdc69b5a881824144d30f76899f62aabbafd6c9632"
+      ".opencode/commands/build.md","161f807562f1303fd47e46a9fd1e78d477cb0195e53d750fbb6c729b2fc7b9ed"
+      ".opencode/commands/bundle-sync.md","4027c20d5bc08abc8d266eb680535984cebb21e49b365cefd4416ee869687c3f"
+      ".opencode/commands/changelog.md","28e390fc6fe6abcc2ea11b9118925b96dfd04d55d266499d1b2db84c6808bf83"
+      ".opencode/commands/checkpoint.md","35cbbe83dfb2d5a2b1dda2a755f96362bb0e5e92fba60cc19af464d7b967f51e"
+      ".opencode/commands/cooldown.md",e03ff5f42597a08f31d57c2f7394404b6e90b91ea0d6f73d649af3c8b45e3e97
+      ".opencode/commands/critique.md",b49ad5e6d69541594a3368923f0031ffe9a148862ee34cc75ea18da013d36cc4
+      ".opencode/commands/dependency-security.md","6222354d4bc3a9d52b0e0f4e036c6c2e7712ec609b2b6bed19a3fa9fb358c7ff"
+      ".opencode/commands/eval-harness.md",f5af146facb0ffb883a2747abcd315e59c13280e81a7e7c2cf5680f9a01211fc
+      ".opencode/commands/fix.md",d878f6ca6b857e220cab43eeb2aa518c28cca99a099c1fe9aa4598b32e6a6d76
+      ".opencode/commands/impact.md",f068a208d34bc0ffed2926c61eb1a0c2f4e39d524898ff34c2a46535405991da
+      ".opencode/commands/knowledge-health.md","47bf002b60af30a0792015c940b7fd469a5d182f6919788174762072ce009c15"
+      ".opencode/commands/pitch-compress.md","840e1c204edf6d9b480f627742a7cf28bbe3eb587239dee529396f943d36bfaa"
+      ".opencode/commands/plan.md",f5663a94fe039dc833ea7ccf34cf219e18e5b3bd30cd5bf7735e132c31f789f2
+      ".opencode/commands/resume.md","23cd3ebf64dcbbc4c5d85b7bbd7cf1168e33c41a7506e17d13d3e923ef33efaa"
+      ".opencode/commands/search.md","8c5d195c865f7f5f3e7b85f94134e8fb3d693ad136cd43c3e98804495a430957"
+      ".opencode/commands/setup-validator.md",f91b775bfdc4a5ce9c0e9ed72f112aae4d419d2de07b04aeff2fe0cf02ef91ec
+      ".opencode/commands/setup.md","1f0112b7797923d620a08020802fa6e702b79a34051a393abcfd674de2d56b72"
+      ".opencode/commands/shape-lite.md",a62d2cce2677a5d29cc0bdefc1034dab7d560e9e33b73d9a9464cb1c71787b0e
+      ".opencode/commands/shape.md",a9c091ed89541016e40502a8458e83da5d8dfce072a6e04d8c787afbf301069b
+      ".opencode/commands/ship.md","0c854ecb8a070072dd97d30e90cbc5fee3c90ae756dc11467ba4f1a108ac69a8"
+      ".opencode/commands/state.md","6d860a5ee9bcc56943462b62e37e858cc09430fabf89f2324c98578a2794a419"
+      ".opencode/commands/switch.md","6d8565bf8f0b85fbc241cb3de0e389abec959bffb796e84e58678496f26e979d"
+      ".opencode/commands/sync.md","814817fd48af767c8b75b0a89e17970048d4fd02d59f1ad71a326758fc505886"
+      ".opencode/commands/test-strategy.md",da062c2b25400b88e5d218e9b500b2a9c6a3502a3c02091a10420536597c7bdd
+      ".opencode/commands/ui-design.md","9f903532327b2af84c6e45f66ad4df50bca414c16d6c2ba6fef18161cda73e6a"
+      ".opencode/commands/workflow-doctor.md",b511e97fa072cb1619d8e2b0c5c100172d1b59d5bd8cbf67c63be21d8c505fa5
+      AGENTS.md,feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+      CHANGELOG.md,da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c
+      CLAUDE.md,feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+      README.md,"8b7cf7992df6b7c5401c418f8b87a8efdd0aa0399c046b12c34b7e27c3b9804b"
+      SETUP.md,c1e234187bd02dc51bf42662ba6a41d6ae57595d5529301d3ecae36c57f8817f
+      VERSION,"9bd51d4120f0ac96a8e2e9f9a3e68e8175db7659324704ba2306aa682dffec33"
+      ai-framework/docs/design-notes.md,f4141e7d74b56f20e8e2deec14eb19baf5dbe233b925183025b9ebb5c848f54b
+      ai-framework/docs/extending.md,"935499627ae1c09fe618f9c8736e66b3df6aebed4ce14206448e283949c7588c"
+      ai-framework/docs/knowledge-graph.md,"6a98e9fbf1fe90fdfd712504403ac3faf2e7e29bf7ecbbfb80fb18f74b83ce1e"
+      ai-framework/docs/pipeline.md,da7eb210d0263bf82b2a3f4de8046a5fe396623a7006aefc748dc09b2067942b
+      ai-framework/docs/setup-validator.md,a616b2971976374fb0987ac53d0ec5cb641a39260b194db2b0a2125f1501302a
+      ai-framework/docs/setup.md,"9792b1079b82f19e46ae3338cb01b2eb55823394cffc69ceda5aaa157f1c11ec"
+      ai-framework/docs/testing.md,"2c6d49b64898f9b30250f07fa55ab7de29c4b5702733280595e304a0e209ef95"
+      ai-framework/docs/token-consumption.md,c3c0b442989f000c323e851044f10c26b5c9bf065546d7734eff4bd0249132cc
+      ai-framework/docs/vendors.md,"144911290b522d3ac1356d6d7f3de538a7fd0ed2b4fdac8b6cf609827b5d458e"
+      ai-framework/docs/versioning-and-sync.md,"6993335e25990ee864d5050b8dad9e15544813c6ae4cb1ef3eff89f3e9f53e5d"
+      ai-framework/docs/what-you-get.md,"7cb906b4029ce8d6b8231c60f88ec3d6ac22cd61db77728939b1262a730c0c7b"
+      ai-framework/docs/workflow-doctor.md,"2a435ab9db182c9e251775e4961210db2b93e4bf2ecf50d7b183bacb79cf0b2d"
+      ai-framework/hooks/hooks.json,a043f76bffe935b69ffcde83f8ee411ac0c8db390bf1e0b5ca0a515481aeb738
+      ai-framework/hooks/scripts/metrics-lock.mts,"3735953435a9335c986077b676249ce84eb4c700c47842490a17738fbdc302aa"
+      ai-framework/hooks/scripts/metrics-lock.test.mts,"64e98bcad00c630660891a4c337ae6f93871266ad2bd380ff7fc97cd0c7c0ce7"
+      ai-framework/hooks/scripts/opencode-plugin.test.mts,f8c3cc0155dd27a1d15edc3a8eac8673625d4e974407dd9a670d64a7f6329323
+      ai-framework/hooks/scripts/orca-start-codex-hook.mts,"04d1db5cbabd8a2d92c74ace3c4ed18aecbd86aa5e0d82c1ec5983d878bec9a5"
+      ai-framework/hooks/scripts/orca-start-codex-hook.test.mts,"23b7dd3444ab20ece59faaa0e6ef9aaa8324c8c6afe46be288d241036a2feb06"
+      ai-framework/hooks/scripts/orca-start-hook.mts,"37908c66cd1044e2e1b9b84c88819d495d1c8c2d7c1de18e8485700e0922babc"
+      ai-framework/hooks/scripts/orca-start-hook.test.mts,"5f08b7a54a819b2aba16a6443110020d50e2c73c54eaa7a32738bc3dadb2c83e"
+      ai-framework/hooks/scripts/pre-ship-verify.mts,bb32bd2d5885a9589c0e2ae2247dfc4db7d7ec5a891e4548e752aabd9e877e95
+      ai-framework/hooks/scripts/pre-ship-verify.test.mts,d2fb5a3c8fc8ffc4beabe8ef6f7a8b1335f6fe6dc0f6ce35cba98a8e4d7c3ca9
+      ai-framework/hooks/scripts/stuck-uphill-detector.mts,e3eea81bca629bd8ed4a4c6fdafd1c132b6e210814c64ca1a8b4dc7afd0807bb
+      ai-framework/hooks/scripts/stuck-uphill-detector.test.mts,"555391b2434a5c7b990b50c9f0f44706f538fd65403c8c0421b2dc6f266dba70"
+      ai-framework/hooks/scripts/token-consumption.mts,"59019aab893efd99e20ef3a909096811f5cd05c73d1a7444db32e6e9070b260c"
+      ai-framework/hooks/scripts/token-consumption.test.mts,"9f2af606afd074ef84d734f79c116f6dc63cb2256d4fbde616e7d15b315e3fe5"
+      ai-framework/hooks/scripts/token-report.mts,"16132e33e16b1758b46a82e5cb7f4f8b78f972d29d8491dcbc0fe3e14761780a"
+      ai-framework/hooks/scripts/token-report.test.mts,"25261c9a3edb5c9ea11a6f50e548cea6987101c05b7dd405915e888ef78b40a8"
+      ai-framework/hooks/scripts/transcript-usage.mts,eb61d064e51ec7dbffb15df93fa4c821b6abc9cdf5b3ce1e49000d8e14c75c6a
+      ai-framework/hooks/scripts/transcript-usage.test.mts,d4f44ff24e69030a64474238d7a628a8d3554b320614e7d827426edfb164d612
+      ai-framework/hooks/scripts/workflow-capture.mts,a405d52d6789dfabbe86ed697c459c96c24c8b862b75870fc106f3b8725cbf58
+      ai-framework/hooks/scripts/workflow-capture.test.mts,"220a5ba991285e67165c0f26b73260aaea3c5a64065badb3df21d3ef657e0b78"
+      ai-framework/hooks/scripts/workflow-notice.mts,"78922fb86d1dd5370c70186eb50f6e520808496d7324de0e2a8c3529e8b631b3"
+      ai-framework/hooks/scripts/workflow-notice.test.mts,"71df25da12987497f1bfd071ce6ded207a08f1678927bc7d24b360266fcca6d4"
+      ai-framework/integrations/harnesses.md,"0ef7fe3f102503aca042746a339479b83724bcdf36f72dbf86ecaa8fe843b827"
+      ai-framework/integrations/orca-vendors.example.json,"9b02de69ebc7d86ca64b3a91b03722c22b4b51c83df30d88b58a31e077c0f24e"
+      ai-framework/integrations/orca-vendors.md,"80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+      ai-framework/integrations/skill-defaults.json,"68df8f9dbe489506898f1c7468ade4264b7185c782ae4a67220702db1e251c31"
+      ai-framework/integrations/skill-defaults.md,aed215e20cfdf1fa4ef52074fda880603e491694f2ba47028c0bf2423afaebd4
+      ai-framework/integrations/skill-vendors.json,"984d7f2969bd6e7556604df438ab867002efd10341a01b6f0bc3eae4d8b436c1"
+      ai-framework/integrations/skills.md,b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403
+      ai-framework/integrations/state-report.md,"2f7049c70c92d2209186632d3b9bc79e126f6bcffa75c43b99b75edac8df8dcf"
+      ai-framework/integrations/workflow-metrics.md,dcb13ff9d2c8438df62dc7bf677f9fabbaf5d5f3caca2ad804241fbefe23bc0a
+      ai-framework/rules/boundaries.md,"61a96a6c5f0080cc76bd9ed36334c5b7a78d4d9fa26ebfe99ce746a468d4256d"
+      ai-framework/rules/canonical-mirror-sync.md,f7b6f1aea6da8ac7b632c17c9a8ff8d9f1a0c52e2cb23dbd34698007ad0e4d36
+      ai-framework/rules/ci-deployment.md,"057352139e4a49be9f14ab4a768a5506a7efd9b0b898b49a32a214bb306d51e6"
+      ai-framework/rules/coding-standards.md,"8cf88955b0a5875c55cfd289a34d1f3e095ac82091ed43c5ac9bdaeaf73fc87c"
+      ai-framework/rules/component-architecture.md,"29f3a8bcd7448f9baf7187c117627c9a00401d79dd346b6c7a9ed58e6592b6e1"
+      ai-framework/rules/context-management.md,dc17def4e97dbcb6ddc830b0ffab9e4e34e47337a743d3b2f25a924b69ec2355
+      ai-framework/rules/data-modeling.md,"770be714ae5704510f8eb281d490775b9360d6fb0eeee1ba827a9f35199f6faf"
+      ai-framework/rules/eval-harness.md,c4d2d61523679b9916c98eac78503a7875c6e16f2fbdf0acdbb15ed3060c07c1
+      ai-framework/rules/i18n.md,"0b01cfaa7a5ad3a55fcd5584768834c7b65d639bfb3ad3e542436df34ccbb3ab"
+      ai-framework/rules/machine-data-format.md,"4d1812f421e26771ae07e526dd0cd15f60315d8a1e7a7a3cf6348560b21a1d3e"
+      ai-framework/rules/model-routing.md,"808a11a5bb154f60185c7aa89be669f6cc36e2ac58e6a2f74c1bce9a53747eda"
+      ai-framework/rules/observability.md,"1a9dc8f8b13441fc0fd90d0da0d3ebaa1a4bde7e2c216db3a119b5a321e57fc7"
+      ai-framework/rules/performance.md,"96a68ddf97587c6e30246a0168c2fba4e7253eec5981b742ec89af9a4e17252c"
+      ai-framework/rules/security.md,a4ca5b64c845bceee7c022cfa71af90d30524183e84bab40fee0b6adf1bf98c4
+      ai-framework/rules/testing.md,fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4
+      ai-framework/rules/tool-use.md,"502c479b4fde12525f8e612c6580e133efb1000829f77116a68811415826268c"
+      ai-framework/rules/ui-ux-review.md,f44625f2cb8a7f615e22de2902d572d46056ae31894c19cf83b66e259d98a1cc
+      ai-framework/scripts/add-skill.mts,"139e28020ea1e8364a5b1a477ebd04a3c23131752abb622a2a63ee7ae0b5c2a1"
+      ai-framework/scripts/add-skill.test.mts,"457362b3cddaac608c53e900b8f58de0f64e74baf2341a1c467ada4a03b30a05"
+      ai-framework/scripts/agent-frontmatter-invariant.test.mts,"6cd46140d41c9a829d0b257e289d13097db9e4c70c6e3b37a90857772859d62c"
+      ai-framework/scripts/browser-runtime.mts,"1d41e97b1f475de584753f75373da01ed5311ae34e7d8aaad84f7fc048b30b1b"
+      ai-framework/scripts/browser-runtime.test.mts,f887f452e1f734435b74d1cccd4e97d1161d5efbe962d8e255639214e3c04f9e
+      ai-framework/scripts/bundle-sync.mts,"4e85d956e280ae4c699903e2373b67b55200f2f4c29ea1379a0bd9a8978ff8b5"
+      ai-framework/scripts/bundle-sync.test.mts,"082b41ffee498dec13f5d70a5cd6dcbcd5dc60ba6593d205bc012713c213034f"
+      ai-framework/scripts/changelog.mts,b6dcc744ccd1da5e621fb3298d9fc2d2b67fdf64ccbe45fc472724922207880b
+      ai-framework/scripts/changelog.test.mts,"9f9d8de5c8bd881814a59fb817a6e3d92bcedec62519ab48a3dc8474fbc863ed"
+      ai-framework/scripts/config-migrate.mts,"522e406ba032d4de9914926abf0eb271d6b6d16b32dd5801791230ffc90d8e34"
+      ai-framework/scripts/config-migrate.test.mts,"09c90a02536f7e47ca8b73d82252dfa84ff1b11240f668738c29dfdd5c07f130"
+      ai-framework/scripts/docs-links.mts,"69d9231c293ea15ba740d6584f8437d2b100029050c41290a9324030046e3ebe"
+      ai-framework/scripts/docs-links.test.mts,"937774f162075024a1f2bfa68bd358836cf857a9f368cb449da78d5da95b6736"
+      ai-framework/scripts/entry-import.mts,"452a6e05b8d92e1f8b190d99160e434b86f73a228bbc3bdc4f52359c8bfe42d4"
+      ai-framework/scripts/entry-import.test.mts,ffd52ffd00f1459122060619309860eb6303dada847ca74f15b956ab108005dc
+      ai-framework/scripts/flow-join.mts,e260428733adcbb214c2753725b96db55d592826e4de3a1245b28487bdb69149
+      ai-framework/scripts/flow-join.test.mts,eb3f5f8281342cebd51779c44aaef8a728dabdc29864b2161f0fcbce6d4ae628
+      ai-framework/scripts/flow-render.mts,"8781e59b3fe094be1f71c6f227d8440df70dcf7415ee13f0435e9e719735f482"
+      ai-framework/scripts/flow-render.test.mts,"43264ce93320730f34547f1c0a9d971622248e5b8cb11c0d68fd3c239175a967"
+      ai-framework/scripts/flow-report.mts,"452f07f06a6d57b268b53afbf80ef7ac5f4d94219998f2ace8e691d370376bb1"
+      ai-framework/scripts/flow-report.test.mts,"908fb93e9f9b46d7a04f6afd952368db777beaeeb32713bfdf7d4d5493bdf0fb"
+      ai-framework/scripts/graphify.mts,b15b994c411783aec7e8dca621088c9f9bef175688438eeed6ae4fe301801cb5
+      ai-framework/scripts/graphify.test.mts,"1a4e95b3e13555004842b9af5c43173d356e2036a31e3530a40a0d851f1bda36"
+      ai-framework/scripts/instruction-loading.test.mts,f430f3f61e72e42be161a10f8331965a6ee462a44f086f63cea25e0b8aa9039a
+      ai-framework/scripts/opencode-service.mts,"6f20412410482657070a033d5e9309b7dfa6d9904245c25d9253ff25be39c003"
+      ai-framework/scripts/opencode-service.test.mts,f74ae7c9c1d95ab13c00f087a7667082aa5f314aff5baffc311a3dbd036ec38e
+      ai-framework/scripts/orca-apply.mts,"3031386c17d1941e899ba565a5ebab6cc8e1cfb9ff280bbca6cbebe3e766af26"
+      ai-framework/scripts/orca-apply.test.mts,c677d2be9887b8d325f2a1b05035cec07d0b146c236fd8c724b4a7d4b6c73834
+      ai-framework/scripts/orca-assign.mts,c90ff858e73f04328917eda589f904a0eb1d96643042eb8a1c87499eec90d052
+      ai-framework/scripts/orca-assign.test.mts,"139c68c878e6ea6dc5a97d7b269b09491474e32b97bbd48f124efce11669b3ff"
+      ai-framework/scripts/orca-diff-admit.mts,"1cda46e26b9a70a74753207b341a640b0cae42704002395f46fb4773277739b0"
+      ai-framework/scripts/orca-diff-admit.test.mts,"3c337c6545bf846337d38635d810e220ace7fd2809dd718906e167c2b842a1ae"
+      ai-framework/scripts/orca-dispatch.mts,"6ba5efb1e870eadfbf279f58353007188d72ae839afd4ec1f01076d5bfbcabe9"
+      ai-framework/scripts/orca-dispatch.test.mts,"2948ecc2666aaeb54f139b074696ed68087f57fe5ea1649f03fe3a9b79b6ad19"
+      ai-framework/scripts/orca-eval-grader.mts,aa4793bed42f7fb6d72580a83b18e8d10660ac239908f4e8c5eaa6135045be11
+      ai-framework/scripts/orca-eval-grader.test.mts,c761186bc2e975446314af94fc10a62a0d4c793223aa00b9e3ac7e22b358c1c0
+      ai-framework/scripts/orca-evidence.mts,"490ba3b395e1990dd2a52ce5b7d5732d734e59f65f154cb6b11308289952bb43"
+      ai-framework/scripts/orca-evidence.test.mts,a39f7617c926eb5ff76bff449a901efb484a391eeeb476b645ba649309ac3035
+      ai-framework/scripts/orca-launch-gate.mts,"6a1af51f400040781fc0ded7c9395b35c8bdfa94af537af46acc312092927e92"
+      ai-framework/scripts/orca-launch-gate.test.mts,d4d1e01fdb9f4e4b0f191966e3d0907b3ef1a28f249c3a4882e09222187eb0d7
+      ai-framework/scripts/orca-ledger.mts,fc0b481f7cf7608bd33bea386cef60fb70b24a526ec3f914a2529572dba3e333
+      ai-framework/scripts/orca-ledger.test.mts,"2e287dc27fc617085cb3d0867396fd6ca0d98c056e0a24d6167b73ddb2b9029f"
+      ai-framework/scripts/orca-policy.mts,"60cd83f4c6b47e10eebe48b9a4b156e4a535c249652f3d2dc3258d8ecea1a569"
+      ai-framework/scripts/orca-policy.test.mts,efecdef629d7e758cea86b2256c2ca10450e8b3feec704c5462928b5ae002f44
+      ai-framework/scripts/orca-preflight.mts,"225837b18440d8ce273ee4c4edda1fbc0a8121523a74649cd51318cc9df2c948"
+      ai-framework/scripts/orca-preflight.test.mts,"64d7548c38a5722b1386bf92533b8223944198b91025ca31c72783a22874d794"
+      ai-framework/scripts/orca-reconcile.mts,"27e707fbf19796e650cc2cb1a84d4eb1c9ea114972f11e8dd7e245b209dcde5c"
+      ai-framework/scripts/orca-reconcile.test.mts,"6007c462299b3ecbb30c05887a4fd3a3cfcbc595de145e88808b2354bc1ec9c6"
+      ai-framework/scripts/orca-run.mts,"5c0e0b1fe0f530d23c037133a8ada8a4623ee87e337e587c1443fe7354ec6b74"
+      ai-framework/scripts/orca-run.test.mts,"6c1da356ebacebb46a888d7c0893a00eadbf1c54d65435822e62364f5e0dd75f"
+      ai-framework/scripts/orca-start.mts,"2dab69fed6ab26485bfded1face68a073cbe7fba7f1eb15e9c836188e7575ac3"
+      ai-framework/scripts/orca-start.test.mts,"4e9be424f41695abde281336fbc8a9409fe8be8e8cbb0b50eaae2525062d9496"
+      ai-framework/scripts/pitch-archive.mts,ff8bcc2ab1e404be5647bba6c4b0170cdc692615680b8cbd0832854252be02b5
+      ai-framework/scripts/pitch-archive.test.mts,"5daa7edc577b9cc06e575850254d1922b19f5e25cd499d55153e249189b03eca"
+      ai-framework/scripts/pitch-compress.mts,b65221150ec1bb998c393065d7f9f24c74e79f86752b7d6e9d5a337d347835fe
+      ai-framework/scripts/pitch-compress.test.mts,"9b951cd36bbb9820aadaf251458aa4cc984e8d1331295cfa0efaf7f2273311dd"
+      ai-framework/scripts/review-bench.mts,"02a4a38ff2811ae851b2d3f3248f1b1e2a197516f99ec259d491ea8441b9fead"
+      ai-framework/scripts/review-bench.test.mts,"0cbf0dd552002ebd9cb651beafee114e146b06e22365138d8de0736b02ed04a3"
+      ai-framework/scripts/run-tests.mts,"6b6202eef04a7337cf30b43e3b651635b7c2e3dc41335cd2f0010b5a6e4799a7"
+      ai-framework/scripts/run-tests.test.mts,"1b585a4f2d2d8ad77f812c4293c9e39c20924af84752153428a0dc9cf9c8362c"
+      ai-framework/scripts/runtime/README.md,"4beec211f68764c4a2b219aad3e50fa1a0bfe0e4bd3a31434da9d323d922de20"
+      ai-framework/scripts/runtime/bun.mts,"489795f0d02a8d4091e13602a21ede6d0171760e1acdabaa4635f9cd84a2d5ec"
+      ai-framework/scripts/runtime/cli.mts,e11c515cba0a95bdccf04572f32b3c952380ce711bd86ab36fc043ead18ae78d
+      ai-framework/scripts/runtime/config.mts,"0f305a481661cac02b794f88be45f804956de857d7eebcdd7f4a7896a6962980"
+      ai-framework/scripts/runtime/config.test.mts,"9201ce7e1817efb1f9fcc6de062d4f170202b1a8f4465b4d3723960881aac5b4"
+      ai-framework/scripts/runtime/data-file.mts,"929d6240eb82a5efabbf3009d9f3fd0c5bb0612a928379b952aa9c82d17e1a75"
+      ai-framework/scripts/runtime/data-file.test.mts,b431039c1793ceb7d99844ac6005bbc6802348d7a19eefd6a5ed7a56f5ffcf78
+      ai-framework/scripts/runtime/entry.mts,"62edee638b130c9eaeb2126c30467928509e3eb73c1879403238ab1b8e25698e"
+      ai-framework/scripts/runtime/entry.test.mts,"369aa62e6f5f20c141b05b75f4ca757a0d890252db942ffb8c5e2fb8678cccd0"
+      ai-framework/scripts/runtime/env.mts,"6c6a09653c454bddb7a4b5c3769633eb087cb18b9bd904f0065f7ba03ba82c6e"
+      ai-framework/scripts/runtime/invariants.test.mts,"232159017258e7e183d824725dfc68fdef8c31e92e01b9b4d0b79059e2db8bcd"
+      ai-framework/scripts/runtime/migrate.mts,"617f10fdcd383f80330305b5057a90840ad8b4c42a4e18ab2c7f9044b0ec8c3e"
+      ai-framework/scripts/runtime/migrate.test.mts,"9d8e84638c35ea3ad7fb8f4b8495c45000dc02c74965166c09c9c9d250a8f599"
+      ai-framework/scripts/runtime/node.mts,"45c1551bbcbc52e63d54eaae9973bc28dd25628bd63797fd5757909102a4a2e8"
+      ai-framework/scripts/runtime/oex-lock.mts,c324476014d7feb59452c50b17ec583450d140ae224cdc4cb6191d64a15f17dc
+      ai-framework/scripts/runtime/runtime.test.mts,"1a6216d224eb259bc93b316453a7805a47fc1f412f7cba30fc9cdddecc8273c5"
+      ai-framework/scripts/runtime/select.mts,c68e5af73849bc642305cc341392bba7dc4166f270f43f1a083f15dc3856f630
+      ai-framework/scripts/runtime/semver-range.fixtures.json,"4c127de6e98037f31ccbc74461bfe97ed07dc471af893d7f16dc97cb220e30be"
+      ai-framework/scripts/runtime/semver-range.mts,d06baa220e9a3a4646c9e97aadf39d4ac8e57cfe566614f3c54ab7af1fb8e80c
+      ai-framework/scripts/runtime/semver-range.test.mts,eb164fc979e9a434e682ddd283db3696f02df677d8a4af139f23da4807a9e7c6
+      ai-framework/scripts/runtime/test-helpers.mts,b87441e3dc5d1c223ac7db566afbe5ec367248b4a4f8285485c9bcdc5d85994e
+      ai-framework/scripts/runtime/test-helpers.test.mts,a320f8e7c4ccdcc72f92527d93bcacee0fc2a2144d46dac43ff7400df22249c7
+      ai-framework/scripts/runtime/toon-data.mts,"3c2c402934a07b7da5056d776d6fa39091182102479fed9a349bb27e1191012f"
+      ai-framework/scripts/runtime/toon-data.test.mts,fbec4a02e85e04c7d6c2313e0d9aa4de133c306bc222ddba49f99c425dfbd60f
+      ai-framework/scripts/runtime/types.mts,"29992cf482d689126b23633194750fa28a3bfaa6143d9f12045a5a78a7e6a0b2"
+      ai-framework/scripts/runtime/upgrade.test.mts,"77153c81dae500255f9ad0adb922dbaec46de46953347d55d0d97ef69b34c66b"
+      ai-framework/scripts/runtime/validate.mts,"65576f08658f62fee0d4742006e95db894bf248a4654418782b9a2be25afeb7b"
+      ai-framework/scripts/runtime/validate.test.mts,"3576a389182adc50dc05794f6e78e6e6e095e48714f225b53c0090fad2cdd1cc"
+      ai-framework/scripts/setup-validator.mts,"132ff8995b1403b7ec479532df71b39aa69b4a1a337a1102c3c0e41b3ffce321"
+      ai-framework/scripts/setup-validator.test.mts,"66476d0a0301f33325623909ad510938b6bec2a7fdd82cb16e60d3fe35cacc2f"
+      ai-framework/scripts/skill-compress-guard.mts,"60a9c252d6955a33206db67477995a17dec245c4101d7eed2ad9eb736bc6e46f"
+      ai-framework/scripts/skill-compress-guard.test.mts,dce94212236ac8bdb5642a648561be36b4b7af2b72789195e546555e5f363466
+      ai-framework/scripts/skill-defaults.mts,b0d1faaa4d8edf3a983ac1fc054ae39994a3687e94c1bfa11bc3e582811d1955
+      ai-framework/scripts/skill-defaults.test.mts,a712181bb389e4540f3068fe4ef25a2bfd00c397ae4539798269f71aeab8115b
+      ai-framework/scripts/skill-registry.mts,c88bc17b9a056febaa298a62f5aa1ac83b6af24e060acf49475b287e2342dcda
+      ai-framework/scripts/skill-registry.test.mts,df1bfbade1cb60fdad59f7c7a84c8cc35982b0402ee1935e937ba8ee6af6135b
+      ai-framework/scripts/skill-source.mts,bf71133a6af736463f3633a62a4e7450a99115902dab7db1dfcf3b6a778610b3
+      ai-framework/scripts/skill-source.test.mts,daba16d72dbe246df0e8605e50e2c81367b3afa8aa3969922c88a866be937259
+      ai-framework/scripts/skill-sync.mts,"7dad4f0c56fd583377aeb71cfaad3823f1e738532679edfc2b0d2b642375d4ca"
+      ai-framework/scripts/skill-sync.test.mts,d3622471616a428c5ef5419ba0dc953db1a36036c286e556774a384345a561a9
+      ai-framework/scripts/skill-vendors.mts,"013a987c9ae527176ff5248ab3c458c34c8026dae0dacbf2e54f3ecba7c460c5"
+      ai-framework/scripts/skill-vendors.test.mts,ebdcc633fcc6bf0a2cde01eb1ea259bcf86339e97d132916dde5f8b80b19434f
+      ai-framework/scripts/state-charts.mts,dfd6516c509c89a66289cffef0803648f5891ad222594bac1403d3cf9f07ee0f
+      ai-framework/scripts/state-charts.test.mts,"22bd405f1d994cb6d40d6ceefe3acc669190c2a16a9c8685c73ee1f5c5a217f9"
+      ai-framework/scripts/state-design.mts,d992a544bc7c2daad1fb17e13be8dce2e22011fba1d2893273a396234e3eedd0
+      ai-framework/scripts/state-fragment-dataset.test.mts,"59c5e3e24f7b32508e6be3835e4dd3274f315e1804c09d34de85cdcad92ab1f8"
+      ai-framework/scripts/state-fragment-evidence.mts,"50380b5e5a7a7e82f7a179f464f437774b2fc8df3f71935ee5a9de8792416eac"
+      ai-framework/scripts/state-fragment-evidence.test.mts,"25e49ec95e07d372d759195208733caee1e29b3fc7afb31226c0a96b876cc3f9"
+      ai-framework/scripts/state-fragment-inject.mts,"71269a3070c2d64b31ad6be90bc598068a634a4321f78a4aefe6e4b980ce861f"
+      ai-framework/scripts/state-fragment-inject.test.mts,"0908d064fb22fc1478dea909a387c0c7f841c27db38b59680e4364aa2a4c0fff"
+      ai-framework/scripts/state-fragment-parse.mts,"8df6055a80ecb0a4cdf4da254676ace9a3fe86d805ccf7a19f31eec956193d0b"
+      ai-framework/scripts/state-fragment-parse.test.mts,"5147ef205f61142ea656a03db86f062e3c4a00a35735b68db7bc58d603cf53f0"
+      ai-framework/scripts/state-fragment.mts,"78ecbed5fada3d219f4ab43f6daa1798dce6fe05e846e5fab3a1426c32b201a5"
+      ai-framework/scripts/state-fragment.test.mts,"6f51958f27645d141d2fbd1d8f16fe5b42438533b57bad98b547fa8a8c04bc6f"
+      ai-framework/scripts/state-graph.mts,cde9c5f7df0e3ce159e20a11565ec681945415955397ec2c8747fed9455c2d7b
+      ai-framework/scripts/state-graph.test.mts,d3903429ebdaafea675bc68a5dc048cf05b5a1aa71b23bcadbd2769af498fd73
+      ai-framework/scripts/state-history.mts,"64241c5e5fd03c29d6675f6c0ab3193d846612af3af997e673e93cf0a77e4ec2"
+      ai-framework/scripts/state-history.test.mts,"01a504a8f75ced89af315b2b0bf187d0899a1924bc08153abc812f55e9d59991"
+      ai-framework/scripts/state-html.test.mts,f539844e21b2d836cd7df8556acf20a1e130065ceacb79c607b804693214f872
+      ai-framework/scripts/state-pages.mts,adcb50917171fbc4fc1ac01965d08a0003dba004a3eb41dac869baec0f802d08
+      ai-framework/scripts/state-render.mts,b04c2383693502ce91cef1ee0b00b854e305384364bb6c5f3aa24126fdcc5b53
+      ai-framework/scripts/state-snapshot.mts,"65aa3f9a06f683938a5f2709a56cc498a27cc139a2436db694b7e99cbb7f64ac"
+      ai-framework/scripts/state-snapshot.test.mts,"5ace7d8a47089c2a38fbc7aad52591e3c3ec4a0d75c9abecccc5effab7c8baab"
+      ai-framework/scripts/state-structure.mts,a2e60745aedf7923b94bc4e7a223cf12b3b1a2049cb84a82dbdf8a8b122b7d6b
+      ai-framework/scripts/state-test-helpers.mts,"3d71a4358c3ca3b17a0f0fa54d878b6dd663dacf2d6c5d5a62673cf81e5373bc"
+      ai-framework/scripts/state-theme.mts,"3e1f778d8046718768c63ad45af09870b617ddcd7cf1e19294a617d855885cc8"
+      ai-framework/scripts/state-theme.test.mts,d3240c16c2ad631335b57b9124d278bcd32184a36256a39f29c91fc862110f51
+      ai-framework/scripts/toon-convert.mts,"10e305aa561aa4136409aed61b954db1bcf278faf8a9e62aa953d3efe26cd5a9"
+      ai-framework/scripts/toon-convert.test.mts,"537503e2455ad1da326978dae0f13974bfd4e07f55cfe684ed3470f4b3c17a58"
+      ai-framework/scripts/workflow-contracts.test.mts,"5fe4477b8d32c84b7c5bb3d194bdec66e4e69f5ae1c03bece46754579dc933cd"
+      ai-framework/scripts/workflow-doctor.mts,"54fc4f0203ffdd3a2bf8adb760b980d1fe73e3ebbf2f69fdae859818d7be161d"
+      ai-framework/scripts/workflow-doctor.test.mts,"15f5b2e21ea5dd54b2c8b03d18674273cf40f9abc252e2b09027595811ab3223"
+      ai-framework/scripts/workflow-metrics-report.mts,"98a28139b2e5fc4a965be5adc04331f677e4449668069af2d6dbbf2d298b8662"
+      ai-framework/scripts/workflow-metrics-report.test.mts,"26b2c361577908cf42bc3b2150328bb0f98be18ec0558bb3db462434592b75af"
+      ai-framework/scripts/workflow-metrics-state.mts,"445170d9a49119f9479d522e53ae9421d567ba7a57886c048cd289a261c7fedb"
+      ai-framework/scripts/workflow-metrics-state.test.mts,"0b5914c1446aa7757d328679871d0e19195be7027ec55a72ba02e40b98b124f5"
+      ai-framework/scripts/workflow-metrics.mts,"8ec0824f72cf45cd0c9565483250c51664136ed679defc6301eccfcf9268d35f"
+      ai-framework/scripts/workflow-metrics.test.mts,"97857efe0bbdadbf3b52bc5af44de832ce0685e6bbb6c4fa57f188bc32962b7e"
+      ai-framework/templates/ai-workflow.example.toon,dc41ce03805031b0b4b7e2aa7153d05525bc8eeae65fcbd4790effe0146981c4
+      ai-framework/templates/ai_workflow_env.example.json,"98dbcb3a7b9da4a149e67cd26c8dc4e416e7b1a7dcb22ce09f728c7924850017"
+      ai-framework/templates/project/analysis/README.md,"9116655c8f8d3e6dcbdc69fcd32319804724b18bb6fb52b82ca23cdce9dd5a90"
+      ai-framework/templates/project/context/README.md,"5e76c38ea55af9925fc68548f7fad48373d241c0cd180943b29561ea725a91c9"
+      ai-framework/templates/project/design/decisions/template.md,"53811f0820d81415253f2a4efe16fdb45227a8ed55f04527d1b59e0d92373ce5"
+      ai-framework/templates/project/design/plans/rollback-template.md,a78158600a847a6840ee761e2481890b80bf8609084a92862fe805a1ed812cab
+      ai-framework/templates/project/design/plans/template.md,d62d8649f6cb97dd3db9622f4f86492ff75037ff5afd0e216aa12a9953d16c90
+      ai-framework/templates/project/design/template.md,d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+      ai-framework/templates/project/design/wireframes/template.md,d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+      ai-framework/templates/project/done-work.md,c721b6ec084de8a11a31b5fae753746888c127b85952a335a860ce100264465d
+      ai-framework/templates/project/knowledge/README.md,"99e824eb8d955ffb4ee50b41fa0ea2501c42fce1749690eeab2c42385fe023d5"
+      ai-framework/templates/project/knowledge/templates/decision.md,eb7b93ef148d3da5eec03c75a6de427cf9a648354bdd4b52da412929a8fefe88
+      ai-framework/templates/project/knowledge/templates/entity.md,"15485085bf9faf8fa4a61545df7d795467dd28befe6dfd3910a6816ae0c3eae8"
+      ai-framework/templates/project/knowledge/templates/issue.md,"9270185df6ff085341fab5905134651cd7e0a5d3679ccd604686149100dcc542"
+      ai-framework/templates/project/knowledge/templates/pattern.md,"27621bfc41afc5c984fbc16d310b20715353b6df4dd8b36d82fd2ab3c97773aa"
+      ai-framework/templates/project/pitches/_archive/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/pitches/_parked/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/pitches/_templates/hill.md,"6d728f73ff5b532ff6ef77949221a2dbe4f38a158b6d90985fb4c789530559dc"
+      ai-framework/templates/project/pitches/_templates/pitch.md,eb927ca736585fec3e9afc14539582b5cb9b261e49085759b11f68bf01f8cada
+      ai-framework/templates/project/pitches/_templates/plan.md,"64f750a6d2b90bd36c37daee3427e6183b61f4fb04d937a402f1db122e093b86"
+      ai-framework/templates/project/reports/README.md,"6a09eb48c81bf1eae76b757230c20436a1a1709b45b7a071dcc5081b52766a2a"
+      ai-framework/templates/project/requirements/bugs/template.md,"54f0dc660d2177883bedf8c02be5d6e368b2e1eeb6a5e597c1b2d20d39039f75"
+      ai-framework/templates/project/requirements/features/template.md,"0207eec5f811c08b303783a65c697129a4c4a7f1cd803a9e8db06655e20ad5fc"
+      ai-framework/templates/project/rules/README.md,e1f7f7c7cb05a750ee338a346987bd450e4e53630aec0690a2ba267d9cd5883a
+      ai-framework/templates/project/runs/README.md,"11e2d6c91b7b1a3abad781f73017979a59d403a31bc608850cf7ffe32c99f0a6"
+      ai-framework/templates/project/status.md,"317486b3922fd511b627e5d14b3c28b23b6da25d8950f9461f6f00e6e2f7d8ab"
+      ai-framework/workflow/overview.md,"873bb51f966fef96b0c9970f36a35c3a7b74b6897c64095de318aad7d0b14301"
+      ai-framework/workflow/phases/0-shape.md,"0837ca21f826f0e48a18070f574348c730081915f410ecb9bd95fccb2a1485b7"
+      ai-framework/workflow/phases/1-plan.md,eb9c56adc6f045daf50c0ec6708a5ad4f2a609b6baed789f76c6b42d7d07ac54
+      ai-framework/workflow/phases/2-build.md,d1f1a816bd653e7ab45a2703075eb50ebb2450e7a8015f336e6d4cd29137efab
+      ai-framework/workflow/phases/3-audit.md,"067275df459da6fca94d083ec081076273043e98ce81f3cab9a1f1557b6a603d"
+      ai-framework/workflow/phases/4-ship.md,a8685a3628670eeca49a29359eb6d3d8a9ed66250d1a5b472d7d103602899a9c
+      ai-framework/workflow/phases/5-cooldown.md,"828633bec26df18363126a04e649f15e3f512014527030b8692f9f1a8b37a59f"
+      ".project/status.md",e427b798c76d837566837baa52361b95cfcc3b3630815134c5bc2cca96d0b2ad
+      ".project/context/stack.md","999ae0207160b3e6c28aba32873f40631a0693571e4e1d41a804d20c0e70b0d9"
+      ".project/pitches/connected-memory-consolidation/plan.md","259de12cf95ab9c0ad68c518824338610375a21e3c1451e5e06ddda0c3d0509f"
+      ".project/pitches/connected-memory-consolidation/deviations.md",b37e078c68496b77876dcdea95d716fea2df6be976a3b208601ef3638d53f34a
+      ".project/pitches/connected-memory-consolidation/closing-exceptions.approved.toon",aaa288e412348c12222072613543c0a606645618335a87a3d347a0a393a5d92a
+      ".project/pitches/workflow-v3-rollout/pitch.md",eba3bf397244c34e26b68e4fe7fadc4929fa4a160979ea40ed2fe3c558a7cb83
+      ".project/pitches/package-less-ship-verification/pitch.md",ea689efee7916d4392e9f1b0750fc0e1844c1f527387bbf05c894e8ed59b47b2
+      ".project/pitches/orca-bounded-control-receipts/pitch.md",e1cca59fa538576cb37f47b76d756bb640274e2badc3e6d34e41e5eb88930e14
+      ".project/pitches/fix-retired-live-evidence-path/log.md",a69f0a38e643e70f2ce1357a3a2232cdffb711c5172b3954cc4d45b13f5f7c44
+      ".project/pitches/fix-retired-live-evidence-path/source-proof.toon","38ead5dcdf39d369ce237443e8aae327cd4b514eda4f4100d0a17ed63def4704"
+      ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md","868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a"
+    canary:
+      file: ai-framework/scripts/legacy-upgrade.mts
+      line: 270
+      findSha256: "4444b3ee24266e245818511d5bb41a3321b7371467178969a99159f6abb6dee6"
+      replaceSha256: b0fea39dcfc16790dcb56eebfaceee45022a9a3c9aabc28b43e67608bb2161d6
+    testCommand[3]: node,"--test",ai-framework/scripts/legacy-upgrade.test.mts
+    baselinePassed: true
+    canaryBreaksTests: true
+  repair:
+    files[430]{path,sha256}:
+      ai-framework/scripts/consolidation-migrate.mts,"8374daab56cac02d3bac575fe2191e8b332ee96860aa18a7910e268f4bfd74f6"
+      ai-framework/scripts/consolidation-migrate.test.mts,c35da87119b5eb3cda0c000e31c96d220a86ca7dce1ccf7fe5d0d2449f697ab7
+      ai-framework/scripts/done-work-index.mts,c31dabc332164f6faf4b8e143101b8ffd0065554fb322c8726b1cf7bc387fb2e
+      ai-framework/scripts/done-work-index.test.mts,c5512956180a4be121c15b21098c1a560f09e0dfc03f51ee3006b60be41237b2
+      ai-framework/scripts/graphify-refs.mts,b3d816aa913e16da3d50069cd310a92f83dd3790267d092e9d9e54f6d9f9ceba
+      ai-framework/scripts/graphify-refs.test.mts,"24de7ac954d6d1ffe17de8e028444b9a6dab14f11c030350d1b3871179c3bb3e"
+      ai-framework/scripts/graphify-relations.mts,"188a05a38c3aeb28dff9584d3915ce59436bb13e465630fbbd1181f21f20614e"
+      ai-framework/scripts/graphify-relations.test.mts,"19dc94408c46fe6be23fc62b410bd6be8cdc235ee8b94512416d7e57ba435c70"
+      ai-framework/scripts/installed-upgrade.test.mts,"8abf9eea79de9e02025fa710d94a0886da98b6a2725cd1c88c21c3c5b796367b"
+      ai-framework/scripts/ledger-schema.mts,f3166ed20310c110b53fc2c26d2d55b06acafba4e592eb9124e2f158de54cf01
+      ai-framework/scripts/ledger-schema.test.mts,b9a14c9c0cf5ffe3eb04c53f5b8ac23bfecf9b0459a64eeadb7706cef115a161
+      ai-framework/scripts/legacy-upgrade.mts,"252a77e0bf0e926a812ac082774c4ea09e675716e3125cb4acba3d4a8236a95e"
+      ai-framework/scripts/legacy-upgrade.test.mts,ab7788e9c067f6301f241765cca4cc42e229593094da681406634fb8fc3d8b94
+      ai-framework/scripts/outcome-record.mts,bd5db227978b2e22c4b8842732cef663829fa0f191e6a786f2029a4cdcbe0524
+      ai-framework/scripts/outcome-record.test.mts,"250a6c1e871cdb2332ca8c64ec0733aebad5535880f881786b35db0be5ad1d5a"
+      ai-framework/templates/project/records/shipped/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/records/shipped/_template.md,c1d60dfa0eada8f2eeb3c317ea3dd0173b0b6bfc5695c99ec09273ce5fa90e59
+      ai-framework/workflow/relations.toon,"1b9c854a1b0ada6eb7eede64571065213a035fa270fa45e9bbc32ab31acb896c"
+      ".agents/skills/add-skill/SKILL.md",d7837a88324d9893b33da31c1488e7c70d8ce259f7c0e4a92ba73af5b7c18383
+      ".agents/skills/audit/SKILL.md","32d867694d321cd0393e17d8cfa4245c7da6e205c61bac9732920f98c8c8cfc4"
+      ".agents/skills/build/SKILL.md","22595bb21aeb07b260c7b8af5d082516d9367be95959b0d0d4d46416ccf0fd08"
+      ".agents/skills/bundle-sync/SKILL.md",c0c161afa4744901449ad01a0d4563c9072db3abf16c8e4656b9fa0aeb2f1f32
+      ".agents/skills/changelog/SKILL.md",d7d73123e3ffdfc65bffc53eb4f4b793e6b73684f2dd674ab409375491d06fd7
+      ".agents/skills/checkpoint/SKILL.md","96556aedde6a13aa5fb77e064736cca30a1ab8f92e7be250a89bf17019368a76"
+      ".agents/skills/cooldown/SKILL.md","3bc26b12ced53b161132efdaf651054ecce4e48a4090dcb0e476480260c43755"
+      ".agents/skills/critique/SKILL.md","11c21a8556ab25f4afb115f8a14bb452955f63e05388074aec89ab8d6fc9bbf8"
+      ".agents/skills/dependency-security/SKILL.md",e4c1f4cdb80ed3c38f67d3dc53d31c5fb038754fb4b1a01dcc040c403ab513e6
+      ".agents/skills/eval-harness/SKILL.md","7dc9cab1549371b2b66f0f20b1e42e849deb28966e2457f1a69758af38a0c2b6"
+      ".agents/skills/fix/SKILL.md","5e2fe2aec889f5bbe6ae7cedf8fa494734e29a5f2b8a70d73f38cb40006ff16f"
+      ".agents/skills/impact/SKILL.md","938be82e10cfa944f000efc59a16074f731e35a252fc6a01b0fd3b4c172fbbd8"
+      ".agents/skills/knowledge-health/SKILL.md","427b596f307332471287f33827a3663fa645c9772acd81feb3e5ea4f79e41339"
+      ".agents/skills/pitch-compress/SKILL.md","3f15f6ee79fbc21807dd1ae81151b0c64294d42a151af34663ae65222dcb3dc1"
+      ".agents/skills/plan/SKILL.md","123c4edf8cc16034b151526cd004c73ff9cf889ed2dd68a7f6317fc32ad266be"
+      ".agents/skills/resume/SKILL.md","9f79d5026375dffbb792a8ab1e8c036f971fca0dadcc07870d87bf99df652615"
+      ".agents/skills/search/SKILL.md","5e18fe9870171d720bd4626230a38a8cf33283337369318a16b84f653eef2b41"
+      ".agents/skills/setup-validator/SKILL.md",cbc5acbfbd37c681cf03ee4b4e8a5904ad82ca9699661dfd5d87dad655b3f7bb
+      ".agents/skills/setup/SKILL.md",bfdaeb0013c1bf50279c5788045f19f9766f0124afdb1b467af7d96c7b513d48
+      ".agents/skills/shape-lite/SKILL.md","8db611a176e4aa8bce689cb69c5a4744be840a8cee8337c51de51bf06009d5d0"
+      ".agents/skills/shape/SKILL.md","997e8ffca9913d7750cc2220380d1daaee781c80a72641b24ac5d297d0bb96de"
+      ".agents/skills/ship/SKILL.md",ab3169550c59630fcd76ba82ef7d6a8d4585469d00a237c8edb6d5cc10f84240
+      ".agents/skills/state/SKILL.md","5826d2916847ad938ece309158a36daf173ea9b5f3cf895b3ee0cb0e7f14cd20"
+      ".agents/skills/switch/SKILL.md","96fb35be2e5f0df6beb3108aeb6891efa8907d5b43404112c8a3374e4b75a0a5"
+      ".agents/skills/sync/SKILL.md",b5dc6bc484d7f2bdc89c42dc6b55ddf167c41bbc0ca64888215f21247ad23d19
+      ".agents/skills/test-strategy/SKILL.md","22f0c4819c70efb45ad4d46dd7e86b5868e34466bc8ae3d1d41b62ce5f1e3787"
+      ".agents/skills/ui-design/SKILL.md","02c16453c5bea27aa35e38099159b5437e2de053a722546385f0f8658ac99e8e"
+      ".agents/skills/workflow-doctor/SKILL.md",ec23c3cddbaf405e4b233e28d44d2b0be1e83fc54ef956c19612da565ce60b58
+      ".claude/agents/appetite-auditor.md","8eefe2784aa5abe39451f0cf3e62f5547e2f3be6371a365542d0bd42e6776dd3"
+      ".claude/agents/architect.md","946d7b59066d8bdf600427f9178ba82418c8e552c01e6a2cbabedd312774f03a"
+      ".claude/agents/build-error-resolver.md","46f47d4b31ad0e42923f4133a4c9732ca470348d8e3878ef82355647a8446fd5"
+      ".claude/agents/code-reviewer.md","66e01142e0a10ce05e03a117d210181346e4b12e6ea20c0adf9625983151e8aa"
+      ".claude/agents/cross-pitch-conflict-checker.md",e7730afa362b81ddcdd6e6d2c70b7b2971020ab59e1f0b80f8c9707a3f91727e
+      ".claude/agents/cross-pitch-projector.md",abde0dbeb4996ba4711e6691c7d0eb6bdb8afb8f5ffd6c22bcc9747328cea484
+      ".claude/agents/eval-regression-projector.md",bd18787da6bda83fec81f2776511d85045bf9e35d320d9f7f4a9240f59115092
+      ".claude/agents/eval-runner.md",cfea69c7b1e5aedc7d351cfa770f065d7289022973cb66d13b183ad3802ff2d9
+      ".claude/agents/i18n-checker.md","906c3cda8a507fedce3f0e1f13d96bc7ce8684173af0c457cec67e6003fbf250"
+      ".claude/agents/knowledge-historian.md",df0db5fbbf9bcc9cc1eb54c4b0a877c7974a45f24393d56274a8996d2672acec
+      ".claude/agents/planner.md","400e2223c32cdfdb856a21f276f63e19f634a57eb7203e3cd6ce23e425d6327a"
+      ".claude/agents/refactor-cleaner.md",fd309d0a7dd9e8c096d7b8eb6deef8ee33c88a48df5a65e0bd0f2b8b7a7b72da
+      ".claude/agents/security-reviewer.md","47447823a6a9e15b8ca65707847e7c98f2609d3872fade369d6899cec770e2d2"
+      ".claude/agents/skeptic.md","2d35896e104c4757552fa4c5fa974c6728bae32ab66b26635f0f76283997cba9"
+      ".claude/agents/test-coverage-checker.md",b0e3bcff229aa21b76b21932ac65335f3aea7e7d22c31d2421766c82f1faf08c
+      ".claude/agents/ux-reviewer.md","08667ce6bf0d9624993bdc74fc2174a748853dee82fb0ac8530eb93a6deec03c"
+      ".claude/skills/add-skill/SKILL.md","22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      ".claude/skills/audit/SKILL.md","9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+      ".claude/skills/build/SKILL.md","6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+      ".claude/skills/bundle-sync/SKILL.md","84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+      ".claude/skills/changelog/SKILL.md","521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+      ".claude/skills/checkpoint/SKILL.md","6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+      ".claude/skills/cooldown/SKILL.md",cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+      ".claude/skills/critique/SKILL.md","8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+      ".claude/skills/dependency-security/SKILL.md","02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+      ".claude/skills/eval-harness/SKILL.md",d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+      ".claude/skills/fix/SKILL.md","25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+      ".claude/skills/impact/SKILL.md",bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+      ".claude/skills/knowledge-health/SKILL.md","316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+      ".claude/skills/pitch-compress/SKILL.md",ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+      ".claude/skills/plan/SKILL.md","0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+      ".claude/skills/resume/SKILL.md",cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+      ".claude/skills/search/SKILL.md","23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+      ".claude/skills/setup-validator/SKILL.md","8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+      ".claude/skills/setup/SKILL.md",adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+      ".claude/skills/shape-lite/SKILL.md","3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+      ".claude/skills/shape/SKILL.md",a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+      ".claude/skills/ship/SKILL.md",aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+      ".claude/skills/state/SKILL.md","531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+      ".claude/skills/switch/SKILL.md",f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+      ".claude/skills/sync/SKILL.md","1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+      ".claude/skills/test-strategy/SKILL.md","077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+      ".claude/skills/ui-design/SKILL.md",b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+      ".claude/skills/workflow-doctor/SKILL.md",c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+      ".codex/agents/appetite-auditor.toml","950d04aa91809e1f271fd4161def233e2af6cc381f0b3d24a1385b0adee06674"
+      ".codex/agents/architect.toml","5c7268383d8d443e5426d197674a308d31b26bbb71bad9d83fbc5d1fa66f53f1"
+      ".codex/agents/build-error-resolver.toml",a7166d2de56ac842a4c3a362df329e7b5a0387ac7f15db29a090493afadce997
+      ".codex/agents/code-reviewer.toml","3c379b174dfca92bcbda008e61263a758ad48922e3bf7ba70d532e4637fd6eeb"
+      ".codex/agents/cross-pitch-conflict-checker.toml","24af3aebd95784bb070de363adbbfddc553b4ff899b30b023fa85dd47cd510ac"
+      ".codex/agents/cross-pitch-projector.toml","0d93072027c5325becbee585659ce3875662a92d085960d82b30bf4e97029ff2"
+      ".codex/agents/eval-regression-projector.toml","02937025ec7da86f92f736d0649ab68ca2e495a2d83b850de289347a4ffa9d76"
+      ".codex/agents/eval-runner.toml",dd5f532db6ebf0ca3e3e10b0ee80ab846b8c2f308c589d71bb191e24f702f7fb
+      ".codex/agents/i18n-checker.toml",d8af2b2e17ea0180f613b3993132b55cfefe29fff03bea47b5fe1a4a8d9f78f9
+      ".codex/agents/knowledge-historian.toml","7353de3fce2134043bce9394f9babb2b7ed87d9cf45486d8a60acccead569248"
+      ".codex/agents/planner.toml",afbcacc2e157d89bb225173118d56f26b28209d118555a65549f69a7e3d4e7b4
+      ".codex/agents/refactor-cleaner.toml",a56771324bf3eb9307feaa5aab560171de5edc7b8e4c918882a389520452aa81
+      ".codex/agents/security-reviewer.toml","824ab52cf562da785219195aced4b87c820b79d8c18280a8c518dad9e44cb6ba"
+      ".codex/agents/skeptic.toml","98fba04902c641565ba9c1fb5b00c472bf2249d4f37c03d2318e8c9218255a05"
+      ".codex/agents/test-coverage-checker.toml",d61fab07a844c551bbc5fb82befadf97523532f6c84b065f2c9c0f7446586fb2
+      ".codex/agents/ux-reviewer.toml",b19e62df117ed879d75b166c9ad8ac85a63c776c21aea200ed687eff2a654d29
+      ".cursor/skills/add-skill/SKILL.md","22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      ".cursor/skills/audit/SKILL.md","9e5f8eaff3076142e40d8e93503ab9d8a2762a187a341f2ed969b97fba049768"
+      ".cursor/skills/build/SKILL.md","6662d53b595604b84c39530190825667161b788d24df895c6415c82b4d994b0e"
+      ".cursor/skills/bundle-sync/SKILL.md","84e22bd6bdd331184c9c4e69f6702fc321937b640e8b7e0502f167bf8a4ec611"
+      ".cursor/skills/changelog/SKILL.md","521942ea8e70e925d6605de021bfbc894979430b798ab03c29c4b690108c1a32"
+      ".cursor/skills/checkpoint/SKILL.md","6dfd0aae2385b6ad32e82327318e56c75008385841eb2356fa843be3738c39ad"
+      ".cursor/skills/cooldown/SKILL.md",cfff5c90e9d90b4e5a26819c90a09e8763f3d88f5ea56f117d472105db2a4906
+      ".cursor/skills/critique/SKILL.md","8b236983598ac5f71387bb847baa369ba5e8ab17a6cd2f67ebf7ac33c86341c9"
+      ".cursor/skills/dependency-security/SKILL.md","02a6b95ad3f32f2794312f292bdb45f7afda53980167717344915c2112f13436"
+      ".cursor/skills/eval-harness/SKILL.md",d0b39faf3168f74de06e85d6a7047dc2e297d1bae728fe23627b54b6cf1eedca
+      ".cursor/skills/fix/SKILL.md","25a7a4016e8b78a3f7d681759110258adae018ea6f347196242462eb11530033"
+      ".cursor/skills/impact/SKILL.md",bb717630ba8ae5405b3679e17560d6767ab819df8546f8c717fcbcdc2b9e715c
+      ".cursor/skills/knowledge-health/SKILL.md","316cf25633a0487ba9326420ebb9b0ac509f4bef67bff6c77a3cf38c4ca3a26a"
+      ".cursor/skills/pitch-compress/SKILL.md",ea0ed82369db405bc787818eb303eeb6e74fed9ace4020baee74481eed0e4343
+      ".cursor/skills/plan/SKILL.md","0df576503246063397d86755d16b01c57a8b0ccbd4bf47920892ca8413b06070"
+      ".cursor/skills/resume/SKILL.md",cf880065b8deb14115915d0901d913c9715b0e602131d4a1562d836e32e5d771
+      ".cursor/skills/search/SKILL.md","23143001d0c245a6d55b62785ca821f069e2ac19a312e509568e4317f5922902"
+      ".cursor/skills/setup-validator/SKILL.md","8ece5995655d6576644cd586d8d4838f94a033c4d23cc70c3bc34ade1add7e13"
+      ".cursor/skills/setup/SKILL.md",adc701890439fdf8d0b0817c3282dec963fae7e8aaf65581093de5f9e6c36fc4
+      ".cursor/skills/shape-lite/SKILL.md","3a3cf74cd8ea694b11af10c94a4cb621b4465e22d454be5ea0635900ded44901"
+      ".cursor/skills/shape/SKILL.md",a2aa0fdb7f2eb3f929b771e9739dbc6380a54d4bff957e5aa964326b8a9aa11e
+      ".cursor/skills/ship/SKILL.md",aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69
+      ".cursor/skills/state/SKILL.md","531c1c02b8e4712455eb1041e99dcd488a1f588d3673b0aee671cc80555deab1"
+      ".cursor/skills/switch/SKILL.md",f188b1e0a68430c9be5201b223c927367dd5ed930a0cb24662ad4f297215d74e
+      ".cursor/skills/sync/SKILL.md","1b1436c0edd3df80e54825f7cbd05f2fd1649beb23c9000d84152e089db3f206"
+      ".cursor/skills/test-strategy/SKILL.md","077ddf11f6b9851d715a528b51062c3cb4bf3f9b834a5fd5bee0fbf180138ab1"
+      ".cursor/skills/ui-design/SKILL.md",b49b04f982e1869c2e6dc0e0c9dd361cc99633a5769905dc3e92bdad3b4d94fe
+      ".cursor/skills/workflow-doctor/SKILL.md",c80f03e8a893eb37e51ca8b16961ac4cf2cc5e3bbf33a207f758790d40c48116
+      ".gitignore","6b3798fef1a85f421f9564c35574dadfe7a6dde8e98c5d585566081e64c99bc0"
+      ".graphifyignore",ac41f08adb3b692d4c61d68cd51e1e878b3d33fb6dadf19e36a8e1f644a57771
+      ".opencode/agents/appetite-auditor.md","6067c968c076d1557bf53e539aa56cad16d9eba9b3dc91d6b8b95c6bc90a73b9"
+      ".opencode/agents/architect.md",a7a75598b94225f54361631692f8e3be28797fe8731bdd9dd8009afc494a7656
+      ".opencode/agents/build-error-resolver.md","3c4bf7b9b2b2b4cde6aca86250ed2555a08e59ca2ec13b901baf219f4af1dea9"
+      ".opencode/agents/code-reviewer.md","4b6b95d64769f432c9291f4523fc4522fcb5cc2d08374a74765b806d693f53ba"
+      ".opencode/agents/cross-pitch-conflict-checker.md",f3523bd36501b3608538950dd48a66a644aefe2202eefd5f82ad8d7b5cfdbbf2
+      ".opencode/agents/cross-pitch-projector.md","05d3000704c89550343a1122d122413c5fd05dbf45d59c4ae7008a27840aef2b"
+      ".opencode/agents/eval-regression-projector.md","6a05af0ff60fc3abcd6e1c230a939e18545b729e5a3bd5bfb8254d9f806728f4"
+      ".opencode/agents/eval-runner.md",edf8c488ab98d58beeab95232f0a8c1e2c44f93ab09cf07d25b467fae2e887bb
+      ".opencode/agents/i18n-checker.md","76c389a7d9169320935a24ca220ea89bb322ff79ff8f028b3cf5014cf0ebb22b"
+      ".opencode/agents/knowledge-historian.md","78decb1d8fffe8db93a067a889253d25089009cc2e94753dd23c2ebeb81ca6ca"
+      ".opencode/agents/planner.md","4593b7f3308081e1acfcb26b8c5dc92377e0440e2c0e1bba428ff597c2fdffdd"
+      ".opencode/agents/refactor-cleaner.md","0187f37319a323c67ebc5268429cbb414f4250f9bf48765940c2987e1e3d546d"
+      ".opencode/agents/security-reviewer.md",df8da747d2e84db26c5d2d68740c696c5c151c62e220f864ed8faab7606fec8f
+      ".opencode/agents/skeptic.md",bd8114fc3a698beabfaabbca4101d8ac857841b6545d3de286fb56113d21c44e
+      ".opencode/agents/test-coverage-checker.md",c638436a5fc9613c1e2264af2d79340c060d45318100eda91c4fc7d052b505e1
+      ".opencode/agents/ux-reviewer.md",e1746aebefb0fdaf9e018dab630c3b02fab47abf9f98991e786080588b361c99
+      ".opencode/commands/add-skill.md",a24a853b7cfd2648bc3c6c7e5faceb503367a41125546706dc2e5c1a58eaefa0
+      ".opencode/commands/audit.md","3e1d85c40b6ea6c9affc8abdc69b5a881824144d30f76899f62aabbafd6c9632"
+      ".opencode/commands/build.md","161f807562f1303fd47e46a9fd1e78d477cb0195e53d750fbb6c729b2fc7b9ed"
+      ".opencode/commands/bundle-sync.md","4027c20d5bc08abc8d266eb680535984cebb21e49b365cefd4416ee869687c3f"
+      ".opencode/commands/changelog.md","28e390fc6fe6abcc2ea11b9118925b96dfd04d55d266499d1b2db84c6808bf83"
+      ".opencode/commands/checkpoint.md","35cbbe83dfb2d5a2b1dda2a755f96362bb0e5e92fba60cc19af464d7b967f51e"
+      ".opencode/commands/cooldown.md",e03ff5f42597a08f31d57c2f7394404b6e90b91ea0d6f73d649af3c8b45e3e97
+      ".opencode/commands/critique.md",b49ad5e6d69541594a3368923f0031ffe9a148862ee34cc75ea18da013d36cc4
+      ".opencode/commands/dependency-security.md","6222354d4bc3a9d52b0e0f4e036c6c2e7712ec609b2b6bed19a3fa9fb358c7ff"
+      ".opencode/commands/eval-harness.md",f5af146facb0ffb883a2747abcd315e59c13280e81a7e7c2cf5680f9a01211fc
+      ".opencode/commands/fix.md",d878f6ca6b857e220cab43eeb2aa518c28cca99a099c1fe9aa4598b32e6a6d76
+      ".opencode/commands/impact.md",f068a208d34bc0ffed2926c61eb1a0c2f4e39d524898ff34c2a46535405991da
+      ".opencode/commands/knowledge-health.md","47bf002b60af30a0792015c940b7fd469a5d182f6919788174762072ce009c15"
+      ".opencode/commands/pitch-compress.md","840e1c204edf6d9b480f627742a7cf28bbe3eb587239dee529396f943d36bfaa"
+      ".opencode/commands/plan.md",f5663a94fe039dc833ea7ccf34cf219e18e5b3bd30cd5bf7735e132c31f789f2
+      ".opencode/commands/resume.md","23cd3ebf64dcbbc4c5d85b7bbd7cf1168e33c41a7506e17d13d3e923ef33efaa"
+      ".opencode/commands/search.md","8c5d195c865f7f5f3e7b85f94134e8fb3d693ad136cd43c3e98804495a430957"
+      ".opencode/commands/setup-validator.md",f91b775bfdc4a5ce9c0e9ed72f112aae4d419d2de07b04aeff2fe0cf02ef91ec
+      ".opencode/commands/setup.md","1f0112b7797923d620a08020802fa6e702b79a34051a393abcfd674de2d56b72"
+      ".opencode/commands/shape-lite.md",a62d2cce2677a5d29cc0bdefc1034dab7d560e9e33b73d9a9464cb1c71787b0e
+      ".opencode/commands/shape.md",a9c091ed89541016e40502a8458e83da5d8dfce072a6e04d8c787afbf301069b
+      ".opencode/commands/ship.md","0c854ecb8a070072dd97d30e90cbc5fee3c90ae756dc11467ba4f1a108ac69a8"
+      ".opencode/commands/state.md","6d860a5ee9bcc56943462b62e37e858cc09430fabf89f2324c98578a2794a419"
+      ".opencode/commands/switch.md","6d8565bf8f0b85fbc241cb3de0e389abec959bffb796e84e58678496f26e979d"
+      ".opencode/commands/sync.md","814817fd48af767c8b75b0a89e17970048d4fd02d59f1ad71a326758fc505886"
+      ".opencode/commands/test-strategy.md",da062c2b25400b88e5d218e9b500b2a9c6a3502a3c02091a10420536597c7bdd
+      ".opencode/commands/ui-design.md","9f903532327b2af84c6e45f66ad4df50bca414c16d6c2ba6fef18161cda73e6a"
+      ".opencode/commands/workflow-doctor.md",b511e97fa072cb1619d8e2b0c5c100172d1b59d5bd8cbf67c63be21d8c505fa5
+      AGENTS.md,feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+      CHANGELOG.md,da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c
+      CLAUDE.md,feb32484e13a3e18f30d3add7b4a99b676fcf8943ef3a6eaf6c1cf0b7f8fe99d
+      README.md,"8b7cf7992df6b7c5401c418f8b87a8efdd0aa0399c046b12c34b7e27c3b9804b"
+      SETUP.md,c1e234187bd02dc51bf42662ba6a41d6ae57595d5529301d3ecae36c57f8817f
+      VERSION,"9bd51d4120f0ac96a8e2e9f9a3e68e8175db7659324704ba2306aa682dffec33"
+      ai-framework/docs/design-notes.md,f4141e7d74b56f20e8e2deec14eb19baf5dbe233b925183025b9ebb5c848f54b
+      ai-framework/docs/extending.md,"935499627ae1c09fe618f9c8736e66b3df6aebed4ce14206448e283949c7588c"
+      ai-framework/docs/knowledge-graph.md,"6a98e9fbf1fe90fdfd712504403ac3faf2e7e29bf7ecbbfb80fb18f74b83ce1e"
+      ai-framework/docs/pipeline.md,da7eb210d0263bf82b2a3f4de8046a5fe396623a7006aefc748dc09b2067942b
+      ai-framework/docs/setup-validator.md,a616b2971976374fb0987ac53d0ec5cb641a39260b194db2b0a2125f1501302a
+      ai-framework/docs/setup.md,"9792b1079b82f19e46ae3338cb01b2eb55823394cffc69ceda5aaa157f1c11ec"
+      ai-framework/docs/testing.md,"2c6d49b64898f9b30250f07fa55ab7de29c4b5702733280595e304a0e209ef95"
+      ai-framework/docs/token-consumption.md,c3c0b442989f000c323e851044f10c26b5c9bf065546d7734eff4bd0249132cc
+      ai-framework/docs/vendors.md,"144911290b522d3ac1356d6d7f3de538a7fd0ed2b4fdac8b6cf609827b5d458e"
+      ai-framework/docs/versioning-and-sync.md,"6993335e25990ee864d5050b8dad9e15544813c6ae4cb1ef3eff89f3e9f53e5d"
+      ai-framework/docs/what-you-get.md,"7cb906b4029ce8d6b8231c60f88ec3d6ac22cd61db77728939b1262a730c0c7b"
+      ai-framework/docs/workflow-doctor.md,"2a435ab9db182c9e251775e4961210db2b93e4bf2ecf50d7b183bacb79cf0b2d"
+      ai-framework/hooks/hooks.json,a043f76bffe935b69ffcde83f8ee411ac0c8db390bf1e0b5ca0a515481aeb738
+      ai-framework/hooks/scripts/metrics-lock.mts,"3735953435a9335c986077b676249ce84eb4c700c47842490a17738fbdc302aa"
+      ai-framework/hooks/scripts/metrics-lock.test.mts,"64e98bcad00c630660891a4c337ae6f93871266ad2bd380ff7fc97cd0c7c0ce7"
+      ai-framework/hooks/scripts/opencode-plugin.test.mts,f8c3cc0155dd27a1d15edc3a8eac8673625d4e974407dd9a670d64a7f6329323
+      ai-framework/hooks/scripts/orca-start-codex-hook.mts,"04d1db5cbabd8a2d92c74ace3c4ed18aecbd86aa5e0d82c1ec5983d878bec9a5"
+      ai-framework/hooks/scripts/orca-start-codex-hook.test.mts,"23b7dd3444ab20ece59faaa0e6ef9aaa8324c8c6afe46be288d241036a2feb06"
+      ai-framework/hooks/scripts/orca-start-hook.mts,"37908c66cd1044e2e1b9b84c88819d495d1c8c2d7c1de18e8485700e0922babc"
+      ai-framework/hooks/scripts/orca-start-hook.test.mts,"5f08b7a54a819b2aba16a6443110020d50e2c73c54eaa7a32738bc3dadb2c83e"
+      ai-framework/hooks/scripts/pre-ship-verify.mts,bb32bd2d5885a9589c0e2ae2247dfc4db7d7ec5a891e4548e752aabd9e877e95
+      ai-framework/hooks/scripts/pre-ship-verify.test.mts,d2fb5a3c8fc8ffc4beabe8ef6f7a8b1335f6fe6dc0f6ce35cba98a8e4d7c3ca9
+      ai-framework/hooks/scripts/stuck-uphill-detector.mts,e3eea81bca629bd8ed4a4c6fdafd1c132b6e210814c64ca1a8b4dc7afd0807bb
+      ai-framework/hooks/scripts/stuck-uphill-detector.test.mts,"555391b2434a5c7b990b50c9f0f44706f538fd65403c8c0421b2dc6f266dba70"
+      ai-framework/hooks/scripts/token-consumption.mts,"59019aab893efd99e20ef3a909096811f5cd05c73d1a7444db32e6e9070b260c"
+      ai-framework/hooks/scripts/token-consumption.test.mts,"9f2af606afd074ef84d734f79c116f6dc63cb2256d4fbde616e7d15b315e3fe5"
+      ai-framework/hooks/scripts/token-report.mts,"16132e33e16b1758b46a82e5cb7f4f8b78f972d29d8491dcbc0fe3e14761780a"
+      ai-framework/hooks/scripts/token-report.test.mts,"25261c9a3edb5c9ea11a6f50e548cea6987101c05b7dd405915e888ef78b40a8"
+      ai-framework/hooks/scripts/transcript-usage.mts,eb61d064e51ec7dbffb15df93fa4c821b6abc9cdf5b3ce1e49000d8e14c75c6a
+      ai-framework/hooks/scripts/transcript-usage.test.mts,d4f44ff24e69030a64474238d7a628a8d3554b320614e7d827426edfb164d612
+      ai-framework/hooks/scripts/workflow-capture.mts,a405d52d6789dfabbe86ed697c459c96c24c8b862b75870fc106f3b8725cbf58
+      ai-framework/hooks/scripts/workflow-capture.test.mts,"220a5ba991285e67165c0f26b73260aaea3c5a64065badb3df21d3ef657e0b78"
+      ai-framework/hooks/scripts/workflow-notice.mts,"78922fb86d1dd5370c70186eb50f6e520808496d7324de0e2a8c3529e8b631b3"
+      ai-framework/hooks/scripts/workflow-notice.test.mts,"71df25da12987497f1bfd071ce6ded207a08f1678927bc7d24b360266fcca6d4"
+      ai-framework/integrations/harnesses.md,"0ef7fe3f102503aca042746a339479b83724bcdf36f72dbf86ecaa8fe843b827"
+      ai-framework/integrations/orca-vendors.example.json,"9b02de69ebc7d86ca64b3a91b03722c22b4b51c83df30d88b58a31e077c0f24e"
+      ai-framework/integrations/orca-vendors.md,"80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+      ai-framework/integrations/skill-defaults.json,"68df8f9dbe489506898f1c7468ade4264b7185c782ae4a67220702db1e251c31"
+      ai-framework/integrations/skill-defaults.md,aed215e20cfdf1fa4ef52074fda880603e491694f2ba47028c0bf2423afaebd4
+      ai-framework/integrations/skill-vendors.json,"984d7f2969bd6e7556604df438ab867002efd10341a01b6f0bc3eae4d8b436c1"
+      ai-framework/integrations/skills.md,b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403
+      ai-framework/integrations/state-report.md,"2f7049c70c92d2209186632d3b9bc79e126f6bcffa75c43b99b75edac8df8dcf"
+      ai-framework/integrations/workflow-metrics.md,dcb13ff9d2c8438df62dc7bf677f9fabbaf5d5f3caca2ad804241fbefe23bc0a
+      ai-framework/rules/boundaries.md,"61a96a6c5f0080cc76bd9ed36334c5b7a78d4d9fa26ebfe99ce746a468d4256d"
+      ai-framework/rules/canonical-mirror-sync.md,f7b6f1aea6da8ac7b632c17c9a8ff8d9f1a0c52e2cb23dbd34698007ad0e4d36
+      ai-framework/rules/ci-deployment.md,"057352139e4a49be9f14ab4a768a5506a7efd9b0b898b49a32a214bb306d51e6"
+      ai-framework/rules/coding-standards.md,"8cf88955b0a5875c55cfd289a34d1f3e095ac82091ed43c5ac9bdaeaf73fc87c"
+      ai-framework/rules/component-architecture.md,"29f3a8bcd7448f9baf7187c117627c9a00401d79dd346b6c7a9ed58e6592b6e1"
+      ai-framework/rules/context-management.md,dc17def4e97dbcb6ddc830b0ffab9e4e34e47337a743d3b2f25a924b69ec2355
+      ai-framework/rules/data-modeling.md,"770be714ae5704510f8eb281d490775b9360d6fb0eeee1ba827a9f35199f6faf"
+      ai-framework/rules/eval-harness.md,c4d2d61523679b9916c98eac78503a7875c6e16f2fbdf0acdbb15ed3060c07c1
+      ai-framework/rules/i18n.md,"0b01cfaa7a5ad3a55fcd5584768834c7b65d639bfb3ad3e542436df34ccbb3ab"
+      ai-framework/rules/machine-data-format.md,"4d1812f421e26771ae07e526dd0cd15f60315d8a1e7a7a3cf6348560b21a1d3e"
+      ai-framework/rules/model-routing.md,"808a11a5bb154f60185c7aa89be669f6cc36e2ac58e6a2f74c1bce9a53747eda"
+      ai-framework/rules/observability.md,"1a9dc8f8b13441fc0fd90d0da0d3ebaa1a4bde7e2c216db3a119b5a321e57fc7"
+      ai-framework/rules/performance.md,"96a68ddf97587c6e30246a0168c2fba4e7253eec5981b742ec89af9a4e17252c"
+      ai-framework/rules/security.md,a4ca5b64c845bceee7c022cfa71af90d30524183e84bab40fee0b6adf1bf98c4
+      ai-framework/rules/testing.md,fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4
+      ai-framework/rules/tool-use.md,"502c479b4fde12525f8e612c6580e133efb1000829f77116a68811415826268c"
+      ai-framework/rules/ui-ux-review.md,f44625f2cb8a7f615e22de2902d572d46056ae31894c19cf83b66e259d98a1cc
+      ai-framework/scripts/add-skill.mts,"139e28020ea1e8364a5b1a477ebd04a3c23131752abb622a2a63ee7ae0b5c2a1"
+      ai-framework/scripts/add-skill.test.mts,"457362b3cddaac608c53e900b8f58de0f64e74baf2341a1c467ada4a03b30a05"
+      ai-framework/scripts/agent-frontmatter-invariant.test.mts,"6cd46140d41c9a829d0b257e289d13097db9e4c70c6e3b37a90857772859d62c"
+      ai-framework/scripts/browser-runtime.mts,"1d41e97b1f475de584753f75373da01ed5311ae34e7d8aaad84f7fc048b30b1b"
+      ai-framework/scripts/browser-runtime.test.mts,f887f452e1f734435b74d1cccd4e97d1161d5efbe962d8e255639214e3c04f9e
+      ai-framework/scripts/bundle-sync.mts,"4e85d956e280ae4c699903e2373b67b55200f2f4c29ea1379a0bd9a8978ff8b5"
+      ai-framework/scripts/bundle-sync.test.mts,"082b41ffee498dec13f5d70a5cd6dcbcd5dc60ba6593d205bc012713c213034f"
+      ai-framework/scripts/changelog.mts,b6dcc744ccd1da5e621fb3298d9fc2d2b67fdf64ccbe45fc472724922207880b
+      ai-framework/scripts/changelog.test.mts,"9f9d8de5c8bd881814a59fb817a6e3d92bcedec62519ab48a3dc8474fbc863ed"
+      ai-framework/scripts/config-migrate.mts,"522e406ba032d4de9914926abf0eb271d6b6d16b32dd5801791230ffc90d8e34"
+      ai-framework/scripts/config-migrate.test.mts,"09c90a02536f7e47ca8b73d82252dfa84ff1b11240f668738c29dfdd5c07f130"
+      ai-framework/scripts/docs-links.mts,"69d9231c293ea15ba740d6584f8437d2b100029050c41290a9324030046e3ebe"
+      ai-framework/scripts/docs-links.test.mts,"937774f162075024a1f2bfa68bd358836cf857a9f368cb449da78d5da95b6736"
+      ai-framework/scripts/entry-import.mts,"452a6e05b8d92e1f8b190d99160e434b86f73a228bbc3bdc4f52359c8bfe42d4"
+      ai-framework/scripts/entry-import.test.mts,ffd52ffd00f1459122060619309860eb6303dada847ca74f15b956ab108005dc
+      ai-framework/scripts/flow-join.mts,e260428733adcbb214c2753725b96db55d592826e4de3a1245b28487bdb69149
+      ai-framework/scripts/flow-join.test.mts,eb3f5f8281342cebd51779c44aaef8a728dabdc29864b2161f0fcbce6d4ae628
+      ai-framework/scripts/flow-render.mts,"8781e59b3fe094be1f71c6f227d8440df70dcf7415ee13f0435e9e719735f482"
+      ai-framework/scripts/flow-render.test.mts,"43264ce93320730f34547f1c0a9d971622248e5b8cb11c0d68fd3c239175a967"
+      ai-framework/scripts/flow-report.mts,"452f07f06a6d57b268b53afbf80ef7ac5f4d94219998f2ace8e691d370376bb1"
+      ai-framework/scripts/flow-report.test.mts,"908fb93e9f9b46d7a04f6afd952368db777beaeeb32713bfdf7d4d5493bdf0fb"
+      ai-framework/scripts/graphify.mts,b15b994c411783aec7e8dca621088c9f9bef175688438eeed6ae4fe301801cb5
+      ai-framework/scripts/graphify.test.mts,"1a4e95b3e13555004842b9af5c43173d356e2036a31e3530a40a0d851f1bda36"
+      ai-framework/scripts/instruction-loading.test.mts,f430f3f61e72e42be161a10f8331965a6ee462a44f086f63cea25e0b8aa9039a
+      ai-framework/scripts/opencode-service.mts,"6f20412410482657070a033d5e9309b7dfa6d9904245c25d9253ff25be39c003"
+      ai-framework/scripts/opencode-service.test.mts,f74ae7c9c1d95ab13c00f087a7667082aa5f314aff5baffc311a3dbd036ec38e
+      ai-framework/scripts/orca-apply.mts,"3031386c17d1941e899ba565a5ebab6cc8e1cfb9ff280bbca6cbebe3e766af26"
+      ai-framework/scripts/orca-apply.test.mts,c677d2be9887b8d325f2a1b05035cec07d0b146c236fd8c724b4a7d4b6c73834
+      ai-framework/scripts/orca-assign.mts,c90ff858e73f04328917eda589f904a0eb1d96643042eb8a1c87499eec90d052
+      ai-framework/scripts/orca-assign.test.mts,"139c68c878e6ea6dc5a97d7b269b09491474e32b97bbd48f124efce11669b3ff"
+      ai-framework/scripts/orca-diff-admit.mts,"1cda46e26b9a70a74753207b341a640b0cae42704002395f46fb4773277739b0"
+      ai-framework/scripts/orca-diff-admit.test.mts,"3c337c6545bf846337d38635d810e220ace7fd2809dd718906e167c2b842a1ae"
+      ai-framework/scripts/orca-dispatch.mts,"6ba5efb1e870eadfbf279f58353007188d72ae839afd4ec1f01076d5bfbcabe9"
+      ai-framework/scripts/orca-dispatch.test.mts,"2948ecc2666aaeb54f139b074696ed68087f57fe5ea1649f03fe3a9b79b6ad19"
+      ai-framework/scripts/orca-eval-grader.mts,aa4793bed42f7fb6d72580a83b18e8d10660ac239908f4e8c5eaa6135045be11
+      ai-framework/scripts/orca-eval-grader.test.mts,c761186bc2e975446314af94fc10a62a0d4c793223aa00b9e3ac7e22b358c1c0
+      ai-framework/scripts/orca-evidence.mts,"490ba3b395e1990dd2a52ce5b7d5732d734e59f65f154cb6b11308289952bb43"
+      ai-framework/scripts/orca-evidence.test.mts,a39f7617c926eb5ff76bff449a901efb484a391eeeb476b645ba649309ac3035
+      ai-framework/scripts/orca-launch-gate.mts,"6a1af51f400040781fc0ded7c9395b35c8bdfa94af537af46acc312092927e92"
+      ai-framework/scripts/orca-launch-gate.test.mts,d4d1e01fdb9f4e4b0f191966e3d0907b3ef1a28f249c3a4882e09222187eb0d7
+      ai-framework/scripts/orca-ledger.mts,fc0b481f7cf7608bd33bea386cef60fb70b24a526ec3f914a2529572dba3e333
+      ai-framework/scripts/orca-ledger.test.mts,"2e287dc27fc617085cb3d0867396fd6ca0d98c056e0a24d6167b73ddb2b9029f"
+      ai-framework/scripts/orca-policy.mts,"60cd83f4c6b47e10eebe48b9a4b156e4a535c249652f3d2dc3258d8ecea1a569"
+      ai-framework/scripts/orca-policy.test.mts,efecdef629d7e758cea86b2256c2ca10450e8b3feec704c5462928b5ae002f44
+      ai-framework/scripts/orca-preflight.mts,"225837b18440d8ce273ee4c4edda1fbc0a8121523a74649cd51318cc9df2c948"
+      ai-framework/scripts/orca-preflight.test.mts,"64d7548c38a5722b1386bf92533b8223944198b91025ca31c72783a22874d794"
+      ai-framework/scripts/orca-reconcile.mts,"27e707fbf19796e650cc2cb1a84d4eb1c9ea114972f11e8dd7e245b209dcde5c"
+      ai-framework/scripts/orca-reconcile.test.mts,"6007c462299b3ecbb30c05887a4fd3a3cfcbc595de145e88808b2354bc1ec9c6"
+      ai-framework/scripts/orca-run.mts,"5c0e0b1fe0f530d23c037133a8ada8a4623ee87e337e587c1443fe7354ec6b74"
+      ai-framework/scripts/orca-run.test.mts,"6c1da356ebacebb46a888d7c0893a00eadbf1c54d65435822e62364f5e0dd75f"
+      ai-framework/scripts/orca-start.mts,"2dab69fed6ab26485bfded1face68a073cbe7fba7f1eb15e9c836188e7575ac3"
+      ai-framework/scripts/orca-start.test.mts,"4e9be424f41695abde281336fbc8a9409fe8be8e8cbb0b50eaae2525062d9496"
+      ai-framework/scripts/pitch-archive.mts,ff8bcc2ab1e404be5647bba6c4b0170cdc692615680b8cbd0832854252be02b5
+      ai-framework/scripts/pitch-archive.test.mts,"5daa7edc577b9cc06e575850254d1922b19f5e25cd499d55153e249189b03eca"
+      ai-framework/scripts/pitch-compress.mts,b65221150ec1bb998c393065d7f9f24c74e79f86752b7d6e9d5a337d347835fe
+      ai-framework/scripts/pitch-compress.test.mts,"9b951cd36bbb9820aadaf251458aa4cc984e8d1331295cfa0efaf7f2273311dd"
+      ai-framework/scripts/review-bench.mts,"02a4a38ff2811ae851b2d3f3248f1b1e2a197516f99ec259d491ea8441b9fead"
+      ai-framework/scripts/review-bench.test.mts,"0cbf0dd552002ebd9cb651beafee114e146b06e22365138d8de0736b02ed04a3"
+      ai-framework/scripts/run-tests.mts,"6b6202eef04a7337cf30b43e3b651635b7c2e3dc41335cd2f0010b5a6e4799a7"
+      ai-framework/scripts/run-tests.test.mts,"1b585a4f2d2d8ad77f812c4293c9e39c20924af84752153428a0dc9cf9c8362c"
+      ai-framework/scripts/runtime/README.md,"4beec211f68764c4a2b219aad3e50fa1a0bfe0e4bd3a31434da9d323d922de20"
+      ai-framework/scripts/runtime/bun.mts,"489795f0d02a8d4091e13602a21ede6d0171760e1acdabaa4635f9cd84a2d5ec"
+      ai-framework/scripts/runtime/cli.mts,e11c515cba0a95bdccf04572f32b3c952380ce711bd86ab36fc043ead18ae78d
+      ai-framework/scripts/runtime/config.mts,"0f305a481661cac02b794f88be45f804956de857d7eebcdd7f4a7896a6962980"
+      ai-framework/scripts/runtime/config.test.mts,"9201ce7e1817efb1f9fcc6de062d4f170202b1a8f4465b4d3723960881aac5b4"
+      ai-framework/scripts/runtime/data-file.mts,"929d6240eb82a5efabbf3009d9f3fd0c5bb0612a928379b952aa9c82d17e1a75"
+      ai-framework/scripts/runtime/data-file.test.mts,b431039c1793ceb7d99844ac6005bbc6802348d7a19eefd6a5ed7a56f5ffcf78
+      ai-framework/scripts/runtime/entry.mts,"62edee638b130c9eaeb2126c30467928509e3eb73c1879403238ab1b8e25698e"
+      ai-framework/scripts/runtime/entry.test.mts,"369aa62e6f5f20c141b05b75f4ca757a0d890252db942ffb8c5e2fb8678cccd0"
+      ai-framework/scripts/runtime/env.mts,"6c6a09653c454bddb7a4b5c3769633eb087cb18b9bd904f0065f7ba03ba82c6e"
+      ai-framework/scripts/runtime/invariants.test.mts,"232159017258e7e183d824725dfc68fdef8c31e92e01b9b4d0b79059e2db8bcd"
+      ai-framework/scripts/runtime/migrate.mts,"617f10fdcd383f80330305b5057a90840ad8b4c42a4e18ab2c7f9044b0ec8c3e"
+      ai-framework/scripts/runtime/migrate.test.mts,"9d8e84638c35ea3ad7fb8f4b8495c45000dc02c74965166c09c9c9d250a8f599"
+      ai-framework/scripts/runtime/node.mts,"45c1551bbcbc52e63d54eaae9973bc28dd25628bd63797fd5757909102a4a2e8"
+      ai-framework/scripts/runtime/oex-lock.mts,c324476014d7feb59452c50b17ec583450d140ae224cdc4cb6191d64a15f17dc
+      ai-framework/scripts/runtime/runtime.test.mts,"1a6216d224eb259bc93b316453a7805a47fc1f412f7cba30fc9cdddecc8273c5"
+      ai-framework/scripts/runtime/select.mts,c68e5af73849bc642305cc341392bba7dc4166f270f43f1a083f15dc3856f630
+      ai-framework/scripts/runtime/semver-range.fixtures.json,"4c127de6e98037f31ccbc74461bfe97ed07dc471af893d7f16dc97cb220e30be"
+      ai-framework/scripts/runtime/semver-range.mts,d06baa220e9a3a4646c9e97aadf39d4ac8e57cfe566614f3c54ab7af1fb8e80c
+      ai-framework/scripts/runtime/semver-range.test.mts,eb164fc979e9a434e682ddd283db3696f02df677d8a4af139f23da4807a9e7c6
+      ai-framework/scripts/runtime/test-helpers.mts,b87441e3dc5d1c223ac7db566afbe5ec367248b4a4f8285485c9bcdc5d85994e
+      ai-framework/scripts/runtime/test-helpers.test.mts,a320f8e7c4ccdcc72f92527d93bcacee0fc2a2144d46dac43ff7400df22249c7
+      ai-framework/scripts/runtime/toon-data.mts,"3c2c402934a07b7da5056d776d6fa39091182102479fed9a349bb27e1191012f"
+      ai-framework/scripts/runtime/toon-data.test.mts,fbec4a02e85e04c7d6c2313e0d9aa4de133c306bc222ddba49f99c425dfbd60f
+      ai-framework/scripts/runtime/types.mts,"29992cf482d689126b23633194750fa28a3bfaa6143d9f12045a5a78a7e6a0b2"
+      ai-framework/scripts/runtime/upgrade.test.mts,"77153c81dae500255f9ad0adb922dbaec46de46953347d55d0d97ef69b34c66b"
+      ai-framework/scripts/runtime/validate.mts,"65576f08658f62fee0d4742006e95db894bf248a4654418782b9a2be25afeb7b"
+      ai-framework/scripts/runtime/validate.test.mts,"3576a389182adc50dc05794f6e78e6e6e095e48714f225b53c0090fad2cdd1cc"
+      ai-framework/scripts/setup-validator.mts,"132ff8995b1403b7ec479532df71b39aa69b4a1a337a1102c3c0e41b3ffce321"
+      ai-framework/scripts/setup-validator.test.mts,"66476d0a0301f33325623909ad510938b6bec2a7fdd82cb16e60d3fe35cacc2f"
+      ai-framework/scripts/skill-compress-guard.mts,"60a9c252d6955a33206db67477995a17dec245c4101d7eed2ad9eb736bc6e46f"
+      ai-framework/scripts/skill-compress-guard.test.mts,dce94212236ac8bdb5642a648561be36b4b7af2b72789195e546555e5f363466
+      ai-framework/scripts/skill-defaults.mts,b0d1faaa4d8edf3a983ac1fc054ae39994a3687e94c1bfa11bc3e582811d1955
+      ai-framework/scripts/skill-defaults.test.mts,a712181bb389e4540f3068fe4ef25a2bfd00c397ae4539798269f71aeab8115b
+      ai-framework/scripts/skill-registry.mts,c88bc17b9a056febaa298a62f5aa1ac83b6af24e060acf49475b287e2342dcda
+      ai-framework/scripts/skill-registry.test.mts,df1bfbade1cb60fdad59f7c7a84c8cc35982b0402ee1935e937ba8ee6af6135b
+      ai-framework/scripts/skill-source.mts,bf71133a6af736463f3633a62a4e7450a99115902dab7db1dfcf3b6a778610b3
+      ai-framework/scripts/skill-source.test.mts,daba16d72dbe246df0e8605e50e2c81367b3afa8aa3969922c88a866be937259
+      ai-framework/scripts/skill-sync.mts,"7dad4f0c56fd583377aeb71cfaad3823f1e738532679edfc2b0d2b642375d4ca"
+      ai-framework/scripts/skill-sync.test.mts,d3622471616a428c5ef5419ba0dc953db1a36036c286e556774a384345a561a9
+      ai-framework/scripts/skill-vendors.mts,"013a987c9ae527176ff5248ab3c458c34c8026dae0dacbf2e54f3ecba7c460c5"
+      ai-framework/scripts/skill-vendors.test.mts,ebdcc633fcc6bf0a2cde01eb1ea259bcf86339e97d132916dde5f8b80b19434f
+      ai-framework/scripts/state-charts.mts,dfd6516c509c89a66289cffef0803648f5891ad222594bac1403d3cf9f07ee0f
+      ai-framework/scripts/state-charts.test.mts,"22bd405f1d994cb6d40d6ceefe3acc669190c2a16a9c8685c73ee1f5c5a217f9"
+      ai-framework/scripts/state-design.mts,d992a544bc7c2daad1fb17e13be8dce2e22011fba1d2893273a396234e3eedd0
+      ai-framework/scripts/state-fragment-dataset.test.mts,"59c5e3e24f7b32508e6be3835e4dd3274f315e1804c09d34de85cdcad92ab1f8"
+      ai-framework/scripts/state-fragment-evidence.mts,"50380b5e5a7a7e82f7a179f464f437774b2fc8df3f71935ee5a9de8792416eac"
+      ai-framework/scripts/state-fragment-evidence.test.mts,"25e49ec95e07d372d759195208733caee1e29b3fc7afb31226c0a96b876cc3f9"
+      ai-framework/scripts/state-fragment-inject.mts,"71269a3070c2d64b31ad6be90bc598068a634a4321f78a4aefe6e4b980ce861f"
+      ai-framework/scripts/state-fragment-inject.test.mts,"0908d064fb22fc1478dea909a387c0c7f841c27db38b59680e4364aa2a4c0fff"
+      ai-framework/scripts/state-fragment-parse.mts,"8df6055a80ecb0a4cdf4da254676ace9a3fe86d805ccf7a19f31eec956193d0b"
+      ai-framework/scripts/state-fragment-parse.test.mts,"5147ef205f61142ea656a03db86f062e3c4a00a35735b68db7bc58d603cf53f0"
+      ai-framework/scripts/state-fragment.mts,"78ecbed5fada3d219f4ab43f6daa1798dce6fe05e846e5fab3a1426c32b201a5"
+      ai-framework/scripts/state-fragment.test.mts,"6f51958f27645d141d2fbd1d8f16fe5b42438533b57bad98b547fa8a8c04bc6f"
+      ai-framework/scripts/state-graph.mts,cde9c5f7df0e3ce159e20a11565ec681945415955397ec2c8747fed9455c2d7b
+      ai-framework/scripts/state-graph.test.mts,d3903429ebdaafea675bc68a5dc048cf05b5a1aa71b23bcadbd2769af498fd73
+      ai-framework/scripts/state-history.mts,"64241c5e5fd03c29d6675f6c0ab3193d846612af3af997e673e93cf0a77e4ec2"
+      ai-framework/scripts/state-history.test.mts,"01a504a8f75ced89af315b2b0bf187d0899a1924bc08153abc812f55e9d59991"
+      ai-framework/scripts/state-html.test.mts,f539844e21b2d836cd7df8556acf20a1e130065ceacb79c607b804693214f872
+      ai-framework/scripts/state-pages.mts,adcb50917171fbc4fc1ac01965d08a0003dba004a3eb41dac869baec0f802d08
+      ai-framework/scripts/state-render.mts,b04c2383693502ce91cef1ee0b00b854e305384364bb6c5f3aa24126fdcc5b53
+      ai-framework/scripts/state-snapshot.mts,"65aa3f9a06f683938a5f2709a56cc498a27cc139a2436db694b7e99cbb7f64ac"
+      ai-framework/scripts/state-snapshot.test.mts,"5ace7d8a47089c2a38fbc7aad52591e3c3ec4a0d75c9abecccc5effab7c8baab"
+      ai-framework/scripts/state-structure.mts,a2e60745aedf7923b94bc4e7a223cf12b3b1a2049cb84a82dbdf8a8b122b7d6b
+      ai-framework/scripts/state-test-helpers.mts,"3d71a4358c3ca3b17a0f0fa54d878b6dd663dacf2d6c5d5a62673cf81e5373bc"
+      ai-framework/scripts/state-theme.mts,"3e1f778d8046718768c63ad45af09870b617ddcd7cf1e19294a617d855885cc8"
+      ai-framework/scripts/state-theme.test.mts,d3240c16c2ad631335b57b9124d278bcd32184a36256a39f29c91fc862110f51
+      ai-framework/scripts/toon-convert.mts,"10e305aa561aa4136409aed61b954db1bcf278faf8a9e62aa953d3efe26cd5a9"
+      ai-framework/scripts/toon-convert.test.mts,"537503e2455ad1da326978dae0f13974bfd4e07f55cfe684ed3470f4b3c17a58"
+      ai-framework/scripts/workflow-contracts.test.mts,"5fe4477b8d32c84b7c5bb3d194bdec66e4e69f5ae1c03bece46754579dc933cd"
+      ai-framework/scripts/workflow-doctor.mts,"54fc4f0203ffdd3a2bf8adb760b980d1fe73e3ebbf2f69fdae859818d7be161d"
+      ai-framework/scripts/workflow-doctor.test.mts,"15f5b2e21ea5dd54b2c8b03d18674273cf40f9abc252e2b09027595811ab3223"
+      ai-framework/scripts/workflow-metrics-report.mts,"98a28139b2e5fc4a965be5adc04331f677e4449668069af2d6dbbf2d298b8662"
+      ai-framework/scripts/workflow-metrics-report.test.mts,"26b2c361577908cf42bc3b2150328bb0f98be18ec0558bb3db462434592b75af"
+      ai-framework/scripts/workflow-metrics-state.mts,"445170d9a49119f9479d522e53ae9421d567ba7a57886c048cd289a261c7fedb"
+      ai-framework/scripts/workflow-metrics-state.test.mts,"0b5914c1446aa7757d328679871d0e19195be7027ec55a72ba02e40b98b124f5"
+      ai-framework/scripts/workflow-metrics.mts,"8ec0824f72cf45cd0c9565483250c51664136ed679defc6301eccfcf9268d35f"
+      ai-framework/scripts/workflow-metrics.test.mts,"97857efe0bbdadbf3b52bc5af44de832ce0685e6bbb6c4fa57f188bc32962b7e"
+      ai-framework/templates/ai-workflow.example.toon,dc41ce03805031b0b4b7e2aa7153d05525bc8eeae65fcbd4790effe0146981c4
+      ai-framework/templates/ai_workflow_env.example.json,"98dbcb3a7b9da4a149e67cd26c8dc4e416e7b1a7dcb22ce09f728c7924850017"
+      ai-framework/templates/project/analysis/README.md,"9116655c8f8d3e6dcbdc69fcd32319804724b18bb6fb52b82ca23cdce9dd5a90"
+      ai-framework/templates/project/context/README.md,"5e76c38ea55af9925fc68548f7fad48373d241c0cd180943b29561ea725a91c9"
+      ai-framework/templates/project/design/decisions/template.md,"53811f0820d81415253f2a4efe16fdb45227a8ed55f04527d1b59e0d92373ce5"
+      ai-framework/templates/project/design/plans/rollback-template.md,a78158600a847a6840ee761e2481890b80bf8609084a92862fe805a1ed812cab
+      ai-framework/templates/project/design/plans/template.md,d62d8649f6cb97dd3db9622f4f86492ff75037ff5afd0e216aa12a9953d16c90
+      ai-framework/templates/project/design/template.md,d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+      ai-framework/templates/project/design/wireframes/template.md,d3482dc696b3893231b2cc6a54c7457784119fe9df4e8a4976464f9c15628196
+      ai-framework/templates/project/done-work.md,c721b6ec084de8a11a31b5fae753746888c127b85952a335a860ce100264465d
+      ai-framework/templates/project/knowledge/README.md,"99e824eb8d955ffb4ee50b41fa0ea2501c42fce1749690eeab2c42385fe023d5"
+      ai-framework/templates/project/knowledge/templates/decision.md,eb7b93ef148d3da5eec03c75a6de427cf9a648354bdd4b52da412929a8fefe88
+      ai-framework/templates/project/knowledge/templates/entity.md,"15485085bf9faf8fa4a61545df7d795467dd28befe6dfd3910a6816ae0c3eae8"
+      ai-framework/templates/project/knowledge/templates/issue.md,"9270185df6ff085341fab5905134651cd7e0a5d3679ccd604686149100dcc542"
+      ai-framework/templates/project/knowledge/templates/pattern.md,"27621bfc41afc5c984fbc16d310b20715353b6df4dd8b36d82fd2ab3c97773aa"
+      ai-framework/templates/project/pitches/_archive/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/pitches/_parked/.gitkeep,e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+      ai-framework/templates/project/pitches/_templates/hill.md,"6d728f73ff5b532ff6ef77949221a2dbe4f38a158b6d90985fb4c789530559dc"
+      ai-framework/templates/project/pitches/_templates/pitch.md,eb927ca736585fec3e9afc14539582b5cb9b261e49085759b11f68bf01f8cada
+      ai-framework/templates/project/pitches/_templates/plan.md,"64f750a6d2b90bd36c37daee3427e6183b61f4fb04d937a402f1db122e093b86"
+      ai-framework/templates/project/reports/README.md,"6a09eb48c81bf1eae76b757230c20436a1a1709b45b7a071dcc5081b52766a2a"
+      ai-framework/templates/project/requirements/bugs/template.md,"54f0dc660d2177883bedf8c02be5d6e368b2e1eeb6a5e597c1b2d20d39039f75"
+      ai-framework/templates/project/requirements/features/template.md,"0207eec5f811c08b303783a65c697129a4c4a7f1cd803a9e8db06655e20ad5fc"
+      ai-framework/templates/project/rules/README.md,e1f7f7c7cb05a750ee338a346987bd450e4e53630aec0690a2ba267d9cd5883a
+      ai-framework/templates/project/runs/README.md,"11e2d6c91b7b1a3abad781f73017979a59d403a31bc608850cf7ffe32c99f0a6"
+      ai-framework/templates/project/status.md,"317486b3922fd511b627e5d14b3c28b23b6da25d8950f9461f6f00e6e2f7d8ab"
+      ai-framework/workflow/overview.md,"873bb51f966fef96b0c9970f36a35c3a7b74b6897c64095de318aad7d0b14301"
+      ai-framework/workflow/phases/0-shape.md,"0837ca21f826f0e48a18070f574348c730081915f410ecb9bd95fccb2a1485b7"
+      ai-framework/workflow/phases/1-plan.md,eb9c56adc6f045daf50c0ec6708a5ad4f2a609b6baed789f76c6b42d7d07ac54
+      ai-framework/workflow/phases/2-build.md,d1f1a816bd653e7ab45a2703075eb50ebb2450e7a8015f336e6d4cd29137efab
+      ai-framework/workflow/phases/3-audit.md,"067275df459da6fca94d083ec081076273043e98ce81f3cab9a1f1557b6a603d"
+      ai-framework/workflow/phases/4-ship.md,a8685a3628670eeca49a29359eb6d3d8a9ed66250d1a5b472d7d103602899a9c
+      ai-framework/workflow/phases/5-cooldown.md,"828633bec26df18363126a04e649f15e3f512014527030b8692f9f1a8b37a59f"
+      ".project/status.md",e427b798c76d837566837baa52361b95cfcc3b3630815134c5bc2cca96d0b2ad
+      ".project/context/stack.md","999ae0207160b3e6c28aba32873f40631a0693571e4e1d41a804d20c0e70b0d9"
+      ".project/pitches/connected-memory-consolidation/plan.md","259de12cf95ab9c0ad68c518824338610375a21e3c1451e5e06ddda0c3d0509f"
+      ".project/pitches/connected-memory-consolidation/deviations.md",b37e078c68496b77876dcdea95d716fea2df6be976a3b208601ef3638d53f34a
+      ".project/pitches/connected-memory-consolidation/closing-exceptions.approved.toon",aaa288e412348c12222072613543c0a606645618335a87a3d347a0a393a5d92a
+      ".project/pitches/workflow-v3-rollout/pitch.md",eba3bf397244c34e26b68e4fe7fadc4929fa4a160979ea40ed2fe3c558a7cb83
+      ".project/pitches/package-less-ship-verification/pitch.md",ea689efee7916d4392e9f1b0750fc0e1844c1f527387bbf05c894e8ed59b47b2
+      ".project/pitches/orca-bounded-control-receipts/pitch.md",e1cca59fa538576cb37f47b76d756bb640274e2badc3e6d34e41e5eb88930e14
+      ".project/pitches/fix-retired-live-evidence-path/log.md",a69f0a38e643e70f2ce1357a3a2232cdffb711c5172b3954cc4d45b13f5f7c44
+      ".project/pitches/fix-retired-live-evidence-path/source-proof.toon","38ead5dcdf39d369ce237443e8aae327cd4b514eda4f4100d0a17ed63def4704"
+      ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md","868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a"
+      ".project/evals/datasets/state-ai-fragments.json",d91d990a62f40de75cbf5ec0b01b03356587a369d8d7a0083bb6e18db91c7f1c
+      ".project/evals/datasets/state-ai-authoring.json",dfb5857b0d6adbbd391c12450576ccf619e006e76d1a30f0c3fb6e67a0b2664c
+    canary:
+      file: ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md"
+      line: 33
+      findSha256: "102e3f41817028fe2d1af2bc904a3e53ac5debfd1fd8fe7a369603bfb838910a"
+      replaceSha256: dda9bf66c7684f0f478c00fe20800bac0bbf0e818d26710c247e66b3ad7b292d
+    testCommand[3]: node,"--test",ai-framework/scripts/state-fragment-dataset.test.mts
+    baselinePassed: true
+    canaryBreaksTests: true

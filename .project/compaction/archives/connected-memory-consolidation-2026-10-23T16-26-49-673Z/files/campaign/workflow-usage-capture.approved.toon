@@ -1,0 +1,100 @@
+@toon-data 1
+ledgerHash: "sha256:c451e95c5d59c9acf555f056a59690010bde1d9560d80eb11e7e2ef99f586f90"
+legacyEntryHash: "sha256:a5c3cac9be2842c785340c9e2638e346becf9990c059826b819d2eb47e0f9a06"
+bindings:
+  ".project/records/legacy-upgrades/workflow-usage-capture.md": "sha256:cc6832db83122141cfe3cbb061b1ab169b868a3b9be3b0149d5aeb9ea5c0c5eb"
+mapping:
+  schemaVersion: 2
+  sections[31]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#reconciliation",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#what-shipped","Scope outcomes S1 to S7, measured p95 100 ms, 0/60 coexistence skips, lease failures 0/12, and the 15-file 1325-line budget.","sha256:6b584d042638a71ef55a6734c981c82904748abba7e84be1fa0ed74eab7ccef1"
+    "SHIPPED.md#verification-and-approval",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","Final Node 2360 and Bun 2338 passes, release tests, doctor, graph and privacy scan; the wrapper exit 1 and the owner fallback approval.","sha256:7d21739c182906842fb0cf4fdcd0d598a9c604508e3bf6dae5073bab2dd79222"
+    "SHIPPED.md#limits-and-deferred-work",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#limits-and-open-items","Unverified OpenCode wait and live V2, out-of-scope Codex and Cursor, meaning of the dropped count, and the followups kept.","sha256:0598953567ef2fbae278e7fb62d95ea57ce59d73db7e8093aeaaf0ccef999863"
+    "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#standing-constraints","No prompt or response text stored, no prose emission steps, no schema or lease change, always exit 0, exact registrations.","sha256:97ed0bf7b9debdb8cc57f95e438509a3165e4bd7eb41d8108465891f54a97b2a"
+    "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#scope-and-contract","Dependencies on token-attribution and A1, the spike risks, and what was pushed to no-go.","sha256:160ea29e0fce8227bcdad0693ca984bfab9675032af29822cf5d1cc233d2afcb"
+    audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#audit-triage","Canary results, the OpenCode model-pin preflight proof, refuted findings, deferred S1 and S2, and the guard-snapshot witness.","sha256:d33791ad1d6bd67b8f2519f4f335533e7ceaf1a2d998a231f79d7bc5e16b886b"
+    audit-cycle-2.md,limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","Gate V1: the package-less pre-ship wrapper exit 1 and the owner-approved fallback closure.","sha256:d53eefa02002847ea4f84b23cf3dd18b62973e68e501e1d4a7c2121c27d5794c"
+    "deviations.md#2026-10-20-s1-dependency-and-probe-limits",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",A1 lacked three contracts; which probe fields were unverified at runtime and why Orca-on coexistence is not claimed.,"sha256:a44d8b1eaf9e0e8d4b76902c04ee281057ac60c89634634f59137f968e2e2cdb"
+    "deviations.md#2026-10-20-owner-authorized-prerequisite-exception",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",The exception widened the budget from 12 to 15 files and about 160 lines; canonical segment identity and primary-only replacement.,"sha256:c1a0e4d9f8398b4e4e3e8f57b0b00473cac323d766eaa12f62fb00f6dfacfdb1"
+    "deviations.md#2026-10-20-s2-implementation-details",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","Unknown agent kind for OpenCode steps, event id and dedupe limits, and why one-registration checks stay required.","sha256:99dc335daaa65b9d067e74bdd5a3629ac4dfac302bf9e2024f661db5fca0c360"
+    "deviations.md#2026-10-20-s3-start-check-and-retry-accounting",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","Stale C-A1 grep, refused-attempt accounting, outer-call limit and the cohesive adapter size.","sha256:0f4c7841807151d0d9c87b43710ada6c77409e1efc33db0398c7828f9fbb5cc1"
+    "deviations.md#2026-10-20-s4-verification-limits-and-commit-layout",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","Commit 866c68e layout, shell wording tolerance, real-lease tests and the Orca-on refusal that limits coexistence evidence.","sha256:65c4456a645c54b525d1224e5e9781a3ebace75101e3e4b22f8a3835908cfa5b"
+    "deviations.md#2026-10-20-s5-execution-order",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping",S5 ran sequentially on the coordinator checkout instead of the optional isolated wave; the check is 45 lines.,"sha256:c99353efe9a24212502467e9d6552e198068d1630d6d130dd59ab1db8c592e54"
+    "deviations.md#2026-10-20-s6-integration-fixture",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior",V2 test host acknowledges after writes settle and removes immediately delivered events; the plugin is compiled in memory for the spy test.,"sha256:81ecd92e4080523a83f8897415ca613f3b09d9ab6e6c9d7c55b71a38980dabaf"
+    "deviations.md#2026-10-20-s7-suite-execution-and-release-timing",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","Sanitizer baseline exception and its resolution, Bun rerun, release bump deferred to ship and the numstat budget method.","sha256:232abe17c124885334a10dfbce52dbe89db208ffd338b199bc7d609679b70054"
+    "deviations.md#2026-10-21-audit-recovery-and-witness-limits",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#audit-triage","OpenCode model-pin limit, the substitute witness, independent:no for all reviews and the retained canary-citation facts.","sha256:1c8a02b8a1b3dabb2a089551e0e83302f04e2ef2aa6a6f77b5196434e47cf3a6"
+    "deviations.md#2026-10-21-ship-verification-preparation",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","Wrapper exit 1 retained, actual stack checks, and generated graph artifacts counted separately from the 15 files.","sha256:95c59d731dffb1f2b4150130006b68de9b722c4c5a5f90cdf1136dd223bbd5f7"
+    "log.md#2026-10-20-s1-shipped-a1-does-not-satisfy-the-capture-contract",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite","The three A1 gaps with the in-memory reproduction, its symptoms and root cause.","sha256:19917ec0939aa621f6ba346bad9f74b220a1142f240f580b808d2a6a45c1f0d2"
+    "log.md#2026-10-20-s1-evidence",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#measurements","Proxy p50 and p95, concurrent p95, 0/60 skips and the inherited 0/12 baseline, with Orca-on refusal.","sha256:679a1a49ae7920a74c56ed0a927b4ef4114cc4503f16b9257170b5be1a2760be"
+    "log.md#2026-10-20-approved-prerequisite-repair",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite","Repair design, 63 tests, five mutants, the Orca worker-list cap incident and the sanitizer failures.","sha256:fe1ef826dc0c15140354fe4cad6b08a4602e0ec5f568d8253517027ca6cc9c21"
+    "log.md#2026-10-20-owner-approval-prerequisite-exception-and-g1",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite",The owner accepted the sanitizer baseline exception and the G1 amendment without waiving new failures; S2 opened.,"sha256:f15ac32f8f4fd8b0b7cc5529ba51dc61a38d3e70fed81d4e09052d6fd133363c"
+    "log.md#2026-10-20-s2-pure-event-mapper",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","Mapper rules, 14 mutants, identity detail, 98.26 percent coverage and the fixture clock fix.","sha256:0943fb6016ac40096e8c7c1eabf9739829c48c6f7c6d18d8c2433fab6f0db2f2"
+    "log.md#2026-10-20-s3-bounded-hook-entry-and-writer",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","64 KiB read, 3000 ms budget, two outer attempts, no forced cancellation, four mutants and the lifecycle result.","sha256:0cf737862006c17942d19fadebefa84013fde8de69fc875d5dad07008b8ebf6e"
+    "log.md#2026-10-20-s4-start",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping","C-WIRE passed; plan of eight capture-only groups, template and live settings together, and the checks to run.","sha256:025c640ade8f7e2d5fe558c8febad73c78a0cb297032cf712a269eba2e869b8b"
+    "log.md#2026-10-20-s4-claude-wiring-and-sync-propagation",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","Eight groups with timeout 5, migration idempotence, exact sh test, and the p95 100 ms and 0/60 measurements.","sha256:3ed1a4aec08bebbd9c3a081024244914f3ae6cc7810f5cef236cf2f90379b428"
+    "log.md#s5-doctor-validation-2026-10-20",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","Exact-command doctor check, substring mutant and six mutants, 72 tests and the warn on absent capture.","sha256:225fa2867d39784d25814e357e82095f0e701886c1640ecac787f8d358217bad"
+    "log.md#s6-opencode-capture-2026-10-20",behavior,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior","OpenCode capture after the token write settles, V1 and V2 tests, 0/12 lease runs before and after.","sha256:9f7d1a176454b23730ab3ade16f3f8e20f82d3eedf03eb8ad8046fb8eff27eea"
+    "log.md#s7-docs-and-rollout-2026-10-20",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","17 Node failures mapped to the sanitizer followup, Bun 2338 pass, privacy scan and the 15 file budget.","sha256:3bdbaaeed64b28f25e3e508200d4a368c295cab850b08154a8a4932093de3c2e"
+    "log.md#audit-preparation-2026-10-2021-utc",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#audit-triage","Run creation, scratch canaries, the brief control-character refusal and the guard snapshot too large.","sha256:9fb077dc704527a4886bc04835ce4832f00e4b53400fb99bb8bc6187394567c6"
+    "log.md#ship-preparation-2026-10-21",know-how,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history","Serial Node run, version bump, knowledge extraction, evidence archive and the wrapper decision still pending.","sha256:442cb35e945fbb33e7a1ef4e8a018c36959aed2375bd561987b084a90a2a74c3"
+    "log.md#final-closure-2026-10-21",limit,merged,".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history",Owner approved the package-less fallback and closure; final numbers and what the closure does not imply.,"sha256:ae7bea16d01ac960fbf0cd8e6b1c6bfa940582490748dc38429d0ea45abfdef4"
+  otherFiles[10]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:44c864e520c2cd2c01332115011ba88d1bf33668e1375c0a1c6333a4d2a21506"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#what-shipped"
+      helps: "Preserves the release reconciliation, verification table and limits across the supplement."
+    -
+      path: deviations.md
+      hash: "sha256:f5ca7dedc7937866b185281f6ae4320e552848d9a82c8df3750e5b9501ebd9a1"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#a1-prerequisite"
+      helps: "Preserves the ten dated deviations across the A1 prerequisite, delivered behavior, audit and verification sections."
+    -
+      path: hill.md
+      hash: "sha256:5404e7b9ef1dc1a239400946eb5914979a4d31c16ed7fc129d81ac98f323d91d"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:07d628b800a3d93a7a2d0423e5d57f256b4a87fdd91cc5828dedad0036ee1f39"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#delivered-behavior"
+      helps: "Preserves the build, audit and ship logs across delivered behavior, measurements, audit and verification."
+    -
+      path: pitch.md
+      hash: "sha256:fbfa0035c2ab708c89b0aa3520b629d26568515c133081de522f2a01dc087fb9"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#scope-and-contract"
+      helps: "Preserves the problem, mapping affordances, critique rulings folded in and the bet decision."
+    -
+      path: plan.md
+      hash: "sha256:b474c2d02124c8566285d8c6166273ee62a02ab5f0105881e2a2382174b424bc"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping"
+      helps: "Preserves scopes, file budget, blast radius, event mapping, A1 contract items, start conditions, exits, risks and claim corrections."
+    -
+      path: rollout.md
+      hash: "sha256:b032689bd023c2e2bd9eb7d54164b962fa1026628754a147779676498d04bd4a"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#rollout-check"
+      helps: "Preserves the RN-shaped scratch sync, byte-identical Orca groups, the two expected doctor failures and the handoff."
+    -
+      path: shaping-draft.md
+      hash: "sha256:4bfae9f45f36c44751e8d87f54f60f4e4f3a8b58e4d3252ab34f029c0fa30000"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#shaping-origin-and-part-b"
+      helps: "Preserves the token-time-report shaping: seed claim corrections, state v2 design intent, critique rulings and the part B note."
+    -
+      path: ship-readiness.md
+      hash: "sha256:5c094afe55f442d2f0b72553d7b7eb3d537048376636dd9ecd180018e4fa8684"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#verification-history"
+      helps: "Preserves the verification table, reconciliation, decision required and knowledge and archive notes."
+    -
+      path: spike-s1-payloads.md
+      hash: "sha256:d0c2eed54c51c9044025841f99aabbdff4ac6a7b7e35b052d2c87aa72dc521a1"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/workflow-usage-capture.md#payload-facts"
+      helps: "Preserves observed hook keys and order, OpenCode gaps, latency, coexistence, the gate record and the G1 approval."
+outcomeRecord: "---\nslug: workflow-usage-capture\nshipped: 2026-10-22\nschemaVersion: 1\n---\n# workflow-usage-capture\n\nClaude lifecycle hooks and OpenCode plugin events now feed metadata-only workflow usage capture through the existing state boundary.\nEight capture-owned Claude hook groups are validated by the doctor; the bounded CLI never blocks and exits 0.\nOpenCode user-turn timing is unverified, so wait stays Unavailable; Codex and Cursor capture is out of scope.\n\n- outcome: Workflow usage events are captured automatically from Claude and OpenCode without storing prompt or response text.\n- docs: [workflow metrics guide](ai-framework/integrations/workflow-metrics.md), [harnesses](ai-framework/integrations/harnesses.md)\n- decisions: [event mapping and A1 contract](.project/records/legacy-upgrades/workflow-usage-capture.md#plan-and-event-mapping)\n- knowledge: [lease budget](.project/knowledge/patterns/observational-hooks-check-budget-before-acquiring-a-lease.md), [state-boundary attribution](.project/knowledge/issues/native-capture-needs-state-boundary-attribution.md), [guard snapshot bound](.project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md), [package-less wrapper](.project/knowledge/issues/package-less-bundle-ship-wrapper-cannot-select-checks.md), [Orca model preflight](.project/knowledge/issues/orca-model-preflight-can-leave-unproven-ledger-ownership.md)\n- code: [capture adapter](ai-framework/hooks/scripts/workflow-capture.mts), [doctor](ai-framework/scripts/workflow-doctor.mts), [OpenCode plugin](.opencode/plugins/token-consumption.ts), [hook template](ai-framework/hooks/hooks.json)\n- verification: [verification history](.project/records/legacy-upgrades/workflow-usage-capture.md#verification-history)\n- followups: [limits and open items](.project/records/legacy-upgrades/workflow-usage-capture.md#limits-and-open-items), [backlog](.project/pitches/_followups.md)\n- archive: [source supplement](.project/records/legacy-upgrades/workflow-usage-capture.md)\n"

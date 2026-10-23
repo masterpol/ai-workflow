@@ -1,0 +1,73 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slugs[5]: independent-rereview-catch-up,native-safety-feasibility,orca-vendor-foundation,orca-vendor-reconcile-integration,runtime-test-helpers
+sourceBytes: 286779
+sourceFiles: 63
+requiredSections: 73
+retainedSections: 66
+otherFilesAccounted: 61
+retainedOtherFiles: 33
+omissions:
+  process-noise: 35
+acceptedGaps[0]:
+newKnowledgeEntries: 0
+proposals[5]:
+  -
+    slug: independent-rereview-catch-up
+    payloadHash: "sha256:219f377ac701fcf5e15d3d12c81be27e7ce21b91f08928705f574e237f402a1c"
+    supplementHash: "sha256:ecb325bf16891664381108d7a2bcace7c656947a8439becbfbe4f6adf9ed2a13"
+    sourceProof:
+      archiveDirectory: independent-rereview-catch-up-2026-09-27T18-09-29-288Z
+      manifestHash: "sha256:e5c66116c7112f33fb05dc980d8fa70e9372c73e2c7e574fc8a98938b0766fb5"
+      sourceBytes: 151147
+      verifiedFiles: 25
+    recordBytes: 1424
+  -
+    slug: native-safety-feasibility
+    payloadHash: "sha256:7108a33352dab0b7450f52ae6e9283e14406284561258a6f30e33a3677c746c8"
+    supplementHash: "sha256:707b5bf69c1534b14cd6df35abfd147320282def4f9556b90a6edc75b9fe69e1"
+    sourceProof:
+      archiveDirectory: native-safety-feasibility-2026-09-27T01-27-20-473Z
+      manifestHash: "sha256:d0c7dc5424127e2cd5e0ccfa70098dd0cd6128a0eb33daaa541432ee69fdc9e0"
+      sourceBytes: 30758
+      verifiedFiles: 14
+    recordBytes: 1013
+  -
+    slug: orca-vendor-foundation
+    payloadHash: "sha256:71e54e0dca63b5e92f703bdc5ffb647f08a80bc4f650446af0b65288ad3a3a90"
+    supplementHash: "sha256:f149a4368ad3c4c0a4aee43e603d3c7c2998772948cb26e90018792085f7d4a5"
+    sourceProof:
+      archiveDirectory: orca-vendor-foundation-2026-10-08T16-26-37-363Z
+      manifestHash: "sha256:a852dfc14aba763a669193d1d2cd4f0b2ad700f635e54a8db287ad4a624f12d6"
+      sourceBytes: 57459
+      verifiedFiles: 13
+    recordBytes: 1371
+  -
+    slug: orca-vendor-reconcile-integration
+    payloadHash: "sha256:df250caebdb551b059bf41860d09c5f2d2f41705a1948bdc6955130b42ca8ddc"
+    supplementHash: "sha256:99f409a51267c7f233361b9e94709053fdcfe6c612b6ff6a375f658bea669dcd"
+    sourceProof:
+      archiveDirectory: orca-vendor-reconcile-integration-2026-10-08T16-26-38-001Z
+      manifestHash: "sha256:e959a783db36c73db4b790585ffdaf1830295489fd1f187751768391a5bce7a9"
+      sourceBytes: 19027
+      verifiedFiles: 5
+    recordBytes: 1467
+  -
+    slug: runtime-test-helpers
+    payloadHash: "sha256:dd029fb2d90789c60b1845fd4bec2628784afe1a2883f6b4ab8eb9dc4b9c0f2e"
+    supplementHash: "sha256:0a265229eeb7ab41914fcfe03d10c63ffad8978846516d22c2b17691f059a451"
+    sourceProof:
+      archiveDirectory: runtime-test-helpers-2026-10-08T16-26-38-405Z
+      manifestHash: "sha256:1cf754efa61c9680cf1bda7b2c95eab761e6e01e3233c47ba64bb74fa2cab2be"
+      sourceBytes: 28388
+      verifiedFiles: 6
+    recordBytes: 1208
+validation: "{\"slug\":\"independent-rereview-catch-up\",\"coverage\":1,\"sections\":25,\"otherFiles\":24,\"omissions\":{\"process-noise\":16},\"acceptedGaps\":[],\"recordBytes\":1424,\"recordCap\":3000,\"supplementBytes\":4122,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"native-safety-feasibility\",\"coverage\":0.8,\"sections\":10,\"otherFiles\":14,\"omissions\":{\"process-noise\":10},\"acceptedGaps\":[],\"recordBytes\":1013,\"recordCap\":3000,\"supplementBytes\":3722,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-vendor-foundation\",\"coverage\":0.8095238095238095,\"sections\":21,\"otherFiles\":12,\"omissions\":{\"process-noise\":6},\"acceptedGaps\":[],\"recordBytes\":1371,\"recordCap\":3000,\"supplementBytes\":5950,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"orca-vendor-reconcile-integration\",\"coverage\":0.875,\"sections\":8,\"otherFiles\":5,\"omissions\":{\"process-noise\":2},\"acceptedGaps\":[],\"recordBytes\":1467,\"recordCap\":3000,\"supplementBytes\":3019,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"slug\":\"runtime-test-helpers\",\"coverage\":1,\"sections\":9,\"otherFiles\":6,\"omissions\":{\"process-noise\":1},\"acceptedGaps\":[],\"recordBytes\":1208,\"recordCap\":3000,\"supplementBytes\":2306,\"projectedValidation\":\"passed\",\"supplementLinks\":\"passed\"}\n{\"newKnowledgeEntries\":0,\"sourceArchivesReopened\":false}"
+rehearsal: "independent-rereview-catch-up: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nnative-safety-feasibility: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\norca-vendor-foundation: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\norca-vendor-reconcile-integration: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nruntime-test-helpers: projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS\nRehearsal: 5 generated index rows, 5 upgraded slugs; real bundle graph commands with fixture Graphify extraction; live archives not reopened"
+live:
+  legacy: 38
+  partial: 0
+  upgraded: 8
+  compacted: 46
+sourceArchivesReopenedForRehearsal: false

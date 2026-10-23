@@ -1,0 +1,54 @@
+@toon-data 1
+ledgerHash: "sha256:988732548d6f4a80a271a5a139199aa1e13bb2cde9a69addd3f6ff1d40a4cde0"
+legacyEntryHash: "sha256:d207492b68efd942019db2dc0b051928817336a5ff12b5d907ed157873147938"
+bindings:
+  ".project/knowledge/patterns/warn-text-must-be-self-consistent-with-the-code-it-ships.md": "sha256:96a72f9818e1b9c1ca136154c75c1efe60dc162f64bd8f56caf420940f6676d2"
+  ".project/records/legacy-upgrades/agent-model-sweep.md": "sha256:8718af0ae23363533544608dbccc23dfc93678a48c1fde2e500ff1c320d7f00e"
+mapping:
+  schemaVersion: 2
+  sections[14]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scope-statuses",behavior,merged,".project/records/legacy-upgrades/agent-model-sweep.md#shipped-scope","Per-place changes: 16 profile keys and removed models, Cursor mirrors, opencode.json model, doctor fallback removal, invariant test, docs, release 2.28.0.","sha256:b740ee1df3bceee78f8f6bcc3312879cc1e41a4e3b14b80cc06a8003f13b96ed"
+    "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/agent-model-sweep.md#no-gos-and-resolved-rabbit-holes","Prohibited scope and the deferral of remaining model: lines to Bet 3.","sha256:592a01e021778c40a5058803a8708490d2e102dc0aa71e9c325650bd7df0817c"
+    "SHIPPED.md#rabbit-holes-resolved",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#no-gos-and-resolved-rabbit-holes","OpenCode top-level model pairing, warn-not-fail rule, same-commit Cursor mirrors, doctor warn text consistency.","sha256:2e32ebc3c818091bb0e426a5c4818ea02b30a0d4853fb5aa0b08528962b82bd4"
+    "SHIPPED.md#deviations",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#build-decisions-and-incidents",Why S1 and S2 shipped atomically and why the opencode check became a real doctor test.,"sha256:11e2758fff11df2c9bb8a1cfbe6a7ca88ed1bc945b7f7771123a7a46446ad6b9"
+    "SHIPPED.md#verification-final-verify-current-session",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#verification-and-historical-counts","Historical gauntlet with counts, flagged as superseded history and not a new certification.","sha256:337c5012c28b3199adb8a9dc15c8263b1e58769ee46b4638a2e8563c7a10d074"
+    "SHIPPED.md#followups-carried-to-pitchesfollowupsmd-and-the-next-ships-queue",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#follow-ups-and-historical-limits","Bet 3 shape (3a and 3b, file counts), upgrade-test fixture gap, invariant-test negatives, deferred should-fixes.","sha256:5958984b7b2ffb15c699b60fe74453aa54aa8f78bf0cba66f435997fc623296f"
+    "SHIPPED.md#knowledge-extractions",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#knowledge-and-lessons","Promoted lessons with links to the existing patterns, plus the fixture-seeding lesson that has no pattern.","sha256:bc5118749aa3dfede19f23361a20a405e9bf2e67294c4cb13736fef35e17fd07"
+    "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/agent-model-sweep.md#no-gos-and-resolved-rabbit-holes","Original Bet 1 no-gos; the model removal wording differs from the shipped no-go, noted as a contradiction.","sha256:a0bf5aa0a4c64d0eeab963d7c363fbca074178549c4ef4efa9d0fd66228c12ff"
+    "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#no-gos-and-resolved-rabbit-holes","Frontmatter-not-banner decision, line-anchored mirror check, preserved exception tables and deferred ideas.","sha256:4248285fe4b13ea523c48636582eafd5a71e4a5964d520ac2db232d3712bc910"
+    "log.md#incident-2026-10-16-precondition-unmet-at-s1-start-open",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#build-decisions-and-incidents","Dependency lesson: hill-done is not committed and green; the three logged options.","sha256:23dc61844f3dda0340a8123a0ebe1a8a5426aa1a3cd14df9423347396fe602d8"
+    "log.md#deviation-2026-10-16-modelscodexdeepeffort-mismatch-in-users-ai-workflowtoon",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#build-decisions-and-incidents",The toon is authoritative for codex effort; the xhigh versus high mismatch and its resolution.,"sha256:695b46d730cdd36800df6bc04cd38beda4dd1e34d43ae6c11a994b8f5bfa37df"
+    "log.md#incident-2026-10-16-user-rule-ai-workflowtoon-is-mandatory",behavior,merged,".project/records/legacy-upgrades/agent-model-sweep.md#build-decisions-and-incidents","checkToonMandatory behavior, its results and the docs it pointed at.","sha256:8e7bbd7e5b1c3b61cf82b15ef6ef8f60d8024c89c939d2e4477aaf067449731f"
+    "log.md#incident-2026-10-16-audit-cycle-1-must-fix-patches-applied",know-how,merged,".project/records/legacy-upgrades/agent-model-sweep.md#audit-chronology","Must-fix M1 to M5 and the cross-pitch fix, including the skipped orca-preflight assertions.","sha256:6018055af5a48eb2943ff9f694c66a801c97caabda80f1740924f498a226cd82"
+    "log.md#incident-2026-10-16-bet-2-build-3-upgradetestmts-failures-test-fixture-not-bet-2-regression",limit,merged,".project/records/legacy-upgrades/agent-model-sweep.md#follow-ups-and-historical-limits","Three upgrade fixture failures, their root cause and why they are not a Bet 2 regression.","sha256:8fea42b1de8f85017b6b0a0fce84a381245202c4c422e5b12d7d2f9d687a2a0e"
+  otherFiles[5]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:5881596ba84d56867e5ee61d08dda576bbcfdce59b01b060f1263837eaa2f33b"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/agent-model-sweep.md#shipped-scope"
+      helps: "Preserves scope statuses, verification, followups and extractions across the supplement sections."
+    -
+      path: hill.md
+      hash: "sha256:15f8be9e14f70d7f34ef94871e27c417c701bd15c3f90f595fd7962be766884e"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:f3003d4c0e58512b60d93b9264ee4fceac9bd01010f72fd775d8dfdd223a02ed"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/agent-model-sweep.md#build-decisions-and-incidents"
+      helps: "Preserves the four incidents, audit cycle 1 and the upgrade-test failures in the supplement."
+    -
+      path: pitch.md
+      hash: "sha256:b6951b63ef2cf7d32ce2a4a49b64108e1fc4aef891d45973e27024fe132cfdf7"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/agent-model-sweep.md#no-gos-and-resolved-rabbit-holes"
+      helps: "Preserves the problem, critique-driven decisions, no-gos and Bet 2 sketch decisions."
+    -
+      path: plan.md
+      hash: "sha256:e2b2c579a56cbf658c1ec82db68188b354607e763f73c18d5644bafcdc4ba6b4"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/agent-model-sweep.md#plan-and-profile-mapping"
+      helps: "Preserves the profile mapping, scope order, atomic commit rule, risks and dispatch decisions."
+outcomeRecord: "---\nslug: agent-model-sweep\nshipped: 2026-10-16\nschemaVersion: 1\n---\n# agent-model-sweep\n\nCanonical agents declare a capability profile in frontmatter and no longer name a model.\nThe doctor reads profiles from that key, warns without it and no longer guesses from model prefixes.\nCursor mirrors, opencode routing, tests and docs changed together; other vendor mirrors stayed for a later bet.\n\n- outcome: Agent profiles come from one frontmatter key checked by the doctor and an invariant test.\n- docs: [harnesses](ai-framework/integrations/harnesses.md), [vendors](ai-framework/docs/vendors.md), [extending](ai-framework/docs/extending.md)\n- decisions: [profile detection in frontmatter](.project/knowledge/decisions/profile-detection-lives-in-frontmatter-not-in-the-model-id.md)\n- knowledge: [warn text consistency](.project/knowledge/patterns/warn-text-must-be-self-consistent-with-the-code-it-ships.md), [mandatory config check](.project/knowledge/patterns/mandatory-config-files-emit-one-top-level-failure.md)\n- code: [doctor](ai-framework/scripts/workflow-doctor.mts), [invariant test](ai-framework/scripts/agent-frontmatter-invariant.test.mts)\n- verification: [historical counts](.project/records/legacy-upgrades/agent-model-sweep.md#verification-and-historical-counts)\n- followups: [Bet 3 and historical limits](.project/records/legacy-upgrades/agent-model-sweep.md#follow-ups-and-historical-limits)\n- archive: [source supplement](.project/records/legacy-upgrades/agent-model-sweep.md)\n"

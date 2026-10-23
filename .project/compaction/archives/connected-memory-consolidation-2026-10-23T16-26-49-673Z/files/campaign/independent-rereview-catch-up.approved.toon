@@ -1,0 +1,164 @@
+@toon-data 1
+ledgerHash: "sha256:0b965f98351e228e0195e076dc9415c5c69e8a3ff9e3db55fb55193e8e17dbb5"
+legacyEntryHash: "sha256:afef12c23deff5bdd58b5cab9b150105810437a27af1394d7adba3c886efc36a"
+bindings:
+  ".project/records/pitch-compression/independent-rereview-catch-up.md": "sha256:b15f5c97fa5950f42fd7a11ba18c2c9144660a172ca5e406c89213e1a5b402df"
+  ".project/records/legacy-upgrades/independent-rereview-catch-up.md": "sha256:ecb325bf16891664381108d7a2bcace7c656947a8439becbfbe4f6adf9ed2a13"
+mapping:
+  schemaVersion: 2
+  sections[25]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-1-shippedmdscope-reconciliation","Preserves per-scope deliverables, test counts and the 19-file budget; supplement keeps the per-scope versus shared-suite count discrepancy.","sha256:50ae1444fd56e0e61476e90dbe031c52c2f79bbff2c0c2c267edb2f78df52afb"
+    "SHIPPED.md#confidence-read-this-before-relying-on-it",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-2-shippedmdconfidence-read-this-before-relying-on-it","Retains the four review-bench security defects, the independence limit and the S3a canary gap; supplement records the contradiction with every canary caught.","sha256:7e0f675b52a299a7c96f4d5957b1b2e73cd9a2722f1a4c262473972afac771d6"
+    "SHIPPED.md#no-gos-honored",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-3-shippedmdno-gos-honored",Retains the shipped no-go claims and must-fix-only exceptions for S2 and S3; supplement adds the S1 lower-tier fix.,"sha256:2bba6da6261383803f3650013263a5e2cfd4f1400753459b6c7e2be69fe77386"
+    "SHIPPED.md#rabbit-holes-resolved-as-committed",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-4-shippedmdrabbit-holes-resolved-as-committed",Retains the rabbit-hole decisions committed at ship.,"sha256:d64033a106542480a938a8f6815996dc206dfceb682d0e1e29be979853169313"
+    "SHIPPED.md#deviations-that-changed-the-plan-see-deviationsmd",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-5-shippedmddeviations-that-changed-the-plan-see-deviationsmd",Retains plan-changing deviations; supplement notes the superseded plan limits.,"sha256:e8e0408ba75d247078fa3f00c8ac132643c9b7f4a4c6234a7de66f2fe65e107d"
+    "SHIPPED.md#audit-findings-final-disposition",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-6-shippedmdaudit-findings-final-disposition",Retains final dispositions of audit findings and the remaining limits.,"sha256:641a573d045d9eae0d8b7b3ca26195a2b6190bc7669cd5d9fca829b891075c1a"
+    "SHIPPED.md#knowledge-extracted",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-7-shippedmdknowledge-extracted",Retains the pointers to extracted knowledge entries.,"sha256:2a983ff78b965b7c0235ba03beac609086e9e3f9488f2c40500f2346e8cc77cc"
+    "SHIPPED.md#followups-see-followupsmd-for-full-text",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-8-shippedmdfollowups-see-followupsmd-for-full-text",Retains the follow-up items; open ones need comparison with the backlog.,"sha256:88f5f92bab5d12b644d660582e790de003fcad540ddde11a6e4e944fca6e4bd8"
+    "pitch.md#no-gos",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-9-pitchmdno-gos",Retains the pitch's standing no-gos.,"sha256:f4f576a556ef7782154d8d0a9c4d5861f137f8f206c47951f8f6aca4e07ac77e"
+    "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/independent-rereview-catch-up.md#reviewer-protocol-rationale","Supplement adds reviewer models, whole-file prompts, scratch-copy proofs and the audit-contract pointer missing from the compact rabbit-hole summary.","sha256:52b4f07ce39db79f0c5bfecd99d246688c472cf640c6ca59570cab10475e2d9c"
+    audit-cycle-1.md,know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-11-audit-cycle-1md",Retains the audit cycle summary; detailed finding tables remain only in the archive.,"sha256:1b881c5f3ff67ebc6247c9a678629602f34b1c1559cd30b4ccc49a181aa9e6bf"
+    "deviations.md#s0-2026-09-26",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-12-deviationsmds0-2026-09-26",Retains the S0 review-bench deviation.,"sha256:bf362d58099e52aef0a2ddb438a37d097df8e99e802530b46f285f769ab98c0a"
+    "deviations.md#s4-2026-09-26",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-13-deviationsmds4-2026-09-26",Retains the S4 reviewer-contract deviation.,"sha256:36188e68b14a0cc3862f33add60df3de621c485d6c287656b590a9e7a9679f90"
+    "deviations.md#s1-2026-09-26",know-how,merged,".project/records/legacy-upgrades/independent-rereview-catch-up.md#compaction-review-detail","Supplement adds the S1 finding classes (remove gate, symlink and FIFO handling, heading keys, quadratic pattern) that the compact record leaves in the archive.","sha256:56b0ff064487fbdeabe4c13bce19dd63f3110681256148a1ee2f09c84d65cfce"
+    "deviations.md#s2-2026-09-26",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-15-deviationsmds2-2026-09-26",Retains the S2 deviation and its limits.,"sha256:8f3dc1d5af73828339b71ea333d78607c8377991899e8ffcbea38384ae947b37"
+    "deviations.md#s2-gate-2026-09-27",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-16-deviationsmds2-gate-2026-09-27",Retains the S2 gate cap raise.,"sha256:c4bbcd0d1db9dc5db08e73f26af1db6439d137f10f511514ff923e7b8d9c153e"
+    "deviations.md#s3-gate-2026-09-27-second-cap-raise",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-17-deviationsmds3-gate-2026-09-27-second-cap-raise",Retains the S3 second cap raise.,"sha256:9139db06778b5b03afd6ee9dfbfa55f39aac5611f975654de9822eeac040f68f"
+    "deviations.md#s3-2026-09-27",limit,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-18-deviationsmds3-2026-09-27",Retains the S3 deviation and its limits.,"sha256:daf7fff4cce5ce564732f1944bafeb128096bb9ae944ab09b99b93d53852c574"
+    "log.md#2026-09-26-s0-built-review-bench",behavior,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-19-logmd2026-09-26-s0-built-review-bench",Retains the S0 review-bench build record.,"sha256:6c162f59f722b3e122bd6846f280edaa042e921a4a435da164c6cd7ca7ce67c0"
+    "log.md#2026-09-26-concurrency-found-before-s1-build-paused",know-how,merged,".project/records/legacy-upgrades/independent-rereview-catch-up.md#historical-inconsistencies",Supplement records the overlapping-pitch stable claim that conflicts with guard flags; the compact record omits it.,"sha256:54c62e363a21af1adb79611963b515074de867802581dd55456b5bef5d2b67c5"
+    "log.md#2026-09-26-s4-built-ahead-of-s1s3-audit-reviewer-contract-first-pass",behavior,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-21-logmd2026-09-26-s4-built-ahead-of-s1s3-audit-reviewer-contract-first-pass",Retains the S4 reviewer-contract build; supplement records that no amendment after S1 to S3 is recorded.,"sha256:8ed5338d6d284d07dd9ccbb1719932f2a0d7c51cb2d15bb58c6698274174835a"
+    "log.md#2026-09-26-s1-built-compaction-re-review",know-how,merged,".project/records/legacy-upgrades/independent-rereview-catch-up.md#compaction-review-detail","Supplement adds the S1 finding classes, models and the adversarial bare-prefix verification.","sha256:ee3a62db2aad7d5d3056a189ca630e1d779e42612c25a8f8c6af56f95f77ad1b"
+    "log.md#2026-09-26-s2-built-metrics-collector-re-review",know-how,merged,".project/records/legacy-upgrades/independent-rereview-catch-up.md#metrics-and-state-review-detail","Supplement adds the S2 specifics, models and the unfixed items.","sha256:c78cccfe6154dc117725052e8045351d08cb771de22073f612a2f940b9e90f92"
+    "log.md#2026-09-27-s3-built-state-collector-theme-renderer-re-review",know-how,merged,".project/records/legacy-upgrades/independent-rereview-catch-up.md#metrics-and-state-review-detail","Supplement adds the S3 fix patterns (containment, fact filtering, text bound, shared root resolver).","sha256:2e041000d2dc5d875e5595878bfe2677b89b7953f96ac7ed3f380957a69c9f88"
+    "log.md#2026-09-27-audit-cycle-1",know-how,merged,".project/records/pitch-compression/independent-rereview-catch-up.md#section-25-logmd2026-09-27-audit-cycle-1",Retains the outer audit cycle record.,"sha256:cd8d8ef399e788b1595da4525ff748ab81827df09e13f7315bf10b9eaf3d96e0"
+  otherFiles[24]:
+    -
+      path: SHIPPED.md
+      hash: "sha256:33efe3cc875e245371cb399c7f83c2618486e89bfa9eb14f4f56ae52e5bad335"
+      disposition: merged
+      destination: ".project/records/pitch-compression/independent-rereview-catch-up.md"
+      helps: "Preserves historical closure, scope results and confidence limits."
+    -
+      path: deviations.md
+      hash: "sha256:62e6c37246ce7184cd4511a585360042c88ea5dbfc7355e65b82594c89843e19"
+      disposition: merged
+      destination: ".project/records/pitch-compression/independent-rereview-catch-up.md"
+      helps: Preserves plan deviations and cap raises.
+    -
+      path: hill.md
+      hash: "sha256:09ed724b8c41c6bad25e10b4918dd9c735604e5e20ec6739e3ed8061e06baadb"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: log.md
+      hash: "sha256:0e680bd8315f346709423dd2e8d61e9c4c56f9852cee9f2904ee0f3753b76d89"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/independent-rereview-catch-up.md#historical-inconsistencies"
+      helps: Retains the build chronology; supplement keeps the contradictions between log claims and recorded guard flags.
+    -
+      path: pitch.md
+      hash: "sha256:776b70d6bd828e4a68cafe09085b8b2ecc7f200b2438f5b6dbc261cf64ccaf8c"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/independent-rereview-catch-up.md#reviewer-protocol-rationale"
+      helps: "Retains the problem, no-gos and critique-derived reviewer protocol rationale."
+    -
+      path: plan.md
+      hash: "sha256:38bdd308d36f0f7cd4990b882b15d8394fa604ba5cc059b049557bf757ad7c3e"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/independent-rereview-catch-up.md#historical-inconsistencies"
+      helps: Preserves the plan limits that approved raises and five dispatches per slice superseded.
+    -
+      path: prompts/s1-s1a.txt
+      hash: "sha256:a9b83fd7e075bf847a3cbb587ce169334804c0765c8ce64c994c9d825892f23d"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s1-s1b.txt
+      hash: "sha256:293bbf53c11c305b29a679493c33683b12647238fdef3ac720e68abbc524b1e8"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s1-s1c.txt
+      hash: "sha256:7df3f8b68d052de4b411f08ee3da3333cc0ae843593084de51e5ce2aa569c19c"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s1-s1d.txt
+      hash: "sha256:54610c185f725d9644ab518b66c9df13d2565e6ede9d4213738b32d3041cc7d9"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s1-s1e.txt
+      hash: "sha256:602dad83440db9f941741dca70384c26581e9dab96bf21e20a7e7f293562f5b2"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s2-s2a.txt
+      hash: "sha256:91e81c56871dc8f7ae62dd03747413799d80bb1b7fe2d5a58eea9ea75c752ee6"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s2-s2b.txt
+      hash: "sha256:73f811dc48536f6231515fd2463eab752a9c08b84023a305f9e7677c3aec27d5"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s2-s2c.txt
+      hash: "sha256:7f6fc96c9ca8bbbdc9177b54f9b4eaea574c2c4e0670dc2981a7f29c4a8da39b"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s2-s2d.txt
+      hash: "sha256:d3c01e22cf1f1c5a80484d1a284b58d6085e1830cefdc8f720a48c8c8d5d8b97"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s2-s2e.txt
+      hash: "sha256:cb8f1fe1d74a922c177f3ddeac809a7dba838e58f8580f0a30ed9f07baebcbe5"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s3-cross.txt
+      hash: "sha256:15e1fe8043fece9405208b5e33716473d6b9c8168dd67b67006841604180d6e0"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s3-fix.txt
+      hash: "sha256:09fb8aa04620ba5f40cf9e7b9926afb92316eebc76e0b31f0b92cdefdcc0e841"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s3-s3a.txt
+      hash: "sha256:eef76d55e18533d31eebadb5e1474a13f55e68cefdb79568379f8c03dba2fde8"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s3-s3b.txt
+      hash: "sha256:4df1fc54dcac127edcc1599d0826783c0dc1367264f8c198b998a664332a3b36"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: prompts/s3-s3c.txt
+      hash: "sha256:ccf83750adeb417de97edbbd33053e1d8a893b56640f87b1c768d6bfe9cb5740"
+      disposition: omitted
+      reason: process-noise
+    -
+      path: review-compaction.md
+      hash: "sha256:935512ae239020c6dac3baad36e85edc070880b6e787d634b4e132c617bd78ee"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/independent-rereview-catch-up.md#compaction-review-detail"
+      helps: Preserves the compaction re-review findings and fixes.
+    -
+      path: review-metrics.md
+      hash: "sha256:277b33df37f4d20b0abde811ebea896eda53d31a5e2e7c0ec741aed211cc190d"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/independent-rereview-catch-up.md#metrics-and-state-review-detail"
+      helps: Preserves the metrics re-review findings and fixes.
+    -
+      path: review-state.md
+      hash: "sha256:07fa5101e41ca447541f90b8d95957d42997fa8c22cdb476a761093ec5c995e2"
+      disposition: merged
+      destination: ".project/records/legacy-upgrades/independent-rereview-catch-up.md#metrics-and-state-review-detail"
+      helps: Preserves the state-report re-review findings and fixes.
+outcomeRecord: "---\nslug: independent-rereview-catch-up\nshipped: 2026-09-27\nschemaVersion: 1\n---\n# independent-rereview-catch-up\n\nA review bench and audit reviewer contract supported fresh-context re-review of shipped compaction, metrics and state code.\nIndependence meant fresh context in the same model family, not independent blind spots.\nSource inconsistencies and unfixed review limits remain separately recorded.\n\n- outcome: Fresh-context re-review of shipped workflow code is supported by a review bench and reviewer contract.\n- docs: [audit reviewer contract](ai-framework/workflow/phases/3-audit.md)\n- decisions: [reviewer protocol rationale](.project/records/legacy-upgrades/independent-rereview-catch-up.md#reviewer-protocol-rationale)\n- knowledge: [instrument audit lesson](.project/knowledge/patterns/a-gate-must-not-audit-its-own-instrument.md), [author trust lesson](.project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md)\n- code: [review bench](ai-framework/scripts/review-bench.mts)\n- verification: [historical closure](.project/records/pitch-compression/independent-rereview-catch-up.md)\n- followups: [historical inconsistencies](.project/records/legacy-upgrades/independent-rereview-catch-up.md#historical-inconsistencies)\n- archive: [compact record](.project/records/pitch-compression/independent-rereview-catch-up.md), [source supplement](.project/records/legacy-upgrades/independent-rereview-catch-up.md)\n"

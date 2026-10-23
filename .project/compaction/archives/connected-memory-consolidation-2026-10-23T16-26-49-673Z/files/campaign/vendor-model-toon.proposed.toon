@@ -1,0 +1,72 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: vendor-model-toon
+sourceProof:
+  archiveDirectory: vendor-model-toon-2026-10-19T03-28-10-563Z
+  manifestHash: "sha256:8927ca321712a7867ea15cb93c44545feb9ec68c2fd439216a3205c8cdab0724"
+  sourceBytes: 21861
+  verifiedFiles: 6
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/vendor-model-toon.supplement.md"
+  destination: ".project/records/legacy-upgrades/vendor-model-toon.md"
+  hash: "sha256:cbb2c816ac30c669da4934c08f94f62e34ba784718be4302c8b0dd953364b38f"
+payload:
+  ledgerHash: "sha256:ccba119eebc665d45d2d30f387b1e873f7c412331cc6d8b78a94a3192c27a85c"
+  legacyEntryHash: "sha256:a7a004d11dea9f0605a87f53537c33a426f1fa2f4de2157eb2045f7891dc0f5f"
+  bindings:
+    ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md": "sha256:13cc84d4cfd74ec1273c3e8a3b8fc4b814911888a51884766388d95b814ebb0a"
+    ".project/records/legacy-upgrades/vendor-model-toon.md": "sha256:cbb2c816ac30c669da4934c08f94f62e34ba784718be4302c8b0dd953364b38f"
+  mapping:
+    schemaVersion: 2
+    sections[13]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scopes",behavior,merged,".project/records/legacy-upgrades/vendor-model-toon.md#delivered-behavior","What S1 delivered: models block at schemaVersion 3, strict validation, convertV2, example toon, README section and commit df9683d.","sha256:1780624233c65eea6acee26241ecf325b1db87cfff8afad701282dac77f89fd9"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/vendor-model-toon.md#scope-and-limits","No-gos held, and the sequencing inversion: it shipped before workflow-v3-rollout, which must expect a v3 config.","sha256:a6d1e3ed075b311ab9fbfd07022b7dc14e4f4ff498dd148090cd83e6addcd0a7"
+      "SHIPPED.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions",v2 read path kept loadConfig strict; validator gaps in the baseline were closed in the completion pass.,"sha256:a39f2fb590b0264a1940ff46200ff766a08df9348001b3439b843427b6dc0694"
+      "SHIPPED.md#audit",behavior,merged,".project/records/legacy-upgrades/vendor-model-toon.md#audit-and-review-chronology","One Orca cycle with a planted canary caught by all three, two should-fix patched, cycle 2 author-run.","sha256:f27c7490fd41ff4718a347c6582d933ff89a6f18f05bc5bd1ae08a50e89400fb"
+      "SHIPPED.md#verify",behavior,merged,".project/records/legacy-upgrades/vendor-model-toon.md#verification-history","Hand-run checks since no verifier exists, config and migrator 137/137, full suite 1464/1470 with 3 upgrade.test failures at HEAD.","sha256:c58824a1f8b2817a61f3546087b9c41bb6580e043ae07b7027ba937795218a09"
+      "SHIPPED.md#followups-generated",limit,merged,".project/records/legacy-upgrades/vendor-model-toon.md#historical-limits","Open at ship: upgrade.test fixture versus mandatory toon, coverage gaps A2, and OpenCode workers cannot take a launch-time model.","sha256:02d7107d85f0562fff1879f522ba413b1fe07d266fa406524c93fd5d00b66134"
+      "pitch.md#no-gos",limit,merged,".project/records/legacy-upgrades/vendor-model-toon.md#scope-and-limits","Prohibited scope: no agent prompt or doctor changes, dependencies, secrets, aliases, fallbacks or per-role overrides.","sha256:c51885f70f412d48cb75afcddcb998831edd7c0210a595e5be90f9fb1cffc1c9"
+      "pitch.md#rabbit-holes",know-how,merged,".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions","Schema bump to 3, profiles as objects, agents untouched, v2 to v3 value preservation, and what was deferred to agent-model-sweep.","sha256:ec9be5239985a6f989ecbd3d8fa4de7367e7978ec75342e53d93ea3d488dfb6e"
+      "log.md#incident-2026-10-16-effort-scope-clarification",know-how,merged,".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents","effort is accepted for any vendor; only the example toon needed to show it for claude, opencode and codex.","sha256:5419fd35134d36844e3ba7ea53b4708d30b742838f8136c2093a1a97a4c96ac7"
+      "log.md#incident-2026-10-16-test-suite-ripple-from-schemaversion-bump-resolved",know-how,merged,".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents",Bumping the version changed refusal text and regex; 93 tests failed until literals were updated in lockstep (resolved).,"sha256:666dafa37c60223d479092203768b0b4da8e2825eaf731a4a67a8a3d8488cbfe"
+      "log.md#incident-2026-10-16-development-environment-test-fragility-exposed",know-how,merged,".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents",Tests that cpSync the bundle copy a developer's gitignored toon; resolved by converting the local file.,"sha256:bcdad85066789d897de88bfefe92e2c06eca95b9a8bae3b35af70d95691dd3c9"
+      "log.md#build-2026-10-17-s1-completion-pass-pre-audit",behavior,merged,".project/records/legacy-upgrades/vendor-model-toon.md#delivered-behavior","Completion pass: validator guards, convertV2 behavior, README and doc bumps, mutant proofs and evidence counts.","sha256:7be8846e791f0942f34b1b0dc807e8bdea1901b749deb30a0d6f80f1e33f1abb"
+      "log.md#deviation-sequencing",limit,merged,".project/records/legacy-upgrades/vendor-model-toon.md#scope-and-limits",It landed before workflow-v3-rollout; orca-role-pools and agent-model-sweep built on it.,"sha256:184a7e9e6f92323c3bbdad27cb10efcd55be9a3c205f70be53278ff25a5a5da5"
+    otherFiles[6]:
+      -
+        path: SHIPPED.md
+        hash: "sha256:bc62ac2ba42685f798ab7e39ede931bcece5b0b2b2dbb3aaf3a1845660be1b7f"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/vendor-model-toon.md#delivered-behavior"
+        helps: "Preserves scope delivery, no-gos, audit, verification and followups across the supplement sections."
+      -
+        path: audit.md
+        hash: "sha256:735f4530f4506a36c88c282e6c5012a0fcfb2d9afe485b16be0141991e95d377"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/vendor-model-toon.md#audit-and-review-chronology"
+        helps: "Preserves the canary, findings S1 and S2, acknowledged A1 to A3, the reviewer record and the Orca bookkeeping."
+      -
+        path: hill.md
+        hash: "sha256:fac02b2ba9b5f261284190c585f9a8002d962fcc88cd748a2de8330aff072b26"
+        disposition: omitted
+        reason: process-noise
+      -
+        path: log.md
+        hash: "sha256:a805659bb061a0b0cd6dd730da1575c94c16643b66327227ae809838bc8db5eb"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents"
+        helps: "Preserves the three incidents, the completion pass and the sequencing deviation."
+      -
+        path: pitch.md
+        hash: "sha256:fbcd2d13061bded7ce1f42cb3a6c438f96da9e5c344c6acdf630baab1ab51fc6"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions"
+        helps: "Preserves the problem, models shape rationale, resolved questions and deferrals to agent-model-sweep."
+      -
+        path: plan.md
+        hash: "sha256:00d2f58c4571b0d43d280fcbaaa2de7a22a4f07a28af661fe70d89368a12d896"
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions"
+        helps: "Preserves the single scope, exit criteria and the four risks with mitigations."
+  outcomeRecord: "---\nslug: vendor-model-toon\nshipped: 2026-10-17\nschemaVersion: 1\n---\n# vendor-model-toon\n\nai-workflow.toon gained a models block at schemaVersion 3 that maps each vendor's fast, standard and deep profile to a model, with strict validation.\nconfig-migrate converts a version 2 file in place, keeping values, comments and line endings, and the example and README show the block.\nAgent files were left untouched; the block was inert until the later agent-model-sweep pitch.\n\n- outcome: Projects declare model identifiers per vendor profile in one validated block, and version 2 files migrate in place.\n- docs: [example toon](ai-framework/templates/ai-workflow.example.toon), [model routing rule](ai-framework/rules/model-routing.md), [harnesses](ai-framework/integrations/harnesses.md)\n- decisions: [TOON subset grammar](.project/decisions/toon-subset-grammar.md)\n- knowledge: [migrator edits the token](.project/knowledge/patterns/a-version-migrator-edits-the-token-not-the-model.md), [schema bump left stale tests](.project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md)\n- code: [config](ai-framework/scripts/runtime/config.mts), [config-migrate](ai-framework/scripts/config-migrate.mts)\n- verification: [verification history](.project/records/legacy-upgrades/vendor-model-toon.md#verification-history)\n- followups: [historical limits](.project/records/legacy-upgrades/vendor-model-toon.md#historical-limits)\n- archive: [source supplement](.project/records/legacy-upgrades/vendor-model-toon.md)\n"

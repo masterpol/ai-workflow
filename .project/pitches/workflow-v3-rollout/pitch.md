@@ -47,3 +47,12 @@ base version with one config file, and no manual patching left.
 ☐ **Bet** (→ /plan)
 ☐ Re-shape — named gap: {…}
 ☐ Pass — reason: {…}
+
+## Amendment (2026-10-21)
+
+The rollout now also carries the `connected-memory-consolidation` work (P1 relations graph, P2a ledger/decision/record schemas,
+P2d installed-project sync, P2c legacy upgrade) and must be prepared for it. Details, per-project consequences and the open
+inputs are in `consolidation-carry.md`. `readiness.md` (bundle 2.30.0) is historical and must be re-run at the release that
+includes this work. Appetite may need a re-check at /plan: three projects plus an instance-data migration step per project.
+Depends additionally on: `connected-memory-consolidation` P1, P2a, P2d shipped (P2c tool preferably).
+

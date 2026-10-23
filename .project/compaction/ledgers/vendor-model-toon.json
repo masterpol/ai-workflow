@@ -1,88 +1,161 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "vendor-model-toon",
   "sections": [
     {
       "source": "SHIPPED.md#scopes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#delivered-behavior",
+      "helps": "What S1 delivered: models block at schemaVersion 3, strict validation, convertV2, example toon, README section and commit df9683d.",
+      "bodyHash": "sha256:1780624233c65eea6acee26241ecf325b1db87cfff8afad701282dac77f89fd9"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#scope-and-limits",
+      "helps": "No-gos held, and the sequencing inversion: it shipped before workflow-v3-rollout, which must expect a v3 config.",
+      "bodyHash": "sha256:a6d1e3ed075b311ab9fbfd07022b7dc14e4f4ff498dd148090cd83e6addcd0a7"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions",
+      "helps": "v2 read path kept loadConfig strict; validator gaps in the baseline were closed in the completion pass.",
+      "bodyHash": "sha256:a39f2fb590b0264a1940ff46200ff766a08df9348001b3439b843427b6dc0694"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#audit-and-review-chronology",
+      "helps": "One Orca cycle with a planted canary caught by all three, two should-fix patched, cycle 2 author-run.",
+      "bodyHash": "sha256:f27c7490fd41ff4718a347c6582d933ff89a6f18f05bc5bd1ae08a50e89400fb"
     },
     {
       "source": "SHIPPED.md#verify",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#verification-history",
+      "helps": "Hand-run checks since no verifier exists, config and migrator 137/137, full suite 1464/1470 with 3 upgrade.test failures at HEAD.",
+      "bodyHash": "sha256:c58824a1f8b2817a61f3546087b9c41bb6580e043ae07b7027ba937795218a09"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#historical-limits",
+      "helps": "Open at ship: upgrade.test fixture versus mandatory toon, coverage gaps A2, and OpenCode workers cannot take a launch-time model.",
+      "bodyHash": "sha256:02d7107d85f0562fff1879f522ba413b1fe07d266fa406524c93fd5d00b66134"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#scope-and-limits",
+      "helps": "Prohibited scope: no agent prompt or doctor changes, dependencies, secrets, aliases, fallbacks or per-role overrides.",
+      "bodyHash": "sha256:c51885f70f412d48cb75afcddcb998831edd7c0210a595e5be90f9fb1cffc1c9"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions",
+      "helps": "Schema bump to 3, profiles as objects, agents untouched, v2 to v3 value preservation, and what was deferred to agent-model-sweep.",
+      "bodyHash": "sha256:ec9be5239985a6f989ecbd3d8fa4de7367e7978ec75342e53d93ea3d488dfb6e"
     },
     {
       "source": "log.md#incident-2026-10-16-effort-scope-clarification",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents",
+      "helps": "effort is accepted for any vendor; only the example toon needed to show it for claude, opencode and codex.",
+      "bodyHash": "sha256:5419fd35134d36844e3ba7ea53b4708d30b742838f8136c2093a1a97a4c96ac7"
     },
     {
       "source": "log.md#incident-2026-10-16-test-suite-ripple-from-schemaversion-bump-resolved",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/a-schema-version-bump-left-98-stale-tests-and-the-migrator-on-the-old-version.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents",
+      "helps": "Bumping the version changed refusal text and regex; 93 tests failed until literals were updated in lockstep (resolved).",
+      "bodyHash": "sha256:666dafa37c60223d479092203768b0b4da8e2825eaf731a4a67a8a3d8488cbfe"
     },
     {
       "source": "log.md#incident-2026-10-16-development-environment-test-fragility-exposed",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents",
+      "helps": "Tests that cpSync the bundle copy a developer's gitignored toon; resolved by converting the local file.",
+      "bodyHash": "sha256:bcdad85066789d897de88bfefe92e2c06eca95b9a8bae3b35af70d95691dd3c9"
     },
     {
       "source": "log.md#build-2026-10-17-s1-completion-pass-pre-audit",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#delivered-behavior",
+      "helps": "Completion pass: validator guards, convertV2 behavior, README and doc bumps, mutant proofs and evidence counts.",
+      "bodyHash": "sha256:7be8846e791f0942f34b1b0dc807e8bdea1901b749deb30a0d6f80f1e33f1abb"
     },
     {
       "source": "log.md#deviation-sequencing",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#scope-and-limits",
+      "helps": "It landed before workflow-v3-rollout; orca-role-pools and agent-model-sweep built on it.",
+      "bodyHash": "sha256:184a7e9e6f92323c3bbdad27cb10efcd55be9a3c205f70be53278ff25a5a5da5"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:bc62ac2ba42685f798ab7e39ede931bcece5b0b2b2dbb3aaf3a1845660be1b7f",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#delivered-behavior",
+      "helps": "Preserves scope delivery, no-gos, audit, verification and followups across the supplement sections."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:735f4530f4506a36c88c282e6c5012a0fcfb2d9afe485b16be0141991e95d377",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#audit-and-review-chronology",
+      "helps": "Preserves the canary, findings S1 and S2, acknowledged A1 to A3, the reviewer record and the Orca bookkeeping."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:fac02b2ba9b5f261284190c585f9a8002d962fcc88cd748a2de8330aff072b26",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:a805659bb061a0b0cd6dd730da1575c94c16643b66327227ae809838bc8db5eb",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#build-incidents",
+      "helps": "Preserves the three incidents, the completion pass and the sequencing deviation."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:fbcd2d13061bded7ce1f42cb3a6c438f96da9e5c344c6acdf630baab1ab51fc6",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions",
+      "helps": "Preserves the problem, models shape rationale, resolved questions and deferrals to agent-model-sweep."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:00d2f58c4571b0d43d280fcbaaa2de7a22a4f07a28af661fe70d89368a12d896",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/vendor-model-toon.md#design-decisions",
+      "helps": "Preserves the single scope, exit criteria and the four risks with mitigations."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-19T03:28:10.458Z"
+  "committedAt": "2026-10-22T23:33:41.174Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:87b92048197dd4d3a47cd3defb4ee27b545b96a665c06a455b0eed42fe59c8e6",
+    "introducingCommit": "fc7d686ccab4849f255e09ccf2e6fdbc17082f54"
+  }
 }

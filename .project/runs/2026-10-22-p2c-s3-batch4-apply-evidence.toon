@@ -1,0 +1,25 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[2]: state-quoted-fonts,workflow-usage-metrics
+pitches[2]:
+  -
+    slug: state-quoted-fonts
+    status: upgraded
+    outcomeBytes: 1121
+    v1Hash: "sha256:f513e2e2ecaaac5e560c73efed31bb0ab1cf3c2a76a5d551b3d07e68e321d428"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+  -
+    slug: workflow-usage-metrics
+    status: upgraded
+    outcomeBytes: 1614
+    v1Hash: "sha256:e3eb9d6d0ee15f779129cb3cd98d8bfa0e674b8d158fc21c257c378e487f9beb"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+counts:
+  legacy: 31
+  partial: 0
+  upgraded: 15

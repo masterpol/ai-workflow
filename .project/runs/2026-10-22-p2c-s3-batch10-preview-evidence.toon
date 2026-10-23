@@ -1,0 +1,145 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+sections: 92
+retained: 92
+files: 46
+kept: 41
+sourceFiles: 56
+sourceBytes: 250846
+proposals[5]:
+  -
+    slug: codex-orca-coordinator-parity
+    sections: 20
+    retainedSections: 20
+    otherFiles: 15
+    retainedFiles: 14
+    sourceBytes: 88088
+    sourceFiles: 17
+    recordBytes: 1183
+    supplementBytes: 19101
+    payloadHash: "sha256:2fe55c4c573a9c66be82084bf7dd9971b70cb8b48863495a10a89e2c874b67d7"
+    supplementHash: "sha256:ddec0fa289bb96213842755449ee63afa7bfa976decca27f67769de001595ee4"
+    introducingCommit: "1db913a2bc2a7fbcd97c358984916ee21097422d"
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Against introducing commit 1db913a: +218/-2 lines; the two removed lines belong to other pitches and were replaced with resolution annotations. This pitch’s four-bullet section is byte-identical; later additions note guard resolution and trusted-hook/coverage candidate work. Historical source is preserved in supplement, backlog is not a durable destination."
+      ai-framework/integrations/orca-vendors.md:
+        committed: "sha256:a5e59f1eed3e9b02c11b1a109a9e7f014ec4fc79daa26384f0f49009fefda075"
+        current: "sha256:80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+        reason: "Against 1db913a: +95/-16 lines; later TOON config migration, semver policy/runtime floor, pools/self-worker/concurrency, assignment/overlap, OpenCode service management, wiring diagnostics and explicit exit/refusal contract. Codex startup/coordinator-preparation block is byte-identical; supplement preserves old runtime evidence limits."
+      ".project/knowledge/issues/substring-hook-wiring-check-accepts-echoed-commands.md":
+        committed: "sha256:cfad1dddc16d160e90ac05bb9e669867dfb34fe5856e7b061607da8048276953"
+        current: "sha256:53e9e895db5b43de53132ddf24003ed027eeccbf9234237cf252bfc3da1d435b"
+        reason: "Against 1db913a: +6/-2 lines; updated 2026-10-21 and confidence low→medium, plus Additional evidence for capture S5 eight registrations and command-comparison mutant. Original issue/fix text unchanged."
+      ".project/knowledge/issues/review-guard-hashes-ignored-secret-files.md":
+        committed: "sha256:d61174b6b20e3cfc2b4dabe17803740c23d66cfc46cc17b99de544dad01822bd"
+        current: "sha256:9bb2a4fef4ce8f92551060f5dd5fbeb50f8a7a7971c88832c70e41f170975cdb"
+        reason: "Against 1db913a: +7/-3 lines; updated 2026-10-21, resolved false→true, confidence low→high, plus token-time-report production SECRET_NAME-before-read resolution. Original historical incident remains, supplement distinguishes then-unresolved from later-fixed."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[3]: Run file is not whole-file byte-identical to either SHIPPED.md or log.md; both complete cached bodies are verified byte-identical constituent blocks.,Narrative October 9 ship versus local October 8 is explicitly reconciled as UTC release date.,Staged file-line/test/coverage/graph counts preserved; all independence labels remain no despite inconsistent rationale prose.
+  -
+    slug: state-multipage-report
+    sections: 18
+    retainedSections: 18
+    otherFiles: 6
+    retainedFiles: 4
+    sourceBytes: 39615
+    sourceFiles: 9
+    recordBytes: 1139
+    supplementBytes: 40677
+    payloadHash: "sha256:0006172faad5b52c32b673d850fa46d04471f04ab907a89e66d442d7f4685926"
+    supplementHash: "sha256:dd0ddb9daa6633657f6359d8ef173d9ce40eb1cf6d34f59c3ac97a2942b4bda6"
+    introducingCommit: "1db913a2bc2a7fbcd97c358984916ee21097422d"
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Against pitch ship commit 1db913a2bc2a7fbcd97c358984916ee21097422d, +218/-2 lines reflect later additions and resolutions; this pitch runner item is struck through as resolved 2026-10-17, other own bullets persist. Retain original deferral and later resolution as history."
+    omissions[2]{file,reason}:
+      SHIPPED.md,superseded
+      hill.md,process-noise
+    notes[3]: The done-work marker-only summary omits the documented one-time legacy unmarked-page exception.,"Pitch stale-page deletion, dispatchReady fallback and early Orca explanations were superseded; preserve the correction sequence.",Hill/log v2.19.0 precedes final v2.19.1; phase test totals are checkpoints.
+  -
+    slug: collector-robustness
+    sections: 20
+    retainedSections: 20
+    otherFiles: 13
+    retainedFiles: 12
+    sourceBytes: 43776
+    sourceFiles: 15
+    recordBytes: 1067
+    supplementBytes: 15766
+    payloadHash: "sha256:5fb25da817dfbcfdecb3f39cb4f1b3dce62e797cb1bc81e5698d019f5e69c5aa"
+    supplementHash: "sha256:0ddcbde2663e8e3e934f02add64482c451d6fb9742617066b944664609a930e1"
+    introducingCommit: "3be89c081f9c10c281a51bc48e0ed505d2a62214"
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:eb312706f32024d85f513bdd7c3d619631872908ee044b3ca25716842360f24f"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Introducing commit 3be89c081f9c10c281a51bc48e0ed505d2a62214 versus current: +311/-0 lines. Metrics lease followup and candidate-table sections are byte-identical; later unrelated additions do not alter this pitch history. Lease decision hash unchanged."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[6]: Collision causation is asserted in D5 but only suspected without captured output in log and confidence section; narrative must retain uncertainty.,Initial pitch age authority and replacement-safe pathname promise were disproved; completion contract superseded them.,Completion draft required separate critique but approval proceeded without it.,Ten/eleven lock tests and 403/404 suite counts reflect pre/post audit stages.,Coverage prompt capped 35 calls but dispatch table reports 39.,Short run record is not byte-identical to SHIPPED.md; do not claim whole-copy supersession.
+  -
+    slug: fix-orca-dispatch-resume-gate
+    sections: 16
+    retainedSections: 16
+    otherFiles: 2
+    retainedFiles: 2
+    sourceBytes: 15955
+    sourceFiles: 3
+    recordBytes: 1175
+    supplementBytes: 11077
+    payloadHash: "sha256:e7c80051ec25baca7672620324121ed07ad48b1e142abdb92246378a3d155290"
+    supplementHash: "sha256:98452a6c274bb6a1db8ebd3a433c49cdbfcb3e6a5e90c06e3fe404e8da2c7157"
+    introducingCommit: "1db913a2bc2a7fbcd97c358984916ee21097422d"
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:c782dfa790aea9b7d5d74ec51fa2937718e8ae348738ac13bbf6e290f1a74d23"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: Reviewed +218/-2 backlog lines; two removals resolve unrelated historical items and new sections record later work. This pitch service-probe/Bun limits remain retained in the supplement.
+      ai-framework/integrations/orca-vendors.md:
+        committed: "sha256:a5e59f1eed3e9b02c11b1a109a9e7f014ec4fc79daa26384f0f49009fefda075"
+        current: "sha256:80cd5074f41697a305a921d3495fa9783929980a6503c61a47faac1df4308658"
+        reason: "Reviewed guide evolution to schema-3 TOON, expanded roles/pools/concurrency and version ranges, exact startup checks, OpenCode service handling, assignment/overlap and structured refusal rules. Original gate/repeat-vendor semantics preserved as historical behavior."
+    omissions[0]:
+    notes[0]:
+  -
+    slug: metrics-report-dimensions
+    sections: 18
+    retainedSections: 18
+    otherFiles: 10
+    retainedFiles: 9
+    sourceBytes: 63412
+    sourceFiles: 12
+    recordBytes: 1155
+    supplementBytes: 19007
+    payloadHash: "sha256:2d071207dd90db9ae538c4e4ffde70075824f7d1c07884832369630d767b5f88"
+    supplementHash: "sha256:ab3ef0e3261beaa185f3b1ddef76d53671ef8fffe77de8a4b4fb22ed4aad2b71"
+    introducingCommit: ea82bcee68b70bb0b4f2938268c9c796425ccff0
+    drift:
+      ".project/pitches/_followups.md":
+        committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+        current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+        reason: "Against introducing ea82bce, +319/-0 lines are later backlog additions; original hook verification remains. Preserve original deferrals and later D7/lease developments as historical sequence."
+      ai-framework/rules/testing.md:
+        committed: "sha256:6087a3ed65b7bac31ef0235a18e25b3b1dd2217d4f37a87e4225da14ada456e2"
+        current: "sha256:fdc77ea6b96206e672fc82d1417597a9a20e1f49a869a87decff997cea8023e4"
+        reason: "Against introducing ea82bce, +54/-0 lines add later guard/lifecycle/schema/macOS and runtime-redirection rules; original 2026-09-25 mutation/review-fix promotion remains unchanged. Do not attribute later additions to this pitch."
+    omissions[1]{file,reason}:
+      hill.md,process-noise
+    notes[4]: "Cache has 18 required sections versus draft/v1 17: added pitch.md#no-gos is read and retained.","Tracked run is a compact timeline, not byte-identical to SHIPPED; all source mappings use supplement.",Narrative each-reproduced-first overstates S5 code-plausibility evidence; mixed security finding counts must remain explicit.,Rollup tracked-file count disagrees with its list; final file count and staged test totals preserved as historical claims.
+rehearsal: "codex-orca-coordinator-parity: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (13 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 8 neighbouring done-work entries byte-identical\nstate-multipage-report: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 8 neighbouring done-work entries byte-identical\ncollector-robustness: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (4 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 8 neighbouring done-work entries byte-identical\nfix-orca-dispatch-resume-gate: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (7 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 8 neighbouring done-work entries byte-identical\nmetrics-report-dimensions: drift acceptance applied; refused when absent, with a wrong committed hash, a wrong current hash and an edit after review (7 refusals, no state change); projected shared validator, outcome lint, apply, v1 byte retention, archive verify and replay PASS; supplement links 1 file(s) checked, 0 broken link(s); 8 neighbouring done-work entries byte-identical"
+negativeControls: 35
+legacySectionInventory: 91
+extraSourceSections[1]: "metrics-report-dimensions/pitch.md#no-gos"
+acceptedGaps[0]:
+live:
+  legacy: 9
+  upgraded: 37
+  partial: 0
+sourceArchivesReopenedForRehearsal: false

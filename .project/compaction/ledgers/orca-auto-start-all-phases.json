@@ -1,82 +1,152 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "orca-auto-start-all-phases",
   "sections": [
     {
       "source": "SHIPPED.md#pitch-implementation",
-      "status": "extracted",
-      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md#pitch--implementation",
+      "helps": "Promise-by-promise result: what the switch, stop-and-ask, orca=normal and readiness do, and what was cut.",
+      "bodyHash": "sha256:128ffd544b4a5b3de3a7a0faee2ce694c6d3730b9ef316ae497eaa2d7ea70979"
     },
     {
       "source": "SHIPPED.md#scopes",
-      "status": "extracted",
-      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#what-shipped",
+      "helps": "Scope outcomes P0-S5, the 15-file list and ~1,000 lines (run file also holds it, #scopes).",
+      "bodyHash": "sha256:c257caeaf36173b20928301314ec8fe9f591e61d357ad68538d940a7e82d50e2"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#no-gos",
+      "helps": "The six no-gos and that each held.",
+      "bodyHash": "sha256:f7233c6cce292f723c51b5029c1c7fc6ae55253dbd2288a01be79cbee5d2b8cd"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#rabbit-holes-and-how-they-closed",
+      "helps": "R-by-R resolution (R1-R15) incl. the audit-found R14 fix.",
+      "bodyHash": "sha256:6ce353e027a914cadf728372b4b404f1c52a0d7bda1c401806c50ce4bf6f03c5"
     },
     {
       "source": "SHIPPED.md#deviations-see-deviationsmd-and-audit-cycle-12md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-blocking-hook-owns-its-runner-and-its-deadline.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md#deviations-see-deviationsmd-and-audit-cycle-12md",
+      "helps": "Where the build diverged from the plan.",
+      "bodyHash": "sha256:109d7bccc3c45de92940f24b2f1a7bf79d5a8a8c9c27a1a3317f128f5df050ce"
     },
     {
       "source": "SHIPPED.md#verification-at-ship",
-      "status": "extracted",
-      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md#verification-at-ship",
+      "helps": "Suite counts, live hook output, the Bun-parallel token-consumption flake.",
+      "bodyHash": "sha256:c950002e192160a50a152f6517541028a5f7ce6444393adbe7e3b64a385e3297"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#lessons-and-where-they-live",
+      "helps": "Which knowledge entries came out of this pitch.",
+      "bodyHash": "sha256:f0f02453719bf10236b8f4f965fdb325316cec19ed5d330a038b5c85965b0865"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#open-items-and-later-status",
+      "helps": "The four followups plus their later status. (_followups.md itself is refused for v2: pitches/*.)",
+      "bodyHash": "sha256:8ec3d27eaaced7864df760bb3f185bb6cd1dcdc70e34c2e867e3b3d6ee21777a"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#no-gos",
+      "helps": "Six boundaries (full text).",
+      "bodyHash": "sha256:fa3abb91735686bbdceca3838257f73263b8c57161ded3fb7323337bfcf4af30"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#rabbit-holes-and-how-they-closed",
+      "helps": "Resolved decisions (stop-and-ask, 12 phase skills, recursion, off path) plus R1-R15 and pushed-to-no-go.",
+      "bodyHash": "sha256:36ea2b3d3338c01fc3614491469b011b565de57d888d7ba9604cf8d50d360c64"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/issues/a-probe-child-ran-a-bare-command-with-the-parent-path.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#audit-triage",
+      "helps": "M1, M2, S1-S3, canary, acknowledged items, fix spec (the issue file holds only M1).",
+      "bodyHash": "sha256:8af3370cec2865d000d1b07d59dadc2afecffe8da10939be4c027b695a7090a8"
     },
     {
       "source": "audit-cycle-2.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-blocking-hook-owns-its-runner-and-its-deadline.md",
-      "reason": "mapped to a nonempty file outside the pitch"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#audit-triage",
+      "helps": "Cycle-2 canary, coordinator verification, residual fail-open.",
+      "bodyHash": "sha256:7a847d63feb630f9bdc0771b26741a1950089f65d2ae8253dcd71d51130a00fd"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:985dc19ad940896cd77c8645957c25996cbe93ce2605996188d466ebe34e5faa"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#deviations",
+      "helps": "Preserves dated implementation deviations and audit-driven contract changes.",
+      "hash": "sha256:f502b4af49f89ecef07d949bb8745a47393a89196a14cacfc8838be95b8318e4"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:369003d037bd83fe6929a92b5c53d7f33691bf7d4956403beec30a7c8c21126f"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#build-log-facts",
+      "helps": "Preserves scope outcomes, measurements and verification history.",
+      "hash": "sha256:d10282a0ff5541213f7598f8ed20006c62eb11b69ffe65c16bf611143dd11f96"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#problem-and-shaping",
+      "helps": "Preserves the original problem, decisions, constraints, risks and scope choices.",
+      "hash": "sha256:a4ef5a0d72a40a7d59b3a4a9ba9e48246f8fe72f755e3ad8a206d44df39ca6cf"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-auto-start-all-phases.md#plan-contract",
+      "helps": "Preserves the implementation contract, exit criteria, dispatch boundaries and risks.",
+      "hash": "sha256:38f166f53531ca7e748d0caea5c38c204d2efeea1be88865bbe5348f848555e5"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T22:08:53.363Z"
+  "committedAt": "2026-10-23T00:38:28.938Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:69b2c227948291baee5aeff97327bfc64617ffec97a05f8025b19d50ae64bf26",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

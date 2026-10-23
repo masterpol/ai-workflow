@@ -382,7 +382,7 @@ From the local orca smoke in `runs/orca-smoke-2026-10-08.md`. Findings F1 and F2
 - **Holder-state test as a table**: iterate `STATES` against the `holds` predicate instead of a loop plus one case.
 - **workflow-v3-rollout planning inputs**: preflight now probes every pool member; release numbering with agent-model-sweep's 2.28.0.
 
-## agent-model-sweep-bet-3 (cooldown 2026-10-17, bundled from SHIPPED.md followups)
+## agent-model-sweep-bet-3 (cooldown 2026-10-17, bundled from SHIPPED.md followups) — **approved as a candidate pitch 2026-10-22**
 
 Items bundled:
 - Remove `model:` from `.opencode/agents/*.md` (16), `.codex/agents/*.toml` (16), `.opencode/commands/*.md` (28).
@@ -390,14 +390,14 @@ Items bundled:
 - New tests for the doctor relaxation (mutant tests for the `^model:` requirement removal).
 - Cursor regen: cursor-mirrors + manual copy of `report.differs` (the 16 `.cursor/agents/*.md` were already done in Bet 2; Bet 3 does not need to redo them).
 
-## mandatory-fixture-seeding (cooldown 2026-10-17, bundled)
+## mandatory-fixture-seeding (cooldown 2026-10-17, bundled) — **approved as a candidate pitch 2026-10-22**
 
 Items bundled:
 - `upgrade.test.mts` 3 failures (Codex startup wiring, README links, mandatory `ai-workflow.toon` — pre-existing Bet 1 fixture gap).
 - The "every test that creates a temp project from the bundle must seed the example toon" pattern (generalize from the skill-defaults/skill-vendors/orca-preflight fixes in Bet 1 and Bet 2).
 - `agent-frontmatter-invariant.test.mts` negative fixtures (T2: out-of-allowlist profile, missing profile, malformed frontmatter, has-model-line).
 
-## doc-sweep-stale-claims (cooldown 2026-10-17, bundled from agent-model-sweep Bet 2 audit should-fix)
+## doc-sweep-stale-claims (cooldown 2026-10-17, bundled from agent-model-sweep Bet 2 audit should-fix) — **approved as a candidate pitch 2026-10-22**
 
 Items bundled:
 - `harnesses.md` OpenCode section still hardcodes model ids as authoritative (rows 17-19, 46-48).
@@ -406,12 +406,12 @@ Items bundled:
 - Hardcoded agent count `=== 16` (assert `> 0` instead).
 - Stale test titles referencing the removed fallback (rename to "reads profile: frontmatter (no legacy model: fallback)").
 
-## bundle-sync-stale-ledger (cooldown 2026-10-17, bundled)
+## bundle-sync-stale-ledger (cooldown 2026-10-17, bundled) — **approved as a candidate pitch 2026-10-22**
 
 Items bundled:
 - Refresh the rows in `.project/analysis/2026-10-16-upstream-drift-ledger-analysis.md` (the drift ledger, moved out of the compacted `upstream-project-drift` pitch) for `extending.md`/`vendors.md` (rows 79, 81, 168 — marked `conflict` because the project-side version differs from the updated bundle).
 - Refresh row 270 (base-side `agent.build.model` description, now stale).
-- Verify the bundle-sync seed flow carries the v3 toon into a fresh project (the bet 1 mandatory-toon check depends on the toon being present).
+- Verify the bundle-sync seed flow carries the v3 toon into a fresh project (the bet 1 mandatory-toon check depends on the toon being present). **2026-10-22: also proven for the new consolidation files by `connected-memory-consolidation` P2d-S3 (fresh-install case); the rest of this bundle stays its own pitch.**
 
 - ~~**upgrade.test.mts fails at HEAD (3 tests)**~~ (resolved 2026-10-17: the sync now adds missing workflow hook groups, the doctor and upgrade doc name `config-migrate --apply`, the simulation runs it): old-install fixture lacks `ai-workflow.toon` (doctor "mandatory" check fails) and Codex startup wiring is unregistered, so `workflow-doctor` exits 1. Found 2026-10-17 during vendor-model-toon completion; unrelated to its diff. Owner: workflow-v3-rollout / next cooldown.
 
@@ -534,5 +534,37 @@ The package-less pre-ship verifier and timing-under-load issues retain their exi
 
 ## Cooldown candidate pitches (2026-10-21, forced)
 
-- **Candidate pitch `package-less-ship-verification`** (med): bundles the package-less `pre-ship-verify.mts` followups above. The verifier selects checks from a root `package.json`, which this bundle lacks; it blocked `/ship` on 4+ ships and each needed an owner-approved direct-check gauntlet. Fix via a documented check contract or bundle-local manifest; no temporary `package.json`.
-- **Candidate pitch `orca-bounded-control-receipts`** (med): bundles Orca model-pin capability preflight, startup worker-list output overflow and guard reader bounds. Keep ownership fail-closed and cleanup explicitly authorized.
+- **Pitch `package-less-ship-verification`** (med; moved to `pitches/package-less-ship-verification/pitch.md` 2026-10-22): bundles the package-less `pre-ship-verify.mts` followups above. The verifier selects checks from a root `package.json`, which this bundle lacks; it blocked `/ship` on 4+ ships and each needed an owner-approved direct-check gauntlet. Fix via a documented check contract or bundle-local manifest; no temporary `package.json`.
+- **Pitch `orca-bounded-control-receipts`** (med; moved to `pitches/orca-bounded-control-receipts/pitch.md` 2026-10-22; guard-reader-bounds half already fixed): bundles Orca model-pin capability preflight, startup worker-list output overflow and guard reader bounds. Keep ownership fail-closed and cleanup explicitly authorized.
+
+## codex-trusted-hook-smoke (cooldown 2026-10-08 C2, approved 2026-10-22 as a candidate pitch)
+
+Not shaped or bet. Needs a human at a fresh Codex host.
+- Verify the current `UserPromptSubmit` definition through `/hooks` and observe a ready context, a blocked phase, worker suppression and budgets.
+- No trust bypass and no global config edits; hook trust is an explicit owner action.
+
+## workflow-coverage-instrumentation (cooldown 2026-10-08 C3, approved 2026-10-22 as a candidate pitch)
+
+Not shaped or bet. Source followup is at the "coverage" entry above (line ~340).
+- Make coverage compatible with the exact child-environment assertion without weakening it.
+- Keep Node/Bun regression results separate from instrumentation failures; investigate the Bun 1.4.2 coverage crash on its own.
+- Keep the ordinary runtime regression commands.
+
+## connected-memory-consolidation ship verification (2026-10-22)
+
+- **Stale live-evidence test blocks shipping** (high): `state-fragment-dataset.test.mts:435` reads the removed `.project/pitches/state-ai-authoring/live-runs.md` and fails with `ENOENT`. Full Node suite: 2,614 passed, one failed, three skipped. This is distinct from the older load-dependent dataset/sanitizer flake. Repair the evidence ownership through a separate fix/shape entry without fabricating live results, skipping validation or routinely reading recovery archives. Audit is at its three-cycle cap; ship remains blocked. Evidence: `runs/2026-10-22-connected-memory-consolidation-ship-verification.md`.
+
+**Resolved 2026-10-23:** the separately approved `fix-retired-live-evidence-path` ship published the exact original matrix under durable ownership and changed the test path. The final parent regression passed 54/54, independent child tests passed 347/347, and the supported full Node suite passed. Historical `Claim: blocked` is preserved. Receipt: `runs/2026-10-23-fix-retired-live-evidence-path.md`. The diagnostics/timing followups remain separate.
+
+
+## fix-retired-live-evidence-path — 2026-10-23
+
+- **FRLE-D1 — bounded child-failure diagnostics** (med): state-fragment-dataset.test.mts:108/208 reduces a failing child to aggregate counts and stderr while TAP detail is on stdout. Preserve bounded failing child names/TAP diagnostics without weakening assertions, changing timing/security limits or echoing unbounded child output. Cycle2 observed child346/347 then16 dependent parent failures; exact cause unconfirmed. Subsequent independent sequential347/347 and54/54 passed. Existing sanitizer timing-under-load backlog remains the timing owner.
+
+## connected-memory-consolidation — ship preparation (2026-10-23)
+
+- **CMC-A1 — grammar-pin decision adoption** (low): evaluate indexing/adopting the two historical `.project/decisions/` TOON grammar pins under the single ADR home. P2a used the explicit R4 fallback; neither document was rewritten or silently adopted.
+- **CMC-A2 — fail-fast FIFO guard control** (med): make the setup-validator FIFO guard mutation produce a bounded assertion failure instead of hanging the guard test. Keep production refusal and security limits unchanged.
+- **CMC-G1 — workflow relation completeness** (low): assess sparse role/rule declarations and currently undeclared writes for plan/ship/cooldown against their actual playbooks. Do not invent relations to improve counts; P1 ships only observed declarations and bounded references.
+
+The pre-existing state-history archive fallback remains owned by un-bet P2b, under the explicit closing exception. P2b/P3a/P3b and downstream rollout are not implemented or authorized by these four ship proposals. Cooldown should review repeated source/instance boundary and independent gate evidence lessons; no rule promotion is applied here.

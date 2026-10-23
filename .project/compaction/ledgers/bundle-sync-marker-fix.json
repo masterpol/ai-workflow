@@ -1,76 +1,152 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "bundle-sync-marker-fix",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-1-shippedmdscope-reconciliation",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/bundle-sync-marker-fix.md#effective-base-contract-and-boundaries",
+      "helps": "Preserves per-entry effective bases and repeated-comparison behavior.",
+      "bodyHash": "sha256:14fb4c8ba1b57c30920abe09b3056eb7e7c09c1b2a11babacb4a886c60602ebd"
     },
     {
       "source": "SHIPPED.md#verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-2-shippedmdverification",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Retains historical ship-time checks and their reported limits.",
+      "bodyHash": "sha256:36f569117d749f4334edebc53df05ef6d02f99d67bcc733a368438c46cb01742"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-3-shippedmdaudit",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/bundle-sync-marker-fix.md#audit-context",
+      "helps": "Retains reviewer scope and the requirement to recheck settled source after later fixes.",
+      "bodyHash": "sha256:ccf19a90080f6bc13ce012f442e9e80a20881103991792b185d8e5d7916b78f7"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-4-shippedmdno-gos-honored",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Preserves customization, overwrite, CSS, history and application boundaries.",
+      "bodyHash": "sha256:9188ef057c70f04a0cd8826f4c64813c2d2c1ca19796c4d3c5f3962bcd9b73de"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-and-deviations",
-      "status": "extracted",
+      "class": "decision",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-5-shippedmdrabbit-holes-and-deviations",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Retains effective-base semantics and removal/prune handling.",
+      "bodyHash": "sha256:989f746744f3c6ba6ea752157108320b88e01a6c7e6e23d156db4390ad2af260"
     },
     {
       "source": "SHIPPED.md#knowledge-and-followups",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-6-shippedmdknowledge-and-followups",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Retains durable knowledge and the safety pitches outside the approval.",
+      "bodyHash": "sha256:01ff363327b950b217bc15e11d3e84d048bbb5e876dd15665068e540b14940d9"
     },
     {
       "source": "SHIPPED.md#delivery",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-7-shippedmddelivery",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Retains historical approval provenance and delivery exclusions.",
+      "bodyHash": "sha256:50d7568373afa55ec371477c72552c7835de0ca845a34f9544841095fa084c97"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-8-pitchmdno-gos",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Preserves unverified-file, schema-change and unrelated-reconciliation exclusions.",
+      "bodyHash": "sha256:fd83050ed2547696612f22f7ab070bcb45cb5517c7ad18a954ad834f64915ad5"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
+      "class": "decision",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-9-pitchmdrabbit-holes",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Retains marker decisions and excluded conflict and instance-sync behavior.",
+      "bodyHash": "sha256:a45ccfe0c18e9ec3f3996240ab878e9c400fd0fb3f6aa34658e1183304c4aa36"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-10-audit-cycle-1md",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/bundle-sync-marker-fix.md#audit-context",
+      "helps": "Preserves historical review scope and cross-pitch recheck requirements.",
+      "bodyHash": "sha256:f6dca97090de3eb11956abf3b8b30801dd96170167264caecf64cb9a50bdce30"
     },
     {
       "source": "log.md#s1-2026-09-26",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md#section-11-logmds1-2026-09-26",
-      "reason": "Closure evidence, constraints and disposition preserved in the corresponding compact record section; reusable design preserved in the linked knowledge decision."
+      "helps": "Retains historical regressions and comparison-only help-command evidence.",
+      "bodyHash": "sha256:cea0ba5d0fe0cd38b499a05b0ea1699efbd1302be67910b2536fb0d1ab10bd97"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:b558c501bb941bdb72feb38a72ca4fe7c38337e887a0d7d46c38a4c2ec8a8320",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:9bde016aedf029bb1fb58d50b979ea754d3f19eb0f0d3278c8e39507981b663c",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:05d4a64cdc0982218f8f6d91174daf13097a7446971fec6c5efc167b20b785d3",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:1e8e531bc2f6565344acd7e7d0309a8bf65931872d89226a78df5b6e2173b0b1",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:8c941742fb99666b25c243029ca9224da674c8219fa89e525b967c577f008ca6",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/bundle-sync-marker-fix.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:901fd1e87daa6839caa1dc71d0c69333c98085e9d582ad8a5836bfddba613b24",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/bundle-sync-marker-fix.md",
+      "helps": "Preserves the lasting behavior contract and boundaries; transient workflow metadata remains archived."
+    },
+    {
+      "path": "ship-readiness.md",
+      "hash": "sha256:27b3350f97e8af7d4e02c9c47d705e0fd369941ab276c0197f7d2972f3ab7eb4",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/bundle-sync-marker-fix.md",
+      "helps": "Preserves the lasting closure, behavior and constraints; transient workflow metadata remains archived."
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-09-27T01:26:57.401Z"
+  "committedAt": "2026-10-22T17:52:58.796Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:574b30f1c02f101667cbe82bec299f49e0b287f33d4e651af413ce30e69575aa",
+    "introducingCommit": "ea82bcee68b70bb0b4f2938268c9c796425ccff0"
+  }
 }

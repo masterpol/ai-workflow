@@ -1,318 +1,308 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "workflow-usage-state",
   "sections": [
     {
       "source": "SHIPPED.md#scopes",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#what-shipped",
+      "helps": "Per-scope outcomes S1-S9: schema 2 migration, activity key, interval engine, LRU tree, drop marker, report rows, contract doc, 1,007,578-byte full-cap state.",
+      "bodyHash": "sha256:2687f5ebae0c46ddbaf9e8d76b5d0b084b9f5fe415136de6746efcd9fb4de16d"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#standing-constraints",
+      "helps": "Five no-gos with the evidence that each held, plus the four plan deviations flagged at ship.",
+      "bodyHash": "sha256:fe616fb91cb5946852cad3c52c75c08be636f5a7c0cf2c34a4d2a58853b59812"
     },
     {
       "source": "SHIPPED.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#risks-and-resolutions",
+      "helps": "Which rabbit holes were resolved as planned, which surfaced during build/audit (clock ahead of events, hand-edited frontier).",
+      "bodyHash": "sha256:c35af52254fe2d662b7c7cdd813dc2b2c1a2d4b368d40b85c8aec19d5978a278"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#audit-triage",
+      "helps": "Two audit cycles, three independent reviewers with canaries, the single must-fix M1 and its two-sided fix.",
+      "bodyHash": "sha256:ed915b38b69228ed9fb6e3e2732ef5328fcb1f443294a2af27e195c70d9ae79b"
     },
     {
       "source": "SHIPPED.md#final-verify",
-      "status": "gap",
-      "destination": null,
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#verification-history",
+      "helps": "pre-ship-verify exit 1 on a package-less bundle, the real commands run instead, and the pre-existing dataset-mapping and bun stall failures.",
+      "bodyHash": "sha256:c3d1deb05a39a7e0011bb6bea1763e5221de7de020ca5756c0684d7edc0d1702"
     },
     {
       "source": "SHIPPED.md#docs",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#contract-and-code",
+      "helps": "Contract lives in workflow-metrics.md; no ADR, the drop-channel and cap choices come from the S1 spike.",
+      "bodyHash": "sha256:30014a0776ef3df986bb83aca3d31e4b21e79d807a52ff688200f0a77a3d17d4"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#limits-and-open-items",
+      "helps": "Six followups (capture wiring, O_* constants, test flake and bun stall, ship wrapper, audit tree, test hygiene).",
+      "bodyHash": "sha256:17980232c1c531d7079a68d3fa464764ba446b87c22da2a18c31b8d911ce1821"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#standing-constraints",
+      "helps": "Original five no-gos the pitch bet on.",
+      "bodyHash": "sha256:ca07953c01cced3e20bb89b45760b920eed41b984277c4497e37af87b1024412"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#risks-and-resolutions",
+      "helps": "Resolved items, risks pushed to plan with owners, and what was pushed to no-go.",
+      "bodyHash": "sha256:1ceea067b34898b20df3812508e4c655c4fb450428f2ce60e633c82dac43e6a9"
     },
     {
       "source": "deviations.md#s3",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#deviations-from-plan",
+      "helps": "Arriving start competes in eviction; rewritten unmatched-finish test and why.",
+      "bodyHash": "sha256:c1c41f5be4d8df98bb57288e83f20cb80b5e33a8e3e261bcc0491263f12ea122"
     },
     {
       "source": "deviations.md#s4",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#deviations-from-plan",
+      "helps": "openIntervals rename, early pitch tree, gap materialized on first accepted event after the cap.",
+      "bodyHash": "sha256:97abfc6ae145bce69ce5c4ea591a0e383fb94292743d9fc84c64ddc5462a4e4a"
     },
     {
       "source": "deviations.md#s5",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#deviations-from-plan",
+      "helps": "lastAt is collector time, leaf cap counts non-(other) rows (600 plus one per phase), trace shape.",
+      "bodyHash": "sha256:576b9ac9f8798598ce6c0efd2bdb904e5f329464c084664f24783360117c94f1"
     },
     {
       "source": "deviations.md#s6",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#drop-marker-and-accepted-risk",
+      "helps": "Why the marker opens with flag \"a\", the guards, the accepted residual symlink window, consume order, and the added caller.",
+      "bodyHash": "sha256:ae643a4844cf95ff0ec92f8714cdc6571bee4188433cf05b2379157c0f62e3a6"
     },
     {
       "source": "deviations.md#s7",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#deviations-from-plan",
+      "helps": "blankState stamps usage.since; the since-line wording; usageSince field; \"at least\" wording.",
+      "bodyHash": "sha256:2b3d185376e1572145d6a657d4906fb0a516f8526a5e77280a9cabb7fc082ce4"
     },
     {
       "source": "deviations.md#s8",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#deviations-from-plan",
+      "helps": "Mapping table sourced from the capture shaping draft, not the pitch; extra Time and flow subsection.",
+      "bodyHash": "sha256:2967d6c45d96fcc1dd41dae4aec9f1994871bcdfce3637194609272e065216b9"
     },
     {
       "source": "deviations.md#audit-cycle-1",
-      "status": "gap",
-      "destination": null,
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#audit-triage",
+      "helps": "Frontier validation, loop cut-back, captureDropped moved inside the try, comment and doc fixes.",
+      "bodyHash": "sha256:182fcb51922f9d6518903414f9bcb7e2cd43241466ea9ec69cbe3024d72d793e"
     },
     {
       "source": "log.md#s2",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Two-guard migrator mutant, first dataset-mapping flake sighting, zsh unsplit-variable trap.",
+      "bodyHash": "sha256:bd4ece812470083fc19005e7210fc524887a91e7c7313d21e34d0b79bb6c9152"
     },
     {
       "source": "log.md#s3",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Eviction and key mutants, 14 dataset-mapping failures present at HEAD too.",
+      "bodyHash": "sha256:0696980b2006229d2bbd653e12d1628e04a1e6f25557ec445d232dea0f956023"
     },
     {
       "source": "log.md#s4",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Three engine mutants and the simulated-clock test-harness lesson.",
+      "bodyHash": "sha256:5692854cf34480f489d4a60f41e734f30b880a6803ee99a823bb952bdb3c420e"
     },
     {
       "source": "log.md#s5",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Full-cap bytes 1,007,578, two LRU mutants, 8 s test and scopeRow hot spot.",
+      "bodyHash": "sha256:c17de1f26ee732992409218394446b536355fc503d26f798aac815131b5e8cf2"
     },
     {
       "source": "log.md#s6",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Consume-step mutant and the four tests it fails.",
+      "bodyHash": "sha256:d703ce9f11f0412c25ce1145166798123e090b07a7f7993919ff35aa46ab427d"
     },
     {
       "source": "log.md#s7",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Hard-coded unconfigured mutant and the two tests it fails.",
+      "bodyHash": "sha256:377e09de7b8e244813670176d722e860e886eb08c28090cb424abc100921422f"
     },
     {
       "source": "log.md#s9",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#verification-history",
+      "helps": "Flake 0/12, resolver exported (556a60f), run counts, scope fence and the 64-file base-ref explanation, validators.",
+      "bodyHash": "sha256:feecb9ec8a52f295b5d9b3bd81dfd37a2dd7e717a84f26139d5b6cb8cb1575c5"
     },
     {
       "source": "log.md#audit",
-      "status": "gap",
-      "destination": null,
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Three audit-fix mutants and flake loop 0/12 after fixes.",
+      "bodyHash": "sha256:2ad12358600701aeb8b02ae7381f3a0dcc97f396df67c0a9fa6754cd8fd25edf"
     }
   ],
-  "coverage": 0.25,
-  "gaps": [
+  "otherFiles": [
     {
-      "source": "SHIPPED.md#scopes",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#what-shipped",
+      "helps": "Preserves release reconciliation and header facts.",
+      "hash": "sha256:a79ecd3a35afbbe0a60fb7b75574282e7207c607837e4938c4d1f89cbc340df5"
     },
     {
-      "source": "SHIPPED.md#audit",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "audit-prompts/code.txt",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:85d4d4f3f95898b473331b071495438b553576aa61fd1d8bd3afba7186db9c84"
     },
     {
-      "source": "SHIPPED.md#final-verify",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
+      "path": "audit-prompts/cycle2.txt",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:8d7b26a42bfb69c8bdbdba7ad235cbcd416f1b282f5ff69e1fde416987bf95e6"
     },
     {
-      "source": "deviations.md#s3",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "audit-prompts/security.txt",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:54c6757245a0254a3183624859c5581b3ef5781e740598e81dfa30abc3a63543"
     },
     {
-      "source": "deviations.md#s4",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "audit-prompts/test.txt",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:a3b917058fd09ff97eaf9f13af5395467e999a6686f4414eebcd7d28ef89319c"
     },
     {
-      "source": "deviations.md#s5",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "audit-record-code.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#audit-triage",
+      "helps": "Preserves audit findings, verdicts, fixes and review limitations.",
+      "hash": "sha256:7c842fb90467b08a28be6769fec570bf1ff63f9bd4e723dd9b598a2c9fe1a744"
     },
     {
-      "source": "deviations.md#s6",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "audit-record-security.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#audit-triage",
+      "helps": "Preserves audit findings, verdicts, fixes and review limitations.",
+      "hash": "sha256:e26b475596d966cab58b9c8684515ddb563eed41c1669a7f11b945b1cf887823"
     },
     {
-      "source": "deviations.md#s7",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "audit-record-test.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#audit-triage",
+      "helps": "Preserves audit findings, verdicts, fixes and review limitations.",
+      "hash": "sha256:b3476e79ae1e7fb208763517b8fcd566f13649c74c89c37019d2402ce5ade9fb"
     },
     {
-      "source": "deviations.md#s8",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "audit.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#audit-triage",
+      "helps": "Preserves audit findings, verdicts, fixes and review limitations.",
+      "hash": "sha256:2bd02def723d52fcfe69c9f7f7eede3e65271e9ea878078b79127bbde05346a1"
     },
     {
-      "source": "deviations.md#audit-cycle-1",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#deviations-from-plan",
+      "helps": "Preserves build deviations and decisions through mapped sections.",
+      "hash": "sha256:215f29393aecbc715ea7deed911f5e6b4a674641a7189fc0bcb6eed2ef46821d"
     },
     {
-      "source": "log.md#s2",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:de260531b42c4cbf3b80dffbd8a8b3cea5b1f988a87f1d0de5dc31a5b6309289"
     },
     {
-      "source": "log.md#s3",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#build-log-highlights",
+      "helps": "Preserves build evidence, mutants and verification history.",
+      "hash": "sha256:f89ce86c3589d41e58d1b48751accc963db979f508fc0145ebe932aa530c821e"
     },
     {
-      "source": "log.md#s4",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#scope-and-contract",
+      "helps": "Preserves the problem, breadboard, critique and bet.",
+      "hash": "sha256:76416d90573f5e15664a22f588fb3b04a0242b786ef8842ba0a866e4a74fd56f"
     },
     {
-      "source": "log.md#s5",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#plan-and-exit-criteria",
+      "helps": "Preserves scope design, definitions, caps and checked claims.",
+      "hash": "sha256:132a79cadfbd888c5730726572ec56d095cd6774b80647c8bdf884fc3db60098"
     },
     {
-      "source": "log.md#s6",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s7",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s9",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#audit",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
+      "path": "spike-s1.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-state.md#design-decisions",
+      "helps": "Preserves baseline, drop channel, record cap and coordination decisions.",
+      "hash": "sha256:e9a8ccdcfa260c6c8bcebdb3a1f32efcb240f79a813341aa9166ee43cea6ec36"
     }
   ],
-  "acceptedGaps": [
-    {
-      "source": "SHIPPED.md#scopes",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
-    },
-    {
-      "source": "SHIPPED.md#audit",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
-    },
-    {
-      "source": "SHIPPED.md#final-verify",
-      "reason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive",
-      "acceptedReason": "task-by-task or verification/audit output; outcome summarised in done-work, details recoverable from the archive"
-    },
-    {
-      "source": "deviations.md#s3",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#s4",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#s5",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#s6",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#s7",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#s8",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "deviations.md#audit-cycle-1",
-      "reason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs",
-      "acceptedReason": "build-time plan-vs-code deviation log; lessons already extracted to knowledge at /ship, contracts live in the integration docs"
-    },
-    {
-      "source": "log.md#s2",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s3",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s4",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s5",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s6",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s7",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#s9",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    },
-    {
-      "source": "log.md#audit",
-      "reason": "scope-by-scope build log; narrative, outcome is in the done-work summary",
-      "acceptedReason": "scope-by-scope build log; narrative, outcome is in the done-work summary"
-    }
-  ],
-  "committedAt": "2026-10-22T02:43:34.948Z"
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T00:39:53.898Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:522f862431865ab7eff984cefd100e086502fc8d29d365ccc2ab177d7ab9e4fe",
+    "introducingCommit": "b26b45b0e90ef02cadd850b9c151def287690cd0"
+  }
 }

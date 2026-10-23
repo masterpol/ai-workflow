@@ -2,7 +2,8 @@
 id: installed-skill-wrappers-ship-as-orphans
 type: issue
 created: 2026-09-25
-updated: 2026-09-25
+updated: 2026-10-23
+confidence: high
 tags: [bundle-sync, publishing, instance-data, migration]
 related: [caveman-mode-is-default-everywhere, a-gate-must-not-trust-its-own-author, local-eval-data-is-gitignored]
 source: caveman-rollout
@@ -47,3 +48,15 @@ the first sync of an older project, which runs its own older script.
 - Fix at the level the old consumer can see: a script change never protects a project that still
   runs the old script.
 - Related: [[caveman-mode-is-default-everywhere]], [[a-gate-must-not-trust-its-own-author]].
+
+## Corroboration: installed-sync (2026-10-23)
+
+The P2d installed-project fixture exposed a related publication trap: registry-owned paths use
+lowercase keys, so matching them against `/SKILL.md` selected nothing. Excluding only the owned
+file also left empty skill directories that validators still inventoried. The fixture now excludes
+the complete source-owned skill directory and preserves the target's local overlay and managed
+skill. Its two-pass sync uses the old installed tool first, then the delivered tool and documented
+doctor/migration steps. Fresh independent code and coverage reviews passed the installed tests.
+This is corroboration of the source/instance boundary, not a claim that newly published production
+orphans were observed. The fixture exercises real render/overlay code with an empty upstream AST
+base; it is not a full installed-project AST scan or a downstream deployment.

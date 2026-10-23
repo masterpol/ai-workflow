@@ -1,0 +1,31 @@
+# Source-review supplement: orca-vendor-orchestration
+
+Prepared 2026-10-22 from the verified original recovery source. This supplements the unchanged [compact record](../pitch-compression/orca-vendor-orchestration.md). Investigation and closure claims below are historical, not newly executed runtime probes.
+
+## Historical feasibility
+
+The 2026-10-07 investigation and requested online follow-up were read-only: no worker worktrees, terminals, messages, installation, lifecycle state or source edits were created. Official Orca README, orchestration and CLI guides, worker CLI specification, and messaging, placement and coordinator references documented vendor IDs, supervised Run/Task/Dispatch operations, recovery, isolated placement, runtime identity/receipts and Run-group messages. Upstream main was mutable and could be newer than the installation. Interface documentation was not local runtime proof.
+
+Local inspection found Orca 1.4.222 and bundled specifications/guides with the proposed interfaces. Claude, Codex and OpenCode executables existed without proving authentication or available models. The selected launcher failed inside and outside the sandbox with “Unable to determine Orca.app path from symlink: /usr/local/bin/orca”. The root-owned symlink mode lrwx------, permission-denied inspection and launcher's readlink use suggested a diagnosis; they did not prove it. The app-bundled executable existed, but silent executable switching after failure was prohibited. Approval to select it was requested; no switch, repair, launch or message occurred in these investigation records.
+
+Online documentation described experimental orchestration enabled through Settings / Experimental. Availability was to be checked without automatically toggling it. Later foundation evidence narrowed this: inspected 1.4.222 contract/status did not prove enabled orchestration. Fetched sources disagreed on OpenCode model overrides in existing worktrees versus OpenCode configuration. Initial proposals used configured vendor defaults and required installed-version proof before overrides.
+
+## Configuration and coordination boundaries
+
+The proposed coordinator schema and automatic routing were workflow-adapter responsibilities inferred from Orca primitives, not existing Orca policy. The invoking harness retained final accountability. Worker eligibility did not authorize installation or authentication. Cross-harness review did not establish independent models or providers. Initial mode/schema examples, a two-worker cap and alternate-only routing were proposals superseded by shipped policy. Historical automatic preflight fallback advice is superseded by the [current Orca contract](../../../ai-framework/integrations/orca-vendors.md): requested-Orca refusal stops unless explicitly bypassed.
+
+Peer mail used dispatch addresses or Run groups. Enqueue was not proof of receipt or action; workers needed checkpoint inbox inspection. Completion required an attempt-specific report, not terminal idleness, PID or age. Original design called for useful independent scopes with explicit ownership/dependencies, identical baselines and isolated parallel writers; dependent work could serialize. This is design intent, not proof that every later worker used isolation. Refused/corrupt recovery records could never authorize new editing, and unknown liveness retained ownership. Evidence had to survive outside retired worker resources and be reverified before cleanup. Coordinator diff inspection and combined checks remained necessary beyond worker reports.
+
+## Validation boundaries
+
+Planned validation included all coordinator permutations; missing, disabled, malformed and unavailable policies/capabilities; recursion; partial starts; duplicate/stale completion; pending questions; restarts; uncertain liveness and retries only after proven settlement. Shaping fixtures were specifications, not executed tests. Executable graders, stateful receipt traces, independently reviewed gates and live smoke were separate evidence. The [grader pattern](../../knowledge/patterns/a-grader-reports-executed-and-unexecuted-cases-separately.md) retains executed-versus-unexecuted reporting.
+
+The prepared live test depended on approved launcher selection and version-matched guides. It proposed an external disposable Git fixture, explicit baseline, three tiny independent modules, isolated vendor workers using defaults, a peer question/reply with receipt evidence, attempt-specific completion, actual outputs and combined reconciled checks. Only test-created resources were in scope; uncertain partial launches retained ownership. Outcome evidence lived outside disposable worker trees. Workflow-repository edits, commits and publication were excluded. Existing OpenCode adapter and harness edits were to be preserved and overlap rechecked during planning.
+
+Normal-workflow comparison required completed-task elapsed time, attributable reported coordinator/worker usage and cost, integration overhead, rework and integrated acceptance failures. Incomplete cost evidence left improvement unproven. Vendor variety and smoke success alone did not establish general speed, cost or quality gains. Earlier two-part decomposition estimates and pending bet scaffolding were superseded by the four-part closure.
+
+## Closure and provenance
+
+The umbrella closed on 2026-10-08 after foundation, dispatch, reconcile and integration shipped separately. Original closure left Codex, OpenCode and peer live smoke not-run, with outside-Claude compatibility unverified. Original all-vendor launch/peer/completion acceptance was therefore not established by this closure. The umbrella assigned no foundation version; a compressed release range must not supply one by inference.
+
+Current integration documentation records later vendor observations. The later [worker-environment issue](../../knowledge/issues/orca-workers-differ-from-the-coordinator-environment.md) attributes failures to a stale unreadable symlink and records a fix with source state-multipage-report. That later attribution does not retroactively prove the earlier plausible launcher diagnosis or resolve the provenance difference. Dated limits and later claims keep their separate sources.

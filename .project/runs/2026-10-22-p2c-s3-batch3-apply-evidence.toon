@@ -1,0 +1,49 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[5]: independent-rereview-catch-up,native-safety-feasibility,orca-vendor-foundation,orca-vendor-reconcile-integration,runtime-test-helpers
+pitches[5]:
+  -
+    slug: independent-rereview-catch-up
+    status: upgraded
+    outcomeBytes: 1424
+    v1Hash: "sha256:0b965f98351e228e0195e076dc9415c5c69e8a3ff9e3db55fb55193e8e17dbb5"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+  -
+    slug: native-safety-feasibility
+    status: upgraded
+    outcomeBytes: 1013
+    v1Hash: "sha256:c429da7fd1384e5f36d68175b675954789bc8dc7599feee84e76dcd35cc50230"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+  -
+    slug: orca-vendor-foundation
+    status: upgraded
+    outcomeBytes: 1371
+    v1Hash: "sha256:2b3c5420ac4996ed2fdacc781620d319157336566e2ed293753bd92f2f0b0070"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+  -
+    slug: orca-vendor-reconcile-integration
+    status: upgraded
+    outcomeBytes: 1467
+    v1Hash: "sha256:3b1362f84dc669f5b6530e9535db7a1935a6cb59de5afcb458f26c78a3d02bfd"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+  -
+    slug: runtime-test-helpers
+    status: upgraded
+    outcomeBytes: 1208
+    v1Hash: "sha256:a0fa4531c2b6a3a438d22afc1b09cc37d0b67ee83968fa639b6db5021f558538"
+    archiveVerify: valid
+    applyOutput:
+      applied: true
+counts:
+  legacy: 33
+  partial: 0
+  upgraded: 13

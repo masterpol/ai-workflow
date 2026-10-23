@@ -1,0 +1,138 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: portable-skill-installation
+sourceProof:
+  archiveDirectory: portable-skill-installation-2026-09-25T13-27-02-414Z
+  manifestHash: "sha256:0524f8f6407fce149b9fc3124424aaa6a185e8468ffdbfafbebd3fa3996cc063"
+  sourceBytes: 61274
+  verifiedFiles: 12
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/portable-skill-installation.supplement.md"
+  destination: ".project/records/legacy-upgrades/portable-skill-installation.md"
+  hash: "sha256:8f2b80b30a8277d14c32d0076768e66d63315799e5b46a6edd4ec6f0ea4037bc"
+payload:
+  ledgerHash: "sha256:748c1824bbeaae6a455d97c12ff765b55e070e5239de424cbb9a2b549c20127b"
+  legacyEntryHash: "sha256:531b0bcb0f85348b39bed5d5db826b1503544f1ed46def471370927c8434e707"
+  bindings:
+    ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md": "sha256:62ae5aab21c4f63cc7a6dd3923d12a989da12784028e93b8212034c1f84644f0"
+    ".project/knowledge/index.md": "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+    ".project/pitches/_followups.md": "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+    CHANGELOG.md: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+    ".project/knowledge/patterns/resolve-config-only-from-trusted-root.md": "sha256:7fd5a3e85ef2a38bb4529dd0cdb12ead36324e1d92d3018cd06b97140101d15c"
+    ai-framework/integrations/skills.md: "sha256:b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403"
+    ".project/knowledge/patterns/subprocess-revalidation-against-on-disk-code.md": "sha256:7fac5842e515bc1185175a43edf9a48e0e75a8109c92bee9f5e84c2c52cb37a5"
+    ".project/knowledge/issues/macos-tmpdir-realpath-alias-breaks-path-assertions.md": "sha256:ab4df7f4249b06f17de028e7a21b79d8c0436aedeb5a4c917428adbbfd186eb2"
+    ".claude/skills/add-skill/SKILL.md": "sha256:22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+    ".project/records/legacy-upgrades/portable-skill-installation.md": "sha256:8f2b80b30a8277d14c32d0076768e66d63315799e5b46a6edd4ec6f0ea4037bc"
+    ".project/runs/2026-09-25-portable-skill-installation.md": "sha256:dadbbb76e805b16c09c26a0f723b5eb5e012f356c5a6993c9e978407c027808e"
+  mapping:
+    schemaVersion: 2
+    sections[19]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scope-reconciliation",behavior,merged,".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership","Preserves SHIPPED.md#scope-reconciliation with historical context and evidence limits.","sha256:8c65d0331f1f5abf560800bb556d9df40f62e7f6b35db6c35fc036447bb6a22f"
+      "SHIPPED.md#no-gos-honored",rule,merged,".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership","Preserves SHIPPED.md#no-gos-honored with historical context and evidence limits.","sha256:6d020900655d50c97069f305f38dd09cd9c206bd5b66ab63f684b0ef685b7497"
+      "SHIPPED.md#rabbit-holes-resolved-as-committed",decision,merged,".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions","Preserves SHIPPED.md#rabbit-holes-resolved-as-committed with historical context and evidence limits.","sha256:66a8115f0511a256d4fcdbfacfc02df4665f91ff102720a5cebc84d2a6f146d1"
+      "SHIPPED.md#audit-findings-final-disposition",know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence","Preserves SHIPPED.md#audit-findings-final-disposition with historical context and evidence limits.","sha256:6e8079385d64d86665550a3b3b72687445f9a7a9b992a14ddbf5cfff6b10f22f"
+      "SHIPPED.md#knowledge-extracted",know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions","Preserves SHIPPED.md#knowledge-extracted with historical context and evidence limits.","sha256:d51a091cb7359071a18bac940be99ac8d88c772070d54a181e002eb2bac35821"
+      "SHIPPED.md#followups-generated",limit,merged,".project/records/legacy-upgrades/portable-skill-installation.md#followups-and-release-history","Preserves SHIPPED.md#followups-generated with historical context and evidence limits.","sha256:c6f01b8d776d552fdea153eb336c76daeaa314cc139e1a0384a8c74fc5edbd50"
+      "SHIPPED.md#what-downstream-pitches-can-now-build-on",behavior,merged,".project/records/legacy-upgrades/portable-skill-installation.md#vendor-parity-and-activation","Preserves SHIPPED.md#what-downstream-pitches-can-now-build-on with historical context and evidence limits.","sha256:9f4b50668aa32c1cd11badff6e5ced5ec5bbc6863be365d18ecae30ef45209d8"
+      "SHIPPED.md#version",know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#followups-and-release-history","Preserves SHIPPED.md#version with historical context and evidence limits.","sha256:c6547ab587020ce9917ee5145d44e2b6d3b6417e94071db39d62e9b453b2dea0"
+      "pitch.md#no-gos",rule,merged,".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership","Preserves pitch.md#no-gos with historical context and evidence limits.","sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
+      "pitch.md#rabbit-holes",decision,merged,".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions","Preserves pitch.md#rabbit-holes with historical context and evidence limits.","sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
+      audit-cycle-1.md,know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence",Preserves audit-cycle-1.md with historical context and evidence limits.,"sha256:e76169521f1bb75238680e2b51e3528b75c417402a5da1823902ff85cded37ac"
+      "deviations.md#s1-2026-09-24",decision,merged,".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership","Preserves deviations.md#s1-2026-09-24 with historical context and evidence limits.","sha256:c187e393d59d36216e78896ccc42a55213781862ec5f5194b9701e0738ae88bc"
+      "deviations.md#s2-2026-09-24",behavior,merged,".project/records/legacy-upgrades/portable-skill-installation.md#vendor-parity-and-activation","Preserves deviations.md#s2-2026-09-24 with historical context and evidence limits.","sha256:c5f0ee0a49a5332a906f7fbe03b9111e074f5f31cb7f64c518c08831d3e1fe24"
+      "deviations.md#s3-2026-09-25",decision,merged,".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions","Preserves deviations.md#s3-2026-09-25 with historical context and evidence limits.","sha256:344240fd5e3c5001964dd278eb322aaf2080f71c22e0208f38abe4c6f2bb7e14"
+      "deviations.md#audit-cycle-1-2026-09-25",limit,merged,".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence","Preserves deviations.md#audit-cycle-1-2026-09-25 with historical context and evidence limits.","sha256:39d8b9ecf11ec9d2805e1efdcd6a809e7b134c2fbc7f2428800eb0f43169ca27"
+      "log.md#s1-initial-tests-2026-09-24",know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents","Preserves log.md#s1-initial-tests-2026-09-24 with historical context and evidence limits.","sha256:f5a94884c93730fb6a1d19bccda6461ae2a53d2d3f3a543cbe4eaea08a5e75bc"
+      "log.md#s1-live-upstream-probe-2026-09-24",know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents","Preserves log.md#s1-live-upstream-probe-2026-09-24 with historical context and evidence limits.","sha256:910e59c970116f8e8926aff14bed893442683e4f6d23620529cd1f2d8d39cc49"
+      "log.md#s3-observation-2026-09-25-not-fixed-out-of-scope",limit,merged,".project/records/legacy-upgrades/portable-skill-installation.md#followups-and-release-history","Preserves log.md#s3-observation-2026-09-25-not-fixed-out-of-scope with historical context and evidence limits.","sha256:6113cd438ee6c007f478d7a443cf7bd6232e790f896506ab058e9c8b406d5e55"
+      "log.md#audit-cycle-1-2026-09-25",know-how,merged,".project/records/legacy-upgrades/portable-skill-installation.md#audit-findings-and-confidence","Preserves log.md#audit-cycle-1-2026-09-25 with historical context and evidence limits.","sha256:ee529495206162cda27fd943a6e32d1901d16dfb2713e547c807c8ce07e853b6"
+    otherFiles[11]:
+      -
+        path: SHIPPED.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership"
+        helps: "Preserves substantive SHIPPED.md contracts, evidence and limits."
+        hash: "sha256:4957a2bd99b2c5a3cfee86962dd2c9151e5637e3ea25a68b30191db8e153dbfc"
+      -
+        path: deviations.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#sync-and-formatting-decisions"
+        helps: "Preserves substantive deviations.md contracts, evidence and limits."
+        hash: "sha256:51fb4166d3d8aa31da44db38d052310709e1e8a4c4bb0df29b40ff72b724d91e"
+      -
+        path: hill.md
+        disposition: omitted
+        reason: process-noise
+        hash: "sha256:9cb00d4be709d0bcd2582233154cc92f1498cc62d4dfbc3e24827eef3690035a"
+      -
+        path: log.md
+        disposition: merged
+        destination: ".project/runs/2026-09-25-portable-skill-installation.md"
+        helps: The tracked run is byte-identical to the fully read cached log.
+        hash: "sha256:33439c07298a2bb76cc342ea78e7f1a3bde679f897e2a3122b210d572f63f4df"
+      -
+        path: pitch.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership"
+        helps: "Preserves substantive pitch.md contracts, evidence and limits."
+        hash: "sha256:eb54cb755e3ae78276fabe7051338b59128ae759bc0e0de138c46622b2aae252"
+      -
+        path: plan.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership"
+        helps: "Preserves substantive plan.md contracts, evidence and limits."
+        hash: "sha256:aa82c681d8543e296621dd709d8b6272d10c3e31bbe05d5429009c8ec355f791"
+      -
+        path: registry-installer.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#delivered-behavior-and-ownership"
+        helps: "Preserves substantive registry-installer.md contracts, evidence and limits."
+        hash: "sha256:bb57d3091605c8837cc056f54dd6d7ecacbdbe87a343577119e9aeb2dd5313a9"
+      -
+        path: s1-evidence.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents"
+        helps: "Preserves substantive s1-evidence.md contracts, evidence and limits."
+        hash: "sha256:90d8ef45c0345c9eca4fd6ffeb08739ea855e75e9b4551a7c248f834e1dd81c7"
+      -
+        path: s2-evidence.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents"
+        helps: "Preserves substantive s2-evidence.md contracts, evidence and limits."
+        hash: "sha256:990c270b32709bc1bacec8546412c489514b641be1c9dc53aa2252e745765e48"
+      -
+        path: s3-evidence.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#verification-and-incidents"
+        helps: "Preserves substantive s3-evidence.md contracts, evidence and limits."
+        hash: "sha256:3de285c78c8cbb0336164c23e5aef857778512166bd1e8ebad60e4977d354e25"
+      -
+        path: skill-portability.md
+        disposition: merged
+        destination: ".project/records/legacy-upgrades/portable-skill-installation.md#vendor-parity-and-activation"
+        helps: "Preserves substantive skill-portability.md contracts, evidence and limits."
+        hash: "sha256:b37a9b37f21bbba397c7aa5daf0f8e95b27e2cdc684812c03a6bb9d8f60a22aa"
+  outcomeRecord: "---\nslug: portable-skill-installation\nshipped: 2026-09-25\nschemaVersion: 1\n---\n# portable-skill-installation\n\nExternal skills install through tracked ownership and vendor adapters with bounded safety and rollback behavior.\nOriginal source decisions, contradictions and verification limits are retained in the linked supplement.\nThis legacy upgrade makes no new execution or live-quality claim.\n\n- outcome: External skills install through tracked ownership and vendor adapters with bounded safety and rollback behavior.\n- docs: [source supplement](.project/records/legacy-upgrades/portable-skill-installation.md)\n- decisions: [retained decisions](.project/records/legacy-upgrades/portable-skill-installation.md)\n- knowledge: [lessons and constraints](.project/records/legacy-upgrades/portable-skill-installation.md)\n- code: none\n- verification: [historical verification](.project/records/legacy-upgrades/portable-skill-installation.md)\n- followups: [retained limits](.project/records/legacy-upgrades/portable-skill-installation.md), [backlog](.project/pitches/_followups.md)\n- archive: [reviewed recovery record](.project/records/legacy-upgrades/portable-skill-installation.md)\n"
+  acceptDestinationDrift:
+    ".project/knowledge/index.md":
+      committed: "sha256:4f0282c69c497039462551cf7f0faf67fc7db64f246f18d890c01ceb7d04abf7"
+      current: "sha256:f0524db686cf048377c85a0ee67241fe1d0f2800b479f23ac77711690c40249d"
+      reason: "Against introducing ea82bcee: +560/-45 lines. Generated date, counts, tags and graph pointer changed, and later entries were added. The four installation lesson links remain; this index was navigation, not a content copy. Supplement maps substantive content directly."
+    ".project/pitches/_followups.md":
+      committed: "sha256:97f0c9adc832628e116a53a7dee18cdf1f582155487c07d5b27b67bf05b1a16c"
+      current: "sha256:d0404fd9e23bfeb0230a469b09f0312a5ffde39b7070dcbdadf8aaa0748495f5"
+      reason: "Against introducing ea82bcee: +319/-0 lines. Later backlog additions preserve all original installation followup text byte-for-byte. Retain TOCTOU and marker issue as ship-time deferrals, not current-open claims."
+    CHANGELOG.md:
+      committed: "sha256:efb59e1efb0224c3595a893d757ae08e16c005b5c0b926e692eabffe8e34dfaa"
+      current: "sha256:da26e3d2b1714bbfa20f3778f21bafae3575aa7bf5dcfd453bff8343cff8047c"
+      reason: "Against introducing ea82bcee: +565/-0 lines. Later releases were prepended; the original 2.4.0 installation entry remains byte-for-byte. Preserve consolidated-release history and staged version resets."
+    ai-framework/integrations/skills.md:
+      committed: "sha256:3cc1d11d94d5ce9a62a7b42a59159037816c50017ec5e2a39d947b9f4d2451b4"
+      current: "sha256:b23b038ec29166d37045703ecf1f99e512cd9ac44ea3efe29ff6768dba9f2403"
+      reason: "Against introducing ea82bcee, changes are .js to .mts command/test references plus Node type-stripping flags for coverage. Source-era install/reconcile/format ownership behavior is unchanged; preserve .js historical measurements without replacing current docs."
+    ".claude/skills/add-skill/SKILL.md":
+      committed: "sha256:1620061f7c66ebf09135d07258c1ea00edd6c29fb079728b3dd0f1294ccc2cbb"
+      current: "sha256:22e4c0f23b6ac18b6db19d81e9201f4ef8125728c4a3b1ad38ea7451b3a8d378"
+      reason: "Against introducing ea82bcee, thirteen command/script references migrated .js to .mts (26 diff lines); inspect/choice/preview/approval/apply/lifecycle contract unchanged. Preserve live source-selection incident and runtime caveats in supplement."

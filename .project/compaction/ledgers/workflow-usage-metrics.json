@@ -1,142 +1,404 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "workflow-usage-metrics",
   "sections": [
     {
       "source": "SHIPPED.md#scopes",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-1-shippedmdscopes",
-      "reason": "Preserved in the compact record section."
+      "helps": "Three shipped scopes: state, writer and CLI; reports; guide and release 2.16.0.",
+      "bodyHash": "sha256:f72d2f5b430c944393c75fbe34e2f812e8115630e43c56f8b4b70876bb8eeac4"
     },
     {
       "source": "SHIPPED.md#verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-2-shippedmdverification",
-      "reason": "Preserved in the compact record section."
+      "helps": "156/156 Node and Bun, graph 44 entries and 124 links, fault injection and the manual-event caveat; supplement reconciles counts.",
+      "bodyHash": "sha256:060f7e39b1c89a8fd0f0ecbb534149f2157c405c7048b9f28613467580873a03"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-3-shippedmdno-gos-honored",
-      "reason": "Preserved in the compact record section."
+      "helps": "Prohibited token, cost, payload, backfill and rollout work.",
+      "bodyHash": "sha256:f5556fcdb5b923cecfc65585cfd8262ca58adeebf07149a691986e295f3098ab"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-and-deviations",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-4-shippedmdrabbit-holes-and-deviations",
-      "reason": "Preserved in the compact record section."
+      "helps": "Ships counter, bucket versus lifecycle identity and encoded components.",
+      "bodyHash": "sha256:8a272ff7d31a2ffcd087c5d18f41178aaefaa4a0973edb1ae278e5d131b7370a"
     },
     {
       "source": "SHIPPED.md#knowledge-and-followups",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-5-shippedmdknowledge-and-followups",
-      "reason": "Preserved in the compact record section."
+      "helps": "Knowledge links and the three open followups: capture, adoption and maintainability.",
+      "bodyHash": "sha256:5493cc81f5b5c61857b8f71663153362f92abe8bfa836362f08d1c298cee07d4"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-6-pitchmdno-gos",
-      "reason": "Preserved in the compact record section."
+      "helps": "Standing no-gos for the metrics core.",
+      "bodyHash": "sha256:3d65dd05c35c14556950ae4c3a254c469582f38eb85161c2a609858b033e8f7e"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-7-pitchmdrabbit-holes",
-      "reason": "Preserved in the compact record section."
+      "helps": "No history reconstruction, test classes and the 15-file, 1,500-line split rule.",
+      "bodyHash": "sha256:f4332d9925bd27a4b1eb43e499d668a35009bb3ea3391da65561b360e71214f8"
     },
     {
       "source": "deviations.md#d1-explicit-runner-for-compatibility-verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-8-deviationsmdd1-explicit-runner-for-compatibility-verification",
-      "reason": "Preserved in the compact record section."
+      "helps": "Pin AI_WORKFLOW_RUNNER=node for compatibility runs.",
+      "bodyHash": "sha256:a237bf14a410192075c4d25c9e0c5a300a71af432ff661403b389bbcb081b2ce"
     },
     {
       "source": "deviations.md#d2-explicit-successful-pitch-counter",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-9-deviationsmdd2-explicit-successful-pitch-counter",
-      "reason": "Preserved in the compact record section."
+      "helps": "Optional ships counter; unknown for pre-counter data.",
+      "bodyHash": "sha256:a17102e6f1669cde27b2a598a9ea5204ff73feb0e39bd170d3614674c931c8e6"
     },
     {
       "source": "deviations.md#d3-audit-hardening-and-path-check-boundary",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-10-deviationsmdd3-audit-hardening-and-path-check-boundary",
-      "reason": "Preserved in the compact record section."
+      "helps": "Pinned identities, no atomicity claim and possible leftover private temp file.",
+      "bodyHash": "sha256:2b594531a8fc3462c9c846e566aa99ba4e4acaf8a9063d1c91cf269f0ae78096"
     },
     {
       "source": "deviations.md#d4-coupled-modules-and-explicit-schema-validation",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-11-deviationsmdd4-coupled-modules-and-explicit-schema-validation",
-      "reason": "Preserved in the compact record section."
+      "helps": "Size conventions waived; manual validators are deliberate.",
+      "bodyHash": "sha256:18e393bc30b3f9df80190df23540fd17635043253489b9574513ae24bc7f2ee8"
     },
     {
       "source": "log.md#2026-10-08-s1-start",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-12-logmd2026-10-08-s1-start",
-      "reason": "Preserved in the compact record section."
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:fccad64a8a5cad87798b94e7e1df6cc30c28b96f9dc299ee0674f9c770f2980e"
     },
     {
       "source": "log.md#s1-verification-attempt-1",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-13-logmds1-verification-attempt-1",
-      "reason": "Preserved in the compact record section."
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:692bf86594dc200aba05a0c48fcfed5f1b6e9af468b8032e433a19c268464f26"
     },
     {
       "source": "log.md#s1-compatibility-run",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-14-logmds1-compatibility-run",
-      "reason": "Preserved in the compact record section."
+      "helps": "Legacy tests flake under simultaneous runtime suites; the runner pin is the fix; coverage figures kept.",
+      "bodyHash": "sha256:82eaaf8eeb3e32a969619658657f3d35c62de1298d3d3206e5b1b49963263ff8"
     },
     {
       "source": "log.md#s1-exit-evidence-complete",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-15-logmds1-exit-evidence-complete",
-      "reason": "Preserved in the compact record section."
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:7fc5601f2b493a3c62f5e2570214c180d3f9db222eada83fa9e73dadc750f13f"
     },
     {
       "source": "log.md#s2-start-approved",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-16-logmds2-start-approved",
-      "reason": "Preserved in the compact record section."
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:a2250d9765a579e52ed946f0e3b3abf6f8e7795d1838587bb876da54af9e1900"
     },
     {
       "source": "log.md#s2-exit-evidence-complete",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-17-logmds2-exit-evidence-complete",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#contract-limits-historical",
+      "helps": "Supplement keeps that report writes are not atomic and source timestamps expose stale views; compact omits the sentence.",
+      "bodyHash": "sha256:a03a67045ddac0e1b9d54bdfa53fbe513451f22adfb6a0852f09acbf93997169"
     },
     {
       "source": "log.md#runtime-test-helper-integration-user-requested",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-18-logmdruntime-test-helper-integration-user-requested",
-      "reason": "Preserved in the compact record section."
+      "helps": "Helper adoption and the async lease test needing deps.child.run.",
+      "bodyHash": "sha256:9a9beab529ea2c5849d35d2fc925051b0bdbd52067a74ec8b6119c45fbcb0d39"
     },
     {
       "source": "log.md#s3-start-approved",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-19-logmds3-start-approved",
-      "reason": "Preserved in the compact record section."
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:ffacd13f46f6e9320a42948cfeb3682060d2ac093bd0f8ca5894f74dd03f4414"
     },
     {
       "source": "log.md#s3-exit-evidence-complete",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-20-logmds3-exit-evidence-complete",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#historical-counts",
+      "helps": "Supplement adds 138/138, doctor 729 checks, setup 22 checks and graph 41 entries missing from the compact record.",
+      "bodyHash": "sha256:93f3ef84387e112bd19365cad9bc7c78d80a3f44222697144880a5d7c10f9dd1"
     },
     {
       "source": "log.md#audit-approved-three-cycles-complete",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-21-logmdaudit-approved-three-cycles-complete",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Supplement adds the fixed-finding list, 36/37 overflow-expectation fix and kept transient failures.",
+      "bodyHash": "sha256:aeb1c6c0e642c027de9ef2d6c0653a5807c948a75c7fc1924d5056f7841b5957"
     },
     {
       "source": "log.md#ship-approved-and-closed-2026-10-08",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/workflow-usage-metrics.md#section-22-logmdship-approved-and-closed-2026-10-08",
-      "reason": "Preserved in the compact record section."
+      "helps": "Ship verification and knowledge extraction; supplement adds the proposal-only cooldown trigger.",
+      "bodyHash": "sha256:0206aef0d168d702c9cb1275fe417802b410c62258e08d1f40bd9c72b60f789f"
     }
   ],
-  "coverage": 1,
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:8000adefa2bbda3dbb59fd091c9788eb470c0e912eb06be5beee60f55faaa43b",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md",
+      "helps": "Preserves scopes, verification, no-gos, deviations and followups in the compact record."
+    },
+    {
+      "path": "audit-prompts/code.txt",
+      "hash": "sha256:f712984ec88d7f2fb75fb6ea6e1598d109248af1c05c3f1f86ae2f6d0dc6df42",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/conflicts.txt",
+      "hash": "sha256:4140722d812fc77b975eaf812a453597dc2b4b5ca3c23403aacad5c5193c0768",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/coverage.txt",
+      "hash": "sha256:a12d4e4f9808ab1188e9725640d62857ea4b7879716b6ce67ebf17ff9aa9c7a8",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle2-code.txt",
+      "hash": "sha256:e2dc12f9e8abb498ff1482ff385e4d6dd239fb90a0f534b291d109f83ecd9ea4",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle2-coverage.txt",
+      "hash": "sha256:4623427e43103c4d71143aacf055b41a1debbc8037a6a2ab55f0570559e92721",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle2-security.txt",
+      "hash": "sha256:f36cd940c25f8e5f1804c3579bb63b89c2a90e2e79a48c9d308d595c47db7b0b",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle2-ux.txt",
+      "hash": "sha256:15d7a9a4268b82f86c570a6bac22a07769851f8e0f2b47db93f1ef1d2a6bdd03",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle3-code-verify.txt",
+      "hash": "sha256:bd108b3b6e89b4909e8eeb7011c3605b8916716fc202df39f7d803eafe57c962",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle3-code.txt",
+      "hash": "sha256:40cca1ed8e8fc1de90a374b3df5d8f5b22212cba581e7bde5ec2d7b148cb2aaf",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle3-coverage.txt",
+      "hash": "sha256:25c47cf3081285f7cac0864bbebc7fb23a3bea0fb2486ee24a8bb507dfa7aaac",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/cycle3-security.txt",
+      "hash": "sha256:5c6cde604aa648773cabbdf5120ec81ee4410484fc7c7734f18305ccec4bc854",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/security.txt",
+      "hash": "sha256:cf71a8ec2f39c3bcf8de04b04a63d58b973cf005974a83c032c6782aea9f98e0",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-prompts/ux.txt",
+      "hash": "sha256:88ce33b64c8fde41d4a503a7ab1d984a45ae60be870737a19b95031038abec01",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "audit-reviews/code.md",
+      "hash": "sha256:d20fc193e92a6e2116b19e4085d0bb497869b806b80302dca81c75475ba5aeb2",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/conflicts.md",
+      "hash": "sha256:66766fdf73adb936d21bae52b7fe11fd80a4177479a958b63c6b966c5dd929de",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/coverage.md",
+      "hash": "sha256:2d0932206af368b464852967fd08ce9722f53d3c2a19f6eb9101bb045fecc63c",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle2-code.md",
+      "hash": "sha256:0db73d3d7384ed364dea1e50e624a32064822d3ac9727c7eedf43b4003fdb70b",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle2-coverage.md",
+      "hash": "sha256:7db27e11f043b537f5974e5dbf098c4d96204fb63b5f3df5e54bf58889c6d2a6",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle2-security.md",
+      "hash": "sha256:7166c4de931b1254ccdeeca84ddc5687259bf61bd83bf06a0d4cb3a7332a1c1f",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle2-ux.md",
+      "hash": "sha256:cd8fda83adfa2c8ae710c54039c52d4e5d755b111a7bc5f12f263ca07a5ef854",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle3-code-verify.md",
+      "hash": "sha256:2d1da1f6b278bdedcd0c6c8789914a2d4c92d62217f8e68cdbcbc8ffcc522d95",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle3-code.md",
+      "hash": "sha256:91b281dafd82890ee397446b24969c72da0e13922de4e9c05878ac45b6027116",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle3-coverage.md",
+      "hash": "sha256:ce440d3d07838157d20b32db4c39da13dabc6a6586345da76dc46ec832343cc1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/cycle3-security.md",
+      "hash": "sha256:a26b530d7ac1072b7ee2424da5d5bbc26b25da2553b90629ad49b3b2714164d1",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/security.md",
+      "hash": "sha256:00586a18ac8bf031071caa390c46bb799d48963c67c5627972f93a4e9dd6f25e",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit-reviews/ux.md",
+      "hash": "sha256:b8ee4ea78c5aaeb422005747730ac5e3f9aedc76dc321098d5bc06e15a082549",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Per-pass reviewer findings are consolidated into the supplement's audit triage, independence record and guard notes."
+    },
+    {
+      "path": "audit.md",
+      "hash": "sha256:bf6e49c25e341a3dbb9a43318fa86b7e4385173c1a1012c8c194f9f272f4ae1b",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#audit-triage-and-provenance",
+      "helps": "Preserves the verified triage M1, M2, S1 to S8 and refuted F1, plus the non-atomic path-check and large-module limits."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:4fc0f793cfc4796265acd723cc0ed4eed50340a9595e1b9fec1f1fdd7f4f836c",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md",
+      "helps": "Preserves deviations D1 to D4 in compact sections 8 to 11."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:3020de123c58d98e78c9f57f3a8faa705e393e8542c426449076256f1b8d42af",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:491b9c094da726f29a35ee276084e184765224cdfecec9a6440e03e946164abe",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/workflow-usage-metrics.md",
+      "helps": "Preserves build, compatibility, audit and ship evidence in compact sections 14 to 22; the supplement adds the audit chronology."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:400fbe8b4a1fdb241a23cd4f560fb5ceab94d92e012517697f4d648b5080c0c2",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#scope-and-revision",
+      "helps": "Preserves the bet, the user-requested narrowing to useful metrics and the legacy-collector problem figures."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:0bd305df2a4bcb398c197a4126fdb4caa244f28e91413f1a8d94400a687a5603",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/workflow-usage-metrics.md#contract-limits-historical",
+      "helps": "Preserves the planned state bounds and semantics as historical limits with a pointer to the current guide."
+    }
+  ],
+  "coverage": 0.7727272727272727,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:25:54.829Z"
+  "committedAt": "2026-10-22T19:08:36.208Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:708ea1b73db21694969f00b0fcd5d6a1cbb39939d338e11f5bee3e04560ad5c6",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

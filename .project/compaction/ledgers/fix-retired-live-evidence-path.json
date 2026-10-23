@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 2,
+  "slug": "fix-retired-live-evidence-path",
+  "sections": [
+    {
+      "source": "SHIPPED.md#result-and-reconciliation",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Shows what the repair changed: the exact original matrix restored at a durable path and one test path constant repointed.",
+      "bodyHash": "sha256:9875e7a2bbc8544ba278ef0318a94ba84e91ba71ea3cae2107d4d663cd55b25c"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Shows the exact checks that proved the repair, including the 54/54 dataset and full Node suite results and how reuse was justified.",
+      "bodyHash": "sha256:7950470a808ff017e604730cd24b580bf3f9b57ea809307e374cff41c9f3d396"
+    },
+    {
+      "source": "SHIPPED.md#audit-and-remaining-risk",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the unconfirmed 346/347 child failure, the deferred FRLE-D1 diagnostics and the reached audit cycle cap.",
+      "bodyHash": "sha256:a9ae9d6c43e6b0b7ee9e41e95443a9b8745c7fd20e5e2402ae487e6d8d136d70"
+    },
+    {
+      "source": "SHIPPED.md#knowledge-followups-and-documentation",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Points to the extracted issue and the single new followup so they are found later.",
+      "bodyHash": "sha256:dbaf0a8c28a804745186ee476fb22de77380ae7ba885f1fb6cf50b586fd22588"
+    },
+    {
+      "source": "SHIPPED.md#approval-and-closure",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the owner approval, approved proposal hash and what closure did and did not close.",
+      "bodyHash": "sha256:4a1b16b1af574a346061f51e222c32d4d63a356a53bcf1296f17be37dd172f25"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "Preserves the first bug-fix audit cycle: reviewers, planted control results and findings.",
+      "bodyHash": "sha256:5c085797b17d10b7ea2c55cbbada497aa7c0234d3ef07842c598c01e64d21feb"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "Preserves the second and final permitted audit cycle that reproduced the child test failure and deferred diagnostics.",
+      "bodyHash": "sha256:892ecdf3e37310bff74284d5fc26ad62e5f53688d64490431ebae8ff867dcdf0"
+    },
+    {
+      "source": "log.md#triage-and-scope",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Explains the root cause and why this was a separate bug-fix step, not a fourth consolidation audit cycle.",
+      "bodyHash": "sha256:4129c340cee6e387e4476096880e94bb32475fa403fcedddedd397c380822231"
+    },
+    {
+      "source": "log.md#concrete-review-material",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Names the patch, candidate asset and source proof that reviewers inspected.",
+      "bodyHash": "sha256:4fcc8886e8eed7926b5b0b23b00416c316bf31c76e3fe8d2a79a94dda61de885"
+    },
+    {
+      "source": "log.md#current-session-scratch-proof",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Shows the isolated-tree proof and the two retained incomplete-fixture attempts.",
+      "bodyHash": "sha256:e1397bc16cca73bae081011d3d03c67fe84022202440ff7115bfdb0d3efeb5f2"
+    },
+    {
+      "source": "log.md#required-build-exits-after-approval",
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "States the exits that had to pass after approval before shipping.",
+      "bodyHash": "sha256:75509068e39481668c7333663de1a706bc9f525c2bc7edf261a3f6a534686cfe"
+    },
+    {
+      "source": "log.md#triage-gate",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records what the triage approval did and did not authorize.",
+      "bodyHash": "sha256:3780175445abfb8b4bd9d45230577a72d9846eba60d70ff78f31cbd425887282"
+    },
+    {
+      "source": "log.md#2026-10-23-approved-build-applied",
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the approved restoration and the one-constant change that were applied.",
+      "bodyHash": "sha256:72af680cf17f7fba1a192a5f805d50dc9a0f22735a6d843dbf54c3d64e74e7de"
+    },
+    {
+      "source": "log.md#2026-10-23-build-exits-verified-build-end-gate-pending",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the exact production and full-suite commands and their results.",
+      "bodyHash": "sha256:25bb81d2ca4af5b19f3c64f5f25085a798c5675ba6f9f204f8a1ad3107406898"
+    },
+    {
+      "source": "log.md#2026-10-23-separate-audit-complete",
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the clean first audit and that every reviewer caught the planted comparison.",
+      "bodyHash": "sha256:0eb034735a08d76065f11900c507d32eb81de4709d4d69d73c99d9e933b97db9"
+    },
+    {
+      "source": "log.md#2026-10-23-final-verification-incident-and-audit-cycle2",
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the unconfirmed child failure and the return to the last permitted audit cycle.",
+      "bodyHash": "sha256:ef286848d1d68630b9cf79c675e1b424934a55884cc5acb0ce2ee54ab4104e7e"
+    },
+    {
+      "source": "log.md#2026-10-23-final-ship-proposal-ready",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "Records the ship-proposal state and hash checks before the final approval.",
+      "bodyHash": "sha256:1127c854e927f9e240559a0ab783387f78af21fac8636735476fd35a4b23d887"
+    },
+    {
+      "source": "log.md#2026-10-23-shipped-with-explicit-owner-approval",
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "Records the final owner approval entry and closure effects.",
+      "bodyHash": "sha256:788f2c5e4306b5f66a98a0d57550f04878d091ac808b554b08e4b499d9f84f18"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "The full ship record is retained in the dated ship run.",
+      "hash": "sha256:db9c7384354ae60066e9f04249f2d25a18abd72de471274b8b639c93eb92a4b8"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path.md",
+      "helps": "The full build log is retained in the dated ship run; its final entry is also in the closure record.",
+      "hash": "sha256:cee305512dc8d069f960aee586c868d31f223f72f50fd7381b6ad5b16b588bdc"
+    },
+    {
+      "path": "live-runs.candidate.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/state-ai-authoring-live-runs.md",
+      "helps": "Byte-identical to the restored historical matrix kept at this durable path.",
+      "hash": "sha256:2fad1150d2cb1b0b4455560ac4c38ad4d027c3613186dc7d4d062578ce30f092"
+    },
+    {
+      "path": "repair.patch",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "The approved one-line patch is kept verbatim.",
+      "hash": "sha256:7733db16fd29779a0d74f11310d935d4586bed1a66359887ebdd8f004ba4ce3d"
+    },
+    {
+      "path": "ship-approved.toon",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "The hash-bound approval receipt is kept verbatim.",
+      "hash": "sha256:bb74932a54bfec0886135b67c78732c1fbebadf743c9c88f454f38254a8799c4"
+    },
+    {
+      "path": "ship-proposal-evidence.toon",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "The proposal evidence is kept verbatim.",
+      "hash": "sha256:bf09f80a25b994194a184d85df150f00aac6a74aca329b7de243317dfac46daf"
+    },
+    {
+      "path": "ship-proposal.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "The approved ship proposal is kept verbatim.",
+      "hash": "sha256:ac441a82564ef748f1c7eeb475a8f2e096c00ae8a3eec1361f68a768751a0f94"
+    },
+    {
+      "path": "source-proof.toon",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "The source proof binding old and new hashes is kept verbatim.",
+      "hash": "sha256:910a498e7979d9988b0907f4bb69ef6dfd9a4d5c92d2c69c8f03ecedd5b06290"
+    },
+    {
+      "path": "audit-records/cycle2-coverage.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-10-23-fix-retired-live-evidence-path-closure.md",
+      "helps": "The cycle 2 coverage review record is kept verbatim.",
+      "hash": "sha256:2dc032f3ccd6fde9c9084d2802c349b02b047778d6d6dabd0aee170cb655a254"
+    },
+    {
+      "path": "audit-records/cycle2-coverage.prompt.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:2c2503f75fde0a77a8b7048c4e5994563cf06ab421ea106737e65663aa39bfbe"
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-23T16:01:00.427Z"
+}

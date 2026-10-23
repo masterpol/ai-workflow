@@ -1,0 +1,82 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-auto-start-all-phases",
+  "sections": [
+    {
+      "source": "SHIPPED.md#pitch-implementation",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#scopes",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#deviations-see-deviationsmd-and-audit-cycle-12md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-blocking-hook-owns-its-runner-and-its-deadline.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-orca-auto-start-all-phases.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extracted",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/decisions/orca-auto-start-design.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/a-probe-child-ran-a-bare-command-with-the-parent-path.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/a-blocking-hook-owns-its-runner-and-its-deadline.md",
+      "reason": "mapped to a nonempty file outside the pitch"
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T22:08:53.363Z"
+}

@@ -1,0 +1,42 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[3]: bundle-sync-marker-fix,fix-workflow-runner-env,readme-split
+pitches[3]:
+  -
+    slug: bundle-sync-marker-fix
+    status: upgraded
+    archiveDirectory: bundle-sync-marker-fix-2026-09-27T01-27-20-241Z
+    archiveManifestHash: "sha256:4e2335c97c62c344a77a6eece0cad104487699b8ce55e76b032d7c7cbbca790f"
+    unchangedArchiveFiles: 10
+    v1Hash: "sha256:75a31fdcc716e25a6f2c2c0eb402b74a5ebc9d7eec90647ada2c6d9c08ff94f6"
+    outcomeBytes: 932
+    applyOutput:
+      slug: bundle-sync-marker-fix
+      applied: true
+  -
+    slug: fix-workflow-runner-env
+    status: upgraded
+    archiveDirectory: fix-workflow-runner-env-2026-10-08T16-26-36-922Z
+    archiveManifestHash: "sha256:9ed97de1d3beba6cdfda87cc764acd1017ff1d78a61391ee8a3914a308974582"
+    unchangedArchiveFiles: 12
+    v1Hash: "sha256:0651347ab42db8c3a3264005fac75912e5308f4c5559d439530622c6916aec15"
+    outcomeBytes: 1044
+    applyOutput:
+      slug: fix-workflow-runner-env
+      applied: true
+  -
+    slug: readme-split
+    status: upgraded
+    archiveDirectory: readme-split-2026-10-08T16-26-38-199Z
+    archiveManifestHash: "sha256:c34d032cb60c45db2508a805412143dd5839770c23ff78e28182793502a98783"
+    unchangedArchiveFiles: 9
+    v1Hash: "sha256:579fc605e4075a880e07809e75e605dd0ef3afec2614ffe2d0ad76091a119fd8"
+    outcomeBytes: 964
+    applyOutput:
+      slug: readme-split
+      applied: true
+totals:
+  legacy: 43
+  partial: 0
+  upgraded: 3

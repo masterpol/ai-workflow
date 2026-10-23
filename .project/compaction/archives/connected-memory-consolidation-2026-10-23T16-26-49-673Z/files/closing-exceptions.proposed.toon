@@ -1,0 +1,29 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-owner-decision
+campaign: connected-memory-consolidation
+exceptions[2]:
+  -
+    id: scenario-c-retained-bytes
+    originalRequirement: Retained bytes <=5% of original source
+    observed:
+      sourceBytes: 274950
+      outcomeBytes: 1127
+      supplementBytes: 25661
+      totalBytes: 26788
+      totalPercent: 9.74286233860702
+      outcomePercent: 0.4098927077650482
+    proposal: "Accept the exact previously approved and hash-bound TTR outcome/supplement at 9.74% as a named exception. Keep the 3000-byte outcome cap, full source coverage and no-new-knowledge limit unchanged."
+    reason: Full content was reconstructed into a new supplement because dated run copies omit closure and are not identical. No section omitted or content shortened to game the target.
+    acceptanceInferred: false
+  -
+    id: pre-existing-state-history-archive-fallback
+    originalRequirement: Repo-wide archive-read scan finds only archive/verify/restore tools and approval-gated legacy-upgrade
+    observed:
+      file: ai-framework/scripts/state-history.mts
+      sites[4]: "32 ARCHIVES constant","162-174 archiveFor/recordOf read archived files","193-209 audit/revision fallback","241 unconditional archive-directory inventory"
+      introducedByCampaign: false
+    proposal: "Defer replacement of the pre-existing state-history recovery-archive fallback to the un-bet P2b consumer/ship-flow track, and limit this campaign closing guard to new archive access. The planned literal repo-wide criterion remains an acknowledged exception."
+    reason: The campaign changes did not add this pre-existing history collector. Removing the fallback is a separate history-data contract change; do not silently expand approved schema/campaign work or claim the literal criterion passed.
+    acceptanceInferred: false
+alternatives[2]: "Require original targets: revise the TTR retained-content design and plan a reviewed state-history consumer change before closure.",Approve these two explicit exceptions and retain their measured failures and followup ownership in final reconciliation.

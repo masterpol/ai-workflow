@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-vendor-foundation",
+  "sections": [
+    {
+      "source": "SHIPPED.md#final-verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-1-shippedmdfinal-verification",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#reconciliation",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-2-shippedmdreconciliation",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-3-shippedmdno-gos-honored",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-and-deviations",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-4-shippedmdrabbit-holes-and-deviations",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#knowledge-extraction",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-5-shippedmdknowledge-extraction",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-6-shippedmdfollowups-generated",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#documentation-and-status",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-7-shippedmddocumentation-and-status",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "SHIPPED.md#closing-gate",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-8-shippedmdclosing-gate",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-9-pitchmdno-gos",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-10-pitchmdrabbit-holes",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-11-audit-cycle-1md",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d1-explicit-orca-opt-in",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-12-deviationsmdd1-explicit-orca-opt-in",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d2-portable-fixture-assertions",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-13-deviationsmdd2-portable-fixture-assertions",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d3-cohesive-policy-module",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-14-deviationsmdd3-cohesive-policy-module",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "deviations.md#d4-conservative-runtime-proof",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-15-deviationsmdd4-conservative-runtime-proof",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s1-test-review",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-16-logmds1-test-review",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s2-boundary-and-evidence-review",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-17-logmds2-boundary-and-evidence-review",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#s3-fixture-and-sandbox-verification",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-18-logmds3-fixture-and-sandbox-verification",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#audit-cycles-1-2",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-19-logmdaudit-cycles-1-2",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#ship-preparation-2026-10-07",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-20-logmdship-preparation-2026-10-07",
+      "reason": "Preserved in the compact record section."
+    },
+    {
+      "source": "log.md#ship-closed-2026-10-07",
+      "status": "extracted",
+      "destination": ".project/records/pitch-compression/orca-vendor-foundation.md#section-21-logmdship-closed-2026-10-07",
+      "reason": "Preserved in the compact record section."
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-08T16:24:05.616Z"
+}

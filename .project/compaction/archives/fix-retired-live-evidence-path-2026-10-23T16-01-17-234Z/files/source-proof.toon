@@ -1,0 +1,20 @@
+@toon-data 1
+sourceSlug: state-ai-authoring
+archiveDirectory: state-ai-authoring-2026-10-22T02-43-36-385Z
+archiveManifestHash: "sha256:2fb226323c9b52d4e6fb8b504f6ebf561b03e20eeed3f92397f000d32d05c65a"
+source: live-runs.md
+normalizedBodyHash: "sha256:2fad1150d2cb1b0b4455560ac4c38ad4d027c3613186dc7d4d062578ce30f092"
+candidateRawSha256: "sha256:868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a"
+candidateBytes: 36920
+testBeforeHash: "sha256:f026ffd171bee971062d9090bee94939b038a46c447af4494ee63f2014554633"
+testAfterHash: "sha256:59c5e3e24f7b32508e6be3835e4dd3274f315e1804c09d34de85cdcad92ab1f8"
+fixture: /private/tmp/live-evidence-path-repair-C7BgCp
+claimLines[1]: "Claim: blocked"
+scope: one authored test path line plus exact-byte historical asset restoration; production unchanged
+scratchEvidence:
+  tests: 54
+  pass: 54
+  fail: 0
+  childSuite: all four child suites exit 0
+  initialFixtureFailures: missing integration catalog and skill/contract fixtures; completed fixture before passing final run
+  log: /private/tmp/live-evidence-repair-focused-final.log

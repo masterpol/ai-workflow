@@ -1,0 +1,54 @@
+@toon-data 1
+schemaVersion: 1
+date: "2026-10-22"
+approvedSlugs[5]: toon-machine-data,vendor-model-toon,workflow-usage-capture,orca-role-pools,upstream-project-drift
+pitches[5]:
+  -
+    slug: toon-machine-data
+    status: upgraded
+    outcomeBytes: 1731
+    v1Hash: "sha256:8cff798347ffd196ceec871e42b00e02f9a9f54db8e45b60adfcfdadb9bea549"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: vendor-model-toon
+    status: upgraded
+    outcomeBytes: 1546
+    v1Hash: "sha256:ccba119eebc665d45d2d30f387b1e873f7c412331cc6d8b78a94a3192c27a85c"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: workflow-usage-capture
+    status: upgraded
+    outcomeBytes: 1992
+    v1Hash: "sha256:c451e95c5d59c9acf555f056a59690010bde1d9560d80eb11e7e2ef99f586f90"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: orca-role-pools
+    status: upgraded
+    outcomeBytes: 1746
+    v1Hash: "sha256:e68222c8ad3e71298725ed9194732363dadf7b332c9912837477e844c1e9a5c1"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+  -
+    slug: upstream-project-drift
+    status: upgraded
+    outcomeBytes: 1543
+    v1Hash: "sha256:92bab9dbb13800154087962f25eec10d4be7fa151ae4e17622a0bd021716f9de"
+    archiveVerify: valid
+    narrativeRetired: true
+    applyOutput:
+      applied: true
+counts:
+  legacy: 21
+  partial: 0
+  upgraded: 25

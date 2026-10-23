@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "slug": "codex-orca-coordinator-parity",
+  "sections": [
+    {
+      "source": "SHIPPED.md#approval-and-reconciliation",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "SHIPPED.md#final-verify",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes-and-limits",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/verify-run-binding-before-orca-dispatch.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "SHIPPED.md#knowledge-and-followups",
+      "status": "extracted",
+      "destination": ".project/pitches/_followups.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "SHIPPED.md#docs",
+      "status": "extracted",
+      "destination": "ai-framework/integrations/orca-vendors.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "status": "extracted",
+      "destination": ".project/knowledge/patterns/verify-run-binding-before-orca-dispatch.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/substring-hook-wiring-check-accepts-echoed-commands.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/substring-hook-wiring-check-accepts-echoed-commands.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "deviations.md#coverage-runner",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/coverage-instrumentation-changes-exact-child-environments.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "deviations.md#host-activation-evidence",
+      "status": "extracted",
+      "destination": "ai-framework/integrations/orca-vendors.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "deviations.md#audit-git-root-bootstrap-availability-boundary",
+      "status": "extracted",
+      "destination": "ai-framework/integrations/orca-vendors.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "deviations.md#audit-review-and-test-refinements",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/substring-hook-wiring-check-accepts-echoed-commands.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "deviations.md#audit-coverage-and-guard-tooling-boundaries",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/review-guard-hashes-ignored-secret-files.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "log.md#build-start",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "log.md#hook-integration-refinements",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "log.md#final-integration-and-verification",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "log.md#audit-completion",
+      "status": "extracted",
+      "destination": ".project/knowledge/issues/review-guard-hashes-ignored-secret-files.md",
+      "reason": "see destination"
+    },
+    {
+      "source": "log.md#ship",
+      "status": "extracted",
+      "destination": ".project/runs/2026-10-08-codex-orca-coordinator-parity.md",
+      "reason": "see destination"
+    }
+  ],
+  "coverage": 1,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-10-09T13:19:05.621Z"
+}

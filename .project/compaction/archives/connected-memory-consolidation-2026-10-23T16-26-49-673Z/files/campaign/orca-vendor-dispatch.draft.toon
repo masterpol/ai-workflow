@@ -1,0 +1,33 @@
+@toon-data 1
+slug: orca-vendor-dispatch
+draft: true
+state: needs-decision
+ledgerHash: "sha256:9c75b457ffe021b322e5713f0e0f775e50094e0e7a4a03bae3f41aecce581ec0"
+bindings:
+  ".project/records/pitch-compression/orca-vendor-dispatch.md": "sha256:5cecf2c1705f23f26fc0292f36dc41c9aca2dbce0913913c65809d1aabdbfd1e"
+legacyEntryHash: "sha256:1b25421f72c29433b831b07a946a7f31ea2e7ae8d80b6d6dc621ded7e74cc92c"
+mapping:
+  schemaVersion: 2
+  sections[7]{source,class,disposition,destination,helps,bodyHash}:
+    "SHIPPED.md#final-verification",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-1-shippedmdfinal-verification",null,null
+    "SHIPPED.md#reconciliation",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-2-shippedmdreconciliation",null,null
+    "SHIPPED.md#audit",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-3-shippedmdaudit",null,null
+    "SHIPPED.md#no-gos-honored",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-4-shippedmdno-gos-honored",null,null
+    "SHIPPED.md#followups",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-5-shippedmdfollowups",null,null
+    "pitch.md#no-gos",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-6-pitchmdno-gos",null,null
+    "pitch.md#rabbit-holes",null,null,".project/records/pitch-compression/orca-vendor-dispatch.md#section-7-pitchmdrabbit-holes",null,null
+  otherFiles[0]:
+judgments[7]{source,state,legacyStatus,legacyDestination,legacyReason,legacyReasonTruncated}:
+  "SHIPPED.md#final-verification",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-1-shippedmdfinal-verification",Preserved in the compact record section.,false
+  "SHIPPED.md#reconciliation",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-2-shippedmdreconciliation",Preserved in the compact record section.,false
+  "SHIPPED.md#audit",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-3-shippedmdaudit",Preserved in the compact record section.,false
+  "SHIPPED.md#no-gos-honored",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-4-shippedmdno-gos-honored",Preserved in the compact record section.,false
+  "SHIPPED.md#followups",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-5-shippedmdfollowups",Preserved in the compact record section.,false
+  "pitch.md#no-gos",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-6-pitchmdno-gos",Preserved in the compact record section.,false
+  "pitch.md#rabbit-holes",needs-decision,extracted,".project/records/pitch-compression/orca-vendor-dispatch.md#section-7-pitchmdrabbit-holes",Preserved in the compact record section.,false
+otherFilesState: needs-decision
+outcomeRecord: "---\nslug: orca-vendor-dispatch\nshipped: 2026-10-08\nschemaVersion: 1\ndraft: true\n---\n# orca-vendor-dispatch\n\nDraft only: content judgment is still required.\nRead the collected evidence before choosing durable destinations.\nNo upgrade or coverage decision has been applied.\n\n- outcome: needs-decision\n- docs: none\n- decisions: none\n- knowledge: none\n- code: none\n- verification: none\n- followups: none\n- archive: none\n"
+evidence[2]{path,hash,excerpt,truncated}:
+  ".project/done-work.md#orca-vendor-dispatch","sha256:1b25421f72c29433b831b07a946a7f31ea2e7ae8d80b6d6dc621ded7e74cc92c","## orca-vendor-dispatch — shipped 2026-10-08\n\nOrca dispatch core (v2.14.0-2.14.1) added the launch gate, the ownership ledger and supervised dispatch behind `AI_WORKFLOW_ORCA_MULTI_AGENT=true`: claim before launch, resume never relaunch, fail-closed retries only on positive proof, one live attempt per task, `worker_done` grammar. Node 846, Bun 817 pass; two audit cycles (4+1 must-fix fixed). Live proof Claude only; Codex and OpenCode launched but did not complete (trust prompt, port conflict, no funds).\n\nNo scheduler, remote support, forced parallelism or permission bypass. Lessons: [[retry-only-on-positive-proof-of-a-clean-failure]], [[a-gate-spawns-exactly-what-it-probed]].\n",false
+  ".project/records/pitch-compression/orca-vendor-dispatch.md","sha256:5cecf2c1705f23f26fc0292f36dc41c9aca2dbce0913913c65809d1aabdbfd1e","# Compaction record: orca-vendor-dispatch\n\nPrepared 2026-10-08. This record preserves closure evidence and constraints; the recovery archive retains the full source history.\n\nDurable knowledge: [[retry-only-on-positive-proof-of-a-clean-failure]], [[a-gate-spawns-exactly-what-it-probed]], [[prove-a-guard-test-with-an-in-memory-mutant]].\n\n## Section 1: SHIPPED.md#final-verification\n\nNode 846/846; Bun 817 pass, 0 fail. workflow-doctor and setup-validator READY, graphify CLEAN, docs-links 0 broken. No build/typecheck/lint/i18n commands exist in this repo. No secrets; dispatch is off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true` and an opted-in policy.\n\n## Section 2: SHIPPED.md#reconciliation\n\nS0 live runtime contract: partial (Claude launch, completion, settlement and isolation observed; Codex hit a trust prompt then no funds; OpenCode's port was held by the user's service then no funds; peer messaging not observed). S1 launch gate `orca-launch-gate.mts` (23 tests; executable pinning, worker guard, env allowlist, bounded briefs). S2 ownership ledger `orca-ledger.mts` (18 tests; distinct missing/refused/corrupt, symlink-safe, set-once dispatch id). S3 dispatch `orca-dispatch.mts` (40 tests; claim before launch, resume never relaunch, fail-closed retries, one live attempt per task, `worker_done` grammar). S4 wiring, docs and release (build skill, `orca-vendors.md`, README, `.env.example`, CHANGELOG). Added the `AI_WORKFLOW_ORCA_MULTI_AGENT` switch and Node/Bun async `run` timeout, overflow and grace fixes. Releases 2.14.0 and 2.14.1.\n\n## Section 3: SHIPPED.md#audit\n\nTwo cycles. Cycle 1: 4 security must-fix and 3 code high findings, all fixed. Cycle 2: security PASS, code 1 must-fix fixed. Reviewers independent with caught canaries. A later round of should-fix items was applied without a third review pass.\n\n## Section 4: SHIPPED.md#no-gos-honored\n\nNo scheduler, remote/SSH/WSL support, forced parallelism, permission bypass, automatic commits or publication. Worker changes were",true
+unavailable[0]:

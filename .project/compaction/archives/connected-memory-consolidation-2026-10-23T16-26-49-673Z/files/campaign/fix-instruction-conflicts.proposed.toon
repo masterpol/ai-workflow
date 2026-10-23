@@ -1,0 +1,35 @@
+@toon-data 1
+schemaVersion: 1
+state: awaiting-apply-approval
+slug: fix-instruction-conflicts
+sourceProof:
+  archiveDirectory: fix-instruction-conflicts-2026-10-19T03-28-32-752Z
+  manifestHash: "sha256:156481ea5939d2835c429bf16aa36cf562324aea4297ceb3f236b61a3f9ecc27"
+  sourceBytes: 23025
+  verifiedFiles: 4
+supplement:
+  staged: ".project/pitches/connected-memory-consolidation/campaign/fix-instruction-conflicts.supplement.md"
+  destination: ".project/records/legacy-upgrades/fix-instruction-conflicts.md"
+  hash: "sha256:a27883dd9f88f401b585085d214941037accabf2b7742062f10c00b8aecc2946"
+payload:
+  ledgerHash: "sha256:a18bceb099a61c793ffc8fbbcb10973dd632085661f7d80c64dde727b4f0723f"
+  legacyEntryHash: "sha256:797ce194894dbd26d1ca8bbb2a6074494da5f41d1fe70da175a789500e3f93ed"
+  bindings:
+    ".project/records/legacy-upgrades/fix-instruction-conflicts.md": "sha256:a27883dd9f88f401b585085d214941037accabf2b7742062f10c00b8aecc2946"
+  mapping:
+    schemaVersion: 2
+    sections[8]{source,class,disposition,destination,helps,bodyHash}:
+      "SHIPPED.md#scope-single-implicit-scope-logmd",behavior,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners","Per-finding outcome and the single owner file for each topic, findings A to M.","sha256:8a4b350d0d013004b2e068893a51ff76348f701a739a5ed15a91bea9f6c5fb75"
+      "SHIPPED.md#no-gos-honored",limit,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#no-gos","No gate, reviewer, evidence requirement or permission boundary removed; no compression; external skills untouched.","sha256:e4379c8f406443e248045239e6b286a03ed3f7e4d787845236613adafd689b33"
+      "SHIPPED.md#verify-final-2026-10-18",know-how,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#verification-and-evidence","No build, typecheck or lint command here; tests, doctor, validator, graph, link and diff checks substitute.","sha256:bf132f2ed5f6e9f2cbcf0a301fecac59ac293d24887347bd76cb7fcda17a2dce"
+      "SHIPPED.md#audit",know-how,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#review-chronology","Orca run, six attempts, canary and the owner-accepted eval residual risk.","sha256:0906d847f0610dfbd60b2fd256f1b8c502212be13bd250c2a11a94347912d899"
+      "SHIPPED.md#knowledge",know-how,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#knowledge-and-durable-owners",Links the pattern (confidence low) and the resolved issue.,"sha256:566e0e53f0e2c68bf5c96d499883aea4b439966ac8247fa6b02d995af88aceca"
+      "SHIPPED.md#followups",know-how,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#historical-limits","Golden cases owned by instruction-compression, the metrics-lock flake and cursor-mirrors skipping project agents.","sha256:e454fe2a33fa5a613268c0a3b98d94fefd087c1ae6e3b2e6d4313d5f89c76a23"
+      "log.md#triage-each-finding-verified-against-the-checkout-before-any-edit",know-how,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners","Contradictory sources, failure scenario and owner per finding A to H.","sha256:6cf3288552e75a96ebbf69570e117ada49ae67b5f5108d9a9265ba12baf13c9c"
+      "log.md#build-2026-10-17-done-awaiting-the-build-end-gate-bug-fix-gated",behavior,merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners","What each fix changed, plus the 7 of 8 pre-fix failure proof and build evidence.","sha256:2c00cd45d76ad0e273109c7cdd0936729ef577bdb19c26ee7dce1efc0a8a0258"
+    otherFiles[4]{path,hash,disposition,destination,helps}:
+      SHIPPED.md,"sha256:7a660ae652c4786893b90494f6eb140dde982e8932a81df424838cd035488bb0",merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners","Preserves scope, no-gos, audit and followups in the findings, chronology and limits sections."
+      audit.md,"sha256:ea62924fd54ec04dd0399e2835360222fd2ce46fbac3d17eca42c301f8ec6474",merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#review-chronology","Preserves S1 to S9, the canary, incomplete eval, author-run counts and the owner decision."
+      log.md,"sha256:9fcda9e48948e134e573d91e87bc8c830ab9b3fe513658f757964c7cbb17af68",merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners","Preserves triage, fixes and build evidence."
+      validation-2026-10-18.md,"sha256:6c10960a05f0e9ad52ce4cef56e0573476932f3409e399b6ec736b2b71705db9",merged,".project/records/legacy-upgrades/fix-instruction-conflicts.md#validation-pass","Preserves the corrections, test counts, second Orca run and non-independence caveats."
+  outcomeRecord: "---\nslug: fix-instruction-conflicts\nshipped: 2026-10-18\nschemaVersion: 1\n---\n# fix-instruction-conflicts\n\nConflicting instructions across phase specs, skills, agents and rules now agree, with one owner per topic.\nNo gate, reviewer, evidence requirement or permission boundary was removed.\nContract tests guard the owners; live behavior across vendors was not verified.\n\n- outcome: Each instruction topic has one owning file and contract tests keep its copies consistent.\n- docs: [orca vendors](ai-framework/integrations/orca-vendors.md), [vendors](ai-framework/docs/vendors.md), [skill defaults](ai-framework/integrations/skill-defaults.md)\n- decisions: [findings and owners](.project/records/legacy-upgrades/fix-instruction-conflicts.md#findings-and-owners)\n- knowledge: [one owner per topic](.project/knowledge/patterns/one-owner-per-instruction-topic-guarded-by-contract-tests.md), [instruction drift](.project/knowledge/issues/instruction-copies-drift-into-contradictions.md)\n- code: [contract tests](ai-framework/scripts/workflow-contracts.test.mts), [security reviewer](.claude/agents/security-reviewer.md), [overview](ai-framework/workflow/overview.md)\n- verification: [review chronology](.project/records/legacy-upgrades/fix-instruction-conflicts.md#review-chronology), [validation pass](.project/records/legacy-upgrades/fix-instruction-conflicts.md#validation-pass)\n- followups: [historical limits](.project/records/legacy-upgrades/fix-instruction-conflicts.md#historical-limits)\n- archive: [source supplement](.project/records/legacy-upgrades/fix-instruction-conflicts.md)\n"

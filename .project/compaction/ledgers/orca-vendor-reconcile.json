@@ -1,52 +1,112 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "orca-vendor-reconcile",
   "sections": [
     {
       "source": "SHIPPED.md#final-verification",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-1-shippedmdfinal-verification",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains historical final verification and library opt-in boundary.",
+      "bodyHash": "sha256:a4c0b19f8861440bcadfa01a30c98789a20db365e2f5b4c73d8120db6797f97e"
     },
     {
       "source": "SHIPPED.md#reconciliation",
-      "status": "extracted",
+      "class": "behavior",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-2-shippedmdreconciliation",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves core modules and release ownership; supplement retains later count chronology.",
+      "bodyHash": "sha256:a80b3b19e712e7df2c5391f59c01e4e53aa521aebdee014994a87b049af40c88"
     },
     {
       "source": "SHIPPED.md#audit",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-3-shippedmdaudit",
-      "reason": "Preserved in the compact record section."
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-reconcile.md#review-and-commit-provenance",
+      "helps": "Preserves audit chronology, incident safeguards and limits on later independent review.",
+      "bodyHash": "sha256:1b6c28122e33aaa242a8cf9213f6ecd06f9f8ff86fa7b116203c9aa563114030"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
+      "class": "limit",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-4-shippedmdno-gos-honored",
-      "reason": "Preserved in the compact record section."
+      "helps": "Retains prohibited automation and integration ownership.",
+      "bodyHash": "sha256:b838e7bfe50329aadb261a6813f47f504dec5ccd7045e1ffe232fa91c079e086"
     },
     {
       "source": "SHIPPED.md#followups",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-5-shippedmdfollowups",
-      "reason": "Preserved in the compact record section."
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:9327a3c9dec2c7085e37855d82f21dd2659af6604c980fba089ecf964d5910b5"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-6-pitchmdno-gos",
-      "reason": "Preserved in the compact record section."
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-4-shippedmdno-gos-honored",
+      "helps": "Retains the standing no-gos through the shared closure statement.",
+      "bodyHash": "sha256:f642eb2aa05536ccbf083c1b0d6a381b1736a1d0bac6af0b7db841b9569beacc"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
+      "class": "know-how",
+      "disposition": "merged",
       "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md#section-7-pitchmdrabbit-holes",
-      "reason": "Preserved in the compact record section."
+      "helps": "Preserves baseline attribution, safe evidence, settlement and coordinator verification.",
+      "bodyHash": "sha256:06f8bbc1f0c668d69b0c632d2e46ede48089840970a220b5d9181b1c6cde3af7"
     }
   ],
-  "coverage": 1,
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "hash": "sha256:eb837372cb25688bfb76b3f6e25f7fe603ee2d7dd00072f94576cef3f5c5d673",
+      "disposition": "merged",
+      "destination": ".project/records/pitch-compression/orca-vendor-reconcile.md",
+      "helps": "Preserves historical closure, core outputs, test results and boundaries."
+    },
+    {
+      "path": "deviations.md",
+      "hash": "sha256:faaf1eeff2a9ac009fd5a02083ff8eaa9895a287931883b5976520cc7af10acb",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-reconcile.md",
+      "helps": "Preserves accepted overrun and exact scratch-Git safety response."
+    },
+    {
+      "path": "hill.md",
+      "hash": "sha256:f4dfa363b6f5c4acff42a72f20de1aa9ed0e4ab0b818d214ab45d996b1d3d8e0",
+      "disposition": "omitted",
+      "reason": "process-noise"
+    },
+    {
+      "path": "log.md",
+      "hash": "sha256:74ab9fc3968d89cc834c60df369db5af8bef7904e45b4bfb21c6b0db243a5532",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-reconcile.md",
+      "helps": "Retains assurance limits, clean-export incident and later review/count chronology."
+    },
+    {
+      "path": "pitch.md",
+      "hash": "sha256:da384c5f36c7771ef6403c4f7ebd438652aa166b6b3c384b84dc85b71799ae46",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-reconcile.md",
+      "helps": "Retains approved core scope, independent verification and live-versus-simulated evidence boundaries."
+    },
+    {
+      "path": "plan.md",
+      "hash": "sha256:efc2fddc9de0aae55f91a384aaf50eb7fa0422ae98320fa33ae1a94d624b0b45",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/orca-vendor-reconcile.md",
+      "helps": "Preserves combined-wave decision and implemented safety contracts through linked current guidance."
+    }
+  ],
+  "coverage": 0.8571428571428571,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-10-08T16:23:24.958Z"
+  "committedAt": "2026-10-22T18:32:00.622Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:8a131e033df4ad983cd12704c7d34f3f229d289fd58d9ac7f81bef29d602ed4f",
+    "introducingCommit": "1db913a2bc2a7fbcd97c358984916ee21097422d"
+  }
 }

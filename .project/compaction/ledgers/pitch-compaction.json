@@ -1,100 +1,198 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "slug": "pitch-compaction",
   "sections": [
     {
       "source": "SHIPPED.md#scope-reconciliation",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility",
+      "helps": "Preserves SHIPPED.md#scope-reconciliation with safety history and verification limits.",
+      "bodyHash": "sha256:fac47eb6b5a1ec78b4e4eac306d431b07ddaec9102534aa2baf3103158742bcf"
     },
     {
       "source": "SHIPPED.md#confidence-read-this-before-relying-on-it",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence",
+      "helps": "Preserves SHIPPED.md#confidence-read-this-before-relying-on-it with safety history and verification limits.",
+      "bodyHash": "sha256:1e570fa8df141aa4cf59bb34a581d35388ace9a3a938852e44952baf1409c656"
     },
     {
       "source": "SHIPPED.md#no-gos-honored",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract",
+      "helps": "Preserves SHIPPED.md#no-gos-honored with safety history and verification limits.",
+      "bodyHash": "sha256:7bee9325cb840bb34896b57abc295d5a1e50ddb97c77fe8603a8426c10ebef80"
     },
     {
       "source": "SHIPPED.md#rabbit-holes-resolved-as-committed",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#shared-machinery-and-generated-context",
+      "helps": "Preserves SHIPPED.md#rabbit-holes-resolved-as-committed with safety history and verification limits.",
+      "bodyHash": "sha256:f1ca60f3f78d84fe10863dc33d6e2b5abc1d20eec5ef7b91aa816b4a0b839c93"
     },
     {
       "source": "SHIPPED.md#audit-findings-final-disposition",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence",
+      "helps": "Preserves SHIPPED.md#audit-findings-final-disposition with safety history and verification limits.",
+      "bodyHash": "sha256:4b0ec0138522ebe974be42da2119eff3b022e797b496e36c7019dcac4aebaeb5"
     },
     {
       "source": "SHIPPED.md#knowledge-extracted",
-      "status": "extracted",
-      "destination": ".project/knowledge/index.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence",
+      "helps": "Preserves SHIPPED.md#knowledge-extracted with safety history and verification limits.",
+      "bodyHash": "sha256:e7db93061921b31c9965a1486e120f9509b9f99e723b33592e168c02b56e86a2"
     },
     {
       "source": "SHIPPED.md#followups-generated",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#followups-version-and-later-narrative",
+      "helps": "Preserves SHIPPED.md#followups-generated with safety history and verification limits.",
+      "bodyHash": "sha256:61af6343bd8eb7447bbabde38f07c4a591f0d66e05be6c4d96a65738585f7aaf"
     },
     {
       "source": "SHIPPED.md#what-downstream-pitches-can-now-build-on",
-      "status": "extracted",
-      "destination": ".project/done-work.md",
-      "reason": ""
+      "class": "behavior",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#shared-machinery-and-generated-context",
+      "helps": "Preserves SHIPPED.md#what-downstream-pitches-can-now-build-on with safety history and verification limits.",
+      "bodyHash": "sha256:30444a492ce40f053b4bab4cb7523c8ae644cd40a911d75378a320c8f6ee7cc6"
     },
     {
       "source": "SHIPPED.md#version",
-      "status": "extracted",
-      "destination": ".project/pitches/_followups.md",
-      "reason": ""
+      "class": "limit",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#followups-version-and-later-narrative",
+      "helps": "Preserves SHIPPED.md#version with safety history and verification limits.",
+      "bodyHash": "sha256:558b22fd18b651861da5b6dfce219282fb31d247dac0178b75f8fab591b5e49d"
     },
     {
       "source": "pitch.md#no-gos",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "rule",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract",
+      "helps": "Preserves pitch.md#no-gos with safety history and verification limits.",
+      "bodyHash": "sha256:46a3e4d6a92f0eccea2ca4b104fa1bbd1b8d8a244119be15bf076fd7b0f2b77e"
     },
     {
       "source": "pitch.md#rabbit-holes",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/workflow-tooling-pitches-share-standing-no-gos-and-design-answers.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#shared-machinery-and-generated-context",
+      "helps": "Preserves pitch.md#rabbit-holes with safety history and verification limits.",
+      "bodyHash": "sha256:939b7b4b316b8bba5d7660f32322224b7f7127ab764b767ac2ed6c6c0bd3c8a2"
     },
     {
       "source": "audit-cycle-1.md",
-      "status": "extracted",
-      "destination": ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence",
+      "helps": "Preserves audit-cycle-1.md with safety history and verification limits.",
+      "bodyHash": "sha256:8fa383195c65c2e84f57f6b594f1f805bd8ef25bb9a9d295048ba10cdf48e3f2"
     },
     {
       "source": "deviations.md#c1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#build-verification-and-unique-lessons",
+      "helps": "Preserves deviations.md#c1-2026-09-25 with safety history and verification limits.",
+      "bodyHash": "sha256:dc609c2f9b8840225f4df61bf91f7269a41469ee87f161825c3bf8e184e99f29"
     },
     {
       "source": "deviations.md#c2-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md",
-      "reason": ""
+      "class": "decision",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract",
+      "helps": "Preserves deviations.md#c2-2026-09-25 with safety history and verification limits.",
+      "bodyHash": "sha256:0f0c36fd51b34168937f418fefc29d66dadaaa658aae2239cb6b2113623917c7"
     },
     {
       "source": "deviations.md#audit-cycle-1-2026-09-25",
-      "status": "extracted",
-      "destination": ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md",
-      "reason": ""
+      "class": "know-how",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#audit-failures-fixes-and-confidence",
+      "helps": "Preserves deviations.md#audit-cycle-1-2026-09-25 with safety history and verification limits.",
+      "bodyHash": "sha256:b64ff3e8aaf7797a8c580b9991922ee18fafde7237ab08e5aef02b14b7482fcf"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility",
+      "helps": "Preserves substantive SHIPPED.md commitments, measurements and limits.",
+      "hash": "sha256:95ddf91255c7047951884899df213befa39315982d858e7e090c0d1b160dee54"
+    },
+    {
+      "path": "c1-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#build-verification-and-unique-lessons",
+      "helps": "Preserves substantive c1-evidence.md commitments, measurements and limits.",
+      "hash": "sha256:091e13e026e3440819fb4da9333e31e05c33ab194e23573881e70f75bfc0c420"
+    },
+    {
+      "path": "c2-evidence.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#build-verification-and-unique-lessons",
+      "helps": "Preserves substantive c2-evidence.md commitments, measurements and limits.",
+      "hash": "sha256:06c1959dfeb666c36e450e15ff18a167593864a96e70ec0247e94592002a6c7e"
+    },
+    {
+      "path": "compaction-index.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility",
+      "helps": "Preserves substantive compaction-index.md commitments, measurements and limits.",
+      "hash": "sha256:ba4608afa85e8a2f9f8151a457d45153f554bcd2c8654d74bb7e24b4f2dceac5"
+    },
+    {
+      "path": "compaction-removal.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#preservation-and-deletion-contract",
+      "helps": "Preserves substantive compaction-removal.md commitments, measurements and limits.",
+      "hash": "sha256:c23be7eb735103d6270d036ab960c33803df0a681f290ad07d0e14b1bc59b3aa"
+    },
+    {
+      "path": "deviations.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-09-25-pitch-compaction.md",
+      "helps": "Tracked run is byte-identical to cached deviations, retaining the superseded safety interpretation.",
+      "hash": "sha256:29ae5ffef50c499fa4d761bc5f728ce8f86bdf1fe55ae5fb5df39cb909f2a15b"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:78f43a20451b7b83e3c7457e7bf7c662a77ed1bfe666d9f92014da9874ea8c64"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility",
+      "helps": "Preserves substantive pitch.md commitments, measurements and limits.",
+      "hash": "sha256:1d3d35f9302614b7893e903c25440759e8c2d4a40bbd25c6f11d162a7000ceff"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "merged",
+      "destination": ".project/records/legacy-upgrades/pitch-compaction.md#scope-and-eligibility",
+      "helps": "Preserves substantive plan.md commitments, measurements and limits.",
+      "hash": "sha256:108192273bbd531a3db57fd5229a9289385559c8d2f884b190504c224f3dc0e4"
     }
   ],
   "coverage": 1,
   "gaps": [],
   "acceptedGaps": [],
-  "committedAt": "2026-09-25T13:39:04.077Z"
+  "committedAt": "2026-10-23T14:21:22.968Z",
+  "legacyUpgrade": {
+    "approvalHash": "sha256:bd59a5e66dc9bb2aa725ad525f5d8a0d6072e70628662fe3187dde19d16f8bce",
+    "introducingCommit": "ea82bcee68b70bb0b4f2938268c9c796425ccff0"
+  }
 }
