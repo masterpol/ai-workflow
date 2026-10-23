@@ -4,8 +4,8 @@ runtime:
 integrations:
   orca:
     engine: ">=1.4.224"
-    enabled: true
-    multiAgent: true
+    enabled: false
+    multiAgent: false
     maxConcurrentWorkers: 3
     maxRetriesPerTask: 1
     coordinators:

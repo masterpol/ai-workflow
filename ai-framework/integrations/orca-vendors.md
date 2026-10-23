@@ -23,6 +23,8 @@ necessary but not sufficient: dispatch also needs an opted-in policy and a suppo
 
 ## `integrations.orca` in `ai-workflow.toon` (schemaVersion 3)
 
+The `integrations` section and the `integrations.orca` block are optional. When either is missing, Orca is off (`enabled: false`, `multiAgent: false`, limits 3 and 1, no engine pin), every phase runs the normal flow, and nothing reports an error. Once the block exists, `engine` is required.
+
 Orca settings live in one block of the project-root `ai-workflow.toon` (`schemaVersion: 3`):
 `integrations.orca` with `engine` (required string, the Orca engine version), `enabled`, `multiAgent`,
 `maxConcurrentWorkers`, `maxRetriesPerTask` and `coordinators.<vendor>.{workers, roles}`. The layout with flat

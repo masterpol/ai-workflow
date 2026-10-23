@@ -480,9 +480,12 @@ function validateCoordinators(raw: unknown, problems: Problem[]): OrcaIntegratio
     return coordinators;
 }
 
+/** Orca when the config does not mention it: off, with the documented limits and no engine pin (the default floor applies). */
+const defaultOrca = (): OrcaIntegration => ({ engine: "", enabled: false, multiAgent: false, maxConcurrentWorkers: 3, maxRetriesPerTask: 1 });
+
 function validateOrca(raw: Record<string, unknown>, problems: Problem[]): OrcaIntegration {
     const base = "integrations.orca";
-    const orca: OrcaIntegration = { engine: "", enabled: false, multiAgent: false, maxConcurrentWorkers: 3, maxRetriesPerTask: 1 };
+    const orca = defaultOrca();
 
     for (const key of Object.keys(raw)) {
         if (!ORCA_KEYS.has(key)) problems.push(problem(errorCodes.parserUnrecognized, `unknown key "${key}" in ${base}`));
@@ -533,6 +536,8 @@ function validateOrca(raw: Record<string, unknown>, problems: Problem[]): OrcaIn
 }
 
 function validateIntegrations(raw: unknown, problems: Problem[]): ConfigModel["integrations"] | undefined {
+    // No `integrations` section means no integration is configured: Orca stays off and the normal flow runs.
+    if (raw === undefined) return { orca: defaultOrca() };
     if (!isRecord(raw)) {
         problems.push(problem(errorCodes.validationType, "integrations must be an object"));
         return undefined;
@@ -554,11 +559,7 @@ function validateIntegrations(raw: unknown, problems: Problem[]): ConfigModel["i
         }
         if (name !== "orca") others[name] = entry;
     }
-    if (orca === undefined) {
-        problems.push(problem(errorCodes.validationType, "integrations.orca is required"));
-        return undefined;
-    }
-    return { ...others, orca };
+    return { ...others, orca: orca ?? defaultOrca() };
 }
 
 function validateModels(raw: unknown, problems: Problem[]): ModelsConfig | undefined {

@@ -750,8 +750,13 @@ test("integrations.orca: legacy top-level engines/orchestration keys are rejecte
 });
 
 test("integrations.orca: missing block, missing engine, bad bounds and unknown keys are reported", () => {
-    const noOrca = loadConfig("/project", memoryDeps(memoryFs({ "/project/ai-workflow.toon": BASELINE_TOON.replace(/integrations:[\s\S]*?doctor:/, "integrations: {}\ndoctor:") }, {})));
-    assert.ok("status" in noOrca && noOrca.code === errorCodes.loadConfigRefused, "missing orca block refuses the load");
+    const off = { engine: "", enabled: false, multiAgent: false, maxConcurrentWorkers: 3, maxRetriesPerTask: 1 };
+    const noOrca = loadText(BASELINE_TOON.replace(/integrations:[\s\S]*?doctor:/, "integrations: {}\ndoctor:"));
+    assert.equal(noOrca.problems.length, 0, "an integrations section without orca is not an error");
+    assert.deepEqual(noOrca.model.integrations.orca, off, "a missing orca block means Orca is off with the default limits");
+    const noIntegrations = loadText(BASELINE_TOON.replace(/integrations:[\s\S]*?doctor:/, "doctor:"));
+    assert.equal(noIntegrations.problems.length, 0, "a config with no integrations section is not an error");
+    assert.deepEqual(noIntegrations.model.integrations.orca, off, "no integrations section means Orca is off and the normal flow runs");
     const bad = loadText(BASELINE_TOON.replace('    engine: "1.4.224"\n', "").replace("maxConcurrentWorkers: 3", "maxConcurrentWorkers: 17").replace("maxRetriesPerTask: 1", "maxRetriesPerTask: -1\n    bogus: 1"));
     const texts = bad.problems.map((p) => p.text).join("|");
     assert.match(texts, /integrations\.orca\.engine is required/);

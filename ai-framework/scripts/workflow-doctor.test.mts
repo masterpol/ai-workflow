@@ -679,10 +679,10 @@ test("doctor Config validators check: absent is info, valid passes, unregistered
   const example = fs.readFileSync(urlPath(new URL("../templates/ai-workflow.example.toon", import.meta.url)), "utf8");
   const cases: Array<[string | null, string, RegExp]> = [
     [null, "info", /absent; no validator slots in use/],
-    [example, "pass", /integrations\.orca \(engine >=1\.4\.224, on\) and 0 other integration\(s\) in use, all registered/],
+    [example, "pass", /integrations\.orca \(engine >=1\.4\.224, off\) and 0 other integration\(s\) in use, all registered/],
     [example.replace("doctor:\n", "  nosuchtool:\n    a: 1\ndoctor:\n"), "fail", /unregistered validator slot\(s\): unknown integration "nosuchtool"/],
     [example.replace("    engine: \">=1.4.224\"\n", ""), "fail", /integrations\.orca\.engine is required/],
-    [example.replace(">=1.4.224", ">=1.4.224 <1.6.0 || ^2.0.0"), "pass", /engine >=1\.4\.224 <1\.6\.0 \|\| \^2\.0\.0, on/],
+    [example.replace(">=1.4.224", ">=1.4.224 <1.6.0 || ^2.0.0"), "pass", /engine >=1\.4\.224 <1\.6\.0 \|\| \^2\.0\.0, off/],
     [example.replace(">=1.4.224", "^^1.4"), "fail", /integrations\.orca\.engine is not a valid version range: .* at position \d+/],
     [example.replace(">=1.4.224", "1.5.0-beta.1"), "fail", /prerelease and build metadata are not supported at position 5/],
     ["schemaVersion: 3\n", "fail", /problem|refused/],
