@@ -828,4 +828,3 @@ test("remove refuses, with every file left in place, a group whose folder or led
     for (const file of ["SHIPPED.md", "pitch.md", "campaign/f0.txt"]) assert.equal(exists(root, `${dir}/${file}`), true, `${name}: ${file} must still exist`);
   }
 });
-

@@ -973,4 +973,3 @@ test("a pitch with more files than the folder bound is refused even when grouped
   const root = groupedPitch(t, "grp-big", MAX_PITCH_FILES + 1);
   assert.throws(() => createPitchCompress(testDeps).otherPitchFiles(root, "grp-big"), /more than 2000 files/);
 });
-

@@ -1,17 +1,17 @@
 # Graph Report - ai-workflow-portable  (2026-10-23)
 
 ## Corpus Check
-- 701 files · ~765,303 words
+- 701 files · ~765,310 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 29 file(s) not represented in the graph (top: .toml 17, (none) 9, .toon 3)
 
 ## Summary
-- 7624 nodes · 15099 edges · 399 communities (304 shown, 95 thin omitted)
+- 7624 nodes · 15100 edges · 399 communities (304 shown, 95 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 865 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c78e86ec`
+- Built from commit: `13e20327`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -1662,14 +1662,14 @@ Nodes (7): Bounds and failures, Hook-to-event mapping (planned), Joined token/ti
 
 ## Knowledge Gaps
 - **3512 isolated node(s):** `TsDiagnostic`, `Plain`, `testDeps`, `$schema`, `plugin` (+3507 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 3921 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 3920 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **95 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `RuntimeDeps` connect `RuntimeDeps` to `skill-registry.mts`, `orca-evidence.mts`, `token-consumption.mts`, `pitch-archive.mts`, `index.md`, `workflow-metrics-report.mts`, `state-theme.mts`, `review-bench.mts`, `orca-dispatch.mts`, `token-consumption.test.mts`, `graphify.mts`, `config-migrate.mts`, `workflow-metrics-state.mts`, `state-render.mts`, `createNodeDeps`, `orca-diff-admit.mts`, `state-history.mts`, `orca-dispatch.test.mts`, `state-graph.mts`, `browser-runtime.test.mts`, `skill-defaults.test.mts`, `workflow-metrics-state.test.mts`, `orca-reconcile.mts`, `flow-join.mts`, `orca-eval-grader.mts`, `flow-report.mts`, `orca-preflight.mts`, `skill-source.mts`, `config-migrate.test.mts`, `orca-run.mts`, `graphify-relations.mts`, `skill-vendors.mts`, `skill-sync.test.mts`, `validate.test.mts`, `state-snapshot.mts`, `metrics-lock.test.mts`, `skill-vendors.test.mts`, `orca-launch-gate.test.mts`, `config.mts`, `state-design.mts`, `outcome-record.mts`, `node.mts`, `changelog.test.mts`, `orca-ledger.mts`, `stuck-uphill-detector.mts`, `pre-ship-verify.mts`, `types.mts`, `orca-run.test.mts`, `data-file.mts`, `orca-policy.mts`, `orca-evidence.test.mts`, `test-helpers.mts`, `skill-sync.mts`, `Source-review supplement: state-ai-authoring`, `urlPath`, `legacy-upgrade.mts`, `Codex handoff — start here`, `state-fragment-inject.mts`, `Compaction record: ts-runtime-injection`, `state-structure.mts`, `flow-report.test.mts`, `transcript-usage.mts`, `orca-apply.test.mts`, `bundle-sync.mts`, `Entity: Graphify (knowledge-graph front end)`, `workflow-doctor.mts`, `setup-validator.mts`, `runDirect`, `config.test.mts`, `workflow-capture.mts`, `pitch-compress.mts`, `orca-diff-admit.test.mts`, `post-edit-check.mts`, `consolidation-migrate.mts`, `ref_node_assert`, `add-skill.test.mts`, `state-fragment-evidence.mts`, `docs-links.mts`, `runtime.test.mts`, `orca-apply.mts`?**
-  _High betweenness centrality (0.119) - this node is a cross-community bridge._
+  _High betweenness centrality (0.118) - this node is a cross-community bridge._
 - **Are the 8 inferred relationships involving `RuntimeDeps` (e.g. with `Event contract` and `Boundary validator`) actually correct?**
   _`RuntimeDeps` has 8 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `TsDiagnostic`, `Plain`, `testDeps` to the rest of the system?**
