@@ -26,6 +26,9 @@ ai-workflow.toon
 .claude/skills/caveman/
 .agents/skills/caveman/
 .cursor/skills/caveman/
+.claude/skills/archify/
+.agents/skills/archify/
+.cursor/skills/archify/
 .opencode/skills/
 
 # Graphify: commit graph.json and GRAPH_REPORT.md; the cache, manifest, HTML and snapshots are machine-local.

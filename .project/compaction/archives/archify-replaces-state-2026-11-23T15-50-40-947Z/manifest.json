@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "slug": "archify-replaces-state",
+  "sourceRoot": ".project/pitches/archify-replaces-state",
+  "archivedAt": "2026-11-23T15:50:40.949Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "eb3e0d85cb1557e7419f75ae6443ad7031d7e6e9662ce1d8200e801182bc7d04",
+      "mode": 420
+    },
+    "audit-code.md": {
+      "hash": "22df00fbe7efbb2930bfdc435bf61abc507ac5155b55677b8848e5169d4a1519",
+      "mode": 420
+    },
+    "audit-cross-pitch.md": {
+      "hash": "296e03bbcbb4670aae642e451177e3d074b02e4d9505648f27b0734b19353992",
+      "mode": 420
+    },
+    "audit-security.md": {
+      "hash": "a2458fb837cb6bc20e2d64c5bd88c9162b4b7de130cd05696b19aa37ede09c4b",
+      "mode": 420
+    },
+    "audit-test.md": {
+      "hash": "b1305554ff8a14b6bcae157996477ba650a8ce4632668d00cefe6c06022c8a73",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "af42d53cf4327a665635f64a721470109864fc1975ecc1877e6fde0f6c4af6d5",
+      "mode": 420
+    },
+    "findings.md": {
+      "hash": "c98b373e66581c1daba52316c6d7b1b163b307cf91d4514c1b246eb3592cf97e",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "25a6077747c73edcf4449c92521fd0dd67c1c7bed3942b08fa90789383bc0ade",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "61b370acc24509a8122bf20fb8d047a02f8bdb5e4ab7f6becd89beb305e241d1",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "f34d60e6d1ced5605d98d1285359a378d8e4b617168087b41c3105a065b0469d",
+      "mode": 420
+    }
+  }
+}

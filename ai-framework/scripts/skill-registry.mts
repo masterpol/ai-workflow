@@ -46,7 +46,7 @@ interface Created { root: RootName; path: string }
 interface StoredValue { data: string; mode: number }
 
 let nodeDeps: RuntimeDeps | undefined;
-/** Lazily created Node deps, so old-signature callers (add-skill, skill-sync, state-snapshot, ...) need no change. */
+/** Lazily created Node deps, so old-signature callers (add-skill, skill-sync, ...) need no change. */
 function defaultDeps(): RuntimeDeps {
   return (nodeDeps ??= createNodeDeps());
 }

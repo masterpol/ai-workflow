@@ -2,9 +2,9 @@
 id: orca-model-preflight-can-leave-unproven-ledger-ownership
 type: issue
 created: 2026-10-21
-updated: 2026-10-21
+updated: 2026-11-23
 tags: [orca, orchestration, liveness, model-routing, diagnostics]
-related: [a-gate-must-not-trust-its-own-author, reviewer-reports-contradicted-by-measurement]
+related: [a-gate-must-not-trust-its-own-author, reviewer-reports-contradicted-by-measurement, a-receipt-field-reaches-a-reason-only-as-a-bounded-token]
 source: workflow-usage-capture
 severity: medium
 resolved: false
@@ -36,3 +36,8 @@ pre-creation gate excerpt), effective-model-receipts.json, accepted completions 
 Audit evidence was subsequently archived with per-file SHA-256 verification to
 `.project/runs/2026-10-21-workflow-usage-capture-audit-evidence.tar.gz`; its adjacent manifest
 preserves the former metrics filenames and hashes. Extract to a temporary directory to inspect it.
+
+## Partly addressed (orca-bounded-control-receipts, 2026-11-23; still `resolved: false`)
+
+A structured CLI refusal is now reported as `launch-failed:refused:<code>` (a plain token only, nothing else echoed), so the reason is no longer lost. Ownership is unchanged on purpose: the code says why, it does not prove that nothing was created. What is still missing is a positive proof, which needs one real captured refusal receipt (scope S3, deferred because it creates Orca state in the owner's account).
+

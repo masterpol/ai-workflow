@@ -40,11 +40,11 @@ Codex, and Cursor** — install once, open with whichever tool you have.
 - **Consumption is compact and local.** A post-agent collector keeps current and previous usage,
   lifetime totals, and a small idempotency window in one JSON snapshot, plus regenerated Markdown
   and HTML views. It never retains prompts, responses, or transcripts.
-- **A snapshot of where the project stands.** `/state` writes a linked set of static HTML pages to
-  `.project/reports/` (git-ignored): an overview, a folder-structure diagram for the detected project type with the
-  decisions that touch each folder, base skills versus project skills, token metrics, knowledge counts with a link to
-  the graph, and the pitch list. Every fact carries a status (observed, proposed, stale, unavailable, unconfigured)
-  and the file it came from; the pages contain no scripts. See [State report](ai-framework/integrations/state-report.md).
+- **A snapshot of where the project stands.** `/state` gathers facts (installed version, active pitches, knowledge
+  counts, installed skills) from a fixed list of project files and renders one page to `.project/reports/state.html`
+  (git-ignored) with the [Archify](https://github.com/tt-a1i/archify) skill, which you install per checkout. Every fact
+  carries a status (observed, proposed, stale, unavailable, unconfigured) and the file it came from. Without Archify it
+  stops after the facts and prints the install command. See [State report](ai-framework/integrations/state-report.md).
 - **History stays small.** After a pitch ships, `/pitch-compress` extracts what is worth keeping into the knowledge
   graph and `.project/done-work.md`, archives the pitch byte-for-byte outside `.project/pitches/`, and deletes the
   original only after you approve a specific preview. The archive can restore it.
@@ -163,4 +163,4 @@ the full decision table: [Orca vendors](ai-framework/integrations/orca-vendors.m
 | [The pipeline](ai-framework/docs/pipeline.md) | Phases, gates and the core skills |
 | [How to improve this flow](ai-framework/docs/extending.md) | When and how to extend the workflow |
 | [Design notes](ai-framework/docs/design-notes.md) | Rationale and safety notes |
-| [State report](ai-framework/integrations/state-report.md) | `/state` pages, snapshot contract and what the report never reads |
+| [State report](ai-framework/integrations/state-report.md) | `/state` facts contract, the pinned Archify install and what the report never reads |

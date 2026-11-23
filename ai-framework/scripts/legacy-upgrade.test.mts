@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { status, prepare, apply, main, type ApprovedUpgrade, MAX_RECEIPT_BYTES, MAX_LEGACY_SCAN_BYTES } from "./legacy-upgrade.mts";
-import { buildSnapshot } from "./state-snapshot.mts";
 import { writeData } from "./runtime/data-file.mts";
 import { createPitchCompress } from "./pitch-compress.mts";
 import { createPitchArchive } from "./pitch-archive.mts";
@@ -224,8 +223,6 @@ test("upgrades a removed pitch, retains exact v1 bytes, lints, indexes once and 
   assert.equal(read(root, ".project/compaction/ledgers/alpha.v1.json"), original);
   assert.equal(status(root, base)[0].state, "upgraded");
   assert.equal(compactedSlugs(root, base).size, 1);
-  const snapshot = buildSnapshot(root, { now: "2026-10-22T12:00:00.000Z" });
-  assert.equal(snapshot.doneWork.value?.compacted, 1);
   assert.equal(createPitchCompress(applyDeps).inventory(root).filter(row => row.slug === "alpha").length, 1);
   assert.deepEqual(lintOutcomeRecord(root, ".project/records/shipped/alpha.md", base).problems, []);
   assert.equal((read(root, DONE_WORK_FILE).match(/^- \[alpha\]/gm) ?? []).length, 1);
@@ -252,8 +249,6 @@ for (const step of [1, 2, 3, 4, 5]) test(`resumes after SIGKILL at completed ste
   assert.equal(read(root, ".project/compaction/ledgers/alpha.v1.json"), v1());
   assert.equal(status(root, base).filter(row => row.slug === "alpha").length, 1);
   assert.equal(compactedSlugs(root, base).size, 1);
-  const snapshot = buildSnapshot(root, { now: "2026-10-22T12:00:00.000Z" });
-  assert.equal(snapshot.doneWork.value?.compacted, 1);
   assert.equal(createPitchCompress(applyDeps).inventory(root).filter(row => row.slug === "alpha").length, 1);
   apply(root, "alpha", approved, applyDeps, approvalOptions);
   assert.equal(status(root, base)[0].state, "upgraded");

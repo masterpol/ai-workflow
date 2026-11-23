@@ -13,7 +13,7 @@ The live matrix was blocked by two 0.50 regressions and unrun OpenCode and Curso
 - docs: [state report guide](ai-framework/integrations/state-report.md)
 - decisions: [state report design](.project/knowledge/decisions/project-state-report-design.md), [audit and owner decisions](.project/records/legacy-upgrades/state-deep-evidence.md#audit-and-owner-decisions)
 - knowledge: [scrubbing bypass](.project/knowledge/issues/snapshot-metadata-bypassed-output-scrubbing.md), [guard snapshot cap](.project/knowledge/issues/review-guard-snapshot-can-outgrow-its-reader.md), [package-less wrapper](.project/knowledge/issues/package-less-bundle-ship-wrapper-cannot-select-checks.md)
-- code: [graph](ai-framework/scripts/state-graph.mts), [history](ai-framework/scripts/state-history.mts), [snapshot](ai-framework/scripts/state-snapshot.mts), [dataset](.project/evals/datasets/state-deep-evidence.json)
+- code: [removed by archify-replaces-state; see the source supplement](.project/records/legacy-upgrades/state-deep-evidence.md)
 - verification: [verification history](.project/records/legacy-upgrades/state-deep-evidence.md#verification-history)
 - followups: [limits and open items](.project/records/legacy-upgrades/state-deep-evidence.md#limits-and-open-items), [backlog](.project/pitches/_followups.md)
 - archive: [source supplement](.project/records/legacy-upgrades/state-deep-evidence.md)

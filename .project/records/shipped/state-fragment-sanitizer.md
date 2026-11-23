@@ -13,7 +13,7 @@ Release 2.35.0 shipped with 666 of 800 production lines. Rendering and injection
 - docs: [state report guide](ai-framework/integrations/state-report.md)
 - decisions: [design decisions D1 to D10](.project/records/legacy-upgrades/state-fragment-sanitizer.md#design-decisions)
 - knowledge: [limits object defeats cap](.project/knowledge/patterns/a-caller-supplied-limits-object-can-defeat-a-hard-cap.md), [sparse array holes](.project/knowledge/issues/a-sparse-array-hole-skips-every-but-visits-for-of.md), [named test per case](.project/knowledge/patterns/a-golden-dataset-case-counts-only-when-a-named-test-passes.md)
-- code: [parser](ai-framework/scripts/state-fragment-parse.mts), [validator](ai-framework/scripts/state-fragment.mts), [evidence checker](ai-framework/scripts/state-fragment-evidence.mts), [dataset](.project/evals/datasets/state-ai-fragments.json)
+- code: [removed by archify-replaces-state; see the source supplement](.project/records/legacy-upgrades/state-fragment-sanitizer.md)
 - verification: [verification history](.project/records/legacy-upgrades/state-fragment-sanitizer.md#verification-history)
 - followups: [limits and open items](.project/records/legacy-upgrades/state-fragment-sanitizer.md#limits-and-open-items), [backlog](.project/pitches/_followups.md)
 - archive: [source supplement](.project/records/legacy-upgrades/state-fragment-sanitizer.md)

@@ -12,6 +12,8 @@ source: project-state-report
 
 ## Summary
 
+> Rendering, snapshot, theme and AI-fragment parts superseded 2026-11-23 by [[archify-renders-the-state-report]]; the safety lessons below still bind the fact collector.
+
 `/state` writes `.project/reports/state.json` and a self-contained `state.html`. Contract:
 `ai-framework/integrations/state-report.md`. Code: `state-snapshot.js`, `state-theme.js`, `state-render.js`.
 

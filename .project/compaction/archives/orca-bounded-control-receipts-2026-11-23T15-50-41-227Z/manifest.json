@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-bounded-control-receipts",
+  "sourceRoot": ".project/pitches/orca-bounded-control-receipts",
+  "archivedAt": "2026-11-23T15:50:41.228Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "2c3205362a244518fd9f73b1f4b169e69aca9e92fcbfe479816dcc7eb5f3544d",
+      "mode": 420
+    },
+    "audit-code.md": {
+      "hash": "45a0bea3059c613587b50cf6345eff5459ab6a52f1f711a240b15f794ed9cc64",
+      "mode": 420
+    },
+    "audit-cross-pitch.md": {
+      "hash": "7de5a79917120ef0f2aa01c145a5eb7971fc07d4f8f1fbc64007ed9c496266b2",
+      "mode": 420
+    },
+    "audit-security.md": {
+      "hash": "219e5232b952548c804012e261b0d163c22869525ee48e42c9ac6427c8762b06",
+      "mode": 420
+    },
+    "audit-test.md": {
+      "hash": "73cd7837d54329bf90a19c923113a9630a03799c74b618b338a5f35742350702",
+      "mode": 420
+    },
+    "audit.md": {
+      "hash": "eb1eb5e9d26b92e7cac3a138d5f0b59306f14eeeeca7d612ca550e7f1bc11210",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "871e232e8f2631e7c54710e60a41813f88c3da55a32cb08cdf3ab8d4cf245d67",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "c5905a3aa82191390f35b8c57f1cbad428c7ea0b00a7ed38438ddf6e72e10ad4",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "5851779a9b266821670405b352463afed620a8fb0d2dc387f30cbd9d25bbec76",
+      "mode": 420
+    }
+  }
+}

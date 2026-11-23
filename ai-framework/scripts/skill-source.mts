@@ -123,8 +123,36 @@ function gitBytes(deps: RuntimeDeps, directory: string, args: string[]): Buffer 
   return Buffer.from(bytes.buffer, bytes.byteOffset, bytes.byteLength);
 }
 
+/**
+ * Removes inline code spans the way CommonMark reads them: a run of N backticks closes at the next run of exactly N on the same
+ * line, and a backslash makes the next character literal. An unmatched run stays literal, so nothing is hidden by a stray backtick.
+ */
+function stripCodeSpans(text: string): string {
+  let out = "";
+  let index = 0;
+  while (index < text.length) {
+    const char = text[index];
+    if (char === "\\" && index + 1 < text.length) { out += char + text[index + 1]; index += 2; continue; }
+    if (char !== "`") { out += char; index++; continue; }
+    let size = 0;
+    while (text[index + size] === "`") size++;
+    let close = -1;
+    for (let cursor = index + size; cursor < text.length && text[cursor] !== "\n";) {
+      if (text[cursor] !== "`") { cursor++; continue; }
+      let run = 0;
+      while (text[cursor + run] === "`") run++;
+      if (run === size) { close = cursor; break; }
+      cursor += run;
+    }
+    if (close === -1) { out += text.slice(index, index + size); index += size; continue; }
+    index = close + size;
+  }
+  return out;
+}
+
 function validateLinks(files: Record<string, SourceFile>, deps: RuntimeDeps): void {
-  const text = files["SKILL.md"].data.toString().replace(/```[\s\S]*?```/g, "");
+  // Fenced blocks and inline code spans are examples, not links: a skill may show `[x](/abs/path/y.html)` verbatim.
+  const text = stripCodeSpans(files["SKILL.md"].data.toString().replace(/```[\s\S]*?```/g, ""));
   for (const match of text.matchAll(/\]\(([^\s)]+)(?:\s+"[^"]*")?\)/g)) {
     const link = match[1];
     if (/^(?:[a-z][a-z0-9+.-]*:|#)/i.test(link)) continue;

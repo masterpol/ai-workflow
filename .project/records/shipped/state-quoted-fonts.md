@@ -13,7 +13,7 @@ Historical counts and naming differences remain separately recorded.
 - docs: none
 - decisions: [bounded font discovery](.project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md)
 - knowledge: [bounded font discovery](.project/knowledge/decisions/effective-sync-bases-and-bounded-font-discovery.md)
-- code: [theme parser](ai-framework/scripts/state-theme.mts)
+- code: [removed by archify-replaces-state; see the source supplement](.project/records/legacy-upgrades/state-quoted-fonts.md)
 - verification: [historical closure](.project/records/pitch-compression/state-quoted-fonts.md), [mutation proof](.project/records/legacy-upgrades/state-quoted-fonts.md#mutation-proof)
 - followups: none
 - archive: [compact record](.project/records/pitch-compression/state-quoted-fonts.md), [source supplement](.project/records/legacy-upgrades/state-quoted-fonts.md)

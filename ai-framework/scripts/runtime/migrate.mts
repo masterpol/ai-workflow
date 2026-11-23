@@ -8,7 +8,7 @@ export interface EntryMigration {
 interface Change extends EntryMigration { before: string; after: string; mode: number }
 const FILES = ["AGENTS.md", "CLAUDE.md", ".claude/settings.json", ".codex/hooks.json"];
 const MAX_BYTES = 1024 * 1024;
-const SCRIPT_NAMES = "add-skill|browser-runtime|bundle-sync|changelog|docs-links|entry-import|graphify|orca-policy|orca-preflight|pitch-archive|pitch-compress|review-bench|setup-validator|skill-compress-guard|skill-defaults|skill-registry|skill-source|skill-sync|skill-vendors|state-render|state-snapshot|state-theme|workflow-doctor";
+const SCRIPT_NAMES = "add-skill|browser-runtime|bundle-sync|changelog|docs-links|entry-import|graphify|orca-policy|orca-preflight|pitch-archive|pitch-compress|review-bench|setup-validator|skill-compress-guard|skill-defaults|skill-registry|skill-source|skill-sync|skill-vendors|workflow-doctor";
 const REFERENCES = new RegExp(`ai-framework/scripts/(?:${SCRIPT_NAMES})\\.js\\b|ai-framework/hooks/scripts/(?:metrics-lock|pre-ship-verify|stuck-uphill-detector|token-consumption|token-report)\\.js\\b|\\.claude/hooks/post-edit-check\\.js\\b|\\.opencode/plugins/token-consumption\\.js\\b`, "g");
 
 /** Cooperating project directories are required, as for the bundle's other managed writes. */
