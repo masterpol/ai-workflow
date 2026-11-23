@@ -399,7 +399,7 @@ test("engine range: a hostile runtime version is refused and never echoed into t
   }
 });
 
-// Shape from a captured real `orca agent installed --json` (Orca 1.4.271, this host; .project/pitches/orca-api-currency-and-opencode2/s3-capture.md).
+// Shape from a captured real `orca agent installed --json` (Orca 1.4.271, this host; .project/analysis/2026-11-23-orca-live-receipts-s3.md).
 const installedJson = (...ids: string[]) => JSON.stringify({ id: "380264a7-69f6-474b-a0bd-0e1d5b9d6897", ok: true,
   result: { agents: ids.map((id, index) => ({ id, name: id, default: index === 0 })) }, _meta: { runtimeId: "0f1ef424-562b-442e-a3b4-08730bee069d" } });
 /** Probe runner that also answers `agent installed --json`, recording the command, args and env of that call. */

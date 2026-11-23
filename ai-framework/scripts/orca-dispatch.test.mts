@@ -29,7 +29,7 @@ function fixture(t: TestContext, enabled = true): string {
   return root;
 }
 /** Probe runner that serves the three preflight receipts in order, for every evaluation. */
-/** Real `orca agent installed --json` output, Orca 1.4.271, recorded on this host (see s3-capture.md). */
+/** Real `orca agent installed --json` output, Orca 1.4.271, recorded on this host (see .project/analysis/2026-11-23-orca-live-receipts-s3.md). */
 const REAL_INSTALLED = { id: "380264a7-69f6-474b-a0bd-0e1d5b9d6897", ok: true, result: { agents: [
   { id: "claude", name: "Claude", default: true }, { id: "claude-agent-teams", name: "Claude Agent Teams", default: false },
   { id: "codex", name: "Codex", default: false }, { id: "opencode", name: "OpenCode", default: false }] }, _meta: { runtimeId: "0f1ef424-562b-442e-a3b4-08730bee069d" } };
@@ -1218,14 +1218,14 @@ test("claude and codex still launch with --agent set to the vendor and never rea
   }
 });
 
-// Recorded Orca 1.4.271 receipts, 2026-11-23: pitch s3-capture.md (S3b) and
+// Recorded Orca 1.4.271 receipts, 2026-11-23: .project/analysis/2026-11-23-orca-live-receipts-s3.md (S3b) and
 // the R4b-1 worker brief. Trimmed to the observed fields dispatch consumes.
 const REAL_START_SUCCESS = { ok: true, result: { state: "ready", runId: "run_07adc69ad9b4", taskId: "task_ed660de9272c",
   dispatchId: "ctx_0edc7ff55272", stage: "input_accepted",
   mutation: { requestId: "03b367df-47db-43b2-869c-b1dca7c1b738", replayed: false }, residualResources: [] } };
 const REAL_START_REFUSAL = { ok: false, error: { code: "agent_unconfigured",
   data: { orchestrationRequestId: "57315680-84ea-4aa5-b70c-a6fae37bd250" } } };
-// Recorded Orca 1.4.271 receipt of a start cut off by Orca's own `--timeout-ms 1` (s3-capture.md, S3c): a FAILED start that still carries the request id.
+// Recorded Orca 1.4.271 receipt of a start cut off by Orca's own `--timeout-ms 1` (.project/analysis/2026-11-23-orca-live-receipts-s3.md, S3c): a FAILED start that still carries the request id.
 const REAL_START_TIMEOUT = { ok: true, result: { state: "failed", stage: "agent_readiness", failedStage: "agent_readiness", lastError: "timeout",
   dispatchId: "ctx_2c90caa79b0b", taskId: "task_76d0f36f03e1", runId: "run_07adc69ad9b4",
   residualResources: [{ kind: "terminal", role: "agent", action: "created", id: "term_9809a69a-e8b2-494d-949a-ec2366bc8d69" }],

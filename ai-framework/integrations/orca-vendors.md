@@ -328,7 +328,7 @@ with `opencode-port-held`; `unverified` and `unsupported` let it continue.
 ## OpenCode agent id, request ids and releasing workers
 
 **Agent id** (owners: `resolveOpenCodeAgentId` and `parseInstalledAgents` in `orca-policy.mts`; the gate re-check in
-`orca-launch-gate.mts`; evidence in `s3-capture.md` of the `orca-api-currency-and-opencode2` pitch). The OpenCode
+`orca-launch-gate.mts`; evidence in `.project/analysis/2026-11-23-orca-live-receipts-s3.md`). The OpenCode
 `--agent` value is not guessed from a version. It is read from `orca agent installed --json` (bounded, one call,
 ids matching `^[a-z][a-z0-9-]{0,63}$`): `opencode2` when it is installed, else `opencode`, else a named refusal.
 `AI_WORKFLOW_ORCA_OPENCODE_AGENT` may name only `opencode` or `opencode2`, and that id must also be installed.

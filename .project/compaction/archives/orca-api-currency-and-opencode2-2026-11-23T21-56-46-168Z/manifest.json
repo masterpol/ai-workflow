@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-api-currency-and-opencode2",
+  "sourceRoot": ".project/pitches/orca-api-currency-and-opencode2",
+  "archivedAt": "2026-11-23T21:56:46.168Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "29d3a385ad87d51970d20e5b913496feb8871fbdd426660ffa42b16ec06e3cd7",
+      "mode": 420
+    },
+    "audit-cycle-1.md": {
+      "hash": "3f9fe33aa3bb1a426c651a3b7fc6b2f0537536c4fbb95436fac045de392033e1",
+      "mode": 420
+    },
+    "audit-cycle-2.md": {
+      "hash": "7e6e1e368fbc25b8d367291c819ccc174fcecd9d2278641435dd84a5c0fe72ae",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "452b90f15e51fc0949b637442cc6b50808313993498a1248c10ab7369d4a5e14",
+      "mode": 420
+    },
+    "log.md": {
+      "hash": "418c5437a98ed53f57c87e84229029a03b91c85b5950688c9c47b1376dba14b1",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "ed6d7265ab423aabb3e89015fd70180ed044ca76374a266cae2f82f59631669d",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "58664adafa2091bf5393df44c28ad32ec0c96d3124e272bb74bd648562b23609",
+      "mode": 420
+    },
+    "s3-capture.md": {
+      "hash": "b46dca5256113f70d8c07e2c830e6201038a9955cf716c5eb9ec47005b7d9a11",
+      "mode": 420
+    }
+  }
+}

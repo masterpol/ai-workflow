@@ -78,7 +78,7 @@ function fixture(t: TestContext, enabled: string | null = "true"): Fixture {
   const env: Record<string, string | undefined> = { PATH: bin, ORCA_AGENT_SESSION_ID: "s1", ...(enabled !== null ? { [SWITCH]: enabled } : {}) };
   return { root, bin, env };
 }
-// Real `orca agent installed --json` result, Orca 1.4.271 (s3-capture.md): OpenCode 2.2.6 is launched by the id `opencode`.
+// Real `orca agent installed --json` result, Orca 1.4.271 (.project/analysis/2026-11-23-orca-live-receipts-s3.md): OpenCode 2.2.6 is launched by the id `opencode`.
 const INSTALLED_AGENTS = { ok: true, result: { agents: [{ id: "claude" }, { id: "claude-agent-teams" }, { id: "codex" }, { id: "opencode" }] } };
 const probeSync: SyncHandler = (_command, args) => {
   const body = args[0] === "agent" && args[1] === "installed" ? INSTALLED_AGENTS

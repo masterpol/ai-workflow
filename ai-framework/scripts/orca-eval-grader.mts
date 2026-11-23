@@ -527,7 +527,7 @@ const observeHostileSummary: Observer = async (given, ctx) => {
 const AGENT_TOKEN = /^[a-z][a-z0-9-]{0,63}$/;
 /** Reasons and ids are reported only as plain tokens; any other text (a hostile override, a receipt) is never echoed. */
 const token = (value: unknown): string => (typeof value === "string" && AGENT_TOKEN.test(value) ? value : "unrecognized");
-// Shape from a captured real `orca agent installed --json` (Orca 1.4.271; .project/pitches/orca-api-currency-and-opencode2/s3-capture.md section 3).
+// Shape from a captured real `orca agent installed --json` (Orca 1.4.271; .project/analysis/2026-11-23-orca-live-receipts-s3.md section 3).
 const installedReceipt = (ids: readonly string[]): Receipt => ({ status: 0, signal: null, stdout: JSON.stringify({ ok: true,
   result: { agents: ids.map((id, index) => ({ id, name: id, default: index === 0 })) } }), stderr: "" });
 

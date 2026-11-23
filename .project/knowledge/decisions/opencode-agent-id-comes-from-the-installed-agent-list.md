@@ -30,4 +30,4 @@ The pitch started from "OpenCode 2 should be the default, so use `opencode2`". A
 
 - An unreadable or malformed list refuses the launch (`installed-agents-unavailable`); a hostile list entry is ignored, never launched.
 - `AI_WORKFLOW_ORCA_OPENCODE_AGENT` may name `opencode` or `opencode2` but the id must also be installed.
-- Evidence and raw observations: `.project/pitches/orca-api-currency-and-opencode2/s3-capture.md`. Contract text: `ai-framework/integrations/orca-vendors.md`.
+- Evidence and raw observations: `.project/analysis/2026-11-23-orca-live-receipts-s3.md`. Contract text: `ai-framework/integrations/orca-vendors.md`.
