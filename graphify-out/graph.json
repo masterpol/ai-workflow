@@ -32469,7 +32469,7 @@
       "node_kind": "heading",
       "norm_label": "reconcile core (opt-in, library only)",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L357",
+      "source_location": "L362",
       "id": "ai_framework_integrations_orca_vendors_reconcile_core_opt_in_library_only"
     },
     {
@@ -52739,7 +52739,7 @@
       "node_kind": "heading",
       "norm_label": "cli, grader and live-smoke status",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L396",
+      "source_location": "L401",
       "id": "ai_framework_integrations_orca_vendors_cli_grader_and_live_smoke_status"
     },
     {
@@ -52751,7 +52751,7 @@
       "node_kind": "heading",
       "norm_label": "codex startup and coordinator preparation",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L222",
+      "source_location": "L225",
       "id": "ai_framework_integrations_orca_vendors_codex_startup_and_coordinator_preparation"
     },
     {
@@ -52835,7 +52835,7 @@
       "node_kind": "heading",
       "norm_label": "surviving orca updates",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L198",
+      "source_location": "L201",
       "id": "ai_framework_integrations_orca_vendors_surviving_orca_updates"
     },
     {
@@ -56618,7 +56618,7 @@
       "node_kind": "heading",
       "norm_label": "dispatch core (opt-in, library only)",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L309",
+      "source_location": "L312",
       "id": "ai_framework_integrations_orca_vendors_dispatch_core_opt_in_library_only"
     },
     {
@@ -61335,7 +61335,7 @@
       "node_kind": "heading",
       "norm_label": "opencode port before the first opencode worker",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L287",
+      "source_location": "L290",
       "id": "ai_framework_integrations_orca_vendors_opencode_port_before_the_first_opencode_worker"
     },
     {
@@ -69640,7 +69640,7 @@
       "node_kind": "heading",
       "norm_label": "documentation",
       "source_file": "README.md",
-      "source_location": "L143",
+      "source_location": "L151",
       "id": "readme_documentation"
     },
     {
@@ -111263,7 +111263,7 @@
       "confidence_score": 0.95,
       "context": "decideCleanup",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L391",
+      "source_location": "L396",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_reconcile_core_opt_in_library_only",
       "target": "ai_framework_scripts_orca_evidence_decidecleanup"
@@ -111614,7 +111614,7 @@
       "confidence_score": 0.95,
       "context": "performCleanup",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L391",
+      "source_location": "L396",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_reconcile_core_opt_in_library_only",
       "target": "ai_framework_scripts_orca_evidence_performcleanup"
@@ -123725,7 +123725,7 @@
       "confidence_score": 0.95,
       "context": "launched",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L305",
+      "source_location": "L308",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_opencode_port_before_the_first_opencode_worker",
       "target": "ai_framework_scripts_orca_dispatch_test_launched"
@@ -134870,7 +134870,7 @@
       "confidence_score": 0.95,
       "context": "missing",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L325",
+      "source_location": "L328",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_dispatch_core_opt_in_library_only",
       "target": "ai_framework_scripts_runtime_config_missing"
@@ -138267,7 +138267,7 @@
       "confidence_score": 0.95,
       "context": "claude",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L168",
+      "source_location": "L171",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_automatic_start_every_workflow_phase",
       "target": "ai_framework_hooks_scripts_workflow_capture_test_claude"
@@ -138279,7 +138279,7 @@
       "confidence_score": 0.95,
       "context": "claude",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L227",
+      "source_location": "L230",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_codex_startup_and_coordinator_preparation",
       "target": "ai_framework_hooks_scripts_workflow_capture_test_claude"
@@ -139572,7 +139572,7 @@
       "confidence_score": 0.95,
       "context": "decideStart",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L226",
+      "source_location": "L229",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_codex_startup_and_coordinator_preparation",
       "target": "ai_framework_scripts_orca_start_decidestart"
@@ -141389,7 +141389,7 @@
       "confidence_score": 0.95,
       "context": "isSupportedVersion",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L317",
+      "source_location": "L320",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_dispatch_core_opt_in_library_only",
       "target": "ai_framework_scripts_orca_preflight_issupportedversion"
@@ -142374,7 +142374,7 @@
       "confidence_score": 0.95,
       "context": "setup",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L322",
+      "source_location": "L325",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_dispatch_core_opt_in_library_only",
       "target": "ai_framework_hooks_scripts_opencode_plugin_test_v1plugin_setup"
@@ -147784,7 +147784,7 @@
       "confidence_score": 0.95,
       "context": "cwd",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L237",
+      "source_location": "L240",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_codex_startup_and_coordinator_preparation",
       "target": "ai_framework_scripts_runtime_types_procdeps_cwd"
@@ -148585,7 +148585,7 @@
       "confidence_score": 0.95,
       "context": "unsupported",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L302",
+      "source_location": "L305",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_opencode_port_before_the_first_opencode_worker",
       "target": "ai_framework_scripts_graphify_test_unsupported"
@@ -163457,7 +163457,7 @@
       "confidence_score": 0.95,
       "context": "name",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L322",
+      "source_location": "L325",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_dispatch_core_opt_in_library_only",
       "target": "ai_framework_scripts_workflow_metrics_state_name"
@@ -163469,7 +163469,7 @@
       "confidence_score": 0.95,
       "context": "name",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L206",
+      "source_location": "L209",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_surviving_orca_updates",
       "target": "ai_framework_scripts_workflow_metrics_state_name"
@@ -167324,7 +167324,7 @@
       "confidence_score": 0.95,
       "context": "evaluateLaunch",
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L157",
+      "source_location": "L160",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_automatic_start_every_workflow_phase",
       "target": "ai_framework_scripts_orca_launch_gate_evaluatelaunch"
@@ -181926,7 +181926,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L357",
+      "source_location": "L362",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_optional_orca_vendor_policy",
       "target": "ai_framework_integrations_orca_vendors_reconcile_core_opt_in_library_only"
@@ -187746,7 +187746,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "README.md",
-      "source_location": "L141",
+      "source_location": "L143",
       "weight": 1,
       "source": "readme",
       "target": "ai_framework_integrations_orca_vendors"
@@ -212014,7 +212014,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L198",
+      "source_location": "L201",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_automatic_start_every_workflow_phase",
       "target": "ai_framework_integrations_orca_vendors_surviving_orca_updates"
@@ -212025,7 +212025,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L222",
+      "source_location": "L225",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_automatic_start_every_workflow_phase",
       "target": "ai_framework_integrations_orca_vendors_codex_startup_and_coordinator_preparation"
@@ -212047,7 +212047,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L396",
+      "source_location": "L401",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_optional_orca_vendor_policy",
       "target": "ai_framework_integrations_orca_vendors_cli_grader_and_live_smoke_status"
@@ -212135,7 +212135,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L287",
+      "source_location": "L290",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_optional_orca_vendor_policy",
       "target": "ai_framework_integrations_orca_vendors_opencode_port_before_the_first_opencode_worker"
@@ -212146,7 +212146,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "ai-framework/integrations/orca-vendors.md",
-      "source_location": "L309",
+      "source_location": "L312",
       "weight": 1,
       "source": "ai_framework_integrations_orca_vendors_optional_orca_vendor_policy",
       "target": "ai_framework_integrations_orca_vendors_dispatch_core_opt_in_library_only"
@@ -231312,7 +231312,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1,
       "source_file": "README.md",
-      "source_location": "L143",
+      "source_location": "L151",
       "weight": 1,
       "source": "readme_portable_ai_development_workflow",
       "target": "readme_documentation"
