@@ -141,7 +141,7 @@ function inspectRuntime(command: string, context: Context, range: ParsedRange): 
   if (!verifyGuide(cli.value, "orca-cli", ["worktree current", "terminal"])) return { reason: "cli-guide-unsupported" };
   const guide = readReceipt(command, CALLS.orchestrationGuide, context);
   if (guide.reason) return { reason: guide.reason };
-  if (!verifyGuide(guide.value, "orchestration", ["worker-start", "worker_done", "orchestration check"])) return { reason: "orchestration-guide-unsupported" };
+  if (!verifyGuide(guide.value, "orchestration", ["worker-start", "worker_done"])) return { reason: "orchestration-guide-unsupported" };
   const status = readReceipt(command, CALLS.status, context);
   if (status.reason) return { reason: status.reason };
   const body = status.value as { ok?: unknown; result?: unknown } | null | undefined;

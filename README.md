@@ -135,6 +135,14 @@ launch workers, using the launch gate, not the status flag.
 | `orca=normal` in your invocation | That one call runs without Orca and says so |
 | Switch off or unset | Nothing is printed and nothing is probed |
 
+**After an Orca update.** The version check is only a floor (`integrations.orca.engine`, default `>=1.4.224`), so a newer Orca is
+never refused for being newer. What can still stop a phase is a change in what the Orca CLI prints. The gate reads only what it
+uses and accepts the output shapes Orca is known to print, so renamed fields, a reworded guide, a missing page object or a very
+large worker history do not stop it. If a phase still stops, the message names the reason (for example
+`worker-identity-unavailable` or `worker-list-too-large`); run the same phase again with `orca=normal` to continue without Orca,
+and see "Surviving Orca updates" in [Orca vendors](ai-framework/integrations/orca-vendors.md#surviving-orca-updates) for what is
+tolerated, what still fails closed, and how to add the new shape as a test.
+
 **Limits.** Workers share your checkout, so check each worker's diff; only Claude Code triggers the automatic check today
 (Codex, OpenCode and Cursor triggers, and a start block inside each phase skill, are later work); a hook entry copied
 without the `AI_WORKFLOW_RUNNER=node` prefix can fail open if the configured runner is missing. Details, exit codes and

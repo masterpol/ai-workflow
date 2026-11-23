@@ -42,7 +42,7 @@ function probe() {
   return { state, run };
 }
 
-type Behaviour = "ok" | "ok-noid" | "agent_readiness" | "residual" | "timeout" | "overflow" | "plain-fail" | "signal" | "stderr-residual" | "unreadable" | "bare-object";
+type Behaviour = "ok" | "ok-nested-dispatchId" | "ok-projection" | "ok-bare" | "ok-noid" | "agent_readiness" | "residual" | "timeout" | "overflow" | "plain-fail" | "signal" | "stderr-residual" | "unreadable" | "bare-object";
 /** Stateful fake Orca: records every worker-start and answers from a script of behaviours. */
 function fakeOrca(behaviours: Behaviour[] = ["ok"]) {
   const state = { starts: [] as Array<{ args: string[]; options: SpawnOptions }>, workers: 0 };
@@ -51,6 +51,9 @@ function fakeOrca(behaviours: Behaviour[] = ["ok"]) {
     const behaviour = behaviours[Math.min(state.starts.length - 1, behaviours.length - 1)];
     const base = { signal: null, stderr: "" };
     if (behaviour === "ok") { state.workers++; return { ...base, status: 0, stdout: JSON.stringify({ result: { stage: "input_accepted", dispatch: { id: `ctx_${state.workers}` } } }) }; }
+    if (behaviour === "ok-nested-dispatchId") { state.workers++; return { ...base, status: 0, stdout: JSON.stringify({ result: { dispatch: { dispatchId: `ctx_${state.workers}` } } }) }; }
+    if (behaviour === "ok-projection") { state.workers++; return { ...base, status: 0, stdout: JSON.stringify({ result: { projection: { dispatchId: `ctx_${state.workers}` } } }) }; }
+    if (behaviour === "ok-bare") { state.workers++; return { ...base, status: 0, stdout: JSON.stringify({ dispatchId: `ctx_${state.workers}` }) }; }
     if (behaviour === "ok-noid") return { ...base, status: 0, stdout: "{}" };
     if (behaviour === "signal") return { ...base, status: null, signal: "SIGKILL", stdout: "" };
     if (behaviour === "stderr-residual") return { signal: null, status: 1, stdout: "warning: x\n", stderr: JSON.stringify({ failedStage: "setup", residualResources: [{ kind: "worktree" }] }) };
@@ -95,6 +98,14 @@ test("unsupported delegation uses the normal workflow with no ledger write and n
   assert.deepEqual([outcome.route, outcome.reason], ["normal", "policy-disabled"]);
   assert.equal(orca.state.starts.length, 0);
   assert.equal(fs.existsSync(path.join(root, ".project/metrics")), false);
+});
+
+test("the dispatch id is found in every receipt shape Orca is known to print", async (t: TestContext) => {
+  for (const behaviour of ["ok", "ok-nested-dispatchId", "ok-projection", "ok-bare"] as Behaviour[]) {
+    const root = fixture(t);
+    const outcome = await dispatchScope(base(root, fakeOrca([behaviour]).deps));
+    assert.deepEqual([outcome.route, outcome.dispatchId], ["launched", "ctx_1"], behaviour);
+  }
 });
 
 test("a launch writes a claim first, carries the worker flag in the brief and records the dispatch id", async (t: TestContext) => {
@@ -506,6 +517,69 @@ test("an unreadable or unproven failure keeps the task owned: a second attempt i
     assert.deepEqual([second.route, second.reason], ["resume", "task-already-owned"], behaviour);
     assert.equal(orca.state.starts.length, 1, behaviour);
   }
+});
+
+const REFUSAL_MESSAGE = "OpenCode 2.1.1 cannot pin a model (/Users/someone/secret/path token=abc123)";
+const refusal = (code: unknown, extra: Obj = {}): string => JSON.stringify({ ok: false, error: { code, message: REFUSAL_MESSAGE, data: {} }, ...extra });
+
+test("a CLI refusal keeps its error code in the reason and keeps ownership unknown, with the message never echoed", async (t: TestContext) => {
+  const root = fixture(t);
+  const orca = fakeOrca(["ok"]);
+  orca.deps.child.run = async (_command, args, options = {}) => { orca.state.starts.push({ args: [...args], options }); return { status: 1, signal: null, stdout: refusal("model_not_supported"), stderr: "error: model_not_supported" }; };
+  const first = await dispatchScope(base(root, orca.deps));
+  assert.deepEqual([first.route, first.reason, first.retryable], ["blocked", "launch-failed:refused:model_not_supported", undefined]);
+  assert.match(String(first.humanAction), /model_not_supported/);
+  assert.match(String(first.humanAction), /does not prove nothing was created/);
+  assert.doesNotMatch(JSON.stringify(first), /Users|secret|abc123|OpenCode/, "no text from the receipt beyond the token");
+  assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness", "fail-closed ownership is unchanged");
+  const second = await dispatchScope(base(root, orca.deps, { attemptId: "a2" }));
+  assert.deepEqual([second.route, second.reason], ["resume", "task-already-owned"]);
+  assert.equal(orca.state.starts.length, 1, "no automatic retry");
+});
+
+test("a refusal code that is not a plain token is reported as unproven, with nothing from the receipt echoed", async (t: TestContext) => {
+  for (const code of ["Bad Code", "../../etc/passwd", "a".repeat(65), "x\u001b[31mred", "9starts_with_digit", "UPPER_CASE", "", 42, null, { nested: "token" }]) {
+    const root = fixture(t);
+    const orca = fakeOrca(["ok"]);
+    orca.deps.child.run = async () => ({ status: 1, signal: null, stdout: refusal(code), stderr: "" });
+    const outcome = await dispatchScope(base(root, orca.deps));
+    assert.deepEqual([outcome.route, outcome.reason], ["blocked", "launch-failed:unproven"], String(code));
+    assert.doesNotMatch(JSON.stringify(outcome), /Users|secret|abc123|passwd|OpenCode/, String(code));
+    assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness");
+  }
+});
+
+test("a refusal receipt that also proves a clean failure keeps the existing retryable route", async (t: TestContext) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  orca.deps.child.run = async () => ({ status: 1, signal: null, stdout: refusal("some_refusal", { residualResources: [] }), stderr: "" });
+  const outcome = await dispatchScope(base(root, orca.deps));
+  assert.deepEqual([outcome.route, outcome.reason, outcome.retryable], ["blocked", "launch-failed", true]);
+  assert.equal(stateOf(root, attemptKeyOf("a1")), "failed");
+});
+
+test("a failed stage is reported only as a plain token, whatever the receipt says", async (t: TestContext) => {
+  const hostile = ["S".repeat(100000), "Bad Stage", "../../etc/passwd", "x\u001b[31m", "UPPER"];
+  for (const stage of hostile) {
+    for (const [extra, expected] of [[{}, "launch-failed:unproven"], [{ residualResources: [{ kind: "worktree" }] }, "launch-failed:residual"]] as const) {
+      const root = fixture(t);
+      const orca = fakeOrca();
+      orca.deps.child.run = async () => ({ status: 1, signal: null, stdout: JSON.stringify({ result: { failedStage: stage, ...extra } }), stderr: "" });
+      const outcome = await dispatchScope(base(root, orca.deps));
+      assert.deepEqual([outcome.route, outcome.reason], ["blocked", expected], stage.slice(0, 12));
+      assert.ok(JSON.stringify(outcome).length < 2000, "nothing unbounded from the receipt");
+      assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness", "ownership is unchanged");
+    }
+  }
+});
+
+test("a refusal receipt that names a failed stage keeps the stage route", async (t: TestContext) => {
+  const root = fixture(t);
+  const orca = fakeOrca();
+  orca.deps.child.run = async () => ({ status: 1, signal: null, stdout: refusal("some_refusal", { failedStage: "setup" }), stderr: "" });
+  const outcome = await dispatchScope(base(root, orca.deps));
+  assert.deepEqual([outcome.route, outcome.reason], ["blocked", "launch-failed:setup"]);
+  assert.equal(stateOf(root, attemptKeyOf("a1")), "unknown-liveness");
 });
 
 test("a non-list residualResources is not proof of a clean failure", async (t: TestContext) => {

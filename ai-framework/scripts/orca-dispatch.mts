@@ -100,12 +100,16 @@ function placementArgs(placement: Placement | undefined): string[] | undefined {
 }
 
 function dispatchIdOf(receipt: Record<string, unknown>): string | undefined {
-  for (const candidate of [obj(receipt.dispatch).id, receipt.dispatchId, obj(receipt.worker).dispatchId]) {
+  for (const candidate of [obj(receipt.dispatch).id, obj(receipt.dispatch).dispatchId, receipt.dispatchId, obj(receipt.worker).dispatchId, obj(receipt.projection).dispatchId]) {
     if (typeof candidate === "string" && ID.test(candidate)) return candidate;
   }
   return undefined;
 }
 
+/** The only part of a CLI refusal that is reported: a lower-case token, never free text. */
+const REFUSAL_CODE = /^[a-z][a-z0-9_]{1,63}$/;
+/** A failed stage is reported the same way: a lower-case token of at most 64 characters. */
+const STAGE_CODE = /^[a-z][a-z0-9_-]{0,63}$/;
 const REVIEW_STATES = ["completed", "settled"];
 const blockedAssignment = (reason: string, humanAction: string): DispatchOutcome => ({ route: "blocked", reason, humanAction });
 
@@ -246,11 +250,13 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   // Orca prints the failure receipt on stdout; read stderr too so a receipt on either stream is honoured.
   const receipts = [receiptOf(launch.stdout), receiptOf(launch.stderr)].filter((value): value is Record<string, unknown> => value !== undefined);
   const residual = receipts.some((receipt) => Array.isArray(receipt.residualResources) && receipt.residualResources.length > 0);
-  const failedStage = receipts.map((receipt) => receipt.failedStage).find((stage): stage is string => typeof stage === "string");
-  if (residual || failedStage) {
+  const named = receipts.map((receipt) => receipt.failedStage).find((stage): stage is string => typeof stage === "string");
+  // The stage is reported only as a plain token; any other text from the receipt is never echoed.
+  const failedStage = named !== undefined && STAGE_CODE.test(named) ? named : undefined;
+  if (residual || named !== undefined) {
     // A failed stage/residual receipt does not prove that every writer exited. Keep both the task and capacity.
     recorded({ state: "unknown-liveness" });
-    return { route: "blocked", reason: failedStage ? `launch-failed:${failedStage}` : "launch-failed:residual", attemptKey,
+    return { route: "blocked", reason: failedStage ? `launch-failed:${failedStage}` : residual ? "launch-failed:residual" : "launch-failed:unproven", attemptKey,
       humanAction: "a person must resolve the blocker (trust prompt, port, funds) and clean residual resources; no automatic retry" };
   }
   // Positive proof of a clean failure is an explicit, empty residualResources list. Anything else (no receipt, junk,
@@ -258,6 +264,11 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const proven = receipts.some((receipt) => Array.isArray(receipt.residualResources) && receipt.residualResources.length === 0);
   if (!proven) {
     recorded({ state: "unknown-liveness" });
+    // A structured CLI refusal ({ ok: false, error: { code } }) says why Orca stopped but does not prove that nothing was created, so
+    // ownership stays unknown. Only a strict token is reported; the message and any other text from the receipt are never echoed.
+    const code = receipts.map((receipt) => obj(receipt.error).code).find((value): value is string => typeof value === "string" && REFUSAL_CODE.test(value));
+    if (code) return { route: "blocked", reason: `launch-failed:refused:${code}`, attemptKey,
+      humanAction: `Orca refused the start with code ${code}; that does not prove nothing was created, so ownership is kept. Inspect the Run with worker-list before dispatching this task again` };
     return { route: "blocked", reason: "launch-failed:unproven", attemptKey, humanAction: "inspect the Run with worker-list before dispatching this task again" };
   }
   recorded({ state: "failed" });

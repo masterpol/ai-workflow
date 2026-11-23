@@ -3,6 +3,7 @@ import { test } from "node:test";
 import type { TestContext } from "node:test";
 import { createTestDeps, orcaPolicyToonText, stripTypes, tempFixture } from "./runtime/test-helpers.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
+import { MAX_OUTPUT_BYTES } from "./orca-preflight.mts";
 import type { Run, RunOptions } from "./orca-preflight.mts";
 import { decideStart, hasNormalBypass, versionDetail } from "./orca-start.mts";
 import type { StartOptions } from "./orca-start.mts";
@@ -107,7 +108,7 @@ test("returns worker for an agent terminal of an open dispatch before any policy
   f.deps.proc.env.ORCA_TERMINAL_HANDLE = "agent";
   f.deps.fs.openSync = fail;
   assert.equal(decideStart(f.options).state, "worker");
-  assert.deepEqual(f.state.calls.map((call) => call.args), [["orchestration", "worker-list", "--limit", "100", "--json"]]);
+  assert.deepEqual(f.state.calls.map((call) => call.args), [["orchestration", "worker-list", "--limit", "100", "--json", "--terminal-state", "active"]]);
 });
 
 test("uses the explicit caller handle and ignores completed dispatches", (t) => {
@@ -279,11 +280,17 @@ test("bounds worker-list pages and refuses malformed matching dispatch identity"
     f.state.page = { hasMore: true, nextCursor: `page-${f.state.calls.length}` };
     return f.run(command, args, options);
   };
-  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).reason, "worker-identity-unavailable");
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).reason, "worker-list-too-large", "a listing that never ends is too large, not an identity failure");
   assert.equal(f.state.calls.length, 32);
   f.state.page = { hasMore: false };
   f.state.workers = [{ agentTerminalHandle: "agent", dispatchStatus: "unknown" }];
   assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).reason, "worker-identity-unavailable");
+});
+
+test("skips context-only workers whose terminal handle is null", (t) => {
+  const f = fixture(t);
+  f.state.workers = [{ agentTerminalHandle: null, dispatchStatus: "completed" }];
+  assert.notEqual(decideStart({ ...f.options, terminalHandle: "agent" }).reason, "worker-identity-unavailable");
 });
 
 test("blocks malformed, killed and oversized worker status receipts", (t) => {
@@ -341,13 +348,187 @@ test("proves switch, worker and deadline guard assertions reject in-memory mutan
 
 test("rejects malformed worker-list pagination objects", (t) => {
   const f = fixture(t);
-  for (const page of [undefined, null, [], {}, { hasMore: "false" }, { hasMore: true },
+  for (const page of [[], "none", { hasMore: "false" }, { hasMore: true },
     { hasMore: true, nextCursor: 7 }, { hasMore: true, nextCursor: "" },
     { hasMore: true, nextCursor: "x".repeat(4097) }]) {
     const run: Run = () => ({ status: 0, stderr: "", stdout: JSON.stringify({ ok: true,
       result: { workers: [], page } }) });
     assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).reason, "worker-identity-unavailable");
   }
+});
+
+// Real worker-list shapes recorded from Orca 1.4.271 (ids shortened). The first shape is what 1.4.224 printed and every older
+// fixture in this file uses; the next two are what 1.4.271 prints with and without --full.
+const CONCISE_CLOSED = { dispatchId: "ctx_1", taskId: "task_1", state: "succeeded", liveness: "exited", terminal: "agent", terminalState: "released", workspace: "w", host: "local" };
+const CONCISE_NO_TERMINAL = { dispatchId: "ctx_2", taskId: "task_2", state: "succeeded", liveness: "unverifiable", workspace: "w", host: "local", attention: ["unverifiable"] };
+const FULL_CLOSED = { dispatchId: "ctx_3", taskId: "task_3", runId: "run_1", workerState: "succeeded", dispatchStatus: "completed", agentTerminalHandle: "agent", terminalState: "released",
+  resource: { terminalHandle: "agent", releaseState: "released" }, projection: { stage: { worker: "succeeded", dispatch: "completed" }, liveness: { verdict: "exited" } } };
+const FULL_NO_TERMINAL = { dispatchId: "ctx_4", taskId: "task_4", workerState: "succeeded", dispatchStatus: "completed", agentTerminalHandle: null, terminalState: "retained" };
+
+test("reads every recorded worker-list shape: concise and full, with or without a page object", (t) => {
+  for (const [name, workers, page] of [["1.4.224 full", [{ agentTerminalHandle: "agent", dispatchStatus: "completed" }], { hasMore: false }],
+    ["1.4.271 concise", [CONCISE_CLOSED, CONCISE_NO_TERMINAL], undefined], ["1.4.271 full", [FULL_CLOSED, FULL_NO_TERMINAL], { limit: 100, total: 2, hasMore: false, nextCursor: null }],
+    ["page is an empty object", [CONCISE_CLOSED], {}],
+    ["state word is new but liveness says exited", [{ ...CONCISE_CLOSED, state: "retired-soon" }], undefined],
+    ["state word is new but the terminal was released", [{ ...CONCISE_CLOSED, state: "retired-soon", liveness: "n/a" }], undefined], ["page missing, other terminal", [{ ...CONCISE_CLOSED, terminal: "someone-else", state: "running", liveness: "alive", terminalState: "active" }], undefined]] as const) {
+    const f = fixture(t);
+    f.state.workers = [...workers]; f.state.page = page as Record<string, unknown>;
+    assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).state, "ready", name);
+  }
+});
+
+test("a live worker is recognised from the concise view and the full view", (t) => {
+  for (const row of [{ ...CONCISE_CLOSED, state: "running", liveness: "alive", terminalState: "active" }, { ...FULL_CLOSED, dispatchStatus: "running", workerState: "running", terminalState: "active",
+    resource: { terminalHandle: "agent", releaseState: "none" }, projection: { stage: { dispatch: "running" }, liveness: { verdict: "alive" } } }]) {
+    const f = fixture(t);
+    f.state.workers = [row];
+    assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).state, "worker");
+  }
+});
+
+test("rows that cannot be this terminal never block the start, however odd", (t) => {
+  const f = fixture(t);
+  f.state.workers = [7, "x", null, [], {}, { terminal: 5 }, { agentTerminalHandle: "other", dispatchStatus: { odd: true } }, { terminal: "other", state: 42, liveness: ["x"] }, CONCISE_NO_TERMINAL, FULL_NO_TERMINAL];
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).state, "ready");
+});
+
+test("a row for this terminal with a status nobody recognises still fails closed", (t) => {
+  const f = fixture(t);
+  f.state.workers = [{ terminal: "agent", state: "teleporting" }];
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).reason, "worker-identity-unavailable");
+});
+
+test("a full page with no cursor cannot be called complete, a short page with no page object can", (t) => {
+  const f = fixture(t);
+  f.state.workers = Array.from({ length: 100 }, (_, index) => ({ ...CONCISE_CLOSED, terminal: `t${index}` }));
+  f.state.page = undefined as unknown as Record<string, unknown>;
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).reason, "worker-identity-unavailable");
+  f.state.workers = f.state.workers.slice(0, 99);
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).state, "ready");
+});
+
+// orca-bounded-control-receipts S1: the identity lookup stays inside the shared output bound however large the fleet's history is.
+const listing = (rows: number, pad = 0): string => JSON.stringify({ ok: true, result: { workers: Array.from({ length: rows }, (_, index) =>
+  ({ ...FULL_CLOSED, dispatchId: `ctx_${index}`, agentTerminalHandle: `t${index}`, pad: "x".repeat(pad) })), page: { hasMore: false } } });
+const okRun = (stdout: string): { status: number; stdout: string; stderr: string; signal: null } => ({ status: 0, stdout, stderr: "", signal: null });
+const limitOf = (args: string[]): string => args[args.indexOf("--limit") + 1];
+
+test("asks for every non-released terminal state, in the concise view, so the answer follows live work and not history", (t) => {
+  const f = fixture(t);
+  const asked: string[][] = [];
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    asked.push(args);
+    // An unfiltered fleet would be 5,000 settled workers (far over the bound); each filtered state returns none of them.
+    return args.includes("--terminal-state") ? okRun(JSON.stringify({ ok: true, result: { workers: [], scope: { source: "all" } } })) : okRun(listing(100, 3000));
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).state, "ready");
+  assert.deepEqual(asked.map((args) => args[args.indexOf("--terminal-state") + 1]), ["active", "retained", "reclaimable", "release_pending", "release_unknown"]);
+  for (const args of asked) assert.deepEqual(args.slice(0, 5), ["orchestration", "worker-list", "--limit", "100", "--json"]);
+  assert.ok(asked.every((args) => !args.includes("--full") && !args.includes("released")), "never the full view, never the released history");
+});
+
+test("a worker whose terminal is kept open (not active) while its dispatch is open is still recognised", (t) => {
+  const f = fixture(t);
+  const states: string[] = [];
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    const state = args[args.indexOf("--terminal-state") + 1]; states.push(state);
+    const row = { ...CONCISE_CLOSED, state: "running", liveness: "alive", terminalState: "retained" };
+    return okRun(JSON.stringify({ ok: true, result: { workers: state === "retained" ? [row] : [], scope: { source: "all" } } }));
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).state, "worker");
+  assert.deepEqual(states, ["active", "retained"], "stops at the first state that holds it");
+});
+
+test("a state the CLI does not know falls back to one unfiltered read that covers every state", (t) => {
+  const f = fixture(t);
+  f.state.workers = [{ agentTerminalHandle: "agent", dispatchStatus: "running" }];
+  const asked: string[][] = [];
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    asked.push(args);
+    if (args.includes("reclaimable")) return { status: 2, stdout: "", stderr: "error: unknown terminal state" };
+    return args.includes("--terminal-state") ? okRun(JSON.stringify({ ok: true, result: { workers: [], scope: { source: "all" } } })) : f.run(command, args, options);
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).state, "worker");
+  assert.deepEqual([asked.length, asked[asked.length - 1].includes("--full"), limitOf(asked[asked.length - 1])], [4, true, "25"]);
+});
+test("a CLI that rejects the filter is asked again unfiltered, in small full-record pages", (t) => {
+  const f = fixture(t);
+  f.state.workers = [{ agentTerminalHandle: "agent", dispatchStatus: "running" }];
+  const asked: string[][] = [];
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    asked.push(args);
+    return args.includes("--terminal-state") ? { status: 2, stdout: "", stderr: "error: unknown option --terminal-state" } : f.run(command, args, options);
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).state, "worker");
+  assert.equal(asked.length, 2);
+  assert.deepEqual([limitOf(asked[1]), asked[1].includes("--full")], ["25", true]);
+});
+
+test("a first page that outgrows the shared bound (the 268,003-byte incident) is asked again smaller, and later states start there", (t) => {
+  const f = fixture(t);
+  assert.ok(listing(100, 2300).length > MAX_OUTPUT_BYTES, "the fixture really is over the bound");
+  const limits: string[] = [];
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    limits.push(limitOf(args));
+    return okRun(listing(Number(limitOf(args)), 2300));
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).state, "ready");
+  assert.deepEqual(limits, ["100", "50", "50", "50", "50", "50"], "the size that worked is kept for the next states");
+});
+test("an output-buffer overflow, or an oversize stderr, is treated as too large and not as a failure", (t) => {
+  for (const [name, big] of [["ENOBUFS", { status: null, stdout: "", stderr: "", errorCode: "ENOBUFS" }], ["stderr", { status: 0, stdout: "{}", stderr: "x".repeat(MAX_OUTPUT_BYTES + 1) }]] as const) {
+    const f = fixture(t);
+    const limits: string[] = [];
+    const run: Run = (command, args, options) => {
+      if (args[1] !== "worker-list") return f.run(command, args, options);
+      limits.push(limitOf(args));
+      return limitOf(args) === "100" ? (big as unknown as ReturnType<Run>) : f.run(command, args, options);
+    };
+    assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).state, "ready", name);
+    assert.deepEqual(limits.slice(0, 2), ["100", "50"], name);
+  }
+});
+
+test("a row settled only by its state word is closed, with no liveness or terminal state to help", (t) => {
+  const f = fixture(t);
+  f.state.workers = [{ terminal: "agent", state: "succeeded" }];
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).state, "ready");
+});
+
+test("a cursor that could be read as an option ends the walk instead of being passed on", (t) => {
+  const f = fixture(t);
+  f.state.page = { hasMore: true, nextCursor: "--limit" };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent" }).reason, "worker-identity-unavailable");
+  assert.equal(f.state.calls.filter((call) => call.args[1] === "worker-list").length, 1, "never sent");
+});
+test("a listing that is too large at every page size stops with its own reason", (t) => {
+  const f = fixture(t);
+  const limits: string[] = [];
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    limits.push(limitOf(args));
+    return okRun("x".repeat(MAX_OUTPUT_BYTES + 1));
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).reason, "worker-list-too-large");
+  assert.deepEqual(limits, ["100", "50", "25", "10"]);
+});
+
+test("the unfiltered walk never reads a partial list as complete: its page cap ends in its own reason", (t) => {
+  const f = fixture(t);
+  let pages = 0;
+  const run: Run = (command, args, options) => {
+    if (args[1] !== "worker-list") return f.run(command, args, options);
+    if (args.includes("--terminal-state")) return { status: 2, stdout: "", stderr: "" };
+    f.state.page = { hasMore: true, nextCursor: `c${pages++}` };
+    return f.run(command, args, options);
+  };
+  assert.equal(decideStart({ ...f.options, terminalHandle: "agent", run }).reason, "worker-list-too-large");
+  assert.equal(pages, 32);
 });
 
 test("maps evaluateLaunch gate-error to internal without exposing private details", (t) => {
@@ -410,7 +591,7 @@ console.log(JSON.stringify(value));
     };
     assert.equal(decideStart({ root, phase: "shape", vendor: "claude", deps, run }).state, "ready", prefix);
     const probes = calls.filter((call) => call.args[0] === "orchestration" || !call.options.env.AI_WORKFLOW_ORCA_MULTI_AGENT);
-    assert.equal(probes.length, 2);
+    assert.equal(probes.length, 6, "one status and one worker-list per non-released terminal state");
     for (const probe of probes) {
       assert.equal(probe.command, executable);
       assert.deepEqual(probe.options.env, { PATH: `${root}/bin`, HOME: env.HOME, ORCA_TERMINAL_HANDLE: "agent" });
