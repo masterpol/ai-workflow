@@ -57,7 +57,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // Verify ids against your own installation with `opencode models | grep opencode-go` — the catalog
   // changes over time.
   const opencodeModels = {
-    fast: "opencode-go/minimax-m3.1-flash-free",
+    fast: "opencode-go/minimax-m3.1-flash",
     standard: "opencode-go/minimax-m3",
     deep: "opencode-go/kimi-k2.7-code",
   };

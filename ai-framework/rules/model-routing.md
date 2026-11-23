@@ -61,9 +61,9 @@ Harness mappings and role assignments: `ai-framework/integrations/harnesses.md`.
 
 | Profile | Claude Code | OpenCode | Codex |
 |---|---|---|---|
-| `fast` | Claude Haiku | `opencode-go/minimax-m3.1-flash-free` | GPT-5.6 Luna or Terra |
-| `standard` | Claude Sonnet | `opencode-go/minimax-m3` | GPT-5.6, medium/high reasoning |
-| `deep` | Claude Opus | `opencode-go/kimi-k2.7-code` | GPT-5.6, high/xhigh reasoning |
+| `fast` | Claude Haiku | `opencode-go/minimax-m3.1-flash` | `gpt-6-luna` |
+| `standard` | Claude Sonnet | `opencode-go/minimax-m3` | `gpt-6.2-sol`, medium reasoning |
+| `deep` | Claude Opus | `opencode-go/kimi-k2.7-code` | `gpt-6.2-astra`, high reasoning |
 
 Verify OpenCode ids with `opencode models | grep opencode-go`; the catalog changes over time.
 

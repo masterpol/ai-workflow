@@ -1,7 +1,7 @@
 name = "ux-reviewer"
 description = "Standard read-only UX reviewer for heuristic and task-flow risks."
-model = "gpt-6.1-sol"
-model_reasoning_effort = "high"
+model = "gpt-6.2-sol"
+model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 developer_instructions = """
 Read `.claude/agents/ux-reviewer.md` and follow its body as the canonical role prompt. Do not edit.

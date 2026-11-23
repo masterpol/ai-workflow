@@ -14,9 +14,9 @@ Select a model available in the active harness that meets the profile. Never sub
 
 | Profile | Work | Claude Code | OpenCode | Codex |
 |---|---|---|---|---|
-| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/minimax-m3.1-flash-free` for non-sensitive, bounded work | `gpt-6-luna` |
-| `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-6.1-sol` at medium or high effort |
-| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-6-astra` at high or xhigh effort |
+| `fast` | Checklist review, repository search, templated reconciliation | Haiku | `opencode-go/minimax-m3.1-flash` for non-sensitive, bounded work | `gpt-6-luna` |
+| `standard` | Implementation, security, UX, test reasoning | Sonnet | `opencode-go/minimax-m3` | `gpt-6.2-sol` at medium or high effort |
+| `deep` | Shaping, architecture, ambiguous trade-offs | Opus | `opencode-go/kimi-k2.7-code` | `gpt-6.2-astra` at high or xhigh effort |
 
 Escalate one profile only when the returned work is demonstrably incomplete or unreliable. A harness that cannot select per-agent models should use its current model and preserve the same role separation.
 
@@ -37,13 +37,20 @@ to the parent conversation's model (or the per-invocation `CLAUDE_CODE_SUBAGENT_
 override). The toon's `models` block is read by the workflow doctor and by future dispatchers.
 Phase skills state a profile, so another harness can make an equivalent selection.
 
+**Pass `model` on every dispatch (cost).** Because an omitted `model` becomes the session's model, a `fast` role
+dispatched without one runs on whatever the session uses, a multiple of Haiku's price per token, and the cheap tier
+is never used. The dispatcher (a phase skill or the coordinator) therefore sets `model` on each Agent call from the
+role's profile: `fast` to `haiku`, `standard` to `sonnet`, `deep` to `opus`, matching the ids in `models.claude`.
+Canonical agent files keep only `profile:`; the agent-frontmatter invariant test forbids a `model:` line in them.
+Escalate one profile only when the returned work is incomplete or unreliable (see the profile table above).
+
 ## OpenCode
 
 `.opencode/opencode.json` loads `AGENTS.md`. OpenCode discovers the phase wrappers in `.agents/skills/`; `.opencode/commands/` provides native phase commands, and `.opencode/agents/` provides native subagent definitions. Commands and adapters load the canonical playbooks and role prompts from `.claude/`.
 
 The included OpenCode routes are explicit and all run on OpenCode Go, so a single provider
 connection covers them (a route through an unconnected provider errors instead of falling back):
-fast roles use `opencode-go/minimax-m3.1-flash-free`, standard roles use `opencode-go/minimax-m3`, and deep
+fast roles use `opencode-go/minimax-m3.1-flash`, standard roles use `opencode-go/minimax-m3`, and deep
 roles (shape, architecture, planning, and the default `build` agent) use
 `opencode-go/kimi-k2.7-code`. `workflow-doctor` and `setup-validator` run on the standard route
 because diagnostics can expose broad project context. Before assuming a model id from this doc
