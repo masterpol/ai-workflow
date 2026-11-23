@@ -1,9 +1,9 @@
 import { nextMember, pickImplementer, pickReviewer } from "./orca-assign.mts";
 import { attemptKeyOf, createLedger, taskKeyOf, validAuthorizedPaths } from "./orca-ledger.mts";
 import type { Ledger, LedgerRecord } from "./orca-ledger.mts";
-import { evaluateLaunch, launchWorker, workerBrief } from "./orca-launch-gate.mts";
+import { evaluateLaunch, launchWorker, readInstalledAgents, workerBrief } from "./orca-launch-gate.mts";
 import type { BriefSpec, LaunchOptions } from "./orca-launch-gate.mts";
-import { report as policyReport } from "./orca-policy.mts";
+import { report as policyReport, resolveOpenCodeAgentId } from "./orca-policy.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
@@ -58,9 +58,12 @@ export interface DispatchOptions extends Omit<LaunchOptions, "vendor"> {
   placement?: Placement;
 }
 export interface DispatchOutcome {
-  route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string; ownerPid?: number;
+  route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string; requestId?: string; ownerPid?: number;
 }
 
+/** Let Orca finish its own bounded wait before our process kill deadline. */
+export const ORCA_TIMEOUT_MARGIN_MS = 5000;
+const REQUEST_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const ID = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
 const VALUE = /^[A-Za-z0-9][A-Za-z0-9._:/@-]{0,199}$/;
 const PLACEMENT_FLAGS: Readonly<Record<keyof Placement, string>> = Object.freeze({
@@ -87,6 +90,14 @@ function receiptOf(text: string | undefined): Record<string, unknown> | undefine
   const parsed = parseJson(text);
   if (!parsed) return undefined;
   return typeof parsed.result === "object" && parsed.result !== null ? obj(parsed.result) : parsed;
+}
+
+function requestIdOf(text: string | undefined): string | undefined {
+  // Observed in three places (S3, S3b, S3c): a success or a failed-start result carries `result.mutation.requestId` under --full, and a
+  // refusal carries `error.data.orchestrationRequestId`. The envelope `id` is a per-call message id and is never read.
+  const envelope = parseJson(text) ?? {};
+  const candidates = [obj(obj(envelope.result).mutation).requestId, obj(obj(envelope.error).data).orchestrationRequestId];
+  return candidates.find((value): value is string => typeof value === "string" && value.length === 36 && REQUEST_ID.test(value));
 }
 
 function placementArgs(placement: Placement | undefined): string[] | undefined {
@@ -186,7 +197,7 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   // Everything up to the claim is side-effect free: unsupported delegation uses the normal workflow.
   const now = options.now ?? (() => deps.clock.perfNowMs());
   if (!(options.deadlineMs - now() >= 1)) return { route: "normal", reason: "time-budget" };
-  const gateOptions = { ...options, vendor: coordinator };
+  const gateOptions: LaunchOptions = { ...options, vendor: coordinator };
   const decision = evaluateLaunch(gateOptions);
   if (!decision.allowed) return { route: "normal", reason: decision.reason };
   let vendor = options.vendor as string;
@@ -195,6 +206,16 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
     const resolved = resolveAssignment({ root: options.root, coordinator, scopeId: scope.id, assign: options.assign, deps });
     if ("outcome" in resolved) return resolved.outcome;
     vendor = resolved.vendor;
+  }
+  // OpenCode launches by its resolved installed agent id (opencode or opencode2), resolved before anything is claimed.
+  // launchWorker re-gates with this id, which re-reads the installed list immediately before the spawn.
+  let agentArg = vendor;
+  if (vendor === "opencode") {
+    const env = options.env ?? deps.proc.env;
+    const agent = resolveOpenCodeAgentId({ env, installedAgents: readInstalledAgents({ root: options.root, executable: decision.executable as string, env, deps, run: options.run }) });
+    if (agent.error !== undefined) return { route: "normal", reason: agent.error };
+    agentArg = agent.agentId;
+    gateOptions.agentId = agentArg;
   }
   const policy = policyReport(options.root, coordinator, deps) as { workers?: unknown; maxConcurrentWorkers?: unknown };
   if (!Array.isArray(policy.workers) || !policy.workers.includes(vendor)) return { route: "normal", reason: "worker-not-configured" };
@@ -217,19 +238,33 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   if (claim.outcome !== "claimed") return { route: "blocked", reason: `ledger-claim-${claim.outcome}`, attemptKey,
     ...(claim.outcome === "busy" ? { humanAction: "inspect .project/metrics/orca-ledger/.mutation-lock and its owner; retry only after the active mutation finishes, or reconcile a crashed owner before removing its lock" } : {}) };
 
-  const args = ["orchestration", "worker-start", "--spec", brief.brief, "--agent", vendor, ...flags, "--json"];
-  const launch = await launchWorker({ ...gateOptions, deps, command: options.launcher, args, workerContext: false });
+  const args = ["orchestration", "worker-start", "--spec", brief.brief, "--agent", agentArg, ...flags, "--json", "--full"];
+  // Use the actual kill timeout computed after launchWorker's final gate, so time spent probing
+  // cannot consume the margin. Below Orca's 1000 ms minimum, retain only our existing kill bound.
+  const launchDeps: RuntimeDeps = { ...deps, child: { ...deps.child, run: (command, launchArgs, spawnOptions) => {
+    const timeoutMs = Math.floor((spawnOptions?.timeoutMs ?? 0) - ORCA_TIMEOUT_MARGIN_MS);
+    return deps.child.run(command, Number.isSafeInteger(timeoutMs) && timeoutMs >= 1000 ? [...launchArgs, "--timeout-ms", String(timeoutMs)] : launchArgs, spawnOptions);
+  } } };
+  const launch = await launchWorker({ ...gateOptions, deps: launchDeps, command: options.launcher, args, workerContext: false });
   const recorded = (patch: Parameters<Ledger["update"]>[1]): boolean => ledger.update(attemptKey, patch).status === "ok";
+  const requestId = requestIdOf(launch.stdout) ?? requestIdOf(launch.stderr);
+  const requestIdentity = requestId ? { requestId } : {};
+  const requestAction = requestId ? `; inspect the request with orca orchestration request-show --request ${requestId}` : "";
+  if ([launch.stdout, launch.stderr].some((text) => obj(receiptOf(text)?.mutation).replayed === true)) {
+    recorded({ state: "unknown-liveness", ...requestIdentity });
+    return { route: "blocked", reason: "launch-replayed", attemptKey, ...requestIdentity,
+      humanAction: `inspect the existing worker before dispatching this task again${requestAction}` };
+  }
 
   if (launch.launched) {
     const dispatchId = dispatchIdOf(receiptOf(launch.stdout) ?? {});
     if (!dispatchId) {
       // The worker started but cannot be matched to its report: keep ownership and tell a person.
-      recorded({ state: "unknown-liveness" });
-      return { route: "resume", reason: "launched-without-dispatch-id", attemptKey, humanAction: "find the worker with worker-list and record its dispatch id" };
+      recorded({ state: "unknown-liveness", ...requestIdentity });
+      return { route: "resume", reason: "launched-without-dispatch-id", attemptKey, ...requestIdentity, humanAction: "find the worker with worker-list and record its dispatch id" };
     }
-    if (!recorded({ state: "launched", dispatchId })) return { route: "blocked", reason: "ledger-update-failed", attemptKey, dispatchId, humanAction: "a worker is running; repair the ledger record before anything else" };
-    return { route: "launched", reason: "launched", attemptKey, dispatchId };
+    if (!recorded({ state: "launched", dispatchId, ...requestIdentity })) return { route: "blocked", reason: "ledger-update-failed", attemptKey, dispatchId, ...requestIdentity, humanAction: "a worker is running; repair the ledger record before anything else" };
+    return { route: "launched", reason: "launched", attemptKey, dispatchId, ...requestIdentity };
   }
   if (launch.reason === "launch-cleanup-unconfirmed") {
     recorded({ state: "unknown-liveness", ...(launch.ownerPid ? { processOwnerPid: launch.ownerPid } : {}) });
@@ -239,8 +274,8 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   // A timeout, overflow or signal exit means a worker may exist: ownership is preserved and the attempt is inspected, never repeated.
   const killed = launch.reason === "launch-failed" && (Boolean(launch.signal) || launch.status === null || launch.status === undefined);
   if (launch.reason === "launch-timeout" || launch.reason === "launch-output-limit" || killed) {
-    recorded({ state: "unknown-liveness" });
-    return { route: "resume", reason: launch.reason, attemptKey, humanAction: "inspect the Run with worker-list before any retry" };
+    recorded({ state: "unknown-liveness", ...requestIdentity });
+    return { route: "resume", reason: launch.reason, attemptKey, ...requestIdentity, humanAction: `inspect the Run with worker-list before any retry${requestAction}` };
   }
   if (launch.reason !== "launch-failed") {
     // The gate refused after the claim (version drift, deadline, launcher): nothing was spawned.
@@ -253,32 +288,34 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const named = receipts.map((receipt) => receipt.failedStage).find((stage): stage is string => typeof stage === "string");
   // The stage is reported only as a plain token; any other text from the receipt is never echoed.
   const failedStage = named !== undefined && STAGE_CODE.test(named) ? named : undefined;
-  if (residual || named !== undefined) {
+  // A failed stage of ANY type (an object, a number, a list) is still a failed stage: it is never positive proof of a clean failure.
+  const staged = receipts.some((receipt) => receipt.failedStage !== undefined && receipt.failedStage !== null);
+  if (residual || staged) {
     // A failed stage/residual receipt does not prove that every writer exited. Keep both the task and capacity.
-    recorded({ state: "unknown-liveness" });
-    return { route: "blocked", reason: failedStage ? `launch-failed:${failedStage}` : residual ? "launch-failed:residual" : "launch-failed:unproven", attemptKey,
-      humanAction: "a person must resolve the blocker (trust prompt, port, funds) and clean residual resources; no automatic retry" };
+    recorded({ state: "unknown-liveness", ...requestIdentity });
+    return { route: "blocked", reason: failedStage ? `launch-failed:${failedStage}` : residual ? "launch-failed:residual" : "launch-failed:unproven", attemptKey, ...requestIdentity,
+      humanAction: `a person must resolve the blocker (trust prompt, port, funds) and clean residual resources; no automatic retry${requestAction}` };
   }
   // Positive proof of a clean failure is an explicit, empty residualResources list. Anything else (no receipt, junk,
   // a bare object, a non-list) means a worker or its resources may exist: keep ownership and have a person inspect.
   const proven = receipts.some((receipt) => Array.isArray(receipt.residualResources) && receipt.residualResources.length === 0);
   if (!proven) {
-    recorded({ state: "unknown-liveness" });
+    recorded({ state: "unknown-liveness", ...requestIdentity });
     // A structured CLI refusal ({ ok: false, error: { code } }) says why Orca stopped but does not prove that nothing was created, so
     // ownership stays unknown. Only a strict token is reported; the message and any other text from the receipt are never echoed.
     const code = receipts.map((receipt) => obj(receipt.error).code).find((value): value is string => typeof value === "string" && REFUSAL_CODE.test(value));
-    if (code) return { route: "blocked", reason: `launch-failed:refused:${code}`, attemptKey,
-      humanAction: `Orca refused the start with code ${code}; that does not prove nothing was created, so ownership is kept. Inspect the Run with worker-list before dispatching this task again` };
-    return { route: "blocked", reason: "launch-failed:unproven", attemptKey, humanAction: "inspect the Run with worker-list before dispatching this task again" };
+    if (code) return { route: "blocked", reason: `launch-failed:refused:${code}`, attemptKey, ...requestIdentity,
+      humanAction: `Orca refused the start with code ${code}; that does not prove nothing was created, so ownership is kept. Inspect the Run with worker-list before dispatching this task again${requestAction}` };
+    return { route: "blocked", reason: "launch-failed:unproven", attemptKey, ...requestIdentity, humanAction: `inspect the Run with worker-list before dispatching this task again${requestAction}` };
   }
-  recorded({ state: "failed" });
-  return { route: "blocked", reason: "launch-failed", attemptKey, retryable: true };
+  recorded({ state: "failed", ...requestIdentity });
+  return { route: "blocked", reason: "launch-failed", attemptKey, retryable: true, ...requestIdentity };
 }
 
 function resumeExisting(ledger: Ledger, record: LedgerRecord, attemptKey: string): DispatchOutcome {
   // A claim with no launch recorded may have crashed between the claim and the spawn: unknown, so inspect, never relaunch.
   if (record.state === "claimed") ledger.update(attemptKey, { state: "unknown-liveness" });
-  return { route: "resume", reason: "attempt-already-owned", attemptKey, ...(record.dispatchId ? { dispatchId: record.dispatchId } : {}) };
+  return { route: "resume", reason: "attempt-already-owned", attemptKey, ...(record.dispatchId ? { dispatchId: record.dispatchId } : {}), ...(record.requestId ? { requestId: record.requestId } : {}) };
 }
 
 /** Bounded retries across attempts: only a retryable outcome repeats, never past min(caller, policy, 5) or the deadline. */

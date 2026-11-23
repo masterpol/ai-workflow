@@ -610,3 +610,12 @@ Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles t
 - **Confirm `--terminal-state` coverage with a real worker** (low-med): the lookup queries every state but `released`, inferred from the six documented states. A real worker run (S3's Run would also show it) should list its terminal under one of them. Audit SEC-3.
 - **Phase start is about 0.5 s slower** (low): the five-state lookup replaced one call. If it matters, the states could be read in parallel (the runner is synchronous today).
 
+
+- `skill-defaults.test.mts` "workflow-doctor exits 0 on a real bundle copy" (and a registry-managed-skill sibling) copy the whole working tree including the ignored `graphify-out/cache` (118 MB), so they exceed Bun's 5 s default timeout in a long-lived checkout while passing in 1 s on a clean tree. Skip ignored directories in the copy or raise the test timeout. Found 2026-11-23 during orca-api-currency-and-opencode2.
+
+- Orca dispatch accepts an authorized path under `.project/` (for example an eval dataset), but `collectReport` rejects a `worker_done` whose `filesModified` names any `.project` path (`invalid-files`), so such an attempt can never be settled by its own report and stays `launched`. Either allow `.project/` paths that were authorized for that attempt in the report grammar, or refuse them at dispatch. Found 2026-11-23 on scope R5c of orca-api-currency-and-opencode2.
+
+- `argsDigest` / `computeArgsDigest` (orca-ledger.mts) have no consumer after R4b-2 was dropped (orca-api-currency-and-opencode2 audit S1): wire it into the claim with a mismatch check, or remove the field.
+- `USED_CONTRACT` (orca-contract.mts) is hand-maintained; add a test that derives the `worker-start` flags from `PLACEMENT_FLAGS` and the args dispatch builds, so a new flag cannot slip past the snapshot (audit S2).
+- orca-contract.mts regenerate mode writes without a guard when run from a directory without ai-framework/scripts (CLI-only edge, audit acknowledged).
+- Verifying a change set through `git worktree` can fail the two bundle-copy doctor tests: the suite rebuilds the knowledge graph through the shared git directory and reads the main repo's committed cards, so the graph looks out of date. An independent clone passes. Make that rebuild use the checkout it runs in, or document it as a verification caveat (found 2026-11-23 shipping orca-api-currency-and-opencode2).

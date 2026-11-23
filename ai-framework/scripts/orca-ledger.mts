@@ -31,10 +31,14 @@ export interface LedgerRecord {
   /** An unconfirmed local child lifetime blocks reconciliation until its owner is manually reconciled. */
   processOwnerPid?: number;
   dispatchId?: string;
+  /** Immutable Orca request identity, when known. */
+  requestId?: string;
+  /** SHA-256 binding the brief, agent id and exact authorized-path arguments. */
+  argsDigest?: string;
   /** Present once a worker's authoritative report completed the attempt. */
   reportId?: string;
 }
-export interface LedgerPatch { state?: LedgerState; dispatchId?: string; reportId?: string; processOwnerPid?: number }
+export interface LedgerPatch { state?: LedgerState; dispatchId?: string; requestId?: string; argsDigest?: string; reportId?: string; processOwnerPid?: number }
 
 export type ReadResult =
   | { status: "missing" | "refused" | "corrupt" }
@@ -83,7 +87,18 @@ const TRANSITIONS: Readonly<Record<LedgerState, readonly LedgerState[]>> = Objec
   failed: ["settled"],
   settled: [],
 });
-const RECORD_KEYS = ["attemptKey", "taskKey", "vendor", "state", "createdAt", "schemaVersion", "authorizedPaths", "processOwnerPid", "dispatchId", "reportId"];
+const RECORD_KEYS = ["attemptKey", "taskKey", "vendor", "state", "createdAt", "schemaVersion", "authorizedPaths", "processOwnerPid", "dispatchId", "requestId", "argsDigest", "reportId"];
+const PATCH_KEYS = ["state", "dispatchId", "requestId", "argsDigest", "reportId", "processOwnerPid"];
+
+const validRequestId = (value: unknown): value is string => typeof value === "string"
+  && value.length >= 4 && value.length <= 80 && !/[^A-Za-z0-9_-]/.test(value);
+const validArgsDigest = (value: unknown): value is string => typeof value === "string"
+  && value.length === 64 && !/[^0-9a-f]/.test(value);
+
+/** Pure with the runtime SHA-256 primitive supplied; JSON framing preserves boundaries and path order. */
+export function computeArgsDigest(brief: string, agentId: string, authorizedPaths: readonly string[], crypto: Pick<RuntimeDeps["crypto"], "sha256Hex">): string {
+  return crypto.sha256Hex(JSON.stringify([brief, agentId, authorizedPaths]));
+}
 
 const validId = (id: unknown): id is string => typeof id === "string" && ID.test(id) && !id.includes("..");
 export const attemptKeyOf = (id: string): string => ATTEMPT_PREFIX + id;
@@ -140,6 +155,8 @@ export function validateRecord(value: unknown): value is LedgerRecord {
   if (Object.hasOwn(value, "authorizedPaths") && !validAuthorizedPaths(value.authorizedPaths)) return false;
   if (Object.hasOwn(value, "processOwnerPid") && (!Number.isSafeInteger(value.processOwnerPid) || (value.processOwnerPid as number) < 1)) return false;
   if (Object.hasOwn(value, "dispatchId") && !validId(value.dispatchId)) return false;
+  if (Object.hasOwn(value, "requestId") && !validRequestId(value.requestId)) return false;
+  if (Object.hasOwn(value, "argsDigest") && !validArgsDigest(value.argsDigest)) return false;
   if (Object.hasOwn(value, "reportId") && !validId(value.reportId)) return false;
   const hasReport = Object.hasOwn(value, "reportId");
   if (value.state === "completed" && !hasReport) return false;
@@ -308,7 +325,7 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
   }
 
   function update(attemptKey: string, patch: LedgerPatch): UpdateResult {
-    if (idOf(attemptKey, ATTEMPT_PREFIX) === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => ["state", "dispatchId", "reportId", "processOwnerPid"].includes(key))) return { status: "invalid" };
+    if (idOf(attemptKey, ATTEMPT_PREFIX) === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => PATCH_KEYS.includes(key))) return { status: "invalid" };
     return withMutationLock<UpdateResult>(false, () => updateUnlocked(attemptKey, patch), (reason) => ({ status: reason }));
   }
 
@@ -346,7 +363,9 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
 
   function updateUnlocked(attemptKey: string, patch: LedgerPatch): UpdateResult {
     const id = idOf(attemptKey, ATTEMPT_PREFIX);
-    if (id === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => ["state", "dispatchId", "reportId", "processOwnerPid"].includes(key))) return { status: "invalid" };
+    if (id === undefined || !isPlain(patch) || !Object.keys(patch).every((key) => PATCH_KEYS.includes(key))) return { status: "invalid" };
+    if ((Object.hasOwn(patch, "requestId") && !validRequestId(patch.requestId))
+      || (Object.hasOwn(patch, "argsDigest") && !validArgsDigest(patch.argsDigest))) return { status: "invalid" };
     const dir = walkDir(false);
     if (dir.kind !== "dir") return { status: dir.kind };
     const current = readSlot(dir.dir, id);
@@ -360,10 +379,12 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
       if (current.record.processOwnerPid !== undefined && current.record.processOwnerPid !== patch.processOwnerPid) return { status: "rejected" };
       next.processOwnerPid = patch.processOwnerPid;
     }
-    // A recorded dispatch id is the attempt's identity: it can be set once and never replaced.
-    if (patch.dispatchId !== undefined) {
-      if (current.record.dispatchId !== undefined && current.record.dispatchId !== patch.dispatchId) return { status: "rejected" };
-      next.dispatchId = patch.dispatchId;
+    // Launch identity and arguments can be set once and never replaced.
+    for (const field of ["dispatchId", "requestId", "argsDigest"] as const) {
+      if (patch[field] !== undefined) {
+        if (current.record[field] !== undefined && current.record[field] !== patch[field]) return { status: "rejected" };
+        next[field] = patch[field];
+      }
     }
     // Completion is a worker's word, not ours: only an update carrying that worker's reportId may complete an attempt.
     if (next.state === "completed" && current.record.state !== "completed" && patch.reportId === undefined) return { status: "rejected" };

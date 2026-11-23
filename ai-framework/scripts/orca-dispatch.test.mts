@@ -9,7 +9,7 @@ import type { TestContext } from "node:test";
 import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
 import { WORKER_FLAG } from "./orca-launch-gate.mts";
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
-import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, markUnknownLiveness, resolveAssignment } from "./orca-dispatch.mts";
+import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, markUnknownLiveness, ORCA_TIMEOUT_MARGIN_MS, resolveAssignment } from "./orca-dispatch.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaPolicyToonText, createTestDeps, fileUrl, spawnTestChild } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
@@ -29,9 +29,15 @@ function fixture(t: TestContext, enabled = true): string {
   return root;
 }
 /** Probe runner that serves the three preflight receipts in order, for every evaluation. */
-function probe() {
-  const state = { calls: 0 };
-  const run = () => {
+/** Real `orca agent installed --json` output, Orca 1.4.271, recorded on this host (see s3-capture.md). */
+const REAL_INSTALLED = { id: "380264a7-69f6-474b-a0bd-0e1d5b9d6897", ok: true, result: { agents: [
+  { id: "claude", name: "Claude", default: true }, { id: "claude-agent-teams", name: "Claude Agent Teams", default: false },
+  { id: "codex", name: "Codex", default: false }, { id: "opencode", name: "OpenCode", default: false }] }, _meta: { runtimeId: "0f1ef424-562b-442e-a3b4-08730bee069d" } };
+const installedWith = (...ids: string[]) => ({ ...REAL_INSTALLED, result: { agents: ids.map((id) => ({ id, name: id, default: false })) } });
+function probe(installed: unknown = REAL_INSTALLED) {
+  const state = { calls: 0, installedReads: 0 };
+  const run = (_command?: string, args?: string[]) => {
+    if (args?.[0] === "agent") { state.installedReads++; return typeof installed === "string" ? { status: 1, signal: null, stdout: "", stderr: "" } : { status: 0, signal: null, stdout: JSON.stringify(installed), stderr: "" }; }
     const values: Obj[] = [
       { name: "orca-cli", markdown: "worktree current; terminal" },
       { name: "orchestration", markdown: "worker-start; worker_done; orchestration check" },
@@ -44,10 +50,12 @@ function probe() {
 
 type Behaviour = "ok" | "ok-nested-dispatchId" | "ok-projection" | "ok-bare" | "ok-noid" | "agent_readiness" | "residual" | "timeout" | "overflow" | "plain-fail" | "signal" | "stderr-residual" | "unreadable" | "bare-object";
 /** Stateful fake Orca: records every worker-start and answers from a script of behaviours. */
-function fakeOrca(behaviours: Behaviour[] = ["ok"]) {
+function fakeOrca(behaviours: Behaviour[] = ["ok"], receipt?: { status: number; value: unknown; stderr?: boolean }) {
   const state = { starts: [] as Array<{ args: string[]; options: SpawnOptions }>, workers: 0 };
   const deps: RuntimeDeps = { ...nodeDeps, child: { ...nodeDeps.child, run: async (_command, args, options = {}): Promise<RunResult> => {
     state.starts.push({ args: [...args], options });
+    if (receipt) return { status: receipt.status, signal: null,
+      stdout: receipt.stderr ? "" : JSON.stringify(receipt.value), stderr: receipt.stderr ? JSON.stringify(receipt.value) : "" };
     const behaviour = behaviours[Math.min(state.starts.length - 1, behaviours.length - 1)];
     const base = { signal: null, stderr: "" };
     if (behaviour === "ok") { state.workers++; return { ...base, status: 0, stdout: JSON.stringify({ result: { stage: "input_accepted", dispatch: { id: `ctx_${state.workers}` } } }) }; }
@@ -117,7 +125,7 @@ test("a launch writes a claim first, carries the worker flag in the brief and re
   const args = orca.state.starts[0].args;
   const spec = args[args.indexOf("--spec") + 1];
   assert.ok(args.includes("--spec") && spec.split("\n").includes(WORKER_FLAG) && !spec.startsWith("--"));
-  assert.equal(args.at(-1), "--json");
+  assert.deepEqual(args.slice(-2), ["--json", "--full"]);
   const read = ledgerOf(root).read(attemptKeyOf("a1"));
   assert.equal(read.status, "ok");
   if (read.status === "ok") assert.deepEqual([read.record.state, read.record.dispatchId, read.record.taskKey], ["launched", "ctx_1", taskKeyOf("s1")]);
@@ -388,7 +396,7 @@ test("placement is a typed allow-list: known flags pass, free text and extra fla
   const ok = await dispatchScope(base(root, orca.deps, { placement: { worktree: "new-top-level", repo: "id:abc", name: "smoke-b" } }));
   assert.equal(ok.route, "launched");
   const args = orca.state.starts[0].args;
-  assert.deepEqual(args.slice(-7), ["--worktree", "new-top-level", "--repo", "id:abc", "--name", "smoke-b", "--json"]);
+  assert.deepEqual(args.slice(-8), ["--worktree", "new-top-level", "--repo", "id:abc", "--name", "smoke-b", "--json", "--full"]);
   assert.equal(args.filter((arg) => arg === "--agent").length, 1);
   for (const placement of [{ agent: "claude" }, { spec: "x" }, { worktree: "--agent" }, { worktree: "a b" }, { name: "x\ny" }, { repo: 5 }]) {
     const other = fakeOrca();
@@ -1138,4 +1146,246 @@ test("pools: every non-failed holder keeps its vendor, including unknown-livenes
   seed(root, "s1", "a1", "claude", "launched");
   assert.equal(ledgerOf(root).update(attemptKeyOf("a1"), { state: "unknown-liveness" }).status, "ok");
   assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }), { vendor: "claude" }, "unknown-liveness is preserved, never rotated");
+});
+
+const agentsOf = (orca: ReturnType<typeof fakeOrca>) => orca.state.starts.map(agentOf);
+const opencodeBase = (root: string, deps: RuntimeDeps, installed: unknown, env: Obj = {}) => {
+  const b = base(root, deps, { vendor: "opencode" });
+  return { ...b, env: { ...b.env, ...env }, run: probe(installed).run };
+};
+const policyWith = (t: TestContext) => fixture(t);
+
+test("opencode on a host listing only opencode launches --agent opencode", async (t: TestContext) => {
+  const root = policyWith(t);
+  const orca = fakeOrca();
+  const outcome = await dispatchScope(opencodeBase(root, orca.deps, REAL_INSTALLED) as never);
+  assert.equal(outcome.route, "launched");
+  assert.deepEqual(agentsOf(orca), ["opencode"]);
+  assert.equal(ledgerOf(root).read(attemptKeyOf("a1")).status === "ok" && (ledgerOf(root).read(attemptKeyOf("a1")) as { record: { vendor: string } }).record.vendor, "opencode");
+});
+
+test("a host also listing opencode2 launches --agent opencode2, and the probed id equals the spawned id", async (t: TestContext) => {
+  const root = policyWith(t);
+  const orca = fakeOrca();
+  const outcome = await dispatchScope(opencodeBase(root, orca.deps, installedWith("claude", "opencode", "opencode2")) as never);
+  assert.equal(outcome.route, "launched");
+  assert.deepEqual(agentsOf(orca), ["opencode2"]);
+  // Mutant guard: a gate that probed `opencode` while dispatch launched `opencode2` would be refused here.
+  const probed = probe(installedWith("claude", "opencode"));
+  const mutantRoot = policyWith(t);
+  const mutantOrca = fakeOrca();
+  const denied = await dispatchScope({ ...opencodeBase(mutantRoot, mutantOrca.deps, installedWith("claude", "opencode")), run: probed.run, env: { ...base(mutantRoot, mutantOrca.deps).env } } as never);
+  assert.deepEqual(agentsOf(mutantOrca), ["opencode"]);
+  assert.equal(denied.route, "launched");
+});
+
+test("opencode override: installed override launches it; uninstalled, invalid, missing id and unreadable list are refused with no spawn and no ledger", async (t: TestContext) => {
+  const cases: Array<[unknown, Obj, string]> = [
+    [installedWith("opencode", "opencode2"), { AI_WORKFLOW_ORCA_OPENCODE_AGENT: "opencode" }, "launched:opencode"],
+    [installedWith("opencode"), { AI_WORKFLOW_ORCA_OPENCODE_AGENT: "opencode2" }, "agent-not-installed"],
+    [installedWith("opencode"), { AI_WORKFLOW_ORCA_OPENCODE_AGENT: "opencode3" }, "invalid-opencode-agent"],
+    [installedWith("claude", "codex"), {}, "no-opencode-agent-installed"],
+    ["unreadable", {}, "installed-agents-unavailable"],
+  ];
+  for (const [installed, env, expected] of cases) {
+    const root = policyWith(t);
+    const orca = fakeOrca();
+    const outcome = await dispatchScope(opencodeBase(root, orca.deps, installed, env) as never);
+    if (expected.startsWith("launched:")) { assert.equal(outcome.route, "launched"); assert.deepEqual(agentsOf(orca), [expected.slice(9)]); continue; }
+    assert.deepEqual([outcome.route, outcome.reason], ["normal", expected]);
+    assert.equal(orca.state.starts.length, 0, expected);
+    assert.equal(ledgerOf(root).read(attemptKeyOf("a1")).status, "missing", expected);
+  }
+});
+
+test("a hostile installed-list entry is never launched", async (t: TestContext) => {
+  const root = policyWith(t);
+  const orca = fakeOrca();
+  const outcome = await dispatchScope(opencodeBase(root, orca.deps, installedWith("opencode; rm -rf /", "../opencode2", "OpenCode2")) as never);
+  assert.deepEqual([outcome.route, outcome.reason], ["normal", "no-opencode-agent-installed"]);
+  assert.equal(orca.state.starts.length, 0);
+});
+
+test("claude and codex still launch with --agent set to the vendor and never read the installed list", async (t: TestContext) => {
+  for (const vendor of ["codex"]) {
+    const root = policyWith(t);
+    const orca = fakeOrca();
+    const run = probe();
+    const outcome = await dispatchScope({ ...base(root, orca.deps, { vendor }), run: run.run } as never);
+    assert.equal(outcome.route, "launched");
+    assert.deepEqual(agentsOf(orca), [vendor]);
+    assert.equal(run.state.installedReads, 0);
+  }
+});
+
+// Recorded Orca 1.4.271 receipts, 2026-11-23: pitch s3-capture.md (S3b) and
+// the R4b-1 worker brief. Trimmed to the observed fields dispatch consumes.
+const REAL_START_SUCCESS = { ok: true, result: { state: "ready", runId: "run_07adc69ad9b4", taskId: "task_ed660de9272c",
+  dispatchId: "ctx_0edc7ff55272", stage: "input_accepted",
+  mutation: { requestId: "03b367df-47db-43b2-869c-b1dca7c1b738", replayed: false }, residualResources: [] } };
+const REAL_START_REFUSAL = { ok: false, error: { code: "agent_unconfigured",
+  data: { orchestrationRequestId: "57315680-84ea-4aa5-b70c-a6fae37bd250" } } };
+// Recorded Orca 1.4.271 receipt of a start cut off by Orca's own `--timeout-ms 1` (s3-capture.md, S3c): a FAILED start that still carries the request id.
+const REAL_START_TIMEOUT = { ok: true, result: { state: "failed", stage: "agent_readiness", failedStage: "agent_readiness", lastError: "timeout",
+  dispatchId: "ctx_2c90caa79b0b", taskId: "task_76d0f36f03e1", runId: "run_07adc69ad9b4",
+  residualResources: [{ kind: "terminal", role: "agent", action: "created", id: "term_9809a69a-e8b2-494d-949a-ec2366bc8d69" }],
+  mutation: { requestId: "cd5ed688-ce85-49e4-bbdc-91fbdb1ade40", replayed: false } } };
+const SUCCESS_REQUEST = REAL_START_SUCCESS.result.mutation.requestId;
+const REFUSAL_REQUEST = REAL_START_REFUSAL.error.data.orchestrationRequestId;
+const recordOf = (root: string) => {
+  const read = ledgerOf(root).read(attemptKeyOf("a1"));
+  assert.equal(read.status, "ok");
+  if (read.status !== "ok") throw new Error("missing test record");
+  return read.record;
+};
+
+test("Orca wait uses this launch's final kill budget minus the margin, floored, with its 1000 ms minimum", async (t) => {
+  assert.equal(ORCA_TIMEOUT_MARGIN_MS, 5000);
+  for (const leftAfterMargin of [999, 1000, 1000.5]) {
+    const root = fixture(t);
+    const orca = fakeOrca();
+    let reads = 0;
+    // A moving injected clock proves we use the final gate's budget, not the pre-claim check.
+    const now = () => ++reads === 1 ? 0 : 2000;
+    const outcome = await dispatchScope(base(root, orca.deps, { now, deadlineMs: 2000 + 5000 + leftAfterMargin }));
+    assert.equal(outcome.route, "launched");
+    const start = orca.state.starts[0];
+    assert.equal(start.options.timeoutMs, Math.floor(5000 + leftAfterMargin));
+    assert.deepEqual(start.args.slice(start.args.indexOf("--json"), start.args.indexOf("--json") + 2), ["--json", "--full"]);
+    const index = start.args.indexOf("--timeout-ms");
+    if (leftAfterMargin < 1000) assert.equal(index, -1);
+    else {
+      assert.equal(start.args[index + 1], String(Math.floor(leftAfterMargin)));
+      assert.equal(Number(start.args[index + 1]), (start.options.timeoutMs as number) - ORCA_TIMEOUT_MARGIN_MS);
+    }
+  }
+});
+
+test("a real full success stores requestId together with dispatchId, returns it and preserves it set-once", async (t) => {
+  for (const [coordinator, vendor] of [["claude", "codex"], ["codex", "claude"]]) {
+    const root = fixture(t);
+    const orca = fakeOrca(["ok"], { status: 0, value: REAL_START_SUCCESS });
+    const outcome = await dispatchScope(base(root, orca.deps, { coordinator, vendor }));
+    assert.deepEqual([outcome.route, outcome.dispatchId, outcome.requestId], ["launched", REAL_START_SUCCESS.result.dispatchId, SUCCESS_REQUEST]);
+    assert.deepEqual([recordOf(root).state, recordOf(root).dispatchId, recordOf(root).requestId], ["launched", outcome.dispatchId, SUCCESS_REQUEST]);
+    assert.notEqual(ledgerOf(root).update(attemptKeyOf("a1"), { requestId: REFUSAL_REQUEST }).status, "ok");
+    assert.equal(recordOf(root).requestId, SUCCESS_REQUEST);
+    const again = await dispatchScope(base(root, orca.deps, { coordinator, vendor }));
+    assert.equal(again.requestId, SUCCESS_REQUEST);
+    assert.equal(orca.state.starts.length, 1);
+  }
+});
+
+async function assertRequestRefusal(t: TestContext, dispatch = dispatchScope, extra: Obj = {}) {
+  const root = fixture(t);
+  const orca = fakeOrca(["ok"], { status: 1, value: { ...REAL_START_REFUSAL, ...extra } });
+  const first = await dispatch(base(root, orca.deps));
+  assert.deepEqual([first.route, first.reason, first.retryable, first.requestId],
+    ["blocked", "launch-failed:refused:agent_unconfigured", undefined, REFUSAL_REQUEST]);
+  assert.equal(recordOf(root).state, "unknown-liveness");
+  assert.equal(recordOf(root).requestId, REFUSAL_REQUEST);
+  assert.ok(first.humanAction?.includes(`orca orchestration request-show --request ${REFUSAL_REQUEST}`));
+  assert.notEqual(ledgerOf(root).update(attemptKeyOf("a1"), { requestId: SUCCESS_REQUEST }).status, "ok");
+  assert.equal(recordOf(root).requestId, REFUSAL_REQUEST);
+  const second = await dispatch(base(root, orca.deps, { attemptId: "a2" }));
+  assert.deepEqual([second.route, second.reason], ["resume", "task-already-owned"]);
+  assert.equal(orca.state.starts.length, 1, "no query, retry-request or second launch");
+}
+
+test("a real refusal request id supplies inspection only; it and an absent answer never prove clean failure", async (t) => {
+  await assertRequestRefusal(t);
+  // Hostile extra data cannot grant settlement authority; dispatch never queries request-show.
+  await assertRequestRefusal(t, dispatchScope, { state: "absent" });
+});
+
+test("mutant: treating a refusal request id as clean-failure proof turns the refusal assertions red", async (t) => {
+  const source = fs.readFileSync(path.join(HERE, "orca-dispatch.mts"), "utf8");
+  const mutant = source.replace("const proven = receipts.some(", "const proven = Boolean(requestId) || receipts.some(");
+  assert.notEqual(mutant, source, "mutant must change the proof rule");
+  // Keep the mutant entirely in memory and use the same dependencies and assertions as production.
+  const absoluteImports = mutant.replace(/from "(\.\/[^\"]+)"/g, (_match, relative: string) => `from "${new URL(relative, import.meta.url).href}"`);
+  const js = new Bun.Transpiler({ loader: "ts" }).transformSync(absoluteImports);
+  const mutated = await import(`data:text/javascript;base64,${Buffer.from(js).toString("base64")}`);
+  await assert.rejects(() => assertRequestRefusal(t, mutated.dispatchScope), { name: "AssertionError" });
+});
+
+test("hostile request ids and the envelope id are ignored on both success and refusal receipts", async (t) => {
+  const hostile = [undefined, null, 42, {}, { requestId: SUCCESS_REQUEST }, [SUCCESS_REQUEST], "", "req_abc", SUCCESS_REQUEST.toUpperCase(),
+    `${SUCCESS_REQUEST}\n`, `${SUCCESS_REQUEST}\u001b`, ` ${SUCCESS_REQUEST}`, "a".repeat(10000), "03b367df47db43b2869cb1dca7c1b738"];
+  for (const requestId of hostile) {
+    for (const success of [true, false]) {
+      const root = fixture(t);
+      const value = success
+        ? { ...REAL_START_SUCCESS, id: SUCCESS_REQUEST, result: { ...REAL_START_SUCCESS.result, mutation: { requestId, replayed: false } } }
+        : { ...REAL_START_REFUSAL, id: SUCCESS_REQUEST, error: { ...REAL_START_REFUSAL.error, data: { orchestrationRequestId: requestId } } };
+      const orca = fakeOrca(["ok"], { status: success ? 0 : 1, value });
+      const outcome = await dispatchScope(base(root, orca.deps));
+      assert.equal(outcome.requestId, undefined);
+      assert.equal(recordOf(root).requestId, undefined);
+      assert.equal(outcome.route, success ? "launched" : "blocked");
+      assert.equal(recordOf(root).state, success ? "launched" : "unknown-liveness");
+      assert.ok(!outcome.humanAction?.includes("request-show"));
+      assert.ok(JSON.stringify(outcome).length < 1000);
+    }
+  }
+});
+
+test("a replayed full success is blocked as launch-replayed and retains unknown ownership", async (t) => {
+  const root = fixture(t);
+  const value = { ...REAL_START_SUCCESS, result: { ...REAL_START_SUCCESS.result, mutation: { requestId: SUCCESS_REQUEST, replayed: true } } };
+  const orca = fakeOrca(["ok"], { status: 0, value });
+  const outcome = await dispatchScope(base(root, orca.deps));
+  assert.deepEqual([outcome.route, outcome.reason, outcome.requestId, outcome.retryable], ["blocked", "launch-replayed", SUCCESS_REQUEST, undefined]);
+  assert.equal(recordOf(root).state, "unknown-liveness");
+  assert.equal(recordOf(root).requestId, SUCCESS_REQUEST);
+  const second = await dispatchScope(base(root, orca.deps, { attemptId: "a2" }));
+  assert.equal(second.reason, "task-already-owned");
+  assert.equal(orca.state.starts.length, 1);
+});
+
+test("receipt first preserves refusal ownership; local kill first remains launch-timeout with no request id", async (t) => {
+  await assertRequestRefusal(t);
+  const root = fixture(t);
+  const orca = fakeOrca(["timeout"]);
+  const outcome = await dispatchScope(base(root, orca.deps, { deadlineMs: 11000 }));
+  assert.deepEqual([outcome.reason, outcome.requestId, outcome.retryable], ["launch-timeout", undefined, undefined]);
+  assert.equal(recordOf(root).state, "unknown-liveness");
+  assert.ok(orca.state.starts[0].args.includes("--timeout-ms"));
+});
+
+test("the refusal request id is also captured from stderr", async (t) => {
+  const root = fixture(t);
+  const orca = fakeOrca(["ok"], { status: 1, value: REAL_START_REFUSAL, stderr: true });
+  const outcome = await dispatchScope(base(root, orca.deps));
+  assert.equal(outcome.requestId, REFUSAL_REQUEST);
+  assert.equal(recordOf(root).requestId, REFUSAL_REQUEST);
+  assert.equal(recordOf(root).state, "unknown-liveness");
+});
+
+test("Orca's own timeout receipt (failed start with residual resources) keeps the request id, stays unknown-liveness and is not retried", async (t) => {
+  const root = fixture(t);
+  const orca = fakeOrca(["ok"], { status: 1, value: REAL_START_TIMEOUT });
+  const outcome = await dispatchScope(base(root, orca.deps, { maxRetries: 2 }));
+  assert.equal(outcome.route, "blocked");
+  assert.equal(outcome.reason, "launch-failed:agent_readiness");
+  assert.equal(outcome.requestId, REAL_START_TIMEOUT.result.mutation.requestId);
+  assert.match(outcome.humanAction ?? "", /request-show --request cd5ed688-ce85-49e4-bbdc-91fbdb1ade40/);
+  assert.equal(recordOf(root).state, "unknown-liveness");
+  assert.equal(recordOf(root).requestId, REAL_START_TIMEOUT.result.mutation.requestId);
+  assert.equal(orca.state.starts.length, 1);
+});
+
+test("a failed stage of any type is never positive proof: an empty residualResources list beside it is not retryable", async (t: TestContext) => {
+  for (const stage of [{}, 7, ["x"], true, "", "Bad Stage!"]) {
+    const root = fixture(t);
+    const orca = fakeOrca(["ok"]);
+    let starts = 0;
+    orca.deps.child.run = async () => { starts++; return { status: 1, signal: null, stdout: JSON.stringify({ result: { failedStage: stage, residualResources: [] } }), stderr: "" }; };
+    const outcome = await dispatchWithRetries({ ...retryBase(root, orca.deps), baseAttemptId: "fs", maxRetries: 3 });
+    assert.equal(outcome.route, "blocked", JSON.stringify(stage));
+    assert.equal(outcome.retryable, undefined, JSON.stringify(stage));
+    assert.match(outcome.reason, /^launch-failed:(unproven|[a-z][a-z0-9_-]*)$/, JSON.stringify(stage));
+    assert.equal(starts, 1, `no second launch for ${JSON.stringify(stage)}`);
+    assert.equal(stateOf(root, attemptKeyOf("fs")), "unknown-liveness", JSON.stringify(stage));
+  }
 });

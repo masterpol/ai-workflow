@@ -12,6 +12,7 @@ import { MAX_POLICY_BYTES, POLICY_FILE, VENDORS, main, readPolicy, report, valid
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaPolicyToonText, toonFixtureText, createTestDeps, fileUrl, spawnSync } from "./runtime/test-helpers.mts";
 import { registerIntegrationValidator } from "./runtime/config.mts";
+import { validateRecord } from "./orca-ledger.mts";
 import type { FsDeps, RuntimeDeps, StatLike } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -42,6 +43,23 @@ function run(root: string, args: string[] = []) {
 /** Real node deps with chosen fs methods replaced, the replacement for mocking node:fs. */
 const withFs = (overrides: Partial<FsDeps>): RuntimeDeps => ({ ...nodeDeps, fs: { ...nodeDeps.fs, ...overrides } });
 const errnoError = (code: string): Error => Object.assign(new Error("SECRET_MARKER"), { code });
+
+test("agent ids never widen policy or ledger vendor pools", (t) => {
+  assert.deepEqual(VENDORS, ["claude", "codex", "opencode"]);
+  assert.throws(() => report(fixture(t), "opencode2"), /^Error: invalid-vendor$/);
+  for (const allowPools of [false, true]) {
+    const value = policy();
+    value.coordinators.codex = { workers: ["opencode2"], roles: { implementation: allowPools ? ["opencode2"] : "opencode2" } };
+    assert.equal(validatePolicy(value, allowPools).status, "malformed");
+    const coordinator = policy();
+    coordinator.coordinators.opencode2 = coordinator.coordinators.opencode;
+    assert.equal(validatePolicy(coordinator, allowPools).status, "malformed");
+  }
+  // Domain input, matching rec() in orca-ledger.test.mts; no CLI output is mocked.
+  const record = { attemptKey: "attempt:agent-id", taskKey: "task:agent-id", vendor: "opencode", state: "claimed", createdAt: 1000, schemaVersion: 1 };
+  assert.equal(validateRecord(record), true);
+  assert.equal(validateRecord({ ...record, vendor: "opencode2" }), false);
+});
 
 test("selects alternate workers for every invoking vendor without authorizing dispatch", (t) => {
   const root = fixture(t);

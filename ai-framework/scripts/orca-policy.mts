@@ -8,6 +8,36 @@ export const POLICY_FILE = ".project/orchestration.json";
 export const MAX_POLICY_BYTES = 64 * 1024;
 export const VENDORS: readonly string[] = Object.freeze(["claude", "codex", "opencode"]);
 
+/** Resolve only closed agent ids verified against the host's installed-agent list. */
+export function resolveOpenCodeAgentId({ env, installedAgents }: {
+  env: Readonly<Record<string, string | undefined>>;
+  installedAgents?: readonly string[];
+}): { agentId: string; error?: never } | { error: string; agentId?: never } {
+  if (installedAgents === undefined) return { error: "installed-agents-unavailable" };
+  const override = env.AI_WORKFLOW_ORCA_OPENCODE_AGENT;
+  if (override !== undefined) {
+    if (override !== "opencode" && override !== "opencode2") return { error: "invalid-opencode-agent" };
+    return installedAgents.includes(override) ? { agentId: override } : { error: "agent-not-installed" };
+  }
+  if (installedAgents.includes("opencode2")) return { agentId: "opencode2" };
+  if (installedAgents.includes("opencode")) return { agentId: "opencode" };
+  return { error: "no-opencode-agent-installed" };
+}
+
+/** Parse bounded, untrusted `orca agent installed --json` output; invalid ids never reach launch arguments. */
+export function parseInstalledAgents(text: string): string[] | undefined {
+  if (typeof text !== "string" || text.length > 65536) return undefined;
+  let value: unknown;
+  try { value = JSON.parse(text); } catch { return undefined; }
+  if (!isRecord(value) || !isRecord(value.result) || !Array.isArray(value.result.agents)) return undefined;
+  const ids: string[] = [];
+  for (const entry of value.result.agents) {
+    if (isRecord(entry) && typeof entry.id === "string" && /^[a-z][a-z0-9-]{0,63}$/.test(entry.id)) ids.push(entry.id);
+    if (ids.length === 64) break;
+  }
+  return ids;
+}
+
 type Json = Record<string, unknown>;
 type Status = "missing" | "refused" | "malformed" | "unsupported-schema" | "disabled" | "valid";
 /** `roles` keeps the first member of each pool for back-compat consumers; `pools` is the full ordered pool per role. */

@@ -14,6 +14,7 @@ import { validateRuntimeImports } from "./runtime/validate.mts";
 import * as skillVendors from "./skill-vendors.mts";
 import * as skillDefaults from "./skill-defaults.mts";
 import * as orcaPolicy from "./orca-policy.mts";
+import { SNAPSHOT_PATH, checkUsedAgainstSnapshot, readSnapshotFile } from "./orca-contract.mts";
 import * as docsLinks from "./docs-links.mts";
 import { HOOK_EVENTS, HOOK_START, hasRawHook, hooksDir } from "./graphify.mts";
 import { CONSOLIDATION_COMMAND, legacyInventory } from "./consolidation-migrate.mts";
@@ -632,6 +633,17 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record("pass", name, `integrations.orca (engine ${orca.engine || "unset"}, ${orcaState}) and ${Object.keys(others).length} other integration(s) in use, all registered${legacyNote}`);
   }
 
+  /** Offline: parses the committed snapshot and checks USED_CONTRACT against it. Never runs Orca; the live diff is `bun ai-framework/scripts/orca-contract.mts --check`. */
+  function checkOrcaContract(): void {
+    const name = "Orca contract";
+    const snapshot = readSnapshotFile(deps, root);
+    if (snapshot.status === "failed") { record("fail", name, `${SNAPSHOT_PATH}: ${snapshot.reason}; regenerate with bun ai-framework/scripts/orca-contract.mts`); return; }
+    const used = checkUsedAgainstSnapshot(snapshot.snapshot);
+    record(used.ok ? "pass" : "fail", name, used.ok
+      ? "committed snapshot covers every command and flag our scripts send and none is Retired (offline; the live CLI is checked by bun ai-framework/scripts/orca-contract.mts --check)"
+      : `${used.problems.join("; ")}; update the callers, then regenerate with bun ai-framework/scripts/orca-contract.mts`);
+  }
+
   function checkOrcaPolicy() {
     // Optional local policy is inspected without importing preflight or touching executables.
     const result = orcaPolicy.readPolicy(root, deps);
@@ -1098,6 +1110,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkRuntimeBoundary(),
       checkConfigValidators(),
       checkOrcaPolicy(),
+      ...(inPortableBundleRepo ? [Promise.resolve(checkOrcaContract())] : []),
       checkCodexStartupWiring(),
       checkClaudeStartupWiring(),
       checkClaudeCaptureWiring(),

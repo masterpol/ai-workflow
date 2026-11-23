@@ -222,6 +222,22 @@ When an Orca update still blocks a phase, run `node ai-framework/scripts/orca-ru
 worker-list shapes" fixtures in `orca-start.test.mts` or to the preflight fixtures before changing the parser, so the next
 update is covered by a test and not by a surprise. `orca=normal` on the invocation always runs the phase without Orca.
 
+#### Contract check
+
+The committed snapshot `ai-framework/scripts/orca-contract.snapshot.json` records only the commands and flags our
+scripts send. Run `bun ai-framework/scripts/orca-contract.mts --check` for the explicit live check: it reads
+`orca agent-context --json` and compares the generated snapshot with the committed file.
+A removed used command or flag, a newly **Retired** used command, or a changed source schema version fails;
+an added flag or command is not drift. The live check fails if Orca is unavailable; it does not silently skip.
+
+The doctor's **Orca contract** check is **OFFLINE** and never executes Orca. It validates the snapshot and verifies
+that every command and flag our scripts send (declared in `USED_CONTRACT`) is present, with no used command marked
+Retired. It works without Orca installed; a missing, unreadable or invalid snapshot fails.
+
+After reviewing changes to the CLI and callers, regenerate with `bun ai-framework/scripts/orca-contract.mts`.
+The generator's live output and snapshot readers share a **1 MiB** contract bound (`CONTRACT_MAX_BYTES`);
+the shared **256 KiB** probe/output bound (`MAX_OUTPUT_BYTES`) remains unchanged.
+
 ### Codex startup and coordinator preparation
 
 Codex registers `UserPromptSubmit` in `.codex/hooks.json`, preserving the existing
@@ -308,6 +324,35 @@ in another project on 2026-10-15.
 attempt in the ledger is `claimed`, `launched` or `unknown-liveness`. Later workers share the server that the
 first worker starts, so a live worker's server is never ended. A `held` or `foreign` result refuses the launch
 with `opencode-port-held`; `unverified` and `unsupported` let it continue.
+
+## OpenCode agent id, request ids and releasing workers
+
+**Agent id** (owners: `resolveOpenCodeAgentId` and `parseInstalledAgents` in `orca-policy.mts`; the gate re-check in
+`orca-launch-gate.mts`; evidence in `s3-capture.md` of the `orca-api-currency-and-opencode2` pitch). The OpenCode
+`--agent` value is not guessed from a version. It is read from `orca agent installed --json` (bounded, one call,
+ids matching `^[a-z][a-z0-9-]{0,63}$`): `opencode2` when it is installed, else `opencode`, else a named refusal.
+`AI_WORKFLOW_ORCA_OPENCODE_AGENT` may name only `opencode` or `opencode2`, and that id must also be installed.
+Refusals are `installed-agents-unavailable`, `invalid-opencode-agent`, `agent-not-installed` and
+`no-opencode-agent-installed`; each returns before anything is claimed or spawned. `launchWorker` re-reads the list
+immediately before the spawn and denies `agent-not-installed` when the exact id it will pass as `--agent` is missing.
+There is no fallback loop: one attempt makes one `worker-start`, and a failed start is never repeated with another id.
+The policy, config and ledger vendor stay `opencode` (`opencode2` is not a vendor); Claude and Codex are not resolved and
+launch with their own id. The grader case `opencode-agent-id-resolves-from-installed-agents` executes all of this.
+
+**Request ids and timeouts** (owner: `orca-dispatch.mts`). `worker-start` runs with `--json --full`, plus
+`--timeout-ms` equal to the kill deadline minus `ORCA_TIMEOUT_MARGIN_MS` (5000), only when that is at least 1000 ms,
+so Orca answers with its own timeout receipt before our SIGKILL. The request id is read only from
+`result.mutation.requestId` (a success or failed-start receipt) or `error.data.orchestrationRequestId` (a refusal), and
+only as a lower-case UUID; it is stored set-once in the ledger and printed with the read-only
+`orca orchestration request-show --request <id>` command. An id, or `request-show` answering `absent`, is never proof of
+success or of a clean failure: ownership stays `unknown-liveness` until a person inspects the Run. We never call
+`--retry-request`.
+
+**Coordinator rule: release finished workers** (owner of the command: the Orca CLI, `orca-cli` skill). After a worker
+has finished or errored and its report is collected, the coordinator runs
+`orca orchestration worker-release --dispatch <id>` to close its terminal, and never for a worker that is still running.
+A failed start leaves a terminal behind (its receipt names this command in `recovery`/`next`); release it after
+inspection.
 
 ## Dispatch core (opt-in, library only)
 

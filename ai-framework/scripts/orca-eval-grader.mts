@@ -4,7 +4,7 @@ import type { DispatchOptions, DispatchOutcome, MailMessage, Placement, ScopeSpe
 import { verifyEvidence } from "./orca-evidence.mts";
 import { isWorkerContext, workerBrief } from "./orca-launch-gate.mts";
 import { createLedger } from "./orca-ledger.mts";
-import { VENDORS } from "./orca-policy.mts";
+import { resolveOpenCodeAgentId, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport, SUPPORTED_VERSION } from "./orca-preflight.mts";
 import type { Receipt, Run } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
@@ -45,7 +45,7 @@ export interface Summary {
 export interface GradeReport { cases: CaseResult[]; summary: Summary }
 
 /** The libraries the grader drives; tests replace single entries with in-memory mutants. */
-export const LIBRARIES = Object.freeze({ dispatchScope, dispatchWithRetries, collectReport, classifyLiveness, workerBrief, isWorkerContext, preflightReport, reconcile, verifyEvidence });
+export const LIBRARIES = Object.freeze({ dispatchScope, dispatchWithRetries, collectReport, classifyLiveness, workerBrief, isWorkerContext, preflightReport, reconcile, verifyEvidence, resolveOpenCodeAgentId });
 export type GraderLibraries = typeof LIBRARIES;
 export interface GradeOptions { deps: RuntimeDeps; root?: string; libs?: Partial<GraderLibraries>; only?: readonly string[] }
 
@@ -121,6 +121,8 @@ function probe(mode: ProbeMode): Run {
     const call = args.join(" ");
     if (call === "skills get orca-cli --json") return ok({ name: "orca-cli", markdown: mode === "guide-missing" ? "" : "worktree current; terminal" });
     if (call === "skills get orchestration --json") return ok({ name: "orchestration", markdown: "worker-start; worker_done; orchestration check" });
+    // The resolver and the gate read the installed agents of this host; the default fixture host has the three base agents.
+    if (call === "agent installed --json") return installedReceipt(["claude", "codex", "opencode"]);
     if (call !== "status --json") return null;
     if (mode === "status-failed") return { status: 1, signal: null, stdout: "", stderr: "unavailable" };
     const runtime = { reachable: mode !== "runtime-unreachable", state: "ready", appVersion: mode === "version-drift" ? "0.0.1" : SUPPORTED_VERSION };
@@ -520,6 +522,88 @@ const observeHostileSummary: Observer = async (given, ctx) => {
   };
 };
 
+// ---- OpenCode agent id: resolver, gate and spawn must agree on one installed id ----
+
+const AGENT_TOKEN = /^[a-z][a-z0-9-]{0,63}$/;
+/** Reasons and ids are reported only as plain tokens; any other text (a hostile override, a receipt) is never echoed. */
+const token = (value: unknown): string => (typeof value === "string" && AGENT_TOKEN.test(value) ? value : "unrecognized");
+// Shape from a captured real `orca agent installed --json` (Orca 1.4.271; .project/pitches/orca-api-currency-and-opencode2/s3-capture.md section 3).
+const installedReceipt = (ids: readonly string[]): Receipt => ({ status: 0, signal: null, stdout: JSON.stringify({ ok: true,
+  result: { agents: ids.map((id, index) => ({ id, name: id, default: index === 0 })) } }), stderr: "" });
+
+/**
+ * The probe runner of `launch()` plus `agent installed --json`, which the resolver and the gate both read through `options.run`.
+ * `list` null: the command fails. `dropAfterFirst`: every read after the resolver's (the gate's re-check) omits that id.
+ */
+function agentProbe(list: readonly string[] | null, dropAfterFirst?: string): { run: Run; reads: () => number } {
+  const base = probe("verified");
+  let reads = 0;
+  const run: Run = (command, args, options) => {
+    if (args.join(" ") !== "agent installed --json") return base(command, args, options);
+    reads++;
+    if (list === null) return { status: 1, signal: null, stdout: "", stderr: "unavailable" };
+    return installedReceipt(reads > 1 && dropAfterFirst !== undefined ? list.filter((id) => id !== dropAfterFirst) : list);
+  };
+  return { run, reads: () => reads };
+}
+
+const isStart = (args: readonly string[]): boolean => args[0] === "orchestration" && args[1] === "worker-start";
+
+const observeOpenCodeAgentId: Observer = async (given, ctx) => {
+  const input = obj(given.input);
+  const harness = str(input.harness);
+  const vendor = str(input.workerVendor);
+  const resolutions = Array.isArray(input.resolutions) ? input.resolutions.map(obj) : [];
+  const perResolution: Json[] = [];
+  let neverUninstalled = true, gateChecks = true, noFallback = true, ledgerOpencode = VENDORS.includes("opencode") && !VENDORS.includes("opencode2");
+  const dispatch = async (local: Ctx, label: string, coordinator: string, worker: string, list: readonly string[] | null, script: readonly Behaviour[], drop?: string) => {
+    const root = fresh(local, label);
+    writePolicy(local, root, coordinator, coordinator === "claude" ? ["codex", "opencode"] : ["claude", "opencode"]);
+    const orca = fakeOrca(local.deps, script);
+    const agents = agentProbe(list, drop);
+    const options = { ...launch(local, { root, deps: orca.deps, coordinator, vendor: worker, scope: scopeSpec(`scope-${label}`, "change a.txt", ["a.txt"]), attemptId: label }), run: agents.run };
+    const outcome = await local.libs.dispatchScope(options);
+    const starts = orca.calls.filter(isStart);
+    return { root, outcome, starts, spawned: starts.length ? argAfter(starts[0], "--agent") : undefined, reads: agents.reads() };
+  };
+  for (const [index, entry] of resolutions.entries()) {
+    const list = Array.isArray(entry.installedAgents) ? strings(entry.installedAgents) : null;
+    const override = typeof entry.override === "string" ? entry.override : undefined;
+    const env: Env = { ...ctx.env, ...(override !== undefined ? { AI_WORKFLOW_ORCA_OPENCODE_AGENT: override } : {}) };
+    const local: Ctx = { ...ctx, env };
+    const resolved = ctx.libs.resolveOpenCodeAgentId({ env, installedAgents: list ?? undefined });
+    const run = await dispatch(local, `agent-${index}`, harness, vendor, list, ["ok"]);
+    const { outcome, starts, spawned } = run;
+    if (resolved.error !== undefined) {
+      const clean = outcome.route === "normal" && outcome.reason === resolved.error && starts.length === 0 && !metricsWritten(local, run.root);
+      perResolution.push({ agentId: null, refusal: clean ? token(resolved.error) : `disagree:${token(resolved.error)}/${token(outcome.reason)}/starts-${starts.length}`, launches: starts.length });
+      neverUninstalled = neverUninstalled && starts.length === 0;
+      continue;
+    }
+    const agree = outcome.route === "launched" && starts.length === 1 && spawned === resolved.agentId;
+    perResolution.push({ agentId: agree ? token(spawned) : `mismatch:${token(resolved.agentId)}/${token(spawned)}/${token(outcome.route)}` });
+    neverUninstalled = neverUninstalled && spawned !== undefined && (list ?? []).includes(spawned);
+    const record = outcome.attemptKey ? createLedger(run.root, local.deps).read(outcome.attemptKey) : undefined;
+    ledgerOpencode = ledgerOpencode && record?.status === "ok" && record.record.vendor === vendor;
+    // The gate re-reads the list for the id it will spawn: one read for the resolver, one for the gate, and a re-check that lost the id denies.
+    const drift = await dispatch(local, `agent-${index}-drift`, harness, vendor, list, ["ok"], resolved.agentId);
+    gateChecks = gateChecks && run.reads === 2 && drift.outcome.route === "normal" && drift.outcome.reason === "agent-not-installed" && drift.starts.length === 0;
+    // One attempt, one start: a failed start never turns into a second launch with another id.
+    const failed = await dispatch(local, `agent-${index}-failed`, harness, vendor, list, ["residual"]);
+    noFallback = noFallback && failed.starts.length === 1 && failed.spawned === resolved.agentId;
+  }
+  // Claude and codex are not resolved: they spawn with their own id and never read the installed list.
+  const others = [await dispatch(ctx, "agent-claude", "codex", "claude", ["claude", "codex", "opencode"], ["ok"]),
+    await dispatch(ctx, "agent-codex", "claude", "codex", ["claude", "codex", "opencode"], ["ok"])];
+  const ownId = others.every((run, index) => run.outcome.route === "launched" && run.starts.length === 1 && run.spawned === ["claude", "codex"][index] && run.reads === 0);
+  return {
+    actual: { perResolution, neverLaunchesAnIdThatIsNotInstalled: neverUninstalled, gateChecksTheInstalledListForTheIdItLaunches: gateChecks,
+      ledgerAndPolicyVendorStillOpencode: ledgerOpencode, noFallbackLoop: noFallback, claudeAndCodexLaunchWithTheirOwnId: ownId },
+    notExecuted: { reason: "prose rationale; the facts it explains are the measured keys above" },
+    notes: [`${resolutions.length} resolution(s) each run through the resolver, a real dispatch, a drifted gate re-check and a failed start`],
+  };
+};
+
 const EXECUTES: Readonly<Record<string, Observer>> = Object.freeze({
   "codex-coordinates-alternate-vendors": observeAlternateVendors,
   "preflight-fallback": observePreflightFallback,
@@ -528,6 +612,7 @@ const EXECUTES: Readonly<Record<string, Observer>> = Object.freeze({
   "completion-receipts-are-not-proof": variantObserver(COMPLETION_VARIANTS),
   "prepared-input-and-integrated-evidence": variantObserver(PREPARED_VARIANTS),
   [HOSTILE_SUMMARY_CASE]: observeHostileSummary,
+  "opencode-agent-id-resolves-from-installed-agents": observeOpenCodeAgentId,
 });
 
 // ---- comparison and the report ----
