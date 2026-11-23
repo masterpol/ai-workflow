@@ -194,7 +194,7 @@ See also: [legacy token collector](../docs/token-consumption.md).
 
 `flow-report.mts` reads token schema 3 and usage schema 2 under one shared metrics lease.
 It never records events, rewrites snapshots or reads transcripts. Rendering and publication happen
-after releasing that lease; the optional `.project/reports/state.json` history is read separately.
+after releasing that lease; the optional `.project/reports/state.json` history is read separately. The retired `/state` snapshot was its only writer, so history is unavailable unless that file already exists from an earlier run.
 
 ```sh
 node ai-framework/scripts/flow-report.mts --root .
@@ -220,7 +220,7 @@ think-time; pending/buffered intervals make timing provisional without extrapola
 their separate observation windows and freshness (stale after seven days). Effort, cache/output-input
 ratios and time-efficiency metrics are unavailable because flow fields or comparable windows are absent.
 
-History reuses schema-1 `state.json` facts by exact slug, preserving audit/revision availability and
+History reuses schema-1 `state.json` facts (when an earlier `/state` left one) by exact slug, preserving audit/revision availability and
 stale/truncated evidence. Missing history is unavailable; no audit/pitch records are reparsed and no
 history is backfilled. Missing, refused and unsupported sources have distinct fixed reasons, not zeros.
 Each input and output is capped at 4 MiB. Token projection allows 51 pitch buckets, 16 phases, 26

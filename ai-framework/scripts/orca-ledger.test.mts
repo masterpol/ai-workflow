@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { authorizedPathsOverlap, ATTEMPT_PREFIX, MAX_RECORD_BYTES, TASK_PREFIX, SCHEMA_VERSION, MUTATION_LOCK, INTEGRATION_LOCK, pathAuthorized, validAuthorizedPaths, attemptKeyOf, createLedger, idOf, taskKeyOf } from "./orca-ledger.mts";
+import { authorizedPathsOverlap, ATTEMPT_PREFIX, MAX_RECORD_BYTES, TASK_PREFIX, SCHEMA_VERSION, MUTATION_LOCK, INTEGRATION_LOCK, pathAuthorized, validAuthorizedPaths, attemptKeyOf, computeArgsDigest, createLedger, idOf, taskKeyOf, validateRecord } from "./orca-ledger.mts";
 import type { LedgerRecord } from "./orca-ledger.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { createTestDeps, listTree, orcaPolicyToonText } from "./runtime/test-helpers.mts";
@@ -485,10 +485,107 @@ test("reserve refuses a live attempt of another task whose authorized paths over
   assert.equal(ledger.reserve(rec("fifth", { taskKey: taskKeyOf("t5"), authorizedPaths: ["src/d.mts"] }), 4).outcome, "claimed", "completed does not block");
 });
 
-test("the ledger record schema is unchanged by role pools (no new key, same version)", () => {
-  const source = fs.readFileSync(path.join(import.meta.dirname, "orca-ledger.mts"), "utf8");
-  assert.match(source, /const RECORD_KEYS = \["attemptKey", "taskKey", "vendor", "state", "createdAt", "schemaVersion", "authorizedPaths", "processOwnerPid", "dispatchId", "reportId"\];/);
+test("optional launch metadata preserves schema version 1 and keeps vendor role pools out of records", () => {
+  assert.equal(validateRecord(rec("a1", { requestId: "req_abc123", argsDigest: "a".repeat(64) })), true);
+  assert.equal(validateRecord({ ...rec(), role: "builder" }), false);
+  assert.equal(validateRecord(rec("a1", { vendor: "opencode2" })), false);
   assert.equal(SCHEMA_VERSION, 1);
+});
+
+test("captured old-shape record reads without launch metadata; an unknown key still corrupts it", (t) => {
+  const root = fixture(t);
+  mkLedgerDir(root);
+  // Captured verbatim from .project/metrics/orca-ledger/attempt-r4a-1.json on 2026-11-23,
+  // before R4a edits; this is the real coordinator's launch of this worker (no schemaVersion).
+  const oldShape = { attemptKey: "attempt:r4a-1", taskKey: "task:R4a", vendor: "codex", state: "launched", createdAt: 1795462605262,
+    authorizedPaths: ["ai-framework/scripts/orca-ledger.mts", "ai-framework/scripts/orca-ledger.test.mts", "ai-framework/scripts/orca-reconcile.mts", "ai-framework/scripts/orca-reconcile.test.mts"], dispatchId: "ctx_54649d06cc70" };
+  const file = slot(root, "r4a-1");
+  const before = JSON.stringify(oldShape);
+  fs.writeFileSync(file, before);
+  const ledger = createLedger(root, deps);
+  assert.deepEqual(ledger.read(oldShape.attemptKey), { status: "ok", record: oldShape });
+  assert.equal(fs.readFileSync(file), before);
+  fs.writeFileSync(file, JSON.stringify({ ...oldShape, unknownLaunchField: "untrusted" }));
+  assert.equal(ledger.read(oldShape.attemptKey).status, "corrupt");
+  assert.equal(ledger.update(oldShape.attemptKey, { requestId: "req_abc123" }).status, "corrupt");
+});
+
+test("requestId rejects hostile values in claims, updates and disk records", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  ledger.claim(rec());
+  const before = fs.readFileSync(slot(root, "a1"));
+  const hostile: unknown[] = [undefined, null, 1234, {}, [], true, "", "abc", "x".repeat(81), "req abc", " req_abc", "req_abc ", "req_abc\n", "req_abc\r", "req_abc\t", "req_abc\0", "req_abc\x7f", "req_abc\x85", "req_éabc", "req/abc", "req.abc", "req_abc\u2028"];
+  for (const requestId of hostile) {
+    const record = { ...rec("hostile"), requestId } as LedgerRecord;
+    assert.equal(validateRecord(record), false, JSON.stringify(requestId));
+    assert.equal(ledger.claim(record).outcome, "invalid");
+    assert.equal(ledger.update(attemptKeyOf("a1"), { requestId } as never).status, "invalid");
+    if (requestId !== undefined) {
+      fs.writeFileSync(slot(root, "hostile"), JSON.stringify(record));
+      assert.equal(ledger.read(record.attemptKey).status, "corrupt");
+    }
+  }
+  assert.equal(fs.readFileSync(slot(root, "a1")), before);
+  for (const requestId of ["req_abc123", "Ab_-", "x".repeat(80)]) {
+    assert.equal(validateRecord(rec("valid", { requestId })), true, requestId);
+  }
+});
+
+test("argsDigest accepts only 64 lowercase hex characters on every input boundary", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  ledger.claim(rec());
+  for (const argsDigest of [undefined, null, 1234, {}, "", "a".repeat(63), "a".repeat(65), "A".repeat(64), "g".repeat(64), "a".repeat(64) + "\n", " " + "a".repeat(63)]) {
+    const record = { ...rec("digest"), argsDigest } as LedgerRecord;
+    assert.equal(validateRecord(record), false);
+    assert.equal(ledger.claim(record).outcome, "invalid");
+    assert.equal(ledger.update(attemptKeyOf("a1"), { argsDigest } as never).status, "invalid");
+    if (argsDigest !== undefined) {
+      fs.writeFileSync(slot(root, "digest"), JSON.stringify(record));
+      assert.equal(ledger.read(record.attemptKey).status, "corrupt");
+    }
+  }
+});
+
+test("launch metadata is persisted, replayed and set once, including across restarts", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  const metadata = { requestId: "req_abc123", argsDigest: computeArgsDigest("brief", "codex", ["src/"], deps.crypto) };
+  const claimed = rec("with-meta", metadata);
+  assert.equal(ledger.claim(claimed).outcome, "claimed");
+  const restarted = createLedger(root, deps);
+  assert.deepEqual(restarted.read(claimed.attemptKey), { status: "ok", record: claimed });
+  assert.equal(restarted.claim(claimed).outcome, "replayed");
+  for (const field of ["requestId", "argsDigest"] as const) {
+    const different = field === "requestId" ? "req_other" : "b".repeat(64);
+    assert.equal(restarted.claim({ ...claimed, [field]: different }).outcome, "conflict");
+    assert.equal(restarted.update(claimed.attemptKey, { [field]: different, state: "launched" }).status, "rejected");
+    assert.deepEqual(restarted.read(claimed.attemptKey), { status: "ok", record: claimed });
+  }
+  assert.equal(restarted.update(claimed.attemptKey, metadata).status, "ok");
+  ledger.claim(rec());
+  assert.equal(ledger.update(attemptKeyOf("a1"), { requestId: metadata.requestId }).status, "ok");
+  assert.equal(ledger.update(attemptKeyOf("a1"), { argsDigest: metadata.argsDigest, state: "launched" }).status, "ok");
+  assert.equal(restarted.update(attemptKeyOf("a1"), metadata).status, "ok");
+  assert.equal(restarted.update(attemptKeyOf("a1"), { requestId: "req_other" }).status, "rejected");
+  assert.equal(restarted.update(attemptKeyOf("a1"), { argsDigest: "b".repeat(64) }).status, "rejected");
+  assert.deepEqual(restarted.read(attemptKeyOf("a1")), { status: "ok", record: rec("a1", { ...metadata, state: "launched" }) });
+});
+
+test("computeArgsDigest binds each exact launch argument with unambiguous framing", () => {
+  const paths = Object.freeze(["src/a.mts", "docs/"]);
+  const digest = computeArgsDigest("brief", "codex", paths, deps.crypto);
+  assert.match(digest, /^[0-9a-f]{64}$/);
+  assert.equal(digest, deps.crypto.sha256Hex(JSON.stringify(["brief", "codex", paths])));
+  assert.equal(computeArgsDigest("brief", "codex", [...paths], deps.crypto), digest);
+  assert.notEqual(computeArgsDigest("other brief", "codex", paths, deps.crypto), digest);
+  assert.notEqual(computeArgsDigest("brief", "opencode2", paths, deps.crypto), digest);
+  assert.notEqual(computeArgsDigest("brief", "codex", ["src/b.mts", "docs/"], deps.crypto), digest);
+  assert.notEqual(computeArgsDigest("brief", "codex", [...paths].reverse(), deps.crypto), digest);
+  assert.notEqual(computeArgsDigest("ab", "c", paths, deps.crypto), computeArgsDigest("a", "bc", paths, deps.crypto));
+  assert.notEqual(computeArgsDigest("brief", "codex", ["a", "b"], deps.crypto), computeArgsDigest("brief", "codex", ["a,b"], deps.crypto));
+  assert.deepEqual(paths, ["src/a.mts", "docs/"]);
 });
 
 test("reserve overlap: settled and failed attempts never block, and a legacy record without authorizedPaths is ignored", (t) => {

@@ -6,9 +6,9 @@ Candidates in active work are listed in `.project/status.md`. The items below re
 
 | Candidate slug | Kind | Items bundled (headings below) |
 |---|---|---|
-| `independent-rereview-catch-up` | review only | Independent re-review of pitch-compaction; Independent security re-review of the metrics collector fixes; Deeper independent code review of /state |
+| `independent-rereview-catch-up` | review only | Independent re-review of pitch-compaction; Independent security re-review of the metrics collector fixes; Deeper independent code review of /state (moot, see 'Superseded by archify-replaces-state') |
 | `path-safety-hardening` | small build — plan | TOCTOU ancestor-symlink race; commit-ledger writes through a symlinked .project/compaction |
-| `live-host-verification` | manual checklist per host | Verify the OpenCode effort and skill wiring; Confirm the new Claude Skill hook fires; Verify /state on Codex and Cursor |
+| `live-host-verification` | manual checklist per host | Verify the OpenCode effort and skill wiring; Confirm the new Claude Skill hook fires; Verify /state on Codex and Cursor (re-pointed at the new /state) |
 | `collector-robustness` | small build — plan | Collector lock never reclaims a live or reused PID; Collector identity keys can collide |
 | `bundle-sync-marker-fix` | shipped 2026-09-26 | Effective-base marker fix; source item retained below. |
 | `state-quoted-fonts` | shipped 2026-09-26 | Bounded quoted fonts and same-file variables; source item retained below. |
@@ -16,6 +16,25 @@ Candidates in active work are listed in `.project/status.md`. The items below re
 **Promoted to do next, not a pitch:** run the first real `/pitch-compress` trial on a low-stakes pitch
 with the archive kept (item "First real-use trial of /pitch-compress"); fold the "Wire /state into
 /pitch-compress" decision into that trial.
+
+## Superseded by archify-replaces-state (2026-11-23)
+
+`/state` was rebuilt: `ai-framework/scripts/facts-gather.mts` collects facts and the Archify skill (pinned) renders the page.
+The old snapshot, render, theme, structure, graph, history, charts, design, pages and fragment scripts, their tests and the
+three `state-*` eval datasets were deleted. Items below that are about that code are **moot, not done**; they stay as source text.
+
+- **Moot** (code removed): "Deeper independent code review of /state" and the S3 third-round re-review (`state-snapshot.js` fixes); the four `/state`
+  UX/i18n nits in `state-render`; "state report hardening leftovers"; "state-report-redesign leftovers"; "From state-fragment-sanitizer";
+  the fragment/dataset items in "From state-ai-authoring" (live matrix, `uncited-claim`, fragment headings, sanitizer wall-clock test,
+  `[dataset-mapping]` flake); "From state-deep-evidence ship" (`state-monorepo-packages`, metrics/tokens extraction); FRLE-D1 and the
+  stale live-evidence test (the test file is deleted).
+- **Re-pointed**: "Verify /state on Codex and Cursor in a running host" now means: run `/state` once in each host and confirm it runs
+  `facts-gather.mts`, stops cleanly when Archify is not installed, and otherwise validates and delivers `.project/reports/state.html`.
+  OpenCode and Codex/Cursor have not run the new `/state` live. In the `live-host-verification` row the `/state` item carries this meaning.
+- **New** (from archify-replaces-state): Archify's package is 22.5 MiB of `add-skill`'s 25 MiB cap, so a new upstream release can stop installing;
+  re-check the size when bumping the pinned revision. `flow-report.mts` still reads an optional `.project/reports/state.json` history that nothing writes
+  any more; drop that input or give it a new writer. A per-pitch audit/revision history view that the old `/state` offered is gone by decision.
+- **Still live**: "Wire /state into /pitch-compress" (the decision is unchanged: `/pitch-compress` does not call `/state`), and everything not named above.
 
 ## bundle-sync marker misclassifies un-applied unverified files as `local` on the next run
 
@@ -572,3 +591,31 @@ The pre-existing state-history archive fallback remains owned by un-bet P2b, und
 ## review-bench-hardening (cooldown 2026-10-23, forced; promoted to a pitch draft)
 
 Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles the review-bench followups: TTR-A1 (trusted-root Git execution: fsmonitor/filter helpers), TTR-A2 (strict appetite counting, NUL-delimited listings), TTR-A3 (bounded input/path diagnostics, in-root `..name` snapshot destinations) and the 2026-09-27 question whether convention-based read-only is enough or the tool needs real process isolation (decide in shaping; the tool is internal developer tooling run on a trusted checkout).
+
+## From archify-replaces-state (2026-11-23)
+- **Commit the Orca work in its own commits, stacked after `feat/archify-replaces-state`** (med; now also covers `orca-bounded-control-receipts`, 2.51.3 and 2.51.4): `orca-start.mts`, `orca-start.test.mts`, `orca-preflight.mts`, `orca-dispatch.mts`, `orca-dispatch.test.mts` and `orca-vendors.md` (changelog 2.51.1 and 2.51.2, the second being the tolerance work that came after the audit and was validated on the live 1.4.271 CLI) are in the same working tree as this pitch. `orca-bounded-control-receipts` plans to edit `lookupWorker`; tell it the `--full` and null-terminal change is already made. Audit item X-2, `attribution: shared-diff`.
+- **`flow-report.mts` history input has no writer** (low-med): it reads an optional `.project/reports/state.json` that the retired `/state` produced. Drop the input, or write the facts it wants some other way.
+- **Independent second review cycle of the audit fixes** (low-med): the fixes to `read()`, `writeReport` and the link scanner are author-verified (proofs re-run, 10 mutants killed), not independently re-reviewed.
+- **Live `/state` on OpenCode, Codex and Cursor** (med): only Claude Code has run the new `/state`; also run it once with Archify absent and confirm it stops after the facts preview. Same item as the re-pointed "Verify /state on Codex and Cursor" entry.
+- **Archify inline grammar for `@ = & $`** (low): `clean()` neutralises `< > [ ] | { } \ ~ _ # !` and backticks only; confirm Archify renders the rest literally or neutralise them too.
+- **Archify's package is 22.5 MiB of `add-skill`'s 25 MiB cap** (low-med): re-check the size at every pinned-revision bump; consider raising the cap with a test.
+- **A way to retire a link in a shipped outcome record** (low): deleting a cited file currently forces an edit to history; a `retired` marker would not. See issue `deleting-a-file-breaks-shipped-outcome-records-that-link-to-it`.
+- **Restore a structure view with Archify's code analysis** (low): the folder diagram was dropped by decision; `archify code-analysis prepare` could give it back without bundle code, but needs a language toolchain choice.
+- **`package-less-ship-verification`** (known, already shaped): `pre-ship-verify.mts` failed again here with "No package.json or Muro document verifier found"; the stack's commands were run directly and recorded.
+
+## From orca-bounded-control-receipts (2026-11-23)
+- **Capture one real pre-creation refusal receipt** (med, S3 deferred): run `worker-start --agent opencode --model <pin>` against an OpenCode outside Orca's allow-list in a disposable Run, save the receipt as `.project/analysis/orca-opencode-pin-refusal-receipt.json` (the pitch folder was compacted, so it is no longer a home for it), and decide from it whether a positive "nothing was created" proof exists (an explicit empty `effects` or a pre-creation `failedStage`). It creates Orca coordination state, so it needs the owner's authorization and cleanup choice. Until then a refusal stays `launch-failed:refused:<code>` with `unknown-liveness` ownership.
+- **Verify the concise `worker-start` receipt on a real launch** (low-med): `dispatchIdOf` reads five known places; whether 1.4.271's concise start receipt carries a dispatch id there is unconfirmed until the first real dispatch. A miss is safe (`launched-without-dispatch-id` resumes with a human action) but disruptive.
+- **Confirm Orca accepts a cursor from a larger page at a smaller `--limit`** (low): the identity walk reuses a cursor after halving the page size mid-walk; unconfirmed on Orca, and the walks are now short. Audit COD-4.
+- **Confirm `--terminal-state` coverage with a real worker** (low-med): the lookup queries every state but `released`, inferred from the six documented states. A real worker run (S3's Run would also show it) should list its terminal under one of them. Audit SEC-3.
+- **Phase start is about 0.5 s slower** (low): the five-state lookup replaced one call. If it matters, the states could be read in parallel (the runner is synchronous today).
+
+
+- `skill-defaults.test.mts` "workflow-doctor exits 0 on a real bundle copy" (and a registry-managed-skill sibling) copy the whole working tree including the ignored `graphify-out/cache` (118 MB), so they exceed Bun's 5 s default timeout in a long-lived checkout while passing in 1 s on a clean tree. Skip ignored directories in the copy or raise the test timeout. Found 2026-11-23 during orca-api-currency-and-opencode2.
+
+- Orca dispatch accepts an authorized path under `.project/` (for example an eval dataset), but `collectReport` rejects a `worker_done` whose `filesModified` names any `.project` path (`invalid-files`), so such an attempt can never be settled by its own report and stays `launched`. Either allow `.project/` paths that were authorized for that attempt in the report grammar, or refuse them at dispatch. Found 2026-11-23 on scope R5c of orca-api-currency-and-opencode2.
+
+- `argsDigest` / `computeArgsDigest` (orca-ledger.mts) have no consumer after R4b-2 was dropped (orca-api-currency-and-opencode2 audit S1): wire it into the claim with a mismatch check, or remove the field.
+- `USED_CONTRACT` (orca-contract.mts) is hand-maintained; add a test that derives the `worker-start` flags from `PLACEMENT_FLAGS` and the args dispatch builds, so a new flag cannot slip past the snapshot (audit S2).
+- orca-contract.mts regenerate mode writes without a guard when run from a directory without ai-framework/scripts (CLI-only edge, audit acknowledged).
+- Verifying a change set through `git worktree` can fail the two bundle-copy doctor tests: the suite rebuilds the knowledge graph through the shared git directory and reads the main repo's committed cards, so the graph looks out of date. An independent clone passes. Make that rebuild use the checkout it runs in, or document it as a verification caveat (found 2026-11-23 shipping orca-api-currency-and-opencode2).

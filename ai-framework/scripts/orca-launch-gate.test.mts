@@ -12,7 +12,7 @@ const path = testDeps.path;
 
 // ORCA_GATE_UNDER_TEST lets a mutant copy of the gate be exercised by the same assertions (mutant proofs).
 const gate = await import(process.env.ORCA_GATE_UNDER_TEST ?? "./orca-launch-gate.mts") as typeof import("./orca-launch-gate.mts");
-const { WORKER_ENV_MARKERS, WORKER_FLAG, buildWorkerEnv, evaluateLaunch, isWorkerContext, launchWorker, workerBrief } = gate;
+const { WORKER_ENV_MARKERS, WORKER_FLAG, buildWorkerEnv, evaluateLaunch, isWorkerContext, launchWorker, workerBrief, readInstalledAgents } = gate;
 
 const HERE = import.meta.dirname;
 const EXAMPLE = path.resolve(HERE, "../integrations/orca-vendors.example.json");
@@ -68,6 +68,29 @@ test("does not require caller.orcaSessionId for an external coordinator outside 
   const p = prober(() => "1.4.224", false);
   const decision = evaluateLaunch({ ...common, root, env: { PATH: "/usr/bin", AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run: p.run });
   assert.equal(decision.allowed, true);
+});
+
+// Captured 2026-11-23 (`orca status --json`, appVersion 1.4.271, ORCA_AGENT_SESSION_ID=bogus-x):
+// result.caller = {live:false, refusal:{code:"session_caller_unknown", message:"..."}}. Diagnostics only: authority is unchanged.
+test("an unverified caller, with or without a refusal code, leaves allowed unchanged for claude, codex and opencode", (t: TestContext) => {
+  const root = fixture(t);
+  const shapes: Array<[string, (v: Obj[]) => void, Record<string, string>]> = [
+    ["no caller block", (v) => { delete (v[2].result as Obj).caller; }, { PATH: "/usr/bin" }],
+    ["refused caller", (v) => { (v[2].result as Obj).caller = { live: false, refusal: { code: "session_caller_unknown", message: "x" } }; }, SAFE_ENV],
+    ["hostile refusal", (v) => { (v[2].result as Obj).caller = { live: false, refusal: { code: "bad\u001bcode", message: "x" } }; }, SAFE_ENV],
+  ];
+  for (const vendor of ["claude", "codex", "opencode"]) {
+    for (const [name, change, env] of shapes) {
+      let calls = 0;
+      const run = () => {
+        const values = receipts(); change(values);
+        return { status: 0, signal: null, stdout: JSON.stringify(values[calls++ % 3]), stderr: "" };
+      };
+      const decision = evaluateLaunch({ ...common, vendor, root, env: { ...env, AI_WORKFLOW_ORCA_MULTI_AGENT: "true" }, run });
+      assert.equal(decision.allowed, true, `${vendor}: ${name}`);
+      assert.equal(decision.reason, "launch-allowed", `${vendor}: ${name}`);
+    }
+  }
 });
 
 test("re-reads policy and re-probes on every call: a flip between two calls refuses the second", (t: TestContext) => {
@@ -374,4 +397,55 @@ test("engine range: a hostile runtime version is refused and never echoed into t
     assert.deepEqual([decision.allowed, decision.reason, decision.foundVersion], [false, "runtime-version-unsupported", undefined], JSON.stringify(hostile.slice(0, 20)));
     assert.ok(!JSON.stringify(decision).includes("FAKE"));
   }
+});
+
+// Shape from a captured real `orca agent installed --json` (Orca 1.4.271, this host; .project/analysis/2026-11-23-orca-live-receipts-s3.md).
+const installedJson = (...ids: string[]) => JSON.stringify({ id: "380264a7-69f6-474b-a0bd-0e1d5b9d6897", ok: true,
+  result: { agents: ids.map((id, index) => ({ id, name: id, default: index === 0 })) }, _meta: { runtimeId: "0f1ef424-562b-442e-a3b4-08730bee069d" } });
+/** Probe runner that also answers `agent installed --json`, recording the command, args and env of that call. */
+function agentProber(answer: () => Obj) {
+  const base = prober();
+  const reads: Array<{ command: string; args: string[]; env: Record<string, string | undefined> }> = [];
+  const run = (command: string, args: string[], options: { env: Record<string, string | undefined> }) => {
+    if (args[0] === "agent") { reads.push({ command, args, env: options.env }); return { signal: null, stderr: "", ...answer() }; }
+    return base.run();
+  };
+  return { run: run as never, reads };
+}
+
+test("agentId: the exact id is checked against a fresh installed list with the probed executable and allowlisted env", (t: TestContext) => {
+  const root = fixture(t);
+  const env = { ...SAFE_ENV, SECRET_TOKEN: "x" };
+  const a = agentProber(() => ({ status: 0, stdout: installedJson("claude", "opencode") }));
+  const ok = evaluateLaunch({ ...common, vendor: "codex", root, env, run: a.run, agentId: "opencode" });
+  assert.deepEqual([ok.allowed, ok.reason], [true, "launch-allowed"]);
+  assert.deepEqual(a.reads[0].args, ["agent", "installed", "--json"]);
+  assert.equal(a.reads[0].command, ok.executable);
+  assert.equal("SECRET_TOKEN" in a.reads[0].env, false);
+  const other = evaluateLaunch({ ...common, vendor: "codex", root, env, run: a.run, agentId: "opencode2" });
+  assert.deepEqual([other.allowed, other.reason], [false, "agent-not-installed"]);
+});
+
+test("agentId: a failing, unparseable, timed-out, overflowing or hostile list never allows the launch", (t: TestContext) => {
+  const root = fixture(t);
+  const cases: Array<[() => Obj, string]> = [
+    [() => ({ status: 1, stdout: "" }), "installed-agents-unavailable"],
+    [() => ({ status: 0, stdout: "not json" }), "installed-agents-unavailable"],
+    [() => ({ status: null, stdout: "", error: { code: "ETIMEDOUT" } }), "installed-agents-unavailable"],
+    [() => ({ status: null, stdout: "", error: { code: "ENOBUFS" } }), "installed-agents-unavailable"],
+    [() => ({ status: 0, stdout: "x".repeat(300 * 1024) }), "installed-agents-unavailable"],
+    [() => ({ status: 0, stdout: installedJson("opencode; rm -rf /") }), "agent-not-installed"],
+  ];
+  for (const [answer, reason] of cases) {
+    const decision = evaluateLaunch({ ...common, vendor: "codex", root, env: SAFE_ENV, run: agentProber(answer).run, agentId: "opencode" });
+    assert.deepEqual([decision.allowed, decision.reason], [false, reason]);
+  }
+});
+
+test("without agentId the installed list is never read", (t: TestContext) => {
+  const root = fixture(t);
+  const a = agentProber(() => ({ status: 1, stdout: "" }));
+  assert.equal(evaluateLaunch({ ...common, root, env: SAFE_ENV, run: a.run }).allowed, true);
+  assert.equal(a.reads.length, 0);
+  assert.equal(readInstalledAgents({ root, executable: "orca", env: SAFE_ENV, deps: nodeDeps, run: (() => ({ status: 0, signal: null, stdout: installedJson("opencode"), stderr: "" })) as never })?.[0], "opencode");
 });

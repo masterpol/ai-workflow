@@ -1006,3 +1006,90 @@ test("doctor rejects capture on an unexpected event without reflecting its name"
   assert.equal(result.status, "fail");
   assert.equal(result.detail, "unexpected event registers workflow-capture.mts");
 });
+
+/*
+ * Orca contract check (offline). The snapshot shape is the generator output from the real `orca agent-context --json` captured on 2026-11-23
+ * (schemaVersion 1), trimmed to the five commands our scripts send (see orca-contract.test.mts for the full capture note).
+ * The doctor never runs Orca: the sentinel test in orca-preflight.test.mts guards that, and the tests below assert no child process runs.
+ */
+const snapshotText = JSON.stringify({
+  schemaVersion: 1, source: "orca agent-context --json", sourceSchemaVersion: 1,
+  commands: {
+    "orchestration worker-start": { flags: ["agent", "base-branch", "effort", "full", "json", "model", "name", "repo", "setup", "spec", "timeout-ms", "worktree"], retired: false },
+    "orchestration worker-list": { flags: ["cursor", "full", "json", "limit", "terminal-state"], retired: false },
+    status: { flags: ["json"], retired: false },
+    "skills get": { flags: ["json"], retired: false },
+    "agent installed": { flags: ["json"], retired: false },
+  },
+});
+
+const snapshotWith = (change: (commands: Record<string, { flags: string[]; retired: boolean }>) => void): string => {
+  const parsed = JSON.parse(snapshotText);
+  change(parsed.commands);
+  return JSON.stringify(parsed);
+};
+
+async function contractCheck(t: TestContext, options: { snapshot?: string | null; bundle?: boolean }): Promise<{ results: Check[]; calls: string[][] }> {
+  const root = fixture(t);
+  if (options.bundle !== false) write(root, "SETUP.md", "# setup\n");
+  if (options.snapshot !== null) write(root, "ai-framework/scripts/orca-contract.snapshot.json", options.snapshot ?? snapshotText);
+  const capture = injected(root);
+  const base = capture.deps.child.run;
+  const contractCalls: string[][] = [];
+  capture.deps.child.run = async (command, args, runOptions) => {
+    if (command === "orca" || args[0] === "agent-context") { contractCalls.push([command, ...args]); throw new Error("doctor must never execute orca"); }
+    return base(command, args, runOptions);
+  };
+  await main(["--json"], capture.deps);
+  return { results: checks(capture.output).filter((item) => item.name === "Orca contract" || item.name.includes("orca-contract")), calls: contractCalls };
+}
+
+test("orca contract: a complete snapshot passes offline, never runs orca and never claims the live CLI was checked", async (t) => {
+  const { results, calls } = await contractCheck(t, {});
+  assert.deepEqual(results.map((item) => item.status), ["pass"]);
+  assert.deepEqual(calls, []);
+  assert.match(results[0].detail, /offline/);
+  assert.match(results[0].detail, /orca-contract\.mts --check/);
+  assert.doesNotMatch(results[0].detail, /live CLI (has|matches|contains)|in the live CLI/);
+});
+
+test("orca contract mutant: extra flags in the snapshot still pass", async (t) => {
+  const { results } = await contractCheck(t, { snapshot: snapshotWith((commands) => { commands.status.flags.push("brand-new"); }) });
+  assert.deepEqual(results.map((item) => item.status), ["pass"]);
+});
+
+test("orca contract mutant: a used flag missing from the snapshot fails and names the flag", async (t) => {
+  const { results } = await contractCheck(t, { snapshot: snapshotWith((commands) => { commands["orchestration worker-start"].flags = commands["orchestration worker-start"].flags.filter((flag) => flag !== "agent"); }) });
+  assert.equal(results.length, 1);
+  assert.equal(results[0].status, "fail");
+  assert.match(results[0].detail, /"orchestration worker-start" lacks flag --agent/);
+});
+
+test("orca contract mutant: a used command missing from the snapshot fails and names it", async (t) => {
+  const { results } = await contractCheck(t, { snapshot: snapshotWith((commands) => { delete commands["skills get"]; }) });
+  assert.equal(results[0].status, "fail");
+  assert.match(results[0].detail, /"skills get" is missing/);
+});
+
+test("orca contract mutant: a used command marked Retired in the snapshot fails", async (t) => {
+  const { results } = await contractCheck(t, { snapshot: snapshotWith((commands) => { commands.status.retired = true; }) });
+  assert.equal(results[0].status, "fail");
+  assert.match(results[0].detail, /"status" is marked Retired/);
+});
+
+test("orca contract mutant: a missing or unreadable snapshot is exactly one failure record naming the generator", async (t) => {
+  for (const snapshot of [null, "{ not json"]) {
+    const { results, calls } = await contractCheck(t, { snapshot });
+    assert.equal(results.length, 1);
+    assert.equal(results[0].status, "fail");
+    assert.match(results[0].detail, /orca-contract\.snapshot\.json/);
+    assert.match(results[0].detail, /bun ai-framework\/scripts\/orca-contract\.mts/);
+    assert.deepEqual(calls, []);
+  }
+});
+
+test("orca contract: the check runs only in the portable bundle repo", async (t) => {
+  const { results, calls } = await contractCheck(t, { bundle: false, snapshot: null });
+  assert.deepEqual(results, []);
+  assert.deepEqual(calls, []);
+});

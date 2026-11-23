@@ -102,6 +102,14 @@ test("inspectSource failure paths: missing skill, ambiguity, symlinks, collision
     assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "[x](../escape.md)") }) }, real), /Unsafe relative path/);
     assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill(), ".env": "S=1" }) }, real), /Unsafe relative path/);
     assert.equal(inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "```\n[x](missing.md)\n```\n[ok](https://x.y) [a](#anchor)") }) }, real).name, "sample");
+    assert.equal(inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "Example: `[x](/abs/path/y.html)` and `[z](../up.md)`") }) }, real).name, "sample", "links inside inline code are examples");
+    assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "`[x](/abs/ok.html)` but [real](missing.md)") }) }, real), /Missing referenced resource: missing.md/, "a real link beside inline code is still checked");
+    const missing = /Missing referenced resource: missing.md/;
+    assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "\\`[x](missing.md)\\`") }) }, real), missing, "escaped backticks are literal, so the link is still checked");
+    assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "`` ` ``[x](missing.md) `` ` ``") }) }, real), missing, "a double-backtick span does not swallow a link beside it");
+    assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "an unbalanced ` tick [x](missing.md)") }) }, real), missing, "an unmatched backtick hides nothing");
+    assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "open ` tick\n[x](missing.md) close ` tick") }) }, real), missing, "a span never crosses a line");
+    assert.equal(inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("sample", "`` [x](/abs.html) ``") }) }, real).name, "sample", "a double-backtick example span is skipped");
     assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill("other") }) }, real), /does not exist/, "root skill with another name is skipped");
     assert.throws(() => inspectSource(ID, { repo: repoOf({ "SKILL.md": skill() }), ref: "no-such-ref" }, real), /Source unavailable or revision invalid; no files installed/);
   } finally { for (const dir of cleanup) rmSync(dir, { recursive: true, force: true }); }

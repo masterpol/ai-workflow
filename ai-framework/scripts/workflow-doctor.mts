@@ -14,6 +14,7 @@ import { validateRuntimeImports } from "./runtime/validate.mts";
 import * as skillVendors from "./skill-vendors.mts";
 import * as skillDefaults from "./skill-defaults.mts";
 import * as orcaPolicy from "./orca-policy.mts";
+import { SNAPSHOT_PATH, checkUsedAgainstSnapshot, readSnapshotFile } from "./orca-contract.mts";
 import * as docsLinks from "./docs-links.mts";
 import { HOOK_EVENTS, HOOK_START, hasRawHook, hooksDir } from "./graphify.mts";
 import { CONSOLIDATION_COMMAND, legacyInventory } from "./consolidation-migrate.mts";
@@ -57,7 +58,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   // Verify ids against your own installation with `opencode models | grep opencode-go` — the catalog
   // changes over time.
   const opencodeModels = {
-    fast: "opencode-go/minimax-m3.1-flash-free",
+    fast: "opencode-go/minimax-m3.1-flash",
     standard: "opencode-go/minimax-m3",
     deep: "opencode-go/kimi-k2.7-code",
   };
@@ -632,6 +633,17 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record("pass", name, `integrations.orca (engine ${orca.engine || "unset"}, ${orcaState}) and ${Object.keys(others).length} other integration(s) in use, all registered${legacyNote}`);
   }
 
+  /** Offline: parses the committed snapshot and checks USED_CONTRACT against it. Never runs Orca; the live diff is `bun ai-framework/scripts/orca-contract.mts --check`. */
+  function checkOrcaContract(): void {
+    const name = "Orca contract";
+    const snapshot = readSnapshotFile(deps, root);
+    if (snapshot.status === "failed") { record("fail", name, `${SNAPSHOT_PATH}: ${snapshot.reason}; regenerate with bun ai-framework/scripts/orca-contract.mts`); return; }
+    const used = checkUsedAgainstSnapshot(snapshot.snapshot);
+    record(used.ok ? "pass" : "fail", name, used.ok
+      ? "committed snapshot covers every command and flag our scripts send and none is Retired (offline; the live CLI is checked by bun ai-framework/scripts/orca-contract.mts --check)"
+      : `${used.problems.join("; ")}; update the callers, then regenerate with bun ai-framework/scripts/orca-contract.mts`);
+  }
+
   function checkOrcaPolicy() {
     // Optional local policy is inspected without importing preflight or touching executables.
     const result = orcaPolicy.readPolicy(root, deps);
@@ -1025,13 +1037,14 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     if (inPortableBundleRepo) coreFiles.push("SETUP.md");
     // bundle-sync.mts and skill-sync.mts were missing from this list (found while adding
     // skill-defaults.mts here) — every other script this doctor knows about gets a syntax check.
-    const scripts = [".claude/hooks/post-edit-check.mts", "ai-framework/hooks/scripts/pre-ship-verify.mts", "ai-framework/hooks/scripts/stuck-uphill-detector.mts", "ai-framework/hooks/scripts/token-consumption.mts", "ai-framework/hooks/scripts/token-consumption.test.mts", "ai-framework/hooks/scripts/token-report.mts", "ai-framework/hooks/scripts/token-report.test.mts", "ai-framework/hooks/scripts/opencode-plugin.test.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.test.mts", "ai-framework/scripts/graphify.mts", "ai-framework/scripts/workflow-doctor.mts", "ai-framework/scripts/setup-validator.mts", "ai-framework/scripts/entry-import.mts", "ai-framework/scripts/entry-import.test.mts", "ai-framework/scripts/add-skill.mts", "ai-framework/scripts/skill-registry.mts", "ai-framework/scripts/skill-source.mts", "ai-framework/scripts/skill-vendors.mts", "ai-framework/scripts/skill-sync.mts", "ai-framework/scripts/bundle-sync.mts", "ai-framework/scripts/skill-defaults.mts", "ai-framework/scripts/skill-compress-guard.mts", "ai-framework/scripts/browser-runtime.mts", "ai-framework/scripts/pitch-compress.mts", "ai-framework/scripts/pitch-archive.mts", "ai-framework/scripts/state-snapshot.mts", "ai-framework/scripts/state-theme.mts", "ai-framework/scripts/state-render.mts", "ai-framework/scripts/review-bench.mts"];
+    const scripts = [".claude/hooks/post-edit-check.mts", "ai-framework/hooks/scripts/pre-ship-verify.mts", "ai-framework/hooks/scripts/stuck-uphill-detector.mts", "ai-framework/hooks/scripts/token-consumption.mts", "ai-framework/hooks/scripts/token-consumption.test.mts", "ai-framework/hooks/scripts/token-report.mts", "ai-framework/hooks/scripts/token-report.test.mts", "ai-framework/hooks/scripts/opencode-plugin.test.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.mts", "ai-framework/hooks/scripts/orca-start-codex-hook.test.mts", "ai-framework/scripts/graphify.mts", "ai-framework/scripts/workflow-doctor.mts", "ai-framework/scripts/setup-validator.mts", "ai-framework/scripts/entry-import.mts", "ai-framework/scripts/entry-import.test.mts", "ai-framework/scripts/add-skill.mts", "ai-framework/scripts/skill-registry.mts", "ai-framework/scripts/skill-source.mts", "ai-framework/scripts/skill-vendors.mts", "ai-framework/scripts/skill-sync.mts", "ai-framework/scripts/bundle-sync.mts", "ai-framework/scripts/skill-defaults.mts", "ai-framework/scripts/skill-compress-guard.mts", "ai-framework/scripts/browser-runtime.mts", "ai-framework/scripts/pitch-compress.mts", "ai-framework/scripts/pitch-archive.mts", "ai-framework/scripts/review-bench.mts"];
     scripts.push("ai-framework/scripts/docs-links.mts", "ai-framework/scripts/docs-links.test.mts");
     scripts.push("ai-framework/hooks/scripts/workflow-capture.mts", "ai-framework/hooks/scripts/workflow-capture.test.mts");
     scripts.push("ai-framework/scripts/orca-policy.mts", "ai-framework/scripts/orca-preflight.mts");
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
     // Kept-complete list gains the config validity library (config-validate role) and the migrator (b1: unconditional).
     scripts.push("ai-framework/scripts/runtime/config.mts", "ai-framework/scripts/config-migrate.mts");
+    scripts.push("ai-framework/scripts/facts-gather.mts", "ai-framework/scripts/facts-gather.test.mts");
     // The README is now an index; each documented topic lives in ai-framework/docs/.
     const docsChecks = [
       ["setup", /^# Set up$/m, "documents setup"],
@@ -1097,6 +1110,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       checkRuntimeBoundary(),
       checkConfigValidators(),
       checkOrcaPolicy(),
+      ...(inPortableBundleRepo ? [Promise.resolve(checkOrcaContract())] : []),
       checkCodexStartupWiring(),
       checkClaudeStartupWiring(),
       checkClaudeCaptureWiring(),

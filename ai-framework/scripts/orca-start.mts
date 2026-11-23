@@ -92,28 +92,104 @@ function valueFrom(receipt: Receipt | null): unknown {
   try { return JSON.parse(receipt.stdout) as unknown; } catch { return undefined; }
 }
 
-/** Only the observed worker-list transport identifies implicit workers; guessed env markers do not. */
-function lookupWorker(command: string, terminal: string, root: string, env: Env, run: Run, budget: Budget): boolean | undefined {
+const ACTIVE_DISPATCH = ["pending", "dispatching", "dispatched", "running"];
+const SETTLED = ["completed", "failed", "cancelled", "canceled", "interrupted", "rejected", "succeeded", "released"];
+const ACTIVE_WORKER = ["running", "dispatched", "dispatching", "pending", "active", "working"];
+const PAGE_ROWS = 100;
+const textOf = (value: unknown): string | undefined => (typeof value === "string" && value ? value : undefined);
+
+/**
+ * One worker row, read from either known Orca shape: the full record (`agentTerminalHandle`, `dispatchStatus`) or the concise
+ * view (`terminal`, `state`, `liveness`, `terminalState`). `undefined` means "cannot be this terminal", so a row of another
+ * shape, another terminal or no terminal at all is ignored; only a row for this terminal must be understood.
+ */
+function ownRow(raw: unknown, terminal: string): "open" | "closed" | "unknown" | undefined {
+  if (!object(raw)) return undefined;
+  const resource = object(raw.resource) ? raw.resource : {};
+  const handle = textOf(raw.agentTerminalHandle) ?? textOf(raw.terminal) ?? textOf(resource.terminalHandle);
+  if (handle !== terminal) return undefined;
+  const projection = object(raw.projection) ? raw.projection : {};
+  const stage = object(projection.stage) ? projection.stage : {};
+  const dispatch = textOf(raw.dispatchStatus) ?? textOf(stage.dispatch);
+  const state = textOf(raw.state) ?? textOf(raw.workerState);
+  const liveness = textOf(raw.liveness) ?? (object(projection.liveness) ? textOf(projection.liveness.verdict) : undefined);
+  const released = textOf(raw.terminalState) === "released" || textOf(resource.releaseState) === "released";
+  if (dispatch && SETTLED.includes(dispatch)) return "closed";
+  if (state && SETTLED.includes(state)) return "closed";
+  if (liveness === "exited" || released) return "closed";
+  if (dispatch && ACTIVE_DISPATCH.includes(dispatch)) return "open";
+  if (!dispatch && state && ACTIVE_WORKER.includes(state)) return "open";
+  return "unknown";
+}
+
+const PAGE_LIMITS = [PAGE_ROWS, 50, 25, 10];
+const FALLBACK_ROWS = 25;
+/** Every terminal state but `released`: an open dispatch cannot sit in a released terminal, so these cover every possible worker. */
+const OPEN_STATES = ["active", "retained", "reclaimable", "release_pending", "release_unknown"];
+const PAGE_CAP = 32;
+type Lookup = boolean | undefined | "too-large";
+
+/** A receipt the shared output bound cut off or refused to hold: ask for a smaller page instead of calling it a failure. */
+function oversize(receipt: Receipt | null): boolean {
+  if (!receipt) return false;
+  if (receipt.error?.code === "ENOBUFS") return true;
+  return [receipt.stdout, receipt.stderr].some((text) => typeof text === "string" && new TextEncoder().encode(text).length > MAX_OUTPUT_BYTES);
+}
+
+/**
+ * Walks worker-list pages looking for an open dispatch on `terminal`. `state` asks only for terminals in that state, so the size
+ * follows live work instead of fleet history; with no state (older Orca without the flag) it reads the full record in small pages,
+ * because only that view carries the `page` object. `ladder` carries the page size across calls. Returns "rejected" when the
+ * first filtered page is not understood.
+ */
+function listPages(command: string, terminal: string, root: string, env: Env, run: Run, budget: Budget, state: string | undefined, ladder: { step: number }): Lookup | "rejected" {
   let cursor: string | undefined;
   const cursors = new Set<string>();
-  for (let page = 0; page < 32; page++) {
-    const args = ["orchestration", "worker-list", "--limit", "100", "--json", ...(cursor ? ["--cursor", cursor] : [])];
-    const value = valueFrom(run(command, args, probeOptions(root, env, budget)));
-    if (!object(value) || value.ok !== true || !object(value.result) || !Array.isArray(value.result.workers)) return undefined;
-    for (const worker of value.result.workers) {
-      if (!object(worker) || typeof worker.agentTerminalHandle !== "string" || typeof worker.dispatchStatus !== "string") return undefined;
-      if (worker.agentTerminalHandle !== terminal) continue;
-      if (["pending", "dispatching", "dispatched", "running"].includes(worker.dispatchStatus)) return true;
-      if (!["completed", "failed", "cancelled", "canceled", "interrupted", "rejected"].includes(worker.dispatchStatus)) return undefined;
+  if (state === undefined) ladder.step = Math.max(ladder.step, PAGE_LIMITS.indexOf(FALLBACK_ROWS));
+  let step = ladder.step;
+  for (let page = 0; page < PAGE_CAP; page++) {
+    let value: unknown;
+    let limit = PAGE_LIMITS[step];
+    for (;;) {
+      limit = PAGE_LIMITS[step];
+      const receipt = run(command, ["orchestration", "worker-list", "--limit", String(limit), "--json",
+        ...(state !== undefined ? ["--terminal-state", state] : ["--full"]), ...(cursor ? ["--cursor", cursor] : [])], probeOptions(root, env, budget));
+      if (oversize(receipt)) { if (step < PAGE_LIMITS.length - 1) { ladder.step = ++step; continue; } return "too-large"; }
+      value = valueFrom(receipt);
+      break;
     }
-    const pagination = value.result.page;
-    if (!object(pagination) || typeof pagination.hasMore !== "boolean") return undefined;
-    if (!pagination.hasMore) return false;
-    if (typeof pagination.nextCursor !== "string" || !pagination.nextCursor || pagination.nextCursor.length > 4096
-      || cursors.has(pagination.nextCursor)) return undefined;
-    cursor = pagination.nextCursor; cursors.add(cursor);
+    if (!object(value) || value.ok !== true || !object(value.result) || !Array.isArray(value.result.workers)) return page === 0 && state !== undefined ? "rejected" : undefined;
+    for (const worker of value.result.workers) {
+      const row = ownRow(worker, terminal);
+      if (row === "open") return true;
+      if (row === "unknown") return undefined;
+    }
+    const result = value.result;
+    const pagination = result.page;
+    if (pagination !== undefined && pagination !== null && !object(pagination)) return undefined;
+    const source = object(pagination) ? pagination : {};
+    if (source.hasMore !== undefined && typeof source.hasMore !== "boolean") return undefined;
+    const advertised = textOf(source.nextCursor) ?? textOf(result.nextCursor);
+    // No `page` object at all is a complete listing unless the page is full (then more may exist and a cursor is required).
+    const hasMore = typeof source.hasMore === "boolean" ? source.hasMore : (advertised !== undefined || result.workers.length >= limit);
+    if (!hasMore) return false;
+    // A cursor is an opaque token; one that could be read as an option, or that repeats, ends the walk.
+    if (typeof advertised !== "string" || advertised.length > 4096 || advertised.startsWith("-") || cursors.has(advertised)) return undefined;
+    cursor = advertised; cursors.add(cursor);
   }
-  return undefined;
+  return "too-large";
+}
+
+/** Only the observed worker-list transport identifies implicit workers; guessed env markers do not. */
+function lookupWorker(command: string, terminal: string, root: string, env: Env, run: Run, budget: Budget): Lookup {
+  const ladder = { step: 0 };
+  for (const state of OPEN_STATES) {
+    const found = listPages(command, terminal, root, env, run, budget, state, ladder);
+    // An Orca that does not know the filter (or one of its states) is read in full instead, which covers every state at once.
+    if (found === "rejected") return listPages(command, terminal, root, env, run, budget, undefined, ladder) as Lookup;
+    if (found !== false) return found;
+  }
+  return false;
 }
 
 function probeOptions(root: string, env: Env, budget: Budget): RunOptions {
@@ -153,6 +229,7 @@ export function decideStart(options: StartOptions): StartDecision {
       const resolved = command && resolveExecutable(command, env, deps);
       if (!resolved) return blocked("worker-identity-unavailable");
       const worker = lookupWorker(resolved, terminal, options.root, buildWorkerEnv(env, deps), run, deadline);
+      if (worker === "too-large") return blocked("worker-list-too-large");
       if (worker === undefined) return blocked(deadline.failure ?? "worker-identity-unavailable");
       if (worker) return { state: "worker", reason: "worker-context", line: "" };
     }

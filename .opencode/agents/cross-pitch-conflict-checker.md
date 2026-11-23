@@ -1,7 +1,7 @@
 ---
 description: Fast read-only reviewer for conflicts between active pitch diffs.
 mode: subagent
-model: opencode-go/minimax-m3.1-flash-free
+model: opencode-go/minimax-m3.1-flash
 permission:
   edit: deny
 ---

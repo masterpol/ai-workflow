@@ -41,7 +41,7 @@ models:
       effort: high
   opencode:
     fast:
-      model: opencode-go/minimax-m3.1-flash-free
+      model: opencode-go/minimax-m3.1-flash
     standard:
       model: opencode-go/minimax-m3
     deep:
@@ -52,8 +52,8 @@ models:
       model: gpt-6-luna
       effort: high
     standard:
-      model: gpt-6.1-sol
-      effort: high
+      model: gpt-6.2-sol
+      effort: medium
     deep:
-      model: gpt-6-astra
-      effort: xhigh
+      model: gpt-6.2-astra
+      effort: high

@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 2,
+  "slug": "archify-replaces-state",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/archify-renders-the-state-report.md",
+      "helps": "What each slice delivered and why S3 was split, when reading why /state is built this way.",
+      "bodyHash": "sha256:d906008fe119b760b2c9c968bbfc7db99e1904ae17a4139cb358bf3ddbcb6aa2"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/archify-renders-the-state-report.md",
+      "helps": "Which constraints held (no vendoring, pinned install, no auto-update) and the one owner-approved exception.",
+      "bodyHash": "sha256:427f7301d8da1eb937364907d0752c0da445e0443d2f8815e318ba7be549464f"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/archify-renders-the-state-report.md",
+      "helps": "How install footprint, untrusted input and the dropped sections were resolved, and what stays open.",
+      "bodyHash": "sha256:3e86d3cb7485f035e6b4cea5d3237f9e4a5d6fd63d95ed319df94ca4e30fee3d"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-archify-replaces-state.md",
+      "helps": "Which commands ran at ship and what they showed, and why pre-ship-verify could not run.",
+      "bodyHash": "sha256:19ca22e62bd0433440786dbb934bdede861832b33fc8e3850630212b07bbc8b0"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:f9881f9a792b5921573508fa1f31d34a3a36c7b6d1e7773062530e129dfb8118"
+    },
+    {
+      "source": "SHIPPED.md#knowledge",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:a6151cbe1b04b5961b712e9fea20cba96a9b8b4110362147903caa2fc778eca0"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:6827dfe414de695a1407b39ad040e2af95127f3832ec68adc5e33c53d2816c66"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/archify-renders-the-state-report.md",
+      "helps": "The pitch's exclusions, so a later change can check them.",
+      "bodyHash": "sha256:c987d055ccbd6a28abcb8d4ad263995a2043bf1d3c7292857f1435553e47f2bc"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/archify-renders-the-state-report.md",
+      "helps": "The unknowns the pitch named and how each was settled.",
+      "bodyHash": "sha256:c9dfa0737f47e79eb141576715d2fc2618bf2dd4d5f7d30b6772a1094168f75b"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:10c040e6c38744d714ae2380e9cda6bda48d8a511560e6ee03aa1592a0bafd88"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:95f7ffcbeb5e82347ff5ee83ea812137644019e021f7ee908f42c2107060d54e"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:c8cad4e4c5fccd6ae1283c66d395a87d01f382ea992c1c9fa4edb079917dbeda"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:bcb2ff068ccf6bcaf51679b66434b0c39367f9943a7de8ea8a6df700b52c4ca6"
+    },
+    {
+      "path": "findings.md",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-archify-v3.3.0-validation.md",
+      "helps": "The evidence behind the KEEP verdict: install path, offline behaviour, network calls, hostile-input results and the four conditions.",
+      "hash": "sha256:960fd7173adb027f06d2a2bdbe4c3291d5903d9a82a8ab4dc3b9b2b2b0429f56"
+    },
+    {
+      "path": "audit.md",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-archify-replaces-state-audit.md",
+      "helps": "The audit synthesis: what the reviewers found, what was refuted as a planted canary, and what stayed open.",
+      "hash": "sha256:41e00576b782e825354c786b49b33cdcfa2e285d721866244cf5c60315f42dd8"
+    },
+    {
+      "path": "audit-code.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:b032b3494972acdd3debe08fad1ecbb96a4c19038992e55988b672b4ce3b5507"
+    },
+    {
+      "path": "audit-cross-pitch.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:825ec53a933257d701c2fb802b41bbac5887c3067411e8ce3e4f1fa7e74dedf1"
+    },
+    {
+      "path": "audit-security.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:46fcafa2eec8f58818160cd9d4d43b6cf30fcebcc7e97a09a4bdc049f375e00f"
+    },
+    {
+      "path": "audit-test.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:9a80653f54fb9cf4f6671c4adbeab22740e7f9301a90fa97fecfbaeafd344761"
+    }
+  ],
+  "coverage": 0.6666666666666666,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-23T15:50:26.943Z"
+}

@@ -54,7 +54,7 @@ export const MODES_FILE = ".project/skills/modes.json";
 const defaultRegistry: RegistryApi = registryModule as RegistryApi;
 
 let nodeDeps: RuntimeDeps | undefined;
-/** Lazily created Node deps, so old-signature callers (state-snapshot, workflow-doctor, ...) need no change. */
+/** Lazily created Node deps, so old-signature callers (workflow-doctor, ...) need no change. */
 /** Untrusted values are shown JSON-quoted, control-free and capped, never raw. */
 function shown(value: unknown): string {
   const text = typeof value === "string" ? value : JSON.stringify(value) ?? String(typeof value);

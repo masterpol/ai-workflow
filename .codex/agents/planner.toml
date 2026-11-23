@@ -1,7 +1,7 @@
 name = "planner"
 description = "Deep planning role for independently verifiable implementation scopes."
-model = "gpt-6-astra"
-model_reasoning_effort = "xhigh"
+model = "gpt-6.2-astra"
+model_reasoning_effort = "high"
 developer_instructions = """
 Read `.claude/agents/planner.md` and follow its body as the canonical role prompt. Return dependencies and checkable exits.
 """

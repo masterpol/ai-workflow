@@ -1,7 +1,7 @@
 ---
 description: Fast scope-sizing role that checks work against the stated appetite.
 mode: subagent
-model: opencode-go/minimax-m3.1-flash-free
+model: opencode-go/minimax-m3.1-flash
 permission:
   edit: deny
 ---

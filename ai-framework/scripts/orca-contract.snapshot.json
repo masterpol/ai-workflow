@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "source": "orca agent-context --json",
+  "sourceSchemaVersion": 1,
+  "commands": {
+    "agent installed": {
+      "flags": [
+        "json"
+      ],
+      "retired": false
+    },
+    "orchestration worker-start": {
+      "flags": [
+        "agent",
+        "base-branch",
+        "effort",
+        "full",
+        "json",
+        "model",
+        "name",
+        "repo",
+        "setup",
+        "spec",
+        "timeout-ms",
+        "worktree"
+      ],
+      "retired": false
+    },
+    "orchestration worker-list": {
+      "flags": [
+        "cursor",
+        "full",
+        "json",
+        "limit",
+        "terminal-state"
+      ],
+      "retired": false
+    },
+    "status": {
+      "flags": [
+        "json"
+      ],
+      "retired": false
+    },
+    "skills get": {
+      "flags": [
+        "json"
+      ],
+      "retired": false
+    }
+  }
+}

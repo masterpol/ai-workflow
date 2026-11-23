@@ -197,6 +197,31 @@ test("prune removes only unmodified-vs-base files removed upstream, keeping a lo
   assert.equal(again.removed.some((entry) => /gone-clean/.test(entry.path)), false);
 });
 
+test("archify-replaces-state: pruning the retired state scripts keeps edited copies and never touches the old reports", (t) => {
+  const { source, target } = fixture(t);
+  const scripts = ["state-snapshot", "state-render", "state-theme"].map((name) => `ai-framework/scripts/${name}.mts`);
+  for (const script of scripts) { write(target, script, `// ${script} v1\n`); write(source, script, `// ${script} v1\n`); }
+  const base = commit(source, "snapshot with the old state scripts");
+  const oldReports = { ".project/reports/state.json": "{\"schemaVersion\":1}\n", ".project/reports/index.html": "<!doctype html>old\n", ".project/reports/theme.json": "{}\n" };
+  for (const [file, text] of Object.entries(oldReports)) write(target, file, text);
+  write(target, scripts[1], "// local edit of state-render\n");
+  for (const script of scripts) fs.rmSync(path.join(source, script));
+  write(source, "ai-framework/scripts/facts-gather.mts", "// new collector\n");
+  commit(source, "the bundle retires the state scripts and adds facts-gather");
+  const dry = runJson(target, ["--source", source, "--base-ref", base]);
+  assert.deepEqual(dry.removed.map((entry) => entry.path).sort(), [...scripts].sort());
+  assert.equal(dry.removed.find((entry) => /state-render/.test(entry.path)).modified, "modified");
+  assert.ok(dry.new.some((entry) => entry.path === "ai-framework/scripts/facts-gather.mts"), "the replacement arrives as new");
+  for (const script of scripts) assert.equal(exists(target, script), true, "a dry run removes nothing");
+  const applied = runJson(target, ["--source", source, "--base-ref", base, "--apply", "--prune"]);
+  assert.equal(applied.summary.prunedCount, 2, "only the two unmodified copies are pruned");
+  assert.equal(exists(target, scripts[0]), false);
+  assert.equal(exists(target, scripts[2]), false);
+  assert.equal(read(target, scripts[1]), "// local edit of state-render\n", "a locally edited script is kept");
+  assert.equal(read(target, "ai-framework/scripts/facts-gather.mts"), "// new collector\n");
+  for (const [file, text] of Object.entries(oldReports)) assert.equal(read(target, file), text, `${file} is user data under .project/ and is never deleted`);
+});
+
 test("preserves local bases and retains unpruned upstream removals", (t) => {
   const { source, target } = fixture(t);
   write(source, "ai-framework/rules/gone.md", "old\n");

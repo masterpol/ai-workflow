@@ -118,8 +118,8 @@ test("installed b26b45b project upgrades in two passes, preserving legacy data a
     node(root, "ai-framework/scripts/config-migrate.mts", ["--apply", "--root", "."]);
     node(root, "ai-framework/scripts/workflow-doctor.mts", ["--fix", "--json"]);
     setupChecks(root); // compatible without running the consolidation migration
-    const snapshot = JSON.parse(node(root, "ai-framework/scripts/state-snapshot.mts", ["--json"]));
-    assert.ok(snapshot.pitches.items.some((item: { value: { slug: string; phase: string } }) => item.value.slug === "token-time-report" && item.value.phase === "compacted"));
+    const inventoryRows = JSON.parse(node(root, "ai-framework/scripts/pitch-compress.mts", ["inventory", "--json"]));
+    assert.ok(inventoryRows.some((row: { slug: string; reason: string }) => row.slug === "token-time-report" && row.reason === "already compacted"));
     assert.equal(read(root, ".project/knowledge/templates/decision.md"), beforeEntry, "doctor --fix never refreshes an existing template");
     assert.deepEqual(durableHashes(root), originalHashes);
     assert.equal(legacyText(root), originalEntries);

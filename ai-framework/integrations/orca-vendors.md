@@ -149,10 +149,13 @@ is never persisted, and is ignored when the switch is off. Because bypass preced
 identity, a worker invocation carrying this token returns `bypassed`.
 
 Worker identity comes from the brief's `--worker-context` flag (passed as `workerContext` to
-the decision library), or from matching `ORCA_TERMINAL_HANDLE` against agent terminal handles
-in `orca orchestration worker-list` for an open dispatch. No identifying worker environment
-marker exists in the observed coordinator and worker environments. A terminal lookup that
-cannot be verified blocks rather than assuming the caller is a coordinator.
+the decision library), or from matching `ORCA_TERMINAL_HANDLE` against the terminals that
+`orca orchestration worker-list` reports in every state but `released` (an open dispatch cannot sit
+in a released terminal; see "Surviving Orca updates" below for the request and its fallbacks). No
+identifying worker environment marker exists in the observed coordinator and worker environments.
+A terminal lookup that cannot be verified blocks rather than assuming the caller is a coordinator:
+`worker-identity-unavailable` when the answer is malformed or the caller's own row is not understood,
+`worker-list-too-large` when the listing stays over the output bound at every page size.
 
 The decision calls `evaluateLaunch` with the coordinator vendor. It then checks that workers
 named by that coordinator's policy roles belong to its worker list and have executables in
@@ -194,6 +197,46 @@ the `PreToolUse` (`Skill`) and `UserPromptExpansion` entries in `.claude/setting
 a failure even when it works, because a missing Bun would skip the gate. This environment assignment prefix requires a POSIX shell;
 it is not valid in Windows cmd. Workers share the coordinator checkout;
 automatic start provides no checkout isolation.
+
+### Surviving Orca updates
+
+The version gate is only a floor (`engine`, default `>=1.4.224`); a newer Orca is never refused for being newer. What can still
+break Orca mode after an update is a change in what the CLI prints, so every parse the scripts do is kept to the minimum they use
+and tolerates the shapes Orca is known to print:
+
+| Call | What the scripts rely on | Tolerated |
+|---|---|---|
+| `skills get orca-cli`, `skills get orchestration` | the guide `name`, and the words `worktree current` and `terminal` / `worker-start` and `worker_done` | any other wording; the guide prose may be reorganised |
+| `status --json` | `result.target.kind` is `local`, `runtime.reachable` and `runtime.state` are ready, `appVersion` is a plain `x.y.z` at or above the floor | extra fields |
+| `orchestration worker-list` | rows for **this** terminal: its terminal handle (`agentTerminalHandle`, `terminal` or `resource.terminalHandle`) and whether it is open (`dispatchStatus`, `state`, `liveness`, `terminalState`) | the full record and the concise view; a missing `page`; rows of other terminals or of unknown shape |
+| `orchestration worker-list` request | one bounded answer per terminal state other than `released`: `--limit 100 --json --terminal-state <state>` for `active`, `retained`, `reclaimable`, `release_pending`, `release_unknown` (an open dispatch cannot sit in a released terminal, so these cover every possible worker; the large history stays out of the answer; about 330 bytes a row concise; stops at the first state that holds the caller) | a CLI that rejects the filter or one of its states is read once unfiltered as `--full --limit 25`, which covers every state; a page over the shared output bound (`MAX_OUTPUT_BYTES`), in stdout or stderr, or an `ENOBUFS` is asked again at `--limit` 50, 25, 10 and later queries start at the size that worked; nothing is raised or duplicated; a cursor that starts with `-` ends the walk |
+| `orchestration worker-start --json` | a dispatch id | `dispatch.id`, `dispatch.dispatchId`, `dispatchId`, `worker.dispatchId`, `projection.dispatchId`, bare or under `result` |
+| `orchestration worker-start` failure | the receipt's `failedStage` / `residualResources`, or a structured refusal `{ ok: false, error: { code } }` | a refusal with a plain token `code` (lower-case, 2 to 64 characters) is reported as `launch-failed:refused:<code>`; any other shape stays `launch-failed:unproven`; a `failedStage` is reported the same way (a lower-case token of at most 64 characters), otherwise as `launch-failed:residual` or `launch-failed:unproven` |
+
+Still failing closed, with a precise reason: a `worker-list` that stays too large at every page size, or whose unfiltered walk reaches its page cap, is `worker-list-too-large` (never read as complete). A refused start keeps its task, capacity and `unknown-liveness` ownership exactly as before: the code says *why*, it does not prove that nothing was created, and only a person with proof releases the task. Also failing closed: a row for this terminal whose status no version has used before (the gate cannot tell whether the caller is a
+worker), a `page` that is present but malformed, a `hasMore` with no usable cursor, a full page with no cursor, and a non-`x.y.z`
+`appVersion` (the version parser is shared with config validation and stays strict).
+
+When an Orca update still blocks a phase, run `node ai-framework/scripts/orca-run.mts start --root . --phase build --vendor claude
+--args-text ""` for the reason, run the matching `orca ... --json` command by hand, and add the new shape to the "recorded
+worker-list shapes" fixtures in `orca-start.test.mts` or to the preflight fixtures before changing the parser, so the next
+update is covered by a test and not by a surprise. `orca=normal` on the invocation always runs the phase without Orca.
+
+#### Contract check
+
+The committed snapshot `ai-framework/scripts/orca-contract.snapshot.json` records only the commands and flags our
+scripts send. Run `bun ai-framework/scripts/orca-contract.mts --check` for the explicit live check: it reads
+`orca agent-context --json` and compares the generated snapshot with the committed file.
+A removed used command or flag, a newly **Retired** used command, or a changed source schema version fails;
+an added flag or command is not drift. The live check fails if Orca is unavailable; it does not silently skip.
+
+The doctor's **Orca contract** check is **OFFLINE** and never executes Orca. It validates the snapshot and verifies
+that every command and flag our scripts send (declared in `USED_CONTRACT`) is present, with no used command marked
+Retired. It works without Orca installed; a missing, unreadable or invalid snapshot fails.
+
+After reviewing changes to the CLI and callers, regenerate with `bun ai-framework/scripts/orca-contract.mts`.
+The generator's live output and snapshot readers share a **1 MiB** contract bound (`CONTRACT_MAX_BYTES`);
+the shared **256 KiB** probe/output bound (`MAX_OUTPUT_BYTES`) remains unchanged.
 
 ### Codex startup and coordinator preparation
 
@@ -282,6 +325,35 @@ attempt in the ledger is `claimed`, `launched` or `unknown-liveness`. Later work
 first worker starts, so a live worker's server is never ended. A `held` or `foreign` result refuses the launch
 with `opencode-port-held`; `unverified` and `unsupported` let it continue.
 
+## OpenCode agent id, request ids and releasing workers
+
+**Agent id** (owners: `resolveOpenCodeAgentId` and `parseInstalledAgents` in `orca-policy.mts`; the gate re-check in
+`orca-launch-gate.mts`; evidence in `.project/analysis/2026-11-23-orca-live-receipts-s3.md`). The OpenCode
+`--agent` value is not guessed from a version. It is read from `orca agent installed --json` (bounded, one call,
+ids matching `^[a-z][a-z0-9-]{0,63}$`): `opencode2` when it is installed, else `opencode`, else a named refusal.
+`AI_WORKFLOW_ORCA_OPENCODE_AGENT` may name only `opencode` or `opencode2`, and that id must also be installed.
+Refusals are `installed-agents-unavailable`, `invalid-opencode-agent`, `agent-not-installed` and
+`no-opencode-agent-installed`; each returns before anything is claimed or spawned. `launchWorker` re-reads the list
+immediately before the spawn and denies `agent-not-installed` when the exact id it will pass as `--agent` is missing.
+There is no fallback loop: one attempt makes one `worker-start`, and a failed start is never repeated with another id.
+The policy, config and ledger vendor stay `opencode` (`opencode2` is not a vendor); Claude and Codex are not resolved and
+launch with their own id. The grader case `opencode-agent-id-resolves-from-installed-agents` executes all of this.
+
+**Request ids and timeouts** (owner: `orca-dispatch.mts`). `worker-start` runs with `--json --full`, plus
+`--timeout-ms` equal to the kill deadline minus `ORCA_TIMEOUT_MARGIN_MS` (5000), only when that is at least 1000 ms,
+so Orca answers with its own timeout receipt before our SIGKILL. The request id is read only from
+`result.mutation.requestId` (a success or failed-start receipt) or `error.data.orchestrationRequestId` (a refusal), and
+only as a lower-case UUID; it is stored set-once in the ledger and printed with the read-only
+`orca orchestration request-show --request <id>` command. An id, or `request-show` answering `absent`, is never proof of
+success or of a clean failure: ownership stays `unknown-liveness` until a person inspects the Run. We never call
+`--retry-request`.
+
+**Coordinator rule: release finished workers** (owner of the command: the Orca CLI, `orca-cli` skill). After a worker
+has finished or errored and its report is collected, the coordinator runs
+`orca orchestration worker-release --dispatch <id>` to close its terminal, and never for a worker that is still running.
+A failed start leaves a terminal behind (its receipt names this command in `recovery`/`next`); release it after
+inspection.
+
 ## Dispatch core (opt-in, library only)
 
 `orca-dispatch.mts` sends one scope to one alternate vendor through `orca orchestration worker-start`.
@@ -303,7 +375,9 @@ It is a library for the build phase, not a command, and stays inert unless the p
 - **Dispatch**: a claim precedes the spawn and the deadline is checked before it; a replayed or crashed attempt is
   inspected, never relaunched; one live attempt per task. A failure at `agent_readiness` or with residual resources is
   returned to the user. A timeout, output overflow, signal exit, unreadable receipt or missing dispatch id means unknown
-  liveness. Only a readable receipt with no failed stage and an explicitly empty `residualResources` list is retryable, capped by the smaller
+  liveness. A structured CLI refusal (`{ ok: false, error: { code } }`) is reported as `launch-failed:refused:<code>`, and a
+  `failedStage` as `launch-failed:<stage>`, only when the value is a lower-case token of at most 64 characters; any other receipt text is
+  never echoed, and ownership stays unknown liveness (the code says why, it does not prove that nothing was created). Only a readable receipt with no failed stage and an explicitly empty `residualResources` list is retryable, capped by the smaller
   of the caller's value, the policy's `maxRetriesPerTask` and 5, each retry with a new attempt id.
   The policy's `maxConcurrentWorkers` caps the attempts that are claimed, launched or of unknown liveness; a further
   dispatch returns the normal workflow.
@@ -313,7 +387,7 @@ It is a library for the build phase, not a command, and stays inert unless the p
   pool minus `skip` and minus the vendor recorded for the completed attempt of `reviewOf`. Resume never reassigns: a task with a live, completed
   or settled attempt keeps that attempt's vendor. After a task's attempts all failed cleanly, the next attempt takes the next pool member
   (pool order, circular, once around), through the full launch gate; a lap with no member left is `blocked: pool-exhausted`. Unknown liveness,
-  unproven failures, timeouts and signal exits are never rotated. A review pool with no member other than the implementer is
+  unproven or refused failures, timeouts and signal exits are never rotated. A review pool with no member other than the implementer is
   `blocked: review-independence-unavailable` with a `humanAction` (stop and ask); a review of a scope with no completed attempt is
   `blocked: implementer-unknown`. No ledger field was added: the recorded `vendor` and `taskKey` carry the assignment.
 - **Overlap guard**: `reserve` refuses (`authorized-paths-overlap`, route `normal`) a scope whose `authorizedPaths` overlap a *live*

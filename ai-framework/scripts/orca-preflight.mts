@@ -10,6 +10,8 @@ import type { RuntimeDeps } from "./runtime/types.mts";
 export const MAX_OUTPUT_BYTES = 256 * 1024;
 export const CALL_TIMEOUT_MS = 5000;
 export const TOTAL_TIMEOUT_MS = 20000;
+/** Minimal orchestration contract advertised by `orca status --json` (1.4.271). */
+export const REQUIRED_RUNTIME_CAPABILITIES = Object.freeze(["orchestration.contract.v1"]);
 /** Minimum supported Orca runtime; any later x.y.z release is accepted. */
 export const SUPPORTED_VERSION = "1.4.224";
 /** Range used when `integrations.orca.engine` is absent or empty: the floor above and any later release. */
@@ -133,7 +135,15 @@ function verifyGuide(value: unknown, name: string, markers: string[]): boolean {
     && markers.every((marker) => (guide.markdown as string).includes(marker));
 }
 
-interface Inspection { reason: string; session?: string; capabilities?: string; version?: string; found?: string }
+const REFUSAL_CODE = /^[a-z][a-z0-9_-]{1,63}$/;
+export const GENERIC_CALLER_REFUSAL = "refusal-unrecognized";
+/** Orca's refusal code is untrusted: only a closed token shape reaches diagnostics; the message is never read. */
+function refusalCode(refusal: unknown): string {
+  const code = refusal && typeof refusal === "object" ? (refusal as { code?: unknown }).code : undefined;
+  return typeof code === "string" && REFUSAL_CODE.test(code) ? code : GENERIC_CALLER_REFUSAL;
+}
+
+interface Inspection { reason: string; callerKind?: string; callerRefusal?: string; session?: string; capabilities?: string; version?: string; found?: string }
 
 function inspectRuntime(command: string, context: Context, range: ParsedRange): Inspection {
   const cli = readReceipt(command, CALLS.cliGuide, context);
@@ -141,24 +151,38 @@ function inspectRuntime(command: string, context: Context, range: ParsedRange): 
   if (!verifyGuide(cli.value, "orca-cli", ["worktree current", "terminal"])) return { reason: "cli-guide-unsupported" };
   const guide = readReceipt(command, CALLS.orchestrationGuide, context);
   if (guide.reason) return { reason: guide.reason };
-  if (!verifyGuide(guide.value, "orchestration", ["worker-start", "worker_done", "orchestration check"])) return { reason: "orchestration-guide-unsupported" };
   const status = readReceipt(command, CALLS.status, context);
   if (status.reason) return { reason: status.reason };
   const body = status.value as { ok?: unknown; result?: unknown } | null | undefined;
   const result = (body?.ok === true ? body.result : null) as {
-    target?: { kind?: unknown }; runtime?: { reachable?: unknown; state?: unknown; appVersion?: unknown };
-    caller?: { live?: unknown; orcaSessionId?: unknown };
+    target?: { kind?: unknown }; runtime?: { reachable?: unknown; state?: unknown; appVersion?: unknown; capabilities?: unknown };
+    caller?: { live?: unknown; orcaSessionId?: unknown; refusal?: unknown };
   } | null | undefined;
   if (!result || result.target?.kind !== "local") return { reason: "runtime-unverified" };
+  // A present advertisement is authoritative for capability checks, including a malformed
+  // or incomplete list. Only older runtimes without the field use the guide markers.
+  if (result.runtime && Object.hasOwn(result.runtime, "capabilities")) {
+    const capabilities = result.runtime.capabilities;
+    if (!Array.isArray(capabilities) || !capabilities.every((name) => typeof name === "string")) {
+      return { reason: "runtime-capabilities-invalid" };
+    }
+    const missing = REQUIRED_RUNTIME_CAPABILITIES.find((name) => !capabilities.includes(name));
+    if (missing) return { reason: `runtime-capability-missing:${missing}` };
+  } else if (!verifyGuide(guide.value, "orchestration", ["worker-start", "worker_done"])) {
+    return { reason: "orchestration-guide-unsupported" };
+  }
   if (result.runtime?.reachable !== true || result.runtime.state !== "ready") return { reason: "runtime-unreachable" };
   if (!isSupportedVersion(result.runtime.appVersion, range)) {
     // Only a strict x.y.z is echoed; anything else the runtime reports stays out of diagnostics.
     return { reason: "runtime-version-unsupported", ...(parseVersion(result.runtime.appVersion) ? { found: result.runtime.appVersion as string } : {}) };
   }
   if (result.caller?.live !== true || typeof result.caller.orcaSessionId !== "string"
-    || !context.env.ORCA_AGENT_SESSION_ID || result.caller.orcaSessionId !== context.env.ORCA_AGENT_SESSION_ID) return { reason: "caller-unverified" };
-  // The pinned status contract does not advertise an enabled orchestration field or validate
-  // all worker capabilities. A matching live caller is evidence, never launch authority.
+    || !context.env.ORCA_AGENT_SESSION_ID || result.caller.orcaSessionId !== context.env.ORCA_AGENT_SESSION_ID) {
+    // Diagnostics only: the reason string stays exactly "caller-unverified", so launch authority is unchanged.
+    return { reason: "caller-unverified", callerKind: context.env.ORCA_AGENT_SESSION_ID ? "orca-session" : "external-coordinator",
+      ...(result.caller && typeof result.caller === "object" && "refusal" in result.caller ? { callerRefusal: refusalCode(result.caller.refusal) } : {}) };
+  }
+  // Runtime capabilities and a matching live caller are evidence, never launch authority.
   return { reason: "orchestration-unverified", session: "verified", capabilities: "documented",
     version: result.runtime.appVersion };
 }
@@ -189,7 +213,8 @@ export function report(root: string, vendor: string, options: ReportOptions = {}
   const engine = engineRange(root, deps);
   if ("invalid" in engine) return { ...result, reason: "engine-range-invalid" };
   const runtime = inspectRuntime(command, context, engine.range);
-  return { ...result, reason: runtime.reason, engine: engine.text, ...(runtime.found ? { foundVersion: runtime.found } : {}), runtime: runtime.session ? "reachable" : "unverified",
+  return { ...result, reason: runtime.reason, engine: engine.text, ...(runtime.found ? { foundVersion: runtime.found } : {}),
+    ...(runtime.callerKind ? { callerKind: runtime.callerKind } : {}), ...(runtime.callerRefusal ? { callerRefusal: runtime.callerRefusal } : {}), runtime: runtime.session ? "reachable" : "unverified",
     session: runtime.session || "unverified", capabilities: runtime.capabilities || "unverified",
     ...(runtime.version ? { runtimeVersion: runtime.version } : {}) };
 }

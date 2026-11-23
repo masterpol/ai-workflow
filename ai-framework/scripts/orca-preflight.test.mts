@@ -8,12 +8,12 @@ const path = testDeps.path;
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
-import { CALL_TIMEOUT_MS, DEFAULT_ENGINE_RANGE, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, engineRange, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
+import { CALL_TIMEOUT_MS, DEFAULT_ENGINE_RANGE, GENERIC_CALLER_REFUSAL, MAX_OUTPUT_BYTES, REQUIRED_RUNTIME_CAPABILITIES, SUPPORTED_VERSION, TOTAL_TIMEOUT_MS, engineRange, executablePresent, isSupportedVersion, main, report, selectExecutable } from "./orca-preflight.mts";
 import { parseRange } from "./runtime/semver-range.mts";
 import { ownedPaths } from "./skill-sync.mts";
 import type { Receipt, ReportOptions, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
-import { orcaPolicyToonText, createTestDeps, copyTree, spawnSync } from "./runtime/test-helpers.mts";
+import { orcaPolicyToonText, createTestDeps, copyTree, spawnSync, stripTypes } from "./runtime/test-helpers.mts";
 import type { FsDeps, RuntimeDeps } from "./runtime/types.mts";
 
 const HERE = import.meta.dirname;
@@ -54,6 +54,104 @@ const assertNormal = (result: Obj): void => {
   assert.equal(result.dispatchReady, false);
   assert.equal(result.authentication, "unverified");
 };
+
+// Captured 2026-11-23 with `orca status --json`, appVersion 1.4.271:
+// {ok:true,result:{target:{kind:"local"},runtime:{state:"ready",reachable:true,
+// appVersion:"1.4.271",capabilities:[...,"orchestration.contract.v1",...]}}}.
+// Keep only the contract we consume; identity comes from the existing receipts factory.
+function capabilityReceipts(): Values {
+  const values = receipts();
+  values[2].result.runtime = { reachable: true, state: "ready", appVersion: "1.4.271",
+    capabilities: ["orchestration.contract.v1"] };
+  return values;
+}
+
+async function capabilityMutant(before: string, after: string): Promise<typeof report> {
+  let source = fs.readFileSync(SCRIPT, "utf8");
+  assert.equal(source.split(before).length, 2, "mutation anchor must be unique");
+  source = source.replace(before, after).replace(/from "(\.\/[^\"]+)"/g,
+    (_match, relative: string) => `from "${new URL(relative, import.meta.url).href}"`);
+  const module = await import(`data:text/javascript;base64,${Buffer.from(stripTypes(source)).toString("base64")}`);
+  return module.report;
+}
+
+test("uses guide markers when the runtime capability list is absent, rejecting a mutant that requires it", async (t) => {
+  const root = fixture(t);
+  const verify = (inspect: typeof report) => {
+    const result = inspect(root, "codex", probe().options);
+    assert.equal(result.reason, "orchestration-unverified");
+    assert.equal(result.session, "verified");
+    assertNormal(result);
+  };
+  verify(report);
+  const mutant = await capabilityMutant('if (result.runtime && Object.hasOwn(result.runtime, "capabilities"))', 'if (result.runtime)');
+  assert.throws(() => verify(mutant), { code: "ERR_ASSERTION" });
+});
+
+test("accepts the short required capability set without guide markers, rejecting a guide-only mutant", async (t) => {
+  assert.deepEqual(REQUIRED_RUNTIME_CAPABILITIES, ["orchestration.contract.v1"]);
+  const root = fixture(t);
+  const verify = (inspect: typeof report) => {
+    const values = capabilityReceipts();
+    values[1] = { name: "orchestration", markdown: "changed prose" };
+    // This diagnostic must have no effect on capability evidence or launch authority.
+    for (const dispatchReady of [true, false]) {
+      values[2].result.dispatchReady = dispatchReady;
+      const result = inspect(root, "codex", probe(values).options);
+      assert.equal(result.reason, "orchestration-unverified");
+      assert.equal(result.session, "verified");
+      assertNormal(result);
+    }
+  };
+  verify(report);
+  const mutant = await capabilityMutant('if (result.runtime && Object.hasOwn(result.runtime, "capabilities"))', 'if (false)');
+  assert.throws(() => verify(mutant), { code: "ERR_ASSERTION" });
+});
+
+test("denies a missing named capability without falling back to either valid or invalid guide words", async (t) => {
+  const root = fixture(t);
+  const verify = (inspect: typeof report) => {
+    for (const markdown of ["worker-start; worker_done", "changed prose"]) {
+      const values = capabilityReceipts();
+      values[1].markdown = markdown;
+      values[2].result.runtime.capabilities = ["hostile\nSECRET_MARKER"];
+      const result = inspect(root, "codex", probe(values).options);
+      assert.equal(result.reason, "runtime-capability-missing:orchestration.contract.v1");
+      assert.ok(!JSON.stringify(result).includes("SECRET_MARKER"));
+      assertNormal(result);
+    }
+  };
+  verify(report);
+  const mutant = await capabilityMutant('if (missing) return', 'if (false) return');
+  assert.throws(() => verify(mutant), { code: "ERR_ASSERTION" });
+});
+
+test("denies absent capability lists with missing guide markers, rejecting a skipped-guide mutant", async (t) => {
+  const root = fixture(t);
+  const verify = (inspect: typeof report) => {
+    for (const markdown of ["changed prose", "worker-start", "worker_done"]) {
+      const values = receipts();
+      values[1].markdown = markdown;
+      const result = inspect(root, "codex", probe(values).options);
+      assert.equal(result.reason, "orchestration-guide-unsupported");
+      assertNormal(result);
+    }
+  };
+  verify(report);
+  const mutant = await capabilityMutant('} else if (!verifyGuide(guide.value, "orchestration", ["worker-start", "worker_done"])) {', '} else if (false) {');
+  assert.throws(() => verify(mutant), { code: "ERR_ASSERTION" });
+});
+
+test("denies malformed present capability lists instead of using guide markers", (t) => {
+  const root = fixture(t);
+  for (const capabilities of [null, false, "orchestration.contract.v1", {}, [1, "orchestration.contract.v1"]]) {
+    const values = capabilityReceipts();
+    values[2].result.runtime.capabilities = capabilities;
+    const result = report(root, "codex", probe(values).options);
+    assert.equal(result.reason, "runtime-capabilities-invalid");
+    assertNormal(result);
+  }
+});
 
 test("skips all Orca checks when false or missing, including explicit probe requests", (t: TestContext) => {
   const root = fixture(t, false);
@@ -244,6 +342,38 @@ test("refuses unsupported guides and unproven runtime/caller receipts", (t: Test
   const options = probe().options;
   options.env = { AI_WORKFLOW_ORCA_MULTI_AGENT: "true" };
   assert.equal(report(root, "codex", options).reason, "caller-unverified");
+});
+
+// Captured 2026-11-23 with ORCA_AGENT_SESSION_ID=bogus-x and `orca status --json`, appVersion 1.4.271:
+// result.caller = {live:false, refusal:{code:"session_caller_unknown", message:"..."}}; with no session id, caller is null.
+test("carries a closed-shape caller refusal code into diagnostics and labels an external coordinator", (t: TestContext) => {
+  const root = fixture(t);
+  const run = (change: (v: Values) => void, env?: Record<string, string | undefined>) => {
+    const values = receipts(); change(values);
+    const p = probe(values); if (env) p.options.env = env;
+    return report(root, "codex", p.options);
+  };
+  const real = (v: Values) => { v[2].result.caller = { live: false, refusal: { code: "session_caller_unknown", message: "x" } }; };
+  const known = run(real);
+  assert.equal(known.reason, "caller-unverified");
+  assert.equal(known.callerRefusal, "session_caller_unknown");
+  assert.equal(known.callerKind, "orca-session");
+  const external = run((v) => { delete v[2].result.caller; }, { AI_WORKFLOW_ORCA_MULTI_AGENT: "true" });
+  assert.equal(external.reason, "caller-unverified");
+  assert.equal(external.callerKind, "external-coordinator");
+  assert.equal("callerRefusal" in external, false);
+  const hostile: unknown[] = ["bad\u001b[31mcode", "a".repeat(65), "x", "Upper_case", "../etc/passwd", "worker-agent claude; rm", 42, { code: "x" }, null, ["ab"]];
+  for (const code of hostile) {
+    const result = run((v) => { v[2].result.caller = { live: false, refusal: { code, message: "SECRET-MESSAGE" } }; });
+    assert.equal(result.reason, "caller-unverified");
+    assert.equal(result.callerRefusal, GENERIC_CALLER_REFUSAL);
+    assert.equal(JSON.stringify(result).includes("SECRET-MESSAGE"), false);
+    if (typeof code === "string" && code.length > 3) assert.equal(JSON.stringify(result).includes(JSON.stringify(code).slice(1, -1)), false);
+  }
+  for (const refusal of ["text", 5, null, [] ]) {
+    assert.equal(run((v) => { v[2].result.caller = { live: false, refusal }; }).callerRefusal, GENERIC_CALLER_REFUSAL);
+  }
+  assert.equal("callerRefusal" in run((v) => { v[2].result.caller = { live: false }; }), false);
 });
 
 test("does not infer launch authority from an unpinned experimental feature field", (t: TestContext) => {

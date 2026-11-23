@@ -185,6 +185,105 @@
         "pathsUnchanged": true,
         "approvalsUnchanged": true
       }
+    },
+    {
+      "id": "opencode-agent-id-resolves-from-installed-agents",
+      "input": {
+        "harness": "claude",
+        "workerVendor": "opencode",
+        "evidence": "orca agent installed --json on the host; S3 observed claude, claude-agent-teams, codex, opencode here and a real launch of --agent opencode2 failing with 'command not found: opencode2'",
+        "resolutions": [
+          {
+            "label": "installed list has opencode only (this machine)",
+            "installedAgents": [
+              "claude",
+              "codex",
+              "opencode"
+            ]
+          },
+          {
+            "label": "installed list has opencode and opencode2",
+            "installedAgents": [
+              "claude",
+              "codex",
+              "opencode",
+              "opencode2"
+            ]
+          },
+          {
+            "label": "override opencode2 but it is not installed",
+            "override": "opencode2",
+            "installedAgents": [
+              "claude",
+              "codex",
+              "opencode"
+            ]
+          },
+          {
+            "label": "override is not an agent id",
+            "override": "opencode; rm -rf /",
+            "installedAgents": [
+              "claude",
+              "codex",
+              "opencode"
+            ]
+          },
+          {
+            "label": "no OpenCode id installed",
+            "installedAgents": [
+              "claude",
+              "codex"
+            ]
+          },
+          {
+            "label": "installed list unavailable or unreadable",
+            "installedAgents": null
+          }
+        ]
+      },
+      "expected": {
+        "perResolution": [
+          {
+            "agentId": "opencode"
+          },
+          {
+            "agentId": "opencode2"
+          },
+          {
+            "agentId": null,
+            "refusal": "agent-not-installed",
+            "launches": 0
+          },
+          {
+            "agentId": null,
+            "refusal": "invalid-opencode-agent",
+            "launches": 0
+          },
+          {
+            "agentId": null,
+            "refusal": "no-opencode-agent-installed",
+            "launches": 0
+          },
+          {
+            "agentId": null,
+            "refusal": "installed-agents-unavailable",
+            "launches": 0
+          }
+        ],
+        "neverLaunchesAnIdThatIsNotInstalled": true,
+        "gateChecksTheInstalledListForTheIdItLaunches": true,
+        "ledgerAndPolicyVendorStillOpencode": true,
+        "noFallbackLoop": true,
+    "claudeAndCodexLaunchWithTheirOwnId": true,
+        "reason": "an agent alias such as opencode2 launches its own command; guessing it from a version number failed in a real launch and left a terminal behind"
+      },
+      "variants": [
+        "hostile installed-list entries (control characters, over-long ids, non-strings) are ignored, never launched",
+        "the list read is bounded and one call; an oversized or malformed list is installed-agents-unavailable",
+        "claude and codex workers launch with their own id and are not affected",
+        "probe and launch agree: the id checked in the installed list is the --agent value spawned (mutant: probe opencode, launch opencode2 turns red)",
+        "policy lists only opencode as vendor; a policy naming opencode2 is rejected"
+      ]
     }
   ]
 }

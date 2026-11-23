@@ -1,7 +1,7 @@
 name = "security-reviewer"
 description = "Standard read-only security reviewer for vulnerabilities and mitigations."
-model = "gpt-6.1-sol"
-model_reasoning_effort = "high"
+model = "gpt-6.2-sol"
+model_reasoning_effort = "medium"
 sandbox_mode = "read-only"
 developer_instructions = """
 Read `.claude/agents/security-reviewer.md` and follow its body as the canonical role prompt. Report evidence-backed findings; do not edit.

@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 2,
+  "slug": "orca-api-currency-and-opencode2",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": "ai-framework/integrations/orca-vendors.md",
+      "helps": "Tells a future agent which Orca capabilities exist now (contract check, capability preflight, agent id, request ids, timeouts) and where each is documented.",
+      "bodyHash": "sha256:ea5e4e7fe6a6ce2e29fca6b0db7540cc7e6c625b1b0692b46ae16ea9048d352a"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "limit",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/opencode-agent-id-comes-from-the-installed-agent-list.md",
+      "helps": "States the limits that must keep holding: no fallback loop, no refusal-code or request id as proof, launch authority unchanged, no vendor named opencode2.",
+      "bodyHash": "sha256:c63ffcd3a3c96f483a103b2c107e9f99df889c70d7143b5d85f43478875087d0"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/patterns/capture-the-real-receipt-before-designing-recovery.md",
+      "helps": "Records which assumptions the real launches refuted or settled, so a plan about an external CLI's edge behaviour captures the receipt first.",
+      "bodyHash": "sha256:19ee5c91ab1d502b198def66370ac3f2f427ee912729ee3b20bfeff20c8a5203"
+    },
+    {
+      "source": "SHIPPED.md#deviations-and-coordinator-hand-edits",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the list of deviations from the plan and the coordinator's own edits, with the ledger notes, for anyone auditing how the pitch was built.",
+      "bodyHash": "sha256:e81460fb73313f0f338479512d729edf0d583573561280d59fb4221c7480d4c8"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-api-currency-and-opencode2-audit.md",
+      "helps": "Keeps what was verified and how: the independent-clone run, the audit cycles, the canary results and the unproven mechanical reviewers.",
+      "bodyHash": "sha256:cef23af2a5fb03138507f90418193d0ce1608e73a49efd0d26c0dafa555e5fe9"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:5d68b1e66b4fbe07bc221beed7c9b2fd0efbc73b21aa6383a0022062e62e5271"
+    },
+    {
+      "source": "SHIPPED.md#docs",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": "ai-framework/integrations/orca-vendors.md",
+      "helps": "Points to the vendor contract that now documents the agent id, request ids, timeouts and the contract check.",
+      "bodyHash": "sha256:8b22cf68756c1b20f1d90a68d4e944fb428b0258b1e68bb190bcaf8c802b6af4"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "limit",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/opencode-agent-id-comes-from-the-installed-agent-list.md",
+      "helps": "The pitch's no-gos (launch authority, fail-closed ownership, no fallback without proof) are the constraints the decision card keeps.",
+      "bodyHash": "sha256:4bd0982d0925c0a759d727859f3ed3757c6b60c01d589fd5cdc7ef1219bb5b43"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/patterns/capture-the-real-receipt-before-designing-recovery.md",
+      "helps": "The resolved and pushed rabbit holes and how the captures settled them.",
+      "bodyHash": "sha256:7c84662de604626a5430b3e9586867c35ae77d408281c5e39c3ca5c30872c5e8"
+    },
+    {
+      "source": "audit-cycle-1.md",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-api-currency-and-opencode2-audit.md",
+      "helps": "Keeps the cycle-1 audit synthesis, reviewer independence and the verified findings.",
+      "bodyHash": "sha256:72c4a97f542042ee89448671767f5490ef51f794bd99da8a296d0a756b697fb2"
+    },
+    {
+      "source": "audit-cycle-2.md",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-api-currency-and-opencode2-audit.md",
+      "helps": "Keeps the cycle-2 narrow re-check and its caught canary.",
+      "bodyHash": "sha256:2d6d07cc64827808061a14dd9cd2e703ae8f51ba99af29008e7484d65ce978b8"
+    },
+    {
+      "source": "log.md#2026-11-23-p0-settled-base-branch",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Records why the base branch choice did not matter (Orca files identical on both tips).",
+      "bodyHash": "sha256:992eea716062f1fa5b0ea30288b18bf7abfcaad8690022511f5a72ea956da36a"
+    },
+    {
+      "source": "log.md#orca-run-authorized-by-the-owner-yes-orca-workers",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:06d1907aa687cd00bd3d8d0b9ab0312b9fb8cbc932054b54050ca7595d149591"
+    },
+    {
+      "source": "log.md#wave-1-launched-2026-11-23",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:1085bf05dc737766a6d72c11fad430d5844974926e3c55542f7816f28e1c9698"
+    },
+    {
+      "source": "log.md#deviations",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the decisions that deviated from the plan: the R5a env override, the offline doctor, the evidence-based agent id.",
+      "bodyHash": "sha256:83fffa1010c24392d3e00cc63334bf4e215f4a20d8b6943faeac2dc8cf9a8ebd"
+    },
+    {
+      "source": "log.md#wave-1-verified-coordinator-2026-11-23",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the coordinator's independent verification of wave 1 and the ledger wording notes.",
+      "bodyHash": "sha256:623d5006ffbecd16000b39a3954856fb731e6d821eee249d1a871d7182331b58"
+    },
+    {
+      "source": "log.md#wave-2-launched",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:6e76cbe616f58b2f5cccbe49c1e532099368fc56a01f26a49da6dd6ec082a782"
+    },
+    {
+      "source": "log.md#wave-2-verified-coordinator-2026-11-23",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the verification of wave 2 and the known 5 s test timeouts.",
+      "bodyHash": "sha256:75f87b3d611ad24d44972597275d1e5a94bcbf2a7aa3e89ecb550ecf27b03ee1"
+    },
+    {
+      "source": "log.md#s3-captured-2026-11-23-owner-authorized",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-live-receipts-s3.md",
+      "helps": "Keeps what the first real launch showed (opencode2 is a separate command, the refusal receipt).",
+      "bodyHash": "sha256:cce7367cbd0b1929f0b1d6145fdbd007c2cd210892faea3ca73f1e4c7d31a128"
+    },
+    {
+      "source": "log.md#re-shape-owner-chose-option-1-after-s3",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/opencode-agent-id-comes-from-the-installed-agent-list.md",
+      "helps": "Records the decision to resolve the agent id from the installed list and drop the fallback.",
+      "bodyHash": "sha256:11cd1d85fa3cf989ca1a654d0f91727425adf634d0ea69e6b5fe8b7b261eb880"
+    },
+    {
+      "source": "log.md#r4b-re-shaped-owner-request",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/patterns/capture-the-real-receipt-before-designing-recovery.md",
+      "helps": "Records the R4b re-shape around the request id and why settlement by replay was gated.",
+      "bodyHash": "sha256:ea5218de34296909776e04415020f80fd092baa42e2308c9292622951b98d142"
+    },
+    {
+      "source": "log.md#s3b-captured-owner-authorized",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-live-receipts-s3.md",
+      "helps": "Keeps the success-path receipt: the request id appears only under --full.",
+      "bodyHash": "sha256:4fcc283c21b0e00a20df94a10701183bc82d2b11764ea3691ee4b09673cc7843"
+    },
+    {
+      "source": "log.md#s3c-captured-owner-authorized-and-cleanup-rule",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-live-receipts-s3.md",
+      "helps": "Keeps the timeout receipt and the owner's worker-release rule.",
+      "bodyHash": "sha256:f9c30ba77205013cd366fd1ed5eeb06affbf012c15a5c628e1ebdcd19f4b1a00"
+    },
+    {
+      "source": "log.md#r4b-1-verified-coordinator",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the verification of the timeout and request-id scope and the coordinator fix it needed.",
+      "bodyHash": "sha256:ed831a56ad68ae8cb6748ae040f8bd51d3ac57ec47ffd4b47b78a10f9d6fd045"
+    },
+    {
+      "source": "log.md#r5c-verified-coordinator",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the verification of the golden case and the collect refusal that left an attempt launched.",
+      "bodyHash": "sha256:3763e12a18fad9bde7003df6fa4388ea986d8af7a4c81a5a029e19664b64afb4"
+    },
+    {
+      "source": "log.md#build-complete-2026-11-23-awaiting-the-build-end-gate",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the end-of-build gate results.",
+      "bodyHash": "sha256:cbbca8184b09f544904f51944c3a8cc804eff46dc3608510275b3e02ca845bb1"
+    },
+    {
+      "source": "log.md#audit-2026-11-23",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-api-currency-and-opencode2-audit.md",
+      "helps": "Keeps the audit outcome summary.",
+      "bodyHash": "sha256:cb2565e8ed4cbe66c660834f23c1523d12d0656bad7cbd67c8ad04dbd014aac3"
+    },
+    {
+      "source": "log.md#ship-verification-2026-11-23",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "Keeps the ship-time verification and the worktree caveat.",
+      "bodyHash": "sha256:11a8cb3ec170d7b7e167b7b607a49eae67ad8d25d79f82ac67313e9298dffe94"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:123860dda2a2306a5193e58121ba96e9879eeaaa8b8802f2635a564698028231"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:919a61a6044835fad2f3b0828ad8fd23bdf1fc43e177b14c249f37a0fcb2b54d"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2-hill.md",
+      "helps": "Keeps the final hill chart of every scope, including the dropped R4b-2.",
+      "hash": "sha256:bf676b908822e7a45827a64cf605d55e443fa576b14898e9615fac9b4a0129b6"
+    },
+    {
+      "path": "s3-capture.md",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-live-receipts-s3.md",
+      "helps": "Keeps the real Orca receipts and what each launch settled; test fixtures and the vendor doc cite it.",
+      "hash": "sha256:ea797c19641502d0907121fa4272ee10c1859c4b63237b151f014f2aad45613e"
+    },
+    {
+      "path": "log.md",
+      "disposition": "merged",
+      "destination": ".project/runs/2026-11-23-orca-api-currency-and-opencode2.md",
+      "helps": "The whole build log is preserved verbatim (byte-identical copy) in the ship-time run log.",
+      "hash": "sha256:9182df62496a8fb6537075d2a87eacbeaa65b7dee4a59782ef8a25cac7c1a0d4"
+    },
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:0dc0bcdd1bc0963f9cc4f96fa7558ac955d38c3beab43466a618bb1f718ce63b"
+    }
+  ],
+  "coverage": 0.8571428571428571,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-23T21:56:46.118Z"
+}

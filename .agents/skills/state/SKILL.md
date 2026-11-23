@@ -1,8 +1,8 @@
 ---
 name: state
-description: Report what this project is and where it stands — workflow version, pitches, knowledge, skills, token metrics, database — as an evidence-backed snapshot that separates observed facts from proposals and unconfigured areas. Trigger phrases include "project state", "state report", and "/state".
+description: Report what this project is and where it stands — workflow version, pitches, knowledge, skills — as an evidence-backed page rendered by the installed Archify skill, separating observed facts from proposed analysis and unconfigured areas. Trigger phrases include "project state", "state report", and "/state".
 ---
 
 # State
 
-Load `.claude/skills/state/SKILL.md` and follow it exactly. Run `node ai-framework/scripts/state-snapshot.mts` (and `state-render.mts` for the multipage HTML report: overview, folder structure, skills, metrics, knowledge, pitches), report by fact status (observed, proposed, stale, unavailable, unconfigured), and never claim a live database or complete metrics the snapshot does not show.
+Load `.claude/skills/state/SKILL.md` and follow it exactly. Run `node ai-framework/scripts/facts-gather.mts` (and `--explainer state.explainer.json`, then Archify `validate` and `deliver`, only when Archify is installed at the pinned revision), report by fact status (observed, proposed, stale, unavailable, unconfigured), and never claim a database, metrics or counts the facts do not show.

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 2,
+  "slug": "orca-bounded-control-receipts",
+  "sections": [
+    {
+      "source": "SHIPPED.md#scopes",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-identity-lookup-and-refusal-reporting.md",
+      "helps": "What S1 and S2 do now, and that S3 (a real refusal receipt) was deferred and why.",
+      "bodyHash": "sha256:5d53ac51ad3d7352cad2cf2668b0003c437f52cc4dfe43c2b76b2c082077d43f"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honored",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-identity-lookup-and-refusal-reporting.md",
+      "helps": "No automatic cleanup, ownership stays fail-closed, nothing Orca-owned changed.",
+      "bodyHash": "sha256:1eb1c0ec0855038798919a8ce803bb59908985bcd50cc231ba667d892a571e99"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-identity-lookup-and-refusal-reporting.md",
+      "helps": "How projection vs pagination was settled and the open questions left for a real Orca.",
+      "bodyHash": "sha256:daa64f1abe1070f0d9440d84596089782d41f0033f0c6bea1959ca09c6fb22ed"
+    },
+    {
+      "source": "SHIPPED.md#verification",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/runs/2026-11-23-orca-bounded-control-receipts.md",
+      "helps": "Which commands ran at ship and what they showed, including the live Orca check.",
+      "bodyHash": "sha256:978491509359b3de81ac6fc72ed423552e62502c13126ed6d56f469d3dd6a19a"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-bounded-control-receipts-audit.md",
+      "helps": "What the audit found, which must-fix items were canaries, and what is not independently re-reviewed.",
+      "bodyHash": "sha256:51bc2d6ecb6685ae4f2b48c5eece3e4e00e21e673786bfc74aaad7f0eed55db1"
+    },
+    {
+      "source": "SHIPPED.md#followups-generated",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:987c34d2f2e55637e339c1a5d0cefacd9de18cd7fa08f5561f8da2e0904efc6f"
+    },
+    {
+      "source": "SHIPPED.md#knowledge",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:a9f7437720d19b3f831b0ce1104fb87bab3499ccc8b8db3d4cc0fb011959ad42"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:5ac02007b7c18345739a199111002381726a49302e7972577cf7300527702f4e"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-identity-lookup-and-refusal-reporting.md",
+      "helps": "The pitch's exclusions, so a later change can check them.",
+      "bodyHash": "sha256:0a6d6e10c79b4176b3e1a031262bea167b1c01b6f54e15ab9b82d4bcfbafe398"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-identity-lookup-and-refusal-reporting.md",
+      "helps": "The unknowns the pitch pushed to shaping and how each was settled.",
+      "bodyHash": "sha256:b672a523680a40f70e5d25ce1a1fd7ac994b507ce811341d1403df16bcf06027"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:88cc056df3b35d0bddefb176e7939b09963e083653a05aa233075378c598ab26"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:891fc69a7603fd07fe7ee04e741fa5f941dff1462a52a5445327bd79d21ea898"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:83ec7485d760bc7bfd673708f59784d639c0b18f26f518e79c35d63336a01db6"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:dc7e5e636b4f96031536727e58af75d997bfdf85163a92e7a26bc317c9f52d6b"
+    },
+    {
+      "path": "audit.md",
+      "disposition": "extracted",
+      "destination": ".project/analysis/2026-11-23-orca-bounded-control-receipts-audit.md",
+      "helps": "The audit synthesis: findings, canaries caught, fixes and what stayed open.",
+      "hash": "sha256:a9592f0940395bb6f75c6b9e306581adc831fb602c0e2584ba4b5aa5138bf83b"
+    },
+    {
+      "path": "audit-code.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:76f1eb984d9c91bdd4f39b3a7e7ce285df77e510875e07fb0393af04ff5b476c"
+    },
+    {
+      "path": "audit-cross-pitch.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:d12e63210ef12797755dd2f6bbd61abeac6459627a3f8d1c068ea0230ae9b98f"
+    },
+    {
+      "path": "audit-security.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:a432eb8ac9d294a6c0df9fad05f53d9f078d828f6c7426cd9363aede9b9b2374"
+    },
+    {
+      "path": "audit-test.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:1a40124cb8bdea942bf30f3629584abd744f170f39b2cef4f59f869a677d070c"
+    }
+  ],
+  "coverage": 0.7,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-23T15:50:27.177Z"
+}

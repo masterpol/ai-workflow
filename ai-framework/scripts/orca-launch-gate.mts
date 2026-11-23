@@ -1,5 +1,5 @@
-import { report as policyReport } from "./orca-policy.mts";
-import { MAX_OUTPUT_BYTES, SUPPORTED_VERSION, engineRange, isSupportedVersion, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
+import { parseInstalledAgents, report as policyReport } from "./orca-policy.mts";
+import { CALL_TIMEOUT_MS, MAX_OUTPUT_BYTES, SUPPORTED_VERSION, engineRange, isSupportedVersion, report as preflightReport, selectExecutable } from "./orca-preflight.mts";
 import type { Receipt, ReportOptions, Run, RunOptions } from "./orca-preflight.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaMultiAgentEnabled } from "./runtime/select.mts";
@@ -107,8 +107,38 @@ export interface LaunchOptions {
   now?: () => number;
   platform?: string;
   present?: ReportOptions["present"];
+  /** The exact id that will be passed to `--agent`. Only when set does the gate re-read `orca agent installed` and require it. */
+  agentId?: string;
 }
 export interface LaunchDecision { allowed: boolean; reason: string; vendor: string; policyReason?: string; runtimeVersion?: string; executable?: string; engine?: string; foundVersion?: string }
+
+export interface InstalledAgentsOptions {
+  root: string; executable: string; env?: Env; deps?: RuntimeDeps; run?: Run;
+}
+
+/**
+ * Ids from `orca agent installed --json`, run with the executable the gate probed and the worker allowlisted env.
+ * undefined when the command fails, times out, overflows or prints something unparseable. Output is untrusted.
+ */
+export function readInstalledAgents(options: InstalledAgentsOptions): string[] | undefined {
+  const deps = options.deps ?? defaultDeps();
+  try {
+    const env = buildWorkerEnv(options.env ?? deps.proc.env, deps);
+    const args = ["agent", "installed", "--json"];
+    let receipt: Receipt | null;
+    if (options.run) {
+      receipt = options.run(options.executable, args, { cwd: options.root, env, shell: false, encoding: "utf8",
+        timeout: CALL_TIMEOUT_MS, maxBuffer: MAX_OUTPUT_BYTES, killSignal: "SIGKILL", windowsHide: true });
+    } else {
+      const result = deps.child.runSync(options.executable, args, { cwd: options.root, env, shell: false, encoding: "utf8",
+        timeoutMs: CALL_TIMEOUT_MS, maxBufferBytes: MAX_OUTPUT_BYTES, killSignal: "SIGKILL" });
+      receipt = result.errorCode ? { ...result, error: { code: result.errorCode } } : result;
+    }
+    if (!receipt || receipt.error || receipt.signal || receipt.status !== 0) return undefined;
+    if (typeof receipt.stdout !== "string" || new TextEncoder().encode(receipt.stdout).length > MAX_OUTPUT_BYTES) return undefined;
+    return parseInstalledAgents(receipt.stdout);
+  } catch { return undefined; }
+}
 
 /** Fresh policy read plus fresh probe on every call. Fails closed on any thrown error. */
 export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
@@ -134,6 +164,11 @@ export function evaluateLaunch(options: LaunchOptions): LaunchDecision {
     // The probe proved this executable and no other; launchWorker spawns exactly it.
     const executable = selectExecutable(env, options.platform ?? deps.proc.platform, deps);
     if (!executable) return deny("launcher-unavailable");
+    if (options.agentId !== undefined) {
+      const installed = readInstalledAgents({ root, executable, env, deps, run: options.run });
+      if (installed === undefined) return deny("installed-agents-unavailable");
+      if (!installed.includes(options.agentId)) return deny("agent-not-installed");
+    }
     return { allowed: true, reason: "launch-allowed", vendor, policyReason: String(policy.reason), runtimeVersion: probe.runtimeVersion ?? SUPPORTED_VERSION, executable };
   } catch { return deny("gate-error"); }
 }

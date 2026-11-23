@@ -84,7 +84,7 @@ entries[50]:
     standalone: "Verifies setup output (context, entry files, graph, mirrors) with the validator script; no agents or rules."
   -
     path: ".claude/skills/state/SKILL.md"
-    standalone: Reports an evidence-backed project snapshot from scripts and records; dispatches no agent.
+    standalone: "Reports an evidence-backed project page from a fact collector, rendered by the installed Archify skill; dispatches no agent."
   -
     path: ".claude/skills/switch/SKILL.md"
     standalone: Checkpoints the current pitch then loads the target through the resume flow; dispatches no agent.

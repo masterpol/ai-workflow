@@ -73,11 +73,32 @@ const settleWithoutEvidence: GraderLibraries["reconcile"] = async (options: Reco
   return { status: Object.keys(attempts).length ? "integrated" : "refused", reason: "integrated", attempts, checks: [{ name: "ok", ok: true, output: "" }] };
 };
 
+const AGENT_CASE = "opencode-agent-id-resolves-from-installed-agents";
+const REFUSALS = ["installed-agents-unavailable", "agent-not-installed", "invalid-opencode-agent", "no-opencode-agent-installed"];
+/** A resolver that prefers opencode2 without ever consulting the installed list. */
+const resolveWithoutInstalledList: GraderLibraries["resolveOpenCodeAgentId"] = ({ env }) => ({ agentId: env.AI_WORKFLOW_ORCA_OPENCODE_AGENT === "opencode" ? "opencode" : "opencode2" });
+/** Gate and probe see `opencode`, but the spawned `--agent` is rewritten to `opencode2`. */
+const spawnOtherThanProbed: GraderLibraries["dispatchScope"] = (options) => {
+  const child = (options.deps ?? deps).child;
+  const run: typeof child.run = (command, args, spawnOptions) =>
+    child.run(command, args.map((arg, index) => (args[index - 1] === "--agent" && arg === "opencode" ? "opencode2" : arg)), spawnOptions);
+  return dispatchScope({ ...options, deps: { ...(options.deps ?? deps), child: { ...child, run } } });
+};
+/** A refusal that still spawns a worker with the base id. */
+const spawnAfterRefusal: GraderLibraries["dispatchScope"] = async (options) => {
+  const outcome = await dispatchScope(options);
+  if (outcome.route === "normal" && REFUSALS.includes(outcome.reason)) await (options.deps ?? deps).child.run("orca", ["orchestration", "worker-start", "--agent", "opencode"]);
+  return outcome;
+};
+
 const MUTANTS: ReadonlyArray<{ name: string; caseId: string; libs: Partial<GraderLibraries> }> = [
   { name: "accept a mismatched dispatch id", caseId: "completion-receipts-are-not-proof", libs: { collectReport: acceptMismatchedDispatch } },
   { name: "skip the worker-context deny", caseId: "worker-preamble-prevents-recursive-coordination", libs: { dispatchScope: skipWorkerDeny } },
   { name: "retry after residual resources", caseId: "uncertain-worker-does-not-duplicate-editing", libs: { dispatchWithRetries: retryAfterResidual } },
   { name: "settle without evidence", caseId: "completion-receipts-are-not-proof", libs: { reconcile: settleWithoutEvidence } },
+  { name: "resolver picks opencode2 without the installed list", caseId: AGENT_CASE, libs: { resolveOpenCodeAgentId: resolveWithoutInstalledList } },
+  { name: "probe opencode but spawn opencode2", caseId: AGENT_CASE, libs: { dispatchScope: spawnOtherThanProbed } },
+  { name: "a refusal still spawns", caseId: AGENT_CASE, libs: { dispatchScope: spawnAfterRefusal } },
   { name: "settle without evidence (integration)", caseId: "prepared-input-and-integrated-evidence", libs: { reconcile: settleWithoutEvidence } },
 ];
 
@@ -106,12 +127,13 @@ test("the real dataset: every executable case runs and passes; modes and counts 
     "worker-preamble-prevents-recursive-coordination": "executes", "unreported-cost-is-not-savings": "parses-only", "completion-receipts-are-not-proof": "executes",
     "prepared-input-and-integrated-evidence": "executes", "all-coordinator-and-policy-permutations": "live-only", "stateful-recovery-and-peer-messages": "live-only",
     "static-fixtures-do-not-prove-runtime": "live-only", "hostile-worker-summary-is-data": "executes",
+    "opencode-agent-id-resolves-from-installed-agents": "executes",
   });
   for (const entry of report.cases) {
     if (entry.mode === "executes") assert.equal(entry.pass, true, `${entry.id}: ${entry.detail}`);
     else assert.equal(entry.pass, false, `${entry.id}: only an executed case can pass`);
   }
-  assert.deepEqual(report.summary.executes, { total: 7, passed: 7, failed: 0 });
+  assert.deepEqual(report.summary.executes, { total: 8, passed: 8, failed: 0 });
   assert.deepEqual(report.summary.parsesOnly, { total: 1, parsed: 1, failed: 0 });
   assert.deepEqual(report.summary.liveOnly, { total: 3, notRun: 3 });
   assert.deepEqual(report.summary.deferred, []);
@@ -119,6 +141,19 @@ test("the real dataset: every executable case runs and passes; modes and counts 
   assert.equal(report.cases.filter((entry) => entry.pass).length, report.summary.executes.passed, "pass counts only executed cases");
   assert.doesNotMatch(JSON.stringify(report.summary), /10\/10|"total":10/, "no combined total");
   assert.match(caseOf(report, "codex-coordinates-alternate-vendors").detail, /not executed: peerCommunication/);
+});
+
+test("opencode-agent-id-resolves-from-installed-agents", SLOW, async () => {
+  const report = await gradeAll({ deps, root: ROOT, only: [AGENT_CASE] });
+  const entry = caseOf(report, AGENT_CASE);
+  assert.deepEqual([entry.mode, entry.pass], ["executes", true], entry.detail);
+  assert.match(entry.detail, /executed: 6 expectation\(s\) matched/);
+  assert.deepEqual(report.summary.executes, { total: 1, passed: 1, failed: 0 });
+  for (const mutant of MUTANTS.filter((item) => item.caseId === AGENT_CASE)) {
+    const broken = caseOf(await gradeAll({ deps, root: ROOT, only: [AGENT_CASE], libs: mutant.libs }), AGENT_CASE);
+    assert.equal(broken.pass, false, `${mutant.name} must turn the case red`);
+    assert.match(broken.detail, /FAILED/, mutant.name);
+  }
 });
 
 test("mutation proof: each broken library turns its case red, and the real libraries keep it green", REAL, async () => {
@@ -279,7 +314,7 @@ test("no-race: concurrent graders write each policy via a unique wx temp then re
   const root = rootWith(t, dataset().cases);
   const reports = await Promise.all([1, 2, 3, 4].map(() => gradeAll({ deps: recordingDeps(ops) as typeof deps, root })));
   for (const report of reports) {
-    assert.deepEqual(report.summary.executes, { total: 7, passed: 7, failed: 0 });
+    assert.deepEqual(report.summary.executes, { total: 8, passed: 8, failed: 0 });
     assert.deepEqual(report.cases.map((entry) => [entry.id, entry.pass]), reports[0].cases.map((entry) => [entry.id, entry.pass]));
   }
   const policyOps = ops.filter((entry) => entry.path.endsWith(POLICY_NAME) || entry.path.includes(`${POLICY_NAME}.`));

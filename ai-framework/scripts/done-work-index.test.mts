@@ -2,7 +2,6 @@ import { describe, test } from "node:test";
 import assert from "node:assert";
 import { applyIndex, compactedSlugs, DONE_WORK_FILE, INDEX_END, INDEX_HEADING, INDEX_START, legacyEntries, main, MAX_DONE_WORK_BYTES, recordSlugs, renderBlock, scanRecords, writeIndex } from "./done-work-index.mts";
 import { inventory } from "./pitch-compress.mts";
-import { buildSnapshot } from "./state-snapshot.mts";
 import { createTestDeps, tempFixture } from "./runtime/test-helpers.mts";
 
 const deps = createTestDeps();
@@ -131,7 +130,7 @@ describe("one compacted row per slug (dual read)", () => {
     });
   });
 
-  test("pitch-compress inventory and the state snapshot count a record-only slug as compacted exactly once", () => {
+  test("pitch-compress inventory and compactedSlugs count a record-only slug as compacted exactly once", () => {
     withRoot({
       [DONE_WORK_FILE]: HEADER + LEGACY,
       ".project/records/shipped/beta.md": record("beta", "2026-09-05"),
@@ -139,19 +138,16 @@ describe("one compacted row per slug (dual read)", () => {
     }, (root) => {
       const rows = inventory(root, deps).filter((row) => row.reason === "already compacted").map((row) => row.slug).sort();
       assert.deepStrictEqual(rows, ["alpha", "beta", "gamma"]);
-      const snapshot = buildSnapshot(root, { now: "2026-10-22T12:00:00.000Z" }) as unknown as { pitches: { items: { value: { slug: string; phase: string; shipped: string } }[] }; doneWork: { value: { compacted: number; entries: { slug: string }[] } } };
-      const compacted = snapshot.pitches.items.map((item) => item.value).filter((item) => item.phase === "compacted");
-      assert.deepStrictEqual(compacted.map((item) => item.slug).sort(), ["alpha", "beta", "gamma"]);
-      assert.strictEqual(compacted.find((item) => item.slug === "beta")?.shipped, "2026-09-05", "the record's date wins");
-      assert.strictEqual(snapshot.doneWork.value.compacted, 3);
-      assert.deepStrictEqual(snapshot.doneWork.value.entries.map((entry) => entry.slug).sort(), ["alpha", "beta", "gamma"]);
+      const compacted = compactedSlugs(root, deps);
+      assert.deepStrictEqual([...compacted.keys()].sort(), ["alpha", "beta", "gamma"]);
+      assert.strictEqual(compacted.get("beta")?.shipped, "2026-09-05", "the record's date wins");
     });
   });
 
   test("a record is found even when done-work.md is past the read limit", () => {
     withRoot({ [DONE_WORK_FILE]: `${HEADER}${"<!-- pad -->\n".repeat(8000)}${LEGACY}`, ".project/records/shipped/gamma.md": record("gamma", "2026-09-06") }, (root) => {
-      const snapshot = buildSnapshot(root, { now: "2026-10-22T12:00:00.000Z" }) as unknown as { pitches: { items: { value: { slug: string; phase: string } }[] } };
-      assert.ok(snapshot.pitches.items.map((item) => item.value).some((item) => item.slug === "gamma" && item.phase === "compacted"));
+      assert.ok(compactedSlugs(root, deps).has("gamma"));
+      assert.ok(inventory(root, deps).some((row) => row.slug === "gamma" && row.reason === "already compacted"));
     });
   });
 });
