@@ -10,7 +10,9 @@ import { migrateInstanceEntries } from "./runtime/migrate.mts";
  *
  * Only the bundle's canonical directories are compared (rules, workflow, templates,
  * integrations, scripts, hooks, canonical agents/skills, and their OpenCode/Codex/Cursor
- * mirrors). .project/, settings files, and credentials are never touched; AGENTS.md,
+ * mirrors). .project/ records are never touched, with receipt-verified removal of the
+ * last /state delivery in .project/reports/ as the single exception (the sync marker
+ * still records the baseline). Settings files and credentials are never touched. AGENTS.md,
  * CLAUDE.md, SETUP.md, README.md, opencode.json, and .codex/config.toml are only flagged for
  * manual review.
  *
@@ -130,7 +132,7 @@ function commandFailure(command: string, args: string[], stdout: string, stderr:
   return error;
 }
 
-function makeSync(argv: string[], deps: RuntimeDeps) {
+export function makeSync(argv: string[], deps: RuntimeDeps) {
   const { fs, path } = deps;
   const root = deps.proc.cwd();
   const apply = argv.includes("--apply");
@@ -254,15 +256,128 @@ function makeSync(argv: string[], deps: RuntimeDeps) {
   }
 
   /** Refuses to write or remove through a symlink at the destination or any ancestor below the project root. */
-  async function assertNoSymlinkPath(destination: string): Promise<void> {
-    const relative = path.relative(root, destination);
-    let current = root;
+  async function assertNoSymlinkPath(destination: string, base: string = root): Promise<void> {
+    const relative = path.relative(base, destination);
+    let current = base;
+    if ((await fs.lstat(base)).isSymbolicLink()) throw new Error("refusing symlinked sync root");
     for (const part of relative.split(path.sep)) {
       current = path.join(current, part);
       let stat;
       try { stat = await fs.lstat(current); } catch (error) { if (codeOf(error) === "ENOENT") return; throw error; }
       if (stat.isSymbolicLink()) throw new Error(`refusing to write through symlink: ${current}`);
     }
+  }
+
+  // Read data only: bounded descriptor reads refuse links, FIFOs and growing files.
+  async function readBounded(file: string, limit: number, base: string = root, pin?: (identity: { dev: number; ino: number }) => void): Promise<Uint8Array> {
+    await assertNoSymlinkPath(file, base);
+    const before = await fs.lstat(file);
+    if (!before.isFile()) throw new Error("report-not-regular");
+    if (before.size > limit) throw new Error("report-oversize");
+    const fd = fs.openSync(file, fs.constants.O_RDONLY | (fs.constants.O_NOFOLLOW || 0) | (fs.constants.O_NONBLOCK || 0));
+    try {
+      const opened = fs.fstatSync(fd);
+      if (!opened.isFile() || opened.dev !== before.dev || opened.ino !== before.ino) throw new Error("report-changed");
+      if (opened.size > limit) throw new Error("report-oversize");
+      // The identity of the descriptor whose bytes are about to be hashed, not of whatever the path names later.
+      pin?.({ dev: opened.dev, ino: opened.ino });
+      const bytes = new Uint8Array(limit + 1);
+      let length = 0;
+      while (length < bytes.length) {
+        const count = fs.readSync(fd, bytes, length, bytes.length - length, null);
+        if (!count) break;
+        length += count;
+      }
+      if (length > limit) throw new Error("report-oversize");
+      return bytes.slice(0, length);
+    } finally { fs.closeSync(fd); }
+  }
+
+  /** `updated` is false when this sync brings nothing new: the last delivery then still describes the installed bundle. */
+  async function resetStateReports(updated = true): Promise<NextStep[]> {
+    const steps: NextStep[] = [];
+    const reports = path.join(root, ".project/reports");
+    const receipt = path.join(reports, "state.delivery.json");
+    const targets = [
+      { name: "state.html", field: "artifact", limit: 16 * 1024 * 1024 },
+      { name: "state.explainer.json", field: "specification", limit: 2 * 1024 * 1024 },
+    ];
+    const hint = (message: string): void => { steps.push({ kind: "reports", message }); };
+    if (!updated) return steps;
+    try {
+      await assertNoSymlinkPath(reports);
+      let directory;
+      try { directory = await fs.lstat(reports); } catch (error) { if (codeOf(error) === "ENOENT") return steps; throw error; }
+      if (!directory.isDirectory()) throw new Error("report-not-regular");
+      const checkDirectory = async (): Promise<void> => {
+        await assertNoSymlinkPath(reports);
+        const current = await fs.lstat(reports);
+        if (!current.isDirectory() || current.dev !== directory.dev || current.ino !== directory.ino) throw new Error("report-directory-changed");
+      };
+      // Historical pages have no ownership receipt and are always kept.
+      for (const name of ["index.html", "state.json", "theme.json"]) {
+        const file = path.join(reports, name);
+        await assertNoSymlinkPath(file);
+        try { await fs.lstat(file); hint(`Legacy .project/reports/${name} kept; review manually.`); }
+        catch (error) { if (codeOf(error) !== "ENOENT") throw error; }
+      }
+      let receiptBytes;
+      try { receiptBytes = await readBounded(receipt, 64 * 1024); }
+      catch (error) { if (codeOf(error) === "ENOENT") return steps; throw error; }
+      let delivery;
+      try { delivery = JSON.parse(new TextDecoder().decode(receiptBytes)); } catch { throw new Error("report-invalid-receipt"); }
+      if (!targets.every(({ field }) => typeof delivery?.[field]?.sha256 === "string" && /^[a-f0-9]{64}$/.test(delivery[field].sha256))) throw new Error("report-invalid-receipt");
+      const removals: { file: string; digest: string; limit: number }[] = [];
+      let kept = false;
+      // Preflight every target before the first removal: a refused input removes nothing.
+      for (const target of targets) {
+        const file = path.join(reports, target.name);
+        let bytes;
+        try { bytes = await readBounded(file, target.limit); }
+        catch (error) { if (codeOf(error) === "ENOENT") continue; throw error; }
+        const digest = hash(bytes);
+        if (digest === delivery[target.field].sha256) removals.push({ file, digest, limit: target.limit });
+        else { kept = true; hint(`Kept .project/reports/${target.name}: report-not-owned.`); }
+      }
+      await checkDirectory();
+      if (!kept) removals.push({ file: receipt, digest: hash(receiptBytes), limit: 64 * 1024 });
+      for (const item of removals) {
+        if (apply) {
+          await checkDirectory();
+          await assertNoSymlinkPath(item.file);
+          let hashed = { dev: -1, ino: -1 };
+          // Pin the descriptor that was hashed; a file renamed over it before the unlink is refused, never removed.
+          if (hash(await readBounded(item.file, item.limit, root, (identity) => { hashed = identity; })) !== item.digest) throw new Error("report-changed");
+          await checkDirectory();
+          // No await between the final identity/path check and unlink.
+          await assertNoSymlinkPath(item.file);
+          const current = fs.lstatSync(reports);
+          if (current.dev !== directory.dev || current.ino !== directory.ino) throw new Error("report-directory-changed");
+          const file = fs.lstatSync(item.file);
+          if (file.isSymbolicLink() || !file.isFile() || file.dev !== hashed.dev || file.ino !== hashed.ino) throw new Error("report-changed");
+          fs.unlinkSync(item.file);
+        }
+        hint(`${apply ? "Removed" : "Would remove"} .project/reports/${path.basename(item.file)}; re-run /state after syncing.`);
+      }
+    } catch (error) {
+      const reason = ["report-not-regular", "report-oversize", "report-changed", "report-directory-changed", "report-invalid-receipt"].includes(messageOf(error)) ? messageOf(error) : "report-path-refused";
+      hint(`Report reset refused: ${reason}; kept remaining files. Review before re-running /state.`);
+    }
+    return steps;
+  }
+
+  async function archifyPinStep(sourceRoot: string): Promise<NextStep[]> {
+    try {
+      // Exactly one anchored table row in bounded bundle documentation; never execute it.
+      const text = new TextDecoder().decode(await readBounded(path.join(sourceRoot, "ai-framework/integrations/state-report.md"), 64 * 1024, sourceRoot));
+      const rows = [...text.matchAll(/^\| Pinned commit \| `([a-f0-9]{40})` \|[ \t]*$/gm)];
+      if (rows.length !== 1) return [];
+      const pin = rows[0][1];
+      const registry = JSON.parse(new TextDecoder().decode(await readBounded(path.join(root, ".project/skills/registry.json"), 4 * 1024 * 1024)));
+      const installed = registry?.skills?.["tt-a1i/archify/archify"];
+      if (!installed || installed.source?.revision === pin) return [];
+      return [{ kind: "archify-pin", message: `Archify pin changed: run node ai-framework/scripts/add-skill.mts install tt-a1i/archify/archify --scope project --phases manual --ref ${pin} --apply` }];
+    } catch { return []; }
   }
 
   async function applyEntry(entry: SyncEntry): Promise<void> {
@@ -507,6 +622,9 @@ function makeSync(argv: string[], deps: RuntimeDeps) {
     const skillSync = runSkillSync();
 
     const steps = await nextSteps(sourceRoot);
+    // Reset only when this sync updates the bundle (applied or pruned files, or, on a dry run, files it would apply or prune).
+    const updated = apply ? applied.length + pruned.length > 0 : groups.new.length + groups.changed.length + (prune ? groups.removed.filter((entry) => entry.modified === "unmodified").length : 0) > 0;
+    steps.push(...await resetStateReports(updated), ...await archifyPinStep(sourceRoot));
     for (const migration of instanceMigrations.filter((entry) => entry.status === "manual")) steps.push({ kind: "direct-typescript", message: `${migration.path}: ${migration.reason}` });
     if (await exists(path.join(root, ".opencode/plugins/token-consumption.js"))) steps.push({ kind: "direct-typescript", message: "Legacy OpenCode plugin token-consumption.js remains: review its customization or rerun --prune with the original --base-ref before enabling the direct .ts plugin" });
 
@@ -568,7 +686,7 @@ function makeSync(argv: string[], deps: RuntimeDeps) {
     }
   }
 
-  return { resolveSource, runSync };
+  return { resolveSource, runSync, resetStateReports, archifyPinStep };
 }
 
 export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {

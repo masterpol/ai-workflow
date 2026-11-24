@@ -22,7 +22,8 @@ ARCHIFY_UPDATE_CHECK_DISABLED=1 node .project/skills/packages/tt-a1i/archify/arc
 ARCHIFY_UPDATE_CHECK_DISABLED=1 node .project/skills/packages/tt-a1i/archify/archify/bin/archify.mjs deliver explainer .project/reports/state.explainer.json .project/reports/state.html --json
 ```
 
-`--root <dir>` targets another project; `--now <ISO time>` fixes the stamp. Generated files in
+`--depth simple|project` (default `auto`): `project` depth is used when `.project/.bundle-sync.json` exists, so a
+project with the workflow installed gets it and this bundle's own checkout stays `simple`. `--root <dir>` targets another project; `--now <ISO time>` fixes the stamp. Generated files in
 `.project/reports/` are git-ignored. `--explainer` takes a plain file name ending in `.explainer.json` and
 writes only inside `.project/reports/`, creating `.project` and `reports` only after checking that any existing one is a plain directory (never a link).
 
@@ -75,7 +76,23 @@ Every leaf is a fact: `{ value, status, evidence: [project-relative paths], note
 | `unavailable` | Could not be read. The `note` always says why; nothing is guessed. |
 
 Sections: `workflow.installedVersion`, `pitches.active`, `pitches.shippedListed`, `knowledge`, `skills`.
-A section that cannot be built is `unavailable` on its own; the others still report.
+At `project` depth there is also `project.database`, `project.structure` and `project.stack`, collected by
+`facts-project.mts`. A section that cannot be built is `unavailable` on its own; the others still report.
+
+### Project depth (pitch `state-project-depth`)
+
+| Section | Source | Page |
+|---|---|---|
+| `database` | The newest `drizzle/meta/NNNN_snapshot.json`: tables, columns, primary, unique and foreign keys. It is `stale` when `drizzle/meta/_journal.json` lists more migrations than that snapshot covers. Prisma, SQL and TypeScript schemas are `unconfigured`. | An `erd` diagram of at most 30 entities (the most connected), with at most 5 drawn relationship ends per table. A note says what is not drawn. |
+| `structure` | `readdir` two levels deep. It skips `node_modules`, `dist`, `build`, `coverage`, `graphify-out`, `storybook-static` and dot folders, and refuses symlinks. | A `tree` diagram of at most 60 nodes. |
+| `stack` | `package.json` (dependency counts, script **names** only, frameworks from a fixed list) and the lockfile name. `pyproject.toml`, `go.mod` and `Cargo.toml` give only the language. | A facts block. |
+
+Discovery has its own budgets, separate from the display caps: entries per directory, directories visited, entities,
+fields and relationships. A budget hit makes the section `stale` with an "at least" note. Known residual: `readdirSync`
+still loads one whole directory listing before its budget applies. The page uses 2 of Archify's 4 native diagrams.
+
+Diagram IDs are generated (`e1`, `d3`, …), never derived from names. Relationships are resolved on the raw names first.
+Every label goes through the same redaction and inert-markup step as other text.
 
 ### What was dropped from the old report
 
@@ -103,6 +120,18 @@ look-alikes), so a pitch named `<script>` or `[x](javascript:…)` arrives as pl
 Counts in the page come from the collector. Any analysis a model adds is chat-only, labelled
 "proposed, not observed", and never enters the draft.
 
+## Ownership and reset
+
+- `--explainer` replaces an existing draft only when its SHA-256 equals `specification.sha256` in a bounded, non-symlink
+  `.project/reports/state.delivery.json` (Archify's receipt; `artifact.sha256` is the page), or the hash it recorded itself in
+  `<name>.written-sha256` when it last wrote the draft (so a draft whose `validate` failed stays replaceable). Otherwise it fails with
+  `report-not-owned: <name>`. A new draft is published with a hard link, so a file that appears meanwhile is never overwritten; an
+  owned draft is re-checked (identity and bytes) immediately before the rename.
+- `bundle-sync --apply` runs the reset only when the sync applies or prunes files. It removes `state.html` and `state.explainer.json` when they match the receipt, then removes the receipt
+  if nothing was kept. It pins the reports folder's identity and each file's identity after its final hash, and rechecks both before each removal. It never touches legacy
+  pages or any other `.project/` file. A NEXT STEPS line asks for a `/state` re-run. A second line prints the `add-skill`
+  command when the pinned Archify commit above differs from the installed one.
+
 ## Failure modes
 
 | Symptom | Meaning | Action |
@@ -110,6 +139,7 @@ Counts in the page come from the collector. Any analysis a model adds is chat-on
 | Preview prints `unavailable` facts | A source is missing or unreadable; the note says which | Fix the source or accept the gap |
 | Archify missing or at another revision | `/state` stops after the facts preview | Run the install command above |
 | `validate` fails | The draft held something Archify rejects | Report the diagnostic; never edit the draft by hand |
+| `report-not-owned: <name>` | The draft was edited or not written by the last delivery | Move the file aside, then re-run |
 | `--explainer` refuses | Bad file name, symlinked destination, or `.project/reports` resolving outside the project | Use a plain name; remove the link |
 | `add-skill` says `Unsafe relative path` | Fixed in `skill-source.mts` (inline code spans are no longer read as links); a different skill may still trip it | Inspect the named path |
 

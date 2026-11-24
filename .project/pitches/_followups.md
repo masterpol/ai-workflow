@@ -621,3 +621,10 @@ Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles t
 - Verifying a change set through `git worktree` can fail the two bundle-copy doctor tests: the suite rebuilds the knowledge graph through the shared git directory and reads the main repo's committed cards, so the graph looks out of date. An independent clone passes. Make that rebuild use the checkout it runs in, or document it as a verification caveat (found 2026-11-23 shipping orca-api-currency-and-opencode2).
 
 - `installed-upgrade.test.mts` pins `BASE_REF = "b26b45b"`, a commit that exists only in local clones, not on origin, so the test "installed b26b45b project upgrades in two passes…" fails in every fresh clone of main (also failed at c5d05f9 before PR #9). Re-pin it to a commit reachable from origin/main, or build the legacy fixture without a git ref. Found 2026-11-24 verifying the merge of PR #9.
+
+## From state-project-depth (2026-11-24)
+- **Tell `workflow-v3-rollout` about the report reset** (med, audit S8): its `bundle-sync --apply` on LAH, RN and climbing now removes the last `/state` delivery when files change (receipt-verified). Note it in that pitch before its apply, and re-run `/state` after.
+- **Prisma and other schema sources for project depth** (low-med): only `drizzle/meta/NNNN_snapshot.json` is read; Prisma, SQL and TypeScript schemas report `unconfigured`. A Prisma reader needs a linear, line-anchored scanner (issue `backtracking-regex-over-untrusted-text-is-quadratic`).
+- **`opendirSync` in `RuntimeDeps`** (low): `facts-project` structure discovery uses `readdirSync`, which loads one whole directory before its entry budget applies.
+- **Regression assertion for the doctor's syntax-check list** (low, audit acknowledged): removing the `facts-project` entries from `workflow-doctor.mts` leaves the doctor tests green.
+- **Real LAH checkout after its next sync** (low-med): the live check used a copy of LAH; run `/state` in LAH itself after it syncs to 2.53.0 (Archify is installed there).

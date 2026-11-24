@@ -1044,7 +1044,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     scripts.push("ai-framework/scripts/runtime/entry.mts", "ai-framework/scripts/runtime/cli.mts", ".opencode/plugins/token-consumption.ts");
     // Kept-complete list gains the config validity library (config-validate role) and the migrator (b1: unconditional).
     scripts.push("ai-framework/scripts/runtime/config.mts", "ai-framework/scripts/config-migrate.mts");
-    scripts.push("ai-framework/scripts/facts-gather.mts", "ai-framework/scripts/facts-gather.test.mts");
+    scripts.push("ai-framework/scripts/facts-gather.mts", "ai-framework/scripts/facts-gather.test.mts", "ai-framework/scripts/facts-project.mts", "ai-framework/scripts/facts-project.test.mts");
     // The README is now an index; each documented topic lives in ai-framework/docs/.
     const docsChecks = [
       ["setup", /^# Set up$/m, "documents setup"],

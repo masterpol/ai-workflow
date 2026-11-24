@@ -23,6 +23,11 @@ node ai-framework/scripts/facts-gather.mts
 Read-only. Prints how many facts were observed, proposed, stale, unavailable or unconfigured.
 Add `--json` for the full facts. Nothing is written.
 
+**Depth** is `auto` by default. A project where the workflow is installed (it has `.project/.bundle-sync.json`)
+gets `project` depth, which adds a database schema (from the newest Drizzle snapshot), the folder structure
+(two levels) and the stack (from `package.json`). This bundle's own checkout stays at `simple` depth. Pass
+`--depth simple|project` to override it.
+
 ## Step 2 — Check Archify is installed (stop here if it is not)
 
 `.project/skills/registry.json` must hold an enabled `tt-a1i/archify/archify` entry whose
@@ -39,7 +44,11 @@ node ai-framework/scripts/facts-gather.mts --explainer state.explainer.json
 
 Writes `.project/reports/state.explainer.json` atomically. Every number, name and status in it comes from
 the collector; you do not write or edit page text. Project text is bounded, secret-redacted and stripped of
-anything Archify would read as markup.
+anything Archify would read as markup. Diagram IDs are generated, never taken from project names.
+
+It replaces an existing draft only when that file is the one the last `deliver` recorded in
+`.project/reports/state.delivery.json`. Otherwise it stops with `report-not-owned: <name>`. Do not delete
+or overwrite the file yourself: tell the user which file it is and ask them to move it.
 
 ## Step 4 — Validate and render with Archify
 
