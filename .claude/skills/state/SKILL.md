@@ -24,9 +24,11 @@ Read-only. Prints how many facts were observed, proposed, stale, unavailable or 
 Add `--json` for the full facts. Nothing is written.
 
 **Depth** is `auto` by default. A project where the workflow is installed (it has `.project/.bundle-sync.json`)
-gets `project` depth, which adds a database schema (from the newest Drizzle snapshot), the folder structure
-(two levels) and the stack (from `package.json`). This bundle's own checkout stays at `simple` depth. Pass
-`--depth simple|project` to override it.
+gets `project` depth, which adds a database schema, the folder structure (two levels), the stack and the workspace
+packages of a monorepo. The schema comes from whichever source the project has: a Drizzle snapshot or SQL migrations
+(any dialect), found at the root or under a workspace. The page names the source it used, the others it found and
+the ones it found but did not read (TypeScript, Prisma and Python schemas). This bundle's own checkout stays at
+`simple` depth. Pass `--depth simple|project` to override it.
 
 ## Step 2 — Check Archify is installed (stop here if it is not)
 
@@ -77,8 +79,12 @@ knowledge, skills. Hold to these rules — they are the point of the command:
   fill the gap with a guess.
 - **Counts are the collector's counts.** Quote them; never recompute or estimate. A `stale` count that hit
   the 64 KB read limit is "at least", not exact.
-- **There is no database, metrics or folder-structure section.** Say so if asked; token and time numbers
-  come from the token report, not from `/state`.
+- **Database and folder-structure sections exist at project depth only** (this bundle's own page has neither); there
+  is no metrics section. Say which depth applies if asked; token and time numbers come from the token report, not
+  from `/state`.
+- **A schema from SQL migrations is `stale` when any statement was not understood** ("N statements not understood",
+  "approximate" tables): quote that, never call it complete. "No schema source found" means detection finished and
+  found none; a schema that was found but not read says so by path.
 - **Any analysis you add in chat is "proposed, not observed"** and never goes into the page or the draft.
 - **Cite the evidence path** for any fact the user may want to verify.
 - **`.project/status.md` and `.project/runs/` stay the lifecycle authority.** Do not edit them from here.

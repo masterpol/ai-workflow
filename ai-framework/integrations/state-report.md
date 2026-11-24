@@ -83,9 +83,22 @@ At `project` depth there is also `project.database`, `project.structure` and `pr
 
 | Section | Source | Page |
 |---|---|---|
-| `database` | The newest `drizzle/meta/NNNN_snapshot.json`: tables, columns, primary, unique and foreign keys. It is `stale` when `drizzle/meta/_journal.json` lists more migrations than that snapshot covers. Prisma, SQL and TypeScript schemas are `unconfigured`. | An `erd` diagram of at most 30 entities (the most connected), with at most 5 drawn relationship ends per table. A note says what is not drawn. |
+| `database` | One schema source per project, found at the root or under a workspace (depth ≤5, never `node_modules`, `dist`, `build`, `.next`, `ios`, `android`, `fixtures` or dot folders): the newest `drizzle/meta/NNNN_snapshot.json` when its `_journal.json` covers every migration of that folder, otherwise the SQL migrations replayed in file-name order (`facts-sql.mts`). A migration folder has at least 2 sequentially named `.sql` files, or one file beside a Drizzle `_journal.json` (in the folder or its `meta/`). A migration file name must be letters, digits, `.`, `_`, `-` or a space and must not look like a credential; any other file is skipped, counted ("N migration file(s) not read") and its name is never copied. SQL read per source is capped at 8 MB and per scan at 16 MB. The source with the most tables wins (ties by path); the others are named as alternatives. Prisma, TypeScript (`schema.ts` beside a drizzle config) and Python (`models.py`) schemas are listed by path as "not read". | An `erd` diagram of at most 30 entities (the most connected), with at most 5 drawn relationship ends per table. The note names the source, the alternatives, what was found but not read, and what is not drawn. |
 | `structure` | `readdir` two levels deep. It skips `node_modules`, `dist`, `build`, `coverage`, `graphify-out`, `storybook-static` and dot folders, and refuses symlinks. | A `tree` diagram of at most 60 nodes. |
 | `stack` | `package.json` (dependency counts, script **names** only, frameworks from a fixed list) and the lockfile name. `pyproject.toml`, `go.mod` and `Cargo.toml` give only the language. | A facts block. |
+
+**SQL reader.** Text in, schema out: a linear, string-, comment- and dollar-quote-aware lexer and a closed statement set
+(`CREATE TABLE`, `ALTER TABLE` add/drop column, add foreign key or primary key, `DROP TABLE`, `CREATE UNIQUE INDEX` and `DROP INDEX`; a partial index is understood but adds no unique key, and `ADD COLUMN IF NOT EXISTS` keeps an existing column). Unquoted names fold to lower case and quoted names keep their case; a reference that matches exactly one name ignoring case is linked to it. It never executes, connects or
+imports anything. Anything else (`RENAME`, `ALTER COLUMN … TYPE`, functions, triggers) is counted as "not understood"; a table
+such a statement names is `approximate` (its label ends in " (approx.)"). Status fails closed: `observed` only when every file
+was read in full and every statement touching a table was understood; an un-understood statement, an unterminated quote,
+comment or dollar quote, a refused file or a budget hit makes the source `stale` ("at least"), `unavailable` when no table
+could be built, and `unconfigured` ("No schema source found") only when detection finished and found nothing. An evidence
+path that changes when scrubbed is refused with a fixed reason code, never rewritten.
+
+**Workspaces.** `pnpm-workspace.yaml` (only the top-level `packages:` block) and `package.json` `workspaces` (array or
+`{packages}`; block or flow list, and `packages:` may follow other keys): literal paths and one trailing `/*`. Patterns with `!` or mid-path globs are counted as unresolved. At most 20
+packages become one Stack row each.
 
 Discovery has its own budgets, separate from the display caps: entries per directory, directories visited, entities,
 fields and relationships. A budget hit makes the section `stale` with an "at least" note. Known residual: `readdirSync`
@@ -97,8 +110,9 @@ Every label goes through the same redaction and inert-markup step as other text.
 ### What was dropped from the old report
 
 The old snapshot (`state-snapshot`, `state-render`, fragment checking) is replaced, not ported. Gone, by decision:
-the `project`, `database`, `doneWork`, `runs`, `metrics` and `tokens` sections; the folder-structure diagram and
-project-type guess; theme extraction from the project's CSS; the AI-analysis fragments and their
+the `project`, `doneWork`, `runs`, `metrics` and `tokens` sections; the bespoke folder-structure diagram and
+project-type guess (the database and folder-structure sections are back at project depth, rendered by Archify from collector
+facts); theme extraction from the project's CSS; the AI-analysis fragments and their
 evidence/number-binding checks. Token and time figures come from the token report, not `/state`. What stays:
 status labels, evidence paths, bounded reads, secret redaction and symlink refusal.
 
@@ -111,8 +125,8 @@ resolves outside the project. Reads are size-bounded (1 MiB, 64 MiB for the grap
 capped at 100 rows and 20 knowledge types (the rest count under `other`); a capped or truncated fact is `stale` with a note,
 its true count is still reported, and the page says "at least". An unavailable fact never prints a number.
 
-Never reads `.env*`, `credentials.json`, `settings.local.json` or session transcripts, never opens a database or
-network connection, never runs a script the analyzed project supplies, and starts no child process. Every
+Never reads `.env*`, `credentials.json`, `settings.local.json` or session transcripts, never opens or queries a database (it reads
+SQL files as text) or a network connection, never runs a script the analyzed project supplies, and starts no child process. Every
 captured string is cut to 200 characters, normalised, scrubbed of credential-shaped text (replaced with
 `(redacted)`) and stripped of characters Archify would parse (`< > ` * [ ] | { } \ ~ _ # !` become inert
 look-alikes), so a pitch named `<script>` or `[x](javascript:…)` arrives as plain text.

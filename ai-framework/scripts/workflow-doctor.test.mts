@@ -1097,3 +1097,11 @@ test("orca contract: the check runs only in the portable bundle repo", async (t)
   assert.deepEqual(results, []);
   assert.deepEqual(calls, []);
 });
+
+test("the doctor's syntax-check list names every facts-*.mts script and its test", () => {
+  const source = fs.readFileSync(urlPath(new URL("./workflow-doctor.mts", import.meta.url)));
+  const directory = urlPath(new URL(".", import.meta.url));
+  const facts = fs.readdirSync(directory).filter((file: string) => /^facts-[a-z-]+(\.test)?\.mts$/.test(file));
+  assert.ok(facts.length >= 6, "the facts scripts were found");
+  for (const file of facts) assert.ok(source.includes(`"ai-framework/scripts/${file}"`), `${file} is in the doctor's list`);
+});

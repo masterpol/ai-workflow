@@ -356,7 +356,7 @@ test("--depth auto is project with a bundle-sync marker and simple without one; 
   } finally { rmSync(installed, { recursive: true, force: true }); rmSync(plain, { recursive: true, force: true }); }
 });
 
-test("project depth adds exactly one erd and one tree diagram, a stack block, and stays within four diagrams", () => {
+test("project depth adds exactly one erd and one tree diagram, a stack block, and stays within two diagrams", () => {
   const root = project(projectFiles({ users: { columns: ["id", "name"] }, posts: { columns: ["id", "author"], fks: [{ to: "users", from: ["author"] }] } }, { "src/a.ts": "x", "docs/b.md": "x" }));
   try {
     const simple = api.explainer(api.gather(root), "p", "t");
@@ -364,7 +364,7 @@ test("project depth adds exactly one erd and one tree diagram, a stack block, an
     assert.ok(diagrams(simple).length <= 4);
     assert.equal(diagrams(simple).length, 0);
     assert.deepEqual(diagrams(draft).map((block) => block.diagramType).sort(), ["erd", "tree"]);
-    assert.ok(diagrams(draft).length <= 4);
+    assert.ok(diagrams(draft).length <= 2);
     const erd = diagrams(draft).find((block) => block.diagramType === "erd")!.spec!;
     assert.deepEqual(erd.entities!.map((entity) => entity.id), ["e1", "e2"]);
     assert.deepEqual(erd.relationships, [{ id: "r1", from: "e2", to: "e1", fromCardinality: "many", toCardinality: "one" }]);
@@ -373,7 +373,7 @@ test("project depth adds exactly one erd and one tree diagram, a stack block, an
     assert.ok(stack.entries.some((entry) => entry.key === "Frameworks" && /react/.test(entry.value)));
     const unconfigured = api.explainer(api.gather(project(MARKER), "project"), "p", "t");
     assert.equal(diagrams(unconfigured).filter((block) => block.diagramType === "erd").length, 0, "no schema means a note, not an empty diagram");
-    assert.match(JSON.stringify(unconfigured), /no Drizzle snapshot/);
+    assert.match(JSON.stringify(unconfigured), /No schema source found/);
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
@@ -710,3 +710,121 @@ test("same-named tables in two schemas: a foreign key resolves by its schema, an
     assert.deepEqual(erd.relationships ?? [], [], "two tables could be meant, so no relationship is drawn");
   } finally { rmSync(ambiguous, { recursive: true, force: true }); }
 });
+
+// S3: render the public project-source facts, without changing the simple-depth draft.
+const sqlFiles = (first: string, second = "CREATE TABLE extra (id integer PRIMARY KEY);"): Record<string, string> => ({
+  ...MARKER, "migrations/0000_first.sql": first, "migrations/0001_second.sql": second,
+});
+const databaseNote = (facts: Facts): string => blocksOf(api.explainer(facts, "p", "t")).find((block) => block.id === "database-note")!.text!;
+
+test("database wording names observed SQL and snapshot sources, alternatives, and found TypeScript schemas", () => {
+  const root = project(sqlFiles("CREATE TABLE users (id integer PRIMARY KEY);", "CREATE TABLE posts (id integer PRIMARY KEY);"));
+  const snapshotRoot = project(projectFiles({ users: { columns: ["id"] } }, { "drizzle/meta/_journal.json": JSON.stringify({ entries: [{}] }) }));
+  try {
+    const facts = api.gather(root, "project");
+    assert.equal(facts.project!.database.status, "observed");
+    const value = facts.project!.database.value as Record<string, unknown>;
+    value.alternatives = [{ kind: "drizzle-snapshot", path: "apps/api/drizzle/meta", tables: 1 }];
+    value.found = [{ kind: "typescript-schema", path: "packages/data/src/schema.ts" }];
+    const note = databaseNote(facts);
+    assert.match(note, /from 2 SQL migrations in migrations/);
+    assert.match(note, /Alternative: drizzle-snapshot in apps\/api\/drizzle\/meta, 1 tables/);
+    assert.match(note, /packages\/data\/src\/schema.ts: TypeScript schema, not read/);
+    assert.match(note, /\[observed\]/);
+    assert.match(databaseNote(api.gather(snapshotRoot, "project")), /from the newest Drizzle snapshot in drizzle\/meta/);
+    assert.doesNotMatch(note, /No schema source found/);
+  } finally { rmSync(root, { recursive: true, force: true }); rmSync(snapshotRoot, { recursive: true, force: true }); }
+});
+
+test("database wording explains stale approximation, unparsed statements and budgets, and distinguishes absent from unreadable", () => {
+  const root = project(sqlFiles('CREATE TABLE "long_table_name_abcdefghijklmnopqrstuvwxyz" (id integer PRIMARY KEY);', 'ALTER TABLE "long_table_name_abcdefghijklmnopqrstuvwxyz" RENAME COLUMN id TO renamed;'));
+  const empty = project();
+  const unreadable = project({ "drizzle.config.ts": "", "schema.ts": "export const schema = {};" });
+  try {
+    const facts = api.gather(root, "project");
+    assert.equal(facts.project!.database.status, "stale");
+    facts.project!.database.note += "; discovery budget reached";
+    const note = databaseNote(facts);
+    assert.match(note, /1 approximate table\(s\)/);
+    assert.match(note, /1 statement\(s\) not understood/);
+    assert.match(note, /budget reached/);
+    assert.match(note, /\[stale:/);
+    const entity = diagrams(api.explainer(facts, "p", "t")).find((block) => block.diagramType === "erd")!.spec!.entities![0];
+    assert.ok(entity.label.endsWith(" (approx.)"));
+    assert.equal(entity.label.length, 28);
+    assert.match(databaseNote(api.gather(empty, "project")), /No schema source found \[unconfigured\]/);
+    const unavailable = api.gather(unreadable, "project");
+    assert.equal(unavailable.project!.database.status, "unavailable");
+    assert.match(databaseNote(unavailable), /unavailable/);
+    assert.match(databaseNote(unavailable), /schema.ts: TypeScript schema, not read/);
+    assert.doesNotMatch(databaseNote(unavailable), /No schema source found/);
+    facts.project!.database = { value: null, status: "stale", evidence: [], note: "discovery budget reached" };
+    assert.match(databaseNote(facts), /Schema source could not be read.*budget reached/);
+    assert.doesNotMatch(databaseNote(facts), /No schema source found/);
+  } finally { for (const dir of [root, empty, unreadable]) rmSync(dir, { recursive: true, force: true }); }
+});
+
+test("workspace packages become cleaned Stack rows with frameworks and one unresolved-pattern row, capped at 20", () => {
+  const root = project({ "package.json": JSON.stringify({ workspaces: ["packages/*", "!excluded"] }),
+    "packages/web/package.json": JSON.stringify({ name: "@team/web", dependencies: { react: "1" } }),
+    "packages/api/package.json": JSON.stringify({ name: "api", dependencies: { hono: "1" } }),
+  });
+  try {
+    const facts = api.gather(root, "project");
+    assert.equal(facts.project!.workspaces.status, "observed");
+    const rows = (blocksOf(api.explainer(facts, "p", "t")).find((block) => block.id === "stack-facts") as unknown as { entries: { key: string; value: string }[] }).entries;
+    assert.ok(rows.some((row) => row.key === "Workspace packages/web" && row.value === "(at)team/web, react"));
+    assert.ok(rows.some((row) => row.key === "Workspace packages/api" && row.value.startsWith("api")));
+    assert.deepEqual(rows.filter((row) => row.key === "Workspace patterns not resolved"), [{ key: "Workspace patterns not resolved", value: "1" }]);
+    facts.project!.workspaces.value = { packages: Array.from({ length: 24 }, (_, index) => ({ path: `packages/p${index}@x`, name: "<b>@pkg=1&$", frameworks: ["react"] })), unresolved: 2 };
+    facts.project!.stack.value = null; // Workspace rows also survive an unreadable root manifest.
+    const capped = (blocksOf(api.explainer(facts, "p", "t")).find((block) => block.id === "stack-facts") as unknown as { entries: { key: string; value: string }[] }).entries;
+    assert.equal(capped.filter((row) => row.key.startsWith("Workspace packages/")).length, 20);
+    assert.equal(capped.length, 21);
+    assert.doesNotMatch(JSON.stringify(capped), /[<>@=&$]/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("a capped or refused workspace list says so in the Stack block (audit CR5)", () => {
+  const many: Record<string, string> = { "pnpm-workspace.yaml": "packages:\n  - pkgs/*\n" };
+  for (let i = 0; i < 22; i++) many[`pkgs/p${String(i).padStart(2, "0")}/package.json`] = JSON.stringify({ name: `p${i}` });
+  const root = project(many);
+  try {
+    const rows = (blocksOf(api.explainer(api.gather(root, "project"), "p", "t")).find((block) => block.id === "stack-facts") as unknown as { entries: { key: string; value: string }[] }).entries;
+    const row = rows.find((entry) => entry.key === "Workspace list");
+    assert.ok(row, "the cap is stated");
+    assert.match(row!.value, /more than 20 workspace packages/);
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+const SQL_ERD_CASES = [
+  { name: "an approximate SQL table", first: 'CREATE TABLE "approximate_table_with_a_long_name" (id integer PRIMARY KEY);', second: 'ALTER TABLE "approximate_table_with_a_long_name" RENAME COLUMN id TO renamed;', labels: [" (approx.)"] },
+  { name: "hostile SQL identifiers", first: 'CREATE TABLE "__proto__" (id integer PRIMARY KEY); CREATE TABLE "a""b" (id integer); CREATE TABLE "a.b" (id integer); CREATE TABLE "a_table_name_that_is_longer_than_twenty_eight_characters" (id integer);', second: 'CREATE TABLE refs (id integer PRIMARY KEY, parent integer REFERENCES "__proto__"(id));', labels: ["--proto--", 'a"b', "a.b"] },
+  { name: "the same SQL table name in two schemas", first: 'CREATE TABLE auth.users (id integer PRIMARY KEY); CREATE TABLE billing.users (id integer PRIMARY KEY);', second: 'CREATE TABLE billing.posts (id integer PRIMARY KEY, author integer REFERENCES auth.users(id));', labels: ["auth.users", "billing.users"] },
+];
+for (const example of SQL_ERD_CASES) {
+  test(`SQL ERD renders ${example.name} and preserves guards`, () => {
+    const root = project(sqlFiles(example.first, example.second));
+    try {
+      const draft = api.explainer(api.gather(root, "project"), "p", "t");
+      assert.ok(diagrams(draft).length <= 2);
+      const erd = diagrams(draft).find((block) => block.diagramType === "erd")!.spec!;
+      for (const expected of example.labels) assert.ok(erd.entities!.some((entity) => entity.label.includes(expected)), expected);
+      for (const entity of erd.entities!) assert.ok(entity.label.length <= 28);
+      if (example.name.includes("two schemas")) {
+        const auth = erd.entities!.find((entity) => entity.label === "auth.users")!;
+        assert.equal(erd.relationships!.length, 1);
+        assert.equal(erd.relationships![0].to, auth.id);
+      }
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
+  test(`SQL ERD with ${example.name} passes real archify validate`, { skip: !existsSync(archify) }, () => {
+    const root = project(sqlFiles(example.first, example.second));
+    try {
+      api.writeReport(root, "state.explainer.json", `${JSON.stringify(api.explainer(api.gather(root, "project"), "p", "2026-11-23T00:00:00.000Z"))}\n`);
+      const result = validate(join(root, ".project/reports/state.explainer.json"));
+      assert.equal(result.status, 0, String(result.stdout).slice(0, 1500));
+      assert.equal(JSON.parse(String(result.stdout)).ok, true);
+    } finally { rmSync(root, { recursive: true, force: true }); }
+  });
+}

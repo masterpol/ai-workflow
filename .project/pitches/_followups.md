@@ -626,5 +626,13 @@ Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles t
 - **Tell `workflow-v3-rollout` about the report reset** (med, audit S8): its `bundle-sync --apply` on LAH, RN and climbing now removes the last `/state` delivery when files change (receipt-verified). Note it in that pitch before its apply, and re-run `/state` after.
 - **Prisma and other schema sources for project depth** (low-med): only `drizzle/meta/NNNN_snapshot.json` is read; Prisma, SQL and TypeScript schemas report `unconfigured`. A Prisma reader needs a linear, line-anchored scanner (issue `backtracking-regex-over-untrusted-text-is-quadratic`).
 - **`opendirSync` in `RuntimeDeps`** (low): `facts-project` structure discovery uses `readdirSync`, which loads one whole directory before its entry budget applies.
-- **Regression assertion for the doctor's syntax-check list** (low, audit acknowledged): removing the `facts-project` entries from `workflow-doctor.mts` leaves the doctor tests green.
+- ~~Regression assertion for the doctor's syntax-check list~~ done in state-project-sources (a test lists every `facts-*.mts` file).
 - **Real LAH checkout after its next sync** (low-med): the live check used a copy of LAH; run `/state` in LAH itself after it syncs to 2.53.0 (Archify is installed there).
+
+## From state-project-sources (2026-11-24)
+- **Route map diagram** (med): a tree from the generated TanStack `routeTree.gen.ts` (`FileRoutesByFullPath`), cut at critique (over the LOC cap; climbing-lab has two route trees and needs a rule for which wins). A linear text scan bounded to that block, not a global regex.
+- **Service and API diagrams** (low): OpenAPI, docker-compose and supabase service diagrams. None of the five checked projects had one.
+- **ORM schema sources** (low-med): Prisma, TypeScript (`schema.ts` beside a drizzle config, e.g. RN) and Python models are only listed as "not read".
+- **`workflow-v3-rollout` release pin** (med, X1): it must name which release it syncs to LAH, RN and climbing, and regenerate `/state` after the final sync so the new sources appear.
+- **Rename and retype in the SQL reader** (low): `RENAME` and `ALTER COLUMN … TYPE` mark a table approximate; replaying them would make LAH exact.
+- **S2 cost** (note): the opencode worker took about 2 hours for S2 and wrote 422 source lines against an estimate of 250; consider the vendor and a smaller brief for parser-adjacent scopes.

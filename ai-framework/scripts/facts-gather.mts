@@ -7,7 +7,7 @@ import { runDirect } from "./runtime/cli.mts";
  */
 import { createNodeDeps } from "./runtime/node.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
-import { createProjectFacts } from "./facts-project.mts";
+import { SECRET_PATTERNS, createProjectFacts } from "./facts-project.mts";
 
 export const STATUSES = ["observed", "proposed", "stale", "unavailable", "unconfigured"] as const;
 export type Status = (typeof STATUSES)[number];
@@ -19,7 +19,7 @@ export interface Facts {
   knowledge: Fact;
   skills: Fact;
   /** Present only at project depth. */
-  project?: { database: Fact; structure: Fact; stack: Fact };
+  project?: { database: Fact; structure: Fact; stack: Fact; workspaces: Fact };
 }
 export type Depth = "simple" | "project";
 export class FactsError extends Error {}
@@ -39,32 +39,6 @@ const ERD_ATTRIBUTES = 15;
 const ERD_ENDS = 5; // relationship ends drawn per entity: Archify refuses a side with more ports than it has room for
 const SCRIPT_NAMES = 20;
 
-// Defense in depth, same families as the old snapshot: bound first, then redact credential shapes.
-const SECRET_PATTERNS = [
-  /-----BEGIN [A-Z ]*PRIVATE KEY[A-Z ]*-----[\s\S]*?(?:-----END [A-Z ]*PRIVATE KEY[A-Z ]*-----|$)/g,
-  /AKIA[0-9A-Z]{16}/g,
-  /\bnpm_[A-Za-z0-9]{20,}/g,
-  /\bglpat-[A-Za-z0-9_-]{16,}/g,
-  /\bdop_v1_[a-f0-9]{20,}/g,
-  /\bwhsec_[A-Za-z0-9]{16,}/g,
-  /\bSG\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}/g,
-  /hooks\.slack\.com\/services\/\S+/g,
-  /\bssh-(?:rsa|ed25519|dss)\s+[A-Za-z0-9+\/=]{20,}/g,
-  /\bAuthorization\s{0,3}:\s{0,3}(?:(?:Bearer|Basic|Token|Digest|ApiKey|OAuth|AWS4-HMAC-SHA256)\s+\S+|[A-Za-z0-9._~+\/=-]{20,})/gi,
-  /--(?:password|passwd|token|secret|api-?key)[ =]\S+/gi,
-  /\b(?:sk|pk|rk)[-_](?:live_|test_)?[A-Za-z0-9_-]{16,}/g,
-  /\bgh[pousr]_[A-Za-z0-9]{20,}/g,
-  /\bgithub_pat_[A-Za-z0-9_]{20,}/g,
-  /\bxox[baprs]-[A-Za-z0-9-]{10,}/g,
-  /\bAIza[0-9A-Za-z_-]{30,}/g,
-  /\beyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]*/g,
-  /\b(?:Bearer|Basic)\s+[A-Za-z0-9._~+\/=-]{8,}/g,
-  /\b[a-z][a-z0-9+.-]{0,31}:\/\/[^\/\s:@]*:[^\/\s]+@/gi,
-  // No leading \b: DB_PASSWORD and AWS_SECRET_ACCESS_KEY have the keyword after an underscore.
-  /(?:password|passwd|secret|token|api[_-]?key|access[_-]?key|private[_-]?key|credential)[A-Za-z0-9_-]{0,40}["']?\s{0,3}[:=]\s{0,3}["']?\S+/gi,
-  // Short words only at a word start, so "compass: north" is not touched.
-  /(?<![A-Za-z])(?:pwd|pass|passphrase|auth|signature|sig)["']?\s{0,3}[:=]\s{0,3}["']?\S+/gi,
-];
 
 /** Characters Archify's inline language would parse (HTML, emphasis, links, code, pipes, braces) become inert look-alikes. */
 const INERT: Record<string, string> = { "<": "‹", ">": "›", "`": "'", "*": "∗", "[": "(", "]": ")", "|": "¦", "{": "(", "}": ")", "\\": "/", "~": "-", "_": "-", "#": "№", "!": "." };
@@ -214,7 +188,7 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
     };
     if (depth === "project") {
       const reader = createProjectFacts(deps, { read, clean });
-      facts.project = { database: reader.database(root), structure: reader.structure(root), stack: reader.stack(root) };
+      facts.project = { database: reader.database(root), structure: reader.structure(root), stack: reader.stack(root), workspaces: reader.workspaces(root) };
     }
     return facts;
   }
@@ -227,11 +201,29 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
   /** ERD and tree blocks plus a stack table. Names are raw in the facts: relations resolve on them first, then ids are generated. */
   function projectPanels(project: NonNullable<Facts["project"]>, projectName: string): Record<string, unknown>[] {
     const panels: Record<string, unknown>[] = [];
-    const { database, structure, stack } = project;
+    const { database, structure, stack, workspaces } = project;
 
     type Entity = { name: string; schema?: string; columns: { name: string; type: string; pk: boolean }[]; unique: string[][] };
     type Relation = { from: string; fromSchema?: string; fromColumns: string[]; to: string; toSchema?: string; toColumns: string[] };
-    const databaseValue = database.value as { entities: Entity[]; relationships: Relation[]; total: { entities: number; relationships: number } } | null;
+    const databaseValue = database.value as {
+      entities: Entity[]; relationships: Relation[]; total: { entities: number; relationships: number };
+      source?: { kind: string; path: string; files: number; ignored?: string } | null;
+      approximate?: string[]; notUnderstood?: number;
+      alternatives?: { kind: string; path: string; tables: number }[]; found?: { kind: string; path: string }[];
+    } | null;
+    const approximate = new Set(databaseValue?.approximate ?? []);
+    const source = databaseValue?.source;
+    const details = [
+      ...(source ? [source.kind === "sql-migrations" ? `from ${source.files} SQL migrations in ${label(source.path)}` : `from the newest Drizzle snapshot in ${label(source.path)}`] : []),
+      ...(databaseValue?.alternatives ?? []).map((item) => `Alternative: ${label(item.kind)} in ${label(item.path)}, ${item.tables} tables`),
+      ...(databaseValue?.found ?? []).map((item) => `${label(item.path)}: ${item.kind === "typescript-schema" ? "TypeScript schema" : label(item.kind)}, not read`),
+      ...(approximate.size ? [`${approximate.size} approximate table(s)`] : []),
+      ...(databaseValue?.notUnderstood ? [`${databaseValue.notUnderstood} statement(s) not understood`] : []),
+      ...(source?.ignored ? [`Ignored SQL sources: ${label(source.ignored)}`] : []),
+    ];
+    const databaseText = (text: string): string => database.status === "unavailable"
+      ? [show(database, text), ...details].join("; ")
+      : show(database.status === "unconfigured" ? { ...database, note: undefined } : database, [text, ...details].join("; "));
     if (databaseValue && databaseValue.entities.length) {
       const entities = databaseValue.entities;
       // Tables from different schemas can share a name (`auth.users`, `public.users`). A name resolves to an entity only when exactly one
@@ -293,7 +285,9 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
           const type = fit(column.type, 20);
           return { name: emittedName, ...(column.type ? { type } : {}), ...(keys.length ? { key: keys.length === 1 ? keys[0] : keys } : {}), ...(reference ? { references: reference } : {}) };
         });
-        return { id: ids.get(position)!, label: fit(entity.schema && (byName.get(entity.name)?.length ?? 0) > 1 ? `${entity.schema}.${entity.name}` : entity.name, 28), row: Math.floor(order / 6), col: order % 6, ...(attributes.length ? { attributes } : {}) };
+        const name = entity.schema && (byName.get(entity.name)?.length ?? 0) > 1 ? `${entity.schema}.${entity.name}` : entity.name;
+        const suffix = approximate.has(entity.name) ? " (approx.)" : "";
+        return { id: ids.get(position)!, label: `${fit(name, 28 - suffix.length)}${suffix}`, row: Math.floor(order / 6), col: order % 6, ...(attributes.length ? { attributes } : {}) };
       });
       const ends = new Map<number, number>();
       let undrawn = 0;
@@ -311,9 +305,9 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
       const capNote = `${undrawn ? `; ${undrawn} more relationship(s) are not drawn (at most ${ERD_ENDS} per table)` : ""}${selfReferences ? `; ${selfReferences} self-reference(s) are not drawn` : ""}${unlinked ? `; ${unlinked} foreign-key column(s) point at a table or column not shown` : ""}`;
       panels.push({ id: "database", title: "Database", blocks: [
         { id: "database-erd", type: "diagram", diagramType: "erd", spec: { schema_version: 1, diagram_type: "erd", meta: { title: `${label(projectName)} schema` }, layout: { mode: "grid", gapX: 96, gapY: 64 }, entities: erdEntities, relationships } },
-        { id: "database-note", type: "callout", level: "note", text: show(database, `${shown}${capNote}`) },
+        { id: "database-note", type: "callout", level: "note", text: databaseText(`${shown}${capNote}`) },
       ] });
-    } else panels.push({ id: "database", title: "Database", blocks: [{ id: "database-note", type: "callout", level: "note", text: show(database, "No database schema found") }] });
+    } else panels.push({ id: "database", title: "Database", blocks: [{ id: "database-note", type: "callout", level: "note", text: databaseText(database.status === "unconfigured" ? "No schema source found" : "Schema source could not be read") }] });
 
     type Node = { path: string; label: string; parent: string | null; files: number };
     const structureValue = structure.value as { nodes: Node[]; total: { dirs: number; files: number } } | null;
@@ -332,6 +326,13 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
     } else panels.push({ id: "structure", title: "Structure", blocks: [{ id: "structure-note", type: "callout", level: "note", text: show(structure, "No directory structure found") }] });
 
     const stackValue = stack.value as { manager: string | null; language: string; dependencies: number; devDependencies: number; frameworks: string[]; scripts: string[] } | null;
+    const workspaceValue = workspaces.value as { packages: { path: string; name: string; frameworks: string[] }[]; unresolved: number } | null;
+    const workspaceRows = (workspaceValue?.packages ?? []).slice(0, 20).map((item) => ({
+      key: `Workspace ${label(item.path)}`, value: label([item.name, ...item.frameworks].join(", ")),
+    }));
+    if (workspaceValue?.unresolved) workspaceRows.push({ key: "Workspace patterns not resolved", value: String(workspaceValue.unresolved) });
+    // A capped or refused list says so; a stale status is never hidden behind the rows that were read.
+    if (workspaces.status === "stale" || workspaces.status === "unavailable") workspaceRows.push({ key: "Workspace list", value: label(workspaces.note ?? "incomplete") });
     panels.push({ id: "stack", title: "Stack", blocks: stackValue ? [{ id: "stack-facts", type: "facts", entries: [
       { key: "Language", value: show(stack, label(stackValue.language)) },
       { key: "Package manager", value: label(stackValue.manager ?? "unknown") },
@@ -339,7 +340,8 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
       { key: "Dev dependencies", value: String(stackValue.devDependencies) },
       { key: "Frameworks", value: stackValue.frameworks.length ? stackValue.frameworks.map(label).join(", ") : "none listed" },
       { key: "Scripts", value: stackValue.scripts.length ? `${stackValue.scripts.slice(0, SCRIPT_NAMES).map(label).join(", ")}${stackValue.scripts.length > SCRIPT_NAMES ? `, and ${stackValue.scripts.length - SCRIPT_NAMES} more` : ""}` : "none" },
-    ] }] : [{ id: "stack-note", type: "callout", level: "note", text: show(stack, "No project stack found") }] });
+      ...workspaceRows,
+    ] }] : [...(workspaceRows.length ? [{ id: "stack-facts", type: "facts", entries: workspaceRows }] : []), { id: "stack-note", type: "callout", level: "note", text: show(stack, "No project stack found") }] });
     return panels;
   }
 
@@ -349,7 +351,7 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
     const activeValue = active.value as { count: number; items: Record<string, string>[] } | null;
     const knowledgeValue = knowledgeFact.value as { entries: number; byType: Record<string, number> } | null;
     const skillsValue = skillsFact.value as { count: number; items: { name: string; enabled: boolean; revision: string }[] } | null;
-    const evidence = [...new Set([...facts.workflow.installedVersion.evidence, ...active.evidence, ...knowledgeFact.evidence, ...skillsFact.evidence, ...(facts.project ? [facts.project.database, facts.project.structure, facts.project.stack].flatMap((item) => item.evidence).filter((file) => file !== ".") : [])])];
+    const evidence = [...new Set([...facts.workflow.installedVersion.evidence, ...active.evidence, ...knowledgeFact.evidence, ...skillsFact.evidence, ...(facts.project ? [facts.project.database, facts.project.structure, facts.project.stack, facts.project.workspaces].flatMap((item) => item.evidence).filter((file) => file !== ".") : [])])];
     const sources = evidence.map((file, index) => ({ id: `src-${index + 1}`, title: file, path: file }));
     const panels: Record<string, unknown>[] = [
       { id: "workflow", title: "Workflow", blocks: [{ id: "workflow-facts", type: "facts", entries: [

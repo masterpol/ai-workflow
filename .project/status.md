@@ -9,6 +9,7 @@
 | package-less-ship-verification | draft | shape | small-batch | 2026-10-22 |
 | review-bench-hardening | draft | shape | small-batch | 2026-10-23 |
 | orca-balanced-role-pools | audit done (2 cycles, 0 must-fix open) | audit → ship | big-batch | 2026-11-24 |
+| state-project-sources | audit done (3 cycles, 0 must-fix open; cycle-3 fixes unreviewed) | audit → ship | big-batch | 2026-11-24 |
 
 ## Parked pitches
 _None. `restore-vendor-adapters` was removed 2026-10-22 (premise invalidated 2026-10-08; its `_parked/` directory no longer exists)._
