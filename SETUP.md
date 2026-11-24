@@ -189,7 +189,7 @@ Steps:
 5. **Initialize the knowledge graph:** install [`uv`](https://docs.astral.sh/uv/) if missing, then run
    `node ai-framework/scripts/graphify.mts setup` from the project root. It runs Graphify
    (`uv tool run --from graphifyy`, pinned), creates `.graphifyignore` and the `.gitignore` block, installs
-   the rebuild-on-commit git hooks, migrates a legacy `.project/knowledge/graph.json` if present, scans `.project/knowledge/{decisions,patterns,entities,issues}/`, and writes
+   the pre-commit graph rebuild (the commit includes the graph), migrates a legacy `.project/knowledge/graph.json` if present, scans `.project/knowledge/{decisions,patterns,entities,issues}/`, and writes
    `graphify-out/graph.json` (machine-readable — nodes, edges, tag index) and
    `.project/knowledge/index.md` (human-readable catalog). At this point the scaffold is empty, so
    this just produces the initial empty graph — the point is that it exists and every later phase

@@ -602,3 +602,68 @@ test("reserve overlap: settled and failed attempts never block, and a legacy rec
   assert.equal(ledger.read(legacy.attemptKey).status, "ok");
   assert.equal(ledger.reserve(rec("fresh", { taskKey: taskKeyOf("t4"), authorizedPaths: ["src/a.mts"] }), 9).outcome, "claimed");
 });
+
+// ---- Run id and optimistic admission (orca-balanced-role-pools P2) ----
+
+test("runId is validated at every input boundary and stored set-once at claim", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  const badRunIds = ["run_", "run_abc12", `run_${"a".repeat(33)}`, "run_ABC123", "run_abc/def", "run_abc-123", 123, null, true];
+  for (const runId of badRunIds) {
+    assert.equal(validateRecord(rec("x", { runId } as never)), false, JSON.stringify(runId));
+    assert.equal(ledger.claim(rec("x", { runId } as never)).outcome, "invalid", JSON.stringify(runId));
+  }
+  const good = rec("with-run", { runId: "run_abc123" });
+  assert.deepEqual(ledger.claim(good), { outcome: "claimed", record: good });
+  assert.equal(ledger.claim(good).outcome, "replayed");
+  assert.equal(ledger.claim(rec("with-run", { runId: "run_def456" })).outcome, "conflict", "a different runId for the same attempt conflicts");
+  assert.equal(ledger.update(good.attemptKey, { runId: "run_def456" } as never).status, "invalid", "patches can never mention runId");
+});
+
+test("records without a runId stay valid and replay with the normalized record", (t) => {
+  const root = fixture(t);
+  mkLedgerDir(root);
+  const legacy: LedgerRecord = { attemptKey: attemptKeyOf("legacy"), taskKey: taskKeyOf("t1"), vendor: "codex", state: "claimed", createdAt: 1000 };
+  fs.writeFileSync(slot(root, "legacy"), JSON.stringify(legacy));
+  const ledger = createLedger(root, deps);
+  assert.deepEqual(ledger.read(legacy.attemptKey), { status: "ok", record: legacy });
+  assert.equal(ledger.claim(rec("legacy")).outcome, "replayed");
+});
+
+test("reserve runs admit inside the mutation lock on the same list and writes nothing on load-changed", (t) => {
+  const root = fixture(t);
+  const ledger = createLedger(root, deps);
+  const first = rec("first", { authorizedPaths: ["first.mjs"] });
+  assert.equal(ledger.reserve(first, 2).outcome, "claimed");
+  let seen: readonly LedgerRecord[] = [];
+  const admit = (records: readonly LedgerRecord[]) => { seen = records; return false; };
+  const second = rec("second", { taskKey: taskKeyOf("t2"), authorizedPaths: ["second.mjs"] });
+  assert.deepEqual(ledger.reserve(second, 2, admit), { outcome: "load-changed" });
+  assert.equal(ledger.read(second.attemptKey).status, "missing", "load-changed writes no record");
+  assert.equal(seen.length, 1, "admit saw the same list as the overlap/capacity checks");
+  assert.equal(seen[0].attemptKey, first.attemptKey);
+});
+
+test("mutant: dropping the admit callback from reserve claims instead of returning load-changed", async (t) => {
+  const source = fs.readFileSync(path.join(import.meta.dirname, "orca-ledger.mts"), "utf8");
+  const guard = 'if (admit && !admit(records)) return { outcome: "load-changed" };';
+  assert.ok(source.includes(guard), "the guard under test is present in the source");
+  const absoluteImports = source.replace(/from "(\.\/[^\"]+)"/g, (_match, relative: string) => `from "${new URL(relative, import.meta.url).href}"`);
+  const mutated = absoluteImports.replace(guard, "");
+  assert.notEqual(mutated, absoluteImports, "the mutant actually removes the guard");
+  const mutant = await importMutant<typeof import("./orca-ledger.mts")>(mutated);
+  const root = fixture(t);
+  const ledger = mutant.createLedger(root, deps);
+  assert.equal(ledger.reserve(rec("a", { authorizedPaths: ["a.mjs"] }), 2).outcome, "claimed");
+  // The intact reserve returns "load-changed" here (see the test above); the mutant claims instead, which is what that test would catch.
+  const outcome = ledger.reserve(rec("b", { taskKey: taskKeyOf("t2"), authorizedPaths: ["b.mjs"] }), 2, () => false);
+  assert.equal(outcome.outcome, "claimed", "without the guard, admit is ignored and the second attempt is claimed");
+});
+
+/** Imports mutated module source on Bun and Node alike: written as a temporary .mts (Node strips types natively). */
+async function importMutant<T>(source: string): Promise<T> {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "orca-mutant-"));
+  const file = path.join(dir, `mutant-${Math.random().toString(36).slice(2)}.mts`);
+  fs.writeFileSync(file, source);
+  try { return await import(new URL(`file://${file}`).href) as T; } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}

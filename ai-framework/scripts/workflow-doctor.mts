@@ -16,7 +16,7 @@ import * as skillDefaults from "./skill-defaults.mts";
 import * as orcaPolicy from "./orca-policy.mts";
 import { SNAPSHOT_PATH, checkUsedAgainstSnapshot, readSnapshotFile } from "./orca-contract.mts";
 import * as docsLinks from "./docs-links.mts";
-import { HOOK_EVENTS, HOOK_START, hasRawHook, hooksDir } from "./graphify.mts";
+import { HOOK_EVENTS, HOOK_START, LEGACY_HOOK_EVENTS, hasRawHook, hooksDir } from "./graphify.mts";
 import { CONSOLIDATION_COMMAND, legacyInventory } from "./consolidation-migrate.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
@@ -743,15 +743,19 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     const dir = hooksDir(root, deps);
     if (!dir) return;
     const raw: string[] = [];
+    const older: string[] = [];
     let ours = 0;
-    for (const event of HOOK_EVENTS) {
+    for (const event of [...HOOK_EVENTS, ...LEGACY_HOOK_EVENTS]) {
       let text: string;
       try { text = deps.fs.readFileSync(deps.path.join(dir, event)); } catch { continue; }
+      // An after-commit rebuild (the workflow's older one or graphify's own) leaves the rebuilt graph uncommitted.
+      if ((LEGACY_HOOK_EVENTS as readonly string[]).includes(event)) { if (text.includes(HOOK_START) || hasRawHook(text)) older.push(event); continue; }
       if (hasRawHook(text)) raw.push(event);
       else if (text.includes(HOOK_START)) ours++;
     }
     if (raw.length) record("warn", "Graphify hooks", `${raw.join(" and ")} ${raw.length > 1 ? "hooks run" : "hook runs"} graphify's own rebuild, which drops the knowledge overlay and leaves graph.json out of date after each commit; run node ai-framework/scripts/graphify.mts setup to replace them`);
-    else if (ours) record("pass", "Graphify hooks", `post-commit/post-checkout rebuild through graphify.mts (knowledge overlay kept)`);
+    else if (older.length) record("warn", "Graphify hooks", `${older.join(" and ")} rebuilds the graph after the commit, which leaves graphify-out/ uncommitted; run node ai-framework/scripts/graphify.mts setup to rebuild it before the commit instead`);
+    else if (ours) record("pass", "Graphify hooks", `pre-commit/post-checkout rebuild through graphify.mts (knowledge overlay kept; the commit includes the graph)`);
   }
 
   // fs.access is case-insensitive on macOS/Windows, so a `skill.md` would pass there but be

@@ -7,9 +7,10 @@ import { test } from "node:test";
 import type { TestContext } from "node:test";
 
 import { attemptKeyOf, createLedger, taskKeyOf } from "./orca-ledger.mts";
+import type { LedgerRecord } from "./orca-ledger.mts";
 import { WORKER_FLAG } from "./orca-launch-gate.mts";
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
-import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, markUnknownLiveness, ORCA_TIMEOUT_MARGIN_MS, resolveAssignment } from "./orca-dispatch.mts";
+import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, loadOf, markUnknownLiveness, ORCA_TIMEOUT_MARGIN_MS, resolveAssignment } from "./orca-dispatch.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import { orcaPolicyToonText, createTestDeps, fileUrl, spawnTestChild } from "./runtime/test-helpers.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
@@ -1037,7 +1038,7 @@ function seed(root: string, scopeId: string, attemptId: string, vendor: string, 
     settled: [{ state: "launched", dispatchId: `d-${attemptId}` }, { state: "completed", reportId: `r-${attemptId}` }, { state: "settled" }] };
   for (const patch of steps[state]) assert.equal(ledger.update(record.attemptKey, patch as never).status, "ok");
 }
-const resolve = (root: string, scopeId: string, assign: Obj, coordinator = "claude") => resolveAssignment({ root, coordinator, scopeId, assign: assign as never, deps: nodeDeps });
+const resolve = (root: string, scopeId: string, assign: Obj, coordinator = "claude", runId?: string) => resolveAssignment({ root, coordinator, scopeId, assign: assign as never, runId, deps: nodeDeps });
 const threeWay = (t: TestContext) => poolFixture(t, { implementation: ["opencode", "claude", "codex"], review: ["codex", "claude", "opencode"] });
 
 test("pools: resolveAssignment rejects malformed shapes and ids without reading the ledger", (t: TestContext) => {
@@ -1087,11 +1088,11 @@ test("pools: rotation uses the whole failure history, not only the last attempt"
 
 test("pools: skip removes members from the first pick, from rotation and from review", (t: TestContext) => {
   const root = threeWay(t);
-  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0, skip: ["opencode"] }), { vendor: "claude" });
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0, skip: ["opencode"] }), { vendor: "claude", balanced: true });
   seed(root, "s2", "k1", "opencode", "failed");
   assert.deepEqual(resolve(root, "s2", { role: "implementation", planIndex: 0, skip: ["claude"] }), { vendor: "codex" });
   seed(root, "s3", "i1", "codex", "completed");
-  assert.deepEqual(resolve(root, "r3", { role: "review", planIndex: 0, reviewOf: "s3", skip: ["claude"] }), { vendor: "opencode" });
+  assert.deepEqual(resolve(root, "r3", { role: "review", planIndex: 0, reviewOf: "s3", skip: ["claude"] }), { vendor: "opencode", balanced: true });
 });
 
 test("pools: a rotating reviewer still excludes the implementer", (t: TestContext) => {
@@ -1109,7 +1110,7 @@ test("pools: the reviewed implementer is the latest completed or settled attempt
   const root = threeWay(t);
   seed(root, "other", "o1", "codex", "completed");
   seed(root, "s1", "i1", "claude", "settled");
-  assert.deepEqual(resolve(root, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }), { vendor: "codex" });
+  assert.deepEqual(resolve(root, "r1", { role: "review", planIndex: 0, reviewOf: "s1" }), { vendor: "codex", balanced: true });
   const none = resolve(root, "r2", { role: "review", planIndex: 0, reviewOf: "missing" });
   assert.ok("outcome" in none);
   assert.deepEqual([none.outcome.route, none.outcome.reason], ["blocked", "implementer-unknown"]);
@@ -1131,7 +1132,7 @@ test("pools: blocked outcomes carry a human action that names the next step", (t
 
 test("pools: the coordinator selects its own pool", (t: TestContext) => {
   const root = threeWay(t);
-  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }, "codex"), { vendor: "claude" });
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }, "codex"), { vendor: "claude", balanced: true });
   assert.deepEqual(resolve(root, "s1", { role: "review", planIndex: 0, reviewOf: "zz" }, "codex") as never, { outcome: { route: "blocked", reason: "implementer-unknown", humanAction: "the scope under review has no completed attempt; dispatch it and collect its report first" } } as never);
 });
 
@@ -1146,6 +1147,249 @@ test("pools: every non-failed holder keeps its vendor, including unknown-livenes
   seed(root, "s1", "a1", "claude", "launched");
   assert.equal(ledgerOf(root).update(attemptKeyOf("a1"), { state: "unknown-liveness" }).status, "ok");
   assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }), { vendor: "claude" }, "unknown-liveness is preserved, never rotated");
+});
+
+// ---- Run-scoped load and optimistic admission (orca-balanced-role-pools P2) ----
+
+test("loadOf counts the owning set and scopes to the runId", (t: TestContext) => {
+  const root = threeWay(t);
+  const runCurrent = "run_abc123";
+  const runOther = "run_def456";
+  const counts: Array<[LedgerRecord["state"], "counted" | "not-counted"]> = [
+    ["claimed", "counted"],
+    ["launched", "counted"],
+    ["unknown-liveness", "counted"],
+    ["completed", "counted"],
+    ["failed", "not-counted"],
+    ["settled", "not-counted"],
+  ];
+  for (const [state, expected] of counts) {
+    if (state === "unknown-liveness") continue;
+    const extra: Obj = { runId: runCurrent };
+    seed(root, `s-${state}`, `a-${state}`, "codex", state as never, extra);
+  }
+  // unknown-liveness is reached from launched.
+  seed(root, "s-unknown", "a-unknown", "codex", "launched", { runId: runCurrent });
+  assert.equal(ledgerOf(root).update(attemptKeyOf("a-unknown"), { state: "unknown-liveness" }).status, "ok");
+  // A settled clean failure (failed then settled) is a tried vendor, not load.
+  seed(root, "s-failed-settled", "a-failed-settled", "codex", "failed", { runId: runCurrent });
+  assert.equal(ledgerOf(root).update(attemptKeyOf("a-failed-settled"), { state: "settled" }).status, "ok");
+  // Settled with a report still counts.
+  seed(root, "s-settled-report", "a-settled-report", "opencode", "settled", { runId: runCurrent });
+  // Records from another Run or with no runId never count toward the current Run.
+  seed(root, "s-other", "a-other", "claude", "claimed", { runId: runOther });
+  seed(root, "s-norun", "a-norun", "claude", "claimed", {});
+  // processOwnerPid counts regardless of state.
+  seed(root, "s-pid", "a-pid", "claude", "failed", { runId: runCurrent, processOwnerPid: 4242 });
+
+  const listed = ledgerOf(root).list();
+  assert.equal(listed.status, "ok");
+  const records = listed.entries.flatMap((entry) => entry.result.status === "ok" ? [entry.result.record] : []);
+  const currentLoad = loadOf(records, runCurrent);
+  assert.equal(currentLoad.get("codex"), 5, "claimed, launched, unknown-liveness, completed, settled-with-report");
+  assert.equal(currentLoad.get("opencode"), 1, "settled with report");
+  assert.equal(currentLoad.get("claude"), 1, "process-owner pid; other-run and no-runId are excluded");
+
+  const liveLoad = loadOf(records, undefined);
+  assert.equal(liveLoad.get("codex") ?? 0, 3, "without runId only live states count");
+  assert.equal(liveLoad.get("opencode") ?? 0, 0, "settled-with-report is not live");
+  assert.equal(liveLoad.get("claude") ?? 0, 3, "other-run, no-runId and pid all count as live");
+});
+
+test("resolveAssignment picks the least-loaded eligible member using Run-scoped load", (t: TestContext) => {
+  const root = threeWay(t);
+  const runCurrent = "run_abc123";
+  seed(root, "busy-codex", "a1", "codex", "claimed", { runId: runCurrent });
+  seed(root, "other-codex", "a2", "codex", "claimed", { runId: "run_other123" });
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }, "claude", runCurrent), { vendor: "opencode", balanced: true });
+});
+
+test("resolveAssignment keeps a recorded owner even when another vendor has a lower load", (t: TestContext) => {
+  const root = threeWay(t);
+  const runCurrent = "run_abc123";
+  seed(root, "s1", "owner", "codex", "claimed", { runId: runCurrent });
+  seed(root, "light-opencode", "a2", "opencode", "claimed", { runId: runCurrent });
+  assert.deepEqual(resolve(root, "s1", { role: "implementation", planIndex: 0 }, "claude", runCurrent), { vendor: "codex" });
+});
+
+test("dispatch rejects an invalid runId before any ledger write or spawn", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex"], review: ["codex"] });
+  const orca = fakeOrca();
+  for (const runId of ["run_", "run_abc12", `run_${"a".repeat(33)}`, "run_ABC123"]) {
+    const out = await dispatchScope({ ...base(root, orca.deps), vendor: "codex", runId } as never);
+    assert.deepEqual([out.route, out.reason], ["normal", "invalid-run-id"], runId);
+  }
+  assert.equal(orca.state.starts.length, 0);
+  assert.equal(ledgerOf(root).list().entries.length, 0);
+});
+
+test("dispatch with explicit vendor stores runId and bypasses load balancing", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex", "opencode"], review: ["codex"] });
+  const orca = fakeOrca();
+  const runId = "run_explicit123";
+  const out = await dispatchScope({ ...base(root, orca.deps), vendor: "codex", runId } as never);
+  assert.deepEqual([out.route, out.reason], ["launched", "launched"]);
+  const read = ledgerOf(root).read(attemptKeyOf("a1"));
+  assert.equal(read.status === "ok" && read.record.runId, runId);
+});
+
+test("assign-picked opencode still resolves the installed agent id", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode"], review: ["codex"] });
+  const orca = fakeOrca();
+  const run = probe(installedWith("claude", "opencode", "opencode2"));
+  const out = await dispatchScope({ ...assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }), run: run.run } as never);
+  assert.equal(out.route, "launched");
+  assert.deepEqual(agentsOf(orca), ["opencode2"]);
+  assert.ok(run.state.installedReads > 0);
+});
+
+/** Injected at the lock: the first dispatch claims the least-loaded vendor while the second is mid-resolve, so the second gets load-changed and re-resolves to the next vendor. */
+test("load-changed: an interleaved load change makes the second dispatch re-resolve to a different vendor", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex", "opencode"], review: ["codex"], cap: 4 });
+  const orca = fakeOrca();
+  // First dispatch claims codex so the ledger is no longer empty.
+  const first = await dispatchScope({ ...assigned(root, orca.deps, "first", { role: "implementation", planIndex: 0 }), runId: "run_interleaved123" } as never);
+  assert.equal(first.route, "launched");
+  // The second dispatch sees an empty ledger on its first list() call (simulating a stale read), then sees the real ledger on the list() used for admit.
+  let listCalls = 0;
+  const ledgerDir = path.join(root, ".project/metrics/orca-ledger");
+  const staleDeps: RuntimeDeps = { ...orca.deps, fs: { ...orca.deps.fs,
+    readdirSync: (dir: string) => {
+      if (String(dir).endsWith("orca-ledger")) {
+        listCalls++;
+        if (listCalls === 1) return [] as string[]; // stale empty read used by resolveAssignment
+      }
+      return orca.deps.fs.readdirSync(dir);
+    },
+  } };
+  const run = probe();
+  const second = await dispatchScope({ ...assigned(root, staleDeps, "second", { role: "implementation", planIndex: 0 }), runId: "run_interleaved123", run: run.run } as never);
+  assert.equal(second.route, "launched");
+  const firstVendor = (ledgerOf(root).read(attemptKeyOf("first-a")) as { record: { vendor: string } }).record.vendor;
+  const secondVendor = (ledgerOf(root).read(attemptKeyOf("second-a")) as { record: { vendor: string } }).record.vendor;
+  assert.notEqual(firstVendor, secondVendor, "the second dispatch re-resolved away from the now-loaded vendor");
+  for (const id of ["first-a", "second-a"]) {
+    const read = ledgerOf(root).read(attemptKeyOf(id));
+    assert.equal(read.status === "ok" && read.record.runId, "run_interleaved123");
+  }
+});
+
+/** Audit cycle 1 (code finding 1): the very first dispatch of a Run has no ledger directory yet, and must still be re-checked at the claim. */
+test("load-changed: a first dispatch with no ledger directory is re-checked, and a competing claim made just before it moves it to the next vendor", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex", "opencode"], review: ["codex"], cap: 4 });
+  const orca = fakeOrca();
+  assert.equal(fs.existsSync(path.join(root, ".project/metrics/orca-ledger")), false, "no ledger directory yet");
+  let injected = false;
+  const racing: RuntimeDeps = { ...orca.deps, fs: { ...orca.deps.fs,
+    openSync: (file: string, ...rest: unknown[]) => {
+      if (!injected && String(file).endsWith(".mutation-lock")) {
+        injected = true;
+        const claim = ledgerOf(root).reserve({ attemptKey: attemptKeyOf("competitor"), taskKey: taskKeyOf("competitor"), vendor: "codex", state: "claimed",
+          createdAt: 1000, authorizedPaths: ["competitor.mjs"], runId: "run_firstdispatch1" }, 4);
+        assert.equal(claim.outcome, "claimed");
+      }
+      return (orca.deps.fs.openSync as (f: string, ...r: unknown[]) => number)(file, ...rest);
+    },
+  } };
+  const out = await dispatchScope({ ...assigned(root, racing, "fresh", { role: "implementation", planIndex: 0 }), runId: "run_firstdispatch1", run: probe().run } as never);
+  assert.equal(out.route, "launched");
+  assert.equal(injected, true);
+  const picked = (ledgerOf(root).read(attemptKeyOf("fresh-a")) as { record: { vendor: string } }).record.vendor;
+  assert.equal(picked, "opencode", "codex became loaded under the pick, so the claim re-picked the least-loaded vendor");
+});
+
+/** Audit cycle 1 (security finding 3): a clean-failure rotation is chosen by pool order, so it must not be re-checked against load. */
+test("a clean-failure rotation pick is claimed without a load re-check or an extra installed-agent probe", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex", "claude", "opencode"], review: ["codex"], cap: 4 });
+  const orca = fakeOrca();
+  const runId = "run_rotation1234";
+  seed(root, "other", "other-a", "opencode", "launched", { runId });
+  seed(root, "s1", "s1-old", "claude", "failed", { runId });
+  assert.equal(ledgerOf(root).update(attemptKeyOf("s1-old"), { state: "settled" }).status, "ok");
+  const run = probe(installedWith("claude", "codex", "opencode"));
+  const out = await dispatchScope({ ...assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }), runId, run: run.run } as never);
+  assert.equal(out.route, "launched");
+  const picked = (ledgerOf(root).read(attemptKeyOf("s1-a")) as { record: { vendor: string } }).record.vendor;
+  assert.equal(picked, "opencode", "rotation moved past the failed claude to the next pool member, although codex has the lower load");
+  assert.equal(run.state.installedReads, 2, "one read to resolve the agent id and one by the launch re-gate; a spurious load-changed re-pick would add a third");
+});
+
+/** Code review (high): a member that cannot launch before any claim never gains load, so it must be skipped instead of winning every pick. */
+test("a pool member that cannot launch before a claim is skipped for the next least-loaded member", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex", "opencode"], review: ["codex"], cap: 4 });
+  const orca = fakeOrca();
+  const runId = "run_unlaunchable1";
+  const run = probe(installedWith("codex"));
+  for (const [index, id] of ["s1", "s2", "s3"].entries()) {
+    const out = await dispatchScope({ ...assigned(root, orca.deps, id, { role: "implementation", planIndex: index }), runId, run: run.run } as never);
+    assert.equal(out.route, "launched", `${id}: ${JSON.stringify(out)}`);
+    const vendor = (ledgerOf(root).read(attemptKeyOf(`${id}-a`)) as { record: { vendor: string } }).record.vendor;
+    assert.equal(vendor, "codex", `${id}: opencode is not installed, so every scope goes to codex instead of falling back to the normal workflow`);
+  }
+});
+
+test("a pool whose every member cannot launch reports the launch failure, not an exhausted pool", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["opencode"], review: ["codex"], cap: 4 });
+  const orca = fakeOrca();
+  const out = await dispatchScope({ ...assigned(root, orca.deps, "s1", { role: "implementation", planIndex: 0 }), runId: "run_unlaunchable2", run: probe(installedWith("codex")).run } as never);
+  assert.equal(out.route, "normal");
+  assert.notEqual(out.reason, "pool-exhausted");
+  assert.equal(fs.existsSync(path.join(root, ".project/metrics/orca-ledger")), false, "nothing was claimed");
+});
+
+/** Code review (high): the re-pick after load-changed is checked too, so a second competing claim moves it again. */
+test("load-changed: the re-pick is itself checked, so a second competing claim moves it to a third vendor", async (t: TestContext) => {
+  const root = poolFixture(t, { implementation: ["codex", "claude", "opencode"], review: ["codex"], cap: 6 });
+  const orca = fakeOrca();
+  const runId = "run_secondrace12";
+  let opens = 0;
+  const racing: RuntimeDeps = { ...orca.deps, fs: { ...orca.deps.fs,
+    openSync: (file: string, ...rest: unknown[]) => {
+      if (String(file).endsWith(".mutation-lock") && opens < 2) {
+        const vendor = opens === 0 ? "codex" : "claude";
+        const name = `competitor-${opens++}`;
+        assert.equal(ledgerOf(root).reserve({ attemptKey: attemptKeyOf(name), taskKey: taskKeyOf(name), vendor, state: "claimed",
+          createdAt: 1000 + opens, authorizedPaths: [`${name}.mjs`], runId }, 6).outcome, "claimed");
+      }
+      return (orca.deps.fs.openSync as (f: string, ...r: unknown[]) => number)(file, ...rest);
+    },
+  } };
+  const out = await dispatchScope({ ...assigned(root, racing, "fresh", { role: "implementation", planIndex: 0 }), runId, run: probe(installedWith("claude", "codex", "opencode")).run } as never);
+  assert.equal(out.route, "launched", JSON.stringify(out));
+  const picked = (ledgerOf(root).read(attemptKeyOf("fresh-a")) as { record: { vendor: string } }).record.vendor;
+  assert.equal(picked, "opencode", "codex then claude were claimed under the picks; the only vendor left at the minimum is opencode");
+});
+
+// ---- mutants for Run-scoped load ----
+
+test("mutant: counting a clean failure as load fails the ownership-matrix test", async (t: TestContext) => {
+  const source = fs.readFileSync(path.join(HERE, "orca-dispatch.mts"), "utf8");
+  const absoluteImports = source.replace(/from "(\.\/[^\"]+)"/g, (_match, relative: string) => `from "${new URL(relative, import.meta.url).href}"`);
+  const mutantSource = absoluteImports.replace("if (!holds(record)) continue;", "if (record.state === \"completed\" && record.reportId === undefined) continue;");
+  const mutant = await importMutant<typeof import("./orca-dispatch.mts")>(mutantSource);
+  const runCurrent = "run_abc123";
+  const records = [
+    { attemptKey: attemptKeyOf("a1"), taskKey: taskKeyOf("t1"), vendor: "codex", state: "failed", createdAt: 1000, runId: runCurrent },
+    { attemptKey: attemptKeyOf("a2"), taskKey: taskKeyOf("t2"), vendor: "codex", state: "settled", createdAt: 1000, runId: runCurrent },
+  ] as never[];
+  assert.throws(() => {
+    const loadMap = mutant.loadOf(records, runCurrent);
+    assert.equal(loadMap.get("codex"), 0, "mutant counted a clean failure as load");
+  }, /mutant counted a clean failure as load/);
+});
+
+test("mutant: dropping the runId filter counts records from another Run", async (t: TestContext) => {
+  const source = fs.readFileSync(path.join(HERE, "orca-dispatch.mts"), "utf8");
+  const absoluteImports = source.replace(/from "(\.\/[^\"]+)"/g, (_match, relative: string) => `from "${new URL(relative, import.meta.url).href}"`);
+  const mutantSource = absoluteImports.replace("if (record.runId !== runId) continue;", "");
+  const mutant = await importMutant<typeof import("./orca-dispatch.mts")>(mutantSource);
+  const records = [
+    { attemptKey: attemptKeyOf("a1"), taskKey: taskKeyOf("t1"), vendor: "codex", state: "claimed", createdAt: 1000, runId: "run_other123" },
+  ] as never[];
+  assert.throws(() => {
+    const loadMap = mutant.loadOf(records, "run_abc123");
+    assert.equal(loadMap.get("codex"), undefined, "mutant counted another Run toward the current Run");
+  }, /mutant counted another Run toward the current Run/);
 });
 
 const agentsOf = (orca: ReturnType<typeof fakeOrca>) => orca.state.starts.map(agentOf);
@@ -1302,10 +1546,9 @@ test("mutant: treating a refusal request id as clean-failure proof turns the ref
   const source = fs.readFileSync(path.join(HERE, "orca-dispatch.mts"), "utf8");
   const mutant = source.replace("const proven = receipts.some(", "const proven = Boolean(requestId) || receipts.some(");
   assert.notEqual(mutant, source, "mutant must change the proof rule");
-  // Keep the mutant entirely in memory and use the same dependencies and assertions as production.
+  // Load the mutant from a temporary file (runtime-neutral) and use the same dependencies and assertions as production.
   const absoluteImports = mutant.replace(/from "(\.\/[^\"]+)"/g, (_match, relative: string) => `from "${new URL(relative, import.meta.url).href}"`);
-  const js = new Bun.Transpiler({ loader: "ts" }).transformSync(absoluteImports);
-  const mutated = await import(`data:text/javascript;base64,${Buffer.from(js).toString("base64")}`);
+  const mutated = await importMutant<typeof import("./orca-dispatch.mts")>(absoluteImports);
   await assert.rejects(() => assertRequestRefusal(t, mutated.dispatchScope), { name: "AssertionError" });
 });
 
@@ -1389,3 +1632,11 @@ test("a failed stage of any type is never positive proof: an empty residualResou
     assert.equal(stateOf(root, attemptKeyOf("fs")), "unknown-liveness", JSON.stringify(stage));
   }
 });
+
+/** Imports mutated module source on Bun and Node alike: written as a temporary .mts (Node strips types natively). */
+async function importMutant<T>(source: string): Promise<T> {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "orca-mutant-"));
+  const file = path.join(dir, `mutant-${Math.random().toString(36).slice(2)}.mts`);
+  fs.writeFileSync(file, source);
+  try { return await import(new URL(`file://${file}`).href) as T; } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+}

@@ -444,7 +444,7 @@ test("writeReport writes when absent and replaces only a file the delivery recei
     assert.equal(api.writeReport(root, "state.explainer.json", "one\n"), ".project/reports/state.explainer.json");
     // Without the tool's own record and without a receipt, an existing draft is never replaced.
     rmSync(join(dir, "state.explainer.json.written-sha256"));
-    assert.throws(() => api.writeReport(root, "state.explainer.json", "two\n"), /report-not-owned: state\.explainer\.json/, "no receipt");
+    assert.throws(() => api.writeReport(root, "state.explainer.json", "two\n"), /report-not-owned: state\.explainer\.json .*delete \.project\/reports\/state\.explainer\.json/, "no receipt");
     writeFileSync(join(dir, "state.delivery.json"), receipt(sha("edited\n")));
     assert.throws(() => api.writeReport(root, "state.explainer.json", "two\n"), /report-not-owned/, "receipt hash differs from the file");
     writeFileSync(join(dir, "state.delivery.json"), receipt(sha("one\n")));
@@ -691,4 +691,22 @@ test("an unreadable file at the marker path is left alone (only a missing marker
     assert.equal(denied.writeReport(root, "state.explainer.json", "one\n"), ".project/reports/state.explainer.json");
     assert.equal(readFileSync(marker), "USER NOTES\n");
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("same-named tables in two schemas: a foreign key resolves by its schema, and an ambiguous name is counted, not guessed", () => {
+  const table = (schema: string, name: string, foreignKeys: Record<string, unknown> = {}) => ({ name, schema, columns: { id: { name: "id", type: "uuid", primaryKey: true, notNull: true }, u: { name: "u", type: "uuid", notNull: true } }, foreignKeys });
+  const fk = (schemaTo?: string) => ({ a: { tableFrom: "posts", columnsFrom: ["u"], tableTo: "users", columnsTo: ["id"], ...(schemaTo ? { schemaTo } : {}) } });
+  const build = (schemaTo?: string) => project({ ...MARKER, "drizzle/meta/_journal.json": JSON.stringify({ entries: [{}] }),
+    "drizzle/meta/0000_snapshot.json": JSON.stringify({ dialect: "postgresql", tables: { "auth.users": table("auth", "users"), "public.users": table("public", "users"), "public.posts": table("public", "posts", fk(schemaTo)) } }) });
+  const named = build("public");
+  try {
+    const erd = diagrams(api.explainer(api.gather(named, "project"), "p", "t")).find((block) => block.diagramType === "erd")!.spec!;
+    assert.deepEqual(erd.entities!.map((entity) => entity.label), ["auth.users", "public.users", "posts"], "a shared name is shown with its schema");
+    assert.deepEqual(erd.relationships!.map((link) => [link.from, link.to]), [["e3", "e2"]], "the key names public, so it points at public.users");
+  } finally { rmSync(named, { recursive: true, force: true }); }
+  const ambiguous = build();
+  try {
+    const erd = diagrams(api.explainer(api.gather(ambiguous, "project"), "p", "t")).find((block) => block.diagramType === "erd")!.spec!;
+    assert.deepEqual(erd.relationships ?? [], [], "two tables could be meant, so no relationship is drawn");
+  } finally { rmSync(ambiguous, { recursive: true, force: true }); }
 });

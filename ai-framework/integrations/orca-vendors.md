@@ -381,15 +381,39 @@ It is a library for the build phase, not a command, and stays inert unless the p
   of the caller's value, the policy's `maxRetriesPerTask` and 5, each retry with a new attempt id.
   The policy's `maxConcurrentWorkers` caps the attempts that are claimed, launched or of unknown liveness; a further
   dispatch returns the normal workflow.
-- **Assignment** (`assign`, `orca-assign.mts`): instead of a caller-named `vendor`, a dispatch may pass `assign: { role, planIndex, reviewOf?, skip? }`;
-  exactly one of the two is required, else `invalid-assignment` before any side effect. The worker comes from the coordinator's role pool
-  (`pools` in the policy report): `implementation` is round-robin by plan position over the pool minus `skip`; `review` is the same over the
-  pool minus `skip` and minus the vendor recorded for the completed attempt of `reviewOf`. Resume never reassigns: a task with a live, completed
-  or settled attempt keeps that attempt's vendor. After a task's attempts all failed cleanly, the next attempt takes the next pool member
-  (pool order, circular, once around), through the full launch gate; a lap with no member left is `blocked: pool-exhausted`. Unknown liveness,
-  unproven or refused failures, timeouts and signal exits are never rotated. A review pool with no member other than the implementer is
-  `blocked: review-independence-unavailable` with a `humanAction` (stop and ask); a review of a scope with no completed attempt is
-  `blocked: implementer-unknown`. No ledger field was added: the recorded `vendor` and `taskKey` carry the assignment.
+- **Assignment** (`assign`, `orca-assign.mts`; pitch `orca-balanced-role-pools`): instead of a caller-named `vendor`, a dispatch may
+  pass `assign: { role, planIndex, reviewOf?, skip? }`. Exactly one of the two is required, else `invalid-assignment` before any side effect.
+  - **Least load.** The worker comes from the coordinator's role pool (`pools` in the policy report). The eligible member with the lowest
+    **load** wins. The tie-break is plan position (rotation from `planIndex`), which equals the old round-robin when the loads are equal.
+    - `implementation` is eligible over the pool minus `skip`.
+    - `review` is eligible over the pool minus `skip` and minus the vendor recorded for the completed attempt of `reviewOf`.
+  - **What counts as load** (`loadOf` in `orca-dispatch.mts`). With `runId`: this Run's attempts that own a task, across both roles —
+    `claimed`, `launched`, `unknown-liveness`, `completed`, settled with a report, or a recorded process owner. A settled clean failure is
+    not load, and neither are other Runs or records without a `runId`. Without `runId`: live attempts only.
+  - **`runId`**: optional dispatch input (`^run_[a-z0-9]{6,32}$`, otherwise a usage error or `invalid-run-id` before any side effect). It is
+    stored once on the claim.
+  - **Input errors.** An unknown, missing or duplicated top-level dispatch key, or a bad `runId`, is a usage error (exit 2, reason `dispatch`),
+    not an input refusal (exit 3). Only top-level duplicates are refused; nested values are still validated key by key.
+  - **`runId` is not verified against Orca.** Its shape is checked, and nothing ties it to a real Run: a coordinator that passes a fresh
+    id for each dispatch resets load to zero and gets plain rotation. It can never move an owned task.
+  - **Concurrent dispatches.** The pick is re-checked inside the claim lock (`reserve(…, admit)`). If another dispatch changed the load,
+    the claim is `load-changed`, and dispatch picks again and re-checks, up to three tries; the last claims without the check, so a busy Run
+    cannot loop. A load pick whose worker cannot launch before any claim (not installed, no agent id, not a configured worker) is skipped for
+    the next least-loaded member, since a member that never gains load would otherwise win every scope. A pick that reports
+    `source: "least-loaded"` was informed by load. Only a pick made by load is re-checked (not a
+    recorded owner or a clean-failure rotation), including the first dispatch of a Run. If the ledger cannot be listed, balancing fails open
+    and `reserve` still refuses on ownership, capacity and overlap. Balancing never blocks a dispatch.
+  - **Unchanged behaviour:**
+    - Resume never reassigns: a task with a live, completed or settled-with-report attempt keeps that attempt's vendor.
+    - After a task's attempts all failed cleanly, the next attempt takes the next pool member (pool order, circular, once around),
+      through the full launch gate. A lap with no member left is `blocked: pool-exhausted`.
+    - Unknown liveness, unproven or refused failures, timeouts and signal exits are never rotated.
+    - A review pool with no member other than the implementer is `blocked: review-independence-unavailable`, with a `humanAction` (stop and ask).
+    - A review of a scope with no completed attempt is `blocked: implementer-unknown`.
+  - **Coordinator rule (owner of this topic).** Dispatch scopes with `assign` and the `runId` verified at phase start, so work spreads
+    across every worker and role. Name a `vendor` only when the owner names one or a scope needs a specific vendor, and record why in
+    the run log. Pitch-level reviewers (critique, audit) have no `reviewOf` scope yet, so they are still named by hand; spread them
+    yourself, including every configured worker.
 - **Overlap guard**: `reserve` refuses (`authorized-paths-overlap`, route `normal`) a scope whose `authorizedPaths` overlap a *live*
   (claimed, launched or unknown-liveness) attempt of another task. Completed attempts do not block, so a reviewer may name the same files;
   `orca-apply` still refuses true overlap at integration. Dispatch only scopes the plan marks parallel-safe.

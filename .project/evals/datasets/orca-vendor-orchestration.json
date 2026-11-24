@@ -284,6 +284,219 @@
         "probe and launch agree: the id checked in the installed list is the --agent value spawned (mutant: probe opencode, launch opencode2 turns red)",
         "policy lists only opencode as vendor; a policy naming opencode2 is rejected"
       ]
+    },
+    {
+      "id": "role-pools-balance-load-across-roles",
+      "input": {
+        "harness": "claude",
+        "runId": "run_current1",
+        "otherRunId": "run_other11",
+        "missingRunId": "legacy records omit runId",
+        "pools": {
+          "implementation": [
+            "codex",
+            "claude",
+            "opencode"
+          ],
+          "review": [
+            "codex",
+            "opencode"
+          ]
+        },
+        "ownershipMatrix": [
+          {
+            "vendor": "codex",
+            "state": "claimed",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "codex",
+            "state": "launched",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "codex",
+            "state": "unknown-liveness",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "codex",
+            "state": "completed",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "claude",
+            "state": "settled",
+            "reportId": "matrix-report",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "claude",
+            "state": "settled",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "opencode",
+            "state": "settled",
+            "processOwnerPid": 1234,
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "opencode",
+            "state": "failed",
+            "runId": "run_current1"
+          },
+          {
+            "vendor": "codex",
+            "state": "completed",
+            "runId": "run_other11"
+          },
+          {
+            "vendor": "opencode",
+            "state": "launched"
+          }
+        ],
+        "sequence": [
+          {
+            "scope": "S1",
+            "role": "implementation",
+            "planIndex": 0,
+            "skip": []
+          },
+          {
+            "scope": "S2",
+            "role": "implementation",
+            "planIndex": 0,
+            "skip": []
+          },
+          {
+            "scope": "R1",
+            "role": "review",
+            "planIndex": 1,
+            "skip": [],
+            "reviewOf": "S1"
+          },
+          {
+            "scope": "S3",
+            "role": "implementation",
+            "planIndex": 2,
+            "skip": [],
+            "result": "clean-failure"
+          },
+          {
+            "scope": "S3",
+            "role": "implementation",
+            "planIndex": 2,
+            "skip": []
+          },
+          {
+            "scope": "S4",
+            "role": "implementation",
+            "planIndex": 2,
+            "skip": [],
+            "result": "unknown-liveness"
+          },
+          {
+            "scope": "S4",
+            "role": "implementation",
+            "planIndex": 0,
+            "skip": [
+              "opencode"
+            ]
+          },
+          {
+            "scope": "S5",
+            "role": "implementation",
+            "planIndex": 2,
+            "skip": [
+              "codex"
+            ]
+          },
+          {
+            "scope": "R2",
+            "role": "review",
+            "planIndex": 0,
+            "skip": [],
+            "reviewOf": "S2"
+          },
+          {
+            "scope": "D1",
+            "role": "implementation",
+            "planIndex": 7,
+            "skip": [],
+            "pool": [
+              "opencode"
+            ]
+          },
+          {
+            "scope": "D2",
+            "role": "review",
+            "planIndex": 4,
+            "skip": [],
+            "reviewOf": "D1",
+            "pool": [
+              "opencode"
+            ]
+          }
+        ],
+        "explicitDispatch": {
+          "vendor": "codex",
+          "scope": "named-worker"
+        },
+        "resume": "replay every owned task with a changed planIndex and every pool member skipped; preserve the recorded vendor"
+      },
+      "expected": {
+        "ownershipCounts": [
+          1,
+          1,
+          1,
+          1,
+          1,
+          0,
+          1,
+          0,
+          0,
+          0
+        ],
+        "liveCounts": [
+          1,
+          1,
+          1,
+          0,
+          0,
+          0,
+          1,
+          0,
+          0,
+          1
+        ],
+        "picks": [
+          "codex",
+          "claude",
+          "opencode",
+          "opencode",
+          "codex",
+          "opencode",
+          "opencode",
+          "claude",
+          "codex",
+          "opencode",
+          "review-independence-unavailable"
+        ],
+        "greedyFairness": true,
+        "reviewerNeverImplementer": true,
+        "everyPoolMemberUsed": true,
+        "otherRunsIgnored": true,
+        "deterministic": true,
+        "resumeKeepsRecordedVendor": true,
+        "unknownLivenessNeverMoved": true,
+        "cleanFailureRotates": true,
+        "explicitVendorStillAllowed": true
+      },
+      "notGraded": {
+        "coordinatorUsesAssignByDefault": "C1 documentation contract and live assign dispatch check; coordinator behavior is not proven by static grading.",
+        "assignedOpencodePortPreparation": "P2 dispatch unit test and C1 live assign-picked opencode smoke check."
+      }
     }
   ]
 }

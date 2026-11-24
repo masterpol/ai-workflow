@@ -255,11 +255,12 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
     return results;
   }
 
-  /** Refuses to write or remove through a symlink at the destination or any ancestor below the project root. */
-  async function assertNoSymlinkPath(destination: string, base: string = root): Promise<void> {
+  /** Refuses to write or remove through a symlink at the destination or any ancestor below the base (the base itself only when `checkBase`). */
+  async function assertNoSymlinkPath(destination: string, base: string = root, checkBase = false): Promise<void> {
     const relative = path.relative(base, destination);
     let current = base;
-    if ((await fs.lstat(base)).isSymbolicLink()) throw new Error("refusing symlinked sync root");
+    // Only the report reset refuses a symlinked project root; an ordinary apply, and a --source given as a link, keep working.
+    if (checkBase && (await fs.lstat(base)).isSymbolicLink()) throw new Error("refusing symlinked sync root");
     for (const part of relative.split(path.sep)) {
       current = path.join(current, part);
       let stat;
@@ -270,7 +271,7 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
 
   // Read data only: bounded descriptor reads refuse links, FIFOs and growing files.
   async function readBounded(file: string, limit: number, base: string = root, pin?: (identity: { dev: number; ino: number }) => void): Promise<Uint8Array> {
-    await assertNoSymlinkPath(file, base);
+    await assertNoSymlinkPath(file, base, base === root);
     const before = await fs.lstat(file);
     if (!before.isFile()) throw new Error("report-not-regular");
     if (before.size > limit) throw new Error("report-oversize");
@@ -305,19 +306,19 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
     const hint = (message: string): void => { steps.push({ kind: "reports", message }); };
     if (!updated) return steps;
     try {
-      await assertNoSymlinkPath(reports);
+      await assertNoSymlinkPath(reports, root, true);
       let directory;
       try { directory = await fs.lstat(reports); } catch (error) { if (codeOf(error) === "ENOENT") return steps; throw error; }
       if (!directory.isDirectory()) throw new Error("report-not-regular");
       const checkDirectory = async (): Promise<void> => {
-        await assertNoSymlinkPath(reports);
+        await assertNoSymlinkPath(reports, root, true);
         const current = await fs.lstat(reports);
         if (!current.isDirectory() || current.dev !== directory.dev || current.ino !== directory.ino) throw new Error("report-directory-changed");
       };
       // Historical pages have no ownership receipt and are always kept.
       for (const name of ["index.html", "state.json", "theme.json"]) {
         const file = path.join(reports, name);
-        await assertNoSymlinkPath(file);
+        await assertNoSymlinkPath(file, root, true);
         try { await fs.lstat(file); hint(`Legacy .project/reports/${name} kept; review manually.`); }
         catch (error) { if (codeOf(error) !== "ENOENT") throw error; }
       }
@@ -344,13 +345,13 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
       for (const item of removals) {
         if (apply) {
           await checkDirectory();
-          await assertNoSymlinkPath(item.file);
+          await assertNoSymlinkPath(item.file, root, true);
           let hashed = { dev: -1, ino: -1 };
           // Pin the descriptor that was hashed; a file renamed over it before the unlink is refused, never removed.
           if (hash(await readBounded(item.file, item.limit, root, (identity) => { hashed = identity; })) !== item.digest) throw new Error("report-changed");
           await checkDirectory();
           // No await between the final identity/path check and unlink.
-          await assertNoSymlinkPath(item.file);
+          await assertNoSymlinkPath(item.file, root, true);
           const current = fs.lstatSync(reports);
           if (current.dev !== directory.dev || current.ino !== directory.ino) throw new Error("report-directory-changed");
           const file = fs.lstatSync(item.file);
@@ -447,6 +448,13 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
     // The synced graphify.mts migrates it, but only when run: name that step instead of leaving a stale graph behind.
     if (await exists(path.join(root, ".project/knowledge")) && (!(await exists(path.join(root, "graphify-out/graph.json"))) || await exists(path.join(root, ".project/knowledge/graph.json")) || !(await exists(path.join(root, ".graphifyignore"))))) {
       steps.push({ kind: "graphify", message: "the knowledge graph is built by Graphify (uv) now: run node ai-framework/scripts/graphify.mts setup (builds graphify-out/graph.json, migrates the legacy .project/knowledge/graph.json, installs the rebuild-on-commit git hooks). Requires uv: https://docs.astral.sh/uv/" });
+    }
+    // An older install rebuilt the graph in post-commit, which left the rebuilt files uncommitted after every commit. The synced
+    // graphify.mts installs the commit-time rebuild only when run, so name that step for a project that still has the older hook.
+    const olderHook = await readIfExists(path.join(root, ".git/hooks/post-commit"));
+    if (olderHook !== null && olderHook !== undefined && (olderHook.includes("# ai-workflow-graphify-start") || olderHook.includes("# graphify-hook-start"))
+      && await exists(path.join(root, "graphify-out/graph.json"))) {
+      steps.push({ kind: "graphify", message: "the graph is now rebuilt and staged before each commit, so a commit includes its graph: run node ai-framework/scripts/graphify.mts setup once (installs the pre-commit hook and removes the older post-commit rebuild, which left graphify-out/ uncommitted)" });
     }
     const marker = /^## Response style \(caveman mode\)$/m;
     const sourceEntry = await readIfExists(path.join(sourceRoot, "AGENTS.md"));

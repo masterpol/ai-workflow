@@ -784,3 +784,28 @@ test("NEXT STEPS prints the source Archify pin command only for an installed dif
   write(source, "ai-framework/integrations/state-report.md", `| Pinned commit | \`${installed}\` |\n`);
   assert.equal(runJson(target, ["--source", source, "--base-ref", baseRef]).nextSteps.some(step => step.kind === "archify-pin"), false);
 });
+
+test("the pin hint still works when --source is a symlink to the bundle; only the report reset refuses a linked project root", async (t) => {
+  const f = await reportFixture(t);
+  const pin = "a".repeat(40);
+  write(f.source, "ai-framework/integrations/state-report.md", `# Source contract\n| Pinned commit | \`${pin}\` |\n`);
+  write(f.target, ".project/skills/registry.json", JSON.stringify({ skills: { "tt-a1i/archify/archify": { source: { revision: "b".repeat(40) } } } }));
+  const link = path.join(path.dirname(f.source), "source-link");
+  fs.symlinkSync(f.source, link);
+  const { makeSync } = await import("./bundle-sync.mts");
+  const steps = await makeSync([], f.deps).archifyPinStep(link);
+  assert.equal(steps.length, 1, "a source reached through a link is still read");
+  assert.equal(steps[0].kind, "archify-pin");
+});
+
+test("a project whose graph is rebuilt in post-commit is told to run graphify setup once, and one with the commit-time rebuild is not", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  write(target, "graphify-out/graph.json", "{}\n");
+  write(target, ".git/hooks/post-commit", "#!/bin/sh\n# ai-workflow-graphify-start\n( rebuild )\n# ai-workflow-graphify-end\n");
+  const older = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  const step = older.nextSteps.find(item => item.kind === "graphify" && /pre-commit hook/.test(item.message));
+  assert.ok(step, "the older after-commit rebuild is named");
+  assert.match(step.message, /graphify\.mts setup/);
+  write(target, ".git/hooks/post-commit", "#!/bin/sh\necho unrelated\n");
+  assert.equal(runJson(target, ["--source", source, "--base-ref", baseRef]).nextSteps.some(item => item.kind === "graphify" && /pre-commit hook/.test(item.message)), false);
+});

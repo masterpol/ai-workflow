@@ -897,6 +897,10 @@ test("doctor warns about graphify's raw git hooks and passes the workflow's over
   assert.match(raw!.detail, /post-checkout hook runs graphify's own rebuild.*graphify\.mts setup/);
   write(root, ".git/hooks/post-checkout", `#!/bin/sh\n${hookBlock("post-checkout")}\n`);
   assert.equal((await hookCheck())?.status, "pass");
+  write(root, ".git/hooks/post-commit", `#!/bin/sh\n${hookBlock("pre-commit")}\n`);
+  const older = await hookCheck();
+  assert.equal(older?.status, "warn", "an after-commit rebuild leaves the graph uncommitted");
+  assert.match(older!.detail, /post-commit rebuilds the graph after the commit.*graphify\.mts setup/);
 });
 
 test("doctor requires the Claude Orca start hooks with the Node runner; a bun-wired or missing hook fails", async (t) => {

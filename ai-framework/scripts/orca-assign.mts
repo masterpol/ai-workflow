@@ -6,7 +6,7 @@
  * elsewhere must never move a scope that already has an owner.
  */
 
-export type Pick = { ok: true; vendor: string; source: "recorded" | "round-robin" } | { ok: false; reason: PickFailure };
+export type Pick = { ok: true; vendor: string; source: "recorded" | "round-robin" | "least-loaded" } | { ok: false; reason: PickFailure };
 export type PickFailure = "invalid-input" | "pool-exhausted" | "implementer-unknown" | "review-independence-unavailable" | "exhausted";
 
 export interface PickInput {
@@ -18,6 +18,8 @@ export interface PickInput {
   skip?: readonly string[];
   /** The vendor already recorded for this task in the ledger, if any. */
   recorded?: string;
+  /** Optional per-member load; the least-loaded member wins, with plan position as the tie-break. */
+  load?: ReadonlyMap<string, number>;
 }
 export interface ReviewInput extends PickInput {
   /** The vendor that implemented the scope under review. */
@@ -33,13 +35,42 @@ function eligible(pool: readonly string[], skip: readonly string[] | undefined):
   return pool.filter((member) => !skipped.has(member));
 }
 
-/** Round-robin over the pool minus skipped members, by plan position. */
+function memberLoad(member: string, load?: ReadonlyMap<string, number>): number {
+  return load?.get(member) ?? 0;
+}
+
+function rotationDistance(index: number, planIndex: number, n: number): number {
+  return ((index - planIndex) % n + n) % n;
+}
+
+/** Order eligible members by `(load, rotation distance from planIndex)` and return the first. */
+export function leastLoaded(members: readonly string[], planIndex: number, load?: ReadonlyMap<string, number>): string | undefined {
+  if (members.length === 0) return undefined;
+  const n = members.length;
+  let best: string | undefined;
+  let bestLoad = Infinity;
+  let bestDistance = Infinity;
+  for (let i = 0; i < n; i++) {
+    const member = members[i];
+    const loadValue = memberLoad(member, load);
+    const distance = rotationDistance(i, planIndex, n);
+    if (loadValue < bestLoad || (loadValue === bestLoad && distance < bestDistance)) {
+      best = member;
+      bestLoad = loadValue;
+      bestDistance = distance;
+    }
+  }
+  return best;
+}
+
+/** Round-robin over the pool minus skipped members, by plan position; load breaks ties toward the least-loaded member. */
 export function pickImplementer(input: PickInput): Pick {
   if (!validPool(input.pool) || !validIndex(input.planIndex)) return { ok: false, reason: "invalid-input" };
   if (input.recorded !== undefined) return { ok: true, vendor: input.recorded, source: "recorded" };
   const members = eligible(input.pool, input.skip);
   if (!members.length) return { ok: false, reason: "pool-exhausted" };
-  return { ok: true, vendor: members[input.planIndex % members.length], source: "round-robin" };
+  const vendor = leastLoaded(members, input.planIndex, input.load);
+  return { ok: true, vendor: vendor!, source: input.load?.size ? "least-loaded" : "round-robin" };
 }
 
 /** Like `pickImplementer`, but never the implementer of the scope under review. */
@@ -51,7 +82,8 @@ export function pickReviewer(input: ReviewInput): Pick {
   if (!members.length) return { ok: false, reason: "pool-exhausted" };
   const others = members.filter((member) => member !== input.implementer);
   if (!others.length) return { ok: false, reason: "review-independence-unavailable" };
-  return { ok: true, vendor: others[input.planIndex % others.length], source: "round-robin" };
+  const vendor = leastLoaded(others, input.planIndex, input.load);
+  return { ok: true, vendor: vendor!, source: input.load?.size ? "least-loaded" : "round-robin" };
 }
 
 /**

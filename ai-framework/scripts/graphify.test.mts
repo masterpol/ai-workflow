@@ -320,18 +320,18 @@ const hookFile = (root: string, event: string): string => deps.path.join(root, "
 test("installHooks writes both hooks, is idempotent, and replaces a raw graphify block while keeping other hook content", (t) => {
   const root = repo(t);
   const raw = `#!/bin/sh\necho keep-before\n${RAW_HOOK_START}\n( graphify raw rebuild )\n${RAW_HOOK_END}\necho keep-after\n`;
-  deps.fs.writeFileSync(hookFile(root, "post-commit"), raw);
+  deps.fs.writeFileSync(hookFile(root, "pre-commit"), raw);
   const first = installHooks(root, deps);
-  assert.deepEqual(first, { installed: ["post-commit", "post-checkout"], replacedRaw: ["post-commit"] });
-  const commit = deps.fs.readFileSync(hookFile(root, "post-commit"));
+  assert.deepEqual(first, { installed: ["pre-commit", "post-checkout"], replacedRaw: ["pre-commit"], removed: [] });
+  const commit = deps.fs.readFileSync(hookFile(root, "pre-commit"));
   assert.match(commit, /^#!\/bin\/sh\necho keep-before\n# ai-workflow-graphify-start\n/);
   assert.match(commit, /# ai-workflow-graphify-end\necho keep-after\n$/);
   assert.doesNotMatch(commit, /graphify raw rebuild|graphify-hook-start/);
   assert.match(commit, /graphify\.mts update/);
   assert.equal(deps.fs.readFileSync(hookFile(root, "post-checkout")), `#!/bin/sh\n${hookBlock("post-checkout")}\n`);
   assert.equal(deps.fs.statSync(hookFile(root, "post-checkout")).mode & 0o111, 0o111);
-  assert.deepEqual(installHooks(root, deps), { installed: ["post-commit", "post-checkout"], replacedRaw: [] });
-  assert.equal(deps.fs.readFileSync(hookFile(root, "post-commit")), commit, "a second install changes nothing");
+  assert.deepEqual(installHooks(root, deps), { installed: ["pre-commit", "post-checkout"], replacedRaw: [], removed: [] });
+  assert.equal(deps.fs.readFileSync(hookFile(root, "pre-commit")), commit, "a second install changes nothing");
 });
 
 test("installHooks removes graphify's checkout block too, even beside an existing workflow block", (t) => {
@@ -339,7 +339,7 @@ test("installHooks removes graphify's checkout block too, even beside an existin
   const text = `#!/bin/sh\n# graphify-checkout-hook-start\n( raw checkout rebuild )\n# graphify-checkout-hook-end\n${hookBlock("post-checkout")}\n`;
   deps.fs.writeFileSync(hookFile(root, "post-checkout"), text);
   const result = installHooks(root, deps);
-  assert.deepEqual(result, { installed: ["post-commit", "post-checkout"], replacedRaw: ["post-checkout"] });
+  assert.deepEqual(result, { installed: ["pre-commit", "post-checkout"], replacedRaw: ["post-checkout"], removed: [] });
   const after = deps.fs.readFileSync(hookFile(root, "post-checkout"));
   assert.doesNotMatch(after, /raw checkout rebuild|graphify-checkout-hook/);
   assert.equal(after.split("# ai-workflow-graphify-start").length - 1, 1, "exactly one workflow block");
@@ -358,13 +358,13 @@ test("installHooks refuses a symlinked hook and reports a non-repository", (t) =
   assert.deepEqual(installHooks(plain, deps), { error: "not a git work tree" });
 });
 
-test("the installed post-commit hook reruns graphify.mts in the background, but not for a graph-only commit", { skip: process.platform === "win32", timeout: 30000 }, async (t) => {
+test("the installed pre-commit hook reruns graphify.mts before the commit, but not for a graph-only commit", { skip: process.platform === "win32", timeout: 30000 }, async (t) => {
   const root = repo(t);
   // Marker and log live outside the repository so they never become part of a commit.
   const outside = tempFixture(deps, {});
   t.after(() => deps.fs.rmSync(outside, { recursive: true, force: true }));
   const marker = deps.path.join(outside, "rebuilt.txt");
-  // A stand-in for the real script: records each background run.
+  // A stand-in for the real script: records each run.
   deps.fs.mkdirSync(deps.path.join(root, "ai-framework/scripts"), { recursive: true });
   deps.fs.writeFileSync(deps.path.join(root, "ai-framework/scripts/graphify.mts"), `import { appendFileSync } from "node:fs";\nappendFileSync(${JSON.stringify(marker)}, process.argv.slice(2).join(" ") + "\\n");\n`);
   assert.ok(!("error" in installHooks(root, deps)));
@@ -375,20 +375,10 @@ test("the installed post-commit hook reruns graphify.mts in the background, but 
     assert.equal(deps.child.runSync("git", ["add", "-A"], { cwd: root, env }).status, 0);
     assert.equal(deps.child.runSync("git", ["commit", "-q", "-m", file], { cwd: root, env }).status, 0);
   };
-  const runs = async (count: number): Promise<number> => {
-    for (let i = 0; i < 100; i++) {
-      const seen = deps.fs.existsSync(marker) ? deps.fs.readFileSync(marker).split("\n").filter(Boolean).length : 0;
-      if (seen >= count) return seen;
-      await deps.clock.sleep(100);
-    }
-    return deps.fs.existsSync(marker) ? deps.fs.readFileSync(marker).split("\n").filter(Boolean).length : 0;
-  };
   commit("src/a.ts");
-  assert.equal(await runs(1), 1, "a code commit triggers one background rebuild");
-  assert.equal(deps.fs.readFileSync(marker), "update\n");
+  assert.equal(deps.fs.readFileSync(marker), "update\n", "a code commit rebuilds once, before the commit is written");
   deps.fs.rmSync(marker);
   commit("graphify-out/graph.json");
-  await deps.clock.sleep(1500);
   assert.equal(deps.fs.existsSync(marker), false, "a commit of graph outputs only does not rebuild");
 });
 
@@ -632,4 +622,57 @@ test("explicit outcome links survive shared-target hub filtering and retain thei
     assert.ok(result.edges.every(edge => edge.relation === "outcome-link" && edge.to === "README.md"));
     assert.deepEqual(result.hubs, []);
   } finally { deps.fs.rmSync(root, { recursive: true, force: true }); }
+});
+
+test("the pre-commit hook rebuilds the graph and stages it, so the commit carries its own graph and nothing is left dirty", (t) => {
+  const root = repo(t);
+  // A stand-in for graphify.mts that rewrites the tracked graph file, like a real rebuild.
+  deps.fs.mkdirSync(deps.path.join(root, "ai-framework/scripts"), { recursive: true });
+  deps.fs.writeFileSync(deps.path.join(root, "ai-framework/scripts/graphify.mts"), "import fs from 'node:fs'; fs.writeFileSync('graphify-out/graph.json', JSON.stringify({ built: process.argv[2] }) + '\\n');\n");
+  deps.fs.mkdirSync(deps.path.join(root, "graphify-out"), { recursive: true });
+  deps.fs.writeFileSync(deps.path.join(root, "graphify-out/graph.json"), "{}\n");
+  const git = (...args: string[]) => deps.child.runSync("git", args, { cwd: root, env: { ...process.env, GRAPHIFY_REBUILD_LOG: deps.path.join(root, "rebuild.log") } });
+  assert.equal(git("add", "-A").status, 0);
+  assert.equal(git("commit", "-q", "-m", "base", "--no-verify").status, 0);
+  assert.ok(!("error" in installHooks(root, deps)));
+  deps.fs.writeFileSync(deps.path.join(root, "notes.md"), "a change\n");
+  assert.equal(git("add", "notes.md").status, 0);
+  const commit = git("commit", "-q", "-m", "change");
+  assert.equal(commit.status, 0, commit.stderr);
+  const files = git("show", "--name-only", "--format=", "HEAD").stdout.trim().split("\n").sort();
+  assert.deepEqual(files, ["graphify-out/graph.json", "notes.md"], "the rebuilt graph is part of the commit");
+  assert.equal(git("status", "--porcelain", "--untracked-files=no").stdout.trim(), "", "nothing tracked is left modified");
+  // A commit that changes only graph outputs does not rebuild again.
+  deps.fs.writeFileSync(deps.path.join(root, "graphify-out/graph.json"), "{\"only\":true}\n");
+  assert.equal(git("add", "graphify-out/graph.json").status, 0);
+  assert.equal(git("commit", "-q", "-m", "graph only").status, 0);
+  assert.equal(deps.fs.readFileSync(deps.path.join(root, "graphify-out/graph.json")), "{\"only\":true}\n");
+});
+
+test("a failing rebuild never blocks the commit, and GRAPHIFY_SKIP_HOOK skips it", (t) => {
+  const root = repo(t);
+  deps.fs.mkdirSync(deps.path.join(root, "ai-framework/scripts"), { recursive: true });
+  deps.fs.writeFileSync(deps.path.join(root, "ai-framework/scripts/graphify.mts"), "process.exit(3);\n");
+  assert.ok(!("error" in installHooks(root, deps)));
+  const env = { ...process.env, GRAPHIFY_REBUILD_LOG: deps.path.join(root, "rebuild.log") };
+  deps.fs.writeFileSync(deps.path.join(root, "a.md"), "a\n");
+  assert.equal(deps.child.runSync("git", ["add", "-A"], { cwd: root }).status, 0);
+  assert.equal(deps.child.runSync("git", ["commit", "-q", "-m", "x"], { cwd: root, env }).status, 0);
+  deps.fs.writeFileSync(deps.path.join(root, "b.md"), "b\n");
+  assert.equal(deps.child.runSync("git", ["add", "-A"], { cwd: root }).status, 0);
+  assert.equal(deps.child.runSync("git", ["commit", "-q", "-m", "y"], { cwd: root, env: { ...env, GRAPHIFY_SKIP_HOOK: "1" } }).status, 0);
+});
+
+test("installHooks removes the older after-commit rebuild, keeps other post-commit content, and deletes a hook left empty", (t) => {
+  const root = repo(t);
+  const workflowOnly = `#!/bin/sh\n${hookBlock("pre-commit").replace("pre-commit", "pre-commit")}\n`;
+  // The legacy block is recognised by its markers, whatever it runs.
+  const legacy = workflowOnly.replace("Rebuilds graphify-out/ with", "Rebuilds graphify-out/graph.json with");
+  deps.fs.writeFileSync(hookFile(root, "post-commit"), legacy);
+  assert.deepEqual(installHooks(root, deps), { installed: ["pre-commit", "post-checkout"], replacedRaw: [], removed: ["post-commit"] });
+  assert.equal(deps.fs.existsSync(hookFile(root, "post-commit")), false, "a hook with nothing left is deleted");
+  deps.fs.writeFileSync(hookFile(root, "post-commit"), `#!/bin/sh\necho keep\n${RAW_HOOK_START}\n( raw )\n${RAW_HOOK_END}\n`);
+  assert.deepEqual((installHooks(root, deps) as { removed: string[] }).removed, ["post-commit"]);
+  assert.equal(deps.fs.readFileSync(hookFile(root, "post-commit")), "#!/bin/sh\necho keep\n");
+  assert.deepEqual((installHooks(root, deps) as { removed: string[] }).removed, [], "nothing left to remove");
 });

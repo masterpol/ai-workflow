@@ -229,15 +229,21 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
     const panels: Record<string, unknown>[] = [];
     const { database, structure, stack } = project;
 
-    type Entity = { name: string; columns: { name: string; type: string; pk: boolean }[]; unique: string[][] };
-    type Relation = { from: string; fromColumns: string[]; to: string; toColumns: string[] };
+    type Entity = { name: string; schema?: string; columns: { name: string; type: string; pk: boolean }[]; unique: string[][] };
+    type Relation = { from: string; fromSchema?: string; fromColumns: string[]; to: string; toSchema?: string; toColumns: string[] };
     const databaseValue = database.value as { entities: Entity[]; relationships: Relation[]; total: { entities: number; relationships: number } } | null;
     if (databaseValue && databaseValue.entities.length) {
       const entities = databaseValue.entities;
-      const index = new Map<string, number>();
-      entities.forEach((entity, position) => { if (!index.has(entity.name)) index.set(entity.name, position); });
+      // Tables from different schemas can share a name (`auth.users`, `public.users`). A name resolves to an entity only when exactly one
+      // candidate fits the schema the foreign key names; an ambiguous name is left unresolved (counted, not drawn) rather than guessed.
+      const byName = new Map<string, number[]>();
+      entities.forEach((entity, position) => byName.set(entity.name, [...(byName.get(entity.name) ?? []), position]));
+      const find = (tableName: string, schema: string | undefined): number | undefined => {
+        const candidates = (byName.get(tableName) ?? []).filter((position) => !schema || !entities[position].schema || entities[position].schema === schema);
+        return candidates.length === 1 ? candidates[0] : undefined;
+      };
       const all = databaseValue.relationships.flatMap((relation) => {
-        const from = index.get(relation.from), to = index.get(relation.to);
+        const from = find(relation.from, relation.fromSchema), to = find(relation.to, relation.toSchema);
         return from === undefined || to === undefined ? [] : [{ relation, from, to }];
       });
       // Archify refuses a relationship from an entity to itself, so self-references are counted, never drawn.
@@ -287,7 +293,7 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
           const type = fit(column.type, 20);
           return { name: emittedName, ...(column.type ? { type } : {}), ...(keys.length ? { key: keys.length === 1 ? keys[0] : keys } : {}), ...(reference ? { references: reference } : {}) };
         });
-        return { id: ids.get(position)!, label: fit(entity.name, 28), row: Math.floor(order / 6), col: order % 6, ...(attributes.length ? { attributes } : {}) };
+        return { id: ids.get(position)!, label: fit(entity.schema && (byName.get(entity.name)?.length ?? 0) > 1 ? `${entity.schema}.${entity.name}` : entity.name, 28), row: Math.floor(order / 6), col: order % 6, ...(attributes.length ? { attributes } : {}) };
       });
       const ends = new Map<number, number>();
       let undrawn = 0;
@@ -423,6 +429,7 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
     const real = fs.realpathSync(path.join(root, REPORT_DIRECTORY));
     if (path.relative(root, real) !== path.join(".project", "reports")) throw new FactsError("report directory resolves outside the project");
     const destination = path.join(real, name);
+    const notOwned = (file: string): string => `report-not-owned: ${file} (no matching Archify receipt or ${file}${WRITTEN_SUFFIX} record proves this tool wrote it; if it is yours to discard, delete ${REPORT_DIRECTORY}/${file} and any ${file}${WRITTEN_SUFFIX} that is not a hash, then run /state again)`;
     let exists = false;
     try {
       const stat = fs.lstatSync(destination);
@@ -431,7 +438,7 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
     } catch (error) { if (error instanceof FactsError) throw error; }
     // An existing draft is replaced only when the receipt or this tool's own record proves it wrote exactly those bytes.
     const owned = exists ? ownedDraft(real, destination, name) : null;
-    if (exists && !owned) throw new FactsError(`report-not-owned: ${name}`);
+    if (exists && !owned) throw new FactsError(notOwned(name));
     // "wx" refuses an existing path; the random suffix makes the temporary name unguessable.
     const temporary = `${destination}.tmp-${deps.proc.pid}-${Array.from(deps.crypto.randomBytes(6), (byte) => byte.toString(16).padStart(2, "0")).join("")}`;
     try {
@@ -439,17 +446,17 @@ export function createFactsGather(deps: RuntimeDeps = createNodeDeps(), limits: 
       if (!owned) {
         // A new draft is published with a hard link, which fails if anything appeared at the destination meanwhile.
         try { fs.linkSync(temporary, destination); } catch (error) {
-          if ((error as NodeJS.ErrnoException).code === "EEXIST") throw new FactsError(`report-not-owned: ${name}`);
+          if ((error as NodeJS.ErrnoException).code === "EEXIST") throw new FactsError(notOwned(name));
           // A filesystem without hard links (FAT, some network mounts): re-check absence, then rename (a documented, narrower window).
           let appeared = true;
           try { fs.lstatSync(destination); } catch (missing) { if ((missing as NodeJS.ErrnoException).code === "ENOENT") appeared = false; }
-          if (appeared) throw new FactsError(`report-not-owned: ${name}`);
+          if (appeared) throw new FactsError(notOwned(name));
           fs.renameSync(temporary, destination);
         }
       } else {
         // Re-check identity and bytes immediately before replacing; an edit or swap since the ownership check is refused.
         const again = readPinned(destination, MAX_FILE_BYTES);
-        if (!again || again.dev !== owned.dev || again.ino !== owned.ino || deps.crypto.sha256Hex(again.bytes) !== owned.sha) throw new FactsError(`report-not-owned: ${name}`);
+        if (!again || again.dev !== owned.dev || again.ino !== owned.ino || deps.crypto.sha256Hex(again.bytes) !== owned.sha) throw new FactsError(notOwned(name));
         fs.renameSync(temporary, destination);
       }
     } finally { fs.rmSync(temporary, { force: true }); }

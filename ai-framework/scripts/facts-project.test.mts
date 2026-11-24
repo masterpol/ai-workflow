@@ -56,9 +56,9 @@ test("Drizzle reads only the newest snapshot and journal, including columns, key
   assert.equal(result.status, "observed");
   assert.equal(value.dialect, "postgresql");
   assert.deepEqual(value.total, { entities: 2, relationships: 1 });
-  assert.deepEqual(value.entities[0], { name: "users", columns: [{ name: "id", type: "uuid", pk: true, nullable: false }, { name: "email", type: "text", pk: false, nullable: true }], unique: [["email"]] });
+  assert.deepEqual(value.entities[0], { name: "users", schema: "", columns: [{ name: "id", type: "uuid", pk: true, nullable: false }, { name: "email", type: "text", pk: false, nullable: true }], unique: [["email"]] });
   assert.ok(value.entities[1].columns.every((column: any) => column.pk));
-  assert.deepEqual(value.relationships, [{ from: "posts", fromColumns: ["user_id"], to: "users", toColumns: ["id"] }]);
+  assert.deepEqual(value.relationships, [{ from: "posts", fromSchema: "", fromColumns: ["user_id"], to: "users", toSchema: "", toColumns: ["id"] }]);
   assert.deepEqual(reads.sort(), ["drizzle/meta/0002_snapshot.json", "drizzle/meta/_journal.json"]);
 });
 
@@ -189,7 +189,7 @@ test("stack reads dependency counts, fixed frameworks and script names, never bo
   assert.doesNotMatch(JSON.stringify(result), /password|PRIVATE BODY/);
 });
 
-for (const [lock, manager] of [["bun.lock", "bun"], ["pnpm-lock.yaml", "pnpm"], ["yarn.lock", "yarn"], ["package-lock.json", "npm"]]) {
+for (const [lock, manager] of [["bun.lock", "bun"], ["bun.lockb", "bun"], ["pnpm-lock.yaml", "pnpm"], ["yarn.lock", "yarn"], ["package-lock.json", "npm"]]) {
   test(`manager comes from ${lock}`, () => {
     const result = api().stack(fixture({ "package.json": "{}", [lock]: "" }));
     assert.equal((result.value as any).manager, manager); assert.equal((result.value as any).language, "JavaScript");
@@ -236,4 +236,27 @@ test("constraint discovery has its own ceiling: 3000 empty composite primary key
   put(root, "drizzle/meta/0002_snapshot.json", { dialect: "postgresql", tables: { t: { name: "t", columns: { id: { name: "id", type: "text" } }, uniqueConstraints } } });
   result = api().database(root);
   assert.equal(result.status, "stale"); assert.match(result.note!, /discovery budget reached/);
+});
+
+test("directory discovery is sorted, so the capped tree does not depend on the filesystem's listing order", () => {
+  const root = fixture({ "zeta/a.ts": "", "alpha/a.ts": "", "mid/a.ts": "", "beta/a.ts": "" });
+  const reversed = new Proxy(deps.fs, { get(target, key) {
+    if (key === "readdirSync") return (dir: string) => [...target.readdirSync(dir)].sort().reverse();
+    return (target as any)[key];
+  } });
+  const sorted = (api({ entriesPerDir: 2 }, { ...deps, fs: reversed }).structure(root).value as any).nodes.map((node: any) => node.path);
+  const natural = (api({ entriesPerDir: 2 }).structure(root).value as any).nodes.map((node: any) => node.path);
+  assert.deepEqual(sorted, natural);
+  assert.deepEqual(sorted, ["alpha", "beta"], "the first two names in sorted order are kept");
+});
+
+test("a table in another schema keeps its schema, and a foreign key keeps the schema it names", () => {
+  const root = fixture(); put(root, "drizzle/meta/0000_snapshot.json", { dialect: "postgresql", tables: {
+    "auth.users": { name: "users", schema: "auth", columns: {}, foreignKeys: {} },
+    "public.posts": { name: "posts", schema: "public", columns: {}, foreignKeys: { a: { tableFrom: "posts", columnsFrom: ["u"], tableTo: "users", schemaTo: "auth", columnsTo: ["id"] } } },
+  } });
+  const value = api().database(root).value as any;
+  assert.deepEqual(value.entities.map((entity: any) => entity.schema), ["auth", "public"]);
+  assert.equal(value.relationships[0].toSchema, "auth");
+  assert.equal(value.relationships[0].fromSchema, "public");
 });

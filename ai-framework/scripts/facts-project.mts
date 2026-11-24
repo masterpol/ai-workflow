@@ -62,7 +62,7 @@ export function createProjectFacts(deps: RuntimeDeps, helpers: {
     let listing: string[];
     try {
       if (!stat(root, directory).isDirectory()) return unavailable([directory], "Drizzle metadata directory refused");
-      listing = fs.readdirSync(path.join(root, directory));
+      listing = fs.readdirSync(path.join(root, directory)).sort();
     } catch (error) {
       if ((error as { code?: string }).code === "ENOENT") return fact(null, "unconfigured", [], "checked drizzle/meta/_journal.json and drizzle/meta/NNNN_snapshot.json; no Drizzle snapshot");
       return unavailable([directory], "Drizzle metadata directory refused");
@@ -76,8 +76,8 @@ export function createProjectFacts(deps: RuntimeDeps, helpers: {
     const snapshot = object(source.value);
     if (!snapshot.tables || typeof snapshot.tables !== "object" || Array.isArray(snapshot.tables)) return unavailable([snapshotPath], "Drizzle snapshot has no tables object");
     const counts = new Map<string, number>([["entities", 0], ["fields", 0], ["relationships", 0], ["primaryKeys", 0], ["uniqueKeys", 0]]);
-    const entities: { name: string; columns: { name: string; type: string; pk: boolean; nullable: boolean }[]; unique: string[][] }[] = [];
-    const relationships: { from: string; fromColumns: string[]; to: string; toColumns: string[] }[] = [];
+    const entities: { name: string; schema: string; columns: { name: string; type: string; pk: boolean; nullable: boolean }[]; unique: string[][] }[] = [];
+    const relationships: { from: string; fromSchema: string; fromColumns: string[]; to: string; toSchema: string; toColumns: string[] }[] = [];
     for (const key in object(snapshot.tables)) {
       if (!Object.hasOwn(snapshot.tables, key)) continue;
       if (counts.get("entities")! >= entitiesLimit) { capped = true; break; }
@@ -103,12 +103,12 @@ export function createProjectFacts(deps: RuntimeDeps, helpers: {
         counts.set("uniqueKeys", counts.get("uniqueKeys")! + 1);
         unique.push(strings(object(object(table.uniqueConstraints)[k]).columns).slice(0, fieldsLimit));
       }
-      entities.push({ name: tableName, columns, unique });
+      entities.push({ name: tableName, schema: name(table.schema), columns, unique });
       for (const k in object(table.foreignKeys)) {
         if (counts.get("relationships")! >= relationsLimit) { capped = true; break; }
         counts.set("relationships", counts.get("relationships")! + 1);
         const relation = object(object(table.foreignKeys)[k]);
-        relationships.push({ from: name(relation.tableFrom) || tableName, fromColumns: strings(relation.columnsFrom), to: name(relation.tableTo), toColumns: strings(relation.columnsTo) });
+        relationships.push({ from: name(relation.tableFrom) || tableName, fromSchema: name(relation.schemaFrom) || name(table.schema), fromColumns: strings(relation.columnsFrom), to: name(relation.tableTo), toSchema: name(relation.schemaTo), toColumns: strings(relation.columnsTo) });
       }
     }
     const journal = json(root, journalPath), evidence = [snapshotPath];
@@ -134,7 +134,7 @@ export function createProjectFacts(deps: RuntimeDeps, helpers: {
       if (counts.get("visited")! >= dirsLimit) { capped = true; return; }
       if (!stat(root, rel).isDirectory()) throw new Error("directory refused");
       counts.set("visited", counts.get("visited")! + 1);
-      const listing = fs.readdirSync(rel ? path.join(root, rel) : root);
+      const listing = fs.readdirSync(rel ? path.join(root, rel) : root).sort();
       if (listing.length > entriesLimit) capped = true;
       for (const entry of listing.slice(0, entriesLimit)) {
         if (SKIP.has(entry)) continue;
@@ -175,7 +175,7 @@ export function createProjectFacts(deps: RuntimeDeps, helpers: {
     }
     const evidence = ["package.json"];
     let manager: string | null = null;
-    for (const [lock, candidate] of [["bun.lock", "bun"], ["pnpm-lock.yaml", "pnpm"], ["yarn.lock", "yarn"], ["package-lock.json", "npm"]]) {
+    for (const [lock, candidate] of [["bun.lock", "bun"], ["bun.lockb", "bun"], ["pnpm-lock.yaml", "pnpm"], ["yarn.lock", "yarn"], ["package-lock.json", "npm"]]) {
       if (present(root, lock)) { manager = candidate; evidence.push(lock); break; }
     }
     const scripts = Object.keys(object(pkg.scripts));
