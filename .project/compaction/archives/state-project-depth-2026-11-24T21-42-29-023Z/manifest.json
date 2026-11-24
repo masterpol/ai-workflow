@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-project-depth",
+  "sourceRoot": ".project/pitches/state-project-depth",
+  "archivedAt": "2026-11-24T21:42:29.025Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "4dd10efdbf48fe7c051de87c170d5b11e2bebcc93b31f54f973b1ab262bf9daa",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-c2-code-reviewer.md": {
+      "hash": "920685bea3143cece6b613c8dd7c144824549a34aa9255c898692e97963fb341",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-c2-security-reviewer.md": {
+      "hash": "7471a5a36e824fa6378c5678beec874774b764ac3897c9b10afe593d78d19530",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-c2-test-coverage-checker.md": {
+      "hash": "1762f48165a9f7d13588c08307f7b7bc1206aca17db80a59dabac3033d0fb6ad",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-c3-code-reviewer.md": {
+      "hash": "266bbe395bea3df7ef5c45b6720aac1d009d8cf91bee9e61165ccdb09613cf7a",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-c3-security-reviewer.md": {
+      "hash": "6b03196f9efb3f1fc8253ee1f4f38e74c70f3c6007d306a5f4ad9f8a19453f1e",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-code-reviewer.md": {
+      "hash": "c4297435772b4855231809e4362606c28928b336abfff732a5aa3268f827162c",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-cross-pitch-conflict-checker.md": {
+      "hash": "a52c2b6d717b20afe8ba7935f1c7aaabb7d7b1524b5548d3a792d7045e7e435c",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-security-reviewer.md": {
+      "hash": "9b147af914ba63d7ff0048974833f067c1d4a406fa628e26ae864a8aa6797f7b",
+      "mode": 420
+    },
+    "audit-reports/state-project-depth-test-coverage-checker.md": {
+      "hash": "70eae7501ec2927b049f65079c144a0dc80ad5578dc35f406a542b224526821e",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "6c27d69d6a3f904f5fc22ba9117a202e6db8b08f82d82917ffc22863f06b8e20",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "f1822f2c4831f685b9e5579f3a833169b38f42705591371c09d36caeba9a32bf",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "34053caec5beec22313c7702634ffd94f1cac0114cb360650c25d7c5b468d134",
+      "mode": 420
+    }
+  }
+}

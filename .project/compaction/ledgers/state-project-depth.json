@@ -1,0 +1,120 @@
+{
+  "schemaVersion": 2,
+  "slug": "state-project-depth",
+  "sections": [
+    {
+      "source": "SHIPPED.md#summary",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-project-depth-for-installed-projects.md",
+      "helps": "What /state shows at project depth (schema ERD, folder tree, stack) and when a bundle update resets the last delivery.",
+      "bodyHash": "sha256:1011f9dd709c1d4adbf0eeb5afd5d76e36a000787b60719b84fff605b12508e4"
+    },
+    {
+      "source": "SHIPPED.md#scope-status",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:8246de6c9cd75b9c3b8ecd927ee59473cce06b8c78031d1e86b05fc8318e56b0"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honoured",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-project-depth-for-installed-projects.md",
+      "helps": "The limits a project-depth collector keeps: no project code, no child process, no database or network, no model text, no deletion without a matching receipt hash.",
+      "bodyHash": "sha256:4c3ae48619c93339ccfcf1f123e2851f97450ce28a070305f68a06928e4ac8a2"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-real-schema-breaks-a-naive-erd.md",
+      "helps": "Why a naive ERD from a real schema is refused by Archify (self-references, hidden targets, name collisions) and how the builder avoids it.",
+      "bodyHash": "sha256:4f63de3683877e24618ab26d4d203b96da3af108d4c583df477910c438c2d4b6"
+    },
+    {
+      "source": "SHIPPED.md#deviations",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-project-depth-for-installed-projects.md",
+      "helps": "Why depth is detected, not configured, and Prisma was dropped.",
+      "bodyHash": "sha256:6f1afaf16d515fb869439f1c112909ba194a949db073bf52fd8a55ad100ab3d3"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/patterns/pin-the-descriptor-you-hashed-before-removing-or-replacing.md",
+      "helps": "How to remove or replace a file you hashed without a check-then-act race: pin the descriptor, publish by hard link.",
+      "bodyHash": "sha256:5c24847d508393f9afddc0031f6a083129a2d90aef85bb0c2fd190134030ed1d"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:cd4b4baabd6f940bb4537e1e6df3ec91bd0c4cb6a4d76bf1f4ea3c9f565cfeeb"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:d3bb65ca9042626befc37634f000c246ebb64a6ebbcab829e1f6da3146a575b3"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-project-depth-for-installed-projects.md",
+      "helps": "The pitch's exclusions, kept as the decision's limits.",
+      "bodyHash": "sha256:68a65ec7597cd0cb637ecf524281be90a45215496494862447c646ae812ee6ee"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-real-schema-breaks-a-naive-erd.md",
+      "helps": "The unknowns resolved at shaping and where their answers live.",
+      "bodyHash": "sha256:18d5fc88416faf47abc3b24f99ee727c1abdd4baef194c14cdce2f0a0ad78eb6"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:9f1035b8f0ccb857775809650886143750b1ea15614c8c9d6d90c3a979fe2572"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:9fafda5f1ad20a67edec00d77d30272c53905553d178d6c5207f29bc4c2b3769"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:b3a68d11b84bdd9929d5b3bd7ac6cd54a22a1081461cd56178866457b523a540"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:97a4e3fae1ed996a9328a6ea2e67ccc5fb57db0b74cd910b69484ca76b848aff"
+    },
+    {
+      "path": "audit-reports/",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:b85f178b70701edb5c71eda6a79a9c17b1ed3836a4f7af83292c6352d3c00d2d",
+      "count": 9
+    }
+  ],
+  "coverage": 0.7,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-24T21:42:28.863Z"
+}
