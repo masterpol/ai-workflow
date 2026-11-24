@@ -15,5 +15,8 @@ reports/
 
 Regenerate any time (see `ai-framework/integrations/state-report.md`):
 `node ai-framework/scripts/facts-gather.mts --explainer state.explainer.json`, then Archify `validate` and
-`deliver`. Everything here is safe to delete. Files left by the previous `/state` (`state.json`, `index.html`,
+`deliver`. `/state` refuses to overwrite a draft it did not write or deliver (`report-not-owned`; it records what it wrote in
+`state.explainer.json.written-sha256`), and `bundle-sync --apply`
+removes the last delivery only when its hashes match `state.delivery.json`, so `/state` can be re-run against the new
+bundle. Everything here is safe to delete. Files left by the previous `/state` (`state.json`, `index.html`,
 `theme.json`, `settings.json`, `fragments/`) are not read any more and are never deleted for you.

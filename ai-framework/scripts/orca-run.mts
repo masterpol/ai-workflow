@@ -5,7 +5,7 @@ import type { Assignment, DispatchOptions, Placement, ScopeSpec } from "./orca-d
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport } from "./orca-preflight.mts";
 import { reconcile } from "./orca-reconcile.mts";
-import { createLedger, validAuthorizedPaths } from "./orca-ledger.mts";
+import { RUN_ID_PATTERN, createLedger, validAuthorizedPaths } from "./orca-ledger.mts";
 import { freeOpencodePort } from "./opencode-service.mts";
 import { decideStart } from "./orca-start.mts";
 import type { CheckSpec, ReconcileAttempt } from "./orca-reconcile.mts";
@@ -184,11 +184,26 @@ function rejectPrototypeKeys(value: unknown, depth = 0): void {
   }
 }
 
-function parseInput(text: string): Json {
+function parseInput(text: string, command: Command): Json {
   let value: unknown;
   try { value = JSON.parse(text); } catch { throw refused("input-invalid-json"); }
   if (!isPlain(value)) throw refused("input-not-an-object");
   rejectPrototypeKeys(value);
+  if (command === "dispatch") {
+    // JSON.parse keeps only the last duplicate. Inspect top-level keys before that can hide a repeated runId.
+    const keys = new Set<string>();
+    let depth = 0;
+    for (const token of text.matchAll(/"(?:[^"\\]|\\.)*"|[{}\[\]]/g)) {
+      const part = token[0];
+      if (part === "{" || part === "[") depth++;
+      else if (part === "}" || part === "]") depth--;
+      else if (depth === 1 && /^\s*:/.test(text.slice((token.index ?? 0) + part.length))) {
+        const key = JSON.parse(part) as string;
+        if (keys.has(key)) throw usage("dispatch");
+        keys.add(key);
+      }
+    }
+  }
   return value;
 }
 
@@ -196,10 +211,10 @@ function parseInput(text: string): Json {
 
 const isPlain = (value: unknown): value is Json => value !== null && typeof value === "object" && !Array.isArray(value);
 const bad = (what: string): CliError => refused(`invalid-${what}`);
-function exactKeys(value: unknown, required: readonly string[], optional: readonly string[], what: string): Json {
-  if (!isPlain(value)) throw bad(what);
+function exactKeys(value: unknown, required: readonly string[], optional: readonly string[], what: string, invalid = bad(what)): Json {
+  if (!isPlain(value)) throw invalid;
   const keys = Object.keys(value);
-  if (keys.some((key) => !required.includes(key) && !optional.includes(key)) || required.some((key) => !keys.includes(key))) throw bad(what);
+  if (keys.some((key) => !required.includes(key) && !optional.includes(key)) || required.some((key) => !keys.includes(key))) throw invalid;
   return value;
 }
 const text = (value: unknown, what: string): string => { if (typeof value !== "string") throw bad(what); return value; };
@@ -222,8 +237,9 @@ const optionalBool = (value: unknown, what: string): boolean | undefined => {
   return value;
 };
 
-function dispatchInput(input: Json): { base: Omit<DispatchOptions, "attemptId" | "root" | "deps">; attemptId: string; timeoutMs: number; maxRetries?: number } {
-  const value = exactKeys(input, ["coordinator", "scope", "attemptId", "timeoutMs"], ["vendor", "assign", "placement", "maxRetries"], "dispatch");
+export function dispatchInput(input: Json): { base: Omit<DispatchOptions, "attemptId" | "root" | "deps"> & { runId?: string }; attemptId: string; timeoutMs: number; maxRetries?: number } {
+  const value = exactKeys(input, ["coordinator", "scope", "attemptId", "timeoutMs"], ["vendor", "assign", "placement", "maxRetries", "runId"], "dispatch", usage("dispatch"));
+  if (value.runId !== undefined && (typeof value.runId !== "string" || !RUN_ID_PATTERN.test(value.runId))) throw usage("dispatch");
   if ((value.vendor === undefined) === (value.assign === undefined)) throw bad("dispatch");
   let assign: Assignment | undefined;
   if (value.assign !== undefined) {
@@ -249,7 +265,8 @@ function dispatchInput(input: Json): { base: Omit<DispatchOptions, "attemptId" |
     if (typeof value.maxRetries !== "number" || !Number.isInteger(value.maxRetries) || value.maxRetries < 0 || value.maxRetries > 5) throw bad("maxRetries");
     maxRetries = value.maxRetries;
   }
-  return { base: { coordinator: text(value.coordinator, "coordinator"), ...(assign ? { assign } : { vendor: text(value.vendor, "vendor") }), scope: spec, deadlineMs: 0, ...(placement ? { placement } : {}) },
+  return { base: { coordinator: text(value.coordinator, "coordinator"), ...(assign ? { assign } : { vendor: text(value.vendor, "vendor") }), scope: spec, deadlineMs: 0, ...(placement ? { placement } : {}),
+    ...(value.runId !== undefined ? { runId: value.runId as string } : {}) },
     attemptId: text(value.attemptId, "attemptId"), timeoutMs: timeoutOf(value.timeoutMs), ...(maxRetries !== undefined ? { maxRetries } : {}) };
 }
 
@@ -330,7 +347,7 @@ async function execute(parsed: Parsed, deps: RuntimeDeps): Promise<{ output: Jso
     // The same switch the libraries obey: with it off, status still reports but exits 3.
     return { output, exit: output.enabled === true ? EXIT.ok : EXIT.refused };
   }
-  const input = parseInput(readInputFile(parsed.root, root, parsed.input as string, deps));
+  const input = parseInput(readInputFile(parsed.root, root, parsed.input as string, deps), parsed.command);
   const deadlineFor = (timeoutMs: number): number => deps.clock.perfNowMs() + timeoutMs;
   let output: Json;
   if (parsed.command === "dispatch") {

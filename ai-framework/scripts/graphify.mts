@@ -611,25 +611,44 @@ export const RAW_HOOK_MARKERS: ReadonlyArray<readonly [string, string]> = [
   [RAW_HOOK_START, RAW_HOOK_END],
   ["# graphify-checkout-hook-start", "# graphify-checkout-hook-end"],
 ];
-export const HOOK_EVENTS = ["post-commit", "post-checkout"] as const;
+export const HOOK_EVENTS = ["pre-commit", "post-checkout"] as const;
+/** Older installs rebuilt the graph in the background after the commit, which left the rebuilt files uncommitted. */
+export const LEGACY_HOOK_EVENTS = ["post-commit"] as const;
 
 /** True when a hook still carries one of graphify's raw rebuild blocks. */
 export function hasRawHook(text: string): boolean {
   return RAW_HOOK_MARKERS.some(([start, end]) => { const from = text.indexOf(start); return from !== -1 && text.indexOf(end, from) !== -1; });
 }
 
-/** POSIX sh block that rebuilds the graph in the background through this script, so the knowledge overlay is applied. */
+/**
+ * POSIX sh block that rebuilds the graph through this script, so the knowledge overlay is applied.
+ * `pre-commit` rebuilds before the commit is written and stages the tracked graph files, so the commit carries its own graph and
+ * nothing is left dirty afterwards; it never blocks a commit. `post-checkout` rebuilds in the background after a branch switch.
+ */
 export function hookBlock(event: (typeof HOOK_EVENTS)[number]): string {
-  const trigger = event === "post-commit"
+  const commit = event === "pre-commit";
+  const trigger = commit
     ? [
-      "  # Only graph outputs changed: nothing to rebuild (avoids a loop when graphify-out/ is tracked).",
-      "  changed=$(git diff-tree --no-commit-id --name-only -r --root HEAD 2>/dev/null)",
-      "  [ -n \"$(printf '%s\\n' \"$changed\" | grep -v '^graphify-out/' | grep -v '^$')\" ] || exit 0",
+      "  # Only graph outputs staged: nothing to rebuild (avoids a loop when graphify-out/ is tracked).",
+      "  staged=$(git diff --cached --name-only 2>/dev/null)",
+      "  [ -n \"$(printf '%s\\n' \"$staged\" | grep -v '^graphify-out/' | grep -v '^$')\" ] || exit 0",
     ]
     : ["  # Branch checkouts only, not file checkouts.", "  [ \"${3:-0}\" = \"1\" ] || exit 0"];
+  const run = "node --experimental-strip-types --disable-warning=ExperimentalWarning ai-framework/scripts/graphify.mts update";
+  const action = commit
+    ? [
+      `  ${run} >>"$log" 2>&1 </dev/null || exit 0`,
+      "  # Stage only graph outputs this repository already tracks; a failed rebuild leaves the commit as it was.",
+      "  tracked=$(git ls-files -- graphify-out 2>/dev/null)",
+      "  [ -n \"$tracked\" ] && printf '%s\\n' \"$tracked\" | xargs git add -- >>\"$log\" 2>&1",
+      "  exit 0",
+    ]
+    : [`  nohup ${run} >>"$log" 2>&1 </dev/null &`];
   return [
     HOOK_START,
-    `# Rebuilds graphify-out/graph.json with the workflow's knowledge overlay after each ${event}.`,
+    commit
+      ? "# Rebuilds graphify-out/ with the workflow's knowledge overlay before each commit and stages it, so the commit includes the graph."
+      : `# Rebuilds graphify-out/graph.json with the workflow's knowledge overlay after each ${event}.`,
     "# Installed by: node ai-framework/scripts/graphify.mts setup",
     "(",
     "  [ \"${GRAPHIFY_SKIP_HOOK:-0}\" = \"1\" ] && exit 0",
@@ -644,7 +663,7 @@ export function hookBlock(event: (typeof HOOK_EVENTS)[number]): string {
     "  log=${GRAPHIFY_REBUILD_LOG:-$HOME/.cache/graphify-rebuild.log}",
     "  mkdir -p \"$(dirname \"$log\")\" 2>/dev/null",
     "  cd \"$root\" || exit 0",
-    "  nohup node --experimental-strip-types --disable-warning=ExperimentalWarning ai-framework/scripts/graphify.mts update >>\"$log\" 2>&1 </dev/null &",
+    ...action,
     ")",
     HOOK_END,
   ].join("\n");
@@ -667,16 +686,17 @@ export function hooksDir(root: string, deps: RuntimeDeps): string | undefined {
 }
 
 /**
- * Installs the overlay-aware rebuild block into post-commit and post-checkout. An existing workflow block is refreshed,
+ * Installs the overlay-aware rebuild block into pre-commit (rebuild and stage) and post-checkout, and removes the older post-commit one. An existing workflow block is refreshed,
  * a raw `graphify hook install` block is replaced in place, and any other hook content is kept. A hook that is a
  * symlink or not a regular file is refused, never followed.
  */
-export function installHooks(root: string, deps: RuntimeDeps): { installed: string[]; replacedRaw: string[] } | { error: string } {
+export function installHooks(root: string, deps: RuntimeDeps): { installed: string[]; replacedRaw: string[]; removed: string[] } | { error: string } {
   const { fs, path } = deps;
   const dir = hooksDir(root, deps);
   if (!dir) return { error: "not a git work tree" };
   const installed: string[] = [];
   const replacedRaw: string[] = [];
+  const removed: string[] = [];
   fs.mkdirSync(dir, { recursive: true });
   for (const event of HOOK_EVENTS) {
     const file = path.join(dir, event);
@@ -708,7 +728,30 @@ export function installHooks(root: string, deps: RuntimeDeps): { installed: stri
     fs.chmodSync(file, 0o755);
     installed.push(event);
   }
-  return { installed, replacedRaw };
+  // An older install rebuilt the graph after the commit, which left the rebuilt files uncommitted. That block (and graphify's raw one)
+  // is removed from post-commit; other hook content is kept, and a hook left with nothing but its shebang is deleted.
+  for (const event of LEGACY_HOOK_EVENTS) {
+    const file = path.join(dir, event);
+    let text: string;
+    try {
+      const stat = fs.lstatSync(file);
+      if (stat.isSymbolicLink() || !stat.isFile()) return { error: `${event} hook is not a regular file; remove the graphify block by hand` };
+      text = fs.readFileSync(file);
+    } catch (error) {
+      if ((error as { code?: string }).code === "ENOENT") continue;
+      return { error: `${event} hook is unreadable` };
+    }
+    let current = text;
+    for (const [start, end] of [[HOOK_START, HOOK_END], ...RAW_HOOK_MARKERS] as const) {
+      for (let swapped = replaceBlock(current, start, end, ""); swapped !== undefined; swapped = replaceBlock(current, start, end, "")) current = swapped;
+    }
+    if (current === text) continue;
+    current = current.replace(/\n{3,}/g, "\n\n").replace(/\n+$/, "\n");
+    if (current.replace(/^#!.*$/m, "").trim() === "") fs.rmSync(file, { force: true });
+    else fs.writeFileSync(file, current);
+    removed.push(event);
+  }
+  return { installed, replacedRaw, removed };
 }
 
 /** CLI entry. Returns the exit code; all output goes through deps.io. */
@@ -786,7 +829,7 @@ export function main(argv: string[], deps: RuntimeDeps): number {
   if (command === "setup") {
     const hooks = installHooks(root, deps);
     note += "error" in hooks ? `; git hooks not installed (${hooks.error})`
-      : `; installed the workflow graph rebuild in ${hooks.installed.join(" and ")} hooks${hooks.replacedRaw.length ? ` (replaced the raw graphify block in ${hooks.replacedRaw.join(" and ")}, which skipped the knowledge overlay)` : ""}`;
+      : `; installed the workflow graph rebuild in ${hooks.installed.join(" and ")} hooks${hooks.replacedRaw.length ? ` (replaced the raw graphify block in ${hooks.replacedRaw.join(" and ")}, which skipped the knowledge overlay)` : ""}${hooks.removed.length ? `; removed the older after-commit rebuild from ${hooks.removed.join(" and ")}, which left the graph uncommitted` : ""}`;
   }
   report(graph, problems, io, json, wrote, `${note}.`, workflow);
   return 0;

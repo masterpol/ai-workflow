@@ -109,6 +109,12 @@ named instead of left for the next doctor run to fail on:
    the old script installs the new scripts; the new script then reports their current next steps.
    Run the migration without flags to review its plan, then `--apply` after approval. It preserves
    local templates and all legacy records. Upgrading legacy pitch content is a separate gated operation.
+5. **Report reset** (`reports`): when the sync applies or prunes files, `--apply` removes the last `/state` delivery (`state.html`, `state.explainer.json`,
+   then `state.delivery.json`) only when each file's SHA-256 matches the receipt. An edited file is kept and named,
+   and so are legacy pre-2.51 pages. This is the single exception to "`.project/` is never touched". It refuses
+   symlinks, a reports folder that changed identity, and a file swapped in after its hash check. Re-run `/state` afterwards so the page reflects the new bundle.
+6. **Archify pin** (`archify-pin`): when the source's pinned Archify commit differs from the installed one, the
+   `add-skill install ... --ref <pin>` command is printed. Installing it stays the human's choice.
 
 A project synced from an **older** bundle version runs its own older script for the first apply.
 For an installation with JavaScript entries, that command is still

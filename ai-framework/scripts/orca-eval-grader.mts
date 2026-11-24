@@ -1,9 +1,10 @@
-import { pickImplementer } from "./orca-assign.mts";
-import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries } from "./orca-dispatch.mts";
+import { nextMember, pickImplementer, pickReviewer } from "./orca-assign.mts";
+import { classifyLiveness, collectReport, dispatchScope, dispatchWithRetries, loadOf } from "./orca-dispatch.mts";
 import type { DispatchOptions, DispatchOutcome, MailMessage, Placement, ScopeSpec } from "./orca-dispatch.mts";
 import { verifyEvidence } from "./orca-evidence.mts";
 import { isWorkerContext, workerBrief } from "./orca-launch-gate.mts";
 import { createLedger } from "./orca-ledger.mts";
+import type { LedgerRecord } from "./orca-ledger.mts";
 import { resolveOpenCodeAgentId, VENDORS } from "./orca-policy.mts";
 import { report as preflightReport, SUPPORTED_VERSION } from "./orca-preflight.mts";
 import type { Receipt, Run } from "./orca-preflight.mts";
@@ -45,7 +46,7 @@ export interface Summary {
 export interface GradeReport { cases: CaseResult[]; summary: Summary }
 
 /** The libraries the grader drives; tests replace single entries with in-memory mutants. */
-export const LIBRARIES = Object.freeze({ dispatchScope, dispatchWithRetries, collectReport, classifyLiveness, workerBrief, isWorkerContext, preflightReport, reconcile, verifyEvidence, resolveOpenCodeAgentId });
+export const LIBRARIES = Object.freeze({ loadOf, pickImplementer, pickReviewer, nextMember, dispatchScope, dispatchWithRetries, collectReport, classifyLiveness, workerBrief, isWorkerContext, preflightReport, reconcile, verifyEvidence, resolveOpenCodeAgentId });
 export type GraderLibraries = typeof LIBRARIES;
 export interface GradeOptions { deps: RuntimeDeps; root?: string; libs?: Partial<GraderLibraries>; only?: readonly string[] }
 
@@ -604,6 +605,79 @@ const observeOpenCodeAgentId: Observer = async (given, ctx) => {
   };
 };
 
+/** Drives real pickers and load accounting over an in-memory attempt ledger; no expected values enter this observer. */
+const observeBalancedRoles: Observer = async (given, ctx) => {
+  const input = obj(given.input), pools = obj(input.pools), runId = str(input.runId);
+  const rows = Array.isArray(input.ownershipMatrix) ? input.ownershipMatrix.map(obj) : [];
+  const record = (row: Json, index: number): LedgerRecord => ({
+    attemptKey: `attempt:balance-${index}`, taskKey: `task:${str(row.scope) || `matrix-${index}`}`,
+    vendor: str(row.vendor), state: str(row.state) as LedgerRecord["state"], createdAt: index,
+    ...(typeof row.runId === "string" ? { runId: row.runId } : {}),
+    ...(typeof row.reportId === "string" ? { reportId: row.reportId } : {}),
+    ...(typeof row.processOwnerPid === "number" ? { processOwnerPid: row.processOwnerPid } : {}),
+  });
+  const matrix = rows.map(record);
+  const ownershipCounts = matrix.map((row) => ctx.libs.loadOf([row], runId).get(row.vendor) ?? 0);
+  const liveCounts = matrix.map((row) => ctx.libs.loadOf([row], undefined).get(row.vendor) ?? 0);
+  // Other-Run and legacy rows remain in the sequence ledger, so forgetting the Run filter changes picks.
+  const ledger = matrix.filter((row) => row.runId !== runId);
+  const owns = (row: LedgerRecord): boolean => row.processOwnerPid !== undefined
+    || ["claimed", "launched", "unknown-liveness", "completed"].includes(row.state)
+    || (row.state === "settled" && row.reportId !== undefined);
+  const sequence = Array.isArray(input.sequence) ? input.sequence.map(obj) : [];
+  const picks: string[] = [], used = new Set<string>();
+  let fair = true, independent = true, deterministic = true, resumed = true, uncertain = false, rotated = false;
+  for (const step of sequence) {
+    const pool = strings(step.pool ?? pools[str(step.role)]), skip = strings(step.skip);
+    const attempts = ledger.filter((row) => row.taskKey === `task:${str(step.scope)}`);
+    const owner = attempts.find(owns);
+    const tried = attempts.filter((row) => !owns(row)).map((row) => row.vendor);
+    const implementer = ledger.find((row) => row.taskKey === `task:${str(step.reviewOf)}` && owns(row))?.vendor;
+    const load = ctx.libs.loadOf(ledger, runId);
+    const args = { pool, planIndex: step.planIndex as number, skip, load, recorded: owner?.vendor };
+    const choose = () => tried.length && !owner
+      ? ctx.libs.nextMember(pool, tried, [...skip, ...(implementer ? [implementer] : [])])
+      : step.role === "review" ? ctx.libs.pickReviewer({ ...args, implementer }) : ctx.libs.pickImplementer(args);
+    const pick = choose();
+    deterministic = deterministic && JSON.stringify(pick) === JSON.stringify(choose());
+    picks.push(pick.ok ? pick.vendor : pick.reason);
+    if (!pick.ok) continue;
+    used.add(pick.vendor);
+    independent = independent && (step.role !== "review" || pick.vendor !== implementer);
+    if (owner) {
+      uncertain = uncertain || (owner.state === "unknown-liveness" && pick.vendor === owner.vendor);
+      resumed = resumed && pick.vendor === owner.vendor;
+      continue;
+    }
+    const eligible = pool.filter((member) => !skip.includes(member) && member !== implementer);
+    if (!tried.length) fair = fair && eligible.includes(pick.vendor)
+      && eligible.every((member) => (load.get(pick.vendor) ?? 0) <= (load.get(member) ?? 0));
+    else rotated = rotated || !tried.includes(pick.vendor);
+    ledger.push(record({ scope: step.scope, vendor: pick.vendor, runId,
+      state: step.result === "clean-failure" ? "settled" : step.result === "unknown-liveness" ? "unknown-liveness" : "completed",
+      ...(step.result === "clean-failure" || step.result === "unknown-liveness" ? {} : { reportId: `report-${ledger.length}` }),
+    }, ledger.length));
+  }
+  for (const row of ledger.filter(owns)) {
+    const args = { pool: strings(pools.implementation), planIndex: 99, skip: strings(pools.implementation), recorded: row.vendor,
+      load: ctx.libs.loadOf(ledger, runId) };
+    const pick = ctx.libs.pickImplementer(args);
+    resumed = resumed && pick.ok && pick.vendor === row.vendor;
+  }
+  const explicit = obj(input.explicitDispatch), root = fresh(ctx, "balanced-explicit");
+  writePolicy(ctx, root, str(input.harness), [str(explicit.vendor), "opencode"]);
+  const orca = fakeOrca(ctx.deps, ["ok"]);
+  const named = await ctx.libs.dispatchScope({ ...launch(ctx, { root, deps: orca.deps, coordinator: str(input.harness),
+    vendor: str(explicit.vendor), scope: scopeSpec(str(explicit.scope), "named worker", ["named.txt"]), attemptId: "balance-explicit" }), runId });
+  return { actual: { ownershipCounts, liveCounts, picks, greedyFairness: fair, reviewerNeverImplementer: independent,
+    everyPoolMemberUsed: strings(pools.implementation).every((member) => used.has(member)),
+    otherRunsIgnored: ctx.libs.loadOf(matrix.filter((row) => row.runId !== runId), runId).size === 0,
+    deterministic, resumeKeepsRecordedVendor: resumed, unknownLivenessNeverMoved: uncertain, cleanFailureRotates: rotated,
+    explicitVendorStillAllowed: named.route === "launched" && orca.calls.length === 1
+      && argAfter(orca.calls[0], "--agent") === str(explicit.vendor) },
+    notes: ["real loadOf/pickers with an in-memory ledger; explicit vendor through real dispatchScope"] };
+};
+
 const EXECUTES: Readonly<Record<string, Observer>> = Object.freeze({
   "codex-coordinates-alternate-vendors": observeAlternateVendors,
   "preflight-fallback": observePreflightFallback,
@@ -613,6 +687,7 @@ const EXECUTES: Readonly<Record<string, Observer>> = Object.freeze({
   "prepared-input-and-integrated-evidence": variantObserver(PREPARED_VARIANTS),
   [HOSTILE_SUMMARY_CASE]: observeHostileSummary,
   "opencode-agent-id-resolves-from-installed-agents": observeOpenCodeAgentId,
+  "role-pools-balance-load-across-roles": observeBalancedRoles,
 });
 
 // ---- comparison and the report ----

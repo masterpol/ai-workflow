@@ -20,6 +20,7 @@ import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 const target = process.env.ORCA_RUN_UNDER_TEST ?? "./orca-run.mts";
 const cli = await import(target) as typeof import("./orca-run.mts");
 const { main, exitCodeFor, checkCatalog, MAX_INPUT_BYTES } = cli;
+const parseDispatchInput = cli.dispatchInput;
 
 const HERE = import.meta.dirname;
 const EXAMPLE = path.resolve(HERE, "../integrations/orca-vendors.example.json");
@@ -99,6 +100,45 @@ function writeInput(root: string, value: unknown, name = "input.json"): string {
 }
 const walkTree = (dir: string): string[] => listTree(testDeps, dir)
   .map((entry) => path.join(dir, entry)).map((file) => `${path.relative(dir, file)}:${fs.lstatSync(file).isFile() ? fs.readFileSync(file, "utf8") : "dir"}`);
+
+test("dispatch runId reaches the dispatch options with and without retries; absent stays absent", async (t: TestContext) => {
+  for (const runId of [undefined, "run_abc123", `run_${"z".repeat(32)}`]) {
+    for (const maxRetries of [undefined, 1]) {
+      const input = dispatchInput({ ...(runId !== undefined ? { runId } : {}), ...(maxRetries !== undefined ? { maxRetries } : {}) });
+      const parsed = parseDispatchInput(input);
+      assert.equal(parsed.base.runId, runId);
+      assert.equal(Object.hasOwn(parsed.base, "runId"), runId !== undefined);
+      assert.equal(parsed.maxRetries, maxRetries);
+      const f = fixture(t);
+      const h = dispatching(f);
+      const result = await exec(["dispatch", "--root", f.root, "--input", writeInput(f.root, input)], h);
+      assert.deepEqual([result.code, result.json.route], [0, "launched"]);
+      assert.equal(h.calls.run.length, 1);
+    }
+  }
+});
+
+test("invalid, duplicate or misspelt dispatch runId is usage dispatch before any Orca call", async (t: TestContext) => {
+  const f = fixture(t);
+  const input = JSON.stringify(dispatchInput());
+  const cases: Array<[string, unknown]> = [
+    ...["RUN_X", "run_", "run_../x", "run_abc12", `run_${"a".repeat(33)}`, "run_ABC123", "run_abc123\n", 123, null, false, [], {}]
+      .map((runId): [string, unknown] => [JSON.stringify(runId), dispatchInput({ runId })]),
+    ["duplicate valid", input.replace(/}$/, ',"runId":"run_abc123","runId":"run_def456"}')],
+    ["duplicate hides invalid", input.replace(/}$/, ',"runId":123,"runId":"run_abc123"}')],
+    ["escaped duplicate", input.replace(/}$/, ',"runId":"run_abc123","run\\u0049d":"run_def456"}')],
+    ["misspelt", dispatchInput({ runID: "run_abc123" })],
+    ["unknown key", dispatchInput({ launcher: "/bin/sh" })],
+    ["missing top-level key", (() => { const value = dispatchInput(); delete value.timeoutMs; return value; })()],
+  ];
+  for (const [label, value] of cases) {
+    const h = dispatching(f);
+    const result = await exec(["dispatch", "--root", f.root, "--input", writeInput(f.root, value)], h);
+    assert.deepEqual([result.code, result.json], [2, { error: "usage", reason: "dispatch" }], label);
+    assert.equal(spawned(h), 0, label);
+    assert.equal(fs.existsSync(path.join(f.root, ".project/metrics")), false, label);
+  }
+});
 
 // ---- parity: the CLI prints what the library returns, no more, no less ----
 
@@ -529,13 +569,11 @@ test("the input size bound is exactly 64 KiB", async (t: TestContext) => {
 test("input shapes are validated strictly and unknown keys are refused", async (t: TestContext) => {
   const f = fixture(t);
   const bads: Array<[string, Obj]> = [
-    ["unknown top-level key", dispatchInput({ launcher: "/bin/sh" })],
     ["unknown scope key", dispatchInput({ scope: { ...scope, extra: "x" } })],
     ["missing scope field", dispatchInput({ scope: { id: "s1" } })],
     ["timeout as text", dispatchInput({ timeoutMs: "600000" })],
     ["timeout zero", dispatchInput({ timeoutMs: 0 })],
     ["timeout too large", dispatchInput({ timeoutMs: 30 * 60 * 1000 + 1 })],
-    ["timeout missing", (() => { const v = dispatchInput(); delete v.timeoutMs; return v; })()],
     ["retries too high", dispatchInput({ maxRetries: 6 })],
     ["vendor and assign together", dispatchInput({ assign: { role: "implementation", planIndex: 0 } })],
     ["neither vendor nor assign", (() => { const v = dispatchInput(); delete v.vendor; return v; })()],
@@ -739,4 +777,16 @@ test("pools: an assigned dispatch whose role pool excludes opencode never inspec
   const result = await exec(["dispatch", "--root", f.root, "--input", "input.json"], h);
   assert.deepEqual([result.code, result.json.route], [0, "launched"]);
   assert.ok(!ran(h, "lsof"), "the implementation pool is [codex]; the held port is irrelevant");
+});
+
+test("one owner for the assignment rule: orca-vendors.md states it, 2-build.md points to it, no other phase doc restates it", () => {
+  const read = (rel: string): string => String(testDeps.fs.readFileSync(testDeps.path.join(import.meta.dirname, "../..", rel)));
+  const vendors = read("ai-framework/integrations/orca-vendors.md");
+  assert.match(vendors, /\*\*Coordinator rule \(owner of this topic\)\.\*\* Dispatch scopes with `assign` and the `runId`/);
+  assert.match(read("ai-framework/workflow/phases/2-build.md"), /\*\*Coordinator rule\*\* under \*\*Assignment\*\* in `ai-framework\/integrations\/orca-vendors\.md`/);
+  for (const phase of ["0-shape.md", "1-plan.md", "3-audit.md", "4-ship.md", "5-cooldown.md"]) {
+    const file = testDeps.path.join(import.meta.dirname, "../../ai-framework/workflow/phases", phase);
+    if (!testDeps.fs.existsSync(file)) continue;
+    assert.doesNotMatch(String(testDeps.fs.readFileSync(file)), /Dispatch scopes with `assign`/, `${phase} must point to orca-vendors.md, not restate the rule`);
+  }
 });

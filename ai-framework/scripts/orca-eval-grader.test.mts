@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import type { TestContext } from "node:test";
 
+import { pickImplementer, pickReviewer } from "./orca-assign.mts";
 import { collectReport, dispatchScope } from "./orca-dispatch.mts";
 import type { DispatchOptions, DispatchOutcome, ReportOutcome } from "./orca-dispatch.mts";
 import { DATASET_FILE, gradeAll, HOSTILE_SUMMARY_CASE, main } from "./orca-eval-grader.mts";
@@ -33,7 +34,7 @@ const caseOf = (report: GradeReport, id: string) => {
   return found;
 };
 const EXECUTES = ["codex-coordinates-alternate-vendors", "preflight-fallback", "uncertain-worker-does-not-duplicate-editing",
-  "worker-preamble-prevents-recursive-coordination", "completion-receipts-are-not-proof", "prepared-input-and-integrated-evidence"];
+  "worker-preamble-prevents-recursive-coordination", "completion-receipts-are-not-proof", "prepared-input-and-integrated-evidence", "role-pools-balance-load-across-roles"];
 
 // ---- in-memory mutant libraries: each breaks one guarantee the matching case depends on ----
 
@@ -92,6 +93,10 @@ const spawnAfterRefusal: GraderLibraries["dispatchScope"] = async (options) => {
 };
 
 const MUTANTS: ReadonlyArray<{ name: string; caseId: string; libs: Partial<GraderLibraries> }> = [
+  { name: "picker ignores load", caseId: "role-pools-balance-load-across-roles", libs: {
+    pickImplementer: (input) => pickImplementer({ ...input, load: undefined }),
+    pickReviewer: (input) => pickReviewer({ ...input, load: undefined }),
+  } },
   { name: "accept a mismatched dispatch id", caseId: "completion-receipts-are-not-proof", libs: { collectReport: acceptMismatchedDispatch } },
   { name: "skip the worker-context deny", caseId: "worker-preamble-prevents-recursive-coordination", libs: { dispatchScope: skipWorkerDeny } },
   { name: "retry after residual resources", caseId: "uncertain-worker-does-not-duplicate-editing", libs: { dispatchWithRetries: retryAfterResidual } },
@@ -127,13 +132,13 @@ test("the real dataset: every executable case runs and passes; modes and counts 
     "worker-preamble-prevents-recursive-coordination": "executes", "unreported-cost-is-not-savings": "parses-only", "completion-receipts-are-not-proof": "executes",
     "prepared-input-and-integrated-evidence": "executes", "all-coordinator-and-policy-permutations": "live-only", "stateful-recovery-and-peer-messages": "live-only",
     "static-fixtures-do-not-prove-runtime": "live-only", "hostile-worker-summary-is-data": "executes",
-    "opencode-agent-id-resolves-from-installed-agents": "executes",
+    "opencode-agent-id-resolves-from-installed-agents": "executes", "role-pools-balance-load-across-roles": "executes",
   });
   for (const entry of report.cases) {
     if (entry.mode === "executes") assert.equal(entry.pass, true, `${entry.id}: ${entry.detail}`);
     else assert.equal(entry.pass, false, `${entry.id}: only an executed case can pass`);
   }
-  assert.deepEqual(report.summary.executes, { total: 8, passed: 8, failed: 0 });
+  assert.deepEqual(report.summary.executes, { total: 9, passed: 9, failed: 0 });
   assert.deepEqual(report.summary.parsesOnly, { total: 1, parsed: 1, failed: 0 });
   assert.deepEqual(report.summary.liveOnly, { total: 3, notRun: 3 });
   assert.deepEqual(report.summary.deferred, []);
@@ -160,6 +165,24 @@ test("mutation proof: each broken library turns its case red, and the real libra
   assert.deepEqual(await undetectedMutants(gradeAll), []);
 });
 
+test("balanced roles: ownership, Run identity, plan position and skip come from case input", REAL, async (t: TestContext) => {
+  const source = dataset().cases.find((entry) => entry.id === "role-pools-balance-load-across-roles") as Obj;
+  const changes: Array<(input: Obj) => void> = [
+    (input) => { delete (input.ownershipMatrix as Obj[])[4].reportId; },
+    (input) => { (input.ownershipMatrix as Obj[])[0].runId = input.otherRunId; },
+    (input) => { (input.sequence as Obj[])[0].planIndex = 1; },
+    (input) => { (input.sequence as Obj[])[0].skip = ["codex"]; },
+  ];
+  for (const change of changes) {
+    const altered = structuredClone(source);
+    change(altered.input as Obj);
+    const entry = caseOf(await gradeAll({ deps, root: rootWith(t, [altered]) }), String(source.id));
+    assert.equal(entry.mode, "executes");
+    assert.equal(entry.pass, false, entry.detail);
+    assert.match(entry.detail, /FAILED/);
+  }
+});
+
 test("an always-pass grader is detected by the mutation harness", SLOW, async () => {
   const alwaysPass: Grade = async (options) => {
     const ids = options.only ?? EXECUTES;
@@ -177,6 +200,7 @@ test("actual never comes from expected: changing one expectation per executable 
     "worker-preamble-prevents-recursive-coordination": ["nestedLaunches", 1],
     "completion-receipts-are-not-proof": ["independentChecksRequired", false],
     "prepared-input-and-integrated-evidence": ["rejectStaleInputs", false],
+    "role-pools-balance-load-across-roles": ["unknownLivenessNeverMoved", false],
   };
   const cases = dataset().cases.filter((entry) => EXECUTES.includes(String(entry.id))).map((entry) => {
     const [key, value] = flips[String(entry.id)];
@@ -188,7 +212,7 @@ test("actual never comes from expected: changing one expectation per executable 
     assert.equal(entry.pass, false, `${id} must fail when its expectation changes`);
     assert.match(entry.detail, new RegExp(flips[id][0]), id);
   }
-  assert.deepEqual(report.summary.executes, { total: 6, passed: 0, failed: 6 });
+  assert.deepEqual(report.summary.executes, { total: 7, passed: 0, failed: 7 });
 });
 
 test("an expectation the grader does not measure, or a variant it cannot run, fails the case", REAL, async (t: TestContext) => {
@@ -314,7 +338,7 @@ test("no-race: concurrent graders write each policy via a unique wx temp then re
   const root = rootWith(t, dataset().cases);
   const reports = await Promise.all([1, 2, 3, 4].map(() => gradeAll({ deps: recordingDeps(ops) as typeof deps, root })));
   for (const report of reports) {
-    assert.deepEqual(report.summary.executes, { total: 8, passed: 8, failed: 0 });
+    assert.deepEqual(report.summary.executes, { total: 9, passed: 9, failed: 0 });
     assert.deepEqual(report.cases.map((entry) => [entry.id, entry.pass]), reports[0].cases.map((entry) => [entry.id, entry.pass]));
   }
   const policyOps = ops.filter((entry) => entry.path.endsWith(POLICY_NAME) || entry.path.includes(`${POLICY_NAME}.`));

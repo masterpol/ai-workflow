@@ -37,6 +37,8 @@ export interface LedgerRecord {
   argsDigest?: string;
   /** Present once a worker's authoritative report completed the attempt. */
   reportId?: string;
+  /** The Run this claim belongs to. Set once at claim; a patch can never change it. */
+  runId?: string;
 }
 export interface LedgerPatch { state?: LedgerState; dispatchId?: string; requestId?: string; argsDigest?: string; reportId?: string; processOwnerPid?: number }
 
@@ -49,7 +51,7 @@ export type ClaimResult =
   | { outcome: "refused" | "corrupt" | "invalid" | "failed" | "busy" };
 export type ReserveResult = ClaimResult
   | { outcome: "task-owned" | "path-overlap"; record: LedgerRecord }
-  | { outcome: "at-capacity" };
+  | { outcome: "at-capacity" | "load-changed" };
 export type UpdateResult =
   | { status: "ok"; record: LedgerRecord }
   | { status: "missing" | "refused" | "corrupt" | "invalid" | "rejected" | "busy" };
@@ -69,7 +71,7 @@ export interface Ledger {
   /** Atomic exclusive create. Identical replay returns the existing record; a different record for the same key is `conflict`. */
   claim(record: LedgerRecord): ClaimResult;
   /** Launch admission: atomically check task ownership/capacity and create the claim. Use this for every dispatch. */
-  reserve(record: LedgerRecord, maxConcurrentWorkers: number): ReserveResult;
+  reserve(record: LedgerRecord, maxConcurrentWorkers: number, admit?: (records: readonly LedgerRecord[]) => boolean): ReserveResult;
   /** Applies a patch along an allowed transition. Never touches a refused, corrupt or missing slot. */
   update(attemptKey: string, patch: LedgerPatch): UpdateResult;
   /** Reads every slot; refused and corrupt slots are listed as such, never skipped. */
@@ -87,13 +89,16 @@ const TRANSITIONS: Readonly<Record<LedgerState, readonly LedgerState[]>> = Objec
   failed: ["settled"],
   settled: [],
 });
-const RECORD_KEYS = ["attemptKey", "taskKey", "vendor", "state", "createdAt", "schemaVersion", "authorizedPaths", "processOwnerPid", "dispatchId", "requestId", "argsDigest", "reportId"];
+const RECORD_KEYS = ["attemptKey", "taskKey", "vendor", "state", "createdAt", "schemaVersion", "authorizedPaths", "processOwnerPid", "dispatchId", "requestId", "argsDigest", "reportId", "runId"];
 const PATCH_KEYS = ["state", "dispatchId", "requestId", "argsDigest", "reportId", "processOwnerPid"];
 
 const validRequestId = (value: unknown): value is string => typeof value === "string"
   && value.length >= 4 && value.length <= 80 && !/[^A-Za-z0-9_-]/.test(value);
 const validArgsDigest = (value: unknown): value is string => typeof value === "string"
   && value.length === 64 && !/[^0-9a-f]/.test(value);
+/** The one grammar for a Run id: the ledger, dispatch and the run CLI all import it. */
+export const RUN_ID_PATTERN = /^run_[a-z0-9]{6,32}$/;
+const RUN_ID = RUN_ID_PATTERN;
 
 /** Pure with the runtime SHA-256 primitive supplied; JSON framing preserves boundaries and path order. */
 export function computeArgsDigest(brief: string, agentId: string, authorizedPaths: readonly string[], crypto: Pick<RuntimeDeps["crypto"], "sha256Hex">): string {
@@ -158,6 +163,7 @@ export function validateRecord(value: unknown): value is LedgerRecord {
   if (Object.hasOwn(value, "requestId") && !validRequestId(value.requestId)) return false;
   if (Object.hasOwn(value, "argsDigest") && !validArgsDigest(value.argsDigest)) return false;
   if (Object.hasOwn(value, "reportId") && !validId(value.reportId)) return false;
+  if (Object.hasOwn(value, "runId") && (typeof value.runId !== "string" || !RUN_ID.test(value.runId))) return false;
   const hasReport = Object.hasOwn(value, "reportId");
   if (value.state === "completed" && !hasReport) return false;
   if ((value.state === "claimed" || value.state === "launched" || value.state === "unknown-liveness" || value.state === "failed") && hasReport) return false;
@@ -293,7 +299,7 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
     return withMutationLock<ClaimResult>(true, () => claimUnlocked(normalized), (reason) => ({ outcome: reason === "missing" ? "refused" : reason }));
   }
 
-  function reserve(record: LedgerRecord, maxConcurrentWorkers: number): ReserveResult {
+  function reserve(record: LedgerRecord, maxConcurrentWorkers: number, admit?: (records: readonly LedgerRecord[]) => boolean): ReserveResult {
     if (!validateRecord(record) || record.state !== "claimed" || !validAuthorizedPaths(record.authorizedPaths)
       || !Number.isSafeInteger(maxConcurrentWorkers) || maxConcurrentWorkers < 1) return { outcome: "invalid" };
     const normalized = withSchema(record);
@@ -320,6 +326,8 @@ export function createLedger(root: string, deps: RuntimeDeps): Ledger {
       }
       if (overlap) return { outcome: "path-overlap", record: overlap };
       if (running >= maxConcurrentWorkers) return { outcome: "at-capacity" };
+      const records = all.entries.flatMap((entry) => entry.result.status === "ok" ? [entry.result.record] : []);
+      if (admit && !admit(records)) return { outcome: "load-changed" };
       return claimUnlocked(record);
     }, (reason) => ({ outcome: reason === "missing" ? "refused" : reason }));
   }

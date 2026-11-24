@@ -266,8 +266,8 @@ Graphify runs through `uv`: check `uv --version` first. If uv is missing, tell t
 (https://docs.astral.sh/uv/) — do not install it yourself — and continue with
 `node ai-framework/scripts/graphify.mts --check` only. Otherwise run
 `node ai-framework/scripts/graphify.mts setup` from the project root. It needs no separate approval for the
-derived files, but it also installs post-commit/post-checkout git hooks that rebuild the graph through
-`graphify.mts` in the background (replacing a raw `graphify hook install` block), so state that
+derived files, but it also installs pre-commit/post-checkout git hooks that rebuild the graph through
+`graphify.mts` and stage it with each commit (replacing a raw `graphify hook install` block and an older post-commit one), so state that
 in the Step 5 approval. On a project that already has `.project/knowledge/graph.json` (older bundle), the same
 command migrates it into `graphify-out/graph.json` and removes the legacy file once it is covered. It builds:
 - `graphify-out/graph.json` — the project graph (code, docs and the `.project/knowledge/{decisions,patterns,entities,issues}/`

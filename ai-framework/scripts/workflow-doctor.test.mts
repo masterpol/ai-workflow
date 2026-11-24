@@ -897,6 +897,10 @@ test("doctor warns about graphify's raw git hooks and passes the workflow's over
   assert.match(raw!.detail, /post-checkout hook runs graphify's own rebuild.*graphify\.mts setup/);
   write(root, ".git/hooks/post-checkout", `#!/bin/sh\n${hookBlock("post-checkout")}\n`);
   assert.equal((await hookCheck())?.status, "pass");
+  write(root, ".git/hooks/post-commit", `#!/bin/sh\n${hookBlock("pre-commit")}\n`);
+  const older = await hookCheck();
+  assert.equal(older?.status, "warn", "an after-commit rebuild leaves the graph uncommitted");
+  assert.match(older!.detail, /post-commit rebuilds the graph after the commit.*graphify\.mts setup/);
 });
 
 test("doctor requires the Claude Orca start hooks with the Node runner; a bun-wired or missing hook fails", async (t) => {
@@ -1092,4 +1096,12 @@ test("orca contract: the check runs only in the portable bundle repo", async (t)
   const { results, calls } = await contractCheck(t, { bundle: false, snapshot: null });
   assert.deepEqual(results, []);
   assert.deepEqual(calls, []);
+});
+
+test("the doctor's syntax-check list names every facts-*.mts script and its test", () => {
+  const source = fs.readFileSync(urlPath(new URL("./workflow-doctor.mts", import.meta.url)));
+  const directory = urlPath(new URL(".", import.meta.url));
+  const facts = fs.readdirSync(directory).filter((file: string) => /^facts-[a-z-]+(\.test)?\.mts$/.test(file));
+  assert.ok(facts.length >= 6, "the facts scripts were found");
+  for (const file of facts) assert.ok(source.includes(`"ai-framework/scripts/${file}"`), `${file} is in the doctor's list`);
 });

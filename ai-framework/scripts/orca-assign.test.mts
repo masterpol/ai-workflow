@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { nextMember, pickImplementer, pickReviewer } from "./orca-assign.mts";
+import { leastLoaded, nextMember, pickImplementer, pickReviewer } from "./orca-assign.mts";
 import { createTestDeps, fileUrl } from "./runtime/test-helpers.mts";
 const testDeps = createTestDeps();
 const fs = testDeps.fs;
@@ -78,6 +78,78 @@ test("rejects malformed input without throwing", () => {
   assert.deepEqual(nextMember(["a", "b"], []), { ok: false, reason: "invalid-input" });
 });
 
+test("load absent or empty preserves today's exact round-robin", () => {
+  const pool = ["opencode", "claude", "codex"];
+  for (const load of [undefined, new Map<string, number>(), new Map([["unknown", 99]])]) {
+    assert.deepEqual([0, 1, 2, 3, 4].map((planIndex) => vendorOf(pickImplementer({ pool, planIndex, load }))), ["opencode", "claude", "codex", "opencode", "claude"]);
+  }
+});
+
+test("least-loaded member wins, with plan position as the tie-break", () => {
+  assert.equal(vendorOf(pickImplementer({ pool: ["a", "b", "c"], planIndex: 0, load: new Map([["a", 1], ["b", 0], ["c", 2]]) })), "b");
+  assert.equal(vendorOf(pickImplementer({ pool: ["a", "b", "c"], planIndex: 1, load: new Map([["a", 0], ["b", 0], ["c", 0]]) })), "b");
+  assert.equal(vendorOf(pickImplementer({ pool: ["a", "b", "c"], planIndex: 2, load: new Map([["a", 1], ["b", 1], ["c", 0]]) })), "c");
+});
+
+test("load keys for non-members are ignored", () => {
+  const pick = pickImplementer({ pool: ["a", "b"], planIndex: 0, load: new Map([["a", 0], ["c", 1000], ["d", -1]]) });
+  assert.deepEqual(pick, { ok: true, vendor: "a", source: "least-loaded" });
+});
+
+test("recorded vendor wins even when it has the highest load", () => {
+  assert.deepEqual(pickImplementer({ pool: ["a", "b"], planIndex: 0, recorded: "a", load: new Map([["a", 100], ["b", 0]]) }), { ok: true, vendor: "a", source: "recorded" });
+  assert.deepEqual(pickReviewer({ pool: ["a", "b"], planIndex: 0, implementer: "b", recorded: "a", load: new Map([["a", 100], ["b", 0]]) }), { ok: true, vendor: "a", source: "recorded" });
+});
+
+test("reviewer still excludes the implementer and respects load", () => {
+  const pool = ["claude", "codex", "opencode"];
+  assert.deepEqual(pickReviewer({ pool, planIndex: 0, implementer: "codex", load: new Map([["claude", 2], ["codex", 0], ["opencode", 1]]) }), { ok: true, vendor: "opencode", source: "least-loaded" });
+  assert.deepEqual(pickReviewer({ pool, planIndex: 1, implementer: "codex", load: new Map([["claude", 0], ["codex", 0], ["opencode", 0]]) }), { ok: true, vendor: "opencode", source: "least-loaded" });
+  assert.deepEqual(pickReviewer({ pool: ["codex"], planIndex: 0, implementer: "codex", load: new Map([["codex", 0]]) }), { ok: false, reason: "review-independence-unavailable" });
+});
+
+test("pool independence: shared load balances greedily across roles over a sequence", () => {
+  const implementers = ["codex", "claude", "opencode"];
+  const reviewers = ["codex", "opencode"];
+  const load = new Map<string, number>();
+  const record = (vendor: string) => load.set(vendor, (load.get(vendor) ?? 0) + 1);
+  for (let planIndex = 0; planIndex < 10; planIndex++) {
+    const implPick = pickImplementer({ pool: implementers, planIndex, load });
+    assert.ok(implPick.ok, JSON.stringify(implPick));
+    const implLoad = load.get(implPick.vendor) ?? 0;
+    for (const member of implementers) {
+      assert.ok((load.get(member) ?? 0) >= implLoad, `implementer ${implPick.vendor} at ${planIndex} is not least-loaded vs ${member}`);
+    }
+    record(implPick.vendor);
+    const revPick = pickReviewer({ pool: reviewers, planIndex, implementer: implPick.vendor, load });
+    assert.ok(revPick.ok, JSON.stringify(revPick));
+    const revLoad = load.get(revPick.vendor) ?? 0;
+    for (const member of reviewers) {
+      if (member === implPick.vendor) continue;
+      assert.ok((load.get(member) ?? 0) >= revLoad, `reviewer ${revPick.vendor} at ${planIndex} is not least-loaded vs ${member}`);
+    }
+    record(revPick.vendor);
+  }
+});
+
+test("leastLoaded returns undefined for an empty member list", () => {
+  assert.equal(leastLoaded([], 0), undefined);
+  assert.equal(leastLoaded([], 5, new Map([["a", 0]])), undefined);
+});
+
+test("determinism with load: the same arguments give the same answer x1000", () => {
+  const pool = ["a", "b", "c", "d"];
+  const loads = [
+    new Map([["a", 3], ["b", 1], ["c", 2], ["d", 0]]),
+    new Map([["a", 0], ["b", 0], ["c", 0], ["d", 0]]),
+    new Map([["b", 5]]),
+  ];
+  const calls = Array.from({ length: 1000 }, (_, i) => ({ planIndex: (i * 7919) % 97, skip: i % 3 === 0 ? ["b"] : [], load: loads[i % loads.length] }));
+  const first = calls.map((call) => pickImplementer({ pool, ...call }));
+  const reversed = [...calls].reverse().map((call) => pickImplementer({ pool, ...call })).reverse();
+  assert.deepEqual(reversed, first);
+});
+
 test("mutants: weakening the reviewer or rotation guard makes the suite's assertions fail", async (t) => {
   const source = fs.readFileSync(SOURCE, "utf8");
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "orca-assign-mutant-"));
@@ -94,4 +166,29 @@ test("mutants: weakening the reviewer or rotation guard makes the suite's assert
   const skipsTried = await load("b", source.replace("!used.has(member)", "true"));
   const repeated = skipsTried.nextMember(["claude", "codex"], ["claude", "codex"]);
   assert.equal(repeated.ok, true, "mutant never reports exhaustion, which the rotation test forbids");
+});
+
+test("mutants: ignoring load or tie rotation fails a load-based test", async (t) => {
+  const source = fs.readFileSync(SOURCE, "utf8");
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "orca-assign-load-mutant-"));
+  t.after(() => fs.rmSync(dir, { recursive: true, force: true }));
+  const load = async (name: string, text: string) => {
+    const file = path.join(dir, `${name}.mts`);
+    fs.writeFileSync(file, text);
+    return await import(fileUrl(file)) as typeof import("./orca-assign.mts");
+  };
+
+  const ignoresLoad = await load("a", source.replace("memberLoad(member, load)", "0"));
+  const shifted = ignoresLoad.pickImplementer({ pool: ["a", "b", "c"], planIndex: 0, load: new Map([["a", 5], ["b", 0], ["c", 5]]) });
+  assert.ok(shifted.ok && shifted.vendor === "a", "mutant ignoring load picks the rotation winner, proving load ordering is needed");
+
+  const ignoresRotation = await load("b", source.replace("rotationDistance(i, planIndex, n)", "0"));
+  const rotated = ignoresRotation.pickImplementer({ pool: ["a", "b", "c"], planIndex: 1, load: new Map([["a", 0], ["b", 0], ["c", 0]]) });
+  assert.ok(rotated.ok && rotated.vendor === "a", "mutant ignoring rotation picks the first member, proving the tie-break is needed");
+});
+
+test("a pick says whether load informed it: no load is plain rotation, a load map is least-loaded", () => {
+  assert.equal(pickImplementer({ pool: ["a", "b"], planIndex: 1 }).ok && (pickImplementer({ pool: ["a", "b"], planIndex: 1 }) as { source: string }).source, "round-robin");
+  assert.equal(pickImplementer({ pool: ["a", "b"], planIndex: 1, load: new Map() }).ok && (pickImplementer({ pool: ["a", "b"], planIndex: 1, load: new Map() }) as { source: string }).source, "round-robin");
+  assert.equal((pickReviewer({ pool: ["a", "b"], planIndex: 0, implementer: "a", load: new Map([["b", 1]]) }) as { source: string }).source, "least-loaded");
 });

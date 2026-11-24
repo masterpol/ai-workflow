@@ -1,5 +1,5 @@
 import { nextMember, pickImplementer, pickReviewer } from "./orca-assign.mts";
-import { attemptKeyOf, createLedger, taskKeyOf, validAuthorizedPaths } from "./orca-ledger.mts";
+import { RUN_ID_PATTERN, attemptKeyOf, createLedger, taskKeyOf, validAuthorizedPaths } from "./orca-ledger.mts";
 import type { Ledger, LedgerRecord } from "./orca-ledger.mts";
 import { evaluateLaunch, launchWorker, readInstalledAgents, workerBrief } from "./orca-launch-gate.mts";
 import type { BriefSpec, LaunchOptions } from "./orca-launch-gate.mts";
@@ -56,6 +56,8 @@ export interface DispatchOptions extends Omit<LaunchOptions, "vendor"> {
   launcher?: string;
   deadlineMs: number;
   placement?: Placement;
+  /** The Run this dispatch belongs to. When present, load is scoped to this Run. */
+  runId?: string;
 }
 export interface DispatchOutcome {
   route: Route; reason: string; attemptKey?: string; retryable?: boolean; humanAction?: string; dispatchId?: string; requestId?: string; ownerPid?: number;
@@ -64,6 +66,9 @@ export interface DispatchOutcome {
 /** Let Orca finish its own bounded wait before our process kill deadline. */
 export const ORCA_TIMEOUT_MARGIN_MS = 5000;
 const REQUEST_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
+const RUN_ID = RUN_ID_PATTERN;
+/** Extra pick-and-claim tries after a `load-changed` claim; the last one claims without the load check. */
+const LOAD_RETRIES = 3;
 const ID = /^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$/;
 const VALUE = /^[A-Za-z0-9][A-Za-z0-9._:/@-]{0,199}$/;
 const PLACEMENT_FLAGS: Readonly<Record<keyof Placement, string>> = Object.freeze({
@@ -124,13 +129,60 @@ const STAGE_CODE = /^[a-z][a-z0-9_-]{0,63}$/;
 const REVIEW_STATES = ["completed", "settled"];
 const blockedAssignment = (reason: string, humanAction: string): DispatchOutcome => ({ route: "blocked", reason, humanAction });
 
+const OWNING_STATES = ["claimed", "launched", "unknown-liveness", "completed"] as const;
+const LIVE_STATES = ["claimed", "launched", "unknown-liveness"] as const;
+
+/** Ownership predicate used by both `reserve()` (task-owned) and `resolveAssignment` (recorded owner). */
+function holds(record: LedgerRecord): boolean {
+  return record.processOwnerPid !== undefined
+    || OWNING_STATES.includes(record.state as typeof OWNING_STATES[number])
+    || (record.state === "settled" && record.reportId !== undefined);
+}
+
+/** Live-only predicate for load when no Run id is provided. */
+function live(record: LedgerRecord): boolean {
+  return record.processOwnerPid !== undefined
+    || LIVE_STATES.includes(record.state as typeof LIVE_STATES[number]);
+}
+
+/** Per-vendor load for the given Run scope. Mirrors `holds`: other Runs and no-runId records never count toward a Run. */
+export function loadOf(records: readonly LedgerRecord[], runId: string | undefined): Map<string, number> {
+  const load = new Map<string, number>();
+  for (const record of records) {
+    if (runId !== undefined) {
+      if (record.runId !== runId) continue;
+      if (!holds(record)) continue;
+    } else {
+      if (!live(record)) continue;
+    }
+    load.set(record.vendor, (load.get(record.vendor) ?? 0) + 1);
+  }
+  return load;
+}
+
+/** Builds the optimistic admission callback for an assignment: the chosen vendor must still have the minimum load. */
+function buildAdmit(assign: Assignment, runId: string | undefined, chosenVendor: string, pool: readonly string[], records: readonly LedgerRecord[]): (records: readonly LedgerRecord[]) => boolean {
+  const skip = new Set(assign.skip ?? []);
+  let implementer: string | undefined;
+  if (assign.role === "review") {
+    const reviewed = records.filter((record) => record.taskKey === taskKeyOf(assign.reviewOf as string) && REVIEW_STATES.includes(record.state));
+    implementer = reviewed.length ? reviewed[reviewed.length - 1].vendor : undefined;
+  }
+  const eligible = pool.filter((member) => !skip.has(member) && member !== implementer);
+  return (currentRecords) => {
+    const load = loadOf(currentRecords, runId);
+    const chosenLoad = load.get(chosenVendor) ?? 0;
+    return eligible.every((member) => (load.get(member) ?? 0) >= chosenLoad);
+  };
+}
+
 /**
  * Picks the worker for an assignment from the ledger and the policy pools. Pure reads: no claim, no spawn.
  * - A task that already has a live or completed attempt keeps that attempt's vendor (resume never reassigns).
  * - A task whose earlier attempts all failed rotates to the next pool member (pool order, after the last one tried).
- * - Otherwise the first attempt is the plan-order round-robin; a reviewer is never the scope's implementer.
+ * - Otherwise the least-loaded eligible member wins, with plan position as the tie-break; a reviewer is never the scope's implementer.
  */
-export function resolveAssignment(options: { root: string; coordinator: string; scopeId: string; assign: Assignment; deps?: RuntimeDeps }): { vendor: string } | { outcome: DispatchOutcome } {
+export function resolveAssignment(options: { root: string; coordinator: string; scopeId: string; assign: Assignment; runId?: string; deps?: RuntimeDeps }): { vendor: string; balanced?: true } | { outcome: DispatchOutcome } {
   const deps = options.deps ?? defaultDeps();
   const { assign, scopeId } = options;
   const shapeOk = obj(assign) === assign && (assign.role === "implementation" || assign.role === "review") && Number.isSafeInteger(assign.planIndex) && assign.planIndex >= 0
@@ -147,13 +199,10 @@ export function resolveAssignment(options: { root: string; coordinator: string; 
   const records = listed.entries.flatMap(({ result }) => result.status === "ok" ? [result.record] : [])
     .sort((a, b) => a.createdAt - b.createdAt || (a.attemptKey < b.attemptKey ? -1 : 1));
   const attempts = records.filter((record) => record.taskKey === taskKeyOf(scopeId));
-  // Mirrors reserve()'s task-owned set, plus a settled attempt that was completed first (it keeps its report id). A failed attempt
-  // that was later settled has no report id: it is a tried vendor, not an owner, so rotation still moves past it.
-  const holds = (record: (typeof attempts)[number]): boolean => record.processOwnerPid !== undefined
-    || ["claimed", "launched", "unknown-liveness", "completed"].includes(record.state) || (record.state === "settled" && record.reportId !== undefined);
   const owner = attempts.find(holds);
   if (owner) return { vendor: owner.vendor };
 
+  const load = loadOf(records, options.runId);
   let implementer: string | undefined;
   if (assign.role === "review") {
     const reviewed = records.filter((record) => record.taskKey === taskKeyOf(assign.reviewOf as string) && REVIEW_STATES.includes(record.state));
@@ -162,9 +211,10 @@ export function resolveAssignment(options: { root: string; coordinator: string; 
   const failed = attempts.filter((record) => !holds(record)).map((record) => record.vendor);
   const skip = [...(assign.skip ?? []), ...(implementer ? [implementer] : [])];
   const pick = failed.length ? nextMember(pool, failed, skip)
-    : assign.role === "review" ? pickReviewer({ pool, planIndex: assign.planIndex, implementer, skip: assign.skip })
-      : pickImplementer({ pool, planIndex: assign.planIndex, skip: assign.skip });
-  if (pick.ok) return { vendor: pick.vendor };
+    : assign.role === "review" ? pickReviewer({ pool, planIndex: assign.planIndex, implementer, skip: assign.skip, load })
+      : pickImplementer({ pool, planIndex: assign.planIndex, skip: assign.skip, load });
+  // `balanced` marks a pick made by load, as opposed to a recorded owner or a clean-failure rotation: only that pick is re-checked at the claim.
+  if (pick.ok) return failed.length ? { vendor: pick.vendor } : { vendor: pick.vendor, balanced: true };
   if (pick.reason === "invalid-input") return { outcome: { route: "normal", reason: "invalid-assignment" } };
   if (pick.reason === "review-independence-unavailable") return { outcome: blockedAssignment(pick.reason, "no review pool member differs from the implementer; ask the user to widen the review pool or accept a same-vendor review") };
   if (pick.reason === "implementer-unknown") return { outcome: blockedAssignment(pick.reason, "the scope under review has no completed attempt; dispatch it and collect its report first") };
@@ -176,6 +226,7 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const { scope, coordinator } = options;
   if (!ID.test(scope?.id ?? "") || !ID.test(options.attemptId ?? "")) return { route: "normal", reason: "invalid-id" };
   if ((options.vendor === undefined) === (options.assign === undefined)) return { route: "normal", reason: "invalid-assignment" };
+  if (options.runId !== undefined && !RUN_ID.test(options.runId)) return { route: "normal", reason: "invalid-run-id" };
   const attemptKey = attemptKeyOf(options.attemptId);
   if (!orcaMultiAgentEnabled(options.root, deps, options.env ?? deps.proc.env)) return { route: "normal", reason: "orca-multi-agent-disabled" };
   const flags = placementArgs(options.placement);
@@ -201,24 +252,70 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
   const decision = evaluateLaunch(gateOptions);
   if (!decision.allowed) return { route: "normal", reason: decision.reason };
   let vendor = options.vendor as string;
-  if (options.assign) {
-    // Resolved after the gate (no side effects before it) and before the claim; a recorded owner wins, so resume never reassigns.
-    const resolved = resolveAssignment({ root: options.root, coordinator, scopeId: scope.id, assign: options.assign, deps });
-    if ("outcome" in resolved) return resolved.outcome;
-    vendor = resolved.vendor;
-  }
-  // OpenCode launches by its resolved installed agent id (opencode or opencode2), resolved before anything is claimed.
-  // launchWorker re-gates with this id, which re-reads the installed list immediately before the spawn.
   let agentArg = vendor;
-  if (vendor === "opencode") {
-    const env = options.env ?? deps.proc.env;
-    const agent = resolveOpenCodeAgentId({ env, installedAgents: readInstalledAgents({ root: options.root, executable: decision.executable as string, env, deps, run: options.run }) });
-    if (agent.error !== undefined) return { route: "normal", reason: agent.error };
-    agentArg = agent.agentId;
-    gateOptions.agentId = agentArg;
-  }
-  const policy = policyReport(options.root, coordinator, deps) as { workers?: unknown; maxConcurrentWorkers?: unknown };
-  if (!Array.isArray(policy.workers) || !policy.workers.includes(vendor)) return { route: "normal", reason: "worker-not-configured" };
+  let admit: ((records: readonly LedgerRecord[]) => boolean) | undefined;
+  type Prepared = { ok: true; vendor: string; agentArg: string; admit?: (records: readonly LedgerRecord[]) => boolean }
+    | { ok: false; outcome: DispatchOutcome; vendor?: string; balanced?: boolean };
+  // One pass of: pick the worker (a pool pick, or the caller's vendor), build the claim-time load check, resolve the OpenCode agent id,
+  // and confirm the worker is configured. Nothing is claimed here.
+  const prepare = (skipped: readonly string[]): Prepared => {
+    let chosen = options.vendor as string;
+    let check: ((records: readonly LedgerRecord[]) => boolean) | undefined;
+    let balanced = false;
+    if (options.assign) {
+      // Resolved after the gate (no side effects before it) and before the claim; a recorded owner wins, so resume never reassigns.
+      const assign: Assignment = skipped.length ? { ...options.assign, skip: [...(options.assign.skip ?? []), ...skipped] } : options.assign;
+      const resolved = resolveAssignment({ root: options.root, coordinator, scopeId: scope.id, assign, runId: options.runId, deps });
+      if ("outcome" in resolved) return { ok: false, outcome: resolved.outcome };
+      chosen = resolved.vendor;
+      balanced = resolved.balanced === true;
+      const poolPolicy = policyReport(options.root, coordinator, deps) as { pools?: unknown };
+      const pool = obj(poolPolicy.pools)[assign.role];
+      const listed = createLedger(options.root, deps).list();
+      // A missing ledger directory is the first dispatch of the Run: an empty history, still re-checked at the claim.
+      // A refused or unreadable one leaves the check unset (balancing fails open; reserve still refuses ownership, capacity and overlap).
+      if (balanced && (listed.status === "ok" || listed.status === "missing") && Array.isArray(pool)) {
+        const records = listed.entries.flatMap(({ result }) => result.status === "ok" ? [result.record] : []);
+        check = buildAdmit(assign, options.runId, chosen, pool as string[], records);
+      }
+    }
+    let agent = chosen;
+    // OpenCode launches by its resolved installed agent id (opencode or opencode2), resolved before anything is claimed.
+    // launchWorker re-gates with this id, which re-reads the installed list immediately before the spawn.
+    if (chosen === "opencode") {
+      const env = options.env ?? deps.proc.env;
+      const resolvedAgent = resolveOpenCodeAgentId({ env, installedAgents: readInstalledAgents({ root: options.root, executable: decision.executable as string, env, deps, run: options.run }) });
+      if (resolvedAgent.error !== undefined) return { ok: false, outcome: { route: "normal", reason: resolvedAgent.error }, vendor: chosen, balanced };
+      agent = resolvedAgent.agentId;
+      gateOptions.agentId = agent;
+    } else if (options.agentId === undefined) {
+      delete gateOptions.agentId;
+    } else {
+      gateOptions.agentId = options.agentId;
+    }
+    const workers = (policyReport(options.root, coordinator, deps) as { workers?: unknown }).workers;
+    if (!Array.isArray(workers) || !workers.includes(chosen)) return { ok: false, outcome: { route: "normal", reason: "worker-not-configured" }, vendor: chosen, balanced };
+    return { ok: true, vendor: chosen, agentArg: agent, ...(check ? { admit: check } : {}) };
+  };
+  // A pool member that cannot launch before any claim (not installed, no agent id) never gains load and would look idle forever, so a
+  // load pick that fails this way is skipped and the next least-loaded member is tried. A recorded owner or a rotation is never skipped.
+  const prepareSkipping = (skipped: string[]): Prepared => {
+    let prepared = prepare(skipped);
+    const firstFailure = prepared;
+    while (!prepared.ok && prepared.balanced && prepared.vendor !== undefined && !skipped.includes(prepared.vendor)) {
+      skipped.push(prepared.vendor);
+      prepared = prepare(skipped);
+      // Every other member is out too: report the launch failure that started this, not the pool being used up.
+      if (!prepared.ok && prepared.vendor === undefined) return firstFailure;
+    }
+    return prepared;
+  };
+  const skipped: string[] = [];
+  const first = prepareSkipping(skipped);
+  if (!first.ok) return first.outcome;
+  vendor = first.vendor;
+  agentArg = first.agentArg;
+  admit = first.admit;
   if (!validAuthorizedPaths(scope.authorizedPaths)) return { route: "normal", reason: "authorized-paths-invalid" };
   const brief = workerBrief({ ...scope, ownership: [...(Array.isArray(scope.ownership) ? scope.ownership : [scope.ownership]),
     `Authorized paths (exact files or directory prefixes): ${JSON.stringify(scope.authorizedPaths)}`] });
@@ -227,9 +324,21 @@ export async function dispatchScope(options: DispatchOptions): Promise<DispatchO
 
   // Task ownership, capacity and claim are one shared filesystem transaction across coordinator processes.
   const taskKey = taskKeyOf(scope.id);
-  const cap = typeof policy.maxConcurrentWorkers === "number" ? policy.maxConcurrentWorkers : 0;
-  const claim = ledger.reserve({ attemptKey, taskKey, vendor, state: "claimed", createdAt: Math.trunc(deps.clock.now()),
-    authorizedPaths: [...scope.authorizedPaths] }, cap);
+  const maxWorkers = (policyReport(options.root, coordinator, deps) as { maxConcurrentWorkers?: unknown }).maxConcurrentWorkers;
+  const cap = typeof maxWorkers === "number" ? maxWorkers : 0;
+  const claimBase: LedgerRecord = { attemptKey, taskKey, vendor, state: "claimed", createdAt: Math.trunc(deps.clock.now()),
+    authorizedPaths: [...scope.authorizedPaths], ...(options.runId !== undefined ? { runId: options.runId } : {}) };
+  let claim = ledger.reserve(claimBase, cap, admit);
+  // A competing claim changed the load between the pick and the claim: pick again from the new ledger and check again.
+  // The last try claims without the check, so a busy Run cannot loop; reserve still refuses ownership, capacity and overlap.
+  for (let retry = 0; claim.outcome === "load-changed"; retry++) {
+    if (!options.assign) return { route: "blocked", reason: "ledger-claim-load-changed", attemptKey };
+    const again = prepareSkipping(skipped);
+    if (!again.ok) return again.outcome;
+    vendor = again.vendor;
+    agentArg = again.agentArg;
+    claim = ledger.reserve({ ...claimBase, vendor }, cap, retry < LOAD_RETRIES - 1 ? again.admit : undefined);
+  }
   if (claim.outcome === "replayed") return resumeExisting(ledger, claim.record, attemptKey);
   if (claim.outcome === "task-owned") return { route: "resume", reason: "task-already-owned", attemptKey: claim.record.attemptKey,
     humanAction: "inspect the existing attempt before dispatching this task again" };
