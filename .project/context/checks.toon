@@ -1,0 +1,28 @@
+@toon-data 1
+schemaVersion: 1
+checks[5]:
+  -
+    name: tests
+    argv[4]: node,"--experimental-strip-types","--disable-warning=ExperimentalWarning","--test"
+    required: true
+    timeoutMs: 600000
+  -
+    name: setup-validator
+    argv[4]: node,"--experimental-strip-types","--disable-warning=ExperimentalWarning",ai-framework/scripts/setup-validator.mts
+    required: true
+    timeoutMs: 60000
+  -
+    name: knowledge-graph
+    argv[5]: node,"--experimental-strip-types","--disable-warning=ExperimentalWarning",ai-framework/scripts/graphify.mts,"--check"
+    required: true
+    timeoutMs: 60000
+  -
+    name: process-relations
+    argv[5]: node,"--experimental-strip-types","--disable-warning=ExperimentalWarning",ai-framework/scripts/graphify-relations.mts,"--check"
+    required: true
+    timeoutMs: 60000
+  -
+    name: workflow-doctor
+    argv[4]: node,"--experimental-strip-types","--disable-warning=ExperimentalWarning",ai-framework/scripts/workflow-doctor.mts
+    required: true
+    timeoutMs: 60000

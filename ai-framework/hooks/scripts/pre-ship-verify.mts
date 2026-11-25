@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 import { runDirect } from "../../scripts/runtime/cli.mts";
+import { readData } from "../../scripts/runtime/data-file.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
 
 import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
@@ -7,14 +8,17 @@ import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 /**
  * pre-ship-verify.mts — final checks for this installation, invoked by /ship-pitch (not a hooks.json hook).
  *
- * Runs direct executables (never a shell) in the project root. With `verify:base` in package.json it runs that
- * script, then the document, integrity and offline-viewer checks; otherwise it runs the recognised build,
- * typecheck, lint, test and i18n scripts. A diff-sanity step blocks sensitive paths and debug logging in
+ * Runs direct executables (never a shell) in the project root. When .project/context/checks.toon exists it is the
+ * whole check list, and an unreadable or invalid one fails without a fallback. Otherwise, with `verify:base` in package.json it runs that
+ * script, then the document, integrity and offline-viewer checks when the project has that viewer; otherwise it
+ * runs the recognised build, typecheck, lint, test and i18n scripts. A diff-sanity step blocks sensitive paths and debug logging in
  * application source. Exit codes: 0 all required checks green, 1 a required check failed or the script failed.
  */
 
+export type CheckSource = "manifest" | "verify:base" | "scripts" | "document viewer" | "built-in";
 export interface Check {
   name: string;
+  source: CheckSource;
   command: string;
   args: string[];
   required: boolean;
@@ -36,7 +40,7 @@ interface Runner {
 type Plain = Record<string, unknown>;
 
 const DEFAULT_TIMEOUT_MS = 60_000;
-const VERIFY_BASE_TIMEOUT_MS = 1_200_000;
+const LONG_TIMEOUT_MS = 1_200_000;
 const MAX_BUFFER_BYTES = 4 * 1024 * 1024;
 const PACKAGE_MANAGERS = ["npm", "pnpm", "yarn", "bun"];
 const CLI_BY_MANAGER: Record<string, string> = {
@@ -45,6 +49,20 @@ const CLI_BY_MANAGER: Record<string, string> = {
   yarn: "yarn/bin/yarn.js",
 };
 const VIEWER_VERIFIER = "tools/viewer/verify-all.ts";
+const MANIFEST_PATH = ".project/context/checks.toon";
+const MANIFEST_SHAPE = `@toon-data 1
+schemaVersion: 1
+checks[1]:
+  -
+    name: tests
+    argv[2]: node,"--test"
+    required: true
+    timeoutMs: 600000
+`;
+const TEST_SCRIPTS = ["test:ci", "test", "test:unit"];
+const CHECK_KEYS = ["argv", "name", "required", "timeoutMs"];
+const MIN_TIMEOUT_MS = 1_000;
+const MAX_TIMEOUT_MS = 3_600_000;
 
 function asRecord(value: unknown): Plain {
   return typeof value === "object" && value !== null && !Array.isArray(value) ? (value as Plain) : {};
@@ -95,28 +113,37 @@ export function packageCommand(pkg: Plain, deps: RuntimeDeps): Runner {
 }
 
 function nodeCheck(deps: RuntimeDeps, name: string, args: string[]): Check {
-  return { name, command: deps.proc.execPath, args, required: true };
+  return { name, source: "document viewer", command: deps.proc.execPath, args, required: true };
+}
+
+/** One application's document checks. They apply only where its viewer exists. */
+function viewerChecks(deps: RuntimeDeps): Check[] {
+  if (!deps.fs.existsSync(deps.path.join(deps.proc.cwd(), VIEWER_VERIFIER))) return [];
+  // Validate the current documents and self-contained HTML without relying on a previous user's absolute
+  // temporary extraction path. Do not regenerate HTML/ZIP.
+  return [
+    nodeCheck(deps, "workflow setup", [
+      "--experimental-strip-types",
+      "--disable-warning=ExperimentalWarning",
+      "ai-framework/scripts/setup-validator.mts",
+      "--json",
+    ]),
+    ...["documentos", "integridad"].map((phase) =>
+      nodeCheck(deps, `documentación: ${phase}`, ["--experimental-strip-types", VIEWER_VERIFIER, "--fase", phase]),
+    ),
+    nodeCheck(deps, "visor HTML sin conexión", ["--experimental-strip-types", "tools/viewer/verify-viewer.ts"]),
+  ];
+}
+
+function noChecks(reason: string): Error {
+  return new Error(`no checks configured: ${reason}. List this project's checks in ${MANIFEST_PATH}:\n${MANIFEST_SHAPE}`);
 }
 
 export function buildChecks(pkg: Plain | null, deps: RuntimeDeps): Check[] {
   if (!pkg) {
-    if (!deps.fs.existsSync(deps.path.join(deps.proc.cwd(), VIEWER_VERIFIER))) {
-      throw new Error("No package.json or Muro document verifier found. Define project checks before shipping.");
-    }
-    // Validate the current documents and self-contained HTML without relying on a previous user's absolute
-    // temporary extraction path. Do not regenerate HTML/ZIP.
-    return [
-      nodeCheck(deps, "workflow setup", [
-        "--experimental-strip-types",
-        "--disable-warning=ExperimentalWarning",
-        "ai-framework/scripts/setup-validator.mts",
-        "--json",
-      ]),
-      ...["documentos", "integridad"].map((phase) =>
-        nodeCheck(deps, `documentación: ${phase}`, ["--experimental-strip-types", VIEWER_VERIFIER, "--fase", phase]),
-      ),
-      nodeCheck(deps, "visor HTML sin conexión", ["--experimental-strip-types", "tools/viewer/verify-viewer.ts"]),
-    ];
+    const viewer = viewerChecks(deps);
+    if (!viewer.length) throw noChecks("there is no package.json");
+    return viewer;
   }
   const scripts = asRecord(pkg.scripts);
   if (scripts["verify:base"]) {
@@ -124,12 +151,13 @@ export function buildChecks(pkg: Plain | null, deps: RuntimeDeps): Check[] {
     return [
       {
         name: "verify:base",
+        source: "verify:base",
         command: runner.command,
         args: [...runner.prefix, "run", "verify:base"],
         required: true,
-        timeout: VERIFY_BASE_TIMEOUT_MS,
+        timeout: LONG_TIMEOUT_MS,
       },
-      ...buildChecks(null, deps),
+      ...viewerChecks(deps),
     ];
   }
   const names: Array<{ name: string; required: boolean }> = [];
@@ -139,26 +167,82 @@ export function buildChecks(pkg: Plain | null, deps: RuntimeDeps): Check[] {
   addAll(["build", "build:web"], true);
   addAll(["typecheck", "typecheck:web", "typecheck:mobile"], true);
   addAll(["lint"], false);
-  addAll(["test:ci", "test", "test:unit"], true);
+  addAll(TEST_SCRIPTS, true);
   addAll(["i18n:check"], false);
-  if (!names.length) throw new Error("package.json has no recognized checks. Define project checks before shipping.");
+  if (!names.length) throw noChecks("package.json has no recognized checks");
   const runner = packageCommand(pkg, deps);
   return names.map(({ name, required }) => ({
     name,
+    source: "scripts",
     required,
     command: runner.command,
     args: [...runner.prefix, "run", name],
+    ...(TEST_SCRIPTS.includes(name) ? { timeout: LONG_TIMEOUT_MS } : {}),
   }));
 }
 
-export async function runCheck(check: Check, deps: RuntimeDeps): Promise<CheckResult> {
-  deps.io.stdout.write(`[pre-ship-verify] running ${check.name}...\n`);
-  const result = await deps.child.run(check.command, check.args, {
-    cwd: deps.proc.cwd(),
-    env: { ...deps.proc.env, CI: "1" },
-    timeoutMs: check.timeout ?? DEFAULT_TIMEOUT_MS,
-    maxBufferBytes: MAX_BUFFER_BYTES,
+function invalidManifest(problem: string): Error {
+  return new Error(`unusable check manifest ${MANIFEST_PATH}: ${problem}`);
+}
+
+function isText(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0 && !value.includes("\0");
+}
+
+/** The project's own check list, or null only when the file does not exist. Every entry is validated before any runs. */
+export function loadManifest(deps: RuntimeDeps): Check[] | null {
+  const read = readData(deps.proc.cwd(), MANIFEST_PATH, deps);
+  if (read.status === "absent") return null;
+  if (read.status === "refused") {
+    const at = read.line === undefined ? "" : ` at line ${read.line}, column ${read.column ?? 0}`;
+    // The reader also refuses an unsafe path or the .json twin, so name both rather than claim checks.toon exists.
+    throw invalidManifest(`${read.code}: ${read.text}${at} (read as checks.toon or its checks.json twin)`);
+  }
+  const { schemaVersion, checks, ...unknown } = read.value;
+  if (Object.keys(unknown).length) throw invalidManifest("only schemaVersion and checks are allowed at the top level");
+  if (schemaVersion !== 1) throw invalidManifest("schemaVersion must be 1");
+  if (!Array.isArray(checks) || !checks.length) throw invalidManifest("checks must be a non-empty list");
+  const seen = new Set<string>(["diff-sanity"]);
+  const list = checks.map((raw, index): Check => {
+    const bad = (problem: string): Error => invalidManifest(`checks[${index}] ${problem}`);
+    const entry = asRecord(raw);
+    if (Object.keys(entry).sort().join() !== CHECK_KEYS.join()) throw bad("needs exactly name, argv, required and timeoutMs");
+    const { name, argv, required, timeoutMs } = entry;
+    if (!isText(name) || /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]/u.test(name)) throw bad("name must be non-empty text without control characters");
+    if (seen.has(name)) throw bad("name is already used or reserved");
+    seen.add(name);
+    if (!Array.isArray(argv) || !argv.length || !argv.every(isText)) throw bad("argv must be a non-empty list of non-empty strings");
+    if (typeof required !== "boolean") throw bad("required must be true or false");
+    if (typeof timeoutMs !== "number" || !Number.isInteger(timeoutMs) || timeoutMs < MIN_TIMEOUT_MS || timeoutMs > MAX_TIMEOUT_MS) {
+      throw bad(`timeoutMs must be a whole number from ${MIN_TIMEOUT_MS} to ${MAX_TIMEOUT_MS}`);
+    }
+    return { name, source: "manifest", command: argv[0], args: argv.slice(1), required, timeout: timeoutMs };
   });
+  if (!list.some((check) => check.required)) throw invalidManifest("at least one check must be required");
+  return list;
+}
+
+export async function runCheck(check: Check, deps: RuntimeDeps): Promise<CheckResult> {
+  deps.io.stdout.write(`[pre-ship-verify] running ${check.name} (source: ${check.source})...\n`);
+  let result;
+  try {
+    result = await deps.child.run(check.command, check.args, {
+      cwd: deps.proc.cwd(),
+      env: { ...deps.proc.env, CI: "1" },
+      timeoutMs: check.timeout ?? DEFAULT_TIMEOUT_MS,
+      maxBufferBytes: MAX_BUFFER_BYTES,
+    });
+  } catch (error) {
+    // A manifest names its own executables, so a missing one is that check's failure. Everything else, including
+    // an unconfirmed process cleanup, still stops the run.
+    if (check.source !== "manifest") throw error;
+    if (asRecord(error).code !== "ENOENT") {
+      deps.io.stderr.write(`[pre-ship-verify] ${check.name}: check did not complete\n`);
+      throw error;
+    }
+    deps.io.stderr.write(`[pre-ship-verify] ${check.name}: executable not found\n`);
+    return { name: check.name, ok: false, code: 127, required: check.required, errorCode: "ENOENT" };
+  }
   if (result.stdout) deps.io.stdout.write(result.stdout);
   if (result.status === 0 && result.signal === null && result.errorCode === undefined) {
     return { name: check.name, ok: true, required: check.required };
@@ -227,13 +311,20 @@ function diffSanity(deps: RuntimeDeps): CheckResult {
 
 export async function main(_argv: string[] = [], deps: RuntimeDeps = createNodeDeps()): Promise<number> {
   try {
-    for (const check of buildChecks(readPackage(deps), deps)) {
+    const summary: string[] = [];
+    const record = (name: string, source: CheckSource, outcome: string): void => {
+      summary.push(`[pre-ship-verify] result: ${name} [${source}] ${outcome}\n`);
+    };
+    for (const check of loadManifest(deps) ?? buildChecks(readPackage(deps), deps)) {
       const result = await runCheck(check, deps);
       if (!result.ok && result.required) throw new Error(`${result.name} failed (${result.errorCode ?? result.signal ?? `exit ${result.code}`})`);
       if (!result.ok) deps.io.stderr.write(`[pre-ship-verify] WARN ${result.name} failed (optional check)\n`);
+      record(check.name, check.source, result.ok ? "passed" : "optional failure");
     }
     const diff = diffSanity(deps);
     if (!diff.ok) throw new Error("diff-sanity failed");
+    record("diff-sanity", "built-in", diff.skipped ? "skipped" : "passed");
+    deps.io.stdout.write(summary.join(""));
     deps.io.stdout.write(
       `[pre-ship-verify] required checks passed${diff.skipped ? "; Git diff comparison unavailable" : ""}\n`,
     );
