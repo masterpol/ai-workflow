@@ -638,3 +638,11 @@ Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles t
 - **S2 cost** (note): the opencode worker took about 2 hours for S2 and wrote 422 source lines against an estimate of 250; consider the vendor and a smaller brief for parser-adjacent scopes.
 - **Raw names in the facts JSON** (low, audit nits C3-SEC-3 and C3-SEC-4, and SEC-8 from 2.53.0): SQL identifiers, `structure.nodes` folder names and the draft's `sources[]` evidence paths are not credential-checked in the raw `--json` output; the page cleaner covers the draft. Add a check at ingest or run the evidence through `clean`.
 - **Review the cycle-3 fixes** (med): the credential cutoff, fullwidth keys, invalid `package.json`, `DROP` name matching and unterminated flow lists were fixed after the last allowed audit cycle and have only regression tests; fold them into the next independent review of the state collector.
+
+## From orca-balanced-role-pools (2026-11-25)
+- **Balanced pitch-level reviewers** (med, cut at critique): audit and critique reviewers have no `reviewOf` scope, so the pools cannot pick them cleanly; reviewers were spread by hand or assigned as `implementation`.
+- **The run helper should supply `runId`** (low-med): the id is only shape-checked; a fresh id on each dispatch resets load to zero. It can never move an owned task.
+- **Run identity in task and attempt keys** (med, S2 at critique): an older Run's `S1` is inherited by a new Run. Pre-existing.
+- **Review the post-audit changes** (med): the unlaunchable-member skip, the checked re-pick loop, the `source` label and the shared Run-id grammar were made after the last audit cycle; mutant-check the two new dispatch tests.
+- **A released worker terminal can come back after a Claude Code restart** (low-med): seen twice (it re-wrote scratch files and once received a new dispatch in its old session). Decide whether release should close the session for good.
+- **Orca status load view** (low, cut): show per-vendor load for a Run.
