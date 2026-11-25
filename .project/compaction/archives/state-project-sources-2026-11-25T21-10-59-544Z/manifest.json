@@ -1,0 +1,72 @@
+{
+  "schemaVersion": 1,
+  "slug": "state-project-sources",
+  "sourceRoot": ".project/pitches/state-project-sources",
+  "archivedAt": "2026-11-25T21:10:59.545Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "9e8fa1184432e4e3158f0d868b3c9cdf78edbf25b28342ac795c65027e4fd804",
+      "mode": 420
+    },
+    "audit-reports/sps-c1-code-reviewer.md": {
+      "hash": "427511cd91345fc82a5e386443b818bd21dff65c7ce1aed626d8beacb45cb745",
+      "mode": 420
+    },
+    "audit-reports/sps-c1-cross-pitch-conflict-checker.md": {
+      "hash": "769d375a93ffa6e65ccb2799dfc8be0da3df589af2ddded4e4503f0514321a91",
+      "mode": 420
+    },
+    "audit-reports/sps-c1-security-reviewer.md": {
+      "hash": "01642e7cee5b1b554e1fbf84309e8be1f1685db413b44fbd570da054f81ee59e",
+      "mode": 420
+    },
+    "audit-reports/sps-c1-test-coverage-checker.md": {
+      "hash": "b1f820f8f9e5a141a7d783cda61b73f3401a0f8e8835b96a00fda1fea4970ec6",
+      "mode": 420
+    },
+    "audit-reports/sps-c2-code-reviewer.md": {
+      "hash": "058b04e56751a2399d600f793fb85909c0e2966dd4218b47f8be4e54eb85a259",
+      "mode": 420
+    },
+    "audit-reports/sps-c2-security-reviewer.md": {
+      "hash": "8c6d4c7c37dd8e347b1fda3da3861525cec5f23b37bfb2533c992e2bc0fbd703",
+      "mode": 420
+    },
+    "audit-reports/sps-c3-code-reviewer.md": {
+      "hash": "03b93968f11b7f96e00578a65863632652f383a77919ac753af307739a857f90",
+      "mode": 420
+    },
+    "audit-reports/sps-c3-security-reviewer.md": {
+      "hash": "922476fdb56a6b92b35d9b48cf0cc942cc8e9760f1f8382723028b333ce7c36f",
+      "mode": 420
+    },
+    "critique/state-project-sources-appetite-auditor.md": {
+      "hash": "91d08b1d94f30c26be96dd85855fc60f2392552f792d0811ae79dc3c1e890b6d",
+      "mode": 420
+    },
+    "critique/state-project-sources-cross-pitch-projector.md": {
+      "hash": "021273984b7c630b919516732a59417027bce80845c749066847d2d452cca410",
+      "mode": 420
+    },
+    "critique/state-project-sources-knowledge-historian.md": {
+      "hash": "953abea90f3e962176e5d176f588565fc01dc14e4eacfc371004091ad8224e02",
+      "mode": 420
+    },
+    "critique/state-project-sources-skeptic.md": {
+      "hash": "c3c26fd31eae75d43931bf39ab7a001a087df3da65889a2af7982a0bc0c56919",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "8fc176cccbb90fb3bdb0d628b05a3d2c404bfeadec3789e4ce8143bb07052698",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "2480ea2ee411e6d4661ed1ec7cd35678f8597d9abf751248f7f1acd92bbe068d",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "72394cd21ec135ae230c9228f28a5b12420c2d54f9cfddb8a3d7be61ca7998b3",
+      "mode": 420
+    }
+  }
+}
