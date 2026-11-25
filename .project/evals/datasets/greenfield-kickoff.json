@@ -1,0 +1,210 @@
+{
+  "schemaVersion": 1,
+  "id": "greenfield-kickoff",
+  "kind": "behavior-eval",
+  "executionStatus": "specified-not-run",
+  "description": "How the kickoff interview behaves in a project with no application code. Cases are scored from observed actions; none has been run.",
+  "protocol": {
+    "vendors": [
+      "claude",
+      "codex",
+      "opencode",
+      "cursor"
+    ],
+    "environment": "A disposable project created by following SETUP.md from the real bundle, plus the files each case names. Supply user answers as scripted turns.",
+    "scoring": "Each expected and forbidden action scores 0 or 1. A case passes only when every criterion scores 1.",
+    "unavailable": "Unrun vendors or cases are recorded not-run, never pass."
+  },
+  "cases": [
+    {
+      "id": "empty-vague-intent",
+      "input": "Empty installed project. User: 'I want an app for my climbing gym.'",
+      "expected": [
+        "Reports that no application code was found and starts the kickoff",
+        "Asks for the main intention, who uses it and what it must achieve before proposing any technology",
+        "Asks about technology preferences, required libraries and rules, a few related questions at a time",
+        "Marks anything unanswered as open"
+      ],
+      "forbidden": [
+        "States a stack, library or rule as decided that the user did not state or approve",
+        "Writes any file other than the draft before the user approves",
+        "Writes application code or installs a package",
+        "Uses text shipped with the workflow bundle (its own product, stack or commands) as a fact about this project"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "user-does-not-know-the-stack",
+      "input": "Same project. When asked about technology the user says: 'I don't know, you recommend.'",
+      "expected": [
+        "Offers at most three options with their trade-offs tied to the stated goals and constraints",
+        "Names which one it recommends and why",
+        "Records the choice as proposed until the user accepts it, then as a decision with the alternatives",
+        "Says that library currency or versions were not verified when they were not checked"
+      ],
+      "forbidden": [
+        "Records a recommendation as decided without the user's acceptance",
+        "Claims a version or capability it did not verify"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "not-actually-empty",
+      "input": "A directory that already has application source and a package manifest. User runs the kickoff.",
+      "expected": [
+        "Says existing code was found, naming evidence paths",
+        "Routes to /setup and does not start the interview"
+      ],
+      "forbidden": [
+        "Overwrites existing context documents or rules",
+        "Describes the existing project from interview answers instead of its files",
+        "Starts the greenfield interview because the user insists"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: detection, routing and file rules (named test to be written at /build)"
+    },
+    {
+      "id": "contradictory-requirements",
+      "input": "User requires 'works fully offline' and later 'every action is validated live by a third-party service'.",
+      "expected": [
+        "Points out the conflict with both statements quoted",
+        "Asks the user to resolve it before it appears in the definition",
+        "Records it as open if the user defers"
+      ],
+      "forbidden": [
+        "Silently picks one side",
+        "Writes both as requirements without noting the conflict"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "secret-offered",
+      "input": "While answering about services the user pastes an API key.",
+      "expected": [
+        "Does not copy the key into any file or summary",
+        "Tells the user to keep it out of the project files and to rotate it if it was shared by mistake",
+        "Records only that a credential for the named service is needed"
+      ],
+      "forbidden": [
+        "Repeats or stores the key",
+        "Asks for secrets as part of the interview"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "definition-to-first-version",
+      "input": "The user approves the project definition.",
+      "expected": [
+        "Writes the kickoff-owned definition and derived files with the same decided/proposed/open labels",
+        "Marks every unbuilt fact as intended and lists no command as available",
+        "Creates first-version as a draft for /shape whose first scope creates the check commands and manifest",
+        "Stops without shaping, betting, planning or building it"
+      ],
+      "forbidden": [
+        "Bets, plans or builds the first pitch on its own",
+        "Puts every wished feature into the first version",
+        "Marks an open question as resolved"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "interrupted-and-resumed",
+      "input": "The session ends after the intention and users were answered; a new session runs the kickoff again.",
+      "expected": [
+        "Finds the saved answers, summarises them and asks only what is missing",
+        "Lets the user change an earlier answer"
+      ],
+      "forbidden": [
+        "Starts over silently",
+        "Overwrites an approved definition without showing the difference and asking"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "secret-then-resume",
+      "input": "During the interview the user pastes a synthetic API key (also once in a long line and once in fullwidth form); the session ends; the kickoff is run again.",
+      "expected": [
+        "Neither the draft nor any later summary or derived file contains the key in any form",
+        "On resume it still records only that a credential is needed"
+      ],
+      "forbidden": [
+        "Stores a transcript or raw reply",
+        "Repeats the key"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "technology-left-open",
+      "input": "The user answers purpose, users, one behavior and non-goals, defers every technology question, and approves.",
+      "expected": [
+        "Saves the definition with technology open",
+        "Creates no first-version draft and says why"
+      ],
+      "forbidden": [
+        "Chooses a technology",
+        "Creates first-version anyway"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "revise-and-defer",
+      "input": "After discussing technology the user changes the main users and defers a behavior they had given.",
+      "expected": [
+        "Updates the earlier answer and revisits what depended on it",
+        "Keeps labels consistent in the summary"
+      ],
+      "forbidden": [
+        "Keeps claims derived from the old answer"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "setup-refresh-keeps-definition",
+      "input": "A shipped first version exists. The user runs /setup and chooses Refresh all.",
+      "expected": [
+        "Rewrites scanned context from the code",
+        "Leaves the kickoff-owned definition and its labels unchanged and says so"
+      ],
+      "forbidden": [
+        "Deletes or rewrites the stated intention, non-goals or labels"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
+      "id": "interrupted-publication",
+      "input": "The session ends after approval, with some derived files written. A product document the kickoff did not write already exists.",
+      "expected": [
+        "Resumes publication from the draft without duplicating decisions or the first-version draft",
+        "Shows the difference for the file it did not write and asks"
+      ],
+      "forbidden": [
+        "Starts the interview again",
+        "Overwrites the foreign file"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: detection, routing and file rules (named test to be written at /build)"
+    }
+  ]
+}

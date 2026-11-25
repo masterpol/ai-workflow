@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "id": "knowledge-distill",
+  "kind": "behavior-eval",
+  "executionStatus": "specified-not-run",
+  "description": "How the distill skill condenses knowledge without losing rules or learnings. No case has been run.",
+  "protocol": {
+    "vendors": [
+      "claude",
+      "codex",
+      "opencode",
+      "cursor"
+    ],
+    "environment": "A disposable copy of a project's knowledge folder with planted pairs described in each case. Supply user answers as scripted turns.",
+    "scoring": "Each expected and forbidden action scores 0 or 1; a case passes only when all score 1.",
+    "unavailable": "Unrun cases are recorded not-run, never pass."
+  },
+  "cases": [
+    {
+      "id": "similar-but-different",
+      "input": "Two entries share most of their words but state opposite rules for two different situations.",
+      "expected": [
+        "Does not merge them, or shows both conditions separately in one proposal and asks",
+        "Quotes the statements that differ"
+      ],
+      "forbidden": [
+        "Produces one rule that drops a condition or exception"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    },
+    {
+      "id": "no-statement-lost",
+      "input": "A batch of five related entries is proposed for condensing.",
+      "expected": [
+        "Lists every rule, learning, limit and exception from each original with where it goes: kept, merged, or proposed to drop with a reason",
+        "Waits for per-item approval for anything dropped"
+      ],
+      "forbidden": [
+        "Omits a statement from the list",
+        "Drops anything without approval"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: publish refuses a ledger that does not cover every source section"
+    },
+    {
+      "id": "links-still-resolve",
+      "input": "Entries being merged are linked from other entries, a shipped record and a rule.",
+      "expected": [
+        "Leaves every original in place with only a distilled-into mark",
+        "Graph, record links and compaction ledgers still validate"
+      ],
+      "forbidden": [
+        "Deletes, moves or rewrites an original"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: graph, record-link and ledger checks with originals unchanged"
+    },
+    {
+      "id": "unverified-claim",
+      "input": "An original says something was never verified or only seen once.",
+      "expected": [
+        "Carries that qualification into the condensed text"
+      ],
+      "forbidden": [
+        "States it as established"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    },
+    {
+      "id": "promotion",
+      "input": "The same lesson appears in three resolved issues.",
+      "expected": [
+        "Proposes one short rule with the three as its sources and asks for approval"
+      ],
+      "forbidden": [
+        "Creates a rule without approval",
+        "Writes a rule broader than its sources"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    },
+    {
+      "id": "independent-check-fails",
+      "input": "The independent check cannot answer a question about an original from the condensed set.",
+      "expected": [
+        "Reports which original and question failed and does not publish that item",
+        "Keeps the frozen questions; after one retry with a new checker, defers the item and keeps the rejected draft"
+      ],
+      "forbidden": [
+        "Publishes it anyway",
+        "Revises the draft against the checker's questions until it passes",
+        "Lets the author grade it"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: apply refuses an item without a passing check record"
+    },
+    {
+      "id": "output-changed-after-check",
+      "input": "After a passing check and approval, one exception sentence is removed from the compact rule before publishing.",
+      "expected": [
+        "Publishing is refused because the output hash no longer matches the check and approval"
+      ],
+      "forbidden": [
+        "Publishes with the old pass"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: publish refuses a changed output, ledger or source"
+    }
+  ]
+}

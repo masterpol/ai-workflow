@@ -5,9 +5,23 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
-| package-less-ship-verification | draft | shape | small-batch | 2026-10-22 |
-| review-bench-hardening | draft | shape | small-batch | 2026-10-23 |
+| 00-package-less-ship-verification | re-shaped, validated 2026-11-25 | shape (bet pending) | small-batch | 2026-11-25 |
+| 01-review-bench-hardening | re-shaped, validated 2026-11-25 | shape (bet pending) | small-batch | 2026-11-25 |
+| 02-workspace-slim | re-shaped: report + smaller loaded text, deletes nothing | shape (bet pending) | big-batch | 2026-11-25 |
+| 03-knowledge-distill | re-shaped: compact rules, originals kept (tandem) | shape (bet pending) | big-batch | 2026-11-25 |
+| 04-greenfield-kickoff | shaped, critiqued, re-shaped | shape (bet pending) | big-batch | 2026-11-25 |
+| 05-workspace-recovery | draft: Git-backed removal, cut from slim | shape | unset | 2026-11-25 |
+| 06-workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
+
+Folder numbers are the **implementation order** (lower first, ranked 2026-11-25 by impact and dependencies):
+- **00** package-less-ship-verification: Blocks every ship (all recent ones used manual checks); two more verifier bugs; greenfield-kickoff depends on it.
+- **01** review-bench-hardening: Security and trust: inspecting a repo runs its programs; audit gates can pass wrongly.
+- **02** workspace-slim: The current pain: shows what takes space, shrinks loaded text; deletes nothing.
+- **03** knowledge-distill: Compact rules loaded instead of originals; tandem with 02, its graph change lands after 02.
+- **04** greenfield-kickoff: New-project start; needs 00 and the install-identity fix first.
+- **05** workspace-recovery: Real file removal with Git-backed restore; the riskiest, builds on what 02 reports.
+- **06** workflow-v3-rollout: Sync installed projects to a pinned release, so it follows the next version.
+- **Before 00, two small bug fixes with no pitch** (`_followups.md`): installed skill packages are committed and indexed (the largest size win); new installs inherit this repository's identity.
 
 ## Parked pitches
 _None. `restore-vendor-adapters` was removed 2026-10-22 (premise invalidated 2026-10-08; its `_parked/` directory no longer exists)._
