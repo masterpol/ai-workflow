@@ -1,9 +1,9 @@
 ---
-name: ship
+name: ship-pitch
 description: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.
 ---
 
-# Ship
+# Ship pitch
 
 > **Recommended capability profile:** `fast` — templated reconciliation + extraction. Select an available model using `ai-framework/integrations/harnesses.md`.
 
@@ -39,10 +39,10 @@ Before the final /verify, when `AI_WORKFLOW_ORCA_MULTI_AGENT=true` and worker ch
 
 ## Confirmation gate
 
-`/ship: pitch ready to close.` — presents verify results, reconciliation summary, knowledge extractions, followup count. Options: **[1] ship** / **[2] hold**.
+`/ship-pitch: pitch ready to close.` — presents verify results, reconciliation summary, knowledge extractions, followup count. Options: **[1] ship** / **[2] hold**.
 
 ## Transition
 
 - **[1] ship** → `/cooldown` if this is the 5th ship since the last one, otherwise back to
   `/shape` for the next pitch
-- **[2] hold** → stay in `/ship`, address the blocker
+- **[2] hold** → stay in `/ship-pitch`, address the blocker

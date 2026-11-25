@@ -3,4 +3,4 @@ description: Close a pitch cleanly after /audit passes. Final /verify gauntlet, 
 model: opencode-go/minimax-m3.1-flash
 ---
 
-Load `.claude/skills/ship/SKILL.md` and follow it exactly. Use the `fast` capability profile only for non-sensitive reconciliation and do not bypass its final verification gate. $ARGUMENTS
+Load `.claude/skills/ship-pitch/SKILL.md` and follow it exactly. Use the `fast` capability profile only for non-sensitive reconciliation and do not bypass its final verification gate. $ARGUMENTS

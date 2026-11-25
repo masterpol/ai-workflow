@@ -29,6 +29,8 @@ import { migrateInstanceEntries } from "./runtime/migrate.mts";
  * Apply:              ... --apply [--prune] [--overwrite-unverified]
  *
  * --prune deletes files removed upstream only when they are unmodified versus base.
+ *         One exception: --apply (with or without --prune) removes the retired `ship` command adapters (renamed to ship-pitch), but only
+ *         a file whose content this bundle itself shipped, and only from a source that has the ship-pitch skill.
  *
  * Upgrade path: this file is what an existing install runs to update itself. It imports only
  * siblings that every synced bundle ships under ai-framework/scripts/ (an old install receives
@@ -83,6 +85,56 @@ export const SYNCED_DIRS: readonly string[] = [
 // Directories the bundle once shipped and has since removed entirely; still scanned on the
 // target side so their files are reported as removed-in-source.
 export const RETIRED_DIRS: readonly string[] = ["ai-framework/contexts"];
+
+// Old command adapter paths for the ship phase. A target that still has any of these needs to
+// know the command has been renamed to /ship-pitch and that the host's built-in /ship shadows
+// the workflow skill.
+// Every content this bundle has shipped at those paths (from git history). Only a file that is byte-identical to one of them is
+// ever removed without --prune: the sync receipt is project data and can name any file, so it is not proof that a file is ours.
+export const RETIRED_ADAPTER_HASHES: Readonly<Record<string, readonly string[]>> = {
+  ".claude/skills/ship/SKILL.md": [
+    "0158fde7c77664359a7d828ef15e534faa8e794adb310cfdb9e1f914af12028a",
+    "21fcad24d73568e4fbbd42a7f9da81c4f2afb7328f559909b0005de4eac307da",
+    "25c53d354104ad4638f25e70c2d2da652a522fd3ef05171ea37ae007030dde96",
+    "6068056224edb75304bc58bd5ecc81d988047bdf5aa14cf5b10561723183569a",
+    "6652cf3bb884ab39b65cad14996f27c9f9369e0446cd5395e6894db598b41577",
+    "7e560563a660c30e163c782c558a04bcf161054b87f27a5090b3f6303ede5c4c",
+    "aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69",
+    "e33361d8be822653758e0aeae61c401fda264366450c9d50e38eb647167adfb1",
+    "fba7cb1c7a5d66070c1b318f0b5b8546e7d1391c59f7228838772553ac9ad3c8",
+  ],
+  ".cursor/skills/ship/SKILL.md": [
+    "21fcad24d73568e4fbbd42a7f9da81c4f2afb7328f559909b0005de4eac307da",
+    "25c53d354104ad4638f25e70c2d2da652a522fd3ef05171ea37ae007030dde96",
+    "6068056224edb75304bc58bd5ecc81d988047bdf5aa14cf5b10561723183569a",
+    "6652cf3bb884ab39b65cad14996f27c9f9369e0446cd5395e6894db598b41577",
+    "7e560563a660c30e163c782c558a04bcf161054b87f27a5090b3f6303ede5c4c",
+    "aea1057d0dcd303da4d4fb98492726ce65b605f3462ad569cc52ac517b141f69",
+    "e33361d8be822653758e0aeae61c401fda264366450c9d50e38eb647167adfb1",
+    "fba7cb1c7a5d66070c1b318f0b5b8546e7d1391c59f7228838772553ac9ad3c8",
+  ],
+  ".agents/skills/ship/SKILL.md": [
+    "ab3169550c59630fcd76ba82ef7d6a8d4585469d00a237c8edb6d5cc10f84240",
+    "e27b2ab0f38779b048332ad3251cf7978381da2d50f6db3669c46af72b1a6a35",
+  ],
+  ".opencode/commands/ship.md": [
+    "0c854ecb8a070072dd97d30e90cbc5fee3c90ae756dc11467ba4f1a108ac69a8",
+    "575206facf744bab3c8b9b99a7f1e75c9fba22ac2e5225094e8793a78f2eea7e",
+    "782eb47a2fd7ab1038aa63f0541319a36ef37a5ec5198c0f4b66e04669489aa9",
+    "7972c560dc150f167bb01b2bb93a5ec1a6a6cf17d878d4848db5dad92bf3cd23",
+    "891d76cc13d38ccb9453dc3cd8c60f128f3c3cadfa2a57cff9a54193fcce35f3",
+    "f51c222e1ffe37f42296c1b6b4a24953290374d46846b48467582bea77de36c9",
+  ],
+};
+/** The source shows the rename happened; a partial source that merely lacks the old files does not. */
+const RENAME_EVIDENCE = ".claude/skills/ship-pitch/SKILL.md";
+const RETIRED_ADAPTER_BYTES = 64 * 1024;
+const OLD_SHIP_SKILL_PATHS: readonly string[] = [
+  ".claude/skills/ship/SKILL.md",
+  ".cursor/skills/ship/SKILL.md",
+  ".agents/skills/ship/SKILL.md",
+  ".opencode/commands/ship.md",
+];
 
 export const FLAGGED_FILES: readonly string[] = ["AGENTS.md", "CLAUDE.md", ".opencode/opencode.json", ".codex/config.toml", "SETUP.md", "README.md"];
 
@@ -394,12 +446,49 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
     if (entry.status !== "local" && entry.status !== "conflict" && entry.sourcePath !== undefined) await fs.copyFile(entry.sourcePath, destination);
   }
 
+  const posix = (relative: string): string => relative.split(path.sep).join("/");
+  // Matched ignoring case: on a case-insensitive volume `Ship/SKILL.md` is the same file, and --prune must not delete it by baseline either.
+  const retiredKeys = new Set(Object.keys(RETIRED_ADAPTER_HASHES).map((key) => key.toLowerCase()));
+  const isRetiredPath = (relative: string): boolean => retiredKeys.has(posix(relative).toLowerCase());
+
+  /** The content of a retired adapter as this bundle shipped it, read through a pinned descriptor; null for anything else. */
+  async function shippedAdapter(label: string, file: string): Promise<{ dev: number; ino: number } | null> {
+    const known = RETIRED_ADAPTER_HASHES[posix(label)];
+    if (!known) return null;
+    let identity: { dev: number; ino: number } | undefined;
+    try {
+      const bytes = await readBounded(file, RETIRED_ADAPTER_BYTES, root, (value) => { identity = value; });
+      return identity && known.includes(deps.crypto.sha256Hex(bytes)) ? identity : null;
+    } catch { return null; } // a link, a non-regular or oversized file, or one that changed while being read is not ours to remove
+  }
+
+  /**
+   * Removes a retired adapter only while it still is the shipped file: it is read and matched through a pinned descriptor, links are
+   * refused on the way, and then, with no `await` before the unlink, its identity and its bytes are read and matched once more.
+   * Residual: another process writing between that synchronous read and the unlink (there is no openat or atomic compare-and-remove here).
+   */
+  async function removeShippedAdapter(label: string, file: string): Promise<boolean> {
+    const pinned = await shippedAdapter(label, file);
+    if (!pinned) return false;
+    await assertNoSymlinkPath(file, root, true);
+    const current = deps.fs.lstatSync(file);
+    if (!current.isFile() || current.dev !== pinned.dev || current.ino !== pinned.ino) return false;
+    if (!RETIRED_ADAPTER_HASHES[posix(label)]!.includes(deps.crypto.sha256Hex(deps.fs.readBytesSync(file)))) return false;
+    deps.fs.unlinkSync(file);
+    // The file is gone: tidying the folders is best effort and never hides that.
+    try { await removeEmptyParents(file); } catch { /* a folder that cannot be tidied stays */ }
+    return true;
+  }
+
   async function removeEmptyParents(file: string): Promise<void> {
     let dir = path.dirname(file);
     while (dir.startsWith(root) && dir !== root) {
-      const left = (await fs.readdir(dir)).filter((name) => !IGNORE_NAMES.has(name));
-      if (left.length) return;
-      await fs.rm(dir, { recursive: true });
+      const names = await fs.readdir(dir);
+      if (names.some((name) => !IGNORE_NAMES.has(name))) return;
+      if ((await fs.lstat(dir)).isSymbolicLink()) return;
+      for (const name of names) await fs.rm(path.join(dir, name));
+      // Never recursive: a file that appeared after the listing makes this fail, and the directory stays.
+      try { deps.fs.rmdirSync(dir); } catch { return; }
       dir = path.dirname(dir);
     }
   }
@@ -483,6 +572,17 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
         if (!Array.isArray(entry.recommendedPhases) || installed[entry.id]) continue;
         steps.push({ kind: "default-skill", message: `recommended default skill ${entry.id} (${entry.purpose}) is not installed, so the instruction that references it in every skill and agent is inert: /add-skill ${entry.id} --path ${entry.path} --scope project --phases ${entry.recommendedPhases.join(",")}` });
       }
+    }
+    const oldShipPaths: string[] = [];
+    const registryOwned = new Set(ownedPaths(root, deps));
+    for (const rel of fs.existsSync(path.join(sourceRoot, RENAME_EVIDENCE)) ? OLD_SHIP_SKILL_PATHS.filter((item) => !registryOwned.has(item.toLowerCase())) : []) {
+      if (await exists(path.join(root, rel))) oldShipPaths.push(rel);
+    }
+    if (oldShipPaths.length) {
+      steps.push({
+        kind: "ship-command-rename",
+        message: `The old ship skill still exists at ${oldShipPaths.join(", ")}. The host's built-in /ship command shadows the workflow skill; the command is now /ship-pitch. --apply removes an old file only when its content is exactly one this bundle shipped, its name has the exact spelling and no link is on its path. For anything still there: if the file or a folder above it is a link, remove only the link (deleting through it deletes the file it points to); otherwise move anything you changed into ship-pitch, then delete it. The doctor can fail while it remains.`,
+      });
     }
     return steps;
   }
@@ -578,6 +678,11 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
 
     const applied: string[] = [];
     const pruned: string[] = [];
+    // Old ship adapters that an apply removes: the source has the renamed skill, and the content is one this bundle shipped.
+    const retirable: typeof groups.removed = [];
+    if (fs.existsSync(path.join(sourceRoot, RENAME_EVIDENCE))) {
+      for (const entry of groups.removed) if (await shippedAdapter(entry.path, entry.targetPath)) retirable.push(entry);
+    }
     if (apply) {
       const toApply = [...groups.new, ...groups.changed, ...(overwriteUnverified ? groups.unverified : [])];
       for (const entry of toApply) {
@@ -587,8 +692,13 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
       for (const entry of [...groups.local, ...groups.conflict]) {
         if (entry.caseRename) await applyEntry(entry);
       }
-      if (prune) {
-        for (const entry of groups.removed.filter((item) => item.modified === "unmodified")) {
+      // The renamed ship adapters are retired even without --prune: left behind, they fail the target's doctor and graph.
+      for (const entry of groups.removed) {
+        if (retirable.includes(entry)) {
+          // One file that cannot be removed must not abort the sync and lose the record of what was already done; the next step reports it.
+          try { if (await removeShippedAdapter(entry.path, entry.targetPath)) pruned.push(entry.path); }
+          catch { /* kept */ }
+        } else if (prune && entry.modified === "unmodified" && !isRetiredPath(entry.path)) {
           await assertNoSymlinkPath(entry.targetPath);
           await fs.rm(entry.targetPath);
           await removeEmptyParents(entry.targetPath);
@@ -631,7 +741,8 @@ export function makeSync(argv: string[], deps: RuntimeDeps) {
 
     const steps = await nextSteps(sourceRoot);
     // Reset only when this sync updates the bundle (applied or pruned files, or, on a dry run, files it would apply or prune).
-    const updated = apply ? applied.length + pruned.length > 0 : groups.new.length + groups.changed.length + (prune ? groups.removed.filter((entry) => entry.modified === "unmodified").length : 0) > 0;
+    const updated = apply ? applied.length + pruned.length > 0 : groups.new.length + groups.changed.length + retirable.length + (prune ? groups.removed.filter((entry) => entry.modified === "unmodified" && !isRetiredPath(entry.path)).length : 0) > 0;
+    if (!apply && retirable.length) steps.push({ kind: "ship-command-rename", message: `--apply will remove these old ship files, which are exactly as this bundle shipped them: ${retirable.map((entry) => posix(entry.path)).join(", ")}` });
     steps.push(...await resetStateReports(updated), ...await archifyPinStep(sourceRoot));
     for (const migration of instanceMigrations.filter((entry) => entry.status === "manual")) steps.push({ kind: "direct-typescript", message: `${migration.path}: ${migration.reason}` });
     if (await exists(path.join(root, ".opencode/plugins/token-consumption.js"))) steps.push({ kind: "direct-typescript", message: "Legacy OpenCode plugin token-consumption.js remains: review its customization or rerun --prune with the original --base-ref before enabling the direct .ts plugin" });

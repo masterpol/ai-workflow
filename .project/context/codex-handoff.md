@@ -3,7 +3,7 @@
 Written 2026-10-08 for a Codex session that continues work on this repository. Facts below were observed in the previous Claude Code session; anything marked "unverified" was not run from Codex.
 
 ## What this repository is
-`ai-workflow-portable` is the bundle itself, not an application: a ShapeUp-style pipeline (`/shape → /critique → /plan → /build → /audit → /ship`, `/cooldown` every 5 ships), role prompts, rules, hooks and Node scripts that get copied into other projects. Read `AGENTS.md` first (Codex loads it automatically), then `ai-framework/workflow/overview.md`.
+`ai-workflow-portable` is the bundle itself, not an application: a ShapeUp-style pipeline (`/shape → /critique → /plan → /build → /audit → /ship-pitch`, `/cooldown` every 5 ships), role prompts, rules, hooks and Node scripts that get copied into other projects. Read `AGENTS.md` first (Codex loads it automatically), then `ai-framework/workflow/overview.md`.
 
 ## State right now
 - Branch `use-orca-multiagent`, version **2.21.0**, open PR: https://github.com/masterpol/ai-workflow/pull/5 (base `main`). Working tree clean after commit `d1d3b57`.

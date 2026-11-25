@@ -8,7 +8,7 @@ Codex, and Cursor** — install once, open with whichever tool you have.
 ## Concepts (read this first)
 
 - **Phases, not chat.** Work moves through named phases — `/shape → /critique → /plan → /build →
-  /audit → /ship`, with `/cooldown` every 5 ships — instead of open-ended conversation. Each
+  /audit → /ship-pitch`, with `/cooldown` every 5 ships — instead of open-ended conversation. Each
   phase has a playbook, a purpose, and (for most) a confirmation gate.
 - **Confirmation gates.** A gated phase always ends with **Approve / Revise / Back / Stop** —
   the AI never auto-advances through one. Which phases are gated adapts to the work's size

@@ -646,3 +646,12 @@ Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles t
 - **Review the post-audit changes** (med): the unlaunchable-member skip, the checked re-pick loop, the `source` label and the shared Run-id grammar were made after the last audit cycle; mutant-check the two new dispatch tests.
 - **A released worker terminal can come back after a Claude Code restart** (low-med): seen twice (it re-wrote scratch files and once received a new dispatch in its old session). Decide whether release should close the session for good.
 - **Orca status load view** (low, cut): show per-vendor load for a Run.
+
+## From rename-ship-command-to-finish (2026-11-25)
+- **Check every workflow command against host built-ins** (med): `ship` was shadowed without any warning. A doctor check or a documented release step should catch the next one (`checkpoint`, `plan`, `resume` are candidates to verify).
+- **`ship-pitch` availability in each host's built-ins is unverified** (low-med): the owner chose the name; confirm in Codex, OpenCode and Cursor.
+- **Installed projects and the old `ship` files** (LAH, RN, climbing): `bundle-sync --apply` removes copies this bundle shipped; a customized copy is the owner's to move. `workflow-v3-rollout` should include it.
+- **`package-less-ship-verification` overlaps this change** (`pre-ship-verify.mts`, `4-ship.md`) and its pitch still tells the reader to run `/ship` (audit X1–X3): update its wording when it is shaped.
+- **`bundle-sync --prune` still removes other files by path and baseline** (low-med, audit): the pinned, content-checked removal covers only the retired adapters.
+- **Review the last rename-audit fixes** (med): the case-insensitive prune guard, the final pre-unlink re-check, the next-step wording, the dry-run list and per-file error handling shipped without a third review cycle. Also never run: Windows, a case-sensitive volume, FIFO or oversize adapter inputs, and a rerun of the failed test-coverage role.
+- **Type `/ship-pitch` in a fresh session** (low): the live check so far loaded it as a skill only.

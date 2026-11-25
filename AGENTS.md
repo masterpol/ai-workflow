@@ -36,7 +36,7 @@ a persistent knowledge graph, and cost-aware model routing.
 ## The pipeline
 
 ```
-(brainstorm) → /shape → /critique → bet → /plan → /build → /audit → /ship
+(brainstorm) → /shape → /critique → bet → /plan → /build → /audit → /ship-pitch
                                                             every 5 ships → /cooldown
 ```
 
@@ -48,7 +48,7 @@ a persistent knowledge graph, and cost-aware model routing.
 | plan | `.claude/skills/plan/SKILL.md` | Decompose into independent scopes with checkable exits |
 | build | `.claude/skills/build/SKILL.md` | Execute scopes, hill-tracked, verify before done |
 | audit | `.claude/skills/audit/SKILL.md` | Parallel review/security/test/ux/i18n/eval fan-out |
-| ship | `.claude/skills/ship/SKILL.md` | Reconcile pitch↔impl, extract knowledge, compact status |
+| ship | `.claude/skills/ship-pitch/SKILL.md` | Reconcile pitch↔impl, extract knowledge, compact status |
 | cooldown | `.claude/skills/cooldown/SKILL.md` | Promote issue→pattern→rule, prune, triage backlog |
 
 | Harness | Native phase entry points | Native role adapters |
@@ -88,7 +88,7 @@ Before every workflow phase, including one selected from ordinary conversation, 
 and pass the original invocation arguments unchanged through `--args-text`. Use structured tool
 arguments or safe shell quoting; never interpolate prompt text into shell code. Always supply
 `--vendor codex`: the CLI's default is Claude. Supported phases are `shape`, `shape-lite`,
-`critique`, `plan`, `build`, `audit`, `ship`, `cooldown`, `fix`, `resume`, `switch`, and `checkpoint`.
+`critique`, `plan`, `build`, `audit`, `ship`, `cooldown`, `fix`, `resume`, `switch`, and `checkpoint`. The ship phase's command is `/ship-pitch` (`$ship-pitch`); its phase name stays `ship`, so the startup command takes `--phase ship`.
 
 - `off` runs the normal phase; `bypassed` runs it only for that invocation's explicit
   `orca=normal` request. `worker` means follow the worker brief instead of coordinating.

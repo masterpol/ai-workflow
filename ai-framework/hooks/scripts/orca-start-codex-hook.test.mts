@@ -9,7 +9,7 @@ import type { RunResult } from "../../scripts/runtime/types.mts";
 const deps = createTestDeps();
 const repo = deps.path.resolve(import.meta.dirname, "../../..");
 const script = deps.path.join(import.meta.dirname, "orca-start-codex-hook.mts");
-const PHASES = ["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"];
+const PHASES = ["shape", "shape-lite", "critique", "plan", "build", "audit", "ship-pitch", "cooldown", "fix", "resume", "switch", "checkpoint"];
 const READY = "Orca: ready (coordinator codex, workers claude, opencode)";
 const BYPASSED = "Orca: bypassed by request (orca=normal)";
 const prompt = (text: string, extra: Record<string, unknown> = {}) => ({ hook_event_name: "UserPromptSubmit", session_id: "s", cwd: "/", prompt: text, ...extra });
@@ -79,7 +79,7 @@ test("every phase accepts a leading slash or dollar name and reports the Codex c
 
 test("non-matching prompts and other events pass through without probes", (t) => {
   const f = fixture(t);
-  const prompts = ["", "hello", " /plan", "please /plan", "run $build now", "/planning", "/plan-x", "/Plan", "//plan", "$$plan", "/search", "/state", "/",
+  const prompts = ["/ship", "$ship", "", "hello", " /plan", "please /plan", "run $build now", "/planning", "/plan-x", "/Plan", "//plan", "$$plan", "/search", "/state", "/",
     "$", "`/plan`", '"/plan"', "# /plan", "/ plan", "$ plan", "\n/plan"];
   for (const text of prompts) silent(f.run(prompt(text), { PATH: "", ORCA_CLI_COMMAND: undefined }));
   for (const event of ["SubagentStop", "PreToolUse", "SessionStart", "Stop"])
@@ -96,7 +96,7 @@ test("raw arguments keep bypass semantics: only a standalone unquoted token bypa
   const f = fixture(t); f.dropPolicy();
   context(f.run(prompt("/build fix orca=normal -- bug")), BYPASSED);
   context(f.run(prompt("$plan\norca=normal")), BYPASSED);
-  context(f.run(prompt("/ship\nline one\n  orca=normal\nlast")), BYPASSED);
+  context(f.run(prompt("/ship-pitch\nline one\n  orca=normal\nlast")), BYPASSED);
   for (const args of ['"orca=normal"', "'orca=normal'", "--orca=normal", "xorca=normal", "orca=normalx", "orca=normal\\"])
     blocked(f.run(prompt(`/shape ${args}`)), "policy-missing");
 });
@@ -144,6 +144,7 @@ test("phase arguments accept exactly 64 KiB and reject one byte more; large ordi
 test("post-probe elapsed guard rejects a late ready result and catches its removal", (t) => {
   const f = fixture(t, { "ai-framework/scripts/orca-start.mts": `export function decideStart() { return { state: "ready", line: ${JSON.stringify(READY)} }; }\n` });
   deps.fs.symlinkSync(deps.path.join(repo, "ai-framework/scripts/runtime"), deps.path.join(f.root, "ai-framework/scripts/runtime"));
+  deps.fs.copyFileSync(deps.path.join(repo, "ai-framework/scripts/phase-commands.mts"), deps.path.join(f.root, "ai-framework/scripts/phase-commands.mts"));
   const entry = deps.path.join(f.root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts");
   deps.fs.mkdirSync(deps.path.dirname(entry), { recursive: true });
   const source = deps.fs.readFileSync(script);
@@ -198,6 +199,7 @@ test("stdin read exceptions never expose private messages", async () => {
 test("off never imports the throwing decision library; on blocks that import failure safely", (t) => {
   const f = fixture(t, { "ai-framework/scripts/orca-start.mts": 'throw new Error("private import failure");\n' });
   deps.fs.symlinkSync(deps.path.join(repo, "ai-framework/scripts/runtime"), deps.path.join(f.root, "ai-framework/scripts/runtime"));
+  deps.fs.copyFileSync(deps.path.join(repo, "ai-framework/scripts/phase-commands.mts"), deps.path.join(f.root, "ai-framework/scripts/phase-commands.mts"));
   const entry = deps.path.join(f.root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts");
   deps.fs.mkdirSync(deps.path.dirname(entry), { recursive: true }); deps.fs.copyFileSync(script, entry);
   silent(f.run(prompt("/plan"), { AI_WORKFLOW_ORCA_MULTI_AGENT: "false", PATH: "" }, { entry }));
@@ -268,4 +270,17 @@ test("assertions catch a vendor mutant and a non-blocking mutant", (t) => {
   exit.f.dropPolicy();
   const mutantBlocked = exit.f.run(prompt("/plan"), {}, { entry: exit.entry });
   assert.throws(() => blocked(mutantBlocked, "policy-missing"));
+});
+
+
+test("ship-pitch slash and dollar prompts reach the start decision with phase ship", (t) => {
+  const f = fixture(t, { "ai-framework/scripts/orca-start.mts": 'export function decideStart({ phase }) { return { state: "ready", line: phase }; }\n' });
+  deps.fs.symlinkSync(deps.path.join(repo, "ai-framework/scripts/runtime"), deps.path.join(f.root, "ai-framework/scripts/runtime"));
+  deps.fs.copyFileSync(deps.path.join(repo, "ai-framework/scripts/phase-commands.mts"), deps.path.join(f.root, "ai-framework/scripts/phase-commands.mts"));
+  const entry = deps.path.join(f.root, "ai-framework/hooks/scripts/orca-start-codex-hook.mts");
+  deps.fs.mkdirSync(deps.path.dirname(entry), { recursive: true }); deps.fs.copyFileSync(script, entry);
+  for (const sigil of ["/", "$"]) {
+    context(f.run(prompt(`${sigil}ship-pitch`), {}, { entry }), "ship");
+    silent(f.run(prompt(`${sigil}ship`), {}, { entry }));
+  }
 });

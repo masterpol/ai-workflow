@@ -7,7 +7,7 @@ Close the pitch cleanly: final verification, pitch ↔ implementation reconcilia
 ## Trigger
 
 - Completion of `/audit` with zero must-fixes
-- `/ship` command
+- `/ship-pitch` command
 
 ## Activities (in order)
 
@@ -19,7 +19,7 @@ Read `.project/context/stack.md` and the scope exit criteria. Run `node ai-frame
 
 Build, type checking, lint, tests and i18n checks apply when the actual project and changed scope require them. Record a concrete reason for every non-applicable check; documentation-only work still needs its content, link and integrity checks. A missing prerequisite or failed available required check is a failure, not an exemption. Do not report a nonexistent application build or test as passed.
 
-When Git exists, inspect the diff without reading secrets. Without Git, compare the scoped files and hashes against the recorded baseline, document that limitation and do not initialize Git or fabricate commits. If any required check fails, `/ship` aborts and returns to `/audit` for its next cycle when the appetite's cycle cap
+When Git exists, inspect the diff without reading secrets. Without Git, compare the scoped files and hashes against the recorded baseline, document that limitation and do not initialize Git or fabricate commits. If any required check fails, `/ship-pitch` aborts and returns to `/audit` for its next cycle when the appetite's cycle cap
 allows it (audit "Adaptive gate"; hotfix: 1). At the cap, stop: report the failure and follow audit "Loop discipline"
 (follow-up or `/shape` re-entry); never ship past a failed required check.
 
@@ -122,7 +122,7 @@ Before the final /verify, when `AI_WORKFLOW_ORCA_MULTI_AGENT=true` and worker ch
 ## Confirmation gate
 
 ```
-/ship: pitch {slug} ready to close.
+/ship-pitch: pitch {slug} ready to close.
 - Verify: required checks passed; non-applicable checks and their reasons listed
 - Reconciliation: {n}/{total} scopes shipped, {m} deferred
 - Knowledge: {x} issues promoted, {y} new patterns, {z} rule changes proposed

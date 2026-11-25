@@ -7,7 +7,7 @@
 ## Users
 
 - Maintainers of this bundle, who change skills, agents, rules, scripts, templates and hooks.
-- Developers who unpack the bundle into a project and work through `/shape`, `/plan`, `/build`, `/audit` and `/ship`.
+- Developers who unpack the bundle into a project and work through `/shape`, `/plan`, `/build`, `/audit` and `/ship-pitch`.
 - AI assistants on Claude Code, OpenCode, Codex and Cursor that read the entry files and follow the playbooks.
 
 ## Product Goal

@@ -4,7 +4,7 @@ const RUNTIME_FLAGS = process.versions.bun ? [] : NODE_FLAGS;
 const CHILD_EXEC = process.versions.bun ? "node" : process.execPath;
 const CHILD_FLAGS = process.versions.bun ? NODE_FLAGS : RUNTIME_FLAGS;
 import assert from "node:assert/strict";
-import { createTestDeps, fileUrl, urlPath, spawnTestChild, spawnSync, adapterNet as net } from "../../scripts/runtime/test-helpers.mts";
+import { captureIo, createTestDeps, fileUrl, urlPath, spawnTestChild, spawnSync, adapterNet as net } from "../../scripts/runtime/test-helpers.mts";
 const testDeps = createTestDeps();
 const fs = testDeps.fs;
 const os = testDeps.os;
@@ -1298,7 +1298,7 @@ test("a subagent's own call never overwrites the parent's context", async () => 
   await withRoot(async (root) => {
     const spy = spyDeps();
     await recordEvent(slash("build", ""), root, {}, spy.deps);
-    const result = await recordEvent(slash("ship", "", { agent_id: "helper-1" }), root, {}, spy.deps);
+    const result = await recordEvent(slash("ship-pitch", "", { agent_id: "helper-1" }), root, {}, spy.deps);
     assert.equal(result.written, false);
     assert.equal(readSnapshot(root).contexts["sess-1"].phase, "build");
   });
@@ -1307,7 +1307,7 @@ test("a subagent's own call never overwrites the parent's context", async () => 
 test("a command that is not a phase returns before the directory or the lease is touched", async () => {
   await withRoot(async (root) => {
     const spy = spyDeps();
-    for (const input of [slash("help", ""), slash("build", "", { expansion_type: "other" }), slash("build", "", { session_id: undefined }), { vendor: "claude", event: "phase-start", raw: {} }]) {
+    for (const input of [slash("ship", ""), slash("help", ""), slash("build", "", { expansion_type: "other" }), slash("build", "", { session_id: undefined }), { vendor: "claude", event: "phase-start", raw: {} }]) {
       assert.equal((await recordEvent(input, root, {}, spy.deps)).written, false);
     }
     assert.equal(spy.listens(), 0, "the lease was never requested");
@@ -1658,4 +1658,43 @@ test("a transcript rewritten shorter on the same inode counts its new messages u
   fs.writeFileSync(c.transcript, asst("m9"));
   await recordEvent(withTranscript(c, "a2"), c.root, {}, c.deps);
   assert.equal(c.snapshot().lifetime.tokens.input, 40, "m9 counted once; the old ids are not counted again");
+});
+
+
+test("ship-pitch invocation forms record metrics phase ship while ship has no phase", async () => {
+  await withRoot(async (root) => {
+    const spy = spyDeps();
+    for (const name of ["ship", "/ship", "$ship"]) assert.equal(resolvePhaseContext(name, "", root, spy.deps), null);
+    for (const name of ["ship-pitch", "/ship-pitch", "$ship-pitch"]) {
+      assert.equal(resolvePhaseContext(name, "", root, spy.deps)?.phase, "ship");
+      await recordEvent(slash(name, ""), root, {}, spy.deps);
+      assert.equal(readSnapshot(root).contexts["sess-1"].phase, "ship");
+    }
+    await recordEvent({ vendor: "claude", event: "skill-use", raw: { session_id: "skill-session", tool_use_id: "ship-call", tool_input: { skill: "ship-pitch" } } }, root, {}, spy.deps);
+    assert.equal(readSnapshot(root).contexts["skill-session"].phase, "ship");
+    const captured = captureIo({ ...spy.deps, io: { ...spy.deps.io, stdin: { readText: async () => JSON.stringify(slash("ship", "").raw) } } });
+    assert.equal(await main(["--event", "phase-start", "--vendor", "claude", "--root", root], captured), 0);
+    assert.match(captured.err.join(""), /skipped/);
+  });
+});
+
+test("report joins a stored ship event and a new ship-pitch event in phase ship", async () => {
+  await withRoot(async (root) => {
+    pitchDir(root, "p1");
+    const spy = spyDeps();
+    // Seed the context as an older hook would have stored it, without invoking the retired command.
+    await startPhase(root, spy.deps, "build", "p1");
+    const stored = readSnapshot(root);
+    stored.contexts["sess-1"].phase = "ship";
+    fs.writeFileSync(metricsFile(root), JSON.stringify(stored));
+    await recordEvent(stop("old-ship"), root, {}, spy.deps);
+    await startPhase(root, spy.deps, "ship-pitch", "p1");
+    await recordEvent(stop("new-ship"), root, {}, spy.deps);
+    const phases = readSnapshot(root).flows.pitches.p1.phases;
+    assert.deepEqual(Object.keys(phases), ["ship"]);
+    assert.equal(phases.ship.scopes["(none)"].claude.completions, 2);
+    const report = fs.readFileSync(metricsFile(root, "token-consumption.md"), "utf8");
+    assert.match(report, /ship/);
+    assert.doesNotMatch(report, /ship-pitch/);
+  });
 });

@@ -106,7 +106,7 @@ as unfinished work. Zero findings from an unfinished review do not establish a c
 findings and retry once with a fresh reviewer on a narrower scope covering the unfinished checks.
 
 If required checks remain unfinished, record `independent: not-completed`, report the missing evidence and keep the
-audit open. Do not auto-advance to `/ship` or claim a clean audit while a required review remains incomplete.
+audit open. Do not auto-advance to `/ship-pitch` or claim a clean audit while a required review remains incomplete.
 Author-run checks remain labelled `author-run`; they do not replace the required reviewer.
 
 ## Synthesis (single-threaded, main thread)
@@ -119,7 +119,7 @@ After dispatch, main thread combines findings into a single report:
 Dispatched: code (3, independent: yes) | security (1, independent: not-completed) | test (2, independent: yes) | ux (PASS) | eval (PASS) | i18n (0) | cross-pitch (0)
 Independence: security reviewer returned nothing twice (rate limit); checks run by the author are listed below as author-run, not as a review.
 
-## Must-fix (blocks /ship)
+## Must-fix (blocks /ship-pitch)
 | ID | Source | File | Issue | Cycle |
 |----|--------|------|-------|-------|
 | M1 | security | api/.../route.ts:12 | No rate limit on AI endpoint | 1 |
@@ -141,7 +141,7 @@ delta vs baseline: −0.0 (no regression) ✅
 
 ## Triage tiers (not negotiable)
 
-- **must-fix** — security high/critical, build-gate failures, eval regression > 0.3 on any criterion, missing exit criterion from /plan, cross-pitch pure overlap. Blocks /ship.
+- **must-fix** — security high/critical, build-gate failures, eval regression > 0.3 on any criterion, missing exit criterion from /plan, cross-pitch pure overlap. Blocks /ship-pitch.
 - **should-fix** — fix this pass OR defer with named reason logged to `deviations.md`. Reason becomes a follow-up pitch candidate.
 - **acknowledged** — noted, not actioned. Goes to `log.md` for `/cooldown` review.
 
@@ -178,9 +178,9 @@ Triggers when ≥ 2 active pitches in `.project/pitches/`. Output:
 
 | Appetite | Cycles capped | Gate at audit end |
 |---|---|---|
-| small-batch | 2 | no — auto-flow to /ship if zero must-fix and all required reviews are complete |
+| small-batch | 2 | no — auto-flow to /ship-pitch if zero must-fix and all required reviews are complete |
 | big-batch | 3 | yes — present synthesis, ask |
-| bug-fix | 2 | no — auto-flow to /ship if zero must-fix and all required reviews are complete |
+| bug-fix | 2 | no — auto-flow to /ship-pitch if zero must-fix and all required reviews are complete |
 | hotfix | 1 (single pass) | yes — must explicitly accept residual risk |
 
 ## Output
@@ -197,9 +197,9 @@ When `AI_WORKFLOW_ORCA_MULTI_AGENT=true` and a worker's changes await integratio
 
 ## Confirmation gate
 
-Big-batch and hotfix only. Options: Approve → /ship / Revise (cycle 2) / Back to /build / Stop.
+Big-batch and hotfix only. Options: Approve → /ship-pitch / Revise (cycle 2) / Back to /build / Stop.
 An incomplete required review keeps the audit open for every appetite; see "Incomplete reviews".
 
 ## Transition
 
-→ Phase 4: `/ship`
+→ Phase 4: `/ship-pitch`
