@@ -17,7 +17,7 @@ Guidelines, not hard limits — tune them at `/cooldown` if a phase keeps overru
 | /plan | ~8K tokens | pitch.md, impacted files list, filtered rules |
 | /build | ~10K per scope | plan.md scope section, target files, filtered rules + `.project/rules/` companion |
 | /audit | ~4K per subagent, ~6K synthesis | diff slice + the rules that subagent applies |
-| /ship | ~4K tokens | pitch.md, plan.md, hill.md, deviations.md, log.md |
+| /ship-pitch | ~4K tokens | pitch.md, plan.md, hill.md, deviations.md, log.md |
 | /cooldown | ~6K tokens | `_followups.md`, graph.json tag index, recent `runs/` ship reports |
 
 ### Context Loading Priority
@@ -188,4 +188,4 @@ Each phase skill should:
 3. Suggest `/checkpoint` if the session is long
 
 ### Ship
-`/ship` extracts key learnings to `knowledge/`, archives the pitch's log and hill chart to `runs/`, and compacts `status.md` (see `ai-framework/workflow/phases/4-ship.md`).
+`/ship-pitch` extracts key learnings to `knowledge/`, archives the pitch's log and hill chart to `runs/`, and compacts `status.md` (see `ai-framework/workflow/phases/4-ship.md`).

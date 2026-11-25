@@ -60,7 +60,7 @@ Define measurable triggers before deployment. Replace these examples with thresh
 ## Post-Rollback
 
 - [ ] Create incident report
-- [ ] Record the incident for per-pitch extraction during `/ship` and recurring review during `/cooldown`
+- [ ] Record the incident for per-pitch extraction during `/ship-pitch` and recurring review during `/cooldown`
 - [ ] Update knowledge/issues/ with root cause
 - [ ] Schedule fix with proper testing
 

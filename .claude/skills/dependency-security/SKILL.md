@@ -87,7 +87,7 @@ Options: **Approve remediation plan / Revise / Back / Stop**
 
 ## After Approved Remediation
 
-Use the normal `/build → /audit → /ship` flow for dependency changes. Re-run the same audit,
+Use the normal `/build → /audit → /ship-pitch` flow for dependency changes. Re-run the same audit,
 the project build, and its tests after updating manifests or lockfiles. Record a non-trivial CVE
 or upgrade lesson in `.project/knowledge/issues/` only when it will help a future task, then run
 `node ai-framework/scripts/graphify.mts`.

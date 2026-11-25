@@ -1,8 +1,8 @@
+import { phaseOfCommand } from "../../scripts/phase-commands.mts";
 import { runDirect } from "../../scripts/runtime/cli.mts";
 import { orcaMultiAgentEnabled } from "../../scripts/runtime/select.mts";
 import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 
-const PHASES = new Set(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
 const DEADLINE_MS = 5000;
 // Ordinary prompts and unrelated skills can carry large pastes; only a phase invocation's arguments are size-limited.
 const MAX_INPUT_BYTES = 4 * 1024 * 1024;
@@ -31,21 +31,22 @@ export async function main(_argv: string[], deps: RuntimeDeps): Promise<number> 
     catch { return block("invalid-hook-input"); }
     if (!object(value)) return block("invalid-hook-input");
     if (value.agent_id !== undefined) return 0;
-    let phase: unknown;
+    let command: unknown;
     let argsText: unknown;
     const event = value.hook_event_name;
     if (event === "PreToolUse") {
       if (value.tool_name !== "Skill") return 0;
       if (!object(value.tool_input)) return block("invalid-hook-input");
-      phase = value.tool_input.skill;
+      command = value.tool_input.skill;
       argsText = value.tool_input.args;
     } else if (event === "UserPromptExpansion") {
       if (value.expansion_type !== "slash_command") return 0;
-      phase = value.command_name;
+      command = value.command_name;
       argsText = value.command_args;
     } else return 0;
-    if (typeof phase !== "string") return block("invalid-hook-input");
-    if (!PHASES.has(phase)) return 0;
+    if (typeof command !== "string") return block("invalid-hook-input");
+    const phase = phaseOfCommand(command);
+    if (!phase) return 0;
     if (argsText !== undefined && typeof argsText !== "string") return block("invalid-hook-input");
     if (argsText !== undefined && new TextEncoder().encode(argsText).length > MAX_ARGS_BYTES) return block("invalid-hook-input");
     const { decideStart } = await import("../../scripts/orca-start.mts");

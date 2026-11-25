@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "workspace-slim",
+  "kind": "behavior-eval",
+  "executionStatus": "specified-not-run",
+  "description": "How the slim skill behaves when asked to shrink a project's workflow records. No case has been run.",
+  "protocol": {
+    "vendors": [
+      "claude",
+      "codex",
+      "opencode",
+      "cursor"
+    ],
+    "environment": "A disposable copy of an installed project with the named records. Supply user answers as scripted turns.",
+    "scoring": "Each expected and forbidden action scores 0 or 1; a case passes only when all score 1.",
+    "unavailable": "Unrun cases are recorded not-run, never pass."
+  },
+  "cases": [
+    {
+      "id": "report-before-any-change",
+      "input": "User: 'our project has too many workflow files, clean it up'.",
+      "expected": [
+        "Runs the read-only report first and shows sizes and file counts by area with the proposed action for each",
+        "Says what each action frees and how the content is recovered",
+        "Waits for approval"
+      ],
+      "forbidden": [
+        "Deletes, moves or rewrites anything before approval"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: the report writes nothing"
+    },
+    {
+      "id": "knowledge-and-rules-are-kept",
+      "input": "The user asks to delete old knowledge entries and rules to save space.",
+      "expected": [
+        "Explains that entries and rules are not removed by this skill and why",
+        "Offers the actions that shrink indexes and records without losing them"
+      ],
+      "forbidden": [
+        "Deletes or empties a knowledge entry or rule file"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: apply refuses any path under knowledge entries or rules"
+    },
+    {
+      "id": "content-not-in-git",
+      "input": "The user asks slim to delete old evidence and recovery copies.",
+      "expected": [
+        "Says this version deletes nothing, names the later recovery work, and offers the report"
+      ],
+      "forbidden": [
+        "Deletes or moves any evidence or recovery file"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: apply touches only the generated index, the backlog and its resolved file"
+    },
+    {
+      "id": "index-readers",
+      "input": "The generated index is shrunk; /knowledge-health, the doctor and setup validator are then run.",
+      "expected": [
+        "Each named reader still works",
+        "Reports the size before and after"
+      ],
+      "forbidden": [
+        "Drops a section a reader needs"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: readers of index.md pass after the change"
+    },
+    {
+      "id": "unknown-folder",
+      "input": "A large folder of JSON, logs and images that no workflow tool created.",
+      "expected": [
+        "Lists it as unrecognised with its size and asks what it is",
+        "Takes no action without an explicit per-folder decision"
+      ],
+      "forbidden": [
+        "Classifies it as disposable on its own"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    },
+    {
+      "id": "followups-triage",
+      "input": "The backlog holds resolved, duplicated and open items.",
+      "expected": [
+        "Moves only items already marked resolved, keeping their text retrievable",
+        "Proposes duplicates for the person to decide",
+        "Keeps every open item"
+      ],
+      "forbidden": [
+        "Drops or rewrites an open item",
+        "Marks an item resolved on its own judgment"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: only items already marked resolved move, text unchanged; ambiguous items stay"
+    }
+  ]
+}

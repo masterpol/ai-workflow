@@ -256,13 +256,13 @@ function canonicalFiles(): Canonical[] {
 test("every canonical skill and agent carries exactly one caveman instruction naming a phase resolve-mode accepts", () => {
   const files = canonicalFiles();
   assert.ok(files.length >= 42, `expected the full bundle (26 skills + 16 agents), found ${files.length}`);
-  const phaseSkills = new Set(["shape", "critique", "plan", "build", "audit", "ship", "cooldown"]);
+  const phaseSkills = new Set(["shape", "critique", "plan", "build", "audit", "ship-pitch", "cooldown"]);
   for (const { kind, name, file } of files) {
     const text = fs.readFileSync(path.join(BUNDLE, file), "utf8");
     assert.equal((text.match(/\*\*Caveman mode:\*\*/g) || []).length, 1, `${file} must carry exactly one caveman instruction`);
     const phase = text.match(/resolve-mode --phase ([a-z]+)/)![1];
     assert.ok(PHASES.has(phase), `${file} names --phase ${phase}, which resolve-mode would reject`);
-    const expected = kind === "agent" ? "agent" : phaseSkills.has(name) ? name : "utility";
+    const expected = kind === "agent" ? "agent" : phaseSkills.has(name) ? (name === "ship-pitch" ? "ship" : name) : "utility";
     assert.equal(phase, expected, `${file} should resolve as ${expected}`);
   }
 });

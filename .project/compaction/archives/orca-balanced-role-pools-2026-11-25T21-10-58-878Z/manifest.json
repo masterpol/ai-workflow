@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "slug": "orca-balanced-role-pools",
+  "sourceRoot": ".project/pitches/orca-balanced-role-pools",
+  "archivedAt": "2026-11-25T21:10:58.880Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "ab2ebfc98711c8d256521fb05f905a9346bb5fb4fc3fb2bf2d4890c0448208aa",
+      "mode": 420
+    },
+    "audit-reports/obrp-c2-code-reviewer.md": {
+      "hash": "654ee93204358e8cad27b477485f608b5b48d6514784cdcc5e9f422d8b500b84",
+      "mode": 420
+    },
+    "audit-reports/obrp-c2-security-reviewer.md": {
+      "hash": "f0dd79abe79b7af2ebb7ee447d9c18d1f155b714701dd8d6d9208bd269fcdc0b",
+      "mode": 420
+    },
+    "audit-reports/obrp-code-reviewer.md": {
+      "hash": "0d35b939ddb22f938b99fc0f1868ba68c235726caa579b26e00250a47a600548",
+      "mode": 420
+    },
+    "audit-reports/obrp-cross-pitch-conflict-checker.md": {
+      "hash": "ab5f10fb8f759157420769f07ee5fcbe71738bd8d653151f7a7f7ab1a502d696",
+      "mode": 420
+    },
+    "audit-reports/obrp-security-reviewer.md": {
+      "hash": "2223e18517c8aed824cc7fb1902b2377e43c4ddcee875fe64ec15c45ec9d7021",
+      "mode": 420
+    },
+    "audit-reports/obrp-test-coverage-checker.md": {
+      "hash": "8d45eee11385fa8f08ae6449c7a36061335d49be58f19367c27ca8c336def544",
+      "mode": 420
+    },
+    "critique/orca-balanced-role-pools-appetite-auditor.md": {
+      "hash": "b97ad68eb1b7c65657e4b6cbe7853b7f3e9b1c2ff2f7e9bbfa42147e03d03d08",
+      "mode": 420
+    },
+    "critique/orca-balanced-role-pools-cross-pitch-projector.md": {
+      "hash": "0a43d693247c1e4463c1d395e18b55535158a45a52bdd73a0fa7a8939b17706c",
+      "mode": 420
+    },
+    "critique/orca-balanced-role-pools-eval-regression-projector.md": {
+      "hash": "ed64ba4cba5706c51fa429b79bc997c7fa68b829efb3967e29236abb664905ab",
+      "mode": 420
+    },
+    "critique/orca-balanced-role-pools-knowledge-historian.md": {
+      "hash": "34f972fe6628d781d8f9d0b64a88f65c964a17f39039b42fedd0cb701a02eb29",
+      "mode": 420
+    },
+    "critique/orca-balanced-role-pools-skeptic.md": {
+      "hash": "42b4d7f22833d439606e45467e573436237fd7c4d7cb60fef28f6f157e262fec",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "7bbb31f6360388c06b04fa7ba7cab141328664f4b34120128422c25b28d9587f",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "76ec97f10d4ef7246b53045df340dba98e751b54d84a466270aab69c7e54cb2f",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "126d0418d6c20848166d039ed344ce622b2d9b6cb533cf7df3556244135c1a52",
+      "mode": 420
+    }
+  }
+}

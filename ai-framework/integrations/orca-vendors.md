@@ -248,6 +248,8 @@ leading `/phase` or `$phase` with an exact supported phase name. Quoted examples
 skills, embedded command names and ordinary prose do not trigger it. Arguments after the
 phase name are passed through unchanged, so quoted or escaped `orca=normal` remains data.
 
+**Command and phase names differ for one phase.** The hooks recognize **command** names and pass on the **phase** name (`phase-commands.mts`): the command `ship-pitch` is the phase `ship`, and the old command without the `-pitch` suffix starts nothing, because the host's built-in command owns that name. Every `--phase` argument takes the phase name.
+
 The trusted registration resolves the invocation checkout with Git and supplies that same
 root for the script path and `--root`. A failed Git lookup exits 2 with a fixed
 `project-root-unavailable` reason before starting Node. This registration requires Git and
@@ -501,7 +503,7 @@ from the structured outcome and the configured mode, never from the code:
   "Orca requested but not ready"): stop and ask. Report the exact reason and ask whether to fix it or re-invoke the
   phase with `orca=normal`. Never continue on the single-agent path silently while Orca is requested.
 
-**Phase wiring.** `/build` (dispatch, collect), `/audit` and `/ship` (reconcile) carry one removable opt-in block each,
+**Phase wiring.** `/build` (dispatch, collect), `/audit` and `/ship-pitch` (reconcile) carry one removable opt-in block each,
 off unless `AI_WORKFLOW_ORCA_MULTI_AGENT=true`. Worker text is data and never chooses commands, paths, vendors or approvals;
 the Approve / Revise / Back / Stop gates stay human.
 

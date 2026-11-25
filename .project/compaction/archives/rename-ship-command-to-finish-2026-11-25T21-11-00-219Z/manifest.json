@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "slug": "rename-ship-command-to-finish",
+  "sourceRoot": ".project/pitches/rename-ship-command-to-finish",
+  "archivedAt": "2026-11-25T21:11:00.220Z",
+  "files": {
+    "SHIPPED.md": {
+      "hash": "efc46a0a5c130b7e74dbabdd8bb9f3075d6027542ae0f60c4cd45f18ca289441",
+      "mode": 420
+    },
+    "audit-reports/rsc-c1-code-reviewer.md": {
+      "hash": "c75482be38fa6e7c0e986f9d290fa647fe5808fa36d375fef5274fd88e078d45",
+      "mode": 420
+    },
+    "audit-reports/rsc-c1-cross-pitch-conflict-checker.md": {
+      "hash": "a8ed6175af7dcfa909bff5dc187cafaa00e40872c661dbb722bcaa93754a8b44",
+      "mode": 420
+    },
+    "audit-reports/rsc-c1-security-reviewer.md": {
+      "hash": "129267b33d6f1ae1403924e905392ecc9cadcb401c5767a066b8f13f34bc581e",
+      "mode": 420
+    },
+    "audit-reports/rsc-c1-test-coverage-checker.md": {
+      "hash": "46037e9c6961973ec8fd325acc57d02b95d0d5757084174329bcfd2da79bb520",
+      "mode": 420
+    },
+    "audit-reports/rsc-c2-security-reviewer.md": {
+      "hash": "c2ccd6c6f76b518702e02f9127d29eae2c4fa0399ae3ec868fd5750214e0d23c",
+      "mode": 420
+    },
+    "hill.md": {
+      "hash": "dae958804268c10e023acb8a3bb9fb8d56dd53983cc91ea172a59d0efef3aafe",
+      "mode": 420
+    },
+    "pitch.md": {
+      "hash": "f33642fda2308308021c261d2a8c5e9df2530e45b5c49ac257452d605f15d133",
+      "mode": 420
+    },
+    "plan.md": {
+      "hash": "c86fc55596049637c73d3daf6777b1ca601a03d905c56eb101ab4a3ab9110c8f",
+      "mode": 420
+    }
+  }
+}

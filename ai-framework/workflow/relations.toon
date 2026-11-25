@@ -28,7 +28,7 @@ entries[50]:
     dispatches[7]: ".claude/agents/code-reviewer.md",".claude/agents/security-reviewer.md",".claude/agents/test-coverage-checker.md",".claude/agents/ux-reviewer.md",".claude/agents/i18n-checker.md",".claude/agents/eval-runner.md",".claude/agents/cross-pitch-conflict-checker.md"
     reads[5]: ai-framework/rules/boundaries.md,ai-framework/rules/coding-standards.md,ai-framework/rules/security.md,ai-framework/rules/testing.md,ai-framework/rules/ui-ux-review.md
   -
-    path: ".claude/skills/ship/SKILL.md"
+    path: ".claude/skills/ship-pitch/SKILL.md"
     phaseDoc: ai-framework/workflow/phases/4-ship.md
   -
     path: ".claude/skills/cooldown/SKILL.md"

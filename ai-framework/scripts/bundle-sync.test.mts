@@ -809,3 +809,170 @@ test("a project whose graph is rebuilt in post-commit is told to run graphify se
   write(target, ".git/hooks/post-commit", "#!/bin/sh\necho unrelated\n");
   assert.equal(runJson(target, ["--source", source, "--base-ref", baseRef]).nextSteps.some(item => item.kind === "graphify" && /pre-commit hook/.test(item.message)), false);
 });
+
+test("a target without the old ship skill gets no ship-command-rename step", (t) => {
+  const { source, target, baseRef } = fixture(t);
+  const result = runJson(target, ["--source", source, "--base-ref", baseRef]);
+  assert.equal(result.nextSteps.some(step => step.kind === "ship-command-rename"), false);
+  assert.doesNotMatch(run(target, ["--source", source, "--base-ref", baseRef]).stdout, /old ship skill/);
+});
+
+// The two small adapters exactly as this bundle shipped them (installed projects hold these bytes).
+const SHIPPED_AGENTS = "---\nname: ship\ndescription: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.\n---\n\n# Ship\n\nFollow `.claude/skills/ship/SKILL.md` and `ai-framework/workflow/phases/4-ship.md`. Use fast reasoning unless reconciliation is ambiguous. Do not bypass the final verification or confirmation gate.\n";
+const SHIPPED_OPENCODE = "---\ndescription: Close a pitch cleanly after /audit passes. Final /verify gauntlet, pitch ↔ implementation reconciliation, knowledge extraction, status compaction.\nmodel: opencode-go/minimax-m3.1-flash\n---\n\nLoad `.claude/skills/ship/SKILL.md` and follow it exactly. Use the `fast` capability profile only for non-sensitive reconciliation and do not bypass its final verification gate. $ARGUMENTS\n";
+const AGENTS_PATH = ".agents/skills/ship/SKILL.md";
+const OPENCODE_PATH = ".opencode/commands/ship.md";
+const RENAMED = ".claude/skills/ship-pitch/SKILL.md";
+
+/** A target installed with `files`, and a source that retired them; `renamed` says whether the source shows the rename. */
+function retiredFixture(t, files, renamed = true) {
+  const { source, target } = fixture(t);
+  for (const [rel, body] of Object.entries(files)) { write(source, rel, body); write(target, rel, body); }
+  const baseRef = commit(source, "base with the old adapters");
+  for (const rel of Object.keys(files)) fs.rmSync(path.join(source, rel));
+  if (renamed) write(source, RENAMED, "---\nname: ship-pitch\n---\n");
+  commit(source, "retire the old adapters");
+  return { source, target, args: ["--source", source, "--base-ref", baseRef] };
+}
+
+test("the fixtures are byte-identical to adapters this bundle shipped", async () => {
+  const { RETIRED_ADAPTER_HASHES } = await import("./bundle-sync.mts");
+  assert.ok(RETIRED_ADAPTER_HASHES[AGENTS_PATH].includes(testDeps.crypto.sha256Hex(SHIPPED_AGENTS)));
+  assert.ok(RETIRED_ADAPTER_HASHES[OPENCODE_PATH].includes(testDeps.crypto.sha256Hex(SHIPPED_OPENCODE)));
+});
+
+test("the old ship skill is named in next steps; a customized copy is never deleted, even with --prune", (t) => {
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS, [OPENCODE_PATH]: SHIPPED_OPENCODE });
+  write(target, OPENCODE_PATH, "---\nname: ship\n---\nlocally customized\n");
+  const dry = runJson(target, args);
+  const step = dry.nextSteps.find(s => s.kind === "ship-command-rename");
+  assert.ok(step, "a target with old adapters gets a rename step");
+  for (const text of [AGENTS_PATH, OPENCODE_PATH]) assert.ok(step.message.includes(text), `step names ${text}`);
+  assert.match(step.message, /built-in \/ship command shadows the workflow skill/);
+  assert.match(step.message, /command is now \/ship-pitch/);
+  assert.match(step.message, /only when its content is exactly one this bundle shipped/);
+  assert.match(step.message, /if the file or a folder above it is a link, remove only the link/);
+  const applied = runJson(target, [...args, "--apply", "--prune"]);
+  assert.equal(exists(target, AGENTS_PATH), false, "the shipped copy is removed");
+  assert.equal(read(target, OPENCODE_PATH), "---\nname: ship\n---\nlocally customized\n", "the customized copy is kept");
+  assert.equal(applied.summary.prunedCount, 1);
+});
+
+test("--apply without --prune removes shipped old adapters, keeps a customized one, and leaves other retired files alone", (t) => {
+  const other = "ai-framework/rules/retired-rule.md";
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS, [OPENCODE_PATH]: SHIPPED_OPENCODE, [other]: "rule\n" });
+  write(target, OPENCODE_PATH, SHIPPED_OPENCODE.replace(/\n/g, "\r\n"));
+  runJson(target, args);
+  for (const rel of [AGENTS_PATH, OPENCODE_PATH, other]) assert.ok(exists(target, rel), `a dry run removes nothing: ${rel}`);
+  const applied = runJson(target, [...args, "--apply"]);
+  assert.equal(exists(target, AGENTS_PATH), false);
+  assert.ok(exists(target, OPENCODE_PATH), "a CRLF edit is a customization");
+  assert.ok(exists(target, other), "other retired files still need --prune");
+  assert.equal(applied.summary.prunedCount, 1);
+});
+
+test("a baseline that vouches for the project's own ship skill does not get it deleted (forged or arbitrary base)", (t) => {
+  const own = "---\nname: ship\n---\nOur release checklist.\n";
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: own });
+  for (const flags of [["--apply"], ["--apply", "--prune"]]) {
+    const applied = runJson(target, [...args, ...flags]);
+    assert.equal(read(target, AGENTS_PATH), own, `kept with ${flags.join(" ")}`);
+    assert.equal(applied.summary.prunedCount, 0);
+  }
+});
+
+test("a source that merely lacks the old files, without the renamed skill, removes nothing", (t) => {
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS }, false);
+  const applied = runJson(target, [...args, "--apply"]);
+  assert.ok(exists(target, AGENTS_PATH));
+  assert.equal(applied.nextSteps.some(s => s.kind === "ship-command-rename"), false, "a source without the rename says nothing about it");
+});
+
+/** Runs --apply in-process with injected filesystem behaviour. */
+async function applyWith(target, args, overrides) {
+  const { main } = await import("./bundle-sync.mts");
+  const out = [];
+  const sink = { write: (text) => { out.push(String(text)); return true; }, on: () => sink, once: () => sink };
+  const deps = { ...testDeps, proc: { ...testDeps.proc, cwd: () => target }, fs: { ...fs, ...overrides }, io: { ...testDeps.io, stdout: sink, stderr: sink } };
+  return { status: await main([...args, "--apply", "--json"], deps), out: out.join("") };
+}
+
+test("an adapter edited after it was hashed is kept (edit between the check and the removal)", async (t) => {
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS });
+  const file = path.join(target, AGENTS_PATH);
+  const watched = new Set();
+  let edited = false;
+  let reads = 0;
+  await applyWith(target, args, {
+    openSync: (name, ...rest) => { const fd = fs.openSync(name, ...rest); if (String(name).endsWith(AGENTS_PATH)) watched.add(fd); return fd; },
+    // The first read is the scan that lists removable files; the second is the removal's own check. The user saves right after that one.
+    closeSync: (fd) => { fs.closeSync(fd); if (watched.delete(fd) && ++reads === 1 + 1) { edited = true; fs.writeFileSync(file, "customized while syncing\n"); } },
+  });
+  assert.equal(edited, true, "the race was injected");
+  assert.equal(read(target, AGENTS_PATH), "customized while syncing\n");
+});
+
+test("cleaning up parent folders is never recursive: a file that appears during cleanup survives", async (t) => {
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS });
+  const late = path.join(target, ".agents/skills/ship/late-user-file.txt");
+  let injected = false;
+  await applyWith(target, args, {
+    rmdirSync: (dir) => { if (!injected && String(dir).endsWith(path.join(".agents", "skills", "ship"))) { injected = true; fs.writeFileSync(late, "valuable user data"); } return fs.rmdirSync(dir); },
+  });
+  assert.equal(injected, true, "the race was injected");
+  assert.equal(read(target, ".agents/skills/ship/late-user-file.txt"), "valuable user data");
+});
+
+test("the dry run announces the report reset that --apply performs when only old adapters will be removed", async (t) => {
+  const { source, target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS });
+  runJson(target, [...args, "--apply"]); // bring everything else up to date
+  write(target, AGENTS_PATH, SHIPPED_AGENTS);
+  const digest = (text) => testDeps.crypto.sha256Hex(text);
+  write(target, ".project/reports/state.html", "page");
+  write(target, ".project/reports/state.explainer.json", "draft");
+  write(target, ".project/reports/state.delivery.json", JSON.stringify({ artifact: { sha256: digest("page") }, specification: { sha256: digest("draft") } }));
+  const dry = runJson(target, ["--source", source, "--base-ref", args[3]]);
+  assert.ok(dry.nextSteps.some(s => s.kind === "reports"), "the dry run names the report reset");
+  assert.ok(exists(target, ".project/reports/state.html"));
+});
+
+test("an in-place edit during the last guards, after the pinned read, is kept", async (t) => {
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS });
+  const file = path.join(target, AGENTS_PATH);
+  const watched = new Set();
+  let closes = 0, edited = false;
+  await applyWith(target, args, {
+    openSync: (name, ...rest) => { const fd = fs.openSync(name, ...rest); if (String(name).endsWith(AGENTS_PATH)) watched.add(fd); return fd; },
+    closeSync: (fd) => { fs.closeSync(fd); if (watched.delete(fd)) closes++; },
+    // Written in place (same inode) while the link guards are being awaited.
+    lstat: async (name) => { const result = await fs.lstat(name); if (!edited && closes >= 2 && String(name).endsWith(AGENTS_PATH)) { edited = true; fs.writeFileSync(file, "late edit\n"); } return result; },
+  });
+  assert.equal(edited, true, "the race was injected");
+  assert.equal(read(target, AGENTS_PATH), "late edit\n");
+});
+
+test("--prune never deletes a retired path under another capitalisation on the strength of a baseline", (t) => {
+  const variant = ".claude/skills/Ship/SKILL.md";
+  const { target, args } = retiredFixture(t, { [variant]: "our own skill\n" });
+  const applied = runJson(target, [...args, "--apply", "--prune"]);
+  assert.equal(read(target, variant), "our own skill\n");
+  assert.equal(applied.summary.prunedCount, 0);
+});
+
+test("the dry run lists the old ship files that --apply will remove, and says nothing of it without the rename", (t) => {
+  const withRename = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS });
+  const listed = runJson(withRename.target, withRename.args).nextSteps.filter(s => /--apply will remove these old ship files/.test(s.message));
+  assert.equal(listed.length, 1);
+  assert.ok(listed[0].message.endsWith(AGENTS_PATH));
+  const without = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS }, false);
+  assert.doesNotMatch(run(without.target, without.args).stdout, /will remove these old ship files|removed by --apply alone/);
+});
+
+test("one old file that cannot be removed does not abort the sync or lose the record of the others", async (t) => {
+  const { target, args } = retiredFixture(t, { [AGENTS_PATH]: SHIPPED_AGENTS, [OPENCODE_PATH]: SHIPPED_OPENCODE });
+  const result = await applyWith(target, args, { unlinkSync: (name) => { if (String(name).endsWith(OPENCODE_PATH)) throw Object.assign(new Error("denied"), { code: "EACCES" }); return fs.unlinkSync(name); } });
+  assert.equal(result.status, 0, result.out);
+  assert.equal(exists(target, AGENTS_PATH), false);
+  assert.ok(exists(target, OPENCODE_PATH));
+  assert.deepEqual(JSON.parse(read(target, ".project/.bundle-sync.json")).pruned, [AGENTS_PATH]);
+});

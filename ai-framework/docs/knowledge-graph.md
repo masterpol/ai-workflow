@@ -27,7 +27,7 @@ filter remain separate. Invalid records, unsafe targets or oversized input fail 
 recovery-state targets are refused before inspection. Graph navigation never opens recovery sources.
 
 Both are derived — never hand-edit them, edit the entries and re-run the script. Setup creates the
-initial graph; `/ship` and `/cooldown` rebuild it when their approved knowledge extraction,
+initial graph; `/ship-pitch` and `/cooldown` rebuild it when their approved knowledge extraction,
 promotion, or archive work changes entries. Run it manually (`--check` for a dry-run report,
 non-zero exit on duplicate ids) after any other manual edit to a knowledge entry.
 

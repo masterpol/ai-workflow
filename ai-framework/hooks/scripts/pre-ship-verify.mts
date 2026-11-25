@@ -5,7 +5,7 @@ import { createNodeDeps } from "../../scripts/runtime/node.mts";
 import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 
 /**
- * pre-ship-verify.mts — final checks for this installation, invoked by /ship (not a hooks.json hook).
+ * pre-ship-verify.mts — final checks for this installation, invoked by /ship-pitch (not a hooks.json hook).
  *
  * Runs direct executables (never a shell) in the project root. With `verify:base` in package.json it runs that
  * script, then the document, integrity and offline-viewer checks; otherwise it runs the recognised build,

@@ -90,6 +90,7 @@ test("off never imports the throwing decision library; on catches that import fa
   const scripts = join(f.root, "ai-framework/scripts");
   mkdirSync(hooks, { recursive: true }); mkdirSync(scripts, { recursive: true });
   symlinkSync(join(repo, "ai-framework/scripts/runtime"), join(scripts, "runtime"), "dir");
+  copyFileSync(join(repo, "ai-framework/scripts/phase-commands.mts"), join(scripts, "phase-commands.mts"));
   writeFileSync(join(scripts, "orca-start.mts"), 'throw new Error("private import failure");\n');
   const entry = join(hooks, "orca-start-hook.mts"); copyFileSync(script, entry);
   silent(f.run(skill(), { AI_WORKFLOW_ORCA_MULTI_AGENT: "false", PATH: "" }, entry));
@@ -100,7 +101,7 @@ test("off never imports the throwing decision library; on catches that import fa
 
 test("non-phase skills and commands pass through without readiness probes", (t) => {
   const f = fixture(t);
-  for (const input of [skill("search"), skill("state"), expansion("state"),
+  for (const input of [skill("ship"), expansion("ship"), skill("search"), skill("state"), expansion("state"),
     { hook_event_name: "PreToolUse", tool_name: "Bash" },
     { ...expansion(), expansion_type: "other" }, { ...skill(), hook_event_name: "Unknown" }]) silent(f.run(input, { PATH: "", ORCA_CLI_COMMAND: undefined }));
 });
@@ -114,7 +115,7 @@ test("Claude subagent helper calls pass through silently before the decision lib
 // Twelve complete hook invocations exceed Bun's default five-second integration budget under load.
 test("every phase returns ready context for the observed Skill payload", { timeout: 30000 }, (t) => {
   const f = fixture(t);
-  for (const phase of ["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"])
+  for (const phase of ["shape", "shape-lite", "critique", "plan", "build", "audit", "ship-pitch", "cooldown", "fix", "resume", "switch", "checkpoint"])
     context(f.run(skill(phase)), "PreToolUse", "Orca: ready (coordinator claude, workers codex, opencode)");
 });
 
@@ -228,4 +229,19 @@ test("configured Bun runs the real hook entry with the same decision outputs", (
   silent(f.run("{", { AI_WORKFLOW_RUNNER: "bun", AI_WORKFLOW_ORCA_MULTI_AGENT: "false" }));
   const malformed = f.run("{", { AI_WORKFLOW_RUNNER: "bun" });
   assert.equal(malformed.status, 2); assert.equal(malformed.stdout, "");
+});
+
+
+test("ship-pitch Skill and slash command reach the start decision with phase ship", (t) => {
+  const f = fixture(t);
+  const scripts = join(f.root, "ai-framework/scripts");
+  const entry = join(f.root, "ai-framework/hooks/scripts/orca-start-hook.mts");
+  mkdirSync(scripts, { recursive: true }); mkdirSync(join(f.root, "ai-framework/hooks/scripts"), { recursive: true });
+  symlinkSync(join(repo, "ai-framework/scripts/runtime"), join(scripts, "runtime"), "dir");
+  copyFileSync(join(repo, "ai-framework/scripts/phase-commands.mts"), join(scripts, "phase-commands.mts"));
+  copyFileSync(script, entry);
+  writeFileSync(join(scripts, "orca-start.mts"), 'export function decideStart({ phase }) { return { state: "ready", line: phase }; }\n');
+  for (const [input, event] of [[skill("ship-pitch"), "PreToolUse"], [expansion("ship-pitch"), "UserPromptExpansion"]] as const)
+    context(f.run(input, {}, entry), event, "ship");
+  for (const input of [skill("ship"), expansion("ship")]) silent(f.run(input, {}, entry));
 });

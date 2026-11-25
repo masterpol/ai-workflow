@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 2,
+  "slug": "orca-balanced-role-pools",
+  "sections": [
+    {
+      "source": "SHIPPED.md#summary",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-role-pools-balance-by-least-load-within-a-run.md",
+      "helps": "What a pool pick does and why it replaced round-robin.",
+      "bodyHash": "sha256:c3dda1af48534977e9ab57f16b82234f5eb8fc3d170d1c22a20c1531580f1fea"
+    },
+    {
+      "source": "SHIPPED.md#scope-status",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:5ec067f423e48cce9105e06cf9571b83cdedb8b946b0c9e111f3c4b2ad84ab75"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honoured",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-role-pools-balance-by-least-load-within-a-run.md",
+      "helps": "The limits the balanced pick keeps: no authority, config, migration or reassignment changes.",
+      "bodyHash": "sha256:a7cef791228e8baf0723438322f1d9cef9e3489f37370c89445f8a24469cd945"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-load-balancer-that-never-charges-a-failed-launch-picks-it-forever.md",
+      "helps": "Why a member that fails before a claim must be skipped, and how the pick is re-checked.",
+      "bodyHash": "sha256:f2a408216b1b2b1d93e6cc7f8c8cf6eda515fcb039a01a0be42d8f7df563f21d"
+    },
+    {
+      "source": "SHIPPED.md#deviations",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-role-pools-balance-by-least-load-within-a-run.md",
+      "helps": "What a pool pick does and why it replaced round-robin.",
+      "bodyHash": "sha256:28bf48d1b2b726e331cc462868395f5c026265269a6b920ffbcbb7ba9ac2d55c"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/patterns/recheck-an-optimistic-pick-under-the-claim-lock.md",
+      "helps": "How the re-check under the claim lock works and why only load picks are re-checked.",
+      "bodyHash": "sha256:97984afb0cf0bf1ae34ee3c2b56ac97281887ed71fb093232538b4b136d4d22d"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:c9f085e9e0c1f9ae91b848decd359339032885c8148916779248ae40431ede34"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:7b321c1a580f085a1e24e4dce88df6476e2fcea36049e2bd5cdeb8da5c7b44db"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:bc9334630c31ac5c599bbf68fab4426b63db5c73bd0bfaaefa0ef1aecfc3a4f2"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/orca-role-pools-balance-by-least-load-within-a-run.md",
+      "helps": "The limits the balanced pick keeps: no authority, config, migration or reassignment changes.",
+      "bodyHash": "sha256:e1f5333cdb379eacc5b231d47508570584688a5746f475e434fe466f4e3ba58d"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-load-balancer-that-never-charges-a-failed-launch-picks-it-forever.md",
+      "helps": "Why a member that fails before a claim must be skipped, and how the pick is re-checked.",
+      "bodyHash": "sha256:93a68c16c459439762e3b6894d967f08c4b98db82248d324e5635c89842acb7c"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:c2119bfcd2b253f6f167488026478d249969e8b6ce6f120b24127b7f3df5a7c8"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:b72815fcaf6bf7926127a5ebe7b69ba7b04b272545987e9ad29aac1c0917ffcf"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:3263c35c1d1a478802659e638a01a8acdd781026811de457784ac9a2a59912c9"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:dc86243af4bb43cebecca310dbf21677af4941761c389d71de9ed4e4dcc441d4"
+    },
+    {
+      "path": "audit-reports/",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:5f101151f84b90bd445cb6cfca2e4b6ebaf591565a93c6b4cbc8ae7209693c6b",
+      "count": 6
+    },
+    {
+      "path": "critique/",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:77ee297aee5212ab5985999ee02f3529c9e9a0681a784256ebc18cd602057799",
+      "count": 5
+    }
+  ],
+  "coverage": 0.6363636363636364,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-25T21:10:58.709Z"
+}

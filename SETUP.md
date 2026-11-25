@@ -111,7 +111,7 @@ supported harness; the person using the project only needs to open it with their
 
 ### 2a — Claude Code
 Nothing extra to convert — Claude Code auto-discovers `.claude/agents/` and `.claude/skills/`.
-- Verify skills appear as `/shape`, `/plan`, `/build`, `/audit`, `/ship`, `/cooldown`.
+- Verify skills appear as `/shape`, `/plan`, `/build`, `/audit`, `/ship-pitch`, `/cooldown`.
 - (Optional) Wire the post-edit hook — see **Step 6**.
 - `AGENTS.md` is the shared project entry point; Step 4 can generate a `CLAUDE.md` mirror.
 
@@ -317,7 +317,7 @@ auto-loaded) — copy the entries you want into `.claude/settings.json`:
 - `ai-framework/hooks/scripts/stuck-uphill-detector.mts` — SessionStart hook that warns when a
   pitch scope sits at the same uphill position across 3+ sessions (rabbit-hole detector).
 - `ai-framework/hooks/scripts/pre-ship-verify.mts` — **not** an event hook; it's a build-gate
-  script the `/ship` phase runs. Leave it in place; the ship playbook invokes it.
+  script the `/ship-pitch` phase runs. Leave it in place; the ship playbook invokes it.
 
 Minimal merge for the post-edit and hill-chart hooks:
 
@@ -379,7 +379,7 @@ conventions follow-up queued in Step 5 because the README didn't document any).
 ## The pipeline (what you just installed)
 
 ```
-(brainstorm) → /shape → /critique → bet → /plan → /build → /audit → /ship
+(brainstorm) → /shape → /critique → bet → /plan → /build → /audit → /ship-pitch
                                                             every 5 ships → /cooldown
 ```
 
@@ -390,7 +390,7 @@ conventions follow-up queued in Step 5 because the README didn't document any).
 | `/plan` | Decompose into independent scopes with checkable exits | deep (big) / standard (small) |
 | `/build` | Execute scopes, hill-tracked, verification-before-done | standard |
 | `/audit` | Parallel review/security/test/ux/i18n/eval fan-out | standard |
-| `/ship` | Reconcile pitch↔impl, extract knowledge, compact status | fast |
+| `/ship-pitch` | Reconcile pitch↔impl, extract knowledge, compact status | fast |
 | `/cooldown` | Promote issue→pattern→rule, prune, triage backlog | standard |
 
 Select available models by profile; never use an unsupported provider/model identifier. Full routing:

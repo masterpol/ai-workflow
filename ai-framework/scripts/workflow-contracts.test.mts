@@ -13,7 +13,7 @@ const orcaBlock = (text: string): string => text.match(/<!-- orca-multi-agent:be
 
 test("A: no Orca section lets exit 3 (or any refusal) fall back to the normal path while Orca is requested", () => {
   const consumers = ["ai-framework/workflow/phases/2-build.md", "ai-framework/workflow/phases/3-audit.md", "ai-framework/workflow/phases/4-ship.md",
-    ".claude/skills/build/SKILL.md", ".claude/skills/audit/SKILL.md", ".claude/skills/ship/SKILL.md"];
+    ".claude/skills/build/SKILL.md", ".claude/skills/audit/SKILL.md", ".claude/skills/ship-pitch/SKILL.md"];
   const ownerPath = "ai-framework/integrations/orca-vendors.md", heading = "CLI, grader and live-smoke status";
   const files = Object.fromEntries([...consumers, ownerPath].map((file) => [file, read(file)]));
   const check = (tree: Record<string, string>): void => {
@@ -227,7 +227,7 @@ test("N: residual owners — UI size, setup import, persistent off, ship retries
     }
   }
   assert.doesNotMatch(read("ai-framework/integrations/skill-defaults.md"), /every vendor mirror\s+already says/, "Cursor copies are byte copies, not pointers");
-  for (const file of ["ai-framework/workflow/phases/4-ship.md", ".claude/skills/ship/SKILL.md"]) {
+  for (const file of ["ai-framework/workflow/phases/4-ship.md", ".claude/skills/ship-pitch/SKILL.md"]) {
     const text = read(file);
     assert.doesNotMatch(text, /`\/audit` cycle 2/, `${file} must not grant a cycle beyond the appetite cap`);
     assert.match(text, /cycle cap/, `${file} routes a failed check under the appetite cycle cap`);
@@ -236,7 +236,7 @@ test("N: residual owners — UI size, setup import, persistent off, ship retries
 
 test("mirrors: every Cursor copy of a canonical skill or agent touched by these contracts is byte-identical", () => {
   for (const file of ["agents/security-reviewer.md", "agents/code-reviewer.md", "agents/eval-runner.md", "skills/build/SKILL.md", "skills/audit/SKILL.md",
-    "skills/ship/SKILL.md", "skills/shape/SKILL.md", "skills/critique/SKILL.md", "skills/shape-lite/SKILL.md", "skills/ui-design/SKILL.md",
+    "skills/ship-pitch/SKILL.md", "skills/shape/SKILL.md", "skills/critique/SKILL.md", "skills/shape-lite/SKILL.md", "skills/ui-design/SKILL.md",
     "skills/setup/SKILL.md"]) {
     assert.ok(exists(`.cursor/${file}`), `.cursor/${file} exists (Cursor copies are committed)`);
     assert.equal(read(`.cursor/${file}`), read(`.claude/${file}`), `.cursor/${file} matches its canonical file`);

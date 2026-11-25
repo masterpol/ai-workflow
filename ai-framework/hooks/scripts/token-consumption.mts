@@ -1,3 +1,4 @@
+import { COMMAND_PHASES, phaseOfCommand } from "../../scripts/phase-commands.mts";
 import { runDirect } from "../../scripts/runtime/cli.mts";
 /*
  * Records one bounded, local snapshot of agent consumption. It deliberately
@@ -40,7 +41,6 @@ const MAX_FLOW_LEAVES = 600;
 const MAX_TRANSCRIPTS = 200;
 const RECENT_TRANSCRIPT_IDS = 50;
 const MAX_TRANSCRIPT_PATH = 4096;
-const PHASES = new Set(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
 const PITCH_SLUG = /^[a-z0-9][a-z0-9-]{0,79}$/;
 const SCOPE_TOKEN = /^S\d{1,3}$/;
 const OTHER = "(other)";
@@ -387,7 +387,7 @@ function applyDimensions(dimensions: Dimensions, record: CompletionRecord, direc
 
 // ---- Flows: pitch > phase > scope > vendor rows, stamped on the record so reversal never re-resolves ----
 
-const FLOW_PHASES = new Set([...PHASES, UNATTRIBUTED, OTHER]);
+const FLOW_PHASES = new Set([...COMMAND_PHASES.values(), UNATTRIBUTED, OTHER]);
 const leafCount = (flows: Flows): number => Object.values(flows.pitches).reduce((sum, pitch) => sum + Object.values(pitch.phases).reduce((inner, phase) => inner + Object.values(phase.scopes).reduce((leaves, byVendor) => leaves + Object.keys(byVendor).length, 0), 0), 0);
 
 function mergeRow(target: Record<string, Row>, vendor: string, row: Row): void {
@@ -517,13 +517,13 @@ function isRealPitchDirectory(root: string, slug: string, deps: RuntimeDeps): bo
 
 /**
  * Pure of side effects: maps a command or skill name and its argument text to the pitch, phase and scope it starts.
- * Returns null unless the name is one of the closed phase names. Only validated tokens are returned; the rest of the
+ * Returns null unless the name is one of the workflow command names. Only validated tokens are returned; the rest of the
  * argument text is dropped. The pitch is the first argument when it names a real pitch directory, else (unattributed).
  */
 export function resolvePhaseContext(name: unknown, args: unknown, root: string, deps: RuntimeDeps = defaultDeps()): PhaseContext | null {
   if (typeof name !== "string" || name.length > MAX_NAME_LENGTH) return null;
-  const phase = name.replace(/^[/$]/, "").toLowerCase();
-  if (!PHASES.has(phase)) return null;
+  const phase = phaseOfCommand(name.replace(/^[/$]/, "").toLowerCase());
+  if (!phase) return null;
   const tokens = typeof args === "string" ? args.slice(0, MAX_ARGS_LENGTH).split(/\s+/).filter(Boolean).slice(0, MAX_ARG_TOKENS) : [];
   const first = tokens[0];
   const pitch = first !== undefined && PITCH_SLUG.test(first) && isRealPitchDirectory(root, first, deps) ? first : UNATTRIBUTED;

@@ -106,8 +106,8 @@ Direct application of ShapeUp's hill-chart insight: a stuck dot signals hidden p
 
 ## log.md and deviations.md discipline
 
-- **`log.md`** — 3-line incident capture per bug hit during build: symptom, root cause, fix. Auto-promoted to `knowledge/issues/` at `/ship` if novel.
-- **`deviations.md`** — every plan deviation: what was planned, what shipped, why. Becomes part of pitch reconciliation at `/ship`.
+- **`log.md`** — 3-line incident capture per bug hit during build: symptom, root cause, fix. Auto-promoted to `knowledge/issues/` at `/ship-pitch` if novel.
+- **`deviations.md`** — every plan deviation: what was planned, what shipped, why. Becomes part of pitch reconciliation at `/ship-pitch`.
 
 ## Bug-fix variant
 

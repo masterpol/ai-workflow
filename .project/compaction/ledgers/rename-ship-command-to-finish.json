@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "slug": "rename-ship-command-to-finish",
+  "sections": [
+    {
+      "source": "SHIPPED.md#summary",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/the-ship-command-is-ship-pitch-and-the-phase-stays-ship.md",
+      "helps": "The command is ship-pitch while the phase stays ship, and what sync removes.",
+      "bodyHash": "sha256:c0ad31361966b64ee865f3a249f5f8933f3774c805c1ba83a54c73a5b5af9e47"
+    },
+    {
+      "source": "SHIPPED.md#scope-status",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:9511b05f89fa69550d2ff9d9278a98e6263efd96d0684a6e6991f6f43f50506c"
+    },
+    {
+      "source": "SHIPPED.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/the-ship-command-is-ship-pitch-and-the-phase-stays-ship.md",
+      "helps": "The limits: no phase rename, no alias, no history edit, no deletion of a customized skill.",
+      "bodyHash": "sha256:58836f35527686be97496a97c269d9cd4b8cee68171297c8f1a5c42eebeb416d"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-workflow-command-can-be-shadowed-by-a-host-built-in.md",
+      "helps": "How a host built-in shadowed a workflow command and why nothing detected it.",
+      "bodyHash": "sha256:f53021c23389801d9b91b514e775779212c7534daaca4dfb60795e5d2bab2063"
+    },
+    {
+      "source": "SHIPPED.md#deviations",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/the-ship-command-is-ship-pitch-and-the-phase-stays-ship.md",
+      "helps": "The command is ship-pitch while the phase stays ship, and what sync removes.",
+      "bodyHash": "sha256:bab18e4eef4a10dd7ce5884f26fc0e5880640d9f1125b7cb1a547ecb14659544"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/patterns/prove-ownership-by-shipped-content-before-removing-a-renamed-file.md",
+      "helps": "How to delete a renamed file automatically without deleting a user's own.",
+      "bodyHash": "sha256:c5167e1d728799d9966b814120a1620dfaaf6539e500d8be5cdcb7e12b079d4a"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:b9018fbb0336d0f8407b73ed8175dc8de02affb25ff07397e4a969737f7904a4"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:7c28339dd98493d787980ae4eb3ae17acde1da87ede0165db7bfe6f4f44c7fb7"
+    },
+    {
+      "source": "SHIPPED.md#doc-updates",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:96bdc875488fddb49e67ed8163ca31458aa1d24ecb44595cabad2220890012db"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/the-ship-command-is-ship-pitch-and-the-phase-stays-ship.md",
+      "helps": "The limits: no phase rename, no alias, no history edit, no deletion of a customized skill.",
+      "bodyHash": "sha256:d9222fac39de633c674e7e9166692ffdc5d32ad9988a13ffb201f05d3868626a"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-workflow-command-can-be-shadowed-by-a-host-built-in.md",
+      "helps": "How a host built-in shadowed a workflow command and why nothing detected it.",
+      "bodyHash": "sha256:7df2c5f15dca48fd1df1c0f399734a3546208f7dceecc7c43021241cf22e42b1"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:67dac7837029b8b8a13d92fcf5a18e9f56045841806935b8e5ff3024de8e0ce7"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:282a7c38340204cdae655a754a40be54d36e44bc96dc7f135007a81687944ec7"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:01410bffec876ae39cec8e3f1476f7f1167f371db7f5c4cb5c2f673783cb4d84"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:874e5d0b6786ec310225233fe8d2254fd792caf04e7422c43f430d74673df7ca"
+    },
+    {
+      "path": "audit-reports/",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:ef1e1ebc8614f676d6a598e4fb90f4d7e634453b5daafd7ee83fe6ac16ffe137",
+      "count": 5
+    }
+  ],
+  "coverage": 0.6363636363636364,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-25T21:11:00.063Z"
+}

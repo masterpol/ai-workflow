@@ -1,6 +1,6 @@
 ---
 name: fix
-description: Entry point for the bug-fix workflow. Searches knowledge for similar issues, confirms reproduction and root cause, then runs the bug-fix variant of /build → /audit → /ship. Use for known bugs with clear reproduction steps.
+description: Entry point for the bug-fix workflow. Searches knowledge for similar issues, confirms reproduction and root cause, then runs the bug-fix variant of /build → /audit → /ship-pitch. Use for known bugs with clear reproduction steps.
 ---
 
 # /fix — Bug-Fix Entry
@@ -12,7 +12,7 @@ description: Entry point for the bug-fix workflow. Searches knowledge for simila
 `/fix` is the front door to the **bug-fix variant** in `ai-framework/workflow/overview.md`:
 
 ```
-/fix (triage) → /build (single implicit scope) → /audit → /ship
+/fix (triage) → /build (single implicit scope) → /audit → /ship-pitch
 ```
 
 It skips `/shape` and `/plan`; the bug report *is* the plan.
@@ -28,7 +28,7 @@ It skips `/shape` and `/plan`; the bug report *is* the plan.
 
 ## 2. Build → Audit → Ship
 
-Hand off to `/build` in its bug-fix variant (see `ai-framework/workflow/phases/2-build.md` → "Bug-fix variant"): minimal fix in the correct layer (`ai-framework/rules/boundaries.md`), a regression test that fails before and passes after, full test suite and `<build-command>` green, evidence pasted. The three-strike rule applies. Then `/audit` (bug-fix gate: auto if clean) and `/ship`, which extracts the bug into `knowledge/issues/` if it is novel.
+Hand off to `/build` in its bug-fix variant (see `ai-framework/workflow/phases/2-build.md` → "Bug-fix variant"): minimal fix in the correct layer (`ai-framework/rules/boundaries.md`), a regression test that fails before and passes after, full test suite and `<build-command>` green, evidence pasted. The three-strike rule applies. Then `/audit` (bug-fix gate: auto if clean) and `/ship-pitch`, which extracts the bug into `knowledge/issues/` if it is novel.
 
 ## Agent recommendations
 

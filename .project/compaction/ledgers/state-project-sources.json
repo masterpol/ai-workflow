@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "slug": "state-project-sources",
+  "sections": [
+    {
+      "source": "SHIPPED.md#summary",
+      "class": "behavior",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-sql-migrations-as-a-neutral-schema-source.md",
+      "helps": "What /state reads as a schema source and how it chooses and reports one.",
+      "bodyHash": "sha256:3aa81ed69bcada5f707439ed480774d3646e987a711e8150757968c4dd3d32c6"
+    },
+    {
+      "source": "SHIPPED.md#scope-status",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:f11570e5d7a16570563d9f60b02ada11c4eee8d1fd029b4b9f270bba888a4480"
+    },
+    {
+      "source": "SHIPPED.md#no-gos-honoured",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-sql-migrations-as-a-neutral-schema-source.md",
+      "helps": "The limits: no execution, no database, no ORM parsing, no route map.",
+      "bodyHash": "sha256:5c044f2a89036337171f5eb2b7fb79e75e526cbe5f218508bb13ec3a345263c2"
+    },
+    {
+      "source": "SHIPPED.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-word-boundary-credential-check-misses-joined-and-long-names.md",
+      "helps": "Where project names leaked past the credential check and how it is closed.",
+      "bodyHash": "sha256:71f023d1a3a68b683db0bf839f162db9c2ecb50c82f254b5dd3e684aa91f263e"
+    },
+    {
+      "source": "SHIPPED.md#deviations",
+      "class": "decision",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-sql-migrations-as-a-neutral-schema-source.md",
+      "helps": "What /state reads as a schema source and how it chooses and reports one.",
+      "bodyHash": "sha256:b388af464b1d3bfe57cc42337b7208634b12e4feb47a1edcd7df2c9592dd20de"
+    },
+    {
+      "source": "SHIPPED.md#audit",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-string-built-in-a-loop-by-reading-its-last-character-is-quadratic.md",
+      "helps": "A quadratic string build the audit found outside the lexer.",
+      "bodyHash": "sha256:8ed81963df2039ef462813bc1562d73c81a0526a6d35c24cf665c3e1a1944da5"
+    },
+    {
+      "source": "SHIPPED.md#verification-at-ship",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "bodyHash": "sha256:db5bb9b211012709ef5cf8837ce0298301193161f6126c2c2aa33b087c9aa07f"
+    },
+    {
+      "source": "SHIPPED.md#followups",
+      "class": "omit",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "bodyHash": "sha256:cb81a942e81fcc98fa32b1b5deefcd14263b5efae68f740e3778bc6bb8dadc74"
+    },
+    {
+      "source": "pitch.md#no-gos",
+      "class": "rule",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/decisions/state-sql-migrations-as-a-neutral-schema-source.md",
+      "helps": "The limits: no execution, no database, no ORM parsing, no route map.",
+      "bodyHash": "sha256:1af504dfff27fcb100559566ab55c6cf3d855da485b1fee4996fe7df29fc8cd6"
+    },
+    {
+      "source": "pitch.md#rabbit-holes",
+      "class": "know-how",
+      "disposition": "extracted",
+      "destination": ".project/knowledge/issues/a-word-boundary-credential-check-misses-joined-and-long-names.md",
+      "helps": "Where project names leaked past the credential check and how it is closed.",
+      "bodyHash": "sha256:b364168eb5ceaaea8e72b83d84ca73a520a8b70bd7544c3d096a74213e9b2831"
+    }
+  ],
+  "otherFiles": [
+    {
+      "path": "SHIPPED.md",
+      "disposition": "omitted",
+      "reason": "duplicate",
+      "hash": "sha256:765d469809641d5c15ade254214c5a818f6906bf6e68ed102ce244dfb27981eb"
+    },
+    {
+      "path": "pitch.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:9f265125c27296fb3be65e21dde3c7165e0f100e9ab20510d77634816bf1983a"
+    },
+    {
+      "path": "plan.md",
+      "disposition": "omitted",
+      "reason": "superseded",
+      "hash": "sha256:cdf08920e95e88bc2cd507b25b7bebde66b3ad58f35dd7756959657299aa1b7f"
+    },
+    {
+      "path": "hill.md",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:1f79374f80f2d28297c02e1ece5b4f7e79c9671591a819b040fee3d66f0b0c3e"
+    },
+    {
+      "path": "audit-reports/",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:6b8b2f1a4402ebe86db1f652c007c57b5d0ad06476c74e98864f5b24831b72c3",
+      "count": 8
+    },
+    {
+      "path": "critique/",
+      "disposition": "omitted",
+      "reason": "process-noise",
+      "hash": "sha256:b8f93dd8de19b331d6d75b6154e54eeb7bbd2fd89a1b973df8ca3efbda14f315",
+      "count": 4
+    }
+  ],
+  "coverage": 0.7,
+  "gaps": [],
+  "acceptedGaps": [],
+  "committedAt": "2026-11-25T21:10:59.383Z"
+}

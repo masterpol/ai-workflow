@@ -1,8 +1,8 @@
+import { phaseOfCommand } from "../../scripts/phase-commands.mts";
 import { runDirect } from "../../scripts/runtime/cli.mts";
 import { orcaMultiAgentEnabled } from "../../scripts/runtime/select.mts";
 import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
 
-const PHASES = new Set(["shape", "shape-lite", "critique", "plan", "build", "audit", "ship", "cooldown", "fix", "resume", "switch", "checkpoint"]);
 const DEADLINE_MS = 5000;
 const DECISION_MS = 4000;
 // Ordinary prompts can be large pastes; only a phase invocation's arguments are size-limited.
@@ -24,8 +24,9 @@ function rootArgument(argv: string[]): string | undefined {
 /** Only a leading `/phase` or `$phase` token starts a workflow phase; arguments stay untouched. */
 function leadingPhase(prompt: string): { phase: string; argsText: string } | undefined {
   const token = /^[/$]([^\s]*)/u.exec(prompt);
-  if (!token || !PHASES.has(token[1])) return undefined;
-  return { phase: token[1], argsText: prompt.slice(token[0].length) };
+  const phase = token && phaseOfCommand(token[1]);
+  if (!token || !phase) return undefined;
+  return { phase, argsText: prompt.slice(token[0].length) };
 }
 
 // Config cutover (unified-toon-config c2.4): the opt-in switch is read through orcaMultiAgentEnabled -> loadConfigEnv ->

@@ -3,7 +3,7 @@
 ← [Back to README](../../README.md)
 
 ```
-(brainstorm) → /shape → /critique → bet → /plan → /build → /audit → /ship
+(brainstorm) → /shape → /critique → bet → /plan → /build → /audit → /ship-pitch
                                                             every 5 ships → /cooldown
 ```
 

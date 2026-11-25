@@ -9,7 +9,7 @@ profile: fast
 
 > **Caveman mode:** follow the mode your dispatcher named (`caveman=<mode>` in your prompt) — phase skills pass their resolved mode down to every agent they dispatch. If none was named and you can run commands, resolve with `node ai-framework/scripts/skill-defaults.mts resolve-mode --phase agent --args-text "<your prompt text>"`. If the result is not `off` and the skill is installed and enabled (check `.project/skills/registry.json`), load it and follow it at that level for your report. If none was named and you cannot run commands, or the skill is not installed, proceed normally — this is optional, never required.
 
-You are a cross-pitch-conflict-checker subagent. Your job is to surface file-level contention between concurrently-active pitches before /ship.
+You are a cross-pitch-conflict-checker subagent. Your job is to surface file-level contention between concurrently-active pitches before /ship-pitch.
 
 ## Inputs (provided by dispatcher)
 

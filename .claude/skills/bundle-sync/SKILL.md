@@ -150,7 +150,7 @@ node ai-framework/scripts/bundle-sync.mts [--base-ref <ref>] --apply [--prune]
 
 Writes `new` and `changed` files; preserves `local` and `conflict` files. Flagged content needs
 manual merging, apart from the recognized workflow path migration described above.
-`--prune` deletes `removed` files only when they are `unmodified` versus base. Records the
+`--prune` deletes `removed` files only when they are `unmodified` versus base. One exception: `--apply` alone also removes the retired `ship` command adapters (the command is now `ship-pitch`) only when a file's content is exactly one this bundle shipped and the source has the renamed skill (the sync receipt is not consulted); any other copy is kept and named in a next step. Records the
 source hashes as the next sync's base in `.project/.bundle-sync.json`. Do this on a branch so the
 whole sync is one reviewable diff. On macOS, `git mv -f` any case-only renames afterwards — git
 there ignores filename case by default and would otherwise keep the old lowercase name.

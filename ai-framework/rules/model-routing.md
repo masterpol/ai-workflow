@@ -19,7 +19,7 @@ Task dispatched
 │  /critique perspectives: knowledge-historian,   │
 │                          appetite-auditor,      │
 │                          cross-pitch-projector  │
-│  /ship — templated reconciliation + extraction  │
+│  /ship-pitch — reconciliation + extraction      │
 │                                                 │
 │  Task too complex for fast?                     │
 │  └── Yes → escalate                             │
@@ -88,7 +88,7 @@ agent/command files.
 | `/plan` orchestrator (small-batch) | standard | Mechanical scope decomposition |
 | `/build` orchestrator | standard | Default coding workhorse |
 | `/audit` orchestrator | standard | Synthesis of subagent findings |
-| `/ship` orchestrator | fast | Templated reconciliation + extraction + compaction |
+| `/ship-pitch` orchestrator | fast | Templated reconciliation + extraction + compaction |
 | `/cooldown` orchestrator | standard | Pattern-promotion judgment |
 | **/critique perspective subagents** | | (parallel fan-out) |
 | `knowledge-historian` | fast | Mechanical search of knowledge graph |
@@ -113,7 +113,7 @@ agent/command files.
 
 ## Recommended-tier banners (advisory)
 
-Each pipeline phase's `SKILL.md` opens with a capability-profile banner (for example, `/shape` → `deep`, `/ship` → `fast`). When a phase starts, choose an available model for that profile using `ai-framework/integrations/harnesses.md`.
+Each pipeline phase's `SKILL.md` opens with a capability-profile banner (for example, `/shape` → `deep`, `/ship-pitch` → `fast`). When a phase starts, choose an available model for that profile using `ai-framework/integrations/harnesses.md`.
 
 This is **advisory only — a nudge, not a gate:**
 
@@ -126,7 +126,7 @@ There is no enforcement hook and no logging event backing this — it lives enti
 
 | Recommend fast | Recommend standard | Recommend deep |
 |-----------------|-----------------|----------------|
-| /ship, all mechanical /audit + /critique subagents | /build orchestrator, /audit security/ux, /critique skeptic + eval-regression-projector, /cooldown | /shape always; /plan big-batch only |
+| /ship-pitch, all mechanical /audit + /critique subagents | /build orchestrator, /audit security/ux, /critique skeptic + eval-regression-projector, /cooldown | /shape always; /plan big-batch only |
 
 ### Conditional Phases
 
@@ -147,7 +147,7 @@ Start each phase on the recommended profile. Upgrade only when the current model
 ## Cost Optimization Rules
 
 ### Always
-- Use fast for `/ship` and mechanical `/audit` + `/critique` subagents — checklist phases
+- Use fast for `/ship-pitch` and mechanical `/audit` + `/critique` subagents — checklist phases
 - Keep `/build` on standard; reserve deep for `/shape` and big-batch `/plan`
 - Avoid deep unless standard is genuinely failing on the task
 

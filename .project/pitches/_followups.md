@@ -553,7 +553,7 @@ The package-less pre-ship verifier and timing-under-load issues retain their exi
 
 ## Cooldown candidate pitches (2026-10-21, forced)
 
-- **Pitch `package-less-ship-verification`** (med; moved to [pitches/package-less-ship-verification/pitch.md](package-less-ship-verification/pitch.md) 2026-10-22): bundles the package-less `pre-ship-verify.mts` followups above. The verifier selects checks from a root `package.json`, which this bundle lacks; it blocked `/ship` on 4+ ships and each needed an owner-approved direct-check gauntlet. Fix via a documented check contract or bundle-local manifest; no temporary `package.json`.
+- **Pitch `package-less-ship-verification`** (med; moved to [pitches/00-package-less-ship-verification/pitch.md](00-package-less-ship-verification/pitch.md) 2026-10-22): bundles the package-less `pre-ship-verify.mts` followups above. The verifier selects checks from a root `package.json`, which this bundle lacks; it blocked `/ship` on 4+ ships and each needed an owner-approved direct-check gauntlet. Fix via a documented check contract or bundle-local manifest; no temporary `package.json`.
 - **Pitch `orca-bounded-control-receipts`** (med; moved to `pitches/orca-bounded-control-receipts/pitch.md` 2026-10-22; guard-reader-bounds half already fixed): bundles Orca model-pin capability preflight, startup worker-list output overflow and guard reader bounds. Keep ownership fail-closed and cleanup explicitly authorized.
 
 ## codex-trusted-hook-smoke (cooldown 2026-10-08 C2, approved 2026-10-22 as a candidate pitch)
@@ -590,7 +590,7 @@ The pre-existing state-history archive fallback remains owned by un-bet P2b, und
 
 ## review-bench-hardening (cooldown 2026-10-23, forced; promoted to a pitch draft)
 
-Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles the review-bench followups: TTR-A1 (trusted-root Git execution: fsmonitor/filter helpers), TTR-A2 (strict appetite counting, NUL-delimited listings), TTR-A3 (bounded input/path diagnostics, in-root `..name` snapshot destinations) and the 2026-09-27 question whether convention-based read-only is enough or the tool needs real process isolation (decide in shaping; the tool is internal developer tooling run on a trusted checkout).
+Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundles the review-bench followups: TTR-A1 (trusted-root Git execution: fsmonitor/filter helpers), TTR-A2 (strict appetite counting, NUL-delimited listings), TTR-A3 (bounded input/path diagnostics, in-root `..name` snapshot destinations) and the 2026-09-27 question whether convention-based read-only is enough or the tool needs real process isolation (decide in shaping; the tool is internal developer tooling run on a trusted checkout).
 
 ## From archify-replaces-state (2026-11-23)
 - **Commit the Orca work in its own commits, stacked after `feat/archify-replaces-state`** (med; now also covers `orca-bounded-control-receipts`, 2.51.3 and 2.51.4): `orca-start.mts`, `orca-start.test.mts`, `orca-preflight.mts`, `orca-dispatch.mts`, `orca-dispatch.test.mts` and `orca-vendors.md` (changelog 2.51.1 and 2.51.2, the second being the tolerance work that came after the audit and was validated on the live 1.4.271 CLI) are in the same working tree as this pitch. `orca-bounded-control-receipts` plans to edit `lookupWorker`; tell it the `--full` and null-terminal change is already made. Audit item X-2, `attribution: shared-diff`.
@@ -636,3 +636,28 @@ Moved to `pitches/review-bench-hardening/pitch.md`. Not shaped or bet. Bundles t
 - **`workflow-v3-rollout` release pin** (med, X1): it must name which release it syncs to LAH, RN and climbing, and regenerate `/state` after the final sync so the new sources appear.
 - **Rename and retype in the SQL reader** (low): `RENAME` and `ALTER COLUMN … TYPE` mark a table approximate; replaying them would make LAH exact.
 - **S2 cost** (note): the opencode worker took about 2 hours for S2 and wrote 422 source lines against an estimate of 250; consider the vendor and a smaller brief for parser-adjacent scopes.
+- **Raw names in the facts JSON** (low, audit nits C3-SEC-3 and C3-SEC-4, and SEC-8 from 2.53.0): SQL identifiers, `structure.nodes` folder names and the draft's `sources[]` evidence paths are not credential-checked in the raw `--json` output; the page cleaner covers the draft. Add a check at ingest or run the evidence through `clean`.
+- **Review the cycle-3 fixes** (med): the credential cutoff, fullwidth keys, invalid `package.json`, `DROP` name matching and unterminated flow lists were fixed after the last allowed audit cycle and have only regression tests; fold them into the next independent review of the state collector.
+
+## From orca-balanced-role-pools (2026-11-25)
+- **Balanced pitch-level reviewers** (med, cut at critique): audit and critique reviewers have no `reviewOf` scope, so the pools cannot pick them cleanly; reviewers were spread by hand or assigned as `implementation`.
+- **The run helper should supply `runId`** (low-med): the id is only shape-checked; a fresh id on each dispatch resets load to zero. It can never move an owned task.
+- **Run identity in task and attempt keys** (med, S2 at critique): an older Run's `S1` is inherited by a new Run. Pre-existing.
+- **Review the post-audit changes** (med): the unlaunchable-member skip, the checked re-pick loop, the `source` label and the shared Run-id grammar were made after the last audit cycle; mutant-check the two new dispatch tests.
+- **A released worker terminal can come back after a Claude Code restart** (low-med): seen twice (it re-wrote scratch files and once received a new dispatch in its old session). Decide whether release should close the session for good.
+- **Orca status load view** (low, cut): show per-vendor load for a Run.
+
+## From rename-ship-command-to-finish (2026-11-25)
+- **Check every workflow command against host built-ins** (med): `ship` was shadowed without any warning. A doctor check or a documented release step should catch the next one (`checkpoint`, `plan`, `resume` are candidates to verify).
+- **`ship-pitch` availability in each host's built-ins is unverified** (low-med): the owner chose the name; confirm in Codex, OpenCode and Cursor.
+- **Installed projects and the old `ship` files** (LAH, RN, climbing): `bundle-sync --apply` removes copies this bundle shipped; a customized copy is the owner's to move. `workflow-v3-rollout` should include it.
+- **`package-less-ship-verification` overlaps this change** (`pre-ship-verify.mts`, `4-ship.md`) and its pitch still tells the reader to run `/ship` (audit X1–X3): update its wording when it is shaped.
+- **`bundle-sync --prune` still removes other files by path and baseline** (low-med, audit): the pinned, content-checked removal covers only the retired adapters.
+- **Review the last rename-audit fixes** (med): the case-insensitive prune guard, the final pre-unlink re-check, the next-step wording, the dry-run list and per-file error handling shipped without a third review cycle. Also never run: Windows, a case-sensitive volume, FIFO or oversize adapter inputs, and a rerun of the failed test-coverage role.
+- **Type `/ship-pitch` in a fresh session** (low): the live check so far loaded it as a skill only.
+
+## From greenfield-kickoff shaping (2026-11-25)
+- **New installs inherit this repository's identity** (high, bug): `SETUP.md` copies the bundle's `AGENTS.md` and `CLAUDE.md`, whose "Project specifics" describe `ai-workflow-portable` (product, stack, verification commands); the bootstrap stub the docs expect is gone and `setup-validator` accepts the copied section as complete. Ship neutral entry files (or a stub) and make the validator refuse the bundle's own section in an install. Check whether LAH, RN and climbing carry it.
+
+## From workspace-slim shaping (2026-11-25)
+- **Installed skill packages are indexed and committed** (high, bug): `GRAPHIGNORE` and `GITIGNORE_BLOCK` in `graphify.mts` and `SETUP.md`'s minimum ignore list omit `.project/skills/packages/` (this checkout's own `.gitignore` has it). In LAH 87% of graph data (58.9 of 67.5 MB) is that folder, rewritten and staged by the pre-commit hook on every commit. LAH also tracks 624 files / 23 MB of packages (597 are Archify, committed by the assistant on 2026-11-24 against `state-report.md`). Fix the templates, warn in the doctor when packages are tracked, and in LAH untrack them and rebuild the graph (history keeps them).

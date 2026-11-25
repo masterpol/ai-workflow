@@ -18,7 +18,7 @@ node ai-framework/scripts/run-tests.mts --list               # print the selecti
   skipped), so new tests are included automatically. It is the only mode that counts as delivery
   verification.
 - **Partial** runs just the files you name, for fast feedback while developing. The summary says
-  `partial (not full verification)`. It never replaces a full run before `/ship`: a static import
+  `partial (not full verification)`. It never replaces a full run before `/ship-pitch`: a static import
   graph misses fixture, source-reading, subprocess and instruction-contract dependencies, so the
   command does not pick tests from changed files.
 - An empty selection, a missing file, a non-`.test.mts` file, or a path outside the project exits 2

@@ -45,7 +45,7 @@ This mechanically lists every **required** section for the chosen pitch: every `
 file, every non-empty section of `deviations.md`/`log.md`. That list is what must be accounted
 for — it is not itself the extraction.
 
-Read every required section and do the actual extraction, exactly as `/ship`'s knowledge
+Read every required section and do the actual extraction, exactly as `/ship-pitch`'s knowledge
 extraction already works:
 - Genuinely reusable lessons → `.project/knowledge/patterns/*.md` or `.project/knowledge/issues/*.md`,
   with a real `id`, `tags`, and at least one `related`/`[[wiki-link]]`. Run
@@ -100,7 +100,7 @@ existing ledgers and tooling keep working. Version 2 asks for what version 1 let
 - A folder of many files (staging, reviewer prompts, snapshots) is accounted for by one **group** entry in `otherFiles`: a `path` ending in `/` (relative to the pitch folder) with a `disposition` and a `reason`, or a `destination` and `helps`. The tool computes the file `count` and a tree `hash` over every member's path and hash, and a `count` or `hash` you supply must match. A file added, dropped, renamed or edited inside the folder invalidates the entry, and `remove` re-checks it. A file belongs to one entry, so a group cannot overlap a single entry or another group. Limits: 200 ledger entries, 2000 files outside the covered sections.
 - A destination is judged by what it is, not how it is spelled: a path that resolves (through a symlink, another letter case or a character the disk folds) into a pitch folder, `.project/pitches` or the compaction folder is refused, for version 1 as well as version 2. `SHIPPED.md`, `deviations.md` and `log.md` also appear in `otherFiles` with a whole-file hash, because text outside their sections belongs to no section.
 
-`/ship` is unchanged by this: it does not yet write version 2 or an outcome record. That arrives with the `ship-consolidate-step` pitch.
+`/ship-pitch` is unchanged by this: it does not yet write version 2 or an outcome record. That arrives with the `ship-consolidate-step` pitch.
 
 ## Step 3 — Write done-work.md
 

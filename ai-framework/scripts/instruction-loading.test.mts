@@ -5,6 +5,7 @@
 // IC_EVAL_REQUIRED=1 (baseline: IC_PHASE=baseline + IC_EVAL_REPORT; candidate: IC_PHASE=build|audit|ship + IC_EVAL_BASELINE
 // + IC_EVAL_REPORT). The approved remaining-policy selector is scoped to baseline/audit/ship; it does not extend S1 implicitly.
 // IC_EVAL_POLICY=s1-approved-2026-10-18 (baseline/build only) accepts the pinned known baseline scores. Required mode never skips: a missing input fails. Criterion ids are 0-based: expected:0, forbidden:0.
+import { skillDirOfPhase as skillDir } from "./phase-commands.mts";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { createTestDeps, spawnSync, tempFixture, urlPath } from "./runtime/test-helpers.mts";
@@ -14,6 +15,7 @@ const deps = createTestDeps();
 const { fs, path } = deps;
 const ROOT = path.resolve(import.meta.dirname, "../..");
 const PHASES = ["build", "audit", "ship"] as const;
+// The ship phase is run by the ship-pitch command; every other phase shares its directory name.
 const OWNERS: Record<string, Record<string, string[]>> = {
   build: { "ai-framework/workflow/phases/2-build.md": ["## Per-scope inner loop", "## Adaptive gate", "## Verification-before-completion (hard rule)"] },
   audit: { "ai-framework/workflow/phases/3-audit.md": ["## Incomplete reviews", "## Loop discipline", "## Adaptive gate", "## Finding contract (every subagent)", "## Reviewer contract (every dispatch)", "## Evidence rule (same as /build)"] },
@@ -21,8 +23,8 @@ const OWNERS: Record<string, Record<string, string[]>> = {
 };
 const LEGACY_HEADINGS: Record<string, string[]> = { build: ["## Activities", "## Adaptive gate"], audit: ["## Loop discipline", "## Adaptive gate"], ship: ["## Activities (in order)", "## Confirmation gate"] };
 const BANNER_SHA = "8e1a549955555052bfc49714f38e28d4088cafdad793827e6eeb538583c6f679";
-const wrappers = (phase: string): string[] => [`.agents/skills/${phase}/SKILL.md`, `.opencode/commands/${phase}.md`];
-const cursor = (phase: string): string => `.cursor/skills/${phase}/SKILL.md`;
+const wrappers = (phase: string): string[] => [`.agents/skills/${skillDir(phase)}/SKILL.md`, `.opencode/commands/${skillDir(phase)}.md`];
+const cursor = (phase: string): string => `.cursor/skills/${skillDir(phase)}/SKILL.md`;
 const orcaBlock = (text: string): string => text.match(/<!-- orca-multi-agent:begin -->([\s\S]*?)<!-- orca-multi-agent:end -->/)?.[1] ?? "";
 type Files = Record<string, string | undefined>;
 
@@ -39,7 +41,7 @@ function loadingProblems(files: Files): string[] {
       if (phase === "build" && (!text.includes("Standalone `/shape-lite`") || !text.includes("Exit check") || !/instead of requiring absent `plan\.md` or `hill\.md`/.test(text))) problems.push(`${owner} lacks lite-card handling`);
       if (/exits 3, continue|or the command exits 3/.test(orcaBlock(text))) problems.push(`${owner} lets exit 3 fall back`);
     }
-    const canonical = files[`.claude/skills/${phase}/SKILL.md`];
+    const canonical = files[`.claude/skills/${skillDir(phase)}/SKILL.md`];
     if (canonical === undefined) problems.push(`absent canonical skill ${phase}`);
     else {
       const banner = canonical.split("\n").find((line) => line.includes("**Caveman mode:**")) ?? "";
@@ -56,7 +58,7 @@ function loadingProblems(files: Files): string[] {
     }
     for (const wrapper of wrappers(phase)) {
       if (files[wrapper] === undefined) problems.push(`absent wrapper ${wrapper}`);
-      else if (!files[wrapper]!.includes(`.claude/skills/${phase}/SKILL.md`)) problems.push(`${wrapper} lacks pointer to the canonical skill`);
+      else if (!files[wrapper]!.includes(`.claude/skills/${skillDir(phase)}/SKILL.md`)) problems.push(`${wrapper} lacks pointer to the canonical skill`);
     }
     if (files[cursor(phase)] === undefined) problems.push(`absent Cursor copy ${cursor(phase)}`);
     else if (files[cursor(phase)] !== canonical) problems.push(`${cursor(phase)} differs from canonical`);
@@ -65,7 +67,7 @@ function loadingProblems(files: Files): string[] {
 }
 const diskFiles = (root = ROOT): Files => {
   const files: Files = {};
-  const paths = PHASES.flatMap((p) => [`.claude/skills/${p}/SKILL.md`, ...Object.keys(OWNERS[p]), ...wrappers(p), cursor(p)]);
+  const paths = PHASES.flatMap((p) => [`.claude/skills/${skillDir(p)}/SKILL.md`, ...Object.keys(OWNERS[p]), ...wrappers(p), cursor(p)]);
   for (const rel of paths) files[rel] = fs.existsSync(path.join(root, rel)) ? fs.readFileSync(path.join(root, rel)) : undefined;
   return files;
 };
@@ -118,7 +120,7 @@ test("negative mutants: each broken loading contract is reported", () => {
   assert.match(mutate((f) => { f[entry] = f[entry]!.replace("**Caveman mode:**", "Mode:"); }).join("\n"), /caveman banner changed/);
   assert.match(mutate((f) => { f[entry] = f[entry]!.replaceAll("ai-framework/workflow/overview.md", "missing.md"); }).join("\n"), /missing applicability\/gate pointer/);
   assert.match(mutate((f) => { f[entry] = f[entry]!.replaceAll("ai-framework/integrations/orca-vendors.md", "missing.md"); }).join("\n"), /missing conditional Orca pointer/);
-  assert.match(mutate((f) => { const p = ".claude/skills/ship/SKILL.md"; f[p] = f[p]!.replace("## Activities (in order)", "## Steps"); }).join("\n"), /missing legacy requirement/);
+  assert.match(mutate((f) => { const p = ".claude/skills/ship-pitch/SKILL.md"; f[p] = f[p]!.replace("## Activities (in order)", "## Steps"); }).join("\n"), /missing legacy requirement/);
   assert.match(mutate((f) => { f[entry] = f[entry]!.replace("<!-- orca-multi-agent:begin -->", "<!-- orca-multi-agent:begin -->\nor the command exits 3, continue"); }).join("\n"), /lets exit 3 fall back/);
   assert.match(mutate((f) => { f[wrappers("build")[0]] = undefined; }).join("\n"), /absent wrapper/);
 });
@@ -404,7 +406,7 @@ test("required mode: baseline or candidate live evidence validates against the g
   assert.ok(object(spec) && object(spec.protocol) && Array.isArray(spec.protocol.vendors) && spec.protocol.vendors.every(text) && Array.isArray(spec.cases));
   assert.ok(spec.cases.every((c: unknown) => object(c) && text(c.id) && text(c.input) && Array.isArray(c.expected) && c.expected.every(text) && Array.isArray(c.forbidden) && c.forbidden.every(text)), "invalid dataset shape");
   const dataset = spec as unknown as Dataset;
-  const manifest = PHASES.flatMap((p) => [`.claude/skills/${p}/SKILL.md`, ...Object.keys(OWNERS[p])]).sort().map((rel) => `${rel} ${sha(fs.readFileSync(path.join(ROOT, rel)))}`).join("\n");
+  const manifest = PHASES.flatMap((p) => [`.claude/skills/${skillDir(p)}/SKILL.md`, ...Object.keys(OWNERS[p])]).sort().map((rel) => `${rel} ${sha(fs.readFileSync(path.join(ROOT, rel)))}`).join("\n");
   const candidate = phase !== "baseline";
   const ctx: Context = { dataset, datasetSha: sha(datasetBytes), manifestSha: sha(manifest), reportDir: path.dirname(reportFile),
     stage: candidate ? "candidate" : "baseline", scope: phase, baseline: candidate ? loadReport(need("IC_EVAL_BASELINE")) : undefined, policy: policy ? S1_PIN : undefined };

@@ -5,7 +5,7 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 ## Pipeline
 
 ```
-(optional) brainstorm → /shape → /critique (auto) → bet → /plan → /build → /audit → /ship
+(optional) brainstorm → /shape → /critique (auto) → bet → /plan → /build → /audit → /ship-pitch
                                                                                      → every 5 ships: /cooldown
 ```
 
@@ -17,20 +17,20 @@ ShapeUp + agentic-coding pipeline. Five phases plus a periodic learning surface.
 | — | **/critique** | Pre-bet red-team (auto for big-batch + AI) | 5 perspective subagents fan out: knowledge-historian, skeptic, appetite-auditor, cross-pitch-projector, eval-regression-projector |
 | 1 | **/plan** | Decompose into independent scopes with machine-checkable exits | Parallel-dispatch plan + hill chart initialized |
 | 2 | **/build** | Execute scopes, hill-tracked, parallel where flagged | Verification-before-completion enforced; marking a scope done in `hill.md` requires evidence |
-| 3 | **/audit** | Parallel fan-out of review/security/test/ux/i18n/eval/cross-pitch | Cycle ≤3; must-fix tier blocks /ship |
-| 4 | **/ship** | Reconcile pitch ↔ implementation, extract knowledge, compact status | Final verification mandatory; status capped at ≤100 lines |
+| 3 | **/audit** | Parallel fan-out of review/security/test/ux/i18n/eval/cross-pitch | Cycle ≤3; must-fix tier blocks /ship-pitch |
+| 4 | **/ship-pitch** | Reconcile pitch ↔ implementation, extract knowledge, compact status | Final verification mandatory; status capped at ≤100 lines |
 | 5 | **/cooldown** | Promote issue → pattern → rule; prune stale; triage backlog | Every 5 ships; per-item approval |
 
 ## Workflow variants
 
 ### Big-batch feature (full pipeline)
 ```
-/shape → /critique → bet → /plan → /build → /audit → /ship
+/shape → /critique → bet → /plan → /build → /audit → /ship-pitch
 ```
 
 ### Small-batch feature (light pipeline, fewer gates)
 ```
-/shape → bet → /plan (1-screen mini) → /build (auto-advance) → /audit (auto-flow if clean) → /ship
+/shape → bet → /plan (1-screen mini) → /build (auto-advance) → /audit (auto-flow if clean) → /ship-pitch
 ```
 `/critique` is skipped only for non-AI small-batch work; AI-prompt scopes still require critique. Per-scope confirmation is skipped.
 
@@ -43,15 +43,15 @@ Compressed framing: graph-only knowledge gate, 4-line frame, one gate (Approve /
 
 ### Bug fix
 ```
-/fix (triage) → /build → /audit → /ship
+/fix (triage) → /build → /audit → /ship-pitch
 ```
 `/fix` searches knowledge and confirms the root cause, then hands off. Single implicit scope; mandatory `log.md` entry; full /audit fan-out still runs.
 
 ### Hotfix
 ```
-/build → /audit (single pass) → /ship
+/build → /audit (single pass) → /ship-pitch
 ```
-One audit cycle only; anything beyond it is deferred to a follow-up. Rollback plan required at /ship; explicit residual-risk acceptance at the audit gate.
+One audit cycle only; anything beyond it is deferred to a follow-up. Rollback plan required at /ship-pitch; explicit residual-risk acceptance at the audit gate.
 
 ## Adaptive confirmation gate
 
@@ -69,7 +69,7 @@ review keeps the audit open even when it reports no findings; follow "Incomplete
 | /build per scope | auto | gated (evidence) | n/a | n/a |
 | /build end | auto (flows into /audit) | gated | gated | gated |
 | /audit end | auto if zero must-fix | gated | auto if clean | gated (residual risk) |
-| /ship | gated (brief) | gated (full) | gated | gated |
+| /ship-pitch | gated (brief) | gated (full) | gated | gated |
 
 ## Hill chart
 
@@ -92,7 +92,7 @@ Stuck-uphill detector: a scope at the same uphill position across 3 session upda
 │   ├── log.md            ← in-build incident notes
 │   ├── deviations.md     ← plan ↔ reality drift
 │   ├── checkpoint.md     ← latest /checkpoint (overwritten, < 300 tokens)
-│   └── SHIPPED.md        ← /ship reconciliation
+│   └── SHIPPED.md        ← /ship-pitch reconciliation
 ├── _followups.md         ← single-file backlog of deferred should-fixes
 ├── _parked/              ← passed pitches awaiting context shift
 ├── _archive/             ← shipped pitches that compacted out of status.md
@@ -148,7 +148,7 @@ Detail and the per-vendor notes: `ai-framework/integrations/skill-defaults.md`.
 | /critique perspectives | fast (3) + standard (2) | Mostly mechanical pre-mortem |
 | /audit code-reviewer / test-coverage / i18n / eval-runner / cross-pitch | fast | Checklist-based |
 | /audit security-reviewer / ux-reviewer | standard | Reasoning required |
-| /ship | fast | Templated reconciliation |
+| /ship-pitch | fast | Templated reconciliation |
 | /cooldown | standard | Pattern-promotion judgment |
 
 Select profiles using `ai-framework/integrations/harnesses.md`. Per-provider costs vary; no savings claim applies until the configured models and prices are known.
@@ -169,7 +169,7 @@ See `workflow/phases/`:
 
 The portable bundle contains the current phase documents. Older phase names may appear in historical records, but no `workflow/phases/_legacy/` directory is included. Use the current pipeline for active work.
 
-Hill updates and final verification are activities inside `/build` and `/ship`; they do not require separate `/hill` or `/verify` commands. Supporting skills such as `/impact`, `/ui-design`, and `/test-strategy` contribute to those phases without adding new pipeline stages.
+Hill updates and final verification are activities inside `/build` and `/ship-pitch`; they do not require separate `/hill` or `/verify` commands. Supporting skills such as `/impact`, `/ui-design`, and `/test-strategy` contribute to those phases without adding new pipeline stages.
 
 ## Process relations in the graph
 

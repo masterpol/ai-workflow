@@ -521,7 +521,7 @@ export function workflowEdges(root: string, deps: RuntimeDeps): WorkflowResult |
 export function overlayWorkflow(base: GraphifyGraph, edges: WorkflowEdge[]): { graph: GraphifyGraph; stubbed: string[] } {
   const links = base.links.filter((link) => !(link.workflow_overlay && WORKFLOW_RELATIONS.has(String(link.relation))));
   const nodes = base.nodes.filter((node) => !node.workflow_stub);
-  // Graphify names a file's own node after its path: `.claude/skills/ship/SKILL.md` -> `claude_skills_ship_skill`.
+  // Graphify names a file's own node after its path: `.claude/skills/ship-pitch/SKILL.md` -> `claude_skills_ship_pitch_skill`.
   const fileId = (file: string): string => file.replace(/\.[^./]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, "_").replace(/^_+|_+$/g, "");
   const fileNode = new Map<string, string>();
   for (const node of nodes) {

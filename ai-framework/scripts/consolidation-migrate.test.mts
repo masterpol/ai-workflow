@@ -15,7 +15,10 @@ const oldDecision = decision.replace("status: accepted\n", "").replace(/^# (?:su
   .replace("source: feature-name", "source: ADR-XXX | feature-name")
   .replace("- Related code or documents: `path/to/relevant/code`", "- Link to ADR: `.project/design/decisions/ADR-XXX.md`\n- Related code: `path/to/relevant/code`");
 const oldReadme = readme.replace(/^Technical decisions.*$/m, "Technical decisions that affect multiple features. Extracted from ADRs but indexed for quick search.")
-  .replace("source: feature-name | manual", "source: ADR-XXX | feature-name | manual");
+  .replace("source: feature-name | manual", "source: ADR-XXX | feature-name | manual")
+  .replaceAll("/ship-pitch", "/ship");
+/** The template as it was before the ship command was renamed. */
+const beforeRename = readme.replaceAll("/ship-pitch", "/ship");
 const legacy = "## alpha — shipped 2026-09-25\n\nExisting narrative.\n";
 const ledger = JSON.stringify({ schemaVersion: 1, slug: "alpha", sections: [{ source: "log.md#one", status: "extracted", destination: ".project/knowledge/decisions/alpha.md" }] });
 const fixture = {
@@ -254,3 +257,14 @@ test("refuses migration while a compaction transaction owns the records", () => 
   assert.throws(() => migrate(root, base, { apply: true }), /Interrupted transaction/);
   assert.deepEqual(tree(root), before);
 }));
+
+test("a knowledge README still holding the pre-rename template is refreshed, and an edited one is kept", () => {
+  assert.ok(PREVIOUS_TEMPLATE_HASHES["knowledge/README.md"].includes(base.crypto.sha256Hex(beforeRename)));
+  run({ ".project/knowledge/README.md": beforeRename }, root => {
+    assert.equal(migrate(root, base, { apply: true }).steps.find(step => step.path === ".project/knowledge/README.md")?.status, "refresh");
+    assert.equal(read(root, ".project/knowledge/README.md"), readme);
+  });
+  run({ ".project/knowledge/README.md": `${beforeRename}\nlocal note\n` }, root => {
+    assert.equal(migrate(root, base, { apply: true }).steps.find(step => step.path === ".project/knowledge/README.md")?.status, "local");
+  });
+});

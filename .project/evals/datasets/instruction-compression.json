@@ -460,7 +460,7 @@
     },
     {
       "id": "owner-loading-ship",
-      "input": "Invoke /ship through each vendor native adapter in a disposable project; observe reads before required decisions.",
+      "input": "Invoke /ship-pitch through each vendor native adapter in a disposable project; observe reads before required decisions.",
       "expected": [
         "Load ai-framework/workflow/phases/4-ship.md with all sections applicable to this invocation",
         "Load overview Adaptive confirmation gate before deciding whether to advance",
