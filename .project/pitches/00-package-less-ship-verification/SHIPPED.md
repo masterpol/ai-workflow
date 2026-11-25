@@ -42,7 +42,12 @@ One earlier run on the audited tree exited 1 on the timing test below, then pass
 run exited 1 on the same test (a different case, ratio 3.52): 2 failures in 5 full runs.
 
 Not applicable, no such command (`.project/context/stack.md`): build, typecheck, lint, i18n. Not run: full suite under Bun; Windows.
-Verified in this checkout with uncommitted changes, not on an independent clone.
+The passing run was in this checkout with uncommitted changes.
+
+**Clean clone of the commit (`aab578c`), after close-out:** the verifier **exited 1** on the same timing test ("quoted noise", 5.36, 8.3 ms to
+44.7 ms); the other 2,371 tests passed, 10 skipped. That makes 3 failures in the last 6 full runs. Run directly in the clone: `graphify --check`
+and `graphify-relations --check` passed; `setup-validator` and `workflow-doctor` failed because the Git-ignored, mandatory `ai-workflow.toon`
+is absent. Both pass with the example config copied in, and both fail the same way on the base commit.
 
 ## Knowledge
 

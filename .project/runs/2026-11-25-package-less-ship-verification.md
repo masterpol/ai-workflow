@@ -12,7 +12,9 @@ Pitch: `.project/pitches/00-package-less-ship-verification/` • Version 2.57.0 
   `independent: no`. All workers released.
 - **/ship-pitch:** the owner accepted both limits. Verifier exit 0 (2,379 pass, 3 skip, 0 fail). One earlier run failed on a timing-ratio test
   and passed on rerun. Checked in this checkout with uncommitted changes, not on an independent clone.
-- **After close-out:** a further run on the closed tree exited 1 on the same timing test (another case, 3.52). Later results are on the pull request.
+- **After close-out:** a further run on the closed tree exited 1 on the same timing test (another case, 3.52). A clean clone of
+  `aab578c` failed on it too (5.36): 3 of the last 6 full runs. In the clone, `setup-validator` and `workflow-doctor` also need the ignored
+  `ai-workflow.toon` (same on the base commit).
 
 ## Records
 [hill](2026-11-25-package-less-ship-verification-hill.md) • reconciliation: `SHIPPED.md` and `audit-cycle-1.md` in the pitch folder • no `log.md`

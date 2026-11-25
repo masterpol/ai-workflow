@@ -21,5 +21,7 @@ It failed again on the closed tree: this time the "valid statements" case, ratio
 is 2 failures in 5 full runs that day; the whole file then passed 5 of 5 alone. The second baseline was not small, so a larger baseline alone may
 not fix it. The cause is not established.
 
+A clean clone of the commit failed on it again ("quoted noise", 5.36, 8.3 ms to 44.7 ms): 3 failures in the last 6 full runs.
+
 Read the failing numbers and rerun the test alone before calling it a flake. Do not raise the limit without a decision: it guards against
 quadratic parsing. Compare the cases under the same load before changing how they are measured.

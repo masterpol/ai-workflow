@@ -1,7 +1,7 @@
 # Graph Report - ai-workflow-portable  (2026-11-25)
 
 ## Corpus Check
-- 741 files · ~781,252 words
+- 741 files · ~781,405 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 30 file(s) not represented in the graph (top: .toml 17, (none) 9, .toon 4)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `81e1bcb4`
+- Built from commit: `aab578ce`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
