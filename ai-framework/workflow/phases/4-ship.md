@@ -17,6 +17,32 @@ For an implicit bug fix, use the expected behavior, scope, and exit criteria in 
 
 Read `.project/context/stack.md` and the scope exit criteria. Run `node ai-framework/hooks/scripts/pre-ship-verify.mts`, then execute any scope checks not covered by that verifier. Use only the real project commands and the execution route required by AGENTS.md.
 
+The verifier takes its list from one route, and prints each check with that source so the ship record can cite it:
+
+1. `.project/context/checks.toon`, when present, is the whole list. An unreadable or invalid file fails; there is no fallback. A `checks.json`
+   twin is read the same way, and having both fails. A symlink anywhere in that path fails too, even when no manifest exists.
+2. Otherwise `package.json`: `verify:base`, else the recognised build, typecheck, lint, test and i18n scripts.
+3. With neither (and no document viewer, whose own checks then form the list), it fails with "no checks configured". Add the manifest; never create a temporary `package.json`.
+
+A project without a `package.json` (or with checks that its scripts do not cover) writes the manifest:
+
+```
+@toon-data 1
+schemaVersion: 1
+checks[1]:
+  -
+    name: tests
+    argv[2]: node,"--test"
+    required: true
+    timeoutMs: 600000
+```
+
+Each entry has exactly these four fields; `timeoutMs` is 1,000 to 3,600,000, names are unique and at least one check is required.
+`argv` is the executable and its arguments, run in the project root without a shell, so pipes, `&&` and variables do not work, and a
+Windows `.cmd` wrapper cannot be the executable. Output of one check is capped at 4 MiB.
+Running the verifier runs the programs named by this file and by `package.json` scripts, with your environment. In a checkout you do not
+trust, read both first.
+
 Build, type checking, lint, tests and i18n checks apply when the actual project and changed scope require them. Record a concrete reason for every non-applicable check; documentation-only work still needs its content, link and integrity checks. A missing prerequisite or failed available required check is a failure, not an exemption. Do not report a nonexistent application build or test as passed.
 
 When Git exists, inspect the diff without reading secrets. Without Git, compare the scoped files and hashes against the recorded baseline, document that limitation and do not initialize Git or fabricate commits. If any required check fails, `/ship-pitch` aborts and returns to `/audit` for its next cycle when the appetite's cycle cap

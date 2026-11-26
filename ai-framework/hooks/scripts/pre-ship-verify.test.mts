@@ -2,9 +2,11 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createNodeDeps } from '../../scripts/runtime/node.mts';
+import { encodeData } from '../../scripts/runtime/toon-data.mts';
 import {
   buildChecks,
   isSensitivePath,
+  loadManifest,
   main,
   packageCommand,
   runCheck,
@@ -13,7 +15,7 @@ import {
 import type { RunResult, RuntimeDeps, SpawnOptions } from '../../scripts/runtime/types.mts';
 import { createTestDeps } from "../../scripts/runtime/test-helpers.mts";
 const testDeps = createTestDeps();
-const { mkdtempSync, readFileSync, rmSync, writeFileSync } = testDeps.fs;
+const { mkdirSync, mkdtempSync, rmSync, writeFileSync } = testDeps.fs;
 const tmpdir = (): string => testDeps.os.tmpdir();
 const { join, posix, win32 } = testDeps.path;
 
@@ -51,6 +53,9 @@ function fakeHost(options: {
     fs: {
       ...base.fs,
       existsSync: (file: string) => file in files,
+      // The virtual project has no check manifest; manifest cases use a real temporary directory.
+      realpathSync: (file: string) => file,
+      lstatSync: () => { throw Object.assign(new Error('ENOENT'), { code: 'ENOENT' }); },
       readFileSync: (file: string) => {
         if (!(file in files)) throw new Error(`ENOENT ${file}`);
         return files[file];
@@ -134,7 +139,7 @@ test('checks come from the recognised scripts, with verify:base first and the do
   assert.ok(base[1].args.includes('ai-framework/scripts/setup-validator.mts'));
 
   assert.throws(() => buildChecks({ scripts: {} }, plain), /no recognized checks/);
-  assert.throws(() => buildChecks(null, fakeHost({ files: {} }).deps), /No package.json or Muro document verifier/);
+  assert.throws(() => buildChecks(null, fakeHost({ files: {} }).deps), /no checks configured/);
 });
 
 test('a green run executes each check with CI=1 and reports Git as unavailable when it is', async () => {
@@ -295,4 +300,242 @@ test('timeout or output-cap results never pass solely because a wrapper reports 
     assert.ok(host.err.join('').includes(errorCode));
     assert.doesNotMatch(host.out.join(''), /required checks passed/);
   }
+});
+
+test('verify:base without the document viewer is the whole list; the viewer keeps its four checks', () => {
+  const bare = fakeHost({ files: {} }).deps;
+  assert.deepEqual(buildChecks({ scripts: { 'verify:base': 'x', test: 'x' } }, bare).map((c) => [c.name, c.source]), [['verify:base', 'verify:base']]);
+  const viewer = fakeHost({ files: { '/repo/tools/viewer/verify-all.ts': '' } }).deps;
+  assert.deepEqual(
+    buildChecks({ scripts: { 'verify:base': 'x' } }, viewer).map((c) => c.source),
+    ['verify:base', 'document viewer', 'document viewer', 'document viewer', 'document viewer'],
+  );
+  assert.equal(buildChecks(null, viewer).length, 4);
+});
+
+test('recognised test scripts get the long timeout; other scripts keep the default', async () => {
+  const scripts = { build: 'x', 'test:ci': 'x', test: 'x', 'test:unit': 'x' };
+  const host = fakeHost({ files: { '/repo/package.json': pkg(scripts) } });
+  assert.equal(await main([], host.deps), 0);
+  assert.deepEqual(
+    host.calls.filter((c) => c.adapter === 'async').map((c) => [c.args[1], c.timeoutMs]),
+    [['build', 60_000], ['test:ci', 1_200_000], ['test', 1_200_000], ['test:unit', 1_200_000]],
+  );
+});
+
+test('with nothing to run the failure names the manifest path and its shape, and runs nothing', async () => {
+  const cases: Array<Record<string, string>> = [{}, { '/repo/package.json': pkg({ other: 'x' }) }];
+  for (const files of cases) {
+    const host = fakeHost({ files });
+    assert.equal(await main([], host.deps), 1);
+    assert.equal(host.calls.length, 0);
+    const text = host.err.join('');
+    assert.match(text, /no checks configured/);
+    assert.ok(text.includes('.project/context/checks.toon'));
+    assert.match(text, /schemaVersion: 1/);
+  }
+});
+
+test('the success output lists every check with its source and result', async () => {
+  const host = fakeHost({
+    files: { '/repo/package.json': pkg({ lint: 'x', test: 'x' }) },
+    results: (call) => call.command === 'git' ? { status: 128, stderr: 'not a git repository' } : call.args.includes('lint') ? { status: 1 } : undefined,
+  });
+  assert.equal(await main([], host.deps), 0);
+  const text = host.out.join('');
+  assert.match(text, /running lint \(source: scripts\)/);
+  assert.match(text, /result: lint \[scripts\] optional failure/);
+  assert.match(text, /result: test \[scripts\] passed/);
+  assert.match(text, /result: diff-sanity \[built-in\] skipped/);
+});
+
+const MANIFEST = '.project/context/checks.toon';
+
+interface Entry { name?: unknown; argv?: unknown; required?: unknown; timeoutMs?: unknown; [key: string]: unknown }
+const entry = (over: Entry = {}): Entry => ({ name: 'tests', argv: ['node', '--test'], required: true, timeoutMs: 5_000, ...over });
+const toon = (value: Record<string, unknown>): string => {
+  const encoded = encodeData(value);
+  assert.equal(encoded.status, 'encoded');
+  return (encoded as { text: string }).text;
+};
+
+/** A real temporary project (the shared reader opens real files); check commands are recorded, not run. */
+function project(files: Record<string, string>): { root: string; deps: RuntimeDeps; ran: Call[]; out: string[]; err: string[] } {
+  const root = mkdtempSync(join(tmpdir(), 'pre-ship-manifest-'));
+  for (const [file, text] of Object.entries(files)) {
+    mkdirSync(testDeps.path.dirname(join(root, file)), { recursive: true });
+    writeFileSync(join(root, file), text);
+  }
+  const base = createNodeDeps();
+  const ran: Call[] = [];
+  const out: string[] = [];
+  const err: string[] = [];
+  const deps: RuntimeDeps = {
+    ...base,
+    proc: { ...base.proc, cwd: () => root },
+    io: {
+      ...base.io,
+      stdout: { write: (text: string) => void out.push(text), isTTY: false },
+      stderr: { write: (text: string) => void err.push(text), isTTY: false },
+    },
+    child: {
+      ...base.child,
+      runSync: () => ({ status: 128, signal: null, stdout: '', stderr: 'not a git repository' }),
+      run: async (command, args, spawn) => {
+        ran.push({ adapter: 'async', command, args, cwd: spawn?.cwd, env: spawn?.env, timeoutMs: spawn?.timeoutMs, shell: spawn?.shell });
+        return { status: 0, signal: null, stdout: '', stderr: '' };
+      },
+    },
+  };
+  return { root, deps, ran, out, err };
+}
+
+test('a valid manifest is the whole check list, in order, even beside a package.json', async (t) => {
+  const host = project({
+    'package.json': '{ not even json',
+    [MANIFEST]: toon({ schemaVersion: 1, checks: [entry(), entry({ name: 'graph', argv: ['node', 'a b;c', '$(x)'], required: false, timeoutMs: 1_000 })] }),
+  });
+  t.after(() => rmSync(host.root, { recursive: true, force: true }));
+  assert.equal(await main([], host.deps), 0, host.err.join(''));
+  assert.deepEqual(host.ran.map((c) => [c.command, c.args, c.timeoutMs]), [['node', ['--test'], 5_000], ['node', ['a b;c', '$(x)'], 1_000]]);
+  assert.ok(host.ran.every((c) => c.cwd === host.root && c.env?.CI === '1' && c.shell === undefined));
+  assert.match(host.out.join(''), /result: tests \[manifest\] passed[\s\S]*result: graph \[manifest\] passed[\s\S]*result: diff-sanity/);
+});
+
+test('the shape shown for a project with no checks is itself a valid manifest', async (t) => {
+  const empty = project({});
+  t.after(() => rmSync(empty.root, { recursive: true, force: true }));
+  assert.equal(await main([], empty.deps), 1);
+  const text = empty.err.join('');
+  const host = project({ [MANIFEST]: text.slice(text.indexOf('@toon-data')).trimEnd() + '\n' });
+  t.after(() => rmSync(host.root, { recursive: true, force: true }));
+  assert.equal(loadManifest(host.deps)?.length, 1);
+});
+
+test('a present but unusable manifest fails, runs nothing and never falls back to package.json', async (t) => {
+  const fallback = { 'package.json': pkg({ test: 'x' }) };
+  const of = (...checks: Entry[]): string => toon({ schemaVersion: 1, checks });
+  const bad: Array<[string, Record<string, string>, RegExp]> = [
+    ['parse error', { [MANIFEST]: 'checks: nope\n' }, /DATA-HEADER: .* at line \d+, column \d+/],
+    ['both twins', { [MANIFEST]: of(entry()), '.project/context/checks.json': '{}' }, /DATA-FILE-BOTH-PRESENT/],
+    ['broken json twin alone', { '.project/context/checks.json': '{' }, /DATA-FILE-JSON/],
+    ['schema version', { [MANIFEST]: toon({ schemaVersion: 2, checks: [entry()] }) }, /schemaVersion must be 1/],
+    ['unknown top key', { [MANIFEST]: toon({ schemaVersion: 1, checks: [entry()], extra: 1 }) }, /only schemaVersion and checks/],
+    ['empty list', { [MANIFEST]: toon({ schemaVersion: 1, checks: [] }) }, /non-empty list/],
+    ['unknown entry key', { [MANIFEST]: of(entry({ shell: true })) }, /needs exactly/],
+    ['missing entry key', { [MANIFEST]: of({ name: 'a', argv: ['node'], required: true }) }, /needs exactly/],
+    ['command string', { [MANIFEST]: of(entry({ argv: 'node --test' })) }, /argv must be/],
+    ['empty argv', { [MANIFEST]: of(entry({ argv: [] })) }, /argv must be/],
+    ['empty argument', { [MANIFEST]: of(entry({ argv: ['node', ''] })) }, /argv must be/],
+    ['empty name', { [MANIFEST]: of(entry({ name: '' })) }, /name must be/],
+    ...['a\nb', 'a\u007fb', 'a\u009bb', 'a\u202eb', 'a\u2028b', 'a\u0000b'].map(
+      (name): [string, Record<string, string>, RegExp] => [`unsafe name ${name.charCodeAt(1)}`, { [MANIFEST]: of(entry({ name })) }, /name must be/],
+    ),
+    ['NUL argument', { [MANIFEST]: of(entry({ argv: ['node', 'a\u0000'] })) }, /argv must be/],
+    ['duplicate name', { [MANIFEST]: of(entry(), entry()) }, /already used or reserved/],
+    ['reserved name', { [MANIFEST]: of(entry({ name: 'diff-sanity' })) }, /already used or reserved/],
+    ['required text', { [MANIFEST]: of(entry({ required: 'yes' })) }, /required must be/],
+    ['short timeout', { [MANIFEST]: of(entry({ timeoutMs: 999 })) }, /timeoutMs must be/],
+    ['long timeout', { [MANIFEST]: of(entry({ timeoutMs: 3_600_001 })) }, /timeoutMs must be/],
+    ['fractional timeout', { [MANIFEST]: of(entry({ timeoutMs: 1_000.5 })) }, /timeoutMs must be/],
+    ['nothing required', { [MANIFEST]: of(entry({ required: false })) }, /at least one check must be required/],
+    ['bad entry after a good one', { [MANIFEST]: of(entry(), entry({ name: 'b', argv: [] })) }, /checks\[1\]/],
+  ];
+  // Collect every mismatch, so one broken refusal cannot hide the cases after it.
+  const wrong: string[] = [];
+  for (const [label, files, expected] of bad) {
+    const host = project({ ...fallback, ...files });
+    t.after(() => rmSync(host.root, { recursive: true, force: true }));
+    const code = await main([], host.deps);
+    if (code !== 1 || host.ran.length !== 0 || !expected.test(host.err.join(''))) wrong.push(label);
+  }
+  assert.deepEqual(wrong, []);
+});
+
+test('a symlinked manifest is refused', async (t) => {
+  const host = project({ 'real.toon': toon({ schemaVersion: 1, checks: [entry()] }), 'package.json': pkg({ test: 'x' }) });
+  t.after(() => rmSync(host.root, { recursive: true, force: true }));
+  mkdirSync(join(host.root, '.project/context'), { recursive: true });
+  testDeps.fs.symlinkSync(join(host.root, 'real.toon'), join(host.root, MANIFEST));
+  assert.equal(await main([], host.deps), 1);
+  assert.equal(host.ran.length, 0);
+  assert.match(host.err.join(''), /DATA-FILE-SYMLINK/);
+});
+
+test('a missing executable fails a required manifest check and only warns for an optional one', async (t) => {
+  const missing = { argv: ['workflow-no-such-executable'] };
+  for (const [required, code] of [[true, 1], [false, 0]] as const) {
+    const checks = [entry({ ...missing, name: 'absent', required }), entry({ name: 'present', argv: [testDeps.proc.execPath, '--version'] })];
+    const host = project({ [MANIFEST]: toon({ schemaVersion: 1, checks }) });
+    t.after(() => rmSync(host.root, { recursive: true, force: true }));
+    // The real adapter: it is the one that throws for a missing executable.
+    host.deps.child.run = createNodeDeps().child.run;
+    assert.equal(await main([], host.deps), code, host.err.join(''));
+    assert.match(host.err.join(''), /absent: executable not found/);
+    if (required) assert.match(host.err.join(''), /absent failed \(ENOENT\)/);
+    else assert.match(host.out.join(''), /result: absent \[manifest\] optional failure/);
+  }
+});
+
+test("this repository's own manifest loads", (t) => {
+  const root = testDeps.path.resolve(import.meta.dirname, '../../..');
+  if (!testDeps.fs.existsSync(join(root, 'VERSION'))) { t.skip('bundle-repo manifest; an install owns its own'); return; }
+  const base = createNodeDeps();
+  const checks = loadManifest({ ...base, proc: { ...base.proc, cwd: () => root } });
+  assert.deepEqual(checks?.map((check) => [check.name, check.required, check.timeout]), [
+    ['tests', true, 600_000], ['setup-validator', true, 60_000], ['knowledge-graph', true, 60_000],
+    ['process-relations', true, 60_000], ['workflow-doctor', true, 60_000],
+  ]);
+  assert.deepEqual([checks?.[0].command, ...(checks?.[0].args ?? [])], ['node', '--experimental-strip-types', '--disable-warning=ExperimentalWarning', '--test']);
+});
+
+test('every recognised script is selected, in order, with its required flag', () => {
+  const expected: Array<[string, boolean]> = [
+    ['build', true], ['build:web', true], ['typecheck', true], ['typecheck:web', true], ['typecheck:mobile', true],
+    ['lint', false], ['test:ci', true], ['test', true], ['test:unit', true], ['i18n:check', false],
+  ];
+  const scripts = Object.fromEntries([...expected].reverse().map(([name]) => [name, 'x']));
+  assert.deepEqual(buildChecks({ scripts }, fakeHost({ files: {} }).deps).map((c) => [c.name, c.required]), expected);
+});
+
+test('only a missing executable of a manifest check is downgraded; other launch failures stop the run', async (t) => {
+  const checks = [entry({ name: 'optional', required: false }), entry({ name: 'gate' })];
+  for (const code of ['EPROCESSCLEANUP', 'EACCES']) {
+    const host = project({ [MANIFEST]: toon({ schemaVersion: 1, checks }) });
+    t.after(() => rmSync(host.root, { recursive: true, force: true }));
+    let launches = 0;
+    host.deps.child.run = async () => { launches += 1; throw Object.assign(new Error(`spawn ${code}`), { code }); };
+    assert.equal(await main([], host.deps), 1, code);
+    assert.equal(launches, 1, code);
+    assert.match(host.err.join(''), /optional: check did not complete/);
+    assert.doesNotMatch(host.err.join(''), /executable not found|WARN/);
+  }
+  const scripts = fakeHost({
+    files: { '/repo/package.json': pkg({ lint: 'x' }) },
+    results: () => { throw Object.assign(new Error('spawn npm ENOENT'), { code: 'ENOENT' }); },
+  });
+  assert.equal(await main([], scripts.deps), 1);
+  assert.doesNotMatch(scripts.out.join(''), /required checks passed/);
+});
+
+test('a check ended by a signal fails even with exit status zero', async () => {
+  const host = fakeHost({ files: { '/repo/package.json': pkg({ build: 'x' }) }, results: () => ({ status: 0, signal: 'SIGTERM' }) });
+  assert.equal(await main([], host.deps), 1);
+  assert.match(host.err.join(''), /build failed \(SIGTERM\)/);
+});
+
+test('the largest timeout is accepted', (t) => {
+  const host = project({ [MANIFEST]: toon({ schemaVersion: 1, checks: [entry({ timeoutMs: 3_600_000 })] }) });
+  t.after(() => rmSync(host.root, { recursive: true, force: true }));
+  assert.equal(loadManifest(host.deps)?.[0].timeout, 3_600_000);
+});
+
+test('a symlinked manifest directory is refused even without a manifest, not treated as absent', async (t) => {
+  const host = project({ 'shared/README.md': '', 'package.json': pkg({ test: 'x' }) });
+  t.after(() => rmSync(host.root, { recursive: true, force: true }));
+  mkdirSync(join(host.root, '.project'), { recursive: true });
+  testDeps.fs.symlinkSync(join(host.root, 'shared'), join(host.root, '.project/context'));
+  assert.equal(await main([], host.deps), 1);
+  assert.equal(host.ran.length, 0);
+  assert.match(host.err.join(''), /unusable check manifest .*DATA-FILE-SYMLINK/);
 });

@@ -2,7 +2,7 @@
 id: a-planted-canary-makes-a-reviewer-finding-checkable
 type: pattern
 created: 2026-10-20
-updated: 2026-11-23
+updated: 2026-11-25
 tags: [audit, subagents, verification, canary]
 related: [reviewer-reports-contradicted-by-measurement, archify-renders-the-state-report, a-gate-must-not-trust-its-own-author, review-guard-hashes-ignored-secret-files]
 source: state-ai-authoring
@@ -26,4 +26,11 @@ Three reviewers each got a different canary; two reported it as a must-fix and t
 ## Seen a third time (orca-bounded-control-receipts, 2026-11-23)
 
 Each of three reviewers reported its own canary as a must-fix (a loosened regex, a wrong limit ladder, a dead `if (false)`), and the test reviewer first ran its mutants on a red baseline, so a mutant that broke the same test looked "killed". It patched the canary out of its base before mutating, which is the right move; a reviewer that does not will report survivors and kills it cannot tell apart. The two real survivors it found were then re-run as mutants on the live code before being believed.
+
+## Seen a fourth time (package-less-ship-verification, 2026-11-25)
+
+Two limits showed. A canary that also breaks tests is found by running the suite, so it proves a reviewer reached the code, not that reading would
+catch such a defect. And "review only the scratch copy" is a prompt rule, not a barrier: one reviewer that shared the repository checkout compared
+its scratch file with the live one and read the other reports, so it was recorded `independent: no`. `canary-check` also answered `false` for a
+report that cited the file by an alias it had defined; ask reviewers to cite full file names.
 

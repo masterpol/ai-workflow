@@ -661,3 +661,24 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 
 ## From workspace-slim shaping (2026-11-25)
 - **Installed skill packages are indexed and committed** (high, bug): `GRAPHIGNORE` and `GITIGNORE_BLOCK` in `graphify.mts` and `SETUP.md`'s minimum ignore list omit `.project/skills/packages/` (this checkout's own `.gitignore` has it). In LAH 87% of graph data (58.9 of 67.5 MB) is that folder, rewritten and staged by the pre-commit hook on every commit. LAH also tracks 624 files / 23 MB of packages (597 are Archify, committed by the assistant on 2026-11-24 against `state-report.md`). Fix the templates, warn in the doctor when packages are tracked, and in LAH untrack them and rebuild the graph (history keeps them).
+
+## From package-less-ship-verification (audit, 2026-11-25)
+
+- **Verifier reads without the guarded reader** (med): `package.json` and changed application sources are read with no symlink, file-type or size check (`security.md` §9). A refused read must not count as absent. Predates the pitch.
+- **`diff-sanity` below the Git root** (med, bug): `git diff` paths are relative to the Git top level, but the source filter and reads use the project directory, so a nested project passes with a changed `console.log`; `ls-files` is limited to the directory. Add subdirectory, staged, untracked and listing-failure tests.
+- **Verifier output is printed raw** (low): child output, Git stderr, error messages and flagged file names reach the terminal unescaped. Predates the pitch.
+- **Interrupting the verifier leaves its check running** (med, unverified by coordinator): the child is detached and no signal is forwarded; with 10–20 minute timeouts a retry can run beside it. Check `runtime/node.mts`.
+- **Viewer route paths** (low): move the document-viewer checks into that project's own manifest (pitch no-go); until then its marker and `setup-validator` path are project-relative and unguarded.
+- **Local-only knowledge graph** (owner question, 2026-11-25): two fresh clones on one machine built identical graphs; the committed `graph.json` held 8 nodes for Git-ignored installed skills and differed in 45 nodes' header data. Decide whether to stop tracking it (needs a build step after clone; `setup-validator` requires the file).
+- **Stale Orca ledger entries hold capacity** (low): `attempt:rsc-s2-1` and `attempt:rsc-aud1-cross-pitch-conflict-checker-1` (Run `run_89271af6dc37`) still read `launched` and refused a third reviewer under the cap of 4. Inspect before settling.
+- **Flaky timing ratio test** (closed by `fix-timing-ratio-flake`, 2026-11-25): equal-work, thread-CPU-time measurement.
+- **Earlier package-less verifier entries are resolved** (2.57.0): older backlog lines about `pre-ship-verify.mts` failing without a `package.json` are closed by the check manifest. Installed projects need a sync and, without a `package.json`, their own `checks.toon`.
+- **The verifier needs `ai-workflow.toon` in a fresh clone** (low): this repository's manifest runs `setup-validator` and `workflow-doctor`, which fail without the Git-ignored mandatory config. Copy the example config first, or document that step in `4-ship.md`.
+
+## From fix-timing-ratio-flake (2026-11-25)
+
+- **The renderer's early stop has no failing test** (low): removing the 80-character `break` in `facts-sql.mts` stays linear and passes; the output length is asserted.
+- **A synchronous reader call cannot be stopped by the test timeout** (low, unverified): run the scaling probes in a killable child with a wall-clock deadline.
+- **Vacuous scaling case** (low): "unterminated openers" costs under 1 ms at both sizes, so the 1 ms floor makes its ratio check pass whatever the growth below that. Raise its sizes.
+- **Other wall-clock limits in tests** (low): several suites assert elapsed milliseconds; none was seen to fail here.
+
