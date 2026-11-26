@@ -39,3 +39,4 @@
 
 ## Final verification
 `pre-ship-verify.mts` on the final tree: exit 0 at load average 81–87; 2,386 tests, 2,383 pass, 3 skip, 0 fail; all five manifest checks and `diff-sanity`.
+Clean clone of `72bc650`, with the example `ai-workflow.toon` copied in: exit 0; 2,376 pass, 10 skip, 0 fail; all checks passed.
