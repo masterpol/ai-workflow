@@ -671,6 +671,14 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **Viewer route paths** (low): move the document-viewer checks into that project's own manifest (pitch no-go); until then its marker and `setup-validator` path are project-relative and unguarded.
 - **Local-only knowledge graph** (owner question, 2026-11-25): two fresh clones on one machine built identical graphs; the committed `graph.json` held 8 nodes for Git-ignored installed skills and differed in 45 nodes' header data. Decide whether to stop tracking it (needs a build step after clone; `setup-validator` requires the file).
 - **Stale Orca ledger entries hold capacity** (low): `attempt:rsc-s2-1` and `attempt:rsc-aud1-cross-pitch-conflict-checker-1` (Run `run_89271af6dc37`) still read `launched` and refused a third reviewer under the cap of 4. Inspect before settling.
-- **Flaky timing ratio test** (med): `facts-sql.test.mts` "doubling the input keeps the time ratio under 3" failed in 3 of 6 full verifier runs, once on a clean clone (3.07, 8.8 ms to 27 ms; 3.52, 183 ms to 643 ms; 5.36, 8.3 ms to 45 ms; load average 12 to 24) and passed alone. It blocks ships now that the verifier runs the suite. Cause not established; do not raise the limit without a decision.
+- **Flaky timing ratio test** (closed by `fix-timing-ratio-flake`, 2026-11-25): equal-work, thread-CPU-time measurement.
 - **Earlier package-less verifier entries are resolved** (2.57.0): older backlog lines about `pre-ship-verify.mts` failing without a `package.json` are closed by the check manifest. Installed projects need a sync and, without a `package.json`, their own `checks.toon`.
 - **The verifier needs `ai-workflow.toon` in a fresh clone** (low): this repository's manifest runs `setup-validator` and `workflow-doctor`, which fail without the Git-ignored mandatory config. Copy the example config first, or document that step in `4-ship.md`.
+
+## From fix-timing-ratio-flake (2026-11-25)
+
+- **Test coverage review never completed** (med): the OpenCode worker was lost before reporting; the final audit fixes were not re-reviewed. Run it before treating the audit as closed.
+- **A synchronous reader call cannot be stopped by the test timeout** (low, unverified): run the scaling probes in a killable child with a wall-clock deadline.
+- **Vacuous scaling case** (low): "unterminated openers" costs under 1 ms at both sizes, so the 1 ms floor makes its ratio check pass whatever the growth below that. Raise its sizes.
+- **Other wall-clock limits in tests** (low): several suites assert elapsed milliseconds; none was seen to fail here.
+

@@ -5,6 +5,7 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
+| fix-timing-ratio-flake | fixed and verified | audit open (test review lost) | bug-fix | 2026-11-25 |
 | 01-review-bench-hardening | re-shaped, validated 2026-11-25 | shape (bet pending) | small-batch | 2026-11-25 |
 | 02-workspace-slim | re-shaped: report + smaller loaded text, deletes nothing | shape (bet pending) | big-batch | 2026-11-25 |
 | 03-knowledge-distill | re-shaped: compact rules, originals kept (tandem) | shape (bet pending) | big-batch | 2026-11-25 |

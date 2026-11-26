@@ -5,10 +5,10 @@ created: 2026-11-25
 updated: 2026-11-25
 tags: [testing, workflow, ship, verification]
 related: [package-less-bundle-ship-wrapper-cannot-select-checks, backtracking-regex-over-untrusted-text-is-quadratic]
-source: package-less-ship-verification
+source: fix-timing-ratio-flake
 severity: medium
-resolved: false
-confidence: low
+resolved: true
+confidence: medium
 ---
 
 # Issue: a wall-clock ratio test can block a ship on a busy machine
@@ -23,5 +23,19 @@ not fix it. The cause is not established.
 
 A clean clone of the commit failed on it again ("quoted noise", 5.36, 8.3 ms to 44.7 ms): 3 failures in the last 6 full runs.
 
-Read the failing numbers and rerun the test alone before calling it a flake. Do not raise the limit without a decision: it guards against
-quadratic parsing. Compare the cases under the same load before changing how they are measured.
+## Root cause and fix (fix-timing-ratio-flake, 2026-11-25)
+
+The two samples had different lengths. On a busy machine a short sample can get an uninterrupted, fast run that no longer sample gets, so
+`best large / best small` inflates on linear code. The fix times the small input twice against the large input once (equal work), alternating,
+on this thread's processor time (`process.threadCpuUsage`), and measures again, up to five times, a result at the limit. The limit stayed 3.
+Slower or mixed-speed cores as the source of the processor-time variation is an inference.
+
+## What did not work
+
+- Alternating the sizes with more samples made it worse under steady load (12 of 15 failed, old test 4 of 15): more samples help the short one
+  more. The first comparison missed this because its load generators likely stopped before the slow part ended, and its regression test modelled
+  only a short burst. Keep the load alive for the whole comparison, and run old and new alternately under the same load.
+- Processor time alone still failed (3 of 15 with 15 samples).
+- `process.cpuUsage` counts every thread, so a "sleeping costs nothing" test could fail from other threads' work.
+
+Retries make a borderline super-linear cost more likely to pass: keep mutants that prove a dominant one still fails.
