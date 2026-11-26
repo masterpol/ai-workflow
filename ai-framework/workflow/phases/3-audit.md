@@ -83,6 +83,17 @@ a shallow code review was mistaken for a clean one. It applies to the "Verify be
 8. **The record is checkable.** `node ai-framework/scripts/review-bench.mts record-check <record>` fails a record that claims independence without
    a caught canary, or that lacks the read-only method, the prompt hash, the model, the cross-file line, or a findings table with a `verified`
    column.
+9. **One heading per reviewer role.** The record has exactly one heading per reviewer role, and each section under it carries that role's own
+   `independent:`, `read-only:`, `prompt-sha256:`, `model:` and `cross-file interactions:` lines, plus its own `canary: caught` when it claims
+   `independent: yes`. A role's evidence never stands in for another's: the check reads each section on its own, and two `independent:` lines in
+   one section fail the record. Write each field at the start of its line; a note after `independent:` or `canary: caught` goes in parentheses.
+   Fenced code and HTML comments are ignored. The findings table with a `verified` header cell and its divider row may sit anywhere in the file.
+10. **Full file names in citations.** A finding cites the file by its full name relative to the project root (for example
+    `ai-framework/scripts/review-bench.mts:270`), never a bare file name, so that the citation resolves to exactly one file and the +-3 line
+    window around the planted canary is unambiguous. A range wider than 40 lines does not count as locating it.
+11. **What the bench does and does not run.** The decision entry `review-bench-isolation-boundary` states the boundary: `guard`, `count`,
+    `canary-check` and `record-check` run nothing from the inspected tree; `prepare` does run the named test command, on the scratch copy of
+    project code, so use it on a trusted checkout only. The guard detects changes after the fact rather than preventing them.
 
 ### Review prompt template
 

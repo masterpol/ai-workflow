@@ -84,6 +84,6 @@ Not run: small-batch, no AI-prompt scope.
 
 ## Bet decision
 
-☐ **Bet** (→ /plan)  
+☑ **Bet** (→ /plan) — 2026-11-25, recorded from the owner running `/plan` on this pitch  
 ☐ Re-shape — named gap: {…}  
 ☐ Pass — reason: {…}

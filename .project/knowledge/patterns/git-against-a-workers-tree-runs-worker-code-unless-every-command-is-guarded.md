@@ -2,9 +2,9 @@
 id: git-against-a-workers-tree-runs-worker-code-unless-every-command-is-guarded
 type: pattern
 created: 2026-10-08
-updated: 2026-10-08
+updated: 2026-11-26
 tags: [security, git, subprocess, untrusted-content]
-related: [a-gate-spawns-exactly-what-it-probed, sync-tools-refuse-symlinks-in-source-and-destination, a-report-over-an-untrusted-tree-runs-only-bundle-code]
+related: [config-defined-git-hooks-ignore-core-hookspath, a-gate-spawns-exactly-what-it-probed, sync-tools-refuse-symlinks-in-source-and-destination, a-report-over-an-untrusted-tree-runs-only-bundle-code]
 source: orca-vendor-reconcile
 ---
 
@@ -28,3 +28,9 @@ ignore a file (assume-unchanged), and a reverse `git apply --check` ignores perm
 - A decision (clean, remove) is a claim: the executor re-verifies the evidence and re-checks the tree immediately
   before the destructive step.
 - Prove "already applied" with the bytes and modes, not with a reverse check.
+
+## Seen again (review-bench-hardening, 2026-11-26)
+
+Two more routes: hooks defined in config (`hook.*`, Git 2.54), which `core.hooksPath` does not stop, and a submodule's own filter, which
+`--ignore-submodules=all` does. Refuse `hook.*` too. A `PATH` check must resolve each entry (a symlink or `..` can lead back into the tree), and
+`git config --local` does not see included or worktree settings. See [[config-defined-git-hooks-ignore-core-hookspath]].

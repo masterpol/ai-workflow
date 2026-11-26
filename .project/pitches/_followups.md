@@ -682,3 +682,30 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **Vacuous scaling case** (low): "unterminated openers" costs under 1 ms at both sizes, so the 1 ms floor makes its ratio check pass whatever the growth below that. Raise its sizes.
 - **Other wall-clock limits in tests** (low): several suites assert elapsed milliseconds; none was seen to fail here.
 
+
+## From review-bench-hardening (build, 2026-11-26)
+
+- **Possible flaky test in `runtime/upgrade.test.mts`** (low, reported by the S3 worker, not reproduced by the coordinator): a bundle-sync no-op assertion failed once in a full run (`[0,1,0,0]` against `[0,0,0,0]`), then passed alone and on rerun.
+- **Orca dispatch without a model uses the tool's own default** (low): build briefs with `assign` and no `placement.model` ran OpenCode on an unavailable free model. Dispatch could default to the `ai-workflow.toon` model for the picked vendor.
+- **No command to settle a stopped Orca attempt** (low): after `worker-stop` confirms a failure, the ledger entry stays `launched` and blocks the same paths; it was moved to `failed` through the ledger library.
+
+## From review-bench-hardening (audit cycle 1, 2026-11-26), deferred
+
+- **`guard` does not hash `.git`** (med): config, hooks, `info/exclude` and `info/attributes` can change during a review and stay `clean`; ignored files outside the roots too. Documented as a limit.
+- **`canary-check` still reads prose** (med): any citation near the line counts, not only findings-table rows; a suffix match accepts a path in another directory that is not a copied file; names cut at `+` or `@`; reversed ranges and `11abc` count.
+- **The scratch manifest sits beside the scratch tree** (med): a reviewer with a shell can read the planted line.
+- **`record-check` structure limits** (low): setext headings do not split sections; a role section with no `independent:` line is ignored; role headings need not be unique.
+- **Raw filesystem errors can print paths** (low); **`guard snapshot --file` replaces any existing file** (low); two superlinear patterns bounded by the size cap (low).
+- **Untested bounds** (low): individual guard roots, `GUARD_SKIP` entries, the walk cap, the 9-digit line limit.
+
+
+## From review-bench-hardening (audit cycle 2, 2026-11-26), deferred at the cycle cap
+
+- **`guard` second-edit gap**: closed by scope S4 of the same pitch (2026-11-26).
+- **`record-check` can be fooled by crafted Markdown** (med, verified): a fence opener with a comment; claims after inline `<!--`, a line starting with inline triple backticks, `<!-->`, or an indented fence.
+- **`PATH` entry `link/..` still reaches the project** (med, verified): drop `..` segments or resolve the `git` file itself and run that path. An empty filtered `PATH` was claimed to search the current folder; not reproduced.
+- **`count` ignores staged changes restored in the worktree** (low, verified).
+- **Replace refs, `prepare` with `TMPDIR` inside the project, other range spellings, numbered or backticked claims** (low, unverified).
+- **Other Git callers may run configured hooks** (high, **unverified**): `core.hooksPath=/dev/null` does not stop Git 2.54 `hook.*` hooks. `pre-ship-verify.mts`, `graphify.mts`, `legacy-upgrade.mts`, `orca-apply.mts`, `orca-diff-admit.mts`, `orca-evidence.mts` and `skill-source.mts` rely on that flag or on `core.fsmonitor`, and none checks `hook.*`. Orca ones run against worker trees. Not tested which of their commands fire a hook.
+- **`guard` hardening from the S4 review** (low): reject empty, `.` or `..` segments in Git-reported paths as a second layer; non-UTF-8 file names may be dropped silently (unreproduced, Linux); two guard lines have no failing test.
+
