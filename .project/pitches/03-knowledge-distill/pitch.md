@@ -101,9 +101,33 @@ Same run as `workspace-slim` (`run_80b5ab62c6c7`); raw reports in `.project/pitc
 | appetite A2, A6, A7 | over the cap; dependency on recovery | **Addressed**: recovery dependency gone; pilot and split trigger |
 | eval E5, E8 | live-only judgment cases; cross-pitch restore case | **Acknowledged**: judgment stays live and per item; the restore case no longer applies |
 
+## Validation 2026-11-26 (at /plan; scope above unchanged)
+
+`workspace-slim` has shipped, so its `graphify.mts` change is in place. Entry counts moved a little. Two claims are weaker: phases load 3–5 hits,
+not the base, and rules are surfaced in addition, so "less text to load" is unproven and may reverse; RN's 35 near-duplicate pairs did not
+reproduce (3 or 7 on entry bodies). The golden dataset now has seven cases, not six. See `plan.md`, "Spike results".
+
+## Re-shape 2026-11-26 (after the pilot said stop; pilot records in `pilot/`)
+
+**Candidate smaller goal:** have `/cooldown` propose rules from repeated resolved lessons, with no loading claim. Measured before writing it:
+
+| Question | Finding |
+|---|---|
+| Is it new? | **No.** `/cooldown` already promotes issue → pattern → rule (3+ pitch references, or a recurring class), approving each item |
+| Has it produced rules? | Yes. `testing.md` and `security.md` carry rules marked as promoted at the 2026-09-25 cooldown, and 13 knowledge cards are named in rule files (naming alone does not show promotion). The earlier "0 / 1 entries ever promoted" is therefore wrong or measured something else |
+| Why not lately? | Cooldown is 11 ships overdue; the status note says recent promotions waited for individual approval that was not given |
+| How much repeated material? | Cards with a recorded recurrence heading: this repo 7 (3 with two or more), LAH 1, RN 0, climbing 0. Only this heading style was counted, so other projects may be undercounted |
+| A real gap found | `/cooldown` and its phase doc name only `ai-framework/rules/` as the destination and never `.project/rules/`. `ai-framework/` is the bundle that sync copies into projects, so a project's own lesson written there sits in bundle files. LAH and climbing keep project rules in `.project/rules/`. No harmed project was looked for |
+
+**Recommendation: Pass** (park this pitch with its pilot). The destination gap is a small separate change (the cooldown skill, its mirror and the
+phase doc) for `/shape-lite`; the three twice-recurred cards are ready candidates for the next `/cooldown`.
+
+**If re-shaped instead:** small-batch, "`/cooldown` lists lessons recorded as recurring and offers each to the right rule folder, project or
+bundle". It would change an AI instruction, so it needs a golden case and `/critique` before a bet.
+
 ## Bet decision
 
-☐ **Bet** (→ /plan)  
+☑ **Bet** (→ /plan) — 2026-11-26, recorded from the owner running `/plan` on this pitch  
 ☐ Re-shape — named gap: {…}  
 ☐ Pass — moved to `.project/pitches/_parked/knowledge-distill/`; reason: {…}
 

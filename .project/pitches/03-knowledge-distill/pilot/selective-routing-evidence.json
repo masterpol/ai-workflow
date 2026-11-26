@@ -1,0 +1,437 @@
+{
+  "experiment": "bounded full-card retrieval",
+  "historicalInputSha256": {
+    "questions": "e8cc778480ae212dbd4aedc49ed1483da96b70e25a50271ebb67cd6bb57a5101",
+    "blocks": "3c5d32c590ebe6652011d9a85a8cc0f5a2dd1d4047e62d6803bf9b6eafa9a7f5",
+    "loadMethod": "ba030487b7878e4cd221984d5801a785b11f191ff7f77094833c07c8e52448ad"
+  },
+  "frozenHeldoutSha256": "5836397da3e9fdea0fdf1f6e086c3c3e0e195db833c48dea657d051189f56c77",
+  "catalog": "D: Pitch compaction approval and deletion. Archive identity, transaction recovery, permissions, ledger gap acceptance, and restore containment.\nG: Folder group coverage for bulk. Count and tree hash, membership changes, overlap, and file caps.\nJ: Per-file judgment for approval or evidence. Group hashes cannot certify decisions about individuals; split at the cap.\nE: Evidence consumers surviving pitch retirement. Durable ownership, byte-exact restoration, historical claims, and uncertain failures.\nS: Oversized pitch staging incident. Duplicate logs and drafts, file bounds, and lifecycle classification.",
+  "routerInstruction": "You are a blind source selector in a disposable retrieval pilot. Use ONLY the five catalog descriptions below and each question. Do not use tools, files, earlier results, or other context. Select the minimum source IDs needed (max 3). For a question with competing rules include both applicable sources. If unrelated or no source is sufficient, return FALLBACK. Output compact JSON object keyed by Q/H IDs, values arrays of IDs or FALLBACK. You are routing, not answering.",
+  "accountingAnswerInstruction": "Read only the routed source cards. Answer using decisive supporting quotes or mark the evidence insufficient. If any applicable condition is missing, use full-search fallback and charge that read.",
+  "lexicalHeldout": [
+    {
+      "id": "H01",
+      "cold": false,
+      "selected": [
+        "live-test-evidence-outlived-its-pitch-path",
+        "pitch-compaction-gate-and-recovery-design",
+        "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash"
+      ],
+      "expected": [
+        "pitch-compaction-gate-and-recovery-design"
+      ],
+      "hits": 6,
+      "coverage": "11/21",
+      "pass": true
+    },
+    {
+      "id": "H02",
+      "cold": false,
+      "selected": [
+        "pitch-compaction-gate-and-recovery-design",
+        "live-test-evidence-outlived-its-pitch-path",
+        "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash"
+      ],
+      "expected": [
+        "pitch-compaction-gate-and-recovery-design"
+      ],
+      "hits": 11,
+      "coverage": "14/22",
+      "pass": true
+    },
+    {
+      "id": "H03",
+      "cold": false,
+      "selected": [
+        "pitch-folders-accumulate-staging-nothing-consumes",
+        "a-ledger-for-judged-files-lists-every-file",
+        "pitch-compaction-gate-and-recovery-design"
+      ],
+      "expected": [
+        "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash",
+        "a-ledger-for-judged-files-lists-every-file"
+      ],
+      "hits": 5,
+      "coverage": "11/19",
+      "pass": false
+    },
+    {
+      "id": "H04",
+      "cold": true,
+      "selected": [],
+      "expected": [
+        "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash",
+        "a-ledger-for-judged-files-lists-every-file"
+      ],
+      "hits": 4,
+      "coverage": "7/18",
+      "pass": false
+    },
+    {
+      "id": "H05",
+      "cold": false,
+      "selected": [
+        "live-test-evidence-outlived-its-pitch-path",
+        "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash",
+        "pitch-compaction-gate-and-recovery-design"
+      ],
+      "expected": [
+        "live-test-evidence-outlived-its-pitch-path"
+      ],
+      "hits": 10,
+      "coverage": "14/21",
+      "pass": true
+    },
+    {
+      "id": "H06",
+      "cold": false,
+      "selected": [
+        "live-test-evidence-outlived-its-pitch-path",
+        "pitch-folders-accumulate-staging-nothing-consumes",
+        "pitch-compaction-gate-and-recovery-design"
+      ],
+      "expected": [
+        "live-test-evidence-outlived-its-pitch-path"
+      ],
+      "hits": 10,
+      "coverage": "14/20",
+      "pass": true
+    },
+    {
+      "id": "H07",
+      "cold": true,
+      "selected": [],
+      "expected": [
+        "pitch-folders-accumulate-staging-nothing-consumes"
+      ],
+      "hits": 7,
+      "coverage": "10/24",
+      "pass": false
+    },
+    {
+      "id": "H08",
+      "cold": false,
+      "selected": [
+        "pitch-compaction-gate-and-recovery-design",
+        "live-test-evidence-outlived-its-pitch-path",
+        "a-ledger-for-judged-files-lists-every-file"
+      ],
+      "expected": [],
+      "hits": 6,
+      "coverage": "8/9",
+      "pass": false
+    }
+  ],
+  "routing": {
+    "summary": {
+      "warm": {
+        "baseline": 3555,
+        "total": 1628,
+        "saving": "54.21",
+        "margin": 860
+      },
+      "heldout": {
+        "baseline": 11033,
+        "total": 6419,
+        "saving": "41.82",
+        "margin": 1304
+      },
+      "all": {
+        "baseline": 14588,
+        "total": 8047,
+        "saving": "44.84",
+        "margin": 2164
+      },
+      "verifiedExcerptThenFull": 1832,
+      "cards": 5,
+      "assertions": 10
+    },
+    "rows": [
+      {
+        "id": "Q1",
+        "question": "compact a finished pitch and delete its files safely",
+        "requiredSources": [
+          "pitch-compaction-gate-and-recovery-design"
+        ],
+        "selection": [
+          "D"
+        ],
+        "selected": [
+          ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md"
+        ],
+        "baseline": 1430,
+        "request": 168,
+        "response": 1,
+        "answer": 39,
+        "body": 388,
+        "fallbackTraversal": 0,
+        "total": 596,
+        "route": [
+          "D"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "Q2",
+        "question": "ledger coverage cap too many files in a pitch folder",
+        "requiredSources": [
+          "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash"
+        ],
+        "selection": [
+          "G"
+        ],
+        "selected": [
+          ".project/knowledge/patterns/a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash.md"
+        ],
+        "baseline": 1113,
+        "request": 169,
+        "response": 1,
+        "answer": 40,
+        "body": 220,
+        "fallbackTraversal": 0,
+        "total": 554,
+        "route": [
+          "G",
+          "J"
+        ],
+        "expandedWords": 124
+      },
+      {
+        "id": "Q3",
+        "question": "retiring a pitch directory that tests still read",
+        "requiredSources": [
+          "live-test-evidence-outlived-its-pitch-path"
+        ],
+        "selection": [
+          "E"
+        ],
+        "selected": [
+          ".project/knowledge/issues/live-test-evidence-outlived-its-pitch-path.md"
+        ],
+        "baseline": 1012,
+        "request": 167,
+        "response": 1,
+        "answer": 38,
+        "body": 272,
+        "fallbackTraversal": 0,
+        "total": 478,
+        "route": [
+          "E"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H01",
+        "question": "A human signed off on cleanup yesterday. The recovery copy still passes verification, but a file in the original folder changed overnight. Can the operator erase the folder today using the same sign-off?",
+        "requiredSources": [
+          "pitch-compaction-gate-and-recovery-design"
+        ],
+        "selection": [
+          "D"
+        ],
+        "selected": [
+          ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md"
+        ],
+        "baseline": 1905,
+        "request": 192,
+        "response": 1,
+        "answer": 63,
+        "body": 388,
+        "fallbackTraversal": 0,
+        "total": 644,
+        "route": [
+          "D"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H02",
+        "question": "A recovery tool finds backups for billing and billing-v2. The candidate passes integrity checks, but its manifest names billing-v2, and one recorded path points outside the intended restore directory. What should happen when recovering billing?",
+        "requiredSources": [
+          "pitch-compaction-gate-and-recovery-design"
+        ],
+        "selection": [
+          "D"
+        ],
+        "selected": [
+          ".project/knowledge/decisions/pitch-compaction-gate-and-recovery-design.md"
+        ],
+        "baseline": 1360,
+        "request": 194,
+        "response": 1,
+        "answer": 65,
+        "body": 388,
+        "fallbackTraversal": 0,
+        "total": 648,
+        "route": [
+          "D"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H03",
+        "question": "A closed project left hundreds of regenerable previews alongside four signed exception decisions. How should the reviewer account for each set, and what does a fingerprint of the whole folder actually prove?",
+        "requiredSources": [
+          "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash",
+          "a-ledger-for-judged-files-lists-every-file"
+        ],
+        "selection": [
+          "G",
+          "J"
+        ],
+        "selected": [
+          ".project/knowledge/patterns/a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash.md",
+          ".project/pitches/03-knowledge-distill/pilot/planted-entry.md"
+        ],
+        "baseline": 1252,
+        "request": 191,
+        "response": 1,
+        "answer": 63,
+        "body": 343,
+        "fallbackTraversal": 0,
+        "total": 598,
+        "route": [
+          "G",
+          "J"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H04",
+        "question": "A previously reviewed cache directory gains a file, while a separate set of signed decisions grows beyond the bookkeeping limit. What must happen before either set can be cleared?",
+        "requiredSources": [
+          "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash",
+          "a-ledger-for-judged-files-lists-every-file"
+        ],
+        "selection": [
+          "G",
+          "J"
+        ],
+        "selected": [
+          ".project/knowledge/patterns/a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash.md",
+          ".project/pitches/03-knowledge-distill/pilot/planted-entry.md"
+        ],
+        "baseline": 1131,
+        "request": 188,
+        "response": 1,
+        "answer": 60,
+        "body": 343,
+        "fallbackTraversal": 0,
+        "total": 592,
+        "route": [
+          "G",
+          "J"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H05",
+        "question": "You found no Markdown links to a finished project's run transcript, but a regression test still parses every row. What needs to move before the folder closes, and how would you show the test is still checking the same evidence?",
+        "requiredSources": [
+          "live-test-evidence-outlived-its-pitch-path"
+        ],
+        "selection": [
+          "E"
+        ],
+        "selected": [
+          ".project/knowledge/issues/live-test-evidence-outlived-its-pitch-path.md"
+        ],
+        "baseline": 1219,
+        "request": 199,
+        "response": 1,
+        "answer": 70,
+        "body": 272,
+        "fallbackTraversal": 0,
+        "total": 542,
+        "route": [
+          "E"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H06",
+        "question": "The team recovered the historical run log byte for byte and the verification suite now passes. In the closeout, how should it describe the original computed result and the earlier unexplained child-process failure?",
+        "requiredSources": [
+          "live-test-evidence-outlived-its-pitch-path"
+        ],
+        "selection": [
+          "E"
+        ],
+        "selected": [
+          ".project/knowledge/issues/live-test-evidence-outlived-its-pitch-path.md"
+        ],
+        "baseline": 1718,
+        "request": 192,
+        "response": 1,
+        "answer": 63,
+        "body": 272,
+        "fallbackTraversal": 0,
+        "total": 528,
+        "route": [
+          "E"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H07",
+        "question": "Repeated review batches left a finished project's folder full of interchangeable drafts and copies of the same log. Nobody reads them after the batch closes. What handling rule would have prevented those leftovers from becoming a closeout blocker?",
+        "requiredSources": [
+          "pitch-folders-accumulate-staging-nothing-consumes"
+        ],
+        "selection": [
+          "S"
+        ],
+        "selected": [
+          ".project/knowledge/issues/pitch-folders-accumulate-staging-nothing-consumes.md"
+        ],
+        "baseline": 989,
+        "request": 197,
+        "response": 1,
+        "answer": 68,
+        "body": 259,
+        "fallbackTraversal": 0,
+        "total": 525,
+        "route": [
+          "S"
+        ],
+        "expandedWords": 0
+      },
+      {
+        "id": "H08",
+        "question": "How do I split a Git commit into two commits while preserving its original author information?",
+        "requiredSources": [],
+        "selection": "FALLBACK",
+        "selected": [
+          ".project/knowledge/patterns/join-metrics-by-exact-identity-and-disclose-evidence-windows.md",
+          ".project/knowledge/issues/false-cross-pitch-attribution-in-a-shared-uncommitted-file.md",
+          ".project/knowledge/issues/reusing-a-transaction-exposes-its-lock-reader-to-new-callers.md",
+          ".project/knowledge/patterns/a-gate-must-not-trust-its-own-author.md",
+          ".project/knowledge/patterns/read-before-the-lease-commit-cursor-and-totals-together.md"
+        ],
+        "baseline": 1459,
+        "request": 175,
+        "response": 1,
+        "answer": 50,
+        "body": 1577,
+        "fallbackTraversal": 539,
+        "total": 2342,
+        "route": "FALLBACK",
+        "expandedWords": 0
+      }
+    ]
+  },
+  "answerChecks": {
+    "Q1": "Safety conditions supported; exact command sequence requires procedure fallback.",
+    "Q2": "Initial group-only read could overgeneralize. Recheck with both cards preserved the bulk/per-file boundary and stop-and-split condition.",
+    "Q3": "Consumer inventory, complete bytes, durable location, and unchanged regression supported.",
+    "H01": "Reject stale approval because source changed. Detailed reapproval sequence outside the card.",
+    "H02": "Reject mismatched manifest and require containment before writes.",
+    "H03": "Group eligible bulk, list each individually judged decision.",
+    "H04": "Recheck membership after addition. Split if per-file entries reach the cap.",
+    "H05": "Preserve complete bytes and prove equivalence while keeping assertions.",
+    "H06": "Retain historical blocked claim and report the child failure as unconfirmed.",
+    "H07": "Classify at creation, clean staging after batch, snapshot shared log once.",
+    "H08": "Fallback exercised and charged. No Git procedure answer graded."
+  }
+}

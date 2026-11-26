@@ -1,0 +1,114 @@
+[
+  {
+    "id": "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash#1",
+    "where": "Group coverage"
+  },
+  {
+    "id": "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash#2",
+    "where": "Group coverage"
+  },
+  {
+    "id": "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash#3",
+    "where": "Group coverage"
+  },
+  {
+    "id": "a-ledger-for-judged-files-lists-every-file#1",
+    "where": "Individual judgment"
+  },
+  {
+    "id": "a-ledger-for-judged-files-lists-every-file#2",
+    "where": "Individual judgment"
+  },
+  {
+    "id": "live-test-evidence-outlived-its-pitch-path#1",
+    "where": "Live evidence repair"
+  },
+  {
+    "id": "live-test-evidence-outlived-its-pitch-path#2",
+    "where": "Live evidence repair"
+  },
+  {
+    "id": "live-test-evidence-outlived-its-pitch-path#3",
+    "where": "Live evidence repair"
+  },
+  {
+    "id": "live-test-evidence-outlived-its-pitch-path#4",
+    "where": "Evidence retention"
+  },
+  {
+    "id": "live-test-evidence-outlived-its-pitch-path#5",
+    "where": "Live evidence repair"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#1",
+    "where": "Deletion gate"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#2",
+    "where": "Deletion gate"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#3",
+    "where": "Deletion gate"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#4",
+    "where": "Recovery"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#5",
+    "where": "Recovery"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#6",
+    "where": "Inventory and records"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#7",
+    "where": "Recovery"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#8",
+    "where": "Inventory and records"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#9",
+    "where": "Inventory and records"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#10",
+    "where": "Inventory and records"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#11",
+    "where": "Deletion gate"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#12",
+    "where": "Deletion gate"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#13",
+    "where": "Recovery"
+  },
+  {
+    "id": "pitch-compaction-gate-and-recovery-design#14",
+    "where": "Inventory and records"
+  },
+  {
+    "id": "pitch-folders-accumulate-staging-nothing-consumes#1",
+    "where": "Staging"
+  },
+  {
+    "id": "pitch-folders-accumulate-staging-nothing-consumes#2",
+    "where": "Staging"
+  },
+  {
+    "id": "pitch-folders-accumulate-staging-nothing-consumes#3",
+    "where": "Staging"
+  },
+  {
+    "id": "pitch-folders-accumulate-staging-nothing-consumes#4",
+    "where": "Staging"
+  }
+]

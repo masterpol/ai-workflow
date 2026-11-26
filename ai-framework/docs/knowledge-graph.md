@@ -12,11 +12,16 @@ and code mentions for markdown; no LLM or API key needed), then overlays the typ
 and regenerates:
 - `graphify-out/graph.json` — the one graph for code, docs and knowledge (`graph.workflow.tagIndex`
   maps tag → entry ids). Phases query it with `node ai-framework/scripts/graphify.mts query "<question>"`
-  (also `path A B`, `explain X`, `god-nodes`, `affected X`; anything else is passed to graphify), which is what
+  (also `path A B`, `explain X`, `god-nodes`, `affected X`), which is what
   `/shape`'s knowledge gate, `/search`, `/knowledge-health`, and `/cooldown` use to find prior knowledge
   instead of re-reading every file. `graphify-out/GRAPH_REPORT.md` summarises hubs and communities.
-- `.project/knowledge/index.md` — human-readable catalog, with a Mermaid graph when entries have
-  related edges.
+- `.project/knowledge/index.md` — human-readable catalog of entries grouped by type, with decision status
+  and counts. It lists no tags or links; those are in `graphify-out/graph.json`.
+
+A plain `query "<question>"` shows up to five knowledge paths before Graphify's traversal results.
+It ranks entries by how many query terms match their title, ID or tags, with rarer terms breaking ties.
+Queries with explicit options such as `--budget` or `--graph` use Graphify's native output.
+The shortlist applies to regular graph files up to 64 MiB within the project.
 
 Shipped outcome records under `.project/records/shipped/` also contribute explicit `outcome-link`
 edges to their documentation, decisions, knowledge, code and retained evidence. Run

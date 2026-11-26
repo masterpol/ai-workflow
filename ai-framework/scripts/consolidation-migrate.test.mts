@@ -10,15 +10,19 @@ const base = createTestDeps();
 const template = (name: string): string => base.fs.readFileSync(base.path.join(import.meta.dirname, "../templates/project", name));
 const decision = template("knowledge/templates/decision.md");
 const readme = template("knowledge/README.md");
+/** The template as it was while index.md still carried a tag index and a diagram. */
+const beforeSlim = readme.replace(/^`index\.md` is the human-readable catalog[^\n]*\n[^\n]*\n/m,
+  "`index.md` is the human-readable rendering of the same data — grouped by type, plus a tag index\nand an auto-generated Mermaid graph of the `related` edges:\n")
+  .replace("(open `knowledge/` as an Obsidian vault)\n", "(open `knowledge/` as an Obsidian vault)\n- Auto-generated Mermaid knowledge map\n");
 // Reconstruct the two immutable b26b45b fixtures, asserting their independently pinned hashes below.
 const oldDecision = decision.replace("status: accepted\n", "").replace(/^# (?:supersedes|superseded_by|alternatives|applies-to):.*\n/gm, "")
   .replace("source: feature-name", "source: ADR-XXX | feature-name")
   .replace("- Related code or documents: `path/to/relevant/code`", "- Link to ADR: `.project/design/decisions/ADR-XXX.md`\n- Related code: `path/to/relevant/code`");
-const oldReadme = readme.replace(/^Technical decisions.*$/m, "Technical decisions that affect multiple features. Extracted from ADRs but indexed for quick search.")
+const oldReadme = beforeSlim.replace(/^Technical decisions.*$/m, "Technical decisions that affect multiple features. Extracted from ADRs but indexed for quick search.")
   .replace("source: feature-name | manual", "source: ADR-XXX | feature-name | manual")
   .replaceAll("/ship-pitch", "/ship");
 /** The template as it was before the ship command was renamed. */
-const beforeRename = readme.replaceAll("/ship-pitch", "/ship");
+const beforeRename = beforeSlim.replaceAll("/ship-pitch", "/ship");
 const legacy = "## alpha — shipped 2026-09-25\n\nExisting narrative.\n";
 const ledger = JSON.stringify({ schemaVersion: 1, slug: "alpha", sections: [{ source: "log.md#one", status: "extracted", destination: ".project/knowledge/decisions/alpha.md" }] });
 const fixture = {
@@ -268,3 +272,16 @@ test("a knowledge README still holding the pre-rename template is refreshed, and
     assert.equal(migrate(root, base, { apply: true }).steps.find(step => step.path === ".project/knowledge/README.md")?.status, "local");
   });
 });
+
+test("a knowledge README still describing the removed index sections is refreshed, and an edited one is kept", () => {
+  assert.ok(PREVIOUS_TEMPLATE_HASHES["knowledge/README.md"].includes(base.crypto.sha256Hex(beforeSlim)));
+  run({ ".project/knowledge/README.md": beforeSlim }, root => {
+    assert.equal(migrate(root, base, { apply: true }).steps.find(step => step.path === ".project/knowledge/README.md")?.status, "refresh");
+    assert.equal(read(root, ".project/knowledge/README.md"), readme);
+  });
+  run({ ".project/knowledge/README.md": `${beforeSlim}\nlocal note\n` }, root => {
+    assert.equal(migrate(root, base, { apply: true }).steps.find(step => step.path === ".project/knowledge/README.md")?.status, "local");
+    assert.equal(read(root, ".project/knowledge/README.md"), `${beforeSlim}\nlocal note\n`, "an edited README is left byte for byte");
+  });
+});
+

@@ -14,7 +14,8 @@ import { runDirect } from "./runtime/cli.mts";
  *   check       validate the knowledge entries only (duplicate ids, broken links, orphans); needs no uv, writes nothing
  *   setup       update + install a post-commit/post-checkout block that reruns this script in the background, so
  *               the rebuilt graph keeps the knowledge overlay (replaces a raw `graphify hook install` block)
- *   anything else (query, path, explain, god-nodes, affected, export, ...) is passed through to graphify
+ *   query <question> prepends ranked knowledge paths to the native query
+ *   queries with options and other Graphify commands (path, explain, export, ...) are passed through
  *
  * Flags: --check (alias of `check`), --json (machine-readable report). `check` exits 1 on an error-level problem.
  * Graphify is resolved as `uv tool run --from graphifyy==<pinned> graphify`; GRAPHIFY_BIN overrides it with a
@@ -24,6 +25,7 @@ import { runDirect } from "./runtime/cli.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 import { canonicalFiles, canonicalOf, checkRelations, MANIFEST_FILE, problemCodes, type RelationEdge, type RelationKind } from "./graphify-relations.mts";
 import { deriveRefs, deriveOutcomeRefs, dropHubTargets, REF_HUB_LIMIT } from "./graphify-refs.mts";
+import { readProjectText } from "./consolidation-migrate.mts";
 
 export type FrontmatterValue = string | string[];
 
@@ -344,32 +346,11 @@ export function renderIndex(data: Graph, root: string, deps: RuntimeDeps): strin
     lines.push("");
   }
 
-  const tags = Object.keys(data.tagIndex).sort();
-  lines.push("## Tag Index");
-  if (tags.length === 0) {
-    lines.push("_none yet_");
-  } else {
-    for (const tag of tags) {
-      lines.push(`- **${tag}** (${data.tagIndex[tag].length}) — ${data.tagIndex[tag].join(", ")}`);
-    }
-  }
-  lines.push("");
-
-  if (data.edges.length > 0) {
-    lines.push("## Graph");
-    lines.push("");
-    lines.push("```mermaid");
-    lines.push("graph LR");
-    for (const edge of data.edges) lines.push(`  ${edge.from} ${edge.relation === "supersedes" ? "-.->|supersedes|" : "-->"} ${edge.to}`);
-    lines.push("```");
-    lines.push("");
-  }
-
   lines.push("## Traversal");
   lines.push("");
   lines.push(
-    "The project graph is built by Graphify into `graphify-out/graph.json` (code, docs and these knowledge " +
-      "entries as `knowledge` nodes with `related` edges and a `tags` attribute; `graph.workflow.tagIndex` maps tag → ids). " +
+    "Tags and links for these entries are in `graphify-out/graph.json`, the project graph Graphify builds, " +
+      "not in this index (`graph.workflow.tagIndex` maps tag → ids). " +
       "Find prior knowledge with `node ai-framework/scripts/graphify.mts query \"<question>\"`, `path A B` or " +
       "`explain X`, or filter graph.json nodes by `node_kind: \"knowledge\"`, `entry_type` and `tags`, instead of " +
       "re-scanning every markdown file under `knowledge/`. Rebuild after adding or editing an entry:"
@@ -408,6 +389,56 @@ const OWN_COMMANDS = new Set(["update", "check", "setup"]);
 interface GraphifyLink { source: string; target: string; relation?: string; workflow_overlay?: boolean; [key: string]: unknown }
 interface GraphifyNode { id: string; source_file?: string; workflow_overlay?: boolean; workflow_stub?: boolean; [key: string]: unknown }
 interface GraphifyGraph { nodes: GraphifyNode[]; links: GraphifyLink[]; graph?: Record<string, unknown>; [key: string]: unknown }
+
+const QUERY_STOP_WORDS = new Set("about after also and are before can could did does for from had has have how into its more only should some than that the their them then there these this too use was were what when where which who why will with would you your".split(" "));
+const KNOWLEDGE_QUERY_LIMIT = 5;
+const KNOWLEDGE_QUERY_MAX_GRAPH_BYTES = 64 * 1024 * 1024;
+
+function queryTerms(value: string): string[] {
+  return (value.toLowerCase().match(/[\p{L}\p{N}]+/gu) ?? [])
+    .filter((term) => term.length >= 3 && !QUERY_STOP_WORDS.has(term));
+}
+
+/** Rank typed knowledge independently of the native mixed-graph traversal. */
+function knowledgeQueryPaths(question: string, root: string, deps: RuntimeDeps): string[] {
+  const terms = [...new Set(queryTerms(question.slice(0, 2048)))].slice(0, 32);
+  if (!terms.length) return [];
+  let graph: GraphifyGraph;
+  try {
+    const directory = deps.proc.env.GRAPHIFY_OUT ?? deps.path.dirname(GRAPH_FILE);
+    const base = deps.fs.realpathSync(root);
+    const file = deps.path.resolve(base, directory, "graph.json");
+    const relative = deps.path.relative(base, file).split(deps.path.sep).join("/");
+    const content = readProjectText(base, relative, KNOWLEDGE_QUERY_MAX_GRAPH_BYTES, deps);
+    if (content === null) return [];
+    graph = JSON.parse(content);
+  } catch {
+    return []; // Let Graphify report missing or unreadable graphs.
+  }
+  if (!Array.isArray(graph?.nodes)) return [];
+
+  const matches = new Map<string, string[]>();
+  const frequencies = new Map<string, number>();
+  for (const node of graph.nodes) {
+    if (node?.node_kind !== "knowledge" || typeof node.source_file !== "string" || node.source_file.length > 1024) continue;
+    const file = node.source_file.replace(/\\/g, "/");
+    if (!/^\.project\/knowledge\/(decisions|patterns|entities|issues)\/[^/\p{C}\p{Zl}\p{Zp}]+\.md$/u.test(file) ||
+        matches.has(file)) continue;
+    const tags = Array.isArray(node.tags) ? node.tags.slice(0, 32) : [];
+    const keywords = new Set([node.entry_id, node.label, ...tags]
+      .flatMap((value) => typeof value === "string" ? queryTerms(value.slice(0, 256)) : []));
+    const hits = terms.filter((term) => keywords.has(term));
+    if (!hits.length) continue;
+    matches.set(file, hits);
+    for (const term of hits) frequencies.set(term, (frequencies.get(term) ?? 0) + 1);
+  }
+  return [...matches].map(([file, hits]) => ({
+    file,
+    count: hits.length,
+    score: hits.reduce((sum, term) => sum + 1 / frequencies.get(term)!, 0),
+  })).sort((a, b) => b.count - a.count || b.score - a.score || a.file.localeCompare(b.file))
+    .slice(0, KNOWLEDGE_QUERY_LIMIT).map(({ file }) => file);
+}
 
 /** The command used to run Graphify: GRAPHIFY_BIN if set, else the pinned package through uv. */
 export function graphifyCommand(deps: RuntimeDeps): { command: string; prefix: string[] } | null {
@@ -566,7 +597,7 @@ function report(graph: Graph, problems: Problem[], io: RuntimeDeps["io"], json: 
   const errors = problems.filter((problem) => problem.level === "error");
   const warnings = problems.filter((problem) => problem.level === "warn");
   if (json) {
-    io.stdout.write(`${JSON.stringify({ stats: graph.stats, problems, wrote: wrote.length > 0, files: wrote, ...(workflow ? { workflow: { edges: workflow.counts, hubsDropped: workflow.hubs } } : {}) }, null, 2)}\n`);
+    io.stdout.write(`${JSON.stringify({ stats: graph.stats, problems, wrote: wrote.length > 0, files: wrote, tagIndex: graph.tagIndex, ...(workflow ? { workflow: { edges: workflow.counts, hubsDropped: workflow.hubs } } : {}) }, null, 2)}\n`);
     return;
   }
   io.stdout.write(
@@ -765,6 +796,10 @@ export function main(argv: string[], deps: RuntimeDeps): number {
   if (!OWN_COMMANDS.has(command)) {
     const tool = graphifyCommand(deps);
     if (!tool) { io.stderr.write("graphify: uv is not installed (https://docs.astral.sh/uv/) — install it, or set GRAPHIFY_BIN.\n"); return 1; }
+    if (argv[0] === "query" && argv.length === 2 && !argv[1].startsWith("-")) {
+      const matches = knowledgeQueryPaths(argv[1], root, deps);
+      if (matches.length) io.stdout.write(`Knowledge matches\n${matches.map((file) => `- ${file}`).join("\n")}\n\n`);
+    }
     const result = child.runSync(tool.command, [...tool.prefix, ...argv], { cwd: root, stdio: "inherit" });
     return result.status ?? 1;
   }

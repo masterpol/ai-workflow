@@ -709,3 +709,34 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **Other Git callers may run configured hooks** (high, **unverified**): `core.hooksPath=/dev/null` does not stop Git 2.54 `hook.*` hooks. `pre-ship-verify.mts`, `graphify.mts`, `legacy-upgrade.mts`, `orca-apply.mts`, `orca-diff-admit.mts`, `orca-evidence.mts` and `skill-source.mts` rely on that flag or on `core.fsmonitor`, and none checks `hook.*`. Orca ones run against worker trees. Not tested which of their commands fire a hook.
 - **`guard` hardening from the S4 review** (low): reject empty, `.` or `..` segments in Git-reported paths as a second layer; non-UTF-8 file names may be dropped silently (unreproduced, Linux); two guard lines have no failing test.
 
+
+## From workspace-slim (build, 2026-11-26)
+
+- **`climbing-lab-monorepo` and LAH track installed skill packages** (observed by the new report, read-only): handle with the pending package-ignore fix.
+- **Report labels** (low): `.opencode/node_modules` counts as workflow bundle; loose files directly in `.project/` show as unrecognised "Project entries" without saying which; absent areas print as zero rows.
+- **Report root through a symlink** (low): `--root` reached through a symlinked folder is refused with only the generic message.
+- **Report bound** (low, from the worker): a folder is listed in full before the 200,000-entry limit applies.
+- **Duplicated hardened Git call** (low): `workspace-report.mts` and `review-bench.mts` each build their own; share one if they drift.
+
+## From workspace-slim (audit cycle 1, 2026-11-26), deferred
+
+- **Report: case aliases of scanned folders** (low): a differently cased `.Project/` entry leaves tracked figures `incomplete` instead of attributed.
+- **Report: many unrecognised folders** (low): marking incomplete loops over all areas per failure, quadratic in a very unusual tree.
+- **Report: tracked-only folder name** (low): a tracked folder later replaced by a loose file of the same name can print that name.
+- **`graphify` tag map** (low, unverified, predates): a tag named `constructor` may throw with a plain-object `tagIndex`, now also in `--check --json`.
+
+## From workspace-slim (audit cycle 2, 2026-11-26), deferred
+
+- **Report: a differently cased scan root** (med, unverified): an index entry under `.Project/` is not listed, so tracked reads 0 as complete and no packages warning appears.
+- **Report: submodule replaced by a plain file** (low, unverified): reads as complete; take the mode from `ls-files --stage`.
+- **`canary-check` false "caught"** (med, observed): an unrelated finding whose cited range covers the planted line counts. Check that the matching row describes the planted edit.
+
+## From knowledge-distill pilot (2026-11-26)
+
+- **A default `graphify query` can return no knowledge** (high, observed): for two of three realistic questions, none of the 55 nodes shown at the default budget was a knowledge entry (617 and 402 found; 7 and 3 knowledge entries appeared at `--budget 60000`). The shape, search and fix gates query this way. Rank knowledge first, filter to knowledge nodes, or tell the gates to raise the budget; measure on more questions first.
+  Closed in v2.59.2 by [fix-graphify-knowledge-query](fix-graphify-knowledge-query/SHIPPED.md). Both previously empty queries now emit five knowledge paths at the default budget.
+- **Cooldown rule destination** (observed): `/cooldown` names `ai-framework/rules/` for promotions. Shape a small change to route project-specific lessons to `.project/rules/` and reusable bundle lessons to `ai-framework/rules/`. See [the knowledge distill pitch](03-knowledge-distill/pitch.md).
+
+## From fix-graphify-knowledge-query (2026-11-26)
+
+- **Shared project reader during concurrent ancestor replacement** (medium, static review): the descriptor-pinned reader rejects static symlinks and verifies the file identity. An ancestor replaced during the pathname inspection can redirect both checks to the same out-of-project file. Evaluate a portable containment strategy for `readProjectText` and its callers.

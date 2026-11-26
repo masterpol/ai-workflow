@@ -1,101 +1,75 @@
 # Pitch: workspace-slim
 
-**Date**: 2026-11-25  •  **Appetite**: big-batch (about 12 files, under 1500 LOC); **deletes nothing**
-**Stack**: workflow tooling (a report-and-compact script, a skill) + ai-prompts
+**Date**: 2026-11-25, re-shaped 2026-11-26  •  **Appetite**: big-batch, small end (about 9 files, under 600 LOC); **deletes nothing**
+**Stack**: workflow tooling (a read-only report script, the generated knowledge index)
 
 ## Problem
 
-Projects that use the workflow keep growing, in files to commit, in repository size and in text an agent may load. A person cannot see what
-takes the space or what is safe to shrink, and the existing compaction tools add files while they shrink others.
-
-## What was measured (2026-11-25, tracked files)
-
-| | LAH | RN | climbing-lab-monorepo | this repo |
-|---|---|---|---|---|
-| `.project/` | 1270 files, 26.9 MB | 314 files, 1.0 MB | 776 files, 5.4 MB | 1568 files, 12.4 MB |
-| `graphify-out/graph.json` | **65 MB** | 6.9 MB | 13 MB | 7.5 MB |
-| installed skill packages tracked in Git | **624 files, 23 MB** | 0 | 3 | 0 |
-| compaction recovery copies | 405 files, 1.7 MB | 93 files | 115 files | **913 files, 6.2 MB** |
-| session evidence under `records/` | — | — | **~430 files, 3.5 MB** (JSON, logs, images, CPU profiles) | upgrade records 1.1 MB |
-| **knowledge entries** | 98, 302 KB | 136, 171 KB | 58, 118 KB | 149, 320 KB |
-| `knowledge/index.md` | 60 KB | 85 KB | 29 KB | 116 KB |
-| followups backlog | 42 KB | 13 KB | 16 KB | 80 KB |
-
-**Reading it.** Knowledge is not what makes the projects big: entries are 118–320 KB per project, typically 1–3 KB each. The size comes from
-(1) installed packages in Git and in the graph, (2) recovery copies, (3) evidence dumps. Where knowledge costs something is **text to load**:
-an index of up to 116 KB and a backlog of up to 80 KB.
-
-**A defect found while measuring, to fix first and separately.** In LAH, **58.9 of 67.5 MB of graph data (87%) comes from
-`.project/skills/packages/`**, and the commit-time graph hook rewrites and stages that file on every commit. The bundle's graph ignore list
-does not exclude the folder, its `.gitignore` block does not either, and `SETUP.md`'s minimum ignore list omits it. LAH has no ignore rule
-for it. 597 of LAH's tracked package files are the Archify package **committed by the assistant on 2026-11-24** with the 2.54.0 update,
-against `state-report.md`, which says the package is per-checkout and Git-ignored. (Whether the graph noise changes query answers was not
-shown: one test query returned no package results.) Untracking them stops the growth; Git history keeps them unless rewritten.
+Projects that use the workflow keep growing, and a person cannot see what takes the space, which of it is tracked in Git, or what could
+safely be done about it. This repository's `index.md` is 120 KB, three quarters of it data that `graph.json` already holds.
 
 ## Knowledge consulted
 
-- decisions/`workflow-tooling-pitches-share-standing-no-gos-and-design-answers` — recovery defined before mutation code; count every mirror.
-- issues/`deleting-a-file-breaks-shipped-outcome-records-that-link-to-it` — removal can break the graph through record links.
-- patterns/`prove-ownership-by-shipped-content-before-removing-a-renamed-file`, `pin-the-descriptor-you-hashed-before-removing-or-replacing` — deleting safely.
-- patterns/`a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash` — accounting for a folder of many files.
-- patterns/`a-gate-must-not-audit-its-own-instrument` — the proof that nothing was lost cannot come from the code that removed it.
-- `/pitch-compress`, `/knowledge-health`, `/cooldown` — what exists: per-pitch compaction with a coverage ledger, a read-only health audit, and promotion of issues to rules. None reports a project's size or handles evidence, old archives, the index or the backlog.
+- decisions/`workflow-tooling-pitches-share-standing-no-gos-and-design-answers` — recovery before mutation; count every mirror.
+- patterns/`a-report-over-an-untrusted-tree-runs-only-bundle-code`, `a-report-never-overwrites-a-file-it-did-not-write` — the report.
+- issues/`config-defined-git-hooks-ignore-core-hookspath` (**unresolved**) — the report asks Git what is tracked, and `graphify.mts` calls Git.
+- issues/`deleting-a-file-breaks-shipped-outcome-records-that-link-to-it`, patterns/`a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash` — why
+  removal stays out.
+- rules/`security` section 9 — one guarded reader, bounded input, no project program run.
 
 ## Solution sketch (breadboard)
 
-**Places**: a `slim` skill and its adapters · `slim.mts` (report, backlog move) · `graphify.mts` (the generated index).
+**Places**: `workspace-report.mts` (new) and its test · `graphify.mts` (index) · `/knowledge-health` · the docs that describe the index.
 
 **Affordances**
-1. **Report** (read-only): files and bytes by area, what is loaded often, and for each area what could be done and by which tool, including
-   "installed packages are tracked" and "no supported action yet" for evidence folders and recovery copies. An unrecognised folder is listed
-   and asked about, never classified as disposable.
-2. **A smaller index.** The entry lines are already one line each. The bulk is the tag index and the diagram: about 85 of 116 KB here and
-   43 of 59 KB in LAH. Those two move out of `index.md` (the same data is in `graph.json`), **after every reader of the file is named** and
-   the saving is measured before and after.
-3. **Backlog:** items already marked resolved move, text unchanged, to a resolved file beside it. Nothing is marked resolved by the tool.
-4. **Gate:** the exact diff is shown; **Approve / Revise / Back / Stop**.
-5. **Check after applying:** every line removed from the backlog is present in the resolved file; the knowledge entry and rule counts are
-   unchanged; the graph, record links and setup validator pass.
+1. **Report** (read-only, run as a script, text or JSON): files and bytes by area; which are tracked; what is generated; for each area what could
+   be done and by which tool or pitch, including "installed packages are tracked" and "no supported action yet" (evidence folders, recovery
+   copies). An unrecognised folder is listed and asked about, never called disposable. It writes nothing.
+2. **Smaller index:** `index.md` keeps the entry lists and counts; the tag index and diagram leave it (same data in `graph.json`). One line
+   names where to find them. Size measured before and after.
+3. **Readers updated:** `/knowledge-health` takes tags from the graph; the knowledge READMEs and the graph doc stop describing the removed
+   sections. The title the doctor and setup validator check stays.
 
-**Connections**: `/slim` → report → plan → gate → apply → check.
+**Connections**: person → report → picks a fix or pitch. `graphify.mts` → smaller `index.md` → readers.
 
 ## Rabbit holes
 
 **Resolved here**
-- Remove records, evidence or recovery copies? → **Not in this pitch** (cut at critique): see `workspace-recovery`.
-- Shorter entry lines? → No; they are not the bulk.
-- Merge or summarise knowledge? → The sibling pitch `knowledge-distill`.
+- A `/slim` skill, approval and apply step? → **Cut.** With nothing to apply but a generated file, a script is enough.
+- Move resolved backlog items? → **Cut:** only 3–13% of backlog text is clearly marked, and more would need the tool to judge.
+- Remove records, evidence or recovery copies? → **Not here:** `workspace-recovery`.
+- Stop tracking `graph.json`? → **Not here** (followup "Local-only knowledge graph").
+- AI-prompt scope? → **No:** no new prompt or skill; `/knowledge-health` only changes where it reads tags. The owner may overrule at the bet.
 
 **Pushed to /plan as risk**
-- Who reads `index.md` (`/knowledge-health` takes its inventory from it; the doctor and setup validator expect the file).
-- What counts as "marked resolved" in a backlog written by hand over months; anything ambiguous stays.
-- Is `slim` free as a command in each host?
+- Every reader of the two sections, by search and tests, including the project template copies.
+- How the report asks Git what is tracked without running a project's programs; whether configured hooks fire on that command.
+- `graphify.mts` also needs the hook-risk check: fix it first, or name who edits the file first.
+- How the report treats very large trees and symlinks (caps, refusals, no following).
+
+**Pushed to no-go** (followups)
+- Any action taken by the report.
 
 ## No-gos (this pitch)
 
-- ✗ No file with content is deleted; no knowledge entry, decision or rule is edited.
-- ✗ No item marked resolved, merged or reworded by the tool.
-- ✗ No change before the person approves the diff.
-- ✗ No Git history rewrite and no change to recovery archives or their format.
+- ✗ No file with content is deleted or moved; no knowledge entry, decision, rule or backlog item is edited.
+- ✗ The report writes nothing and runs nothing from the project it reads.
+- ✗ No change to `graph.json`'s data, to Git history or to recovery archives.
 
-## Evaluation (AI-prompt scope)
+## Order
 
-Golden cases: `.project/evals/datasets/workspace-slim.json` (specified, none run). Cases about removing files now expect a refusal.
-Each is bound to a named test or marked `live-only`.
-
-## Tandem with `knowledge-distill`
-
-Run together (owner, 2026-11-25). Neither deletes content, so neither blocks the other. **`graphify.mts` belongs to this pitch first**: the
-index change lands before the sibling adds its marking. One person integrates the shared registration files (doctor list, process graph).
-
-## Order and size
-
-1. **First, separately (small fix):** ignore `.project/skills/packages/` in the graph and `.gitignore` blocks and in `SETUP.md`; warn in the
-   doctor when packages are tracked; in LAH, untrack them and rebuild the graph. **This is the largest drop in files and size.**
-2. Then this pitch and `knowledge-distill`.
+1. **First, separately (`/fix`, not in this pitch):** exclude `.project/skills/packages/` in the graph and `.gitignore` blocks and `SETUP.md`, warn
+   when packages are tracked, then untrack them in LAH and rebuild its graph. Expected to be the largest size drop (not measured after).
+2. This pitch. Tandem `knowledge-distill` still edits `graphify.mts` after it.
 3. Later: `workspace-recovery`.
-About 12 files: 4 skill adapters, `slim.mts` and test, `graphify.mts` and test, process-graph entry, doctor list, `/knowledge-health` if it
-reads the removed sections, the dataset.
+
+Files (about 9): report script and test, `graphify.mts` and test, doctor script list, `knowledge-health/SKILL.md`, `docs/knowledge-graph.md`, the
+project template's knowledge README, this repository's copy of it.
+
+## Evaluation
+
+No AI-prompt scope, so no golden-case gate. `.project/evals/datasets/workspace-slim.json` stays as written; its report, index-reader,
+unknown-folder and knowledge-kept cases become ordinary tests, and `followups-triage` is out of scope.
 
 ## Critique findings (auto-populated by /critique for big-batch + AI scopes)
 
@@ -111,10 +85,27 @@ and the ledgers naming knowledge files.
 | skeptic S1; historian K1–K3; eval E2–E4; cross-pitch X2, X4 | recovery from Git, failed-proof rollback, archive readers | **Moved** to `workspace-recovery` with the findings |
 | eval E1; appetite A8 | unbound live-only cases | **Addressed**: every case bound or marked |
 
+## Validation 2026-11-26 (of the 2026-11-25 shape, which led to this re-shape)
+
+| Claim | Today | Holds? |
+|---|---|---|
+| Ignore fix comes first, separately | **not done**: `.graphifyignore`, `SETUP.md` and the graph's ignore block still omit `.project/skills/packages/`; LAH still tracks 624 package files (23.8 MB) and a 65.1 MB graph | open (followup, high) |
+| Sizes | LAH, RN, climbing unchanged. This repo: `.project/` 1618 files, 12.6 MB; recovery copies grew 913 → 1073 files, 6.2 → 7.5 MB | yes |
+| Index bulk is tag index and diagram | 88.5 of 120.2 KB (74%) here; removing both leaves about 32 KB | yes |
+| The index is text agents load | The one instruction found that tells an agent to read it for work is `/knowledge-health` (inventory counts). Other mentions call it a human catalog; phases are told to query the graph. The setup validator and doctor only need it to exist and start with its title. No test was found asserting the two sections | **weaker than stated** |
+| Moving resolved backlog items saves text | Items that open with a resolved marker: 2.9 of 87.2 KB here (3%), RN 11%, climbing 13%, LAH 6% (heading-based resolved sections add 0–2%). A looser reading would mean the tool judging what is resolved, which is a no-go | **no: small gain** |
+| `slim` is free as a command | no skill, command or adapter of that name in this repo; host built-ins not checked | partly |
+| Golden cases | 6 cases, each bound or `live-only`; none run | yes |
+
+New since shaping: `graphify.mts`, which this pitch changes first, is on the 2026-11-26 high-risk list (configured Git hooks, untested), so a fix
+there would come before or with it. The owner also asked about not tracking the graph at all (followup "Local-only knowledge graph").
+
 ## Bet decision
 
-☐ **Bet** (→ /plan)  
+☑ **Bet** (→ /plan) — 2026-11-26, owner chose the whole re-shaped scope over the report-only split  
 ☐ Re-shape — named gap: {…}  
 ☐ Pass — moved to `.project/pitches/_parked/workspace-slim/`; reason: {…}
 
 If acknowledging critique findings without addressing, log reason here.
+
+Critique was not re-run for the 2026-11-26 re-shape: the scope is a subset of what was critiqued. New since that run: the Git-hook risk.

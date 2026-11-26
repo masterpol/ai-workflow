@@ -13,6 +13,7 @@
 - Validate workflow records: `node ai-framework/scripts/setup-validator.mts`.
 - Diagnose the workflow: `node ai-framework/scripts/workflow-doctor.mts`.
 - Validate the knowledge graph: `node ai-framework/scripts/graphify.mts --check`.
+- See what workflow folders take up (read-only): `node ai-framework/scripts/workspace-report.mts`.
 - Record a version-log entry: `node ai-framework/scripts/changelog.mts`.
 
 ## Not Applicable

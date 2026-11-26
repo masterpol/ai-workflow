@@ -38,3 +38,9 @@ Two more shapes. A test **passed** for the wrong reason: a planted fake `git` wr
 the original's path, so it could never fail; adding a positive control (show the planted program does run) fixed it. And mutants reported
 "killed" against a baseline that was already red, because the scratch copy lacked a file a new test read. Check that the baseline is green in
 the same copy before reading any mutant result.
+
+## Recurrence: workspace-slim (2026-11-26)
+
+A "never reads a file" spy that only threw passed even when code read a file and caught the error. A spy for something that must not happen
+should record the call, and the test should assert the record is empty. Also, a "never touches application code" check that searched paths for
+`/app` matched `/Applications` on `PATH`.

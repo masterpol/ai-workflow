@@ -34,3 +34,10 @@ ignore a file (assume-unchanged), and a reverse `git apply --check` ignores perm
 Two more routes: hooks defined in config (`hook.*`, Git 2.54), which `core.hooksPath` does not stop, and a submodule's own filter, which
 `--ignore-submodules=all` does. Refuse `hook.*` too. A `PATH` check must resolve each entry (a symlink or `..` can lead back into the tree), and
 `git config --local` does not see included or worktree settings. See [[config-defined-git-hooks-ignore-core-hookspath]].
+
+## Seen again (workspace-slim, 2026-11-26)
+
+"Only `PATH` entries outside the project" is wrong when the project root is a **subfolder** of a repository: a `git` elsewhere in that
+repository passed the filter and ran. Take the outermost enclosing folder with a `.git` entry as the boundary, found without Git. A "read-only"
+`ls-files` also refreshes a split index's shared file time, with optional locks off; detect `sharedindex.*` and do not list. Listing commands
+(`ls-files`, `check-ignore`) ran only `core.fsmonitor` in a marker spike on Git 2.54.0.

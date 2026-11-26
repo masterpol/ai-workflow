@@ -21,6 +21,10 @@ External skills (for example from skills.sh) are added with `/add-skill`, which 
 verified skill for every vendor in the project with an explicit scope and workflow phases. See
 `ai-framework/integrations/skills.md`.
 
+To see what the workflow's own folders take up, run `node ai-framework/scripts/workspace-report.mts` (add `--json` or `--root <dir>`). It
+reports files and bytes on disk and tracked in Git per area, with the next step for each. It only reads: it opens no file, changes nothing and
+suggests no deletion. A figure it cannot measure shows as `unknown` or `incomplete`.
+
 ---
 
 See also: [vendors](vendors.md) · [pipeline](pipeline.md)
