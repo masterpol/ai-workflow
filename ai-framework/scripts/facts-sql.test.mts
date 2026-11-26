@@ -235,7 +235,8 @@ const timed = (fn: () => void) => { const t = performance.now(); fn(); return pe
 // t1 is the cost of one small run (floor 1 ms), so a linear function reads t2 / t1 near 2.
 const RATIO_LIMIT = 3;
 // Older runtimes without the thread clock fall back to the process clock.
-const cpuClock = (since?: NodeJS.CpuUsage) => (process.threadCpuUsage ?? process.cpuUsage).call(process, since);
+type CpuSource = Partial<Pick<NodeJS.Process, "threadCpuUsage">> & Pick<NodeJS.Process, "cpuUsage">;
+const cpuClock = (since?: NodeJS.CpuUsage, source: CpuSource = process) => (source.threadCpuUsage ?? source.cpuUsage).call(source, since);
 const cpuTimed = (fn: () => void) => { const u = cpuClock(); fn(); const d = cpuClock(u); return (d.user + d.system) / 1000; };
 const scaling = (small: () => void, large: () => void, time: (fn: () => void) => number = cpuTimed) => {
   let t1 = 0;
@@ -269,6 +270,34 @@ test("scaling: by default, time spent waiting is not counted", () => {
   // On a wall clock these read as a ratio of 5.
   const { t1, t2 } = scaling(sleep(5), sleep(25));
   assert.ok(t2 < 5 && t2 / t1 < RATIO_LIMIT, `a 25 ms sleep counted as ${t2}ms (ratio ${t2 / t1})`);
+});
+
+test("scaling: the thread clock is used when there is one, else the process clock", () => {
+  const read = (user: number) => () => ({ user, system: 0 });
+  assert.equal(cpuClock(undefined, { threadCpuUsage: read(1), cpuUsage: read(2) }).user, 1);
+  assert.equal(cpuClock(undefined, { cpuUsage: read(2) }).user, 2);
+});
+
+test("scaling: a ratio at the limit is measured again and one just under it is not", () => {
+  const at = scripted(10, 10 * RATIO_LIMIT, () => 1);
+  scaling(at.small, at.large, at.time);
+  assert.equal(at.samples(), 70);
+  const under = scripted(10, 29, () => 1);
+  scaling(under.small, under.large, under.time);
+  assert.equal(under.samples(), 14);
+  assert.equal(RATIO_LIMIT, 3);
+});
+
+test("scaling: the fastest sample counts, wherever it falls in a measurement", () => {
+  // Samples alternate pair, large. Every large sample is slowed except the third.
+  const m = scripted(10, 20, (cost, sample) => (sample % 2 === 0 && sample !== 6 ? 4 : 1));
+  const { t1, t2 } = scaling(m.small, m.large, m.time);
+  assert.deepEqual([t1, t2, m.samples()], [10, 20, 14]);
+});
+
+test("scaling: one small run counts as at least 1 ms", () => {
+  const m = scripted(0.1, 0.2, () => 1);
+  assert.equal(scaling(m.small, m.large, m.time).t1, 1);
 });
 
 test("scaling: a machine that only slows longer samples does not change a linear ratio", () => {
@@ -313,15 +342,18 @@ test("repeated unterminated openers stay linear and finish", { timeout: 30000 },
 });
 
 test("doubling the input keeps the time ratio under 3", { timeout: 60000 }, () => {
-  const cases: [string, (n: number) => string][] = [
-    ["valid statements", (n) => stmts(n)],
-    ["quoted noise", (n) => `CREATE TABLE a (id int); ` + `'it''s' "q""x" /* c */ -- l\n`.repeat(n)],
-    ["unterminated openers", (n) => `CREATE TABLE a (id int); ` + `$a$ ' " /* [ `.repeat(n)],
+  const cases: [string, (n: number) => string, (n: number) => number][] = [
+    ["valid statements", (n) => stmts(n), (n) => n],
+    ["quoted noise", (n) => `CREATE TABLE a (id int); ` + `'it''s' "q""x" /* c */ -- l\n`.repeat(n), () => 1],
+    ["unterminated openers", (n) => `CREATE TABLE a (id int); ` + `$a$ ' " /* [ `.repeat(n), () => 1],
   ];
-  for (const [name, gen] of cases) {
+  for (const [name, gen, tables] of cases) {
     const one = gen(30000);
     const two = gen(60000);
-    const { t1, t2 } = scaling(() => { readSql([f(one)], BIG); }, () => { readSql([f(two)], BIG); });
+    let small: ReturnType<typeof readSql> | undefined;
+    let large: ReturnType<typeof readSql> | undefined;
+    const { t1, t2 } = scaling(() => { small = readSql([f(one)], BIG); }, () => { large = readSql([f(two)], BIG); });
+    assert.deepEqual([small?.total.entities, large?.total.entities], [tables(30000), tables(60000)], name);
     assert.ok(t2 < 5000, `${name} doubled took ${t2}ms`);
     assert.ok(t2 / t1 < RATIO_LIMIT, `${name}: ratio ${(t2 / t1).toFixed(2)} (${t1.toFixed(1)}ms -> ${t2.toFixed(1)}ms)`);
   }
@@ -392,9 +424,12 @@ test("fieldsMax counts columns across all tables, and a hit is a budget hit", ()
 
 test("a column type of hundreds of thousands of tokens is read in linear time (render stopped at 80 characters)", () => {
   const at = (n: number) => `create table a(x ${"int ".repeat(n)});`;
-  const read = (text: string) => () => { readSql([f(text)], { bytesPerFile: 10_000_000, bytesTotal: 10_000_000 }); };
+  const types: number[] = [];
+  const read = (text: string) => () => { types.push(readSql([f(text)], { bytesPerFile: 10_000_000, bytesTotal: 10_000_000 }).entities[0]?.columns[0]?.type.length ?? -1); };
   read(at(1000))(); // warm up
+  types.length = 0; // only the timed runs count below
   const { t1: one, t2: two } = scaling(read(at(150_000)), read(at(300_000)));
+  assert.deepEqual([...new Set(types)], [80], "every run read the column, and its type stops at 80 characters");
   assert.ok(two < 3000, `doubled input took ${two}ms`);
   assert.ok(two / one < RATIO_LIMIT, `ratio ${(two / one).toFixed(2)} (${one.toFixed(1)}ms -> ${two.toFixed(1)}ms)`);
 });

@@ -677,7 +677,7 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 
 ## From fix-timing-ratio-flake (2026-11-25)
 
-- **Test coverage review never completed** (med): the OpenCode worker was lost before reporting; the final audit fixes were not re-reviewed. Run it before treating the audit as closed.
+- **The renderer's early stop has no failing test** (low): removing the 80-character `break` in `facts-sql.mts` stays linear and passes; the output length is asserted.
 - **A synchronous reader call cannot be stopped by the test timeout** (low, unverified): run the scaling probes in a killable child with a wall-clock deadline.
 - **Vacuous scaling case** (low): "unterminated openers" costs under 1 ms at both sizes, so the 1 ms floor makes its ratio check pass whatever the growth below that. Raise its sizes.
 - **Other wall-clock limits in tests** (low): several suites assert elapsed milliseconds; none was seen to fail here.
