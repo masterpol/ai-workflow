@@ -27,7 +27,8 @@ harnesses follow the same doc manually):
    point, but now it exists and every later phase can rebuild it the same way).
 4. Scans the actual project (`package.json`, framework/test/deploy config, `.env.example` —
    **never** `.env`/`.env.local`) and drafts `.project/context/{product,architecture,stack}.md`
-   plus the project-specifics section of `AGENTS.md` and the full `CLAUDE.md` mirror.
+   plus the project-specifics section of `AGENTS.md` and the full `CLAUDE.md` mirror. It **replaces** the copied
+   "Project specifics" section, which describes this bundle, and keeps the workflow sections around it.
 5. Drafts stack-specific rule companions into `.project/rules/` — only for what the scan found
    evidence of (frontend framework, styling system, backend/ORM, mobile target, AI structured
    output). Folds in real conventions from your `README.md`/`CONTRIBUTING.md`; if none are
@@ -36,7 +37,8 @@ harnesses follow the same doc manually):
    writes, then waits for Approve / Revise / Selective / Cancel. The setup status marker may be
    updated before a gate so an interrupted setup can be resumed.
 7. Verifies the install end-to-end (see below) and reports a punch list of what's wired vs. what
-   you still need to decide.
+   you still need to decide. The [setup validator](setup-validator.md) fails an install whose entry files still
+   carry the bundle's own project specifics.
 
 ---
 

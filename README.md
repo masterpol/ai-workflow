@@ -60,6 +60,11 @@ That's it — each supported tool detects that `.project/` is missing and self-t
 If yours doesn't, ask it to *"read `SETUP.md` and set up the workflow."* What setup does, OpenCode
 model setup and verification: [Set up](ai-framework/docs/setup.md).
 
+The copied `AGENTS.md` and `CLAUDE.md` still describe this bundle in their "Project specifics" section. Setup replaces
+that section with your project's own. Check the result with `node ai-framework/scripts/setup-validator.mts`: it fails an
+install that kept the bundle's description, and a context, entry or status file that is a link, a special file or over
+1 MiB. Your project can keep its own `SETUP.md`. See [Setup Validator](ai-framework/docs/setup-validator.md).
+
 ## Choose the script runtime
 
 Scripts use Node by default. Workflow settings live in the project-root `ai-workflow.toon`, which holds no

@@ -59,6 +59,13 @@ test("malformed, foreign, and fenced directives are rejected or ignored as appro
   assert.equal((await resolveClaudeEntry(dir, "@someone please look\n")).kind, "none");
 });
 
+test("a rejected directive is described without echoing its text", async (t: TestContext) => {
+  const dir = project(t, { "AGENTS.md": AGENTS_OK });
+  const result = await resolveClaudeEntry(dir, "@/Users/secret-marker/AGENTS.md \u001b[31m\n");
+  assert.equal(result.kind, "invalid");
+  assert.equal(result.detail, 'malformed or foreign AGENTS.md import (only "@AGENTS.md" is accepted)');
+});
+
 test("a missing or symlinked target is rejected", async (t: TestContext) => {
   const missing = project(t, {});
   assert.match((await resolveClaudeEntry(missing, "@AGENTS.md\n")).detail, /missing/);

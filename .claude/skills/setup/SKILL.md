@@ -123,7 +123,9 @@ Draft these documents based on scan results:
 - Key commands
 
 ### `AGENTS.md` project specifics (project root)
-Extend the existing cross-harness entry file with:
+Keep the workflow sections of the existing cross-harness entry file and **replace** its `## Project specifics`
+section: the copy placed from the bundle describes `ai-workflow-portable`, not this project, and `setup-validator`
+fails an install that keeps it. Write:
 - Project name and description (from scan)
 - Framework location pointer
 - Critical priorities (inferred from stack — e.g., TypeScript strict if tsconfig says so)

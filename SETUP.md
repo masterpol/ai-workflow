@@ -224,7 +224,8 @@ equally valid), and
 2. Draft `.project/context/product.md` (what it is, features, users), `architecture.md`
    (services, routing, data flow, auth, deploy), and `stack.md` (deps, scripts, env vars, aliases).
 3. Draft the root entry file:
-    - All harnesses → `AGENTS.md` (extend the one placed in Step 1 with project specifics)
+    - All harnesses → `AGENTS.md`: keep the workflow sections placed in Step 1 and **replace** its `## Project specifics`
+      section, which describes the `ai-workflow-portable` bundle, not this project (`setup-validator` fails a kept copy)
     - `CLAUDE.md` → **required**, not optional, whichever tool runs setup. Replace the Step-1
       bootstrap with a full, self-contained mirror of `AGENTS.md`'s content (pipeline table,
       the `## Response style (caveman mode)` section — copy it verbatim from the bundle's `AGENTS.md`

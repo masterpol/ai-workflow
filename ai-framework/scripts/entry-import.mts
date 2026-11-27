@@ -8,6 +8,13 @@ import { createNodeDeps } from "./runtime/node.mts";
 export type EntryKind = "none" | "import" | "invalid";
 export interface EntryResolution { kind: EntryKind; content: string; detail: string }
 
+/**
+ * First line of the bundle's SETUP.md, which marks the bundle checkout. Presence alone is not enough: a project may have its
+ * own SETUP.md. setup-validator and workflow-doctor both decide with it, so they cannot disagree.
+ */
+export const BUNDLE_SETUP_TITLE = "# SETUP — Portable AI Development Workflow";
+export const isBundleSetup = (text: string | null | undefined): boolean => text?.split(/\r?\n/)[0] === BUNDLE_SETUP_TITLE;
+
 const TARGET = "AGENTS.md";
 const MAX_BYTES = 1024 * 1024;
 // The only accepted import spellings: the sibling file, optionally with an explicit ./ prefix.
@@ -52,7 +59,7 @@ export async function resolveClaudeEntry(rootDir: string, ownText: string, deps:
   const valid = attempts.filter((line) => VALID_IMPORT.test(line));
   const bad = attempts.filter((line) => !VALID_IMPORT.test(line));
   const agentsAttempt = bad.find((line) => /AGENTS\.md/i.test(line));
-  if (agentsAttempt) return { kind: "invalid", content: ownText, detail: `malformed or foreign AGENTS.md import "${agentsAttempt.trim()}" (only "@AGENTS.md" is accepted)` };
+  if (agentsAttempt) return { kind: "invalid", content: ownText, detail: 'malformed or foreign AGENTS.md import (only "@AGENTS.md" is accepted)' };
   if (valid.length === 0) return { kind: "none", content: ownText, detail: "" }; // @mentions that are not AGENTS.md imports are ordinary prose
   const target = path.join(rootDir, TARGET);
   let stat;

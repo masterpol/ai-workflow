@@ -17,7 +17,8 @@ import * as orcaPolicy from "./orca-policy.mts";
 import { SNAPSHOT_PATH, checkUsedAgainstSnapshot, readSnapshotFile } from "./orca-contract.mts";
 import * as docsLinks from "./docs-links.mts";
 import { HOOK_EVENTS, HOOK_START, LEGACY_HOOK_EVENTS, hasRawHook, hooksDir } from "./graphify.mts";
-import { CONSOLIDATION_COMMAND, legacyInventory } from "./consolidation-migrate.mts";
+import { CONSOLIDATION_COMMAND, legacyInventory, readProjectText } from "./consolidation-migrate.mts";
+import { isBundleSetup } from "./entry-import.mts";
 
 import type { RuntimeDeps } from "./runtime/types.mts";
 
@@ -1035,7 +1036,10 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     // copied per its own Step 1, and an installed project's README.md is that project's own,
     // unrelated file. Detect which context this run is in so those two checks don't misfire
     // against a real target project (found by testing this doctor against one).
-    const inPortableBundleRepo = await exists(absolute("SETUP.md"));
+    // A target project may have its own SETUP.md, so the bundle's title decides, as in setup-validator.
+    let setupText: string | null = null;
+    try { setupText = readProjectText(root, "SETUP.md", 1024 * 1024, deps); } catch { setupText = null; }
+    const inPortableBundleRepo = isBundleSetup(setupText);
 
     const coreFiles = ["AGENTS.md", "CLAUDE.md", "README.md", "ai-framework/workflow/overview.md", "ai-framework/integrations/harnesses.md", "ai-framework/rules/model-routing.md", "ai-framework/hooks/hooks.json", ".claude/settings.json", ".codex/hooks.json", ".opencode/plugins/token-consumption.ts", "ai-framework/integrations/skill-defaults.md"];
     if (inPortableBundleRepo) coreFiles.push("SETUP.md");

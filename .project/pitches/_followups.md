@@ -658,6 +658,7 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 
 ## From greenfield-kickoff shaping (2026-11-25)
 - **New installs inherit this repository's identity** (high, bug): `SETUP.md` copies the bundle's `AGENTS.md` and `CLAUDE.md`, whose "Project specifics" describe `ai-workflow-portable` (product, stack, verification commands); the bootstrap stub the docs expect is gone and `setup-validator` accepts the copied section as complete. Ship neutral entry files (or a stub) and make the validator refuse the bundle's own section in an install. Check whether LAH, RN and climbing carry it.
+  Closed in v2.59.3 by [fix-install-inherits-bundle-identity](fix-install-inherits-bundle-identity/SHIPPED.md); neutral entry files stay with `starter-install`, and LAH is unchecked.
 
 ## From workspace-slim shaping (2026-11-25)
 - **Installed skill packages are indexed and committed** (high, bug): `GRAPHIGNORE` and `GITIGNORE_BLOCK` in `graphify.mts` and `SETUP.md`'s minimum ignore list omit `.project/skills/packages/` (this checkout's own `.gitignore` has it). In LAH 87% of graph data (58.9 of 67.5 MB) is that folder, rewritten and staged by the pre-commit hook on every commit. LAH also tracks 624 files / 23 MB of packages (597 are Archify, committed by the assistant on 2026-11-24 against `state-report.md`). Fix the templates, warn in the doctor when packages are tracked, and in LAH untrack them and rebuild the graph (history keeps them).
@@ -736,6 +737,13 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **A default `graphify query` can return no knowledge** (high, observed): for two of three realistic questions, none of the 55 nodes shown at the default budget was a knowledge entry (617 and 402 found; 7 and 3 knowledge entries appeared at `--budget 60000`). The shape, search and fix gates query this way. Rank knowledge first, filter to knowledge nodes, or tell the gates to raise the budget; measure on more questions first.
   Closed in v2.59.2 by [fix-graphify-knowledge-query](fix-graphify-knowledge-query/SHIPPED.md). Both previously empty queries now emit five knowledge paths at the default budget.
 - **Cooldown rule destination** (observed): `/cooldown` names `ai-framework/rules/` for promotions. Shape a small change to route project-specific lessons to `.project/rules/` and reusable bundle lessons to `ai-framework/rules/`. See [the knowledge distill pitch](03-knowledge-distill/pitch.md).
+
+## From fix-install-inherits-bundle-identity audit (2026-11-27)
+
+- **Unguarded reads in shared helpers** (medium, static review): `skill-vendors.mts` and `skill-registry.mts` read mirrors and registry files without a type or size bound, and the validator's rules and TypeScript directory listings are unchecked (`security.md` §9).
+- **Ledger and outcome readers** (medium, static review): they check a path and then open it, and their diagnostics copy values from malformed records.
+- **`resolveClaudeEntry` second read** (medium, static review): the imported `AGENTS.md` is re-read without a pinned descriptor or link-count check. `bundle-sync` and the validator share it.
+- **LAH** (open check): its entry files are plain files, but its content was not checked for the bundle's specifics (the read was denied) and it has its own root `SETUP.md`. Run its validator after sync.
 
 ## From knowledge-distill re-shape (2026-11-27)
 
