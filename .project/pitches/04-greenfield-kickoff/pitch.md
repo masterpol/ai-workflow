@@ -147,3 +147,5 @@ eval-regression-projector. 29 findings, 10 high. Raw reports: `critique/`.
 ☐ Pass — moved to `.project/pitches/_parked/greenfield-kickoff/`; reason: {…}
 
 If acknowledging critique findings without addressing, log reason here.
+
+**2026-11-27: ☑ Bet**, recorded when the owner approved the [plan](plan.md). The critique findings are dispositioned in the table above. The split trigger fired at `/plan` (about 20 files and about 2,000 lines), so part A (detection, routing and definition ownership) is planned and part B (interview and hand-over) will be planned after A ships. Build waits for the install-identity fix.
