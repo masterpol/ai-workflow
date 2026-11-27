@@ -65,6 +65,13 @@ that section with your project's own. Check the result with `node ai-framework/s
 install that kept the bundle's description, and a context, entry or status file that is a link, a special file or over
 1 MiB. Your project can keep its own `SETUP.md`. See [Setup Validator](ai-framework/docs/setup-validator.md).
 
+First-time setup also runs a read-only check of what the folder already holds. On the install routes above it currently
+reports `unclear`, so setup asks whether the project is new or existing. A guided start for new projects is not available
+yet. See [Set up](ai-framework/docs/setup.md).
+
+**Known issue with Bun:** a script run through Bun from a project folder first runs that project's `bunfig.toml` preload.
+Until this is fixed, use the default Node runner in a checkout you do not trust.
+
 ## Choose the script runtime
 
 Scripts use Node by default. Workflow settings live in the project-root `ai-workflow.toon`, which holds no

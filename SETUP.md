@@ -102,6 +102,16 @@ workflow's bootstrap still fires. Only replace the whole file if the human expli
 
 **Gate:** list every path you will create/merge, then wait for approval.
 
+**Project state (first-time only).** After the Step 1 files are in place, and before Steps 2–5 write anything else,
+if none of `.project/context/{product,architecture,stack}.md` exists yet, run
+`node ai-framework/scripts/project-state.mts --json` and route its `state` as `/setup` does
+(`.claude/skills/setup/SKILL.md`, Step 0). Step 3 creates files the check would count (`.gitignore`,
+`.project/pitches/_followups.md`, the graph files), so run it first. Never run it on a re-run. Run it once per setup:
+Step 4 (`/setup` or the manual scan) uses this result and the person's answer, and writes the
+choice note by the rules in that skill step.
+While this bundle's source folder or its own root files (`README.md`, `LICENSE`, `VERSION` and so on) are in the
+project, expect `unclear`, even for an existing project: ask the person.
+
 ---
 
 ## Step 2 — Wire all harnesses
@@ -215,7 +225,8 @@ project — never guessed.
 **If the active installer is Claude Code:** run `/setup` — the skill scans the repo and drafts `AGENTS.md`
 project specifics, the full `CLAUDE.md` mirror (required — see below; a kept valid `@AGENTS.md` import is
 equally valid), and
-`.project/context/{product,architecture,stack}.md`, then gates for approval.
+`.project/context/{product,architecture,stack}.md`, then gates for approval. On a re-run, Refresh all, Merge and Selective never rewrite, delete or regenerate
+`.project/context/definition.md` (when it exists, the project kickoff writes it).
 
 **If the active installer is OpenCode, Cursor, Codex, or another harness:** do the scan manually, following
 `.claude/skills/setup/SKILL.md`. Concretely:

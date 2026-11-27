@@ -40,6 +40,21 @@ harnesses follow the same doc manually):
    you still need to decide. The [setup validator](setup-validator.md) fails an install whose entry files still
    carry the bundle's own project specifics.
 
+**Project state.** A first-time run first checks the project with `project-state.mts`, which reports one of four states:
+
+- `existing`: the project has application, manifest, infrastructure, notebook, SQL or document files. Setup runs as it always has.
+- `empty`: a completed scan found only the bundle and its scaffold. The project kickoff is not available yet, so setup continues and writes `open` for every field it cannot scan.
+- `unclear`: something could not be judged, such as a symlink, an unreadable file, a scan over budget or an unknown file in a harness folder. Setup asks you to choose new or existing project and records the choice in `.project/status.md`.
+- `resume`: a saved kickoff draft exists. Setup leaves it as it is.
+
+**Current limit:** neither documented install route leaves a clean project. Dropping the bundle folder in leaves that
+folder; copying its contents adds the bundle's own `README.md`, `LICENSE`, `VERSION` and other files. The check then
+reports `unclear`, even for an existing project, and setup asks you. `empty` and `existing` are detected only when the
+project root holds just your project and the files `SETUP.md` Step 1 places. Automatic detection of a new project
+waits for a clean installer, which does not exist yet.
+
+Re-runs skip the check. Refresh all, Merge and Selective never rewrite `.project/context/definition.md`.
+
 ---
 
 See also: [token-consumption](token-consumption.md) · [workflow-doctor](workflow-doctor.md) · [setup-validator](setup-validator.md) · [knowledge-graph](knowledge-graph.md)

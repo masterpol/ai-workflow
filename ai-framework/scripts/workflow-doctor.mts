@@ -1054,6 +1054,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     scripts.push("ai-framework/scripts/runtime/config.mts", "ai-framework/scripts/config-migrate.mts");
     scripts.push("ai-framework/scripts/facts-gather.mts", "ai-framework/scripts/facts-gather.test.mts", "ai-framework/scripts/facts-project.mts", "ai-framework/scripts/facts-project.test.mts", "ai-framework/scripts/facts-sql.mts", "ai-framework/scripts/facts-sql.test.mts");
     scripts.push("ai-framework/scripts/phase-commands.mts", "ai-framework/scripts/phase-commands.test.mts", "ai-framework/scripts/command-name-guard.test.mts");
+    scripts.push("ai-framework/scripts/project-state.mts", "ai-framework/scripts/project-state.test.mts");
     // The README is now an index; each documented topic lives in ai-framework/docs/.
     const docsChecks = [
       ["setup", /^# Set up$/m, "documents setup"],

@@ -6,8 +6,8 @@
 
 | Scope | Position | Last moved | Notes |
 |-------|----------|------------|-------|
-| A1 | uphill 0% | 2026-11-27 | Not started. Blocked by the install-identity fix; the shipped-path spike comes first. |
-| A2 | uphill 0% | 2026-11-27 | Not started. Blocked by the install-identity fix. |
+| A1 | done | 2026-11-27 | Exit criteria evidenced in `log.md`; approved by the owner. |
+| A2 | done | 2026-11-27 | Option 3: instructions state the current limit; exit commands and verifier pass. Owner smoke test and the live-only golden case are not run. |
 
 ## Hill positions reference
 

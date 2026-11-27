@@ -309,7 +309,7 @@ export const nodeNet: NetDeps = { tryListen: listenOnce };
 
 export const nodeFs: FsDeps = {
   constants: {
-    F_OK: fs.constants.F_OK, X_OK: fs.constants.X_OK, O_RDONLY: fs.constants.O_RDONLY,
+    F_OK: fs.constants.F_OK, R_OK: fs.constants.R_OK, X_OK: fs.constants.X_OK, O_RDONLY: fs.constants.O_RDONLY,
     O_NOFOLLOW: fs.constants.O_NOFOLLOW, O_NONBLOCK: fs.constants.O_NONBLOCK, COPYFILE_EXCL: fs.constants.COPYFILE_EXCL,
   },
   readFileSync: (file) => fs.readFileSync(file, "utf8"),

@@ -738,6 +738,15 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
   Closed in v2.59.2 by [fix-graphify-knowledge-query](fix-graphify-knowledge-query/SHIPPED.md). Both previously empty queries now emit five knowledge paths at the default budget.
 - **Cooldown rule destination** (observed): `/cooldown` names `ai-framework/rules/` for promotions. Shape a small change to route project-specific lessons to `.project/rules/` and reusable bundle lessons to `ai-framework/rules/`. See [the knowledge distill pitch](03-knowledge-distill/pitch.md).
 
+## From greenfield-kickoff part A build (2026-11-27)
+
+- **Detector and `node_modules`** (medium, observed): an installed JavaScript project passes the 4,096-entry budget and reports `unclear`, so setup asks instead of going straight to today's flow. The owner left it as is at the A1 gate.
+- **Bun runs a project's `bunfig.toml` preload before workflow scripts** (high, reproduced): affects every script when Bun is the runner or invoked directly. Shape a fix in the shared startup (trusted config, no automatic env files) and document direct invocation. **Open when part A shipped, by the owner's override on 2026-11-27: run `/fix` next.**
+- **Detector hardening** (medium): bounded incremental directory listing; path-swap race; assert reason strings; installed-skill paths report `unclear` (coordinate with pitch 07).
+- **`SETUP.md` Step 3** (medium, static): check that `.project` is not a link before copying the scaffold. The setup skill also has no fallback when `status.md` and its template are both missing on a re-run.
+- **No documented install route reaches `empty` or `existing`** (high, observed): the bundle's source folder or root files make first-time detection `unclear`. A clean installer (`starter-install`) or detector support for the routes is needed before the part B interview can start by itself; settle this before planning part B.
+- **README, LICENSE or `.gitignore` only reports `existing`** (design, observed): a typical new repository would never reach the part B interview. Revisit before planning part B.
+
 ## From fix-install-inherits-bundle-identity audit (2026-11-27)
 
 - **Unguarded reads in shared helpers** (medium, static review): `skill-vendors.mts` and `skill-registry.mts` read mirrors and registry files without a type or size bound, and the validator's rules and TypeScript directory listings are unchecked (`security.md` §9).

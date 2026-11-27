@@ -5,7 +5,7 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| 04-greenfield-kickoff | part A planned (A1, A2 uphill 0%); split per pitch trigger | plan approved; next: `/build` A | big-batch | 2026-11-27 |
+| 04-greenfield-kickoff | part A shipped (v2.60.0) with an open Bun security high; part B not planned: settle the install route first | plan (part B) | big-batch | 2026-11-27 |
 | 05-workspace-recovery | draft: Git-backed removal, cut from slim | shape | unset | 2026-11-25 |
 | 06-workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
 | 07-archify-local-library | shaped: gitignore skill packages so Archify does not commit as source | shape | small-batch | 2026-11-26 |
@@ -27,11 +27,11 @@ Folder numbers are the **implementation order** (lower first, ranked 2026-11-25 
 ## Recent ships (last 5)
 | Pitch | Shipped | Notes |
 |-------|---------|-------|
+| greenfield-kickoff part A | 2026-11-27 | v2.60.0. Read-only project-state check and setup routing; install routes report `unclear`. **Shipped by owner override with a security high open (Bun preload); run `/fix` next.** See `pitches/04-greenfield-kickoff/SHIPPED-part-a.md` and `runs/2026-11-27-greenfield-kickoff-part-a.md`. |
 | fix-install-inherits-bundle-identity | 2026-11-27 | v2.59.3. A new install that keeps the bundle's project specifics now fails setup validation; linked entry files now fail too. Verifier 2,471 pass, three skips. See `pitches/fix-install-inherits-bundle-identity/SHIPPED.md` and `runs/2026-11-27-fix-install-inherits-bundle-identity.md`. |
 | fix-graphify-knowledge-query | 2026-11-26 | v2.59.2. Plain Graphify queries show up to five ranked knowledge paths before native traversal. Final verifier passed with 2,456 tests and three skips. See `pitches/fix-graphify-knowledge-query/SHIPPED.md` and `runs/2026-11-26-fix-graphify-knowledge-query.md`. |
 | workspace-slim | 2026-11-26 | v2.59.1; read-only `workspace-report.mts` (disk and tracked size per area) and a knowledge index cut from 123,059 to 32,367 bytes at build; Orca build and 2-cycle audit, no open confirmed must-fix, cycle 1 security not independent; checkout suite 2,455 pass / 3 skip / 0 fail. Package-ignore fix still pending (LAH and climbing-lab track packages). See `pitches/02-workspace-slim/SHIPPED.md` and `runs/2026-11-26-workspace-slim.md`. |
 | review-bench-hardening | 2026-11-26 | v2.58.1; the review bench inspects a repo without running its Git programs on covered routes (configured hooks, filters, submodules, PATH), its count, canary and record checks no longer pass wrongly in the reproduced cases, and `guard` sees a second edit to a changed file; Orca build and 2-cycle audit plus a follow-up review, no open confirmed must-fix, last executable-bit fix not re-reviewed; checkout suite 2,431 pass / 3 skip / 0 fail. High unverified followup: other Git callers and configured hooks. See `pitches/01-review-bench-hardening/SHIPPED.md` and `runs/2026-11-26-review-bench-hardening.md`. |
-| fix-timing-ratio-flake | 2026-11-25 | test-only bug fix on PR #14; the SQL scaling-ratio tests compare equal work in thread CPU time and remeasure at the limit (still 3); final file 0 of 15 loaded runs failed, old test 3 of 15; audit complete, no confirmed must-fix, last test additions not re-reviewed; verifier exit 0, 2,387 pass / 3 skip / 0 fail. See `pitches/fix-timing-ratio-flake/SHIPPED.md` and `runs/2026-11-25-fix-timing-ratio-flake.md`. |
 
 ## Open rabbit holes across active pitches
 - Legacy source access, content and media totals, and school-site ownership.
@@ -44,4 +44,4 @@ Folder numbers are the **implementation order** (lower first, ranked 2026-11-25 
 ## /cooldown reviewed 2026-10-21 (forced; 5 ships since; due now, no decision pre-approved; consolidation shipped)
 Forced report: `runs/cooldown-2026-10-21-forced.md` (promoted C5, C8 rules; closed C4, C9 as already codified; bundled C6, C7 as candidate pitches). Earlier: `runs/cooldown-2026-10-21.md`. Corrected the stale October 8 counter: nine completed pitches followed the preserved October 17 review. C4–C9 decided; C1–C3 and the October 17 candidates approved 2026-10-22 (C1 closed as already implemented; C2, C3 and the 10-17 bundles are candidate pitches; C6, C7 are pitch drafts). No promotions, archives, revivals or backlog bundles applied; individual approval required.
 
-## /cooldown due now (13 ships since the 2026-10-23 forced cooldown)
+## /cooldown due now (14 ships since the 2026-10-23 forced cooldown)
