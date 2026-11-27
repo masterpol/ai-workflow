@@ -5,7 +5,7 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| 04-greenfield-kickoff | part A shipped (v2.60.0) with an open Bun security high; part B not planned: settle the install route first | plan (part B) | big-batch | 2026-11-27 |
+| 04-greenfield-kickoff | part A shipped (v2.60.0; Bun security high open, `/fix` still due); B1 in build; B2 outline only | build (B1) | big-batch | 2026-11-27 |
 | 05-workspace-recovery | draft: Git-backed removal, cut from slim | shape | unset | 2026-11-25 |
 | 06-workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
 | 07-archify-local-library | shaped: gitignore skill packages so Archify does not commit as source | shape | small-batch | 2026-11-26 |

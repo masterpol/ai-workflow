@@ -8,6 +8,8 @@
 |-------|----------|------------|-------|
 | A1 | done | 2026-11-27 | Exit criteria evidenced in `log.md`; approved by the owner. |
 | A2 | done | 2026-11-27 | Option 3: instructions state the current limit; exit commands and verifier pass. Owner smoke test and the live-only golden case are not run. |
+| B1-S1 | uphill 0% | 2026-11-27 | [Plan B1](plan-b1.md) |
+| B1-S2 | uphill 0% | 2026-11-27 | Spike first. |
 
 ## Hill positions reference
 
