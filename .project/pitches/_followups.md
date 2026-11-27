@@ -737,6 +737,10 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
   Closed in v2.59.2 by [fix-graphify-knowledge-query](fix-graphify-knowledge-query/SHIPPED.md). Both previously empty queries now emit five knowledge paths at the default budget.
 - **Cooldown rule destination** (observed): `/cooldown` names `ai-framework/rules/` for promotions. Shape a small change to route project-specific lessons to `.project/rules/` and reusable bundle lessons to `ai-framework/rules/`. See [the knowledge distill pitch](03-knowledge-distill/pitch.md).
 
+## From knowledge-distill re-shape (2026-11-27)
+
+- **Ranked knowledge query misses cited cards** (high, observed): on five `/shape` gate questions from pitches 01, 02, 04, 06 and 07, `graphify.mts query` ranked 4 of the 9 cards those pitches cited into its top five, and none for the 04, 06 and 07 questions. Candidate `/shape-lite` fix; use [the gate questions](03-knowledge-distill/pilot/gate-questions.json) as a test set with fresh held-out questions, and report recall separately from words loaded. See [the gate comparison](03-knowledge-distill/pilot/gate-comparison.md). The untracked `fix-graph-query-hides-knowledge/` folder may be a start on this; owner to confirm.
+
 ## From fix-graphify-knowledge-query (2026-11-26)
 
 - **Shared project reader during concurrent ancestor replacement** (medium, static review): the descriptor-pinned reader rejects static symlinks and verifies the file identity. An ancestor replaced during the pathname inspection can redirect both checks to the same out-of-project file. Evaluate a portable containment strategy for `readProjectText` and its callers.

@@ -5,7 +5,6 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
-| 03-knowledge-distill | R1 uphill 0%; revised plan awaiting approval | plan | big-batch | 2026-11-26 |
 | 04-greenfield-kickoff | shaped, critiqued, re-shaped | shape (bet pending) | big-batch | 2026-11-25 |
 | 05-workspace-recovery | draft: Git-backed removal, cut from slim | shape | unset | 2026-11-25 |
 | 06-workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
@@ -15,7 +14,7 @@ Folder numbers are the **implementation order** (lower first, ranked 2026-11-25 
 - **00** package-less-ship-verification: shipped 2026-11-25 (v2.57.0); other numbers unchanged.
 - **01** review-bench-hardening: shipped 2026-11-26 (v2.58.1).
 - **02** workspace-slim: shipped 2026-11-26 (v2.59.1).
-- **03** knowledge-distill: reopened 2026-11-26 to revise the approach after the pilot triggered the stop rule.
+- **03** knowledge-distill: passed and parked 2026-11-27 (see Parked pitches).
 - **04** greenfield-kickoff: New-project start; needs 00 and the install-identity fix first.
 - **05** workspace-recovery: Real file removal with Git-backed restore; the riskiest, builds on what 02 reports.
 - **06** workflow-v3-rollout: Sync installed projects to a pinned release, so it follows the next version.
@@ -23,7 +22,7 @@ Folder numbers are the **implementation order** (lower first, ranked 2026-11-25 
 - **Before 00, two small bug fixes with no pitch** (`_followups.md`): installed skill packages are committed and indexed (the largest size win); new installs inherit this repository's identity.
 
 ## Parked pitches
-_None._
+- **03-knowledge-distill** (2026-11-27, kept at `pitches/03-knowledge-distill/` because records link to it): summaries loaded more text; a single-topic loader does not fit real gate questions, which miss cards rather than load too many words. See `parking-decision.md` and `pilot/gate-comparison.md`.
 
 ## Recent ships (last 5)
 | Pitch | Shipped | Notes |

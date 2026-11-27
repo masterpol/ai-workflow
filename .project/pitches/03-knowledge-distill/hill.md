@@ -4,4 +4,4 @@ Initialized 2026-11-26. [Implementation plan](plan.md)
 
 | Scope | Position | Last moved | Notes |
 |---|---|---|---|
-| R1 | uphill 0% | 2026-11-26 | Awaiting approval of the revised implementation plan. |
+| R1 | not started | 2026-11-27 | Pitch passed and parked; plan never approved. |
