@@ -2,7 +2,7 @@
 id: a-gate-must-not-audit-its-own-instrument
 type: pattern
 created: 2026-09-27
-updated: 2026-09-27
+updated: 2026-11-26
 tags: [security, review-tooling, self-audit, workflow-tooling]
 related: [a-gate-must-not-trust-its-own-author, a-report-over-an-untrusted-tree-runs-only-bundle-code, resolve-before-matching-a-protected-path-allowlist, reviewer-reports-contradicted-by-measurement]
 source: independent-rereview-catch-up
@@ -57,3 +57,9 @@ the evidence other decisions rely on.
 
 [[a-gate-must-not-trust-its-own-author]], [[a-report-over-an-untrusted-tree-runs-only-bundle-code]],
 [[resolve-before-matching-a-protected-path-allowlist]], [[reviewer-reports-contradicted-by-measurement]].
+
+## Applied (review-bench-hardening, 2026-11-26)
+
+When the change under audit was the review tool itself, scratch copies, the repository guard and the planted-defect checks ran from the
+**committed pre-change copy**, placed outside the repository. The new tool then checked only its own audit record. Its old known weaknesses were
+covered by hand (reading the cited line against the live file).
