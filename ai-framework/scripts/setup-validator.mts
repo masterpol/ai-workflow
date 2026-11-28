@@ -9,6 +9,7 @@ import { CONFIG_FILE, loadConfig } from "./runtime/config.mts";
 import { MAX_LEDGER_BYTES, validateLedgerShape } from "./ledger-schema.mts";
 import { lintOutcomeRecord, OUTCOME_DIR, printable } from "./outcome-record.mts";
 import { recordSlugs } from "./done-work-index.mts";
+import { readProjectText } from "./consolidation-migrate.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 type Status = "pass" | "info" | "warn" | "fail";
@@ -18,23 +19,42 @@ const safeCode = (value: unknown): string | undefined => typeof value === "strin
 interface CursorReport { created: string[]; differs: string[]; current: number }
 interface ClaudeEntry { kind: string; detail?: string; content: string }
 
+/**
+ * The first words of this bundle's own "Project specifics". SETUP.md copies the bundle's entry files into a new project, so an
+ * install still holding this sentence describes ai-workflow-portable, not itself. A test pins it to the bundle's AGENTS.md.
+ */
+export const BUNDLE_IDENTITY = "This repository is the `ai-workflow-portable` bundle itself";
+
+const MAX_PROJECT_FILE_BYTES = 1024 * 1024;
+const REFUSED = "refused: not a single plain UTF-8 file of at most 1 MiB inside the project (links are not followed)";
+// An error's code is safe to print; its message can carry absolute paths or file text.
+const codeOf = (error: unknown): string => (typeof error === "object" && error !== null && "code" in error ? safeCode(error.code) : undefined) ?? "UNKNOWN";
+
+export { BUNDLE_SETUP_TITLE } from "./entry-import.mts";
+
 /** The CommonJS helpers this script needs; injectable so tests need no real project tree. */
 export interface ValidatorLibs {
   cursorMirrors(root: string): CursorReport;
   resolveClaudeEntry(root: string, own: string): Promise<ClaudeEntry>;
-  effectiveEntryText(root: string, file: string): Promise<{ content: string }>;
+  /** Guarded read of a project file: null when absent, throws when it is refused. */
+  readRootFile(root: string, relative: string, deps: RuntimeDeps): string | null | Promise<string | null>;
 }
 
 const defaultLibs: ValidatorLibs = {
   cursorMirrors: (skillVendors as ValidatorLibs).cursorMirrors,
   resolveClaudeEntry: (entryImport as ValidatorLibs).resolveClaudeEntry,
-  effectiveEntryText: (entryImport as ValidatorLibs).effectiveEntryText,
+  readRootFile: (root, relative, deps) => readProjectText(root, relative, MAX_PROJECT_FILE_BYTES, deps),
 };
 
 const palette: Record<string, string> = { pass: "\u001b[32m", info: "\u001b[34m", warn: "\u001b[33m", fail: "\u001b[31m", heading: "\u001b[35m", reset: "\u001b[0m" };
 
 // Runs under plain `node -e` (CommonJS): parses a TypeScript file by stripping types; exits 1 with the parser message on a syntax error.
 const NODE_PARSE_SCRIPT = 'const m=require("module"),fs=require("fs");if(typeof m.stripTypeScriptTypes!=="function")process.exit(3);m.stripTypeScriptTypes(fs.readFileSync(process.argv[1],"utf8"));';
+// Helper checks come from the running bundle, never from the checked project; they take that project from the working directory.
+const bundleScript = (deps: RuntimeDeps, name: string): string => deps.path.join(import.meta.dirname, name);
+const isCount = (value: unknown): boolean => Number.isSafeInteger(value) && (value as number) >= 0;
+// Why a child check ended, from safe codes only.
+const childEnd = (result: CheckRun): string => result.errorCode ?? (result.signal ? `signal ${result.signal}` : `exit ${result.code}`);
 const TS_DIRS = ["ai-framework/scripts", "ai-framework/scripts/runtime", "ai-framework/hooks/scripts", ".claude/hooks", ".opencode/plugins"];
 
 /**
@@ -93,8 +113,10 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   const absolute = (relativePath: string): string => deps.path.join(root, relativePath);
   const paint = (status: string, text: string): string => (color ? `${palette[status] || ""}${text}${palette.reset}` : text);
   function record(status: Status, name: string, detail: string): void {
-    results.push({ status, name, detail });
-    if (!json) out(`${paint(status, status.toUpperCase().padEnd(5))} ${name}: ${detail}\n`);
+    // File names and some details come from the project: no control character may start a line or move the cursor.
+    const entry = { status, name: printable(name), detail: printable(detail) };
+    results.push(entry);
+    if (!json) out(`${paint(status, status.toUpperCase().padEnd(5))} ${entry.name}: ${entry.detail}\n`);
   }
   // The Bun adapter's exists() is false for directories (Bun.file().exists()), so fall back to readdir.
   const exists = async (relativePath: string): Promise<boolean> =>
@@ -104,6 +126,18 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
     record("fail", relativePath, "missing");
     return false;
   }
+  /** The text of a project file, or null after recording why it could not be read. */
+  async function readText(relativePath: string): Promise<string | null> {
+    try {
+      const text = await libs.readRootFile(root, relativePath, deps);
+      if (text === null) record("fail", relativePath, "missing");
+      return text;
+    } catch { record("fail", relativePath, REFUSED); return null; }
+  }
+  // For checks that must not report a second time: absent and refused both give null.
+  const quietText = async (relativePath: string): Promise<string | null> => {
+    try { return await libs.readRootFile(root, relativePath, deps); } catch { return null; }
+  };
   // A spawn failure (missing binary) is reported like a non-zero exit, as before.
   async function run(command: string, args: string[]): Promise<CheckRun> {
     try {
@@ -114,34 +148,44 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
       return { code: null, stdout: "", stderr: "", signal: null, errorCode: code ?? "SPAWN_FAILED" };
     }
   }
-  const errorText = (error: unknown): string => (error instanceof Error ? error.message : String(error));
 
   async function checkContext(): Promise<void> {
     await Promise.all(["product.md", "architecture.md", "stack.md"].map(async (file) => {
       const relativePath = `.project/context/${file}`;
       if (!(await requireFile(relativePath))) return;
-      const content = await deps.fs.readFile(absolute(relativePath));
+      const content = await readText(relativePath);
+      if (content === null) return;
       // Placeholders inside code (e.g. a `<build-command>` mapping table, or `Array<string>`) are
       // documentation, not unfilled template slots — only bare <...> outside code counts.
       const prose = content.replace(/```[\s\S]*?```/g, "").replace(/`[^`\n]*`/g, "");
-      const incomplete = content.trim().length < 80 || /_Detecting\.\.\.|_Scanning project\.\.\.|<[^>]+>/.test(prose);
+      const incomplete = content.trim().length < 80 || /_Detecting\.\.\.|_Scanning project\.\.\.|<[^<>]+>/.test(prose);
       record(incomplete ? "fail" : "pass", relativePath, incomplete ? "appears to be an unfilled setup draft" : "contains generated project context");
     }));
   }
   async function checkEntryFiles(): Promise<void> {
-    if (await requireFile("AGENTS.md")) {
-      const content = await deps.fs.readFile(absolute("AGENTS.md"));
-      const complete = /^## Project specifics$/m.test(content) && !/Fill this in during Step 4/.test(content);
-      record(complete ? "pass" : "fail", "AGENTS.md", complete ? "project specifics are filled" : "project specifics are still a setup placeholder");
+    // Only the bundle checkout has the bundle's SETUP.md at its root, so elsewhere the bundle's sentence was copied.
+    // An absent or unreadable SETUP.md counts as an install, which keeps the check on.
+    const install = !entryImport.isBundleSetup(await quietText("SETUP.md"));
+    const inherited = (content: string): boolean => install && content.includes(BUNDLE_IDENTITY);
+    const inheritedDetail = "project specifics are still this bundle's own (ai-workflow-portable); replace them with this project's";
+    const agents = (await requireFile("AGENTS.md")) ? await readText("AGENTS.md") : null;
+    if (agents !== null) {
+      const content = agents;
+      if (inherited(content)) record("fail", "AGENTS.md", inheritedDetail);
+      else {
+        const complete = /^## Project specifics$/m.test(content) && !/Fill this in during Step 4/.test(content);
+        record(complete ? "pass" : "fail", "AGENTS.md", complete ? "project specifics are filled" : "project specifics are still a setup placeholder");
+      }
     }
-    if (await requireFile("CLAUDE.md")) {
-      const own = await deps.fs.readFile(absolute("CLAUDE.md"));
+    const own = (await requireFile("CLAUDE.md")) ? await readText("CLAUDE.md") : null;
+    if (own !== null) {
       // A third valid shape: CLAUDE.md loads AGENTS.md through Claude Code's native `@AGENTS.md`
       // import. Validate the effective text (CLAUDE.md + its local, regular-file target); a
       // malformed, foreign, symlinked or missing target fails rather than passing on the pointer.
       const entry = await libs.resolveClaudeEntry(root, own);
       if (entry.kind === "invalid") { record("fail", "CLAUDE.md", entry.detail ?? ""); return; }
       const content = entry.content;
+      if (inherited(content)) { record("fail", "CLAUDE.md", inheritedDetail); return; }
       const isBootstrapStub = /Bootstrap file shipped/.test(own);
       // SETUP.md has two valid completion shapes for CLAUDE.md, not one: a full mirror (no
       // pre-existing CLAUDE.md, so setup replaces the bootstrap wholesale — "## Project
@@ -168,19 +212,22 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   // Warn, not fail: a target project's own pre-existing entry file may legitimately predate this.
   async function checkCavemanEntryFiles(): Promise<void> {
     for (const file of ["AGENTS.md", "CLAUDE.md"]) {
-      if (!(await exists(file))) continue;
-      const has = /^## Response style \(caveman mode\)$/m.test((await libs.effectiveEntryText(root, file)).content);
+      const text = await quietText(file); // checkEntryFiles reports an absent or refused entry file
+      if (text === null) continue;
+      const effective = file === "CLAUDE.md" ? (await libs.resolveClaudeEntry(root, text)).content : text;
+      const has = /^## Response style \(caveman mode\)$/m.test(effective);
       record(has ? "pass" : "warn", file, has ? "carries the caveman response-style section" : "no caveman response-style section: the main session agent will not apply caveman mode (copy the section from the bundle's AGENTS.md)");
     }
   }
   async function checkKnowledgeGraph(): Promise<void> {
     const files = ["graphify-out/graph.json", ".project/knowledge/index.md", ".graphifyignore"];
     if (!(await Promise.all(files.map(exists))).every(Boolean)) { await Promise.all(files.map(requireFile)); return; }
-    const result = await run(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "ai-framework/scripts/graphify.mts", "--check", "--json"]);
-    if (result.code !== 0) { record("fail", "Knowledge graph", result.stderr.trim() || "graphify reported invalid entries"); return; }
+    const result = await run(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", bundleScript(deps, "graphify.mts"), "--check", "--json"]);
+    if (result.code !== 0) { record("fail", "Knowledge graph", `graphify reported invalid entries (${childEnd(result)}); run node ai-framework/scripts/graphify.mts --check`); return; }
     try {
       const report = JSON.parse(result.stdout) as { problems?: { level: string }[]; stats: { total: number } };
-      const errors = report.problems?.filter((problem) => problem.level === "error") ?? [];
+      if (!isCount(report.stats.total) || !Array.isArray(report.problems)) throw new Error("invalid report");
+      const errors = report.problems!.filter((problem) => problem.level === "error");
       record(errors.length === 0 ? "pass" : "fail", "Knowledge graph", errors.length === 0 ? `graphify validated ${report.stats.total} entry(ies)` : `graphify found ${errors.length} error(s)`);
     } catch { record("fail", "Knowledge graph", "graphify did not return JSON"); }
   }
@@ -190,9 +237,11 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   async function checkScaffold(): Promise<void> {
     await Promise.all([".project/status.md", ".project/pitches/_followups.md", ".project/pitches/_archive/.gitkeep", ".project/pitches/_parked/.gitkeep", ".project/done-work.md"].map(requireFile));
     if (await exists(".project/status.md")) {
-      const content = await deps.fs.readFile(absolute(".project/status.md"));
-      const lines = content.trimEnd() === "" ? 0 : content.trimEnd().split("\n").length;
-      record(lines <= 100 ? "pass" : "fail", ".project/status.md", lines <= 100 ? `${lines} lines within the 100-line limit` : `${lines} lines exceeds the 100-line limit`);
+      const content = await readText(".project/status.md");
+      if (content !== null) {
+        const lines = content.trimEnd() === "" ? 0 : content.trimEnd().split("\n").length;
+        record(lines <= 100 ? "pass" : "fail", ".project/status.md", lines <= 100 ? `${lines} lines within the 100-line limit` : `${lines} lines exceeds the 100-line limit`);
+      }
     }
     try {
       const rules = (await deps.fs.readdir(absolute(".project/rules"))).filter((name) => name.endsWith(".md"));
@@ -203,16 +252,17 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   // Cursor adapter and are validated by the doctor instead.
   function checkCursorMirrors(): void {
     let report: CursorReport;
-    try { report = libs.cursorMirrors(root); } catch (error) { record("fail", ".cursor", errorText(error)); return; }
+    try { report = libs.cursorMirrors(root); } catch (error) { record("fail", ".cursor", `cannot check Cursor mirrors (${codeOf(error)})`); return; }
     for (const file of report.created) record("fail", file, "missing Cursor mirror; run node ai-framework/scripts/skill-vendors.mts cursor-mirrors --apply");
     for (const file of report.differs) record("warn", file, "differs from its canonical .claude file; refresh it unless the difference is a deliberate local customization");
     if (!report.created.length) record("pass", ".cursor", `${report.current + report.differs.length} canonical skill/agent mirror file(s) present`);
   }
   async function checkWorkflowDoctor(): Promise<void> {
-    const result = await run(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "ai-framework/scripts/workflow-doctor.mts", "--json"]);
-    if (result.code !== 0) { record("fail", "Workflow doctor", result.stderr.trim() || "workflow doctor found a blocking issue"); return; }
+    const result = await run(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", bundleScript(deps, "workflow-doctor.mts"), "--json"]);
+    if (result.code !== 0) { record("fail", "Workflow doctor", `workflow doctor found a blocking issue (${childEnd(result)})`); return; }
     try {
       const report = JSON.parse(result.stdout) as { failures: number };
+      if (!isCount(report.failures)) throw new Error("invalid report");
       record(report.failures === 0 ? "pass" : "fail", "Workflow doctor", report.failures === 0 ? "portable workflow contracts passed" : `${report.failures} workflow contract failure(s)`);
     } catch { record("fail", "Workflow doctor", "did not return JSON"); }
   }
@@ -248,7 +298,7 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
         ? `parse check timed out (ETIMEDOUT${signal}; limit 30000ms)`
         : result.errorCode ? `parse check could not run (${result.errorCode}${signal})`
         : result.signal ? `parse check terminated (signal ${result.signal})`
-        : result.stderr.trim() ? `does not parse: ${result.stderr.trim().split("\n")[0]}`
+        : result.stderr.trim() ? `does not parse (parse check exited with code ${result.code})`
         : `parse check exited with code ${result.code}`;
       record("fail", file, detail);
     }
@@ -290,8 +340,7 @@ export async function main(argv: string[], deps: RuntimeDeps, libs: ValidatorLib
     if (!json) out(`Validated ${results.filter((result) => result.status === "pass").length} checks. Use --json for automation or --no-color for plain text.\n`);
     return failures.length > 0 ? 1 : 0;
   } catch (error) {
-    const err = error instanceof Error ? error : new Error(String(error));
-    deps.io.stderr.write(`Setup validator failed unexpectedly: ${err.stack || err.message}\n`);
+    deps.io.stderr.write(`Setup validator failed unexpectedly (${codeOf(error)})\n`);
     return 2;
   }
 }

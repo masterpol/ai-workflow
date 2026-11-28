@@ -34,3 +34,7 @@ catch such a defect. And "review only the scratch copy" is a prompt rule, not a 
 its scratch file with the live one and read the other reports, so it was recorded `independent: no`. `canary-check` also answered `false` for a
 report that cited the file by an alias it had defined; ask reviewers to cite full file names.
 
+## A false "caught" (workspace-slim, 2026-11-26)
+
+`canary-check` answered caught because a finding about a different problem cited a line range that covered the planted line. The reviewer had
+only noted the planted effect as harmless. Read the matching row: it must describe the planted edit. The review was recorded `independent: no`.

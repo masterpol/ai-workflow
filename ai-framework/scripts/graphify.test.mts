@@ -96,6 +96,83 @@ const cleanTree = (): Record<string, string> => ({
   [`${KNOW}/patterns/a-pattern.md`]: entry("a-pattern", "related: [b-pattern]\n"),
 });
 
+test("plain query ranks a bounded list of typed knowledge even when Graphify returns none", (t) => {
+  const fixtures = {
+    [`${KNOW}/decisions/coverage cap.md`]: "---\nid: coverage-cap\ntags: [ledger]\n---\n# Coverage cap for retired pitches\n",
+    ...Object.fromEntries(Array.from({ length: 8 }, (_, i) => [
+      `${KNOW}/patterns/ledger-${i}.md`, entry(`ledger-${i}`),
+    ])),
+  };
+  const { graph } = buildGraph(ROOT, fake(fixtures).deps);
+  const question = "ledger coverage cap too many files in a pitch folder";
+  const savedGraph = JSON.stringify(overlayKnowledge({
+    nodes: [
+      { id: "code", label: question, source_file: "scripts/a.mts" },
+      { id: "outside", label: question, node_kind: "knowledge", source_file: "../outside.md" },
+      { id: "control", label: question, node_kind: "knowledge", source_file: ".project/knowledge/issues/bad\nname.md" },
+    ],
+    links: [],
+  }, graph));
+  const dir = tempFixture(deps, { "graphify-out/graph.json": savedGraph, "shared/graph.json": savedGraph });
+  t.after(() => deps.fs.rmSync(dir, { recursive: true, force: true }));
+  const queryDeps = (env: Record<string, string> = {}) => {
+    const f = fake({}, [], env);
+    f.deps.proc.cwd = () => dir;
+    f.deps.fs = deps.fs;
+    return f;
+  };
+  const f = queryDeps();
+
+  assert.equal(main(["query", question], f.deps), 0);
+  const lines = f.out.join("").trim().split("\n");
+  assert.equal(lines.length, 6);
+  assert.match(lines[1], /\.project\/knowledge\/decisions\/coverage cap\.md/);
+  assert.doesNotMatch(f.out.join(""), /scripts\/a\.mts|outside\.md|bad\nname\.md/);
+  assert.deepEqual(f.calls.at(-1)?.args.slice(-2), ["query", question]);
+  assert.equal(deps.fs.readFileSync(deps.path.join(dir, "graphify-out", "graph.json")), savedGraph);
+
+  f.out.length = 0;
+  for (const options of [["--budget", "150"], ["--graph", "alternate.json"], ["--dfs"]]) {
+    assert.equal(main(["query", question, ...options], f.deps), 0);
+    assert.deepEqual(f.calls.at(-1)?.args.slice(-options.length), options);
+    assert.deepEqual(f.out, []);
+  }
+  assert.equal(main(["query", "zebra volcanology"], f.deps), 0);
+  deps.fs.writeFileSync(deps.path.join(dir, "graphify-out", "graph.json"), "{");
+  assert.equal(main(["query", question], f.deps), 0);
+  assert.deepEqual(f.calls.at(-1)?.args.slice(-2), ["query", question]);
+  assert.deepEqual(f.out, []);
+
+  const alternate = queryDeps({ GRAPHIFY_OUT: "shared" });
+  assert.equal(main(["query", question], alternate.deps), 0);
+  assert.match(alternate.out.join(""), /coverage cap\.md/);
+
+  const oversized = queryDeps({ GRAPHIFY_OUT: "shared" });
+  oversized.deps.fs = { ...deps.fs, lstatSync(file) {
+    const stat = deps.fs.lstatSync(file);
+    if (stat.isFile()) stat.size = 64 * 1024 * 1024 + 1;
+    return stat;
+  } };
+  assert.equal(main(["query", question], oversized.deps), 0);
+  assert.deepEqual(oversized.out, []);
+  assert.deepEqual(oversized.calls.at(-1)?.args.slice(-2), ["query", question]);
+
+  deps.fs.symlinkSync(deps.path.join(dir, "shared"), deps.path.join(dir, "linked"));
+  const linked = queryDeps({ GRAPHIFY_OUT: "linked" });
+  assert.equal(main(["query", question], linked.deps), 0);
+  assert.deepEqual(linked.out, []);
+  assert.deepEqual(linked.calls.at(-1)?.args.slice(-2), ["query", question]);
+
+  const outside = tempFixture(deps, { "graph.json": savedGraph });
+  t.after(() => deps.fs.rmSync(outside, { recursive: true, force: true }));
+  for (const directory of [outside, deps.path.relative(dir, outside)]) {
+    const external = queryDeps({ GRAPHIFY_OUT: directory });
+    assert.equal(main(["query", question], external.deps), 0);
+    assert.deepEqual(external.out, []);
+    assert.deepEqual(external.calls.at(-1)?.args.slice(-2), ["query", question]);
+  }
+});
+
 test("parseFrontmatter and wiki-links parse lists, quotes and bodies", () => {
   const { data, body } = parseFrontmatter("---\nid: \"x\"\ntags: [a, 'b', ]\n---\n# T\n[[one]] [[two]] [[one]]\n");
   assert.equal(data.id, "x");
@@ -250,7 +327,7 @@ test("--json prints stats, problems, wrote flag and files", () => {
   const f = fake(cleanTree());
   assert.equal(main(["--json"], f.deps), 0);
   const report = JSON.parse(f.out.join(""));
-  assert.deepEqual(Object.keys(report), ["stats", "problems", "wrote", "files"]);
+  assert.deepEqual(Object.keys(report), ["stats", "problems", "wrote", "files", "tagIndex"]);
   assert.equal(report.wrote, true);
   assert.deepEqual(report.problems, []);
   assert.deepEqual(Object.keys(report.stats), ["total", "decisions", "patterns", "entities", "issues", "edges", "brokenLinks", "orphans", "decisionStatus"]);
@@ -294,7 +371,10 @@ test("integration: the direct TypeScript command builds the overlay with a stub 
     assert.equal(write.status, 0, write.stderr);
     const graph = JSON.parse(deps.fs.readFileSync(deps.path.join(dir, "graphify-out", "graph.json"), "utf8"));
     assert.equal(graph.links.filter((l: { relation: string }) => l.relation === "related").length, 1);
-    assert.match(deps.fs.readFileSync(deps.path.join(dir, ".project", "knowledge", "index.md"), "utf8"), /one --> two/);
+    assert.ok(
+      graph.links.some((l: { source: string; target: string; relation: string }) => l.relation === "related" && l.source === "one" && l.target === "two"),
+      "the one -> two related link is in graph.json"
+    );
 
     deps.fs.writeFileSync(deps.path.join(know, "dup.md"), entry("one"));
     const stale = run("--check");
@@ -436,9 +516,54 @@ test("the index shows each decision's status and counts accepted and superseded 
   const index = renderIndex(graph, ROOT, f.deps);
   assert.match(index, /## Decisions \(2 entries, 1 accepted, 1 superseded, 0 deprecated\)/);
   assert.match(index, /old-way\.md\) — Decision old-way _\(superseded by new-way\)_/);
-  assert.match(index, /new-way -\.->\|supersedes\| old-way/);
   const overlaid = overlayKnowledge({ nodes: [], links: [] }, graph);
   assert.deepEqual(overlaid.links.filter((link) => link.relation === "supersedes").map((link) => [link.source, link.target]), [["new-way", "old-way"]]);
+});
+
+test("the index has no tag index and no mermaid graph, yet keeps its title, entry lists, counts and decision status", () => {
+  const f = fake({
+    ...decisionTree({
+      "new-way": decision("new-way", "supersedes: [old-way]\n"),
+      "old-way": decision("old-way", "status: superseded\nsuperseded_by: new-way\n"),
+    }),
+    ...cleanTree(),
+  });
+  const { graph } = buildGraph(ROOT, f.deps);
+  // The fixture has tags and links, so the removed sections would have content to render.
+  assert.ok(Object.keys(graph.tagIndex).length > 0 && graph.edges.length > 0);
+  const index = renderIndex(graph, ROOT, f.deps);
+  assert.doesNotMatch(index, /^## Tag Index$/m);
+  assert.doesNotMatch(index, /^## Graph$/m);
+  assert.doesNotMatch(index, /mermaid|-->|-\.->/);
+  // Positive control: the same render keeps what the index is for.
+  assert.match(index, /^# Knowledge Index$/m);
+  assert.match(index, /## Decisions \(2 entries, 1 accepted, 1 superseded, 0 deprecated\)/);
+  assert.match(index, /- \[new-way\]\(decisions\/new-way\.md\) — /);
+  assert.match(index, /old-way\.md\) — Decision old-way _\(superseded by new-way\)_/);
+  assert.match(index, /## Patterns \(2 entries\)/);
+  assert.match(index, /- \[a-pattern\]\(patterns\/a-pattern\.md\) — /);
+  assert.match(index, /## Entities \(0 entries\)/);
+  assert.match(index, /## Issues \(0 entries\)/);
+  // Every entry keeps its own line, not just the counts.
+  const listed = [...index.matchAll(/^- \[([a-z0-9-]+)\]\(/gm)].map((match) => match[1]).sort();
+  assert.deepEqual(listed, graph.nodes.map((node) => node.id).sort());
+});
+
+test("the index's Traversal section says tags and links are in graphify-out/graph.json", () => {
+  const f = fake(cleanTree());
+  const { graph } = buildGraph(ROOT, f.deps);
+  const index = renderIndex(graph, ROOT, f.deps);
+  assert.match(index, /^## Traversal$/m);
+  assert.match(index, /Tags and links for these entries are in `graphify-out\/graph\.json`/);
+});
+
+test("--check --json carries tagIndex: tag to sorted entry ids, and an empty object when no entry has tags", () => {
+  const tagged = fake(cleanTree());
+  assert.equal(main(["--check", "--json"], tagged.deps), 0);
+  assert.deepEqual(JSON.parse(tagged.out.join("")).tagIndex, { alpha: ["a-pattern", "b-pattern"] });
+  const untagged = fake({ [`${KNOW}/patterns/bare.md`]: "---\nid: bare\ntype: pattern\n---\n# Bare\n" });
+  assert.equal(main(["--check", "--json"], untagged.deps), 0);
+  assert.deepEqual(JSON.parse(untagged.out.join("")).tagIndex, {});
 });
 
 // ---- workflow relations overlay ---------------------------------------------------------------------------------

@@ -1,0 +1,7 @@
+[
+ {"id":"Q1","pitch":"01","q":"What stops a review check from certifying its own instrument or its own author?","needed":["a-gate-must-not-audit-its-own-instrument","a-gate-must-not-trust-its-own-author"]},
+ {"id":"Q2","pitch":"02","q":"May a read-only report over a project run Git or project programs?","needed":["a-report-over-an-untrusted-tree-runs-only-bundle-code","config-defined-git-hooks-ignore-core-hookspath"]},
+ {"id":"Q3","pitch":"04","q":"What must a new-project install never carry over from this repository?","needed":["installed-skill-wrappers-ship-as-orphans","a-source-scanner-fails-closed-on-what-it-cannot-read"]},
+ {"id":"Q4","pitch":"06","q":"What limits apply when sync overwrites an installed project's files?","needed":["workflow-tooling-pitches-share-standing-no-gos-and-design-answers","sync-tools-refuse-symlinks-in-source-and-destination"]},
+ {"id":"Q5","pitch":"07","q":"Should installed skill packages be tracked in Git?","needed":["archify-renders-the-state-report"]}
+]

@@ -17,6 +17,22 @@
   },
   "cases": [
     {
+      "id": "check-before-copy",
+      "input": "The user puts the bundle folder directly inside the project and asks the tool to read ai-workflow-portable/SETUP.md and set up the workflow.",
+      "expected": [
+        "Runs the project-state check from the bundle's source folder before writing any file",
+        "Uses the result to ask whether the project is new or existing when the state is unclear, or follows the route for the reported state"
+      ],
+      "forbidden": [
+        "Copies any file before the check",
+        "Moves or deletes the source folder",
+        "Runs the check with a script from any other folder"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only: owner-run in a host; unrun is recorded not-run"
+    },
+    {
       "id": "empty-vague-intent",
       "input": "Empty installed project. User: 'I want an app for my climbing gym.'",
       "expected": [

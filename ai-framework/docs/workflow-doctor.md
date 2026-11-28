@@ -51,6 +51,13 @@ only when there is no `ai-workflow.toon`; while a toon exists it is ignored and 
 `config-migrate` carries its value into the toon (and backs the file up); without it, the migrator writes
 `bundle`. Both files are instance data: bundle syncs never write or overwrite them.
 
+## Bundle-only checks
+
+Some checks apply only to the `ai-workflow-portable` checkout, such as its documentation links and the Orca contract
+snapshot. The doctor runs them when the first line of the root `SETUP.md` is the bundle's own title. An installed
+project can keep its own `SETUP.md` without switching them on. The [setup validator](setup-validator.md) uses the
+same test.
+
 ---
 
 See also: [setup](setup.md) · [setup-validator](setup-validator.md) · [vendors](vendors.md)

@@ -95,7 +95,9 @@ the script can't infer intent) and circular dependencies (not itself a problem, 
 if the loop obscures which entry is authoritative).
 
 ### 6. Tag coverage
-Check that tags are consistent and cover the codebase:
+Take the tags from the same `--check --json` report used in step 5: its `tagIndex` maps each tag to the entry ids that carry it,
+so a tag's count is the length of its list. Do not count tags from `index.md`; it lists no tags. Check that tags are consistent
+and cover the codebase:
 ```markdown
 ## Tag Distribution
 | Tag | Count | Coverage |

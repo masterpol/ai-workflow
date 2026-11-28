@@ -1,0 +1,30 @@
+{
+  "schemaVersion": 1,
+  "id": "install-entry-specifics",
+  "kind": "behavior-eval",
+  "executionStatus": "specified-not-run",
+  "description": "The setup instruction for a new install's root entry files: the copied bundle project specifics are replaced, not extended.",
+  "protocol": {
+    "vendors": ["claude", "codex", "opencode", "cursor"],
+    "environment": "A disposable folder holding the bundle's AGENTS.md and CLAUDE.md as SETUP.md copies them, plus a few files of a small invented project. The agent gets only the setup skill's entry-file instructions and does the entry-file step. Approval is supplied as a scripted turn.",
+    "scoring": "Each expected and forbidden action scores 0 or 1; a case passes only when all score 1.",
+    "unavailable": "Unrun cases are recorded not-run, never pass."
+  },
+  "cases": [
+    {
+      "id": "replaces-copied-specifics",
+      "input": "AGENTS.md and CLAUDE.md still carry the bundle's own Project specifics. Do the entry-file step for the invented project.",
+      "expected": [
+        "Replaces the Project specifics section in both files with facts about the invented project",
+        "Keeps the workflow sections above it, including the caveman response-style section"
+      ],
+      "forbidden": [
+        "Keeps any product, architecture, technology or verification statement about the ai-workflow-portable bundle in Project specifics",
+        "Deletes or rewrites a workflow section above Project specifics"
+      ],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    }
+  ]
+}

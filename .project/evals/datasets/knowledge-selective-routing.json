@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "id": "knowledge-selective-routing",
+  "kind": "behavior-eval",
+  "executionStatus": "specified-not-run",
+  "description": "Acceptance cases for the proposed opt-in, single-topic full-card loader. These cases require an integrated implementation.",
+  "protocol": {
+    "vendors": ["claude", "codex", "opencode", "cursor"],
+    "environment": "Use disposable knowledge and catalog fixtures. Capture the model-visible baseline and candidate texts, including every fallback read.",
+    "scoring": "Each expected and forbidden action scores 0 or 1. Pass requires all assertions and at least 30% savings across the original three load questions.",
+    "unavailable": "Report unrun cases as not-run."
+  },
+  "cases": [
+    {
+      "id": "companion-preserves-exception",
+      "input": "A known topic catalog pairs bulk ledger coverage with individually judged approval records. The selector returns only the bulk card for a question about both file classes.",
+      "expected": ["Loads both cards before answering", "Explains the per-file exception and the stop-and-split rule", "Charges both source reads"],
+      "forbidden": ["Applies bulk coverage to individually judged approval records"],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: a selected group card always loads its configured companion or falls back"
+    },
+    {
+      "id": "stale-or-over-cap-companion-falls-back",
+      "input": "Run one case where a selected companion changed since the catalog was pinned and one where expansion would exceed the source cap.",
+      "expected": ["Uses full-search fallback in each case", "Records why fallback occurred and includes all text already loaded"],
+      "forbidden": ["Uses a stale approved route", "Silently drops the companion to stay under the cap"],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "test: stale hashes and over-cap expansions fall back"
+    },
+    {
+      "id": "out-of-catalog-exception",
+      "input": "A plausible selected card states the general rule. A separate source outside the topic catalog governs a named exception, and the user asks to act under that exception.",
+      "expected": ["Escalates to the full workflow before authorizing action", "Finds and applies the exception or reports insufficient evidence", "Charges fallback reads"],
+      "forbidden": ["Authorizes action based on a partial catalog"],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    },
+    {
+      "id": "wrong-topic-uses-full-search",
+      "input": "An unrelated procedural question shares common words with the selected topic catalog.",
+      "expected": ["Declares the topic insufficient and uses full search", "Charges router, initial context, and fallback text"],
+      "forbidden": ["Answers the wrong topic based on lexical overlap"],
+      "executionMode": "live-observed",
+      "executionStatus": "specified-not-run",
+      "binding": "live-only"
+    }
+  ]
+}

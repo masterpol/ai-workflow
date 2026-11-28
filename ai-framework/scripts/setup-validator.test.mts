@@ -8,7 +8,7 @@ const tmpdir = (): string => testDeps.os.tmpdir();
 const { join } = testDeps.path;
 import { test } from "node:test";
 
-import { main } from "./setup-validator.mts";
+import { BUNDLE_IDENTITY, BUNDLE_SETUP_TITLE, main } from "./setup-validator.mts";
 import type { ValidatorLibs } from "./setup-validator.mts";
 import type { RunResult, RuntimeDeps } from "./runtime/types.mts";
 
@@ -81,7 +81,7 @@ function makeDeps(files: Record<string, string>, script: (call: Call) => RunResu
 const libs: ValidatorLibs = {
   cursorMirrors: () => ({ created: [], differs: [], current: 3 }),
   resolveClaudeEntry: async (_root, own) => ({ kind: "plain", content: own }),
-  effectiveEntryText: async (_root, file) => ({ content: file === "AGENTS.md" ? AGENTS : AGENTS }),
+  readRootFile: async (root, relative, deps) => ((await deps.fs.exists(`${root}/${relative}`)) ? deps.fs.readFile(`${root}/${relative}`) : null),
 };
 
 function healthy(call: Call): RunResult {
@@ -179,9 +179,53 @@ test("bootstrap CLAUDE.md fails; invalid @AGENTS.md import reports the library d
   assert.ok(invalid.out.join("").includes("FAIL  CLAUDE.md: target is a symlink\n"));
 });
 
+test("an install that kept the bundle's own project specifics fails; the bundle checkout itself passes", async () => {
+  const copied = AGENTS.replace("Real.", `${BUNDLE_IDENTITY}: a portable, tool-agnostic development workflow.`);
+  const files = baseFiles();
+  files["AGENTS.md"] = copied;
+  files["CLAUDE.md"] = copied;
+  const install = makeDeps(files, healthy);
+  assert.equal(await main(["--no-color"], install.deps, libs), 1);
+  const text = install.out.join("");
+  assert.ok(text.includes("FAIL  AGENTS.md: project specifics are still this bundle's own (ai-workflow-portable); replace them with this project's\n"));
+  assert.ok(text.includes("FAIL  CLAUDE.md: project specifics are still this bundle's own (ai-workflow-portable); replace them with this project's\n"));
+  // A project's own setup guide is not the bundle's, so the install check stays on.
+  const ownGuide = makeDeps({ ...files, "SETUP.md": "# How to set up my app\n" }, healthy);
+  assert.equal(await main(["--no-color"], ownGuide.deps, libs), 1);
+  assert.ok(ownGuide.out.join("").includes("FAIL  AGENTS.md: project specifics are still this bundle's own"));
+  const bundle = makeDeps({ ...files, "SETUP.md": `${BUNDLE_SETUP_TITLE}\n\nSteps.\n` }, healthy);
+  assert.equal(await main(["--no-color"], bundle.deps, libs), 0);
+});
+
+test("a stale AGENTS.md reached through the @AGENTS.md import fails CLAUDE.md too", async () => {
+  const files = baseFiles();
+  files["CLAUDE.md"] = "@AGENTS.md\n";
+  const stale = `${AGENTS}\n${BUNDLE_IDENTITY}.\n`;
+  const { deps, out } = makeDeps(files, healthy);
+  assert.equal(await main(["--no-color"], deps, { ...libs, resolveClaudeEntry: async (_root, own) => ({ kind: "import", content: `${own}\n${stale}` }) }), 1);
+  assert.ok(out.join("").includes("FAIL  CLAUDE.md: project specifics are still this bundle's own"));
+});
+
+// These two tests pin the bundle's own sources. Tests ship into installed projects, where there is nothing to pin.
+const BUNDLE_ROOT = urlPath(new URL("../../", import.meta.url));
+const bundleSetup = join(BUNDLE_ROOT, "SETUP.md");
+const SKIP_OUTSIDE_BUNDLE = testDeps.fs.existsSync(bundleSetup) && String(testDeps.fs.readFileSync(bundleSetup, "utf8")).includes("ai-workflow-portable")
+  ? false : "not the ai-workflow-portable checkout";
+
+test("the bundle's own SETUP.md still starts with the title that marks the bundle checkout", { skip: SKIP_OUTSIDE_BUNDLE }, () => {
+  const setup = testDeps.fs.readFileSync(join(urlPath(new URL("../../", import.meta.url)), "SETUP.md"), "utf8") as string;
+  assert.equal(setup.split(/\r?\n/)[0], BUNDLE_SETUP_TITLE);
+});
+
+test("the bundle's own entry files still carry the identity sentence the install check looks for", { skip: SKIP_OUTSIDE_BUNDLE }, () => {
+  const read = (file: string): string => testDeps.fs.readFileSync(join(urlPath(new URL("../../", import.meta.url)), file), "utf8") as string;
+  for (const file of ["AGENTS.md", "CLAUDE.md"]) assert.ok(read(file).includes(BUNDLE_IDENTITY), `${file} lost the sentence; update BUNDLE_IDENTITY`);
+});
+
 test("missing caveman section only warns; cursor mirror problems fail or warn", async () => {
-  const warn = makeDeps(baseFiles(), healthy);
-  const code = await main(["--no-color"], warn.deps, { ...libs, effectiveEntryText: async () => ({ content: "# nothing" }) });
+  const plain = "# Agents\n\n## Project specifics\n\nReal.\n";
+  const warn = makeDeps({ ...baseFiles(), "AGENTS.md": plain, "CLAUDE.md": plain }, healthy);
+  const code = await main(["--no-color"], warn.deps, libs);
   assert.equal(code, 0);
   assert.ok(warn.out.join("").includes("WARN  AGENTS.md: no caveman response-style section"));
   const mirrors = makeDeps(baseFiles(), healthy);
@@ -191,14 +235,16 @@ test("missing caveman section only warns; cursor mirror problems fail or warn", 
   assert.ok(text.includes("FAIL  .cursor/a.mdc: missing Cursor mirror; run node ai-framework/scripts/skill-vendors.mts cursor-mirrors --apply\n"));
   assert.ok(text.includes("WARN  .cursor/b.mdc: differs from its canonical .claude file"));
   const thrown = makeDeps(baseFiles(), healthy);
-  await main(["--no-color"], thrown.deps, { ...libs, cursorMirrors: () => { throw new Error("no skills dir"); } });
-  assert.ok(thrown.out.join("").includes("FAIL  .cursor: no skills dir\n"));
+  await main(["--no-color"], thrown.deps, { ...libs, cursorMirrors: () => { throw Object.assign(new Error("/private/secret-marker"), { code: "ENOENT" }); } });
+  assert.ok(thrown.out.join("").includes("FAIL  .cursor: cannot check Cursor mirrors (ENOENT)\n"));
+  assert.doesNotMatch(thrown.out.join(""), /secret-marker/);
 });
 
 test("child failures: graphify non-zero uses stderr, bad JSON and doctor failures are reported", async () => {
   const graphFail = makeDeps(baseFiles(), (call) => (call.args.some((arg) => arg.endsWith("graphify.mts")) ? { status: 1, signal: null, stdout: "", stderr: "boom\n" } : healthy(call)));
   assert.equal(await main(["--no-color"], graphFail.deps, libs), 1);
-  assert.ok(graphFail.out.join("").includes("FAIL  Knowledge graph: boom\n"));
+  assert.ok(graphFail.out.join("").includes("FAIL  Knowledge graph: graphify reported invalid entries (exit 1); run node ai-framework/scripts/graphify.mts --check\n"));
+  assert.doesNotMatch(graphFail.out.join(""), /boom/);
   const badJson = makeDeps(baseFiles(), (call) => (call.args.some((arg) => arg.endsWith("graphify.mts")) ? ok("not json") : healthy(call)));
   await main(["--no-color"], badJson.deps, libs);
   assert.ok(badJson.out.join("").includes("FAIL  Knowledge graph: graphify did not return JSON\n"));
@@ -210,7 +256,24 @@ test("child failures: graphify non-zero uses stderr, bad JSON and doctor failure
     return healthy(call);
   });
   await main(["--no-color"], spawnError.deps, libs);
-  assert.ok(spawnError.out.join("").includes("FAIL  Workflow doctor: workflow doctor found a blocking issue\n"));
+  assert.ok(spawnError.out.join("").includes("FAIL  Workflow doctor: workflow doctor found a blocking issue (SPAWN_FAILED)\n"));
+  const exited = makeDeps(baseFiles(), (call) => (call.args.some((arg) => arg.endsWith("workflow-doctor.mts")) ? { status: 4, signal: null, stdout: "", stderr: "secret-marker" } : healthy(call)));
+  await main(["--no-color"], exited.deps, libs);
+  assert.ok(exited.out.join("").includes("FAIL  Workflow doctor: workflow doctor found a blocking issue (exit 4)\n"));
+  assert.doesNotMatch(exited.out.join(""), /secret-marker/);
+  const killed = makeDeps(baseFiles(), (call) => (call.args.some((arg) => arg.endsWith("workflow-doctor.mts")) ? { status: null, signal: "SIGKILL", stdout: "", stderr: "" } : healthy(call)));
+  await main(["--no-color"], killed.deps, libs);
+  assert.ok(killed.out.join("").includes("FAIL  Workflow doctor: workflow doctor found a blocking issue (signal SIGKILL)\n"));
+});
+
+test("child checks run the running bundle's own scripts, never the checked project's copies", async () => {
+  const { deps, calls } = makeDeps(baseFiles(), healthy);
+  await main(["--no-color"], deps, libs);
+  const here = testDeps.path.dirname(urlPath(import.meta.url));
+  for (const name of ["graphify.mts", "workflow-doctor.mts"]) {
+    const targets = calls.flatMap((call) => call.args.filter((arg) => arg.endsWith(name)));
+    assert.deepEqual(targets, [`${here}/${name}`]);
+  }
 });
 
 test("spawns children with execPath and the project cwd", async () => {
@@ -232,7 +295,8 @@ test("K3: every existing .mts entry is parse-checked as one extra check; a bad o
 
   const bad = makeDeps(baseFiles(), (call) => (call.args.includes("-e") ? { status: 1, signal: null, stdout: "", stderr: "SyntaxError: nope\nmore\n" } : healthy(call)));
   assert.equal(await main(["--no-color"], bad.deps, libs), 1);
-  assert.ok(bad.out.join("").includes("FAIL  ai-framework/scripts/demo.mts: does not parse: SyntaxError: nope\n"));
+  assert.ok(bad.out.join("").includes("FAIL  ai-framework/scripts/demo.mts: does not parse (parse check exited with code 1)\n"));
+  assert.doesNotMatch(bad.out.join(""), /SyntaxError: nope/);
 
   const none = baseFiles();
   delete none["ai-framework/scripts/demo.mts"];
@@ -252,7 +316,107 @@ test("unexpected errors exit 2 on stderr", async () => {
   const { deps, err } = makeDeps(baseFiles(), healthy);
   const code = await main(["--no-color"], deps, { ...libs, resolveClaudeEntry: async () => { throw new Error("kaboom"); } });
   assert.equal(code, 2);
-  assert.match(err.join(""), /^Setup validator failed unexpectedly: .*kaboom/s);
+  assert.equal(err.join(""), "Setup validator failed unexpectedly (UNKNOWN)\n");
+});
+
+test("control characters in a reported file name cannot forge report lines", async () => {
+  const { deps, out } = makeDeps(baseFiles(), healthy);
+  await main(["--no-color"], deps, { ...libs, cursorMirrors: () => ({ created: [".cursor/a\nPASS  forged\u001b[2K"], differs: [], current: 0 }) });
+  assert.doesNotMatch(out.join(""), /\nPASS  forged|\u001b/);
+});
+
+test("child reports with non-numeric counts are rejected, not printed", async () => {
+  for (const [script, body, expected] of [
+    ["graphify.mts", { problems: [], stats: { total: "/mock/secret-marker" } }, "FAIL  Knowledge graph: graphify did not return JSON\n"],
+    ["workflow-doctor.mts", { failures: "/mock/secret-marker" }, "FAIL  Workflow doctor: did not return JSON\n"],
+    ["graphify.mts", { problems: [], stats: { total: -1 } }, "FAIL  Knowledge graph: graphify did not return JSON\n"],
+    ["graphify.mts", { problems: null, stats: { total: 4 } }, "FAIL  Knowledge graph: graphify did not return JSON\n"],
+    ["workflow-doctor.mts", { failures: -1 }, "FAIL  Workflow doctor: did not return JSON\n"],
+  ] as const) {
+    const { deps, out } = makeDeps(baseFiles(), (call) => (call.args.some((arg) => arg.endsWith(script)) ? ok(JSON.stringify(body)) : healthy(call)));
+    assert.equal(await main(["--no-color"], deps, libs), 1);
+    assert.ok(out.join("").includes(expected), script);
+    assert.doesNotMatch(out.join(""), /secret-marker/);
+  }
+});
+
+test("control characters in a reported detail cannot forge report lines", async () => {
+  const { deps, out } = makeDeps(baseFiles(), healthy);
+  await main(["--no-color"], deps, { ...libs, resolveClaudeEntry: async () => ({ kind: "invalid", detail: "bad\u001b[2K\nPASS  forged", content: "" }) });
+  assert.doesNotMatch(out.join(""), /\nPASS  forged|\u001b/);
+  assert.ok(out.join("").includes("FAIL  CLAUDE.md: bad?[2K?PASS  forged\n"));
+});
+
+test("the caveman check follows the @AGENTS.md import for CLAUDE.md", async () => {
+  const files = { ...baseFiles(), "CLAUDE.md": "@AGENTS.md\n" };
+  const { deps, out } = makeDeps(files, healthy);
+  const imported: ValidatorLibs = { ...libs, resolveClaudeEntry: async (_root, own) => ({ kind: "import", content: `${own}\n${AGENTS}` }) };
+  await main(["--no-color"], deps, imported);
+  assert.ok(out.join("").includes("PASS  CLAUDE.md: carries the caveman response-style section\n"));
+});
+
+test("a context file full of unclosed angle brackets is checked in linear time", () => {
+  const started = Date.now();
+  realReport((dir) => {
+    testDeps.fs.mkdirSync(join(dir, ".project/context"));
+    testDeps.fs.writeFileSync(join(dir, ".project/context/product.md"), "<".repeat(1024 * 1024));
+  });
+  assert.ok(Date.now() - started < 10000, "the placeholder scan must not be quadratic");
+});
+
+function realReport(prepare: (dir: string, outside: string) => void): { name: string; status: string; detail: string }[] {
+  const base = realpathSync(mkdtempSync(join(tmpdir(), "setup-validator-guard-")));
+  try {
+    const dir = join(base, "proj"), outside = join(base, "outside");
+    for (const folder of [join(dir, ".project"), outside]) testDeps.fs.mkdirSync(folder, { recursive: true });
+    testDeps.fs.writeFileSync(join(dir, "AGENTS.md"), AGENTS);
+    testDeps.fs.writeFileSync(join(dir, "CLAUDE.md"), AGENTS);
+    prepare(dir, outside);
+    const result = spawnSync(process.execPath, [...RUNTIME_FLAGS, urlPath(new URL("./setup-validator.mts", import.meta.url)), "--json"], { cwd: dir, encoding: "utf8", timeout: 20000 });
+    assert.doesNotMatch(String(result.stdout) + String(result.stderr), /outside-marker/);
+    return (JSON.parse(String(result.stdout)) as Report).results;
+  } finally { rmSync(base, { recursive: true, force: true }); }
+}
+const REFUSED = "refused: not a single plain UTF-8 file of at most 1 MiB inside the project (links are not followed)";
+const refusedNames = (results: { name: string; detail: string }[]): string[] => results.filter((item) => item.detail === REFUSED).map((item) => item.name).sort();
+const replace = (dir: string, file: string): void => testDeps.fs.rmSync(join(dir, file), { force: true });
+
+test("guarded reads: a symlinked, oversized or hard-linked entry file is refused and never read", () => {
+  assert.deepEqual(refusedNames(realReport((dir, outside) => {
+    testDeps.fs.writeFileSync(join(outside, "a.md"), `${AGENTS}outside-marker\n@docs/AGENTS.md outside-marker\n`);
+    for (const file of ["AGENTS.md", "CLAUDE.md"]) { replace(dir, file); testDeps.fs.symlinkSync(join(outside, "a.md"), join(dir, file)); }
+  })), ["AGENTS.md", "CLAUDE.md"]);
+  assert.deepEqual(refusedNames(realReport((dir) => { testDeps.fs.writeFileSync(join(dir, "CLAUDE.md"), `${AGENTS}${"x".repeat(1024 * 1024)}`); })), ["CLAUDE.md"]);
+  assert.deepEqual(refusedNames(realReport((dir, outside) => {
+    testDeps.fs.writeFileSync(join(outside, "a.md"), AGENTS);
+    replace(dir, "AGENTS.md");
+    assert.equal(spawnSync("ln", [join(outside, "a.md"), join(dir, "AGENTS.md")]).status, 0);
+  })), ["AGENTS.md"]);
+});
+
+test("guarded reads: a FIFO entry file is refused instead of blocking the run", { skip: process.platform === "win32" }, () => {
+  assert.deepEqual(refusedNames(realReport((dir) => {
+    replace(dir, "AGENTS.md");
+    assert.equal(spawnSync("mkfifo", [join(dir, "AGENTS.md")]).status, 0);
+  })), ["AGENTS.md"]);
+});
+
+test("guarded reads: linked context and status files are refused", () => {
+  assert.deepEqual(refusedNames(realReport((dir, outside) => {
+    testDeps.fs.writeFileSync(join(outside, "s.md"), "outside-marker\n".repeat(101));
+    testDeps.fs.mkdirSync(join(dir, ".project/context"));
+    testDeps.fs.symlinkSync(join(outside, "s.md"), join(dir, ".project/status.md"));
+    for (const file of ["product", "architecture", "stack"]) testDeps.fs.symlinkSync(join(outside, "s.md"), join(dir, `.project/context/${file}.md`));
+  })), [".project/context/architecture.md", ".project/context/product.md", ".project/context/stack.md", ".project/status.md"]);
+});
+
+test("guarded reads: a linked SETUP.md carrying the bundle title does not exempt an install", () => {
+  const results = realReport((dir, outside) => {
+    for (const file of ["AGENTS.md", "CLAUDE.md"]) testDeps.fs.writeFileSync(join(dir, file), `${AGENTS}${BUNDLE_IDENTITY}.\n`);
+    testDeps.fs.writeFileSync(join(outside, "SETUP.md"), `${BUNDLE_SETUP_TITLE}\n`);
+    testDeps.fs.symlinkSync(join(outside, "SETUP.md"), join(dir, "SETUP.md"));
+  });
+  assert.equal(results.filter((item) => item.status === "fail" && item.detail.startsWith("project specifics are still this bundle's own")).length, 2);
 });
 
 test("integration: the direct TypeScript command runs the validator in an empty project dir", () => {

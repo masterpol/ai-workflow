@@ -1035,7 +1035,8 @@ const snapshotWith = (change: (commands: Record<string, { flags: string[]; retir
 
 async function contractCheck(t: TestContext, options: { snapshot?: string | null; bundle?: boolean }): Promise<{ results: Check[]; calls: string[][] }> {
   const root = fixture(t);
-  if (options.bundle !== false) write(root, "SETUP.md", "# setup\n");
+  // bundle: false is a project with its own setup guide, which must not switch the bundle-only checks on.
+  write(root, "SETUP.md", options.bundle !== false ? "# SETUP — Portable AI Development Workflow\n" : "# How to set up my app\n");
   if (options.snapshot !== null) write(root, "ai-framework/scripts/orca-contract.snapshot.json", options.snapshot ?? snapshotText);
   const capture = injected(root);
   const base = capture.deps.child.run;

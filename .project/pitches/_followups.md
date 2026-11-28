@@ -658,6 +658,7 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 
 ## From greenfield-kickoff shaping (2026-11-25)
 - **New installs inherit this repository's identity** (high, bug): `SETUP.md` copies the bundle's `AGENTS.md` and `CLAUDE.md`, whose "Project specifics" describe `ai-workflow-portable` (product, stack, verification commands); the bootstrap stub the docs expect is gone and `setup-validator` accepts the copied section as complete. Ship neutral entry files (or a stub) and make the validator refuse the bundle's own section in an install. Check whether LAH, RN and climbing carry it.
+  Closed in v2.59.3 by [fix-install-inherits-bundle-identity](fix-install-inherits-bundle-identity/SHIPPED.md); neutral entry files stay with `starter-install`, and LAH is unchecked.
 
 ## From workspace-slim shaping (2026-11-25)
 - **Installed skill packages are indexed and committed** (high, bug): `GRAPHIGNORE` and `GITIGNORE_BLOCK` in `graphify.mts` and `SETUP.md`'s minimum ignore list omit `.project/skills/packages/` (this checkout's own `.gitignore` has it). In LAH 87% of graph data (58.9 of 67.5 MB) is that folder, rewritten and staged by the pre-commit hook on every commit. LAH also tracks 624 files / 23 MB of packages (597 are Archify, committed by the assistant on 2026-11-24 against `state-report.md`). Fix the templates, warn in the doctor when packages are tracked, and in LAH untrack them and rebuild the graph (history keeps them).
@@ -709,3 +710,63 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **Other Git callers may run configured hooks** (high, **unverified**): `core.hooksPath=/dev/null` does not stop Git 2.54 `hook.*` hooks. `pre-ship-verify.mts`, `graphify.mts`, `legacy-upgrade.mts`, `orca-apply.mts`, `orca-diff-admit.mts`, `orca-evidence.mts` and `skill-source.mts` rely on that flag or on `core.fsmonitor`, and none checks `hook.*`. Orca ones run against worker trees. Not tested which of their commands fire a hook.
 - **`guard` hardening from the S4 review** (low): reject empty, `.` or `..` segments in Git-reported paths as a second layer; non-UTF-8 file names may be dropped silently (unreproduced, Linux); two guard lines have no failing test.
 
+
+## From workspace-slim (build, 2026-11-26)
+
+- **`climbing-lab-monorepo` and LAH track installed skill packages** (observed by the new report, read-only): handle with the pending package-ignore fix.
+- **Report labels** (low): `.opencode/node_modules` counts as workflow bundle; loose files directly in `.project/` show as unrecognised "Project entries" without saying which; absent areas print as zero rows.
+- **Report root through a symlink** (low): `--root` reached through a symlinked folder is refused with only the generic message.
+- **Report bound** (low, from the worker): a folder is listed in full before the 200,000-entry limit applies.
+- **Duplicated hardened Git call** (low): `workspace-report.mts` and `review-bench.mts` each build their own; share one if they drift.
+
+## From workspace-slim (audit cycle 1, 2026-11-26), deferred
+
+- **Report: case aliases of scanned folders** (low): a differently cased `.Project/` entry leaves tracked figures `incomplete` instead of attributed.
+- **Report: many unrecognised folders** (low): marking incomplete loops over all areas per failure, quadratic in a very unusual tree.
+- **Report: tracked-only folder name** (low): a tracked folder later replaced by a loose file of the same name can print that name.
+- **`graphify` tag map** (low, unverified, predates): a tag named `constructor` may throw with a plain-object `tagIndex`, now also in `--check --json`.
+
+## From workspace-slim (audit cycle 2, 2026-11-26), deferred
+
+- **Report: a differently cased scan root** (med, unverified): an index entry under `.Project/` is not listed, so tracked reads 0 as complete and no packages warning appears.
+- **Report: submodule replaced by a plain file** (low, unverified): reads as complete; take the mode from `ls-files --stage`.
+- **`canary-check` false "caught"** (med, observed): an unrelated finding whose cited range covers the planted line counts. Check that the matching row describes the planted edit.
+
+## From knowledge-distill pilot (2026-11-26)
+
+- **A default `graphify query` can return no knowledge** (high, observed): for two of three realistic questions, none of the 55 nodes shown at the default budget was a knowledge entry (617 and 402 found; 7 and 3 knowledge entries appeared at `--budget 60000`). The shape, search and fix gates query this way. Rank knowledge first, filter to knowledge nodes, or tell the gates to raise the budget; measure on more questions first.
+  Closed in v2.59.2 by [fix-graphify-knowledge-query](fix-graphify-knowledge-query/SHIPPED.md). Both previously empty queries now emit five knowledge paths at the default budget.
+- **Cooldown rule destination** (observed): `/cooldown` names `ai-framework/rules/` for promotions. Shape a small change to route project-specific lessons to `.project/rules/` and reusable bundle lessons to `ai-framework/rules/`. See [the knowledge distill pitch](03-knowledge-distill/pitch.md).
+
+## From greenfield-kickoff part A build (2026-11-27)
+
+- **Detector and `node_modules`** (medium, observed): an installed JavaScript project passes the 4,096-entry budget and reports `unclear`, so setup asks instead of going straight to today's flow. The owner left it as is at the A1 gate.
+- **Bun runs a project's `bunfig.toml` preload before workflow scripts** (high, reproduced): affects every script when Bun is the runner or invoked directly. Shape a fix in the shared startup (trusted config, no automatic env files) and document direct invocation. **Open when part A shipped, by the owner's override on 2026-11-27: run `/fix` next.**
+- **Detector hardening** (medium): bounded incremental directory listing; path-swap race; assert reason strings; installed-skill paths report `unclear` (coordinate with pitch 07).
+- **`SETUP.md` Step 3** (medium, static): check that `.project` is not a link before copying the scaffold. The setup skill also has no fallback when `status.md` and its template are both missing on a re-run.
+- **No documented install route reaches `empty` or `existing`** (high, observed): the bundle's source folder or root files make first-time detection `unclear`. A clean installer (`starter-install`) or detector support for the routes is needed before the part B interview can start by itself; settle this before planning part B.
+- **README, LICENSE or `.gitignore` only reports `existing`** (design, observed): a typical new repository would never reach the part B interview. Revisit before planning part B.
+
+## From fix-install-inherits-bundle-identity audit (2026-11-27)
+
+- **Unguarded reads in shared helpers** (medium, static review): `skill-vendors.mts` and `skill-registry.mts` read mirrors and registry files without a type or size bound, and the validator's rules and TypeScript directory listings are unchecked (`security.md` §9).
+- **Ledger and outcome readers** (medium, static review): they check a path and then open it, and their diagnostics copy values from malformed records.
+- **`resolveClaudeEntry` second read** (medium, static review): the imported `AGENTS.md` is re-read without a pinned descriptor or link-count check. `bundle-sync` and the validator share it.
+- **LAH** (open check): its entry files are plain files, but its content was not checked for the bundle's specifics (the read was denied) and it has its own root `SETUP.md`. Run its validator after sync.
+
+## From knowledge-distill re-shape (2026-11-27)
+
+- **Ranked knowledge query misses cited cards** (high, observed): on five `/shape` gate questions from pitches 01, 02, 04, 06 and 07, `graphify.mts query` ranked 4 of the 9 cards those pitches cited into its top five, and none for the 04, 06 and 07 questions. Candidate `/shape-lite` fix; use [the gate questions](03-knowledge-distill/pilot/gate-questions.json) as a test set with fresh held-out questions, and report recall separately from words loaded. See [the gate comparison](03-knowledge-distill/pilot/gate-comparison.md). The untracked `fix-graph-query-hides-knowledge/` folder may be a start on this; owner to confirm.
+
+## From fix-graphify-knowledge-query (2026-11-26)
+
+- **Shared project reader during concurrent ancestor replacement** (medium, static review): the descriptor-pinned reader rejects static symlinks and verifies the file identity. An ancestor replaced during the pathname inspection can redirect both checks to the same out-of-project file. Evaluate a portable containment strategy for `readProjectText` and its callers.
+
+## From greenfield-kickoff B1 build (2026-11-27)
+
+- **Orca dispatch accepts a `.project` path that collect refuses** (medium, reproduced): a worker that reports it gets `invalid-files`, and the attempt holds a cap slot for good. Refuse the path at dispatch, or define a recovery for released workers; four stale records need it now.
+- **Entry files on the folder-in-project route** (medium, static): after Step 1, `AGENTS.md` and `CLAUDE.md` tell a later session to read a root `SETUP.md` that is not there.
+- **Setup guide errors** (low, observed in the B1 eval; older than B1): `.opencode/package.json` is Git-ignored but listed for copying and checking; Step 7 says 18 agents, 16 ship; no root check for an empty folder; the Cursor mirror step is unclear.
+- **Merge order** (B1 audit): part B1, then pitch 07, then pitch 06 pins a release and hand-merges both install routes.
+- **A leftover OpenCode service stalls the workflow doctor** (medium, reproduced): `opencode debug config` hangs for 15 s and a setup-validator timing test fails. Free the port after the last OpenCode worker is released, and report the hang in the doctor.
+- **Source-folder quoting and marker limit** (low, B1 audit cycle 2): say the character refusal covers later copy commands too; cover PowerShell and `cmd.exe`; add a test for the 64 KiB marker limit.

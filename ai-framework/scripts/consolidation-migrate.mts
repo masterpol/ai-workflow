@@ -12,7 +12,9 @@ export const MAX_MIGRATION_FILES = 2048;
 // SHA-256 of the templates shipped at b26b45b. Only these known bundle copies may be refreshed.
 export const PREVIOUS_TEMPLATE_HASHES: Record<string, readonly string[]> = {
   // The second hash is the copy that told people to run the old `ship` command (renamed to ship-pitch).
-  "knowledge/README.md": ["a2a5dadfc26a41bdeecb86267dfaf967a8278d7d1e4fcacd19808274e8fea440", "99e824eb8d955ffb4ee50b41fa0ea2501c42fce1749690eeab2c42385fe023d5"],
+  "knowledge/README.md": ["a2a5dadfc26a41bdeecb86267dfaf967a8278d7d1e4fcacd19808274e8fea440", "99e824eb8d955ffb4ee50b41fa0ea2501c42fce1749690eeab2c42385fe023d5",
+    // The copy that described a tag index and a diagram inside index.md (removed by workspace-slim).
+    "fc840c31f1e86864243113fa06bcf9cd99dc1a19260b94d2b108f828219ac56e"],
   "knowledge/templates/decision.md": ["b0822d25a5d45badc448748bda51d49038593e317f4c96a363c97609c7c0aa22"],
 };
 export interface MigrationStep {

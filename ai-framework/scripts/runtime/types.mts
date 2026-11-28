@@ -29,6 +29,7 @@ export interface WriteOptions {
 /** Numeric `fs.constants` the scripts read (absent platform values are 0 or undefined, as in Node). */
 export interface FsConstants {
   F_OK: number;
+  R_OK: number;
   X_OK: number;
   O_RDONLY: number;
   O_NOFOLLOW?: number;

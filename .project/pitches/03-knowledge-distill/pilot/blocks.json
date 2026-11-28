@@ -1,0 +1,114 @@
+[
+ {
+  "id": "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash#1",
+  "text": "A destructive gate must prove every file it will delete was judged. Per-file entries do that, but a hard cap on entries makes large folders uncompactable, and raising the cap only moves the wall and grows the ledger."
+ },
+ {
+  "id": "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash#2",
+  "text": "Let one entry cover a folder prefix. Bind it by the member count and a hash over every member's path and hash in a fixed order, computed by the tool and recomputed by the gate. Any add, drop, rename or edit changes the hash. Refuse overlap (a file belongs to one entry), refuse a group that matches nothing, and keep a separate bound on total files. Put the coverage rule in one pure function used by both the writer and the remover."
+ },
+ {
+  "id": "a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash#3",
+  "text": "Mutation checks: ignoring the count, ignoring the tree hash, hashing without member hashes, dropping the overlap check, ignoring unaccounted files, accepting a stale group hash at commit and hashing only part of the folder were each caught. Hashing without a count prefix survived and showed the prefix was redundant, so it was removed. See [[pitch-folders-accumulate-staging-nothing-consumes]]."
+ },
+ {
+  "id": "a-ledger-for-judged-files-lists-every-file#1",
+  "text": "Some folders hold files whose loss matters one by one, such as decisions and approval records. A hard cap on ledger entries makes such a folder harder to compact."
+ },
+ {
+  "id": "a-ledger-for-judged-files-lists-every-file#2",
+  "text": "Do not cover these files with a folder group, even when the group would be bound by a count and tree hash: a hash proves the set did not change, not that anyone judged each member. List every file with its own entry. If the cap is reached, stop and split the pitch folder."
+ },
+ {
+  "id": "live-test-evidence-outlived-its-pitch-path#1",
+  "text": "Pitch compaction removed state-ai-authoring/live-runs.md while the dataset regression still opened that path. Retaining a narrative summary did not preserve the complete machine-readable matrix required by the consumer."
+ },
+ {
+  "id": "live-test-evidence-outlived-its-pitch-path#2",
+  "text": "The historical-record test failed ENOENT. Its input was a removable pitch file rather than a durable evidence owner. The recorded evidence includes 72 runs, 12 seeded bad rows and a Cursor not-run row; the computed historical claim is blocked. A summary, skipped assertion or newly invented successful run would not replace that input."
+ },
+ {
+  "id": "live-test-evidence-outlived-its-pitch-path#3",
+  "text": "Restore the exact 36,920 original UTF-8 bytes from the already approval-gated, verified source cache to .project/records/legacy-upgrades/state-ai-authoring-live-runs.md. Repoint only LIVE_RECORD in state-fragment-dataset.test.mts. Raw SHA-256 868e76e9eace40c14f8014e18a16a8fa5b702de13e5489ebcc29c4e7944fc24a and original normalized source hash match approved proof. Existing consumer assertions remain unchanged and validate Claim: blocked; this is preservation of old evidence, not a new live-model result."
+ },
+ {
+  "id": "live-test-evidence-outlived-its-pitch-path#4",
+  "text": "Before retiring a pitch directory, inventory test and tool consumers of its source paths as well as prose links. Move required full assets to durable ownership, prove complete bytes against an approved original, update the consumer, and run its unchanged regression. Do not make ordinary tests read recovery archives. Check recorded deletion intent before restoring any old path."
+ },
+ {
+  "id": "live-test-evidence-outlived-its-pitch-path#5",
+  "text": "The final-verification child failure during this repair remains an independent, unconfirmed incident; later passing runs do not establish its cause. Bounded parent diagnostics are tracked as FRLE-D1, and existing timing-under-load work retains its own owner."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#1",
+  "text": "`pitch-compaction` is the single, human-approved exception to \"never rewrite `.project/pitches/`\". Its gates\nand recovery design are recorded here; the code is `pitch-compress.js` and `pitch-archive.js` and the\nplaybook is `.claude/skills/pitch-compress/SKILL.md`."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#2",
+  "text": "- **Every mutating step needs `--apply`; deletion needs a verified archive, a complete ledger, an unchanged\n  source, and a human gate.** Nothing is automatic."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#3",
+  "text": "- **Each gap needs an explicit human acceptance** (`commit-ledger --accept-gap SECTION=REASON`, recorded in\n  the ledger and re-checked by `remove`). An earlier deviation collapsed this into \"a ledger exists\", which\n  let a ledger declare every section a gap and pass at coverage 0 (reproduced live); it was reversed at\n  audit ([[a-gate-must-not-trust-its-own-author]])."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#4",
+  "text": "- **Reuse the audited transaction machinery.** `pitch-archive.js` runs on `skill-registry.js`'s\n  `transact`/`recover` with a `{roots, state}` context; interruption is tested with real `SIGKILL`\n  subprocesses, not a fabricated journal."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#5",
+  "text": "- **The interrupted-transaction guard lives in `archive`, `remove` and `restore` themselves**, not only the\n  CLI wrapper, so a direct import cannot bypass it."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#6",
+  "text": "- **`remove` leaves the emptied pitch directory behind** (its \"already removed\" detection handles both a\n  missing and an emptied directory); `inventory` treats an empty directory whose slug is in `done-work.md`\n  as compacted."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#7",
+  "text": "- **Archive lookup is anchored to the exact timestamp shape** and `verify` rejects a manifest for another\n  slug ([[bare-prefix-match-crosses-entities]]); `restore` refuses an unverified archive and checks\n  containment before each write; ledger destinations must be real, nonempty, in-project files outside the\n  pitch being deleted."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#8",
+  "text": "- **`inventory` reports a non-slug directory name as preserved** instead of throwing and hiding the rest."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#9",
+  "text": "- **`done-work.md` is generated**, one section per pitch, replaced in place on a rerun; never hand-edited."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#10",
+  "text": "- **The playbook was written whole in C1**, including the C2 steps, because one coherent document should not\n  be split across two edits; C2's scripts and tests were still built and verified separately."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#11",
+  "text": "- **Pros**: a removal is recoverable (archive, plus git history) and each skipped section is a named decision."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#12",
+  "text": "- **Cons**: extraction is real human/agent work, and the ledger's destination check is only mechanical."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#13",
+  "text": "- **Implications**: a change to a shared reader used by these scripts must be traced through their writers\n  ([[hardening-a-shared-reader-made-its-writer-destructive]])."
+ },
+ {
+  "id": "pitch-compaction-gate-and-recovery-design#14",
+  "text": "`.claude/skills/pitch-compress/SKILL.md`; [[workflow-tooling-pitches-share-standing-no-gos-and-design-answers]]."
+ },
+ {
+  "id": "pitch-folders-accumulate-staging-nothing-consumes#1",
+  "text": "The connected-memory-consolidation pitch held 242 files (6.1 MB of staging, prompts and copies). `commit-ledger` refuses more than 200 files outside the covered sections, and 74 links pointed into the folder, so the pitch that built the compaction flow could not use it."
+ },
+ {
+  "id": "pitch-folders-accumulate-staging-nothing-consumes#2",
+  "text": "About 185 of the files were per-pitch campaign staging: an unresolved draft that `prepare` regenerates, a proposal, an approved input that is the proposal unwrapped, and a supplement byte-identical to its published copy (46 of 47). A further 27 were reviewer prompts and results. The full 95 KB log was also copied into five run files, and each of eleven batches left four to six run files. No step consumed, merged or deleted any of it, and the ledger had no way to account for a folder as a unit."
+ },
+ {
+  "id": "pitch-folders-accumulate-staging-nothing-consumes#3",
+  "text": "Version 2.49.0 added group entries (a folder prefix bound by a count and tree hash) and a 2000-file bound. The pitch-compress and ship playbooks now say what to keep, where to stage and to snapshot a shared log once."
+ },
+ {
+  "id": "pitch-folders-accumulate-staging-nothing-consumes#4",
+  "text": "Treat every file a flow writes into a pitch folder as either durable, derivable or disposable at the moment it is created. Derivable and disposable files belong in a staging path that the batch result deletes. See [[a-bounded-ledger-needs-a-group-entry-bound-by-a-tree-hash]]."
+ }
+]

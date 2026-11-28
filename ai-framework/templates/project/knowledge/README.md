@@ -65,8 +65,8 @@ under `knowledge/`. `/shape`'s knowledge gate, `/search`, `/knowledge-health`, a
 Run `node ai-framework/scripts/graphify.mts check` anytime to validate the entries without writing
 (flags broken links, orphans, and duplicate ids; non-zero exit on duplicate ids).
 
-`index.md` is the human-readable rendering of the same data — grouped by type, plus a tag index
-and an auto-generated Mermaid graph of the `related` edges:
+`index.md` is the human-readable catalog of the same entries — grouped by type, with decision status and
+counts. It lists no tags or links; those are in `graphify-out/graph.json`:
 
 ```markdown
 # Knowledge Index
@@ -131,7 +131,6 @@ Full explanation
 ### Wiki-Links
 Use `[[entry-id]]` to cross-reference entries. This enables:
 - Obsidian graph visualization (open `knowledge/` as an Obsidian vault)
-- Auto-generated Mermaid knowledge map
 - `/knowledge-health` cross-reference validation
 
 ## Knowledge Lifecycle

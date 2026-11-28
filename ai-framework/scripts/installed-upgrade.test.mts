@@ -6,6 +6,7 @@ import { SYNCED_DIRS } from "./bundle-sync.mts";
 import { ownedPaths } from "./skill-sync.mts";
 import { legacyEntries, INDEX_START } from "./done-work-index.mts";
 import { buildGraph, overlayKnowledge, renderIndex } from "./graphify.mts";
+import { BUNDLE_IDENTITY } from "./setup-validator.mts";
 
 const deps = createTestDeps();
 const { fs, path } = deps;
@@ -34,6 +35,14 @@ const nodeExecutable = deps.runtime === "bun" ? command(source, "node", ["-p", "
 const node = (root: string, entry: string, args: string[] = []): string => command(root, nodeExecutable, [...flags, entry, ...args]);
 const git = (root: string, args: string[]): string => command(root, "git", ["-c", "core.hooksPath=/dev/null", ...args]);
 
+/** A completed setup replaces the bundle's own project specifics in the copied entry files; the validator fails a kept copy. */
+function ownProjectSpecifics(root: string): void {
+  for (const file of ["AGENTS.md", "CLAUDE.md"]) {
+    assert.ok(read(root, file).includes(BUNDLE_IDENTITY));
+    write(root, file, read(root, file).replace(BUNDLE_IDENTITY, "This temporary project is an installed-upgrade fixture"));
+  }
+}
+
 /** Export only workflow/project inputs. Recovery archives, historical pitch folders and secrets are never read. */
 function baseline(root: string): void {
   const files = git(source, ["ls-tree", "-r", "--name-only", BASE_REF]).trim().split("\n").filter(file => {
@@ -47,6 +56,7 @@ function baseline(root: string): void {
   assert.equal(archive.status, 0);
   const extracted = spawnSync("tar", ["-x", "-C", root], { input: archive.stdout, timeout: 30000 });
   assert.equal(extracted.status, 0, String(extracted.stderr));
+  ownProjectSpecifics(root);
   assert.equal(legacyEntries(read(root, ".project/done-work.md")).size, 46);
   assert.equal(fs.readdirSync(path.join(root, ".project/compaction/ledgers")).filter(name => name.endsWith(".json")).length, 46);
 }
@@ -177,6 +187,7 @@ test("fresh setup gets consolidation scaffold and passes verification without mi
     for (const file of ["AGENTS.md", "CLAUDE.md", "README.md", ".gitignore", ".graphifyignore", ".opencode/opencode.json", ".codex/hooks.json", ".claude/settings.json"]) {
       write(root, file, read(source, file));
     }
+    ownProjectSpecifics(root);
     copyTree(deps, path.join(source, "ai-framework/templates/project"), path.join(root, ".project"));
     write(root, "ai-workflow.toon", read(source, "ai-framework/templates/ai-workflow.example.toon"));
     for (const file of ["product", "architecture", "stack"]) write(root, `.project/context/${file}.md`, `# Fixture ${file}\n\nThis temporary project models a completed workflow installation with generated context and no application build. It is used only for the installed-upgrade acceptance checks.\n`);
