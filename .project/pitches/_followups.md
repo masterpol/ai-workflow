@@ -741,7 +741,7 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 ## From greenfield-kickoff part A build (2026-11-27)
 
 - **Detector and `node_modules`** (medium, observed): an installed JavaScript project passes the 4,096-entry budget and reports `unclear`, so setup asks instead of going straight to today's flow. The owner left it as is at the A1 gate.
-- **Bun runs a project's `bunfig.toml` preload before workflow scripts** (high, reproduced): affects every script when Bun is the runner or invoked directly. Shape a fix in the shared startup (trusted config, no automatic env files) and document direct invocation. **Open when part A shipped, by the owner's override on 2026-11-27: run `/fix` next.**
+- **Bun runs a project's `bunfig.toml` preload before workflow scripts** (high, reproduced): affects every script when Bun is the runner or invoked directly. Shape a fix in the shared startup (trusted config, no automatic env files) and document direct invocation. **Open when part A shipped, by the owner's override on 2026-11-27: run `/fix` next.** **Closed in v2.62.0** for workflow-started Bun ([record](fix-bun-project-preload/SHIPPED.md)); a direct `bun <script>` is documented as unprotected.
 - **Detector hardening** (medium): bounded incremental directory listing; path-swap race; assert reason strings; installed-skill paths report `unclear` (coordinate with pitch 07).
 - **`SETUP.md` Step 3** (medium, static): check that `.project` is not a link before copying the scaffold. The setup skill also has no fallback when `status.md` and its template are both missing on a re-run.
 - **No documented install route reaches `empty` or `existing`** (high, observed): the bundle's source folder or root files make first-time detection `unclear`. A clean installer (`starter-install`) or detector support for the routes is needed before the part B interview can start by itself; settle this before planning part B.
@@ -770,3 +770,17 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **Merge order** (B1 audit): part B1, then pitch 07, then pitch 06 pins a release and hand-merges both install routes.
 - **A leftover OpenCode service stalls the workflow doctor** (medium, reproduced): `opencode debug config` hangs for 15 s and a setup-validator timing test fails. Free the port after the last OpenCode worker is released, and report the hang in the doctor.
 - **Source-folder quoting and marker limit** (low, B1 audit cycle 2): say the character refusal covers later copy commands too; cover PowerShell and `cmd.exe`; add a test for the 64 KiB marker limit.
+
+## From fix-bun-project-preload audit (2026-11-27)
+
+- **Bun missing-script fallback** (low, reviewer probe): a missing script path can run a `package.json` script of that name; check slash paths and pass absolute paths.
+- **Missing-config tests** (low): also assert that the requested script ran.
+- **Release order** (cross-pitch): pitch 06 pins a release that holds the Bun fix; greenfield-kickoff B2 regenerates the shipped list after it.
+- From the re-shape critique: the runner switch starts `node` or `bun` by bare name, so under `bun run` a project's `node_modules/.bin` can supply it (probed for `node`, 2026-11-27). Needs a trusted-executable policy.
+- From the fix-bun-project-preload build: the upgrade-simulation tests run an earlier release's doctor, which calls `opencode debug config` and leaves a service running after `pre-ship-verify`. Stub `opencode` in those tests.
+
+## From the fix-bun-project-preload re-shaped audit (2026-11-27)
+
+- `workflow-doctor --fix` copies through a symbolic link in the checked project's templates (reproduced on the released code too). Take templates from beside the doctor, or refuse links and non-regular files.
+- Tests: the branch used when `deps.proc.versions` is absent; a behavior test that `bun test` keeps project settings; a guard that no workflow code passes `--live-opencode`.
+- Reviewer notes, not rechecked: the doctor starts `python3` and `agent-browser` version checks in the checked folder; a FIFO git hook can hang it; some paths print raw errors; under Bun the Runtime boundary row says "0 unparsed" for a text scan.

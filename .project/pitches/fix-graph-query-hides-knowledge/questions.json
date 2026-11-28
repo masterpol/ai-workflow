@@ -1,0 +1,70 @@
+[
+ [
+  "a-failed-stage-of-any-type-is-not-positive-proof",
+  "Dispatch read a start failure's stage only when it was a string."
+ ],
+ [
+  "a-headless-cli-follows-pwd-not-the-process-cwd",
+  "Driving three vendor CLIs from a script (subprocess with cwd=<fixture>), opencode run worked in the driver's directory: it reads PWD from the environment, which cwd= does not update."
+ ],
+ [
+  "a-local-workflow-env-file-changes-which-runner-path-tests-spawn",
+  "browser-runtime.test.mts \"CLI end to end\" sets PATH to an empty directory and spawns the script."
+ ],
+ [
+  "a-probe-child-ran-a-bare-command-with-the-parent-path",
+  "decideStart resolved orca against absolute PATH entries only, then ran the bare name with the original PATH."
+ ],
+ [
+  "a-simulated-clock-ahead-of-undelivered-events-folds-them-away",
+  "The interval engine folds time up to the earlier of its pending starts and the collector clock."
+ ],
+ [
+  "a-temp-helper-that-realpaths-silently-voids-an-alias-guard",
+  "A shared tempFixture(deps, files) helper that always returned fs.realpathSync(mkdtempSync(...)) made a caller's real = false / \"give me the un-resolved path\" branch return the resolved path anyway, so a test written to e"
+ ],
+ [
+  "a-workers-passing-tests-can-encode-the-wrong-data-shape",
+  "An OpenCode worker built the transcript usage reader and reported \"17 tests pass on Node and Bun\"."
+ ],
+ [
+  "an-idempotent-replay-path-returned-success-without-re-checking-the-gate",
+  "orca-dispatch.mts dispatchScope() read the ownership ledger before it evaluated the launch gate."
+ ],
+ [
+  "an-unquoted-test-command-variable-fails-silently-under-zsh",
+  "The plan's exit commands use T=\"node --experimental-strip-types \u2026 --test\" then $T file."
+ ],
+ [
+  "bare-prefix-match-crosses-entities",
+  "latestArchiveDir(\"foo\") picked the archive directory with the foo- prefix, which also matches foo-bar-<timestamp>."
+ ],
+ [
+  "config-defined-git-hooks-ignore-core-hookspath",
+  "With Git 2.54.0, hook.<name>.command plus hook.<name>.event in a repository's config ran the program during git diff (event post-index-change), although every call passed -c core.hooksPath=/dev/null, -c core.fsmonitor=fa"
+ ],
+ [
+  "deleting-a-file-breaks-shipped-outcome-records-that-link-to-it",
+  "Deleting 25 scripts and 3 datasets made graphify refuse to build, because five shipped outcome records linked to them in their code: field."
+ ],
+ [
+  "installed-skill-wrappers-ship-as-orphans",
+  "This repo is both the bundle source and a live instance."
+ ],
+ [
+  "macos-tmpdir-realpath-alias-breaks-path-assertions",
+  "A Node test that builds a fixture under os.tmpdir() and later compares a path string returned by the code under test (not a fs.realpathSync-resolved one) against path.join(tmpFixtureDir, ...) can fail on macOS even thoug"
+ ],
+ [
+  "orca-worker-list-concise-view-hides-the-worker-identity-fields",
+  "After Orca 1.4.271 every workflow phase failed with worker-identity-unavailable, because worker-list --json printed a concise view without the fields the gate read."
+ ],
+ [
+  "pitch-folders-accumulate-staging-nothing-consumes",
+  "The connected-memory-consolidation pitch held 242 files (6.1 MB of staging, prompts and copies)."
+ ],
+ [
+  "test-skip-is-a-follow-up-not-a-finish",
+  "A test.skip (or t.skip()) on a test that previously passed is a contract change with a concrete obligation: a future pitch must replace the skipped test with one that exercises the new contract, or remove the test if the"
+ ]
+]

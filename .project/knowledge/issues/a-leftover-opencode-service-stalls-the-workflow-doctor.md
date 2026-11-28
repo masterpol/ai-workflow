@@ -5,7 +5,7 @@ created: 2026-11-27
 updated: 2026-11-27
 confidence: medium
 tags: [opencode, doctor, testing, orca]
-related: [a-wall-clock-ratio-test-can-block-a-ship-under-load, a-headless-cli-follows-pwd-not-the-process-cwd]
+related: [opencode-debug-config-loads-project-plugins, a-wall-clock-ratio-test-can-block-a-ship-under-load, a-headless-cli-follows-pwd-not-the-process-cwd]
 source: greenfield-kickoff
 severity: medium
 resolved: false
@@ -23,6 +23,10 @@ A background OpenCode service left by reviewer workers made the full verifier fa
 
 ## Root Cause
 The doctor runs `opencode debug config`. It hung until its 15 s limit while `opencode serve --service` held the port. Observed once.
+
+## Later evidence (2026-11-27, fix-bun-project-preload)
+- Since 2.62.0 the current doctor starts no OpenCode by default. A service still remains after the full verifier: a traced run showed six
+  `debug config` calls, all from upgrade-simulation tests that run an earlier release's doctor.
 
 ## Solution
 After confirming that no worker or live attempt was using it, `node ai-framework/scripts/opencode-service.mts free --json`. The test then took under 1 s.

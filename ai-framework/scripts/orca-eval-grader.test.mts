@@ -5,12 +5,13 @@ import type { TestContext } from "node:test";
 import { pickImplementer, pickReviewer } from "./orca-assign.mts";
 import { collectReport, dispatchScope } from "./orca-dispatch.mts";
 import type { DispatchOptions, DispatchOutcome, ReportOutcome } from "./orca-dispatch.mts";
-import { DATASET_FILE, gradeAll, HOSTILE_SUMMARY_CASE, main } from "./orca-eval-grader.mts";
+import { DATASET_FILE, evalCatalog, gradeAll, HOSTILE_SUMMARY_CASE, main } from "./orca-eval-grader.mts";
 import type { GradeOptions, GradeReport, GraderLibraries } from "./orca-eval-grader.mts";
+import { bunIsolationOptions } from "./runtime/entry.mts";
 import { WORKER_ENV_MARKERS, WORKER_FLAG } from "./orca-launch-gate.mts";
 import { createLedger, validAuthorizedPaths } from "./orca-ledger.mts";
 import type { ReconcileOptions, ReconcileOutcome } from "./orca-reconcile.mts";
-import { captureIo, createTestDeps, orcaPolicyToonText, tempFixture } from "./runtime/test-helpers.mts";
+import { captureIo, createTestDeps, orcaPolicyToonText, tempFixture, urlPath } from "./runtime/test-helpers.mts";
 
 const deps = createTestDeps();
 const ROOT = deps.path.resolve(import.meta.dirname, "../..");
@@ -120,10 +121,27 @@ async function undetectedMutants(grade: Grade): Promise<string[]> {
 
 // ---- tests ----
 
+test("the grader's eval checks isolate Bun launches and leave Node unchanged, without the bundle dataset", () => {
+  for (const runtime of ["node", "bun"] as const) {
+    const checks = Object.values(evalCatalog({ ...deps, runtime }));
+    assert.equal(checks.length, 3);
+    for (const check of checks) assert.deepEqual(check.args.slice(0, -1), runtime === "bun" ? [...bunIsolationOptions(), "-e"] : ["-e"]);
+  }
+});
+
 test("the real dataset: every executable case runs and passes; modes and counts are never merged", REAL, async () => {
-  const io = captureIo(deps);
+  const checkArgs: string[][] = [];
+  const io = captureIo({ ...deps, child: { ...deps.child, run: (command, args, options) => {
+    if (command === deps.proc.execPath && args.includes("-e")) checkArgs.push(args);
+    return deps.child.run(command, args, options);
+  } } });
   const code = await main(["--root", ROOT], io);
   assert.equal(code, 0, io.err.join(""));
+  const evalArgs = deps.runtime === "bun"
+    ? [`--config=${urlPath(new URL("./runtime/bun-isolated.toml", import.meta.url))}`, "--no-env-file", "--no-install", `--tsconfig-override=${urlPath(new URL("./runtime/bun-isolated-tsconfig.json", import.meta.url))}`, "-e"]
+    : ["-e"];
+  assert.ok(checkArgs.length > 0, "grader ran at least one eval check");
+  for (const args of checkArgs) assert.deepEqual(args.slice(0, -1), evalArgs);
   assert.equal(io.out.length, 1);
   const report = JSON.parse(io.out[0]) as GradeReport;
   const modes = Object.fromEntries(report.cases.map((entry) => [entry.id, entry.mode]));

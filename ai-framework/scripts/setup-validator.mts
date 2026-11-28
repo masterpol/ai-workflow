@@ -139,9 +139,9 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
     try { return await libs.readRootFile(root, relativePath, deps); } catch { return null; }
   };
   // A spawn failure (missing binary) is reported like a non-zero exit, as before.
-  async function run(command: string, args: string[]): Promise<CheckRun> {
+  async function run(args: string[], env?: RuntimeDeps["proc"]["env"]): Promise<CheckRun> {
     try {
-      const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, { cwd: root, timeoutMs: 30000 }) : deps.child.run(command, args, { cwd: root, timeoutMs: 30000 }));
+      const result = await runWorkflow(deps, args, { cwd: root, timeoutMs: 30000, env });
       return { code: result.status, stdout: result.stdout, stderr: result.stderr, signal: safeCode(result.signal) ?? null, ...(safeCode(result.errorCode) ? { errorCode: safeCode(result.errorCode)! } : {}) };
     } catch (error: unknown) {
       const code = typeof error === "object" && error !== null && "code" in error ? safeCode(error.code) : undefined;
@@ -222,7 +222,7 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
   async function checkKnowledgeGraph(): Promise<void> {
     const files = ["graphify-out/graph.json", ".project/knowledge/index.md", ".graphifyignore"];
     if (!(await Promise.all(files.map(exists))).every(Boolean)) { await Promise.all(files.map(requireFile)); return; }
-    const result = await run(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", bundleScript(deps, "graphify.mts"), "--check", "--json"]);
+    const result = await run([bundleScript(deps, "graphify.mts"), "--check", "--json"]);
     if (result.code !== 0) { record("fail", "Knowledge graph", `graphify reported invalid entries (${childEnd(result)}); run node ai-framework/scripts/graphify.mts --check`); return; }
     try {
       const report = JSON.parse(result.stdout) as { problems?: { level: string }[]; stats: { total: number } };
@@ -258,16 +258,22 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
     if (!report.created.length) record("pass", ".cursor", `${report.current + report.differs.length} canonical skill/agent mirror file(s) present`);
   }
   async function checkWorkflowDoctor(): Promise<void> {
-    const result = await run(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", bundleScript(deps, "workflow-doctor.mts"), "--json"]);
+    const result = await run([bundleScript(deps, "workflow-doctor.mts"), "--json"]);
     if (result.code !== 0) { record("fail", "Workflow doctor", `workflow doctor found a blocking issue (${childEnd(result)})`); return; }
     try {
-      const report = JSON.parse(result.stdout) as { failures: number };
+      const report = JSON.parse(result.stdout) as { failures: number; results?: unknown[] };
       if (!isCount(report.failures)) throw new Error("invalid report");
-      record(report.failures === 0 ? "pass" : "fail", "Workflow doctor", report.failures === 0 ? "portable workflow contracts passed" : `${report.failures} workflow contract failure(s)`);
+      if (report.failures > 0) {
+        record("fail", "Workflow doctor", `${report.failures} workflow contract failure(s)`);
+      } else if (Array.isArray(report.results) && report.results.some((row) =>
+        row && typeof row === "object" && "name" in row && row.name === "Syntax check" && "status" in row && row.status === "warn")) {
+        record("warn", "Workflow doctor", "some files were not parse-checked by the workflow doctor");
+      } else {
+        record("pass", "Workflow doctor", "portable workflow contracts passed");
+      }
     } catch { record("fail", "Workflow doctor", "did not return JSON"); }
   }
-  // K3: TypeScript entries (.mts) cannot go through `node --check`, so each one that exists is parsed
-  // by stripping its types (Bun: transpile only). Silent when a project has none (pre-migration installs).
+  // Strip types without evaluating project code. Only the current Node executable may parse project files.
   async function checkTypeScriptEntries(): Promise<void> {
     const files: string[] = [];
     for (const dir of TS_DIRS) {
@@ -276,7 +282,12 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
       for (const name of names.filter((entry) => /\.(mts|ts)$/.test(entry)).sort()) files.push(`${dir}/${name}`);
     }
     if (files.length === 0) return;
-    const bun = deps.runtime === "bun";
+    const bun = deps.proc.versions ? Boolean(deps.proc.versions.bun) : deps.runtime === "bun";
+    if (bun) {
+      record("warn", "TypeScript entries", `${files.length} file(s) not parse-checked under Bun. Run with AI_WORKFLOW_RUNNER=node to check syntax.`);
+      return;
+    }
+    const env = { ...deps.proc.env, AI_WORKFLOW_RUNNER: "node" };
     // Bound process pressure; preserve discovery order without skipping or retrying failures.
     const outcomes: { file: string; result: CheckRun }[] = new Array(files.length);
     let next = 0;
@@ -284,15 +295,15 @@ function makeValidator(argv: string[], deps: RuntimeDeps, libs: ValidatorLibs) {
       while (next < files.length) {
         const index = next++;
         const file = files[index];
-        const args = bun ? ["build", "--no-bundle", file] : ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "-e", NODE_PARSE_SCRIPT, absolute(file)];
-        outcomes[index] = { file, result: await run(deps.proc.execPath, args) };
+        outcomes[index] = { file, result: await run(["-e", NODE_PARSE_SCRIPT, absolute(file)], env) };
       }
     }));
-    const unparsed = outcomes.filter((outcome) => !bun && outcome.result.code === 3);
-    if (unparsed.length > 0) record("info", "TypeScript entries", `${unparsed.length} file(s) not parse-checked: this Node has no module.stripTypeScriptTypes`);
-    const bad = outcomes.filter((outcome) => outcome.result.code !== 0 && !unparsed.includes(outcome));
-    if (bad.length === 0) { record("pass", "TypeScript entries", `${files.length} TypeScript file(s) parse`); return; }
-    for (const { file, result } of bad) {
+    const unparsed = outcomes.filter(({ result }) => result.code === 3).length;
+    if (unparsed > 0) record("warn", "TypeScript entries", `${unparsed} file(s) not parse-checked: this Node has no module.stripTypeScriptTypes`);
+    const parsed = outcomes.filter(({ result }) => result.code === 0).length;
+    if (parsed > 0) record("pass", "TypeScript entries", `${parsed} TypeScript file(s) parse`);
+    for (const { file, result } of outcomes) {
+      if (result.code === 0 || result.code === 3) continue;
       const signal = result.signal ? `; signal ${result.signal}` : "";
       const detail = result.errorCode === "ETIMEDOUT"
         ? `parse check timed out (ETIMEDOUT${signal}; limit 30000ms)`
@@ -329,14 +340,18 @@ export async function main(argv: string[], deps: RuntimeDeps, libs: ValidatorLib
     if (!json) out(`${paint("heading", "Setup validator: checking generated setup artifacts concurrently...\n")}`);
     await validate();
     const failures = results.filter((result) => result.status === "fail");
+    const syntaxSkipped = results.some((result) =>
+      result.status === "warn" && (result.name === "TypeScript entries" || result.name === "Workflow doctor"));
     if (json) {
       out(`${JSON.stringify({ results, failures: failures.length }, null, 2)}\n`);
     } else if (failures.length > 0) {
       out(`\n${paint("fail", `Setup status: INCOMPLETE (${failures.length} issue(s))`)}\n`);
       out("Next: re-run /setup and approve the missing generated artifacts. Do not hand-write generated context, graph, or entry-file content.\n");
     } else {
-      out(`\n${paint("pass", "Setup status: READY")}\nGenerated setup artifacts and portable workflow contracts passed.\n`);
+      const detail = syntaxSkipped ? "Setup checks completed with warnings." : "Generated setup artifacts and portable workflow contracts passed.";
+      out(`\n${paint("pass", "Setup status: READY")}\n${detail}\n`);
     }
+    if (!json && syntaxSkipped) out("Syntax check: some files were not parse-checked.\n");
     if (!json) out(`Validated ${results.filter((result) => result.status === "pass").length} checks. Use --json for automation or --no-color for plain text.\n`);
     return failures.length > 0 ? 1 : 0;
   } catch (error) {

@@ -5,7 +5,7 @@ JavaScript entry files:
 
 ```sh
 node ai-framework/scripts/graphify.mts --check
-bun ai-framework/scripts/graphify.mts --check
+AI_WORKFLOW_RUNNER=bun node ai-framework/scripts/graphify.mts --check
 ```
 
 The Node command above requires Node 22.18 or later. For Node 22.12–22.17, pass the type-stripping
@@ -15,8 +15,8 @@ flags before the entry path:
 node --experimental-strip-types --disable-warning=ExperimentalWarning ai-framework/scripts/graphify.mts --check
 ```
 
-Shipped hook commands include these flags so they also work on Node 22.12–22.17. Older Node
-versions cannot load these entries; launch them with Bun or update Node before running them.
+Shipped hook commands include these flags so they also work on Node 22.12–22.17. Update older
+versions of Node before using these commands.
 If `NODE_OPTIONS` disables type stripping, pass `--experimental-strip-types` explicitly.
 
 ## Choosing Node or Bun
@@ -37,11 +37,44 @@ they apply Node's compatibility flags only to Node and honor an explicit child r
 An explicit child environment replaces the inherited environment; include `PATH` when selecting
 another executable by name. A sanitized environment without a runner keeps the parent's selection.
 
+Bun scripts started this way do not load the project's settings; see
+[Isolation and untrusted projects](#isolation-and-untrusted-projects).
+
 `ai-workflow.toon` (TOON; see `ai-framework/templates/ai-workflow.example.toon`; the legacy flat `ai_workflow_env.json` is the fallback, see `ai-framework/templates/ai_workflow_env.example.json`) is read only from the project root that
 contains `ai-framework/`, never from an unrelated working directory, and the secret-bearing `.env` is never read. A
 symlink leaving that root, a non-regular file, a file over 64 KiB or malformed content is ignored. A present but invalid `ai-workflow.toon` contributes nothing and never falls back to the legacy file. Only the runner (`runtime.runner`) and the Orca switch (`integrations.orca.multiAgent` in a `schemaVersion: 2` file; legacy keys `AI_WORKFLOW_RUNNER` and `AI_WORKFLOW_ORCA_MULTI_AGENT`, string or boolean) are taken from it; other keys never reach a
 child process. The Orca switch is read by the same loader through the Orca launch gate. A selected executable missing from `PATH` fails with an error; it never falls back to
 another runtime. Portable reminder hooks and review-bench test commands use the same selection.
+
+## Isolation and untrusted projects
+
+Workflow-started Bun script, eval, and build commands use the adjacent `bun-isolated.toml` and
+`bun-isolated-tsconfig.json` (through `bunIsolationOptions()` in `entry.mts`), skip automatic `.env` loading, and
+disable automatic package installation. These launches skip project preloads and TypeScript path settings, and Bun
+scripts no longer receive variables from the project's `.env` files. Both config files must ship beside `entry.mts`
+and stay free of settings. Bun test commands retain their normal settings.
+
+These options do not stop Bun macros, which run while Bun parses a file. So the setup validator and workflow doctor
+never give project source to a Bun parser: they parse only when the checking process is Node, with that same
+executable. Under Bun, or on a Node version without type stripping, they warn that files were not parse-checked and
+do not count them as parsed. Use `AI_WORKFLOW_RUNNER=node` with a Node version that supports type stripping for syntax
+checks. A new check must not pass project source to `Bun.Transpiler`, `bun build` or any other Bun parser.
+
+The doctor runs its own Graphify script to check the project, and starts `opencode` only with `--live-opencode`,
+which can run the project's plugins.
+
+To check a tree you do not trust, start a trusted copy of the workflow script with Node. Set
+`AI_WORKFLOW_RUNNER=bun` for an isolated Bun respawn or `AI_WORKFLOW_RUNNER=node` to stay on Node. Do not add `--fix`
+(it follows symbolic links in the checked project's templates) or `--live-opencode`. This covers only what is
+described here, needs trustworthy workflow scripts, hooks and harness settings, and does not make the tree safe to
+build or test.
+
+A direct `bun <script>` command still loads the working folder's `bunfig.toml` preload and `.env`
+before workflow code runs, and its path mappings can replace the script. Your own process
+environment still applies: Node honors `NODE_OPTIONS`, and Bun honors `BUN_OPTIONS`, including a
+preload named there. Tools the workflow calls by bare name are found through `PATH`.
+
+Isolation was verified with Bun 1.4.5 on macOS only.
 
 ## Writing a script
 
@@ -132,6 +165,8 @@ will be migrated by a later pitch, not by the validator. New tests should use th
 `memoryFs()` and `captureIo()`.
 
 ## Running tests
+
+Run Bun tests from a checkout you trust.
 
 ```sh
 node --experimental-strip-types --disable-warning=ExperimentalWarning --test

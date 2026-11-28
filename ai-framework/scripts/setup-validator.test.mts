@@ -10,13 +10,13 @@ import { test } from "node:test";
 
 import { BUNDLE_IDENTITY, BUNDLE_SETUP_TITLE, main } from "./setup-validator.mts";
 import type { ValidatorLibs } from "./setup-validator.mts";
-import type { RunResult, RuntimeDeps } from "./runtime/types.mts";
+import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
 const ROOT = "/proj";
 const GOOD_CONTEXT = "# Product\nA real description of the product that is long enough to pass the unfilled draft check.\n";
 const AGENTS = "# Agents\n\n## Project specifics\n\nReal.\n\n## Response style (caveman mode)\n\nBrief.\n";
 
-interface Call { command: string; args: string[] }
+interface Call { command: string; args: string[]; options: SpawnOptions }
 
 function baseFiles(): Record<string, string> {
   return {
@@ -67,7 +67,7 @@ function makeDeps(files: Record<string, string>, script: (call: Call) => RunResu
     path: { join: (...parts: string[]) => parts.join("/") } as unknown as RuntimeDeps["path"],
     child: {
       runSync: unsupported,
-      run: async (command, args) => { const call = { command, args }; calls.push(call); return script(call); },
+      run: async (command, args, options = {}) => { const call = { command, args, options }; calls.push(call); return script(call); },
     },
     crypto: { sha256Hex: unsupported },
     os: { tmpdir: unsupported, platform: () => "test" },
@@ -306,10 +306,44 @@ test("K3: every existing .mts entry is parse-checked as one extra check; a bad o
   assert.equal(absent.calls.filter((call) => call.args.includes("-e")).length, 0);
 });
 
-test("under the bun runtime .mts entries are transpile-checked", async () => {
-  const { deps, calls } = makeDeps(baseFiles(), healthy);
-  await main(["--json"], { ...deps, runtime: "bun" }, libs);
-  assert.ok(calls.some((call) => call.args.join(" ") === "build --no-bundle ai-framework/scripts/demo.mts"));
+test("validator never sends a project file to a Bun child", async () => {
+  const files = { ...baseFiles(), "ai-framework/scripts/extra.ts": "export {};" };
+  for (const runner of ["node", "bun"]) {
+    const run = makeDeps(files, healthy, { AI_WORKFLOW_RUNNER: runner });
+    run.deps.runtime = "node";
+    run.deps.proc.versions = { bun: "test" };
+    assert.equal(await main(["--json"], run.deps, libs), 0);
+    assert.equal(run.calls.length, 2, "only the bundle doctor and graph check may start");
+    assert.deepEqual((JSON.parse(run.out.join("")) as Report).results.filter((item) => item.name === "TypeScript entries"), [
+      { status: "warn", name: "TypeScript entries", detail: "2 file(s) not parse-checked under Bun. Run with AI_WORKFLOW_RUNNER=node to check syntax." },
+    ]);
+  }
+});
+
+test("validator pins project parsing to its own Node executable", async () => {
+  const run = makeDeps(baseFiles(), healthy, { AI_WORKFLOW_RUNNER: "bun", KEEP: "value" });
+  run.deps.runtime = "bun";
+  run.deps.proc.versions = { node: "24.21.0" };
+  assert.equal(await main(["--json"], run.deps, libs), 0);
+  const parseCalls = run.calls.filter((call) => call.args.at(-1)?.endsWith("demo.mts"));
+  assert.equal(parseCalls.length, 1);
+  assert.equal(parseCalls[0].command, run.deps.proc.execPath);
+  assert.deepEqual(parseCalls[0].options.env, { AI_WORKFLOW_RUNNER: "node", KEEP: "value" });
+  assert.ok(parseCalls[0].args.includes("-e"));
+});
+
+test("validator keeps a doctor syntax warning in JSON and the human summary", async () => {
+  const runDoctor = (call: Call): RunResult => call.args.at(-2)?.endsWith("workflow-doctor.mts")
+    ? ok(JSON.stringify({ failures: 0, results: [{ status: "warn", name: "Syntax check", detail: "child detail" }] }))
+    : healthy(call);
+  const json = makeDeps(baseFiles(), runDoctor);
+  assert.equal(await main(["--json"], json.deps, libs), 0);
+  const report = JSON.parse(json.out.join("")) as Report;
+  assert.equal(report.results.find((item) => item.name === "Workflow doctor")?.status, "warn");
+  const human = makeDeps(baseFiles(), runDoctor);
+  assert.equal(await main(["--no-color"], human.deps, libs), 0);
+  assert.match(human.out.join(""), /Setup status: READY\n[^\n]*\nSyntax check: some files were not parse-checked\./);
+  assert.doesNotMatch(human.out.join(""), /child detail/);
 });
 
 test("unexpected errors exit 2 on stderr", async () => {
@@ -364,7 +398,48 @@ test("a context file full of unclosed angle brackets is checked in linear time",
   assert.ok(Date.now() - started < 10000, "the placeholder scan must not be quadratic");
 });
 
-function realReport(prepare: (dir: string, outside: string) => void): { name: string; status: string; detail: string }[] {
+const bunProbe = spawnSync("bun", ["-p", "process.execPath"], { timeout: 5000 });
+const bunExecutable = process.versions.bun ? process.execPath : bunProbe.stdout.trim();
+const skipBun = !process.versions.bun && bunProbe.error?.code === "ENOENT";
+
+test("real Bun validator reports inert TypeScript as unchecked", { skip: skipBun }, () => {
+  const results = realReport((dir) => {
+    testDeps.fs.mkdirSync(join(dir, "ai-framework/scripts"), { recursive: true });
+    testDeps.fs.writeFileSync(join(dir, "ai-framework/scripts/example.mts"), "export const value: number = 1;\n");
+  }, "bun");
+  assert.equal(results.find((item) => item.name === "TypeScript entries")?.status, "warn");
+  assert.doesNotMatch(results.map((item) => item.detail).join("\n"), /1 TypeScript file\(s\) parse/);
+});
+
+test("real Bun validator runs no project macro: relative, absolute and package imports", { skip: skipBun }, (t) => {
+  const markers = realpathSync(mkdtempSync(join(tmpdir(), "setup-validator-macro-")));
+  t.after(() => rmSync(markers, { recursive: true, force: true }));
+  const kinds = ["relative", "absolute", "package"];
+  const ran = (): string[] => kinds.filter((kind) => testDeps.fs.existsSync(join(markers, `ran-${kind}`)));
+  const results = realReport((dir) => {
+    const put = (name: string, content: string): void => {
+      testDeps.fs.mkdirSync(join(dir, name, ".."), { recursive: true });
+      testDeps.fs.writeFileSync(join(dir, name), content);
+    };
+    const macro = (kind: string): string => 'import { writeFileSync } from "node:fs";\n' +
+      `export function m(): number { writeFileSync(${JSON.stringify(join(markers, `ran-${kind}`))}, "marker"); return 1; }\n`;
+    put("mac-relative.ts", macro("relative"));
+    put("mac-absolute.ts", macro("absolute"));
+    put("node_modules/mpkg/index.ts", macro("package"));
+    put("node_modules/mpkg/package.json", '{"name":"mpkg","version":"1.0.0","module":"index.ts","main":"index.ts"}\n');
+    put(".claude/hooks/zz.ts", 'import { m as a } from "../../mac-relative.ts" with { type: "macro" };\n' +
+      `import { m as b } from ${JSON.stringify(join(dir, "mac-absolute.ts"))} with { type: "macro" };\n` +
+      'import { m as c } from "mpkg" with { type: "macro" };\nconsole.log(a(), b(), c());\n');
+    // Control: these macros do run when Bun is given the source.
+    assert.equal(spawnSync(bunExecutable, ["build", "--no-bundle", ".claude/hooks/zz.ts"], { cwd: dir, timeout: 15000 }).error, undefined);
+    assert.deepEqual(ran(), kinds);
+    for (const kind of kinds) rmSync(join(markers, `ran-${kind}`));
+  }, "bun");
+  assert.deepEqual(ran(), []);
+  assert.equal(results.find((item) => item.name === "TypeScript entries")?.status, "warn");
+});
+
+function realReport(prepare: (dir: string, outside: string) => void, runner = process.versions.bun ? "bun" : "node"): Report["results"] {
   const base = realpathSync(mkdtempSync(join(tmpdir(), "setup-validator-guard-")));
   try {
     const dir = join(base, "proj"), outside = join(base, "outside");
@@ -372,7 +447,11 @@ function realReport(prepare: (dir: string, outside: string) => void): { name: st
     testDeps.fs.writeFileSync(join(dir, "AGENTS.md"), AGENTS);
     testDeps.fs.writeFileSync(join(dir, "CLAUDE.md"), AGENTS);
     prepare(dir, outside);
-    const result = spawnSync(process.execPath, [...RUNTIME_FLAGS, urlPath(new URL("./setup-validator.mts", import.meta.url)), "--json"], { cwd: dir, encoding: "utf8", timeout: 20000 });
+    const result = spawnSync(runner === "bun" ? bunExecutable : process.execPath, [...(runner === "bun" ? [] : NODE_FLAGS), urlPath(new URL("./setup-validator.mts", import.meta.url)), "--json"], {
+      cwd: dir, encoding: "utf8", timeout: 20000,
+      env: { ...process.env, PATH: dir, AI_WORKFLOW_RUNNER: runner },
+    });
+    assert.equal(result.error, undefined);
     assert.doesNotMatch(String(result.stdout) + String(result.stderr), /outside-marker/);
     return (JSON.parse(String(result.stdout)) as Report).results;
   } finally { rmSync(base, { recursive: true, force: true }); }
@@ -423,7 +502,7 @@ test("integration: the direct TypeScript command runs the validator in an empty 
   const shim = urlPath(new URL("./setup-validator.mts", import.meta.url));
   const dir = realpathSync(mkdtempSync(join(tmpdir(), "setup-validator-")));
   try {
-    const run = spawnSync(process.execPath, [...RUNTIME_FLAGS, shim, "--no-color"], { cwd: dir, encoding: "utf8", shell: false, windowsHide: true, timeout: 15000, env: { ...process.env, NO_COLOR: "1" } });
+    const run = spawnSync(process.execPath, [...RUNTIME_FLAGS, shim, "--no-color"], { cwd: dir, encoding: "utf8", shell: false, windowsHide: true, timeout: 15000, env: { ...process.env, NO_COLOR: "1", AI_WORKFLOW_RUNNER: process.versions.bun ? "bun" : "node" } });
     assert.equal(run.stderr, "");
     assert.equal(run.status, 1);
     assert.ok(run.stdout.includes("FAIL  .project: missing; setup has not completed\n"));
@@ -477,11 +556,17 @@ test("parser process failures retain safe diagnostics rather than claiming synta
   }
 });
 
-test("Node without stripTypeScriptTypes still reports its explicit unsupported boundary", async () => {
-  const run = makeDeps(baseFiles(), (call) => call.args.includes("-e") ? { status: 3, signal: null, stdout: "", stderr: "" } : healthy(call));
-  assert.equal(await main(["--json"], run.deps, libs), 0);
-  const report = JSON.parse(run.out.join("")) as Report;
-  assert.ok(report.results.some((result) => result.status === "info" && result.detail.includes("not parse-checked")));
+test("validator warns for old Node and counts only parsed files", async () => {
+  for (const mixed of [false, true]) {
+    const files = mixed ? { ...baseFiles(), "ai-framework/scripts/extra.ts": "export {};" } : baseFiles();
+    const run = makeDeps(files, (call) => call.args.at(-1)?.endsWith("demo.mts") ? { ...ok(""), status: 3 } : healthy(call));
+    assert.equal(await main(["--json"], run.deps, libs), 0);
+    const report = JSON.parse(run.out.join("")) as Report;
+    assert.deepEqual(report.results.filter((item) => item.name === "TypeScript entries"), [
+      { status: "warn", name: "TypeScript entries", detail: "1 file(s) not parse-checked: this Node has no module.stripTypeScriptTypes" },
+      ...(mixed ? [{ status: "pass", name: "TypeScript entries", detail: "1 TypeScript file(s) parse" }] : []),
+    ]);
+  }
 });
 
 test("Workflow config is info when ai-workflow.toon is absent, and never fails the run by itself", async () => {

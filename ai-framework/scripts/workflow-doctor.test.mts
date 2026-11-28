@@ -2,12 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 import { createNodeDeps } from "./runtime/node.mts";
-import { createTestDeps, urlPath } from "./runtime/test-helpers.mts";
+import { createTestDeps, spawnSync, urlPath } from "./runtime/test-helpers.mts";
+import { runWorkflow } from "./runtime/entry.mts";
 import { main } from "./workflow-doctor.mts";
 import { hookBlock } from "./graphify.mts";
 import { toonFixtureText } from "./runtime/test-helpers.mts";
 
-import type { RuntimeDeps } from "./runtime/types.mts";
+import type { RunResult, RuntimeDeps } from "./runtime/types.mts";
 import type { TestContext } from "node:test";
 const testDeps = createTestDeps();
 const fs = testDeps.fs;
@@ -214,33 +215,241 @@ test("doctor rejects a missing direct source and checks a present typed source w
   assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "pass" && item.detail.includes("syntax")));
 });
 
-test("doctor reports invalid TypeScript from the real Node parser", async (t) => {
+test("doctor reports invalid TypeScript without copying parser stderr", async (t) => {
   const root = fixture(t);
   write(root, "ai-framework/scripts/bundle-sync.mts", "export const invalid: number = ;\n");
   const capture = injected(root);
   const base = createNodeDeps();
+  capture.deps.proc.env = { PATH: process.env.PATH, AI_WORKFLOW_RUNNER: "node" };
+  let parserResult: RunResult | undefined;
   capture.deps.child.run = async (command, args, options) => {
-    if (args.at(-1)?.endsWith("bundle-sync.mts")) return base.child.run("node", args, { ...options, env: { PATH: process.env.PATH } });
+    if (args.at(-1)?.endsWith("bundle-sync.mts")) {
+      parserResult = await base.child.run(process.versions.bun ? "node" : command, args, options);
+      return { ...parserResult, stderr: parserResult.stderr + "parser-stderr-marker" };
+    }
     return { status: 0, signal: null, stdout: "", stderr: "" };
   };
   await main(["--json"], capture.deps);
-  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "fail" && /SyntaxError|Unexpected token|invalid Node.js syntax/.test(item.detail)), JSON.stringify(checks(capture.output).filter((item) => item.name.endsWith("bundle-sync.mts"))));
+  assert.ok(parserResult);
+  assert.equal(parserResult.status, 1);
+  assert.match(parserResult.stderr, /SyntaxError/);
+  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "fail" && item.detail === "invalid Node.js syntax (exit 1)"));
+  assert.doesNotMatch(capture.output.join("") + capture.errors.join(""), /parser-stderr-marker|SyntaxError/);
 });
 
-test("doctor checks TypeScript syntax with Bun instead of skipping it", { skip: !process.versions.bun }, async (t) => {
+test("doctor never sends a project file to a Bun child", async (t) => {
   const root = fixture(t);
-  write(root, "ai-framework/scripts/bundle-sync.mts", "export const invalid: number = ;\n");
+  const source = "ai-framework/scripts/bundle-sync.mts";
+  write(root, source, "export const value: number = 1;\n");
+  for (const runner of ["node", "bun"]) {
+    const capture = injected(root);
+    capture.deps.runtime = "node";
+    capture.deps.proc.versions = { bun: "test" };
+    capture.deps.proc.env = { AI_WORKFLOW_RUNNER: runner };
+    await main(["--json"], capture.deps);
+    assert.ok(!capture.calls.some((call) => call.some((arg) => arg.endsWith("bundle-sync.mts"))));
+    const rows = checks(capture.output);
+    assert.deepEqual(rows.filter((item) => item.name === "Syntax check"), [
+      { status: "warn", name: "Syntax check", detail: "1 file(s) not parse-checked under Bun. Run with AI_WORKFLOW_RUNNER=node to check syntax." },
+    ]);
+    assert.ok(!rows.some((item) => item.name === source && item.status === "pass"));
+    assert.ok(rows.some((item) => item.name === "ai-framework/scripts/config-migrate.mts" && item.status === "fail"));
+    capture.output.length = 0;
+    await main(["--no-color"], capture.deps);
+    assert.match(capture.output.join(""), /Workflow status: NEEDS ATTENTION[^\n]*\n(?:[^\n]*\n)?[^\n]*not parse-checked/);
+  }
+});
+
+test("doctor pins project parsing to its own Node executable and warns when stripping is unavailable", async (t) => {
+  const root = fixture(t);
+  const source = "ai-framework/scripts/bundle-sync.mts";
+  const other = "ai-framework/scripts/skill-sync.mts";
+  for (const file of [source, other]) write(root, file, "export {};");
   const capture = injected(root);
   capture.deps.runtime = "bun";
-  capture.deps.proc.versions = { bun: process.versions.bun! };
-  capture.deps.proc.env = { PATH: process.env.PATH, AI_WORKFLOW_RUNNER: "bun" };
-  const base = createNodeDeps();
+  capture.deps.proc.env = { AI_WORKFLOW_RUNNER: "bun", KEEP: "value" };
+  const run = capture.deps.child.run;
+  const parses: { command: string; env: unknown }[] = [];
   capture.deps.child.run = async (command, args, options) => {
-    if (args.includes(path.join(root, "ai-framework/scripts/bundle-sync.mts"))) return base.child.run(command, args, options);
-    return { status: 0, signal: null, stdout: "", stderr: "" };
+    if (!args.some((arg) => arg.endsWith("bundle-sync.mts") || arg.endsWith("skill-sync.mts"))) return run(command, args, options);
+    parses.push({ command, env: options?.env });
+    return { status: args.at(-1)?.endsWith("bundle-sync.mts") ? 3 : 0, signal: null, stdout: "", stderr: "" };
   };
   await main(["--json"], capture.deps);
-  assert.ok(checks(capture.output).some((item) => item.name === "ai-framework/scripts/bundle-sync.mts" && item.status === "fail" && /Unexpected|Expected|error/i.test(item.detail)));
+  assert.deepEqual(parses, Array.from({ length: 2 }, () => ({
+    command: capture.deps.proc.execPath, env: { AI_WORKFLOW_RUNNER: "node", KEEP: "value" },
+  })));
+  const rows = checks(capture.output);
+  assert.deepEqual(rows.filter((item) => item.name === "Syntax check"), [
+    { status: "warn", name: "Syntax check", detail: "1 file(s) not parse-checked: this Node has no module.stripTypeScriptTypes" },
+  ]);
+  assert.ok(rows.some((item) => item.name === other && item.detail === "valid Node.js syntax"));
+  assert.ok(!rows.some((item) => item.name === source && item.status === "pass"));
+});
+
+const bunProbe = spawnSync("bun", ["-p", "process.execPath"], { timeout: 5000 });
+const bunExecutable = process.versions.bun ? process.execPath : bunProbe.stdout.trim();
+const skipBun = !process.versions.bun && bunProbe.error?.code === "ENOENT";
+
+const doctorScript = urlPath(new URL("./workflow-doctor.mts", import.meta.url));
+
+function runDoctor(root: string, executable: string, runner: "node" | "bun", ...args: string[]): Check[] {
+  const result = spawnSync(executable, [doctorScript, "--json", ...args], {
+    cwd: root, env: { ...process.env, PATH: root, AI_WORKFLOW_RUNNER: runner }, timeout: 15000,
+  });
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 1, result.stderr); // The scratch scaffold is intentionally incomplete.
+  return checks([result.stdout]);
+}
+
+function doctorNodeExecutable(): string {
+  const result = spawnSync(process.versions.bun ? "node" : process.execPath, ["-p", "process.execPath"], {
+    env: { ...process.env, AI_WORKFLOW_RUNNER: "node" }, timeout: 5000,
+  });
+  assert.equal(result.status, 0, result.stderr);
+  return result.stdout.trim();
+}
+
+for (const runner of ["node", "bun"] as const) {
+  test(`real ${runner} doctor checks project knowledge without running the project's Graphify script`, { skip: runner === "bun" && skipBun }, (t) => {
+    const root = fixture(t), marker = path.join(root, "graphify-ran");
+    const projectHelper = "ai-framework/scripts/graphify.mts";
+    write(root, projectHelper, 'import { writeFileSync } from "node:fs";\n' +
+      `writeFileSync(${JSON.stringify(marker)}, "ran"); console.log('{"stats":{"total":0}}');\n`);
+    write(root, ".project/knowledge/decisions/broken.md", "---\nid: broken\nstatus: invalid-status\n---\n# Broken\n");
+    const rows = runDoctor(root, runner === "bun" ? bunExecutable : doctorNodeExecutable(), runner);
+    assert.equal(fs.existsSync(marker), false, "the project's Graphify script ran");
+    assert.ok(rows.some((item) => item.name === "Knowledge graph" && item.status === "fail" &&
+      item.detail === "graphify reported invalid knowledge entries"));
+    if (runner === "node") assert.ok(rows.some((item) => item.name === projectHelper && item.detail === "valid Node.js syntax"));
+  });
+}
+
+test("doctor launches its own Graphify helper from the checked project", async (t) => {
+  const root = fixture(t), capture = injected(root);
+  fs.mkdirSync(path.join(root, ".project/knowledge"), { recursive: true });
+  const calls: Array<{ args: string[]; cwd: string | undefined }> = [];
+  const run = capture.deps.child.run;
+  capture.deps.child.run = (command, args, options) => {
+    if (args.at(-2) === "--check" && args.at(-1) === "--json") calls.push({ args: args.slice(-3), cwd: options?.cwd });
+    return run(command, args, options);
+  };
+  await main(["--json"], capture.deps);
+  assert.deepEqual(calls, [{ args: [urlPath(new URL("./graphify.mts", import.meta.url)), "--check", "--json"], cwd: root }]);
+});
+
+test("doctor skips the OpenCode process by default", async (t) => {
+  const capture = injected(fixture(t));
+  await main(["--json"], capture.deps);
+  assert.deepEqual(capture.calls.filter(([command]) => command === "opencode"), []);
+  const rows = checks(capture.output).filter((item) => item.name === "OpenCode");
+  assert.deepEqual(rows.map((item) => item.status), ["info"]);
+  assert.match(rows[0].detail, /static adapter checks.*live configuration was not checked.*project plugins.*--live-opencode.*trusted project/);
+});
+
+test("real doctor runs a fake OpenCode only with --live-opencode", { skip: process.platform === "win32" && "shell fixture needs POSIX" }, (t) => {
+  const root = fixture(t);
+  write(root, "opencode", '#!/bin/sh\nprintf "%s\\n" "$@" > opencode-ran\nprintf "{}\\n"\n');
+  fs.chmodSync(path.join(root, "opencode"), 0o755);
+  const executable = doctorNodeExecutable(), marker = path.join(root, "opencode-ran");
+  runDoctor(root, executable, "node");
+  assert.equal(fs.existsSync(marker), false, "OpenCode started without opt-in");
+  const rows = runDoctor(root, executable, "node", "--live-opencode");
+  assert.equal(fs.readFileSync(marker), "debug\nconfig\n");
+  assert.ok(rows.some((item) => item.name === "OpenCode" && item.status === "pass"));
+});
+
+test("doctor keeps the live OpenCode outcomes", async (t) => {
+  const root = fixture(t);
+  const cases = [
+    { status: "info", detail: "not installed; static adapter checks completed" },
+    { code: 1, stderr: "config failed", status: "warn", detail: "config failed" },
+    { code: 0, stdout: "not JSON", status: "fail", detail: "debug config did not return JSON" },
+    { code: 0, stdout: "{}", status: "pass", detail: "debug config resolves" },
+    { bun: true, status: "info", detail: "static adapter checks completed; run with Node to resolve live OpenCode config" },
+  ];
+  for (const scenario of cases) {
+    const capture = injected(root);
+    if (scenario.bun) capture.deps.proc.versions = { bun: "1.4.5" };
+    const run = capture.deps.child.run;
+    capture.deps.child.run = (command, args, options) => {
+      if (command !== "opencode" || scenario.code === undefined) return run(command, args, options);
+      capture.calls.push([command, ...args]);
+      return Promise.resolve({ status: scenario.code, stdout: scenario.stdout ?? "", stderr: scenario.stderr ?? "", signal: null });
+    };
+    await main(["--json", "--live-opencode"], capture.deps);
+    assert.deepEqual(capture.calls.filter(([command]) => command === "opencode"), scenario.bun ? [] : [["opencode", "debug", "config"]]);
+    assert.deepEqual(checks(capture.output).filter((item) => item.name === "OpenCode"),
+      [{ name: "OpenCode", status: scenario.status, detail: scenario.detail }]);
+  }
+});
+
+test("real Bun doctor reports inert TypeScript as unchecked", { skip: skipBun }, (t) => {
+  const root = fixture(t);
+  const source = "ai-framework/scripts/bundle-sync.mts";
+  write(root, source, "export const value: number = 1;\n");
+  const result = spawnSync(bunExecutable, [urlPath(new URL("./workflow-doctor.mts", import.meta.url)), "--json"], {
+    cwd: root, env: { ...process.env, PATH: root, AI_WORKFLOW_RUNNER: "bun" }, timeout: 15000,
+  });
+  assert.equal(result.error, undefined);
+  assert.equal(result.status, 1, result.stderr);
+  const rows = checks([result.stdout]);
+  assert.equal(rows.find((item) => item.name === "Syntax check")?.status, "warn");
+  assert.ok(!rows.some((item) => item.name === source && item.status === "pass"));
+});
+
+test("real Bun doctor runs no project macro: relative, absolute and package imports", { skip: skipBun }, (t) => {
+  const root = fixture(t);
+  const kinds = ["relative", "absolute", "package"];
+  const macro = (kind: string): string => 'import { writeFileSync } from "node:fs";\n' +
+    `export function m(): number { writeFileSync(${JSON.stringify(path.join(root, `ran-${kind}`))}, "marker"); return 1; }\n`;
+  write(root, "mac-relative.ts", macro("relative"));
+  write(root, "mac-absolute.ts", macro("absolute"));
+  write(root, "node_modules/mpkg/index.ts", macro("package"));
+  write(root, "node_modules/mpkg/package.json", '{"name":"mpkg","version":"1.0.0","module":"index.ts","main":"index.ts"}\n');
+  const source = (relative: string): string => `import { m as a } from "${relative}" with { type: "macro" };\n` +
+    `import { m as b } from ${JSON.stringify(path.join(root, "mac-absolute.ts"))} with { type: "macro" };\n` +
+    'import { m as c } from "mpkg" with { type: "macro" };\nconsole.log(a(), b(), c());\n';
+  const ran = (): string[] => kinds.filter((kind) => fs.existsSync(path.join(root, `ran-${kind}`)));
+  const options = { cwd: root, env: { ...process.env, PATH: root, AI_WORKFLOW_RUNNER: "bun" }, timeout: 15000 };
+  // Control: these macros do run when Bun is given the source.
+  write(root, "control/entry.ts", source("../mac-relative.ts"));
+  assert.equal(spawnSync(bunExecutable, ["build", "--no-bundle", "control/entry.ts"], options).error, undefined);
+  assert.deepEqual(ran(), kinds);
+  for (const kind of kinds) fs.rmSync(path.join(root, `ran-${kind}`));
+  // The doctor's former parser resolved a relative macro against the working folder.
+  write(root, ".claude/hooks/post-edit-check.mts", source("./mac-relative.ts"));
+  const result = spawnSync(bunExecutable, [urlPath(new URL("./workflow-doctor.mts", import.meta.url)), "--json"], options);
+  assert.equal(result.error, undefined);
+  assert.deepEqual(ran(), []);
+  assert.equal(checks([result.stdout]).find((item) => item.name === "Syntax check")?.status, "warn");
+});
+
+test("Node type stripping and --check leave source code unevaluated", async (t) => {
+  const root = fixture(t), marker = path.join(root, "evaluated");
+  const body = `require("node:fs").writeFileSync(${JSON.stringify(marker)}, "evaluated");\n`;
+  const typed = "ai-framework/scripts/bundle-sync.mts";
+  write(root, typed, 'import { writeFileSync } from "node:fs";\n' +
+    `const value: string = "evaluated"; writeFileSync(${JSON.stringify(marker)}, value);\n`);
+  write(root, "plain.cjs", body);
+  const base = createNodeDeps();
+  const nodePath = spawnSync(process.versions.bun ? "node" : process.execPath, ["-p", "process.execPath"], {
+    env: { ...process.env, AI_WORKFLOW_RUNNER: "node" }, timeout: 5000,
+  });
+  assert.equal(nodePath.status, 0, nodePath.stderr);
+  const capture = injected(root);
+  capture.deps.proc.execPath = nodePath.stdout.trim();
+  const run = capture.deps.child.run;
+  capture.deps.child.run = (command, args, options) => args.at(-1)?.endsWith(typed)
+    ? base.child.run(command, args, options)
+    : run(command, args, options);
+  await main(["--json"], capture.deps);
+  assert.ok(checks(capture.output).some((item) => item.name === typed && item.detail === "valid Node.js syntax"));
+  assert.equal(fs.existsSync(marker), false);
+  assert.equal((await runWorkflow({ ...base, proc: capture.deps.proc }, ["--check", path.join(root, "plain.cjs")], {
+    cwd: root, env: { AI_WORKFLOW_RUNNER: "node" }, timeoutMs: 5000,
+  })).status, 0);
+  assert.equal(fs.existsSync(marker), false);
 });
 
 test("doctor reports what ai_workflow_env.json would set and flags a file that would be ignored", async (t) => {
@@ -710,12 +919,11 @@ test("doctor Config validators check mentions leftover legacy files without fail
 test("doctor syntax-checks runtime/config.mts and always lists config-migrate.mts (b1: unconditional)", async (t) => {
   const root = fixture(t);
   write(root, "ai-framework/scripts/runtime/config.mts", "export const a: number = 1;\n");
-  // The parse runs for real on the host runner (Node's strip-types parse, or Bun's parser under Bun).
+  // Run Node parsing under both test runners.
   const real = (capture: ReturnType<typeof injected>) => {
     const host = createTestDeps();
-    capture.deps.runtime = host.runtime;
-    capture.deps.proc = { ...capture.deps.proc, execPath: host.proc.execPath };
-    capture.deps.child.run = async (command, args, options) => args.some((arg) => /\/(config|config-migrate)\.mts$/.test(arg)) ? host.child.run(command, args, options) : { status: 0, signal: null, stdout: "", stderr: "" };
+    capture.deps.proc.env = { ...capture.deps.proc.env, AI_WORKFLOW_RUNNER: "node" };
+    capture.deps.child.run = async (command, args, options) => args.some((arg) => /\/(config|config-migrate)\.mts$/.test(arg)) ? host.child.run(process.versions.bun ? "node" : command, args, options) : { status: 0, signal: null, stdout: "", stderr: "" };
     return capture;
   };
   let capture = real(injected(root));

@@ -23,7 +23,6 @@ import { isBundleSetup } from "./entry-import.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";
 
 const TS_PARSE_SCRIPT = 'const m=require("module"),fs=require("fs");if(typeof m.stripTypeScriptTypes!=="function")process.exit(3);m.stripTypeScriptTypes(fs.readFileSync(process.argv[1],"utf8"));';
-const BUN_PARSE_SCRIPT = 'new Bun.Transpiler({loader:process.argv[2]}).transformSync(require("fs").readFileSync(process.argv[1],"utf8"));';
 
 /** Runs with isolated invocation state and injected host operations. */
 export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
@@ -34,6 +33,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   const fix = argv.includes("--fix");
   const json = argv.includes("--json");
   const color = !json && !argv.includes("--no-color") && !deps.proc.env.NO_COLOR;
+  const bun = deps.proc.versions ? Boolean(deps.proc.versions.bun) : deps.runtime === "bun";
   interface CheckResult { status: string; name: string; detail: string }
   const results: CheckResult[] = [];
 
@@ -177,9 +177,9 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     }
   }
 
-  async function requireFile(relativePath) {
+  async function requireFile(relativePath, reportPresent = true) {
     if (await exists(absolute(relativePath))) {
-      record("pass", relativePath, "present");
+      if (reportPresent) record("pass", relativePath, "present");
       return true;
     }
     record("fail", relativePath, "missing");
@@ -391,9 +391,10 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     record(problems.length ? "fail" : "pass", name, problems.length ? problems.join("; ") : "eight capture events wired exactly once with the Node runner and 5s timeout");
   }
 
-  async function runProcess(command: string, args: string[], options: { timeout?: number } = {}): Promise<{ code?: number | null; stdout: string; stderr: string; error?: Error & { code?: string } }> {
+  async function runProcess(command: string, args: string[], options: { timeout?: number; env?: RuntimeDeps["proc"]["env"] } = {}): Promise<{ code?: number | null; stdout: string; stderr: string; error?: Error & { code?: string } }> {
     try {
-      const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }) : deps.child.run(command, args, { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM" }));
+      const spawnOptions = { cwd: root, timeoutMs: options.timeout ?? 15000, killSignal: "SIGTERM", env: options.env } as const;
+      const result = await (command === deps.proc.execPath ? runWorkflow(deps, args, spawnOptions) : deps.child.run(command, args, spawnOptions));
       return { code: result.status, stdout: result.stdout, stderr: result.stderr };
     } catch (error) {
       return { error: error instanceof Error ? error : new Error(String(error)), stdout: "", stderr: "" };
@@ -449,15 +450,26 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
     return null;
   }
 
-  async function checkNode(relativePath: string): Promise<void> {
-    if (!(await requireFile(relativePath))) return;
-    const typed = /\.(mts|ts)$/.test(relativePath);
-    // A plain .ts file in a directory without "type": "module" is read as CommonJS by --check, so parse by stripping types instead.
-    const args = deps.runtime === "bun" ? ["-e", BUN_PARSE_SCRIPT, absolute(relativePath), typed ? "ts" : "js"] : typed ? ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", "-e", TS_PARSE_SCRIPT, absolute(relativePath)] : ["--check", absolute(relativePath)];
-    const result = await runProcess(deps.proc.execPath, args);
-    if (typed && result.code === 3) { record("info", relativePath, "TypeScript parse skipped: this Node has no module.stripTypeScriptTypes"); return; }
-    const label = deps.runtime === "bun" ? "Bun" : "Node.js";
-    record(result.code === 0 ? "pass" : "fail", relativePath, result.code === 0 ? `valid ${label} syntax` : result.stderr.trim() || `invalid ${label} syntax`);
+  async function checkSyntax(scripts: string[]): Promise<void> {
+    const env = { ...deps.proc.env, AI_WORKFLOW_RUNNER: "node" };
+    const skipped = await Promise.all(scripts.map(async (file) => {
+      if (!(await requireFile(file, false))) return false;
+      if (bun) return true;
+      const typed = /\.(mts|ts)$/.test(file);
+      // Node may treat plain .ts as CommonJS with --check. Strip types directly for TypeScript.
+      const args = typed ? ["-e", TS_PARSE_SCRIPT, absolute(file)] : ["--check", absolute(file)];
+      const { code } = await runProcess(deps.proc.execPath, args, { env });
+      if (typed && code === 3) return true;
+      record("pass", file, "present");
+      if (code === 0) record("pass", file, "valid Node.js syntax");
+      else record("fail", file, `invalid Node.js syntax (${code == null ? "check did not exit normally" : `exit ${code}`})`);
+      return false;
+    }));
+    const count = skipped.filter(Boolean).length;
+    if (count > 0) {
+      const reason = bun ? " under Bun. Run with AI_WORKFLOW_RUNNER=node to check syntax." : ": this Node has no module.stripTypeScriptTypes";
+      record("warn", "Syntax check", `${count} file(s) not parse-checked${reason}`);
+    }
   }
 
   async function statOrNull(target) {
@@ -662,7 +674,11 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
   }
 
   async function checkOpenCodeResolution() {
-    if (deps.proc.versions.bun) {
+    if (!argv.includes("--live-opencode")) {
+      record("info", "OpenCode", "static adapter checks completed; live configuration was not checked because OpenCode can run project plugins. Use --live-opencode only in a trusted project.");
+      return;
+    }
+    if (bun) {
       record("info", "OpenCode", "static adapter checks completed; run with Node to resolve live OpenCode config");
       return;
     }
@@ -690,7 +706,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       return;
     }
 
-    const graphify = absolute("ai-framework/scripts/graphify.mts");
+    const graphify = path.join(import.meta.dirname, "graphify.mts");
     const report = await runProcess(deps.proc.execPath, ["--experimental-strip-types", "--disable-warning=ExperimentalWarning", graphify, "--check", "--json"]);
     if (report.code !== 0) {
       record("fail", "Knowledge graph", report.stderr.trim() || "graphify reported invalid knowledge entries");
@@ -1112,7 +1128,7 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       matches(".claude/settings.json", /--event skill-use/, "wires skill-use counting"),
       matches(".codex/hooks.json", /SubagentStop[\s\S]*token-consumption\.mts/, "wires post-agent consumption collector"),
       matches(".opencode/plugins/token-consumption.ts", /recordEvent/, "wires post-agent consumption collector"),
-      ...scripts.map(checkNode),
+      checkSyntax(scripts),
       checkOpenCodeResolution(),
       checkSkillDefaults(),
       checkCavemanState(),
@@ -1151,6 +1167,9 @@ export async function main(argv: string[], deps: RuntimeDeps): Promise<number> {
       } else {
         deps.io.stdout.write(`\n${paint("pass", "Workflow status: READY")}\n`);
         deps.io.stdout.write("All workflow contracts, adapters, hooks, model routes, and scaffold templates passed.\n");
+      }
+      if (warnings.some((result) => result.name === "Syntax check")) {
+        deps.io.stdout.write("Syntax check: some files were not parse-checked.\n");
       }
       if (fixed.length > 0) deps.io.stdout.write(`${paint("fixed", `Repairs: restored ${fixed.length} missing scaffold artifact(s).`)} Run the doctor again to confirm a clean state.\n`);
       if (results.some((result) => result.name === ".project" && result.status === "info")) {

@@ -503,6 +503,7 @@ function commandFixture(t: TestContext): { root: string; script: string } {
   for (const file of readdirSync(here)) {
     if (file.endsWith(".mts") && !file.endsWith(".test.mts")) copyFileSync(join(here, file), join(runtime, file));
   }
+  for (const name of ["bun-isolated.toml", "bun-isolated-tsconfig.json"]) copyFileSync(join(here, name), join(runtime, name));
   const script = join(root, "ai-framework/scripts/fixture.mts");
   writeFileSync(script, `import { runDirect } from "./runtime/cli.mts";
 import type { RuntimeDeps } from "./runtime/types.mts";

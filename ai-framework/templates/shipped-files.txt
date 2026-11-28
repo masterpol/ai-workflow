@@ -334,6 +334,8 @@ ai-framework/scripts/review-bench.test.mts
 ai-framework/scripts/run-tests.mts
 ai-framework/scripts/run-tests.test.mts
 ai-framework/scripts/runtime/README.md
+ai-framework/scripts/runtime/bun-isolated-tsconfig.json
+ai-framework/scripts/runtime/bun-isolated.toml
 ai-framework/scripts/runtime/bun.mts
 ai-framework/scripts/runtime/cli.mts
 ai-framework/scripts/runtime/config.mts

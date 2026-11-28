@@ -1,0 +1,2 @@
+# Workflow-started Bun uses this file instead of the working directory's bunfig.toml.
+# Leave it free of settings so these launches do not load preloads or project-specific options.

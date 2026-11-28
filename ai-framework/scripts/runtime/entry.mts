@@ -9,6 +9,14 @@ import type { RunResult, RuntimeDeps, SpawnOptions } from "./types.mts";
 /** Child commands support Node 22.12–22.17 with type stripping disabled by default. */
 export const NODE_FLAGS = ["--experimental-strip-types", "--disable-warning=ExperimentalWarning"];
 
+/** Without these, Bun applies the working folder's preload, `.env` and TypeScript path mappings; a mapping can
+ * replace the very script being run. Both files are the bundle's own and must ship beside this module. */
+export function bunIsolationOptions(): string[] {
+  const shipped = (name: string): string => fileURLToPath(new URL(name, import.meta.url));
+  return [`--config=${shipped("./bun-isolated.toml")}`, "--no-env-file", "--no-install",
+    `--tsconfig-override=${shipped("./bun-isolated-tsconfig.json")}`];
+}
+
 /** Child runner choice follows the effective spawn environment, not the parent executable. */
 export function workflowInvocation(deps: RuntimeDeps, args: string[], options: SpawnOptions = {}): { command: string; args: string[]; options: SpawnOptions } {
   const env = options.env ?? deps.proc.env;
@@ -18,8 +26,12 @@ export function workflowInvocation(deps: RuntimeDeps, args: string[], options: S
   const command = runner === current ? deps.proc.execPath : runner;
   const rest = [...args];
   while (NODE_FLAGS.includes(rest[0])) rest.shift();
-  if (runner === "bun" && rest[0] === "--test") rest[0] = "test";
-  return { command, args: runner === "node" ? [...NODE_FLAGS, ...rest] : rest,
+  let flags = NODE_FLAGS;
+  if (runner === "bun") {
+    if (rest[0] === "--test") rest[0] = "test";
+    flags = rest[0] === "test" ? [] : bunIsolationOptions();
+  }
+  return { command, args: [...flags, ...rest],
     options: { ...options, env: { ...env, AI_WORKFLOW_RUNNER: runner } } };
 }
 

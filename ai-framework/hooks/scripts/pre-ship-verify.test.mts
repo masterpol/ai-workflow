@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { bunIsolationOptions } from '../../scripts/runtime/entry.mts';
 import { createNodeDeps } from '../../scripts/runtime/node.mts';
 import { encodeData } from '../../scripts/runtime/toon-data.mts';
 import {
@@ -137,6 +138,11 @@ test('checks come from the recognised scripts, with verify:base first and the do
   );
   assert.equal(base[0].timeout, 1_200_000);
   assert.ok(base[1].args.includes('ai-framework/scripts/setup-validator.mts'));
+
+  // The workflow's own validator is isolated under Bun; the project's viewer scripts keep the project's settings.
+  const underBun = buildChecks({ scripts: { 'verify:base': 'x' } }, { ...viewer, runtime: 'bun' });
+  assert.deepEqual(underBun[1].args, [...bunIsolationOptions(), 'ai-framework/scripts/setup-validator.mts', '--json']);
+  assert.deepEqual(underBun.slice(2).map((check) => check.args), base.slice(2).map((check) => check.args));
 
   assert.throws(() => buildChecks({ scripts: {} }, plain), /no recognized checks/);
   assert.throws(() => buildChecks(null, fakeHost({ files: {} }).deps), /no checks configured/);
