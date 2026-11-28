@@ -94,4 +94,6 @@ If the spike shows the move cannot be made safe, stop and return to the owner.
 
 ## Living-spec deviations log
 
-(Empty at plan time.)
+- **2026-11-27, owner after the S2 spike:** decision 1 (move the source folder out) is **replaced by "check before copying"**. `SETUP.md` runs the check from the bundle's source folder before Step 1 writes anything, and the check skips that folder. Nothing is moved and the entry files do not change. See `deviations.md`.
+- **2026-11-27, owner:** **both install routes stay.** Folder-in-project detects, and the person asks to start setup. Copy-to-root keeps its automatic start, reports `unclear` and asks. This drops the exit criterion that required a single route.
+- B1-S2 files are now `project-state.mts` and its test, `SETUP.md`, `README.md`, `ai-framework/docs/setup.md`, the setup skill and its mirror, and the dataset. Its brief, `build/b1-s2-brief.md`, owns the revised exit criteria. The case `source-folder-move` becomes `check-before-copy`.

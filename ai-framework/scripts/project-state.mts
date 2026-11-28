@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /** Classifies an installed project from file paths and metadata. */
 import { readProjectText } from "./consolidation-migrate.mts";
+import { isBundleSetup } from "./entry-import.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { inferRoot } from "./runtime/entry.mts";
 import type { RuntimeDeps, StatLike } from "./runtime/types.mts";
@@ -19,6 +20,7 @@ const MAX_RELATIVE_LENGTH = 4096;
 const MAX_EVIDENCE = 32;
 const MAX_EVIDENCE_LENGTH = 240;
 const MAX_MANIFEST_BYTES = 256 * 1024;
+const MAX_SETUP_BYTES = 64 * 1024;
 const BUNDLE_ROOT = inferRoot(import.meta.filename);
 const SHIPPED_MANIFEST = "ai-framework/templates/shipped-files.txt";
 const TEMPLATE_ROOT = "ai-framework/templates/project";
@@ -40,6 +42,8 @@ const IGNORED_FILES = new Set([
 // The one exclusion by base name: operating systems write these reserved metadata files into any folder they open,
 // including the bundle folders a person copies. No project file uses these names.
 const OS_METADATA = new Set([".DS_Store", "Thumbs.db", "desktop.ini"]);
+
+const ROOT_STARTER_FILE = /^(?:(?:readme|licen[cs]e)(?:\.(?:md|txt))?|\.gitignore)$/i;
 
 // These labels identify files by name alone. Unrecognized names stay ambiguous.
 const PROJECT_FILENAMES = new Set([
@@ -116,6 +120,16 @@ function checkedDirectory(absolute: string, deps: RuntimeDeps): StatLike {
 
 function sameDirectory(before: StatLike, after: StatLike): boolean {
   return before.dev === after.dev && before.ino === after.ino && before.mtimeMs === after.mtimeMs;
+}
+
+function hasBundleSetup(directory: string, observed: StatLike, deps: RuntimeDeps): boolean {
+  try {
+    if (!sameDirectory(observed, checkedDirectory(directory, deps))) return false;
+    const setup = readProjectText(directory, "SETUP.md", MAX_SETUP_BYTES, deps);
+    return isBundleSetup(setup) && sameDirectory(observed, checkedDirectory(directory, deps));
+  } catch {
+    return false;
+  }
 }
 
 /** Walks a known relative path using metadata. Only ENOENT means absent. */
@@ -241,7 +255,10 @@ function scanProject(root: string, bundle: string, shipped: Set<string>, deps: R
       if (stat.isSymbolicLink()) {
         refuse(child, "Found a symbolic link.");
       } else if (stat.isDirectory()) {
-        if (!SKIPPED_DIRECTORIES.has(child)) visitDirectory(target, child, depth + 1, stat);
+        if (SKIPPED_DIRECTORIES.has(child)) continue;
+        // The scan root and the running bundle path are canonical. Only the running direct child can qualify.
+        if (depth === 0 && target === bundle && hasBundleSetup(target, stat, deps)) continue;
+        visitDirectory(target, child, depth + 1, stat);
       } else if (stat.isFile()) {
         // An access check asks whether this user may read the file without opening it.
         try {
@@ -298,8 +315,13 @@ export function detectProjectState(root: string, deps: RuntimeDeps): ProjectStat
     return stateResult("unclear", [...new Set(scan.issues.map(({ reason }) => reason))],
       scan.files, scan.issues.map(({ relative }) => relative));
   }
-  if (scan.files.length > 0) return stateResult("existing", ["The scan found project files."], scan.files);
-  return stateResult("empty", ["The completed scan found only workflow, scaffold, or incidental files."]);
+  if (scan.files.length === 0) {
+    return stateResult("empty", ["The completed scan found only workflow, scaffold, or incidental files."]);
+  }
+  if (scan.files.every((relative) => ROOT_STARTER_FILE.test(relative))) {
+    return stateResult("unclear", ["The only project files are starter files."], scan.files);
+  }
+  return stateResult("existing", ["The scan found project files."], scan.files);
 }
 
 export function main(argv: string[], deps: RuntimeDeps): number {

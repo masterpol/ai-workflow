@@ -44,3 +44,34 @@
 - One open must-fix for the owner: Bun runs a project's `bunfig.toml` preload before any workflow script.
 - Coordinator error: the first cycle 3 security review was dispatched after the bench refused its planted defect; redone.
 - 2026-11-27 gate: the owner approved shipping with the Bun finding open (override recorded in `audit.md`).
+
+## 2026-11-27 B1 build
+- Run `run_37a7b457e0bd`. S1 names Codex `gpt-6.2-sol` medium instead of `assign`: the plan sets a standard model, and a pool pick cannot carry a per-vendor model.
+
+## B1-S1 evidence (coordinator-run)
+- `project-state.test.mts`: 55 pass, 0 fail on Node and on Bun. Against the old detector in a scratch copy: 48 pass, 6 fail (Git manifest test skipped there).
+- Runtime invariants 8 pass; workflow doctor and setup validator READY; fail-closed mutant exit 1 (author-run).
+- `pre-ship-verify` exit 0: 2,529 tests, 2,526 pass, 3 skipped, 0 fail.
+- Worker `gk-b1s1-1` released. No existing test changed. A first mutant run exited 9 from a coordinator quoting error and was rerun.
+
+## B1-S2 evidence (coordinator-run)
+- `project-state.test.mts`: 60 pass, 0 fail on Node and on Bun; runtime invariants 8 pass; setup mirror identical; dataset parses; relations 0 problems.
+- `pre-ship-verify` exit 0: 2,534 tests, 2,531 pass, 3 skipped, 0 fail.
+- Route trial: all tracked files of the working tree, records included, copied to `ai-workflow-portable/` in scratch projects; the check run before any copy reported `empty`, `unclear` (starter files) and `existing`. No live host ran the instructions.
+- Each skip condition removed in a scratch copy made tests fail (direct child 3, running copy 1, bundle title 2). Author-run.
+- Not run: owner live smoke and golden case `check-before-copy`. The worker's failing-first run (58 pass, 2 fail) is the worker's figure.
+
+## 2026-11-27 B1-S2: worker report refused, ledger slot held
+- Symptom: `orca-run collect` returned `invalid-files`; `attempt-gk-b1s2-1` stays `launched`. The worker is released in Orca.
+- Cause: the coordinator authorized `.project/evals/datasets/greenfield-kickoff.json`; dispatch accepts that path, but a report listing any `.project` file is refused.
+- Fix: none. The report and the ledger were not edited. With three older stale records, all 4 slots of the cap are now counted as taken, so no further Orca worker can start until the owner decides.
+- 2026-11-27 build gate (owner approved): four stale ledger records, each shown exited and released by Orca, moved unchanged to `.project/metrics/orca-ledger-archive-20261127/`.
+
+## 2026-11-27 B1 audit
+- One cycle; see [audit-b1.md](audit-b1.md). No must-fix.
+
+## 2026-11-27 A leftover OpenCode service made the verifier fail
+- Symptom: `setup-validator` timing test took 15.2 s; the workflow doctor took 16 s in an empty folder.
+- Cause: `opencode debug config` hung while `opencode serve --service`, started during the audit's OpenCode reviewers, held its port. No Orca worker was using it.
+- Fix: `opencode-service.mts free`.
+- Cycle 2 (owner ran `/audit` again): no new defect in the real files; no reviewed file changed.

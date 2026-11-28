@@ -761,3 +761,12 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 ## From fix-graphify-knowledge-query (2026-11-26)
 
 - **Shared project reader during concurrent ancestor replacement** (medium, static review): the descriptor-pinned reader rejects static symlinks and verifies the file identity. An ancestor replaced during the pathname inspection can redirect both checks to the same out-of-project file. Evaluate a portable containment strategy for `readProjectText` and its callers.
+
+## From greenfield-kickoff B1 build (2026-11-27)
+
+- **Orca dispatch accepts a `.project` path that collect refuses** (medium, reproduced): a worker that reports it gets `invalid-files`, and the attempt holds a cap slot for good. Refuse the path at dispatch, or define a recovery for released workers; four stale records need it now.
+- **Entry files on the folder-in-project route** (medium, static): after Step 1, `AGENTS.md` and `CLAUDE.md` tell a later session to read a root `SETUP.md` that is not there.
+- **Setup guide errors** (low, observed in the B1 eval; older than B1): `.opencode/package.json` is Git-ignored but listed for copying and checking; Step 7 says 18 agents, 16 ship; no root check for an empty folder; the Cursor mirror step is unclear.
+- **Merge order** (B1 audit): part B1, then pitch 07, then pitch 06 pins a release and hand-merges both install routes.
+- **A leftover OpenCode service stalls the workflow doctor** (medium, reproduced): `opencode debug config` hangs for 15 s and a setup-validator timing test fails. Free the port after the last OpenCode worker is released, and report the hang in the doctor.
+- **Source-folder quoting and marker limit** (low, B1 audit cycle 2): say the character refusal covers later copy commands too; cover PowerShell and `cmd.exe`; add a test for the 64 KiB marker limit.

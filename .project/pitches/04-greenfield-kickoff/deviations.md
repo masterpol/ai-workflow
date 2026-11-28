@@ -11,3 +11,12 @@
 - 2026-11-27 (A2, owner chose option 3): the detector is unchanged. The instructions state that the documented install routes report `unclear`, existing projects included, and that automatic `empty` detection waits for a clean installer (`starter-install`, outside this pitch). **This departs from the plan's promise that `existing` leaves setup unchanged:** on those routes setup now asks one question first. The check moved from `SETUP.md` Step 0 to the end of Step 1, where its command exists.
 - 2026-11-27 (audit): `runtime/node.mts` and `runtime/types.mts` gained `R_OK`, outside A1's file list. The detector stays above the utility and function size guidance as one scanning unit.
 - 2026-11-27 (audit gate): part A ships with an open security high (Bun `bunfig.toml` preload) by the owner's override of the audit tier rule. It needs its own `/fix`.
+
+## B1-S2 spike (2026-11-27)
+
+1. **Later steps that read the source folder:** Step 1 copies from it; Step 3 merges its root `.gitignore` (not in the Step 1 list); the agent reads `SETUP.md` from it. After a move all three need the new location.
+2. **Interrupted setup:** `AGENTS.md` and `CLAUDE.md` say to read `SETUP.md` when `.project/` is missing, and Step 1 does not copy `SETUP.md`. The gap already exists today on the `SETUP.md` route between Step 1 and Step 3. A move would put the file outside the project, so both entry files would need new text.
+3. **Where it can move:** not verified for any harness; `.codex/config.toml` sets no sandbox mode. Instructions would also have to cover a move across filesystems (copy then delete) and a source folder that the project's Git tracks or holds as a submodule.
+4. **Automatic start:** on one folder-in-project route no entry file is at the root before Step 1, so the person has to ask the tool to read `SETUP.md`. This relies on tools loading only root entry files, which the README's current self-start also assumes; not tested live. The plan sends this to the owner.
+
+**Alternative found by the spike:** run the check from the source folder before Step 1 copies anything, and skip the folder the running script belongs to. In scratch, with a one-line throwaway patch, an empty project reported `empty` and one with code reported `existing`; today's code reports `unclear` for both. Nothing moves, so items 1 to 3 do not arise. Item 4 is unchanged. The input was `git archive` of `HEAD` plus an empty `.project/` in the source folder. The coordinator did not offer this when asking decision 1.

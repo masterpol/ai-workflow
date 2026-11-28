@@ -17,9 +17,19 @@ const bundleSetup = path.join(bundle, "SETUP.md");
 const skipOutsideBundle = fs.existsSync(bundleSetup) && fs.readFileSync(bundleSetup).includes("ai-workflow-portable")
   ? false : "not the ai-workflow-portable checkout";
 
-function installedFixture(t: TestContext): string {
+function emptyFixture(t: TestContext): string {
   const root = tempFixture(deps, {});
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
+  return root;
+}
+
+function installedFixture(t: TestContext): string {
+  const root = emptyFixture(t);
+  copyInstalledFiles(root);
+  return root;
+}
+
+function copyInstalledFiles(root: string): void {
   for (const relative of fs.readFileSync(path.join(bundle, manifest)).trimEnd().split("\n")) {
     assert.ok(isStepOnePath(relative), "manifest entry must be in the Step 1 copy list");
     assert.ok(!relative.split("/").some((part) => /^(?:\.env|credentials\.json$|settings\.local\.json$)/i.test(part)));
@@ -32,7 +42,6 @@ function installedFixture(t: TestContext): string {
       fs.copyFileSync(source, destination);
     }
   }
-  return root;
 }
 
 // SETUP.md Step 1 copies these trees and individual entry files. Cursor mirrors are
@@ -71,6 +80,90 @@ function assertState(root: string, state: string, overrides: RuntimeDeps = deps)
   assert.ok(result.evidence.every((relative) => !path.isAbsolute(relative)));
   return result;
 }
+
+function copySourceFolder(root: string, relative: string): void {
+  const folder = path.join(root, relative);
+  copyInstalledFiles(folder);
+  fs.copyFileSync(bundleSetup, path.join(folder, "SETUP.md"));
+  addFile(folder, ".DS_Store");
+  addFile(folder, ".project/local.md");
+  addFile(folder, ".00-local-data");
+}
+
+function scanFromCopy(root: string, folder: string) {
+  const before = snapshot(root);
+  const command = path.join(root, folder, "ai-framework/scripts/project-state.mts");
+  const result = runScript(deps, command, ["--root", ".", "--json"], {
+    cwd: root,
+    env: { ...deps.proc.env, AI_WORKFLOW_RUNNER: deps.runtime },
+  });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.stderr, "");
+  assert.deepEqual(snapshot(root), before);
+  return JSON.parse(result.stdout);
+}
+
+test("checks the project before copying from a renamed source folder", { skip: skipOutsideBundle }, (t) => {
+  const root = emptyFixture(t);
+  const folder = "workflow download";
+  copySourceFolder(root, folder);
+  const empty = scanFromCopy(root, folder);
+  assert.equal(empty.state, "empty", JSON.stringify(empty));
+  assert.deepEqual(empty.evidence, []);
+
+  addFile(root, "README.md");
+  const starter = scanFromCopy(root, folder);
+  assert.equal(starter.state, "unclear");
+  assert.deepEqual(starter.reasons, ["The only project files are starter files."]);
+  assert.deepEqual(starter.evidence, ["README.md"]);
+
+  addFile(root, "src/app.ts");
+  const existing = scanFromCopy(root, folder);
+  assert.equal(existing.state, "existing", JSON.stringify(existing));
+  assert.deepEqual(existing.evidence, ["README.md", "src/app.ts"]);
+});
+
+test("only the running source copy is skipped", { skip: skipOutsideBundle }, (t) => {
+  const root = emptyFixture(t);
+  copySourceFolder(root, "00-running-copy");
+  copySourceFolder(root, "ai-workflow-portable");
+  const result = scanFromCopy(root, "00-running-copy");
+  assert.equal(result.state, "unclear");
+  assert.ok(result.evidence.includes("ai-workflow-portable/.00-local-data"));
+  assert.ok(result.evidence.every((relative: string) => relative.startsWith("ai-workflow-portable/")));
+});
+
+test("a source copy two levels down is still scanned", { skip: skipOutsideBundle }, (t) => {
+  const root = emptyFixture(t);
+  const folder = "downloads/ai-workflow-portable";
+  copySourceFolder(root, folder);
+  const result = scanFromCopy(root, folder);
+  assert.equal(result.state, "unclear");
+  assert.ok(result.evidence.includes(`${folder}/.00-local-data`));
+});
+
+test("an installed copy with its own setup title is still scanned from its parent", (t) => {
+  const root = emptyFixture(t);
+  const folder = "ai-workflow-portable";
+  copyInstalledFiles(path.join(root, folder));
+  addFile(root, `${folder}/SETUP.md`, "# Set up this application\n");
+  addFile(root, `${folder}/src/app.ts`);
+  const result = scanFromCopy(root, folder);
+  assert.equal(result.state, "unclear");
+  assert.ok(result.evidence.some((relative: string) => relative.startsWith(`${folder}/`)));
+});
+
+test("a linked setup file is refused as a source marker", { skip: skipOutsideBundle }, (t) => {
+  const root = emptyFixture(t);
+  const folder = "ai-workflow-portable";
+  copySourceFolder(root, folder);
+  const setup = path.join(root, folder, "SETUP.md");
+  fs.unlinkSync(setup);
+  fs.symlinkSync(bundleSetup, setup);
+  const result = scanFromCopy(root, folder);
+  assert.equal(result.state, "unclear");
+  assert.ok(result.evidence.includes(`${folder}/SETUP.md`));
+});
 
 test("untouched Step 1 install and copied scaffold are empty and byte-identical after a scan", (t) => {
   const root = installedFixture(t);
@@ -113,6 +206,9 @@ for (const [description, relative] of [
   ["infrastructure only", "deploy/Dockerfile"],
   ["a Kubernetes deployment only", "deploy/deployment.yaml"],
   ["documents only", "docs/README.md"],
+  ["a nested license only", "docs/LICENSE"],
+  ["a nested ignore file only", "app/.gitignore"],
+  ["a root name that only ends like a starter file", "OLDREADME.md"],
   ["manifest only", "package.json"],
   ["a copy of a shipped basename elsewhere", "docs/AGENTS.md"],
 ]) {
@@ -135,6 +231,49 @@ for (const [description, relative] of [
     assert.deepEqual(assertState(root, "unclear").evidence, [relative]);
   });
 }
+
+for (const files of [
+  ["README.md"],
+  ["LICENSE"],
+  [".gitignore"],
+  [".gitignore", "LICENSE", "README.md"],
+  ["Readme.txt", "licence.md"],
+  [".GITIGNORE", "LICENCE.txt", "LICENSE.md", "README"],
+]) {
+  test(`reports unclear with only root starter files (${files.join(", ")})`, (t) => {
+    const root = installedFixture(t);
+    for (const relative of files) addFile(root, relative);
+    const result = assertState(root, "unclear");
+    assert.deepEqual(result.evidence, files);
+    assert.deepEqual(result.reasons, ["The only project files are starter files."]);
+  });
+}
+
+test("reports existing with a root starter file and source code", (t) => {
+  const root = installedFixture(t);
+  addFile(root, "README.md");
+  addFile(root, "src/app.ts");
+  assert.deepEqual(assertState(root, "existing").evidence, ["README.md", "src/app.ts"]);
+});
+
+for (const relative of [".gitattributes", "CHANGELOG.md", "COPYING", "README.rst"]) {
+  test(`reports existing with ${relative} alone or beside a starter file`, (t) => {
+    const root = installedFixture(t);
+    addFile(root, relative);
+    assert.deepEqual(assertState(root, "existing").evidence, [relative]);
+    addFile(root, "README.md");
+    assert.deepEqual(assertState(root, "existing").evidence, [relative, "README.md"].sort());
+  });
+}
+
+test("reports the scan refusal when a starter file is beside an unrecognized file", (t) => {
+  const root = installedFixture(t);
+  addFile(root, "README.md");
+  addFile(root, "local-data");
+  const result = assertState(root, "unclear");
+  assert.deepEqual(result.evidence, ["local-data", "README.md"]);
+  assert.deepEqual(result.reasons, ["Found an unrecognized project file."]);
+});
 
 test("a symlink stays unclear, including when it occupies a shipped path", (t) => {
   const root = installedFixture(t);

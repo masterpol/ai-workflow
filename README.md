@@ -29,10 +29,9 @@ Codex, and Cursor** — install once, open with whichever tool you have.
   query with `node ai-framework/scripts/graphify.mts query "<question>"`. Install uv once, then run
   `node ai-framework/scripts/graphify.mts setup` — see
   [Knowledge Graph](ai-framework/docs/knowledge-graph.md).
-- **One entry file per vendor, self-triggering.** `CLAUDE.md` (Claude Code) and `AGENTS.md`
-  (OpenCode/Codex/Cursor) are what each tool auto-reads at session start. Both carry first-run
-  detection: if `.project/` doesn't exist, the tool reads `SETUP.md` and installs itself — see
-  [Set up](ai-framework/docs/setup.md).
+- **One entry file per vendor.** Each tool reads its root entry file at session start.
+  Claude Code reads `CLAUDE.md`. OpenCode, Codex and Cursor read `AGENTS.md`.
+  On the copy-to-root route, the entry file starts setup when `.project/` is missing.
 - **Generated and canonical data stay separate.** `.project/` is a scaffold for both generated
   context/rule companions and canonical project records such as pitches, designs, and knowledge
   entries. Only generated outputs — project specifics, `.project/rules/*`, and
@@ -53,21 +52,21 @@ Codex, and Cursor** — install once, open with whichever tool you have.
 
 ## Set up
 
-1. **Copy** the contents of this folder to the root of your target project.
-2. **Open the project** with your AI tool (Claude Code / OpenCode / Codex / Cursor).
+- **Folder-in-project.** Put the `ai-workflow-portable` folder directly inside your project. Open the
+  project in your AI tool and ask it to “read `ai-workflow-portable/SETUP.md` and set up the workflow.”
+  Setup checks the project before copying files and can tell a new project from an existing one.
+- **Copy-to-root.** Copy this bundle's contents to your project root and open the project in your AI tool.
+  Setup starts automatically, reports `unclear` and asks whether the project is new or existing.
+  If setup does not start, ask it to “read `SETUP.md` and set up the workflow.”
 
-That's it — each supported tool detects that `.project/` is missing and self-triggers `SETUP.md`.
-If yours doesn't, ask it to *"read `SETUP.md` and set up the workflow."* What setup does, OpenCode
-model setup and verification: [Set up](ai-framework/docs/setup.md).
+See [Set up](ai-framework/docs/setup.md) for the steps, OpenCode model setup and verification.
 
 The copied `AGENTS.md` and `CLAUDE.md` still describe this bundle in their "Project specifics" section. Setup replaces
 that section with your project's own. Check the result with `node ai-framework/scripts/setup-validator.mts`: it fails an
 install that kept the bundle's description, and a context, entry or status file that is a link, a special file or over
 1 MiB. Your project can keep its own `SETUP.md`. See [Setup Validator](ai-framework/docs/setup-validator.md).
 
-First-time setup also runs a read-only check of what the folder already holds. On the install routes above it currently
-reports `unclear`, so setup asks whether the project is new or existing. A guided start for new projects is not available
-yet. See [Set up](ai-framework/docs/setup.md).
+A guided start for new projects is not available yet.
 
 **Known issue with Bun:** a script run through Bun from a project folder first runs that project's `bunfig.toml` preload.
 Until this is fixed, use the default Node runner in a checkout you do not trust.

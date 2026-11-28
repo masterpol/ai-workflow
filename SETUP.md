@@ -1,7 +1,7 @@
 # SETUP — Portable AI Development Workflow
 
-> **You are an AI assistant** (Claude Code, OpenCode, Codex, Cursor, or similar). A human dropped this
-> bundle into their project and asked you to set it up. Read this whole file first, then
+> **You are an AI assistant** (Claude Code, OpenCode, Codex, Cursor, or similar). A human placed
+> this bundle in their project. Read this whole file first, then
 > execute the steps in order. Every step that writes files ends with a confirmation gate —
 > **show the human what you plan to do and wait for approval before writing.**
 
@@ -50,17 +50,50 @@ Before touching anything:
     - OpenCode → uses `.opencode/` and reads `AGENTS.md`.
     - Codex → uses `.codex/`, `.agents/skills/`, and `AGENTS.md`.
     - Cursor → uses `.cursor/` + reads `AGENTS.md`.
-3. Read `ai-framework/workflow/overview.md` so you understand the pipeline you're installing.
-
----
-
-## Step 1 — Place the framework files
+3. Read `ai-framework/workflow/overview.md` from the same folder as this `SETUP.md`.
 
 Workflow scripts run directly as TypeScript ES modules. Use Node 22.18 or later for the
 `node ...mts` commands below; Node 22.12–22.17 needs
 `--experimental-strip-types --disable-warning=ExperimentalWarning` before each entry path.
 Bun can execute the same files directly. See [runtime details](ai-framework/scripts/runtime/README.md)
 for runner selection.
+
+### Check project state on first-time setup
+
+Run the check once if none of `.project/context/{product,architecture,stack}.md` exists yet.
+Skip it on re-runs.
+
+- **Folder-in-project.** From the project root, before Step 1 copies any files, run:
+
+  ```sh
+  node "ai-workflow-portable/ai-framework/scripts/project-state.mts" --root . --json
+  ```
+
+  If the source folder has another name or path, use that path throughout setup and keep it quoted
+  as one argument. If the path holds a quote, a backslash, `$` or a backtick, do not put it in a
+  command: treat the result as `unclear`. The check skips
+  the running source folder when it is a direct child of the project root. A deeper source folder
+  is scanned, so expect `unclear`.
+- **Copy-to-root.** The framework files are already in place. From the project root, run this
+  before Steps 2–5 write anything:
+
+  ```sh
+  node ai-framework/scripts/project-state.mts --json
+  ```
+
+  Expect `unclear` because the scan sees the bundle's root files, such as `README.md` and `VERSION`.
+
+Follow the `state` routing in Step 0 of `.claude/skills/setup/SKILL.md` beside this `SETUP.md`.
+Ask the person to choose New project or Existing project when the check reports `unclear`.
+Where that routing says to continue with Step 1, it means continue setup: here, Step 1 below comes next.
+Step 4 uses this result and any answer. It records the choice note during the approved writes
+according to the skill's rules.
+
+---
+
+## Step 1 — Place the framework files
+
+On the copy-to-root route, continue to Step 2. On the folder-in-project route, place the files below.
 
 Copy the portable core and **all** harness adapters to the project root. Do not copy generated
 dependency directories such as `.opencode/node_modules/`; install dependencies separately only
@@ -77,15 +110,9 @@ if a harness requires them.
   `node ai-framework/scripts/skill-vendors.mts cursor-mirrors` to preview and add `--apply` to
   create the missing mirrors. It is safe to rerun and never overwrites an existing mirror.)*
 
-**Every one of these is the "first run" artifact for its vendor** — the file that vendor's tool
-auto-reads at session start, which is what lets it detect that `.project/` doesn't exist yet and
-self-trigger the rest of setup without the human separately asking:
-- Claude Code auto-loads `CLAUDE.md` → its bootstrap sends it to read `SETUP.md`.
-- OpenCode, Codex, and Cursor auto-read `AGENTS.md` → its header sends them to read `SETUP.md`.
-
-Placing all of them in Step 1, before Step 4 fills anything in, is what makes the *next* session
-(in any supported tool) self-triggering — do not skip placing any of them, even for a harness
-that isn't currently installed locally.
+On the copy-to-root route, the root entry file starts setup when `.project/` is missing.
+Claude Code reads `CLAUDE.md`. OpenCode, Codex and Cursor read `AGENTS.md`.
+Place both entry files and all harness adapters so the project can use any supported tool.
 
 If the project already has `.claude/`, `.opencode/`, `.codex/`, `.agents/`, or `.cursor/`,
 **merge** rather than replace: keep the human's existing files, add the files from this bundle
@@ -101,16 +128,6 @@ from the bundle's `CLAUDE.md` — so the human's existing instructions are prese
 workflow's bootstrap still fires. Only replace the whole file if the human explicitly approves.
 
 **Gate:** list every path you will create/merge, then wait for approval.
-
-**Project state (first-time only).** After the Step 1 files are in place, and before Steps 2–5 write anything else,
-if none of `.project/context/{product,architecture,stack}.md` exists yet, run
-`node ai-framework/scripts/project-state.mts --json` and route its `state` as `/setup` does
-(`.claude/skills/setup/SKILL.md`, Step 0). Step 3 creates files the check would count (`.gitignore`,
-`.project/pitches/_followups.md`, the graph files), so run it first. Never run it on a re-run. Run it once per setup:
-Step 4 (`/setup` or the manual scan) uses this result and the person's answer, and writes the
-choice note by the rules in that skill step.
-While this bundle's source folder or its own root files (`README.md`, `LICENSE`, `VERSION` and so on) are in the
-project, expect `unclear`, even for an existing project: ask the person.
 
 ---
 

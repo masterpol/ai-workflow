@@ -2,13 +2,14 @@
 
 ← [Back to README](../../README.md)
 
-1. **Copy** the contents of this folder to the root of your target project.
-2. **Open the project** with your AI tool (Claude Code / OpenCode / Codex / Cursor).
-
-That's it — no need to separately ask it to run setup. Every supported tool auto-reads a root
-file this bundle ships (`CLAUDE.md` for Claude Code, `AGENTS.md` for OpenCode/Codex/Cursor), and
-each one detects `.project/` is missing and self-triggers `SETUP.md` on its own. If your tool
-doesn't auto-read either file, just ask it to *"read `SETUP.md` and set up the workflow."*
+- **Folder-in-project.** Put the `ai-workflow-portable` folder directly inside your project. Open the
+  project in your AI tool and ask it to “read `ai-workflow-portable/SETUP.md` and set up the workflow.”
+  Setup runs the check from the source folder before copying files. It can tell a new project from an
+  existing one.
+- **Copy-to-root.** Copy this bundle's contents to your project root and open the project in your AI tool.
+  The root entry file starts setup when `.project/` is missing. The check sees the bundle's own root
+  files, reports `unclear` and asks whether the project is new or existing. If setup does not start,
+  ask the tool to “read `SETUP.md` and set up the workflow.”
 
 **OpenCode model setup:** connect OpenCode Go before starting a routed workflow — every bundled
 OpenCode route uses it: `opencode-go/minimax-m3.1-flash` for short fast work, `opencode-go/minimax-m3`
@@ -44,14 +45,8 @@ harnesses follow the same doc manually):
 
 - `existing`: the project has application, manifest, infrastructure, notebook, SQL or document files. Setup runs as it always has.
 - `empty`: a completed scan found only the bundle and its scaffold. The project kickoff is not available yet, so setup continues and writes `open` for every field it cannot scan.
-- `unclear`: something could not be judged, such as a symlink, an unreadable file, a scan over budget or an unknown file in a harness folder. Setup asks you to choose new or existing project and records the choice in `.project/status.md`.
+- `unclear`: the project has only starter files, or the scan could not judge it. A symlink, an unreadable file, a scan over budget or an unknown file in a harness folder can trigger this state. Setup asks you to choose new or existing project and records the choice in `.project/status.md`.
 - `resume`: a saved kickoff draft exists. Setup leaves it as it is.
-
-**Current limit:** neither documented install route leaves a clean project. Dropping the bundle folder in leaves that
-folder; copying its contents adds the bundle's own `README.md`, `LICENSE`, `VERSION` and other files. The check then
-reports `unclear`, even for an existing project, and setup asks you. `empty` and `existing` are detected only when the
-project root holds just your project and the files `SETUP.md` Step 1 places. Automatic detection of a new project
-waits for a clean installer, which does not exist yet.
 
 Re-runs skip the check. Refresh all, Merge and Selective never rewrite `.project/context/definition.md`.
 
