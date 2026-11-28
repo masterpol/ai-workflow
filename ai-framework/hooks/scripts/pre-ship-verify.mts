@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { runDirect } from "../../scripts/runtime/cli.mts";
 import { readData } from "../../scripts/runtime/data-file.mts";
+import { bunIsolationOptions, NODE_FLAGS } from "../../scripts/runtime/entry.mts";
 import { createNodeDeps } from "../../scripts/runtime/node.mts";
 
 import type { RuntimeDeps } from "../../scripts/runtime/types.mts";
@@ -112,6 +113,12 @@ export function packageCommand(pkg: Plain, deps: RuntimeDeps): Runner {
   return { command: deps.proc.execPath, prefix: [cli] };
 }
 
+/** The workflow's own validator must not pick up the project's Bun settings. */
+function setupCheck(deps: RuntimeDeps): Check {
+  const flags = deps.runtime === "bun" ? bunIsolationOptions() : NODE_FLAGS;
+  return nodeCheck(deps, "workflow setup", [...flags, "ai-framework/scripts/setup-validator.mts", "--json"]);
+}
+
 function nodeCheck(deps: RuntimeDeps, name: string, args: string[]): Check {
   return { name, source: "document viewer", command: deps.proc.execPath, args, required: true };
 }
@@ -122,12 +129,7 @@ function viewerChecks(deps: RuntimeDeps): Check[] {
   // Validate the current documents and self-contained HTML without relying on a previous user's absolute
   // temporary extraction path. Do not regenerate HTML/ZIP.
   return [
-    nodeCheck(deps, "workflow setup", [
-      "--experimental-strip-types",
-      "--disable-warning=ExperimentalWarning",
-      "ai-framework/scripts/setup-validator.mts",
-      "--json",
-    ]),
+    setupCheck(deps),
     ...["documentos", "integridad"].map((phase) =>
       nodeCheck(deps, `documentación: ${phase}`, ["--experimental-strip-types", VIEWER_VERIFIER, "--fase", phase]),
     ),

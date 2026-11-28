@@ -1,5 +1,5 @@
 import { runDirect } from "./runtime/cli.mts";
-import { NODE_FLAGS } from "./runtime/entry.mts";
+import { bunIsolationOptions, NODE_FLAGS } from "./runtime/entry.mts";
 import { collectReport, dispatchScope, dispatchWithRetries } from "./orca-dispatch.mts";
 import type { Assignment, DispatchOptions, Placement, ScopeSpec } from "./orca-dispatch.mts";
 import { report as policyReport, VENDORS } from "./orca-policy.mts";
@@ -44,14 +44,14 @@ const refused = (reason: string): CliError => new CliError(EXIT.refused, "input-
 
 /** Fixed argv per check name. There is no way to supply command text; the env checks receive is the library's worker allowlist. */
 export function checkCatalog(deps: RuntimeDeps): Readonly<Record<string, CheckSpec>> {
-  const flags = deps.runtime === "node" ? NODE_FLAGS : [];
-  const script = (file: string, ...rest: string[]): CheckSpec => ({ command: deps.proc.execPath, args: [...flags, file, ...rest] });
+  const scriptFlags = deps.runtime === "node" ? NODE_FLAGS : bunIsolationOptions();
+  const script = (file: string, ...rest: string[]): CheckSpec => ({ command: deps.proc.execPath, args: [...scriptFlags, file, ...rest] });
   return Object.freeze({
     "workflow-doctor": script("ai-framework/scripts/workflow-doctor.mts", "--json"),
     "setup-validator": script("ai-framework/scripts/setup-validator.mts"),
     "graph-check": script("ai-framework/scripts/graphify.mts", "--check"),
     "node-tests": deps.runtime === "node"
-      ? { command: deps.proc.execPath, args: [...flags, "--test", "ai-framework/scripts/*.test.mts", "ai-framework/scripts/runtime/*.test.mts", "ai-framework/hooks/scripts/*.test.mts"] }
+      ? { command: deps.proc.execPath, args: [...NODE_FLAGS, "--test", "ai-framework/scripts/*.test.mts", "ai-framework/scripts/runtime/*.test.mts", "ai-framework/hooks/scripts/*.test.mts"] }
       : { command: deps.proc.execPath, args: ["test", "ai-framework/"] },
   });
 }

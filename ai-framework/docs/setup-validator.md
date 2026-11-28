@@ -20,6 +20,15 @@ The workflow doctor uses the same test for its bundle-only checks.
 The check matches that one sentence. A reworded copy of the bundle's description passes, and so does a project that
 keeps the bundle's own `SETUP.md` at its root.
 
+## Syntax checks
+
+The validator parses TypeScript entries without running them, and only when it runs on Node. Under Bun, or on a Node
+version without type stripping, it parses nothing it cannot parse safely: it warns with the number of files not
+parse-checked, and does not count them as parsed. The same applies to the workflow doctor it runs, and the validator
+then marks `Workflow doctor` as a warning. These warnings do not change the exit code, so the status can still be
+`READY`; the summary then says that some files were not parse-checked. Set `AI_WORKFLOW_RUNNER=node` and use a Node
+version with type stripping to check them. The validator never passes `--live-opencode` to the doctor.
+
 ## File reads
 
 The three context files, `AGENTS.md`, `CLAUDE.md`, `SETUP.md` and `.project/status.md` must each be a single plain

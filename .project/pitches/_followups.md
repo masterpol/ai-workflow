@@ -770,3 +770,17 @@ Moved to `pitches/01-review-bench-hardening/pitch.md`. Not shaped or bet. Bundle
 - **Merge order** (B1 audit): part B1, then pitch 07, then pitch 06 pins a release and hand-merges both install routes.
 - **A leftover OpenCode service stalls the workflow doctor** (medium, reproduced): `opencode debug config` hangs for 15 s and a setup-validator timing test fails. Free the port after the last OpenCode worker is released, and report the hang in the doctor.
 - **Source-folder quoting and marker limit** (low, B1 audit cycle 2): say the character refusal covers later copy commands too; cover PowerShell and `cmd.exe`; add a test for the 64 KiB marker limit.
+
+## From fix-bun-project-preload audit (2026-11-27)
+
+- **Bun missing-script fallback** (low, reviewer probe): a missing script path can run a `package.json` script of that name; check slash paths and pass absolute paths.
+- **Missing-config tests** (low): also assert that the requested script ran.
+- **Release order** (cross-pitch): pitch 06 pins a release that holds the Bun fix; greenfield-kickoff B2 regenerates the shipped list after it.
+- From the re-shape critique: the runner switch starts `node` or `bun` by bare name, so under `bun run` a project's `node_modules/.bin` can supply it (probed for `node`, 2026-11-27). Needs a trusted-executable policy.
+- From the fix-bun-project-preload build: the upgrade-simulation tests run an earlier release's doctor, which calls `opencode debug config` and leaves a service running after `pre-ship-verify`. Stub `opencode` in those tests.
+
+## From the fix-bun-project-preload re-shaped audit (2026-11-27)
+
+- `workflow-doctor --fix` copies through a symbolic link in the checked project's templates (reproduced on the released code too). Take templates from beside the doctor, or refuse links and non-regular files.
+- Tests: the branch used when `deps.proc.versions` is absent; a behavior test that `bun test` keeps project settings; a guard that no workflow code passes `--live-opencode`.
+- Reviewer notes, not rechecked: the doctor starts `python3` and `agent-browser` version checks in the checked folder; a FIFO git hook can hang it; some paths print raw errors; under Bun the Runtime boundary row says "0 unparsed" for a text scan.

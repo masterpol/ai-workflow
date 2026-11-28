@@ -12,6 +12,7 @@ import { reconcile } from "./orca-reconcile.mts";
 import type { CheckSpec, ReconcileAttempt, ReconcileOptions } from "./orca-reconcile.mts";
 import { runDirect } from "./runtime/cli.mts";
 import { wxRename } from "./runtime/config.mts";
+import { bunIsolationOptions } from "./runtime/entry.mts";
 import { createNodeDeps } from "./runtime/node.mts";
 import type { RunResult, RuntimeDeps, SpawnOptions } from "./runtime/types.mts";
 
@@ -209,16 +210,17 @@ async function complete(ctx: Ctx, fx: Repo, name: string, files: readonly string
   if (out.route !== "launched" || !out.dispatchId || !out.attemptKey) return false;
   return ctx.libs.collectReport({ root: fx.root, attemptKey: out.attemptKey, message: workerDone(`msg-${name}`, out.dispatchId, files, body), deps: ctx.deps }).accepted;
 }
-function catalog(ctx: Ctx): Record<string, CheckSpec> {
-  const node = (code: string): CheckSpec => ({ command: ctx.deps.proc.execPath, args: ["-e", code] });
+export function evalCatalog(deps: RuntimeDeps): Record<string, CheckSpec> {
+  const flags = deps.runtime === "bun" ? bunIsolationOptions() : [];
+  const evaluate = (code: string): CheckSpec => ({ command: deps.proc.execPath, args: [...flags, "-e", code] });
   return {
-    ok: node("process.exit(0)"),
-    nobad: node("process.exit(require('fs').readFileSync('a.txt','utf8').includes('BAD') ? 1 : 0)"),
-    "sees-change": node("process.exit(require('fs').readFileSync('a.txt','utf8').includes('WORKER-CHANGE') ? 0 : 1)"),
+    ok: evaluate("process.exit(0)"),
+    nobad: evaluate("process.exit(require('fs').readFileSync('a.txt','utf8').includes('BAD') ? 1 : 0)"),
+    "sees-change": evaluate("process.exit(require('fs').readFileSync('a.txt','utf8').includes('WORKER-CHANGE') ? 0 : 1)"),
   };
 }
 function reconcileOptions(ctx: Ctx, fx: Repo, attempts: readonly ReconcileAttempt[], runChecks: readonly string[], baseline = fx.baseline): ReconcileOptions {
-  return { root: fx.root, baseline, attempts, checks: catalog(ctx), runChecks, env: ctx.env, deps: ctx.deps, deadlineMs: ctx.deps.clock.perfNowMs() + 120000 };
+  return { root: fx.root, baseline, attempts, checks: evalCatalog(ctx.deps), runChecks, env: ctx.env, deps: ctx.deps, deadlineMs: ctx.deps.clock.perfNowMs() + 120000 };
 }
 const readText = (ctx: Ctx, dir: string, file: string): string => {
   try { return ctx.deps.fs.readFileSync(ctx.deps.path.join(dir, file)); } catch { return "<missing>"; }
@@ -388,7 +390,7 @@ const COMPLETION_VARIANTS: Readonly<Record<string, VariantRunner>> = Object.free
   "launch accepted": async (ctx) => {
     const { root, attemptKey } = await launchedAttempt(ctx, "receipt-launch");
     const outcome = await ctx.libs.reconcile({ root, baseline: "0".repeat(40), attempts: [{ attemptKey, worktree: { path: ctx.deps.path.join(root, "wt"), baseline: "0".repeat(40), allowedRoots: [root] } }],
-      checks: catalog(ctx), runChecks: ["ok"], env: ctx.env, deps: ctx.deps, deadlineMs: ctx.deps.clock.perfNowMs() + 60000 });
+      checks: evalCatalog(ctx.deps), runChecks: ["ok"], env: ctx.env, deps: ctx.deps, deadlineMs: ctx.deps.clock.perfNowMs() + 60000 });
     return { rejectPrematureCompletion: stateOf(ctx, root, attemptKey) === "launched" && outcome.status !== "integrated" && outcome.attempts[attemptKey]?.state === "excluded" };
   },
   "terminal idle": async (ctx) => {

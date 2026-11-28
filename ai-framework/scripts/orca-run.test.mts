@@ -326,8 +326,21 @@ test("--check names map to the fixed catalog argv and checks receive only the wo
   assert.deepEqual(Object.keys(catalog).sort(), [...names].sort());
   assert.deepEqual(seen.slice(0, 4).map((call) => [call.command, call.args]), names.map((name) => [h.deps.proc.execPath, catalog[name].args]));
   assert.equal(seen.length, 8, "each check runs before and after the apply");
-  assert.deepEqual(catalog["workflow-doctor"].args.slice(-2), ["ai-framework/scripts/workflow-doctor.mts", "--json"]);
-  assert.deepEqual(catalog["graph-check"].args.slice(-2), ["ai-framework/scripts/graphify.mts", "--check"]);
+  const bunCatalog = checkCatalog({ ...h.deps, runtime: "bun" });
+  const scripts = {
+    "workflow-doctor": ["ai-framework/scripts/workflow-doctor.mts", "--json"],
+    "setup-validator": ["ai-framework/scripts/setup-validator.mts"],
+    "graph-check": ["ai-framework/scripts/graphify.mts", "--check"],
+  };
+  const bunOptions = [
+    `--config=${urlPath(new URL("./runtime/bun-isolated.toml", import.meta.url))}`, "--no-env-file", "--no-install",
+    `--tsconfig-override=${urlPath(new URL("./runtime/bun-isolated-tsconfig.json", import.meta.url))}`,
+  ];
+  for (const [name, args] of Object.entries(scripts)) {
+    assert.deepEqual(catalog[name].args, [...NODE_FLAGS, ...args]);
+    assert.deepEqual(bunCatalog[name].args, [...bunOptions, ...args]);
+  }
+  assert.deepEqual(bunCatalog["node-tests"].args, ["test", "ai-framework/"]);
   for (const call of seen) {
     assert.ok(Object.keys(call.env).every((key) => ["PATH", "HOME", "LANG", "TERM", "TMPDIR", "ORCA_TERMINAL_HANDLE", "ORCA_AGENT_SESSION_ID"].includes(key)), Object.keys(call.env).join());
     assert.equal(call.env.SECRET_TOKEN, undefined);

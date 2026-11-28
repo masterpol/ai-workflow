@@ -5,10 +5,11 @@
 ## Active pitches
 | Pitch | Hill | Phase | Appetite | Last touched |
 |-------|------|-------|----------|--------------|
+| fix-bun-project-preload | in a draft PR; audit cycle 1 reviews done, no must-fix in the change; behavior evaluation not run; not shipped | audit: owner decision on evaluation | big-batch | 2026-11-27 |
 | 04-greenfield-kickoff | parts A (v2.60.0) and B1 (v2.61.0) shipped; **Bun security high open, `/fix` still due**; B2 outline only, must split or cut | plan (B2), after the Bun `/fix` | big-batch | 2026-11-27 |
 | 05-workspace-recovery | draft: Git-backed removal, cut from slim | shape | unset | 2026-11-25 |
 | 06-workflow-v3-rollout | shaped; amended 2026-10-21 | shape | small-batch | 2026-10-21 |
-| 07-archify-local-library | shaped: gitignore skill packages so Archify does not commit as source | shape | small-batch | 2026-11-26 |
+| 07-archify-local-library | shaped: gitignore skill packages so Archify does not commit as source; starts its doctor edit after fix-bun-project-preload ships | shape | small-batch | 2026-11-26 |
 
 Folder numbers are the **implementation order** (lower first, ranked 2026-11-25 by impact and dependencies):
 - **00** package-less-ship-verification: shipped 2026-11-25 (v2.57.0); other numbers unchanged.

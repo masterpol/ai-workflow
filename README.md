@@ -68,8 +68,35 @@ install that kept the bundle's description, and a context, entry or status file 
 
 A guided start for new projects is not available yet.
 
-**Known issue with Bun:** a script run through Bun from a project folder first runs that project's `bunfig.toml` preload.
-Until this is fixed, use the default Node runner in a checkout you do not trust.
+## Checking a project without running its code
+
+The setup validator and workflow doctor read a project's files. This is what they and workflow-started Bun do not run:
+
+- **Bun settings.** Workflow-started Bun script, eval and build commands use the bundle's empty Bun and TypeScript
+  configs, skip automatic `.env` loading and disable automatic package installation. They skip the project's preloads
+  and TypeScript path settings, and Bun scripts no longer receive variables from the project's `.env` files.
+- **Bun macros.** The setup validator and workflow doctor never give project source to Bun's parser. Under Bun, or on
+  a Node version without type stripping, they report files as not parse-checked. This is a warning: it does not block,
+  and those files are not counted as parsed. For syntax checks, set `AI_WORKFLOW_RUNNER=node` and use a Node version
+  that supports type stripping.
+- **The project's Graphify script.** The doctor runs the Graphify script that ships beside it.
+- **OpenCode plugins.** The doctor checks OpenCode adapters from their files. The live check,
+  `--live-opencode`, can run the project's plugins and leave an OpenCode service running: use it only in a project you
+  trust.
+
+To check a tree you do not trust, start a trusted copy of the workflow script with Node. Set
+`AI_WORKFLOW_RUNNER=bun` for the isolated Bun launch or `AI_WORKFLOW_RUNNER=node` to stay on Node. Do not add `--fix`
+or `--live-opencode`: `--fix` copies templates from the checked project and follows symbolic links, so it can copy a
+file from outside that project into its `.project/` folder.
+
+**Not covered.** A project whose own workflow scripts, hooks or harness settings are hostile, because those are the
+code being run. A direct `bun <script>` command still loads the working folder's `bunfig.toml` preload and `.env`
+before workflow code runs, and its path mappings can replace the script. Your own process environment still applies:
+Node honors `NODE_OPTIONS`, and Bun honors `BUN_OPTIONS`, including a preload named there. Tools the workflow calls by
+bare name are found through `PATH`. This protection does not make a tree safe to build or test.
+
+Checked with Bun 1.4.5 and OpenCode 2.4.2 on macOS only. See [Workflow Doctor](ai-framework/docs/workflow-doctor.md)
+and [Setup Validator](ai-framework/docs/setup-validator.md).
 
 ## Choose the script runtime
 
@@ -91,11 +118,12 @@ or, in the legacy file:
 { "AI_WORKFLOW_RUNNER": "bun", "AI_WORKFLOW_ORCA_MULTI_AGENT": false }
 ```
 
-Process environment variables override the file. Bun must be installed and available on `PATH`.
+Process environment variables override the file. Bun must be installed and available on `PATH`. With the Bun runner,
+the setup validator and workflow doctor skip syntax checks and warn
+(see [Checking a project without running its code](#checking-a-project-without-running-its-code)).
 Orca multi-agent dispatch is off unless `integrations.orca.multiAgent` (legacy `AI_WORKFLOW_ORCA_MULTI_AGENT`) is `true` (see
 [Orca mode](#orca-mode-multi-agent) below); any other value keeps the normal workflow.
-Run scripts directly as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later, or
-`bun ai-framework/scripts/<name>.mts`. Node 22.12–22.17 requires
+Run scripts as `node ai-framework/scripts/<name>.mts` on Node 22.18 or later. Node 22.12–22.17 requires
 `--experimental-strip-types --disable-warning=ExperimentalWarning` before the script path;
 the shipped hooks include these flags. A Node launch with `AI_WORKFLOW_RUNNER=bun` starts Bun
 for the same TypeScript entry. See [Runtime details](ai-framework/scripts/runtime/README.md)

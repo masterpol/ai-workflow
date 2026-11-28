@@ -7,8 +7,8 @@ skill and agent this bundle ships — not a fixed list. It discovers all `.claud
 `.claude/agents/*.md` at run time, derives each one's `fast`/`standard`/`deep` profile from what
 the canonical file itself declares, and checks that both the OpenCode and Codex mirrors exist,
 load the canonical file (or, for a script-backed skill like `workflow-doctor` itself, the script
-it wraps), and carry the model that profile implies — plus core rules, hook and script syntax,
-scaffold templates, the knowledge graph, and OpenCode's resolved configuration when available.
+it wraps), and carry the model that profile implies. The doctor also checks core rules, hook and
+script syntax, scaffold templates, and the knowledge graph.
 It also requires the caveman-mode instruction in every canonical skill, agent, and (in this bundle)
 both entry files, validates the caveman mode config (`ai-workflow.toon` `skills.modes`, or legacy `.project/skills/modes.json` when that file is absent), checks the project-root `ai-workflow.toon` when present (see `Workflow config`), and reports the live state — active, inert
 (skill not installed), disabled, or under-covering the workflow — so "carries the instruction" is
@@ -22,12 +22,23 @@ coverage and activation instead of canonical mirror rules. It does not validate 
   non-symlink `.project/` directory already exists. Run it only after approving the repair; it
   never overwrites existing project files or credentials.
 - `--json` for machine-readable output; `--no-color` for plain text.
+- `--live-opencode` adds `opencode debug config` to the default static adapter checks. Use it
+  with Node only in a trusted project because OpenCode can load and run project plugins. The
+  command can leave an OpenCode service running. When no OpenCode worker is active, use
+  `node ai-framework/scripts/opencode-service.mts free` to stop the service. With Bun, the
+  doctor reports that the live check requires Node. The OpenCode probe used 2.4.2 on macOS only.
 
-When a project knowledge scaffold exists, the doctor also runs `graphify.mts --check` and
-validates the structural consistency of `graphify-out/graph.json` and `knowledge/index.md` before
-reporting the workflow ready. Run it after adding or changing any skill, agent, rule, template,
+When a project knowledge scaffold exists, the doctor runs its sibling `graphify.mts --check`
+with the project as the working directory. It validates the structural consistency of
+`graphify-out/graph.json` and `.project/knowledge/index.md` before reporting the workflow ready.
+Run it after adding or changing any skill, agent, rule, template,
 or the knowledge graph — nothing needs manual registration for the doctor to pick it up; see
 [One source, every vendor](vendors.md).
+
+The doctor and setup validator report files as unparsed under Bun or on older Node versions
+without type stripping. Run them with `AI_WORKFLOW_RUNNER=node` and a Node version that supports
+type stripping for syntax checks. The doctor still requires the project's own Graphify script
+and checks its syntax when Node can parse it.
 
 ## Project-owned model routing
 
