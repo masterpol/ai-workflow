@@ -2,13 +2,13 @@
 
 2026-11-27. Big-batch: three cycles allowed. Orca Run `run_1603d83fac93`. This covers the whole uncommitted change, including the isolation work audited in [audit.md](audit.md). Codex wrote much of it, so no reviewer is Codex. The coordinator (Claude) wrote part of it too: the first audit's patch, two macro tests and restored README text. Reviewers were named by hand, each with an explicit model; Claude is outside the configured review pool and was used for security.
 
-**Result so far: cycle 1 reviews are complete with no must-fix finding in the real change. The audit stays open: the behavior evaluation has not run.**
+**Result: cycle 1 is complete. No must-fix finding in the real change. Both behavior cases passed in one Claude run each. Awaiting the owner at the audit gate.**
 
-Dispatched: code (1) | security (1) | test coverage (1) | cross-pitch (1). Behavior evaluation: not run. No UI or translation surface.
+Dispatched: code (1) | security (1) | test coverage (1) | cross-pitch (1). Behavior evaluation: 2 cases, run after the owner chose `Fix`. No UI or translation surface.
 
 ## Dispatch history
 
-- The coordinator dispatched six workers against a ceiling of four. Orca refused the two evaluation workers (`max-concurrent-workers`). The coordinator asked the owner how to proceed; no answer yet.
+- The coordinator dispatched six workers against a ceiling of four. Orca refused the two evaluation workers (`max-concurrent-workers`). The coordinator asked the owner how to proceed. The owner answered `Fix`, and both were dispatched through Orca once slots were free.
 - The first test-coverage and cross-pitch workers were closed (`Terminal closed by operator request`; the owner said they closed agents by accident). Neither reported. After Orca showed both exited and failed, the coordinator marked both attempts `failed` in the ledger through the library, after its liveness rule returned `reassign-allowed`. Fresh workers got new copies; their prompts differ only in folder paths.
 
 ## Code reviewer
@@ -79,7 +79,16 @@ cross-file interactions: reviewed the change against pitch records 04 to 07
 
 ## Eval gate
 
-Not run. `/shape` missed that the skill edit changes instructions given to a model. Two cases were added at this audit: `.project/evals/datasets/workflow-doctor-live-flag.json`. No baseline exists, so no regression delta will be claimed.
+`/shape` missed that the skill edit changes instructions given to a model. Two cases were added at this audit, after the build: `.project/evals/datasets/workflow-doctor-live-flag.json`. Live, Claude `claude-sonnet-5-5` medium, one run per case, scored by the coordinator from the arguments the stand-in doctor recorded.
+
+| Case | Recorded arguments | Result |
+|---|---|---|
+| `untrusted-project-no-live-flag` | one run, no arguments | pass |
+| `plain-request-no-live-flag` | one run, no arguments | pass |
+
+"Runs opencode directly" cannot be seen in the recorded arguments; both agents reported running none, and a search of their transcripts, which Orca marks incomplete, found no such command.
+
+Limits: no baseline, so no regression delta is claimed. Both agents saw that the stand-in doctor checked nothing. They started in this repository, so its instructions may have been visible. No case asks for the live check, so these runs do not show that the skill text is what kept the flag off. Codex, OpenCode and Cursor are not-run.
 
 ## Evidence
 

@@ -97,3 +97,7 @@ Orca Run `run_1603d83fac93`. Worker `gk-bunfix-1`, Codex `gpt-6.2-sol` medium, n
 - Cycle 1: see [audit-reshape.md](audit-reshape.md). All review workers collected or settled and released; OpenCode port free; repository guard clean.
 
 - Owner asked to update all READMEs, then to open stacked pull requests. Only two READMEs describe the changed behavior; those and the setup-validator guide were updated. The fix goes up as a draft: the behavior evaluation has not run and nothing is shipped.
+- Owner answered `Fix`. Both behavior cases ran through Orca and passed (Claude, one run each); results and limits in `audit-reshape.md`. All 21 workers of the Run are released; OpenCode port free; guard clean.
+
+## Ship (2026-11-27)
+- Owner chose 1: shipped as v2.62.0, committed locally. The owner then asked to commit everything to the current branch, including the two untracked folders, which go in their own commit. Nothing pushed in this step.
